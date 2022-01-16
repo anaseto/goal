@@ -1427,27 +1427,27 @@ func Divide(w, x Object) Object {
 func DivideBO(w B, x Object) Object {
 	switch x := x.(type) {
 	case B:
-		return B2F(w) / B2F(x)
+		return divide(B2F(w), B2F(x))
 	case F:
-		return B2F(w) / x
+		return divide(B2F(w), x)
 	case I:
-		return B2F(w) / F(x)
+		return divide(B2F(w), F(x))
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = B2F(w) / B2F(x[i])
+			r[i] = divide(B2F(w), B2F(x[i]))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = B2F(w) / x[i]
+			r[i] = divide(B2F(w), x[i])
 		}
 		return r
 	case AI:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = B2F(w) / F(x[i])
+			r[i] = divide(B2F(w), F(x[i]))
 		}
 		return r
 	case AO:
@@ -1471,27 +1471,27 @@ func DivideBO(w B, x Object) Object {
 func DivideFO(w F, x Object) Object {
 	switch x := x.(type) {
 	case B:
-		return w / B2F(x)
+		return divide(w, B2F(x))
 	case F:
-		return w / x
+		return divide(w, x)
 	case I:
-		return w / F(x)
+		return divide(w, F(x))
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w / B2F(x[i])
+			r[i] = divide(w, B2F(x[i]))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w / x[i]
+			r[i] = divide(w, x[i])
 		}
 		return r
 	case AI:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w / F(x[i])
+			r[i] = divide(w, F(x[i]))
 		}
 		return r
 	case AO:
@@ -1515,27 +1515,27 @@ func DivideFO(w F, x Object) Object {
 func DivideIO(w I, x Object) Object {
 	switch x := x.(type) {
 	case B:
-		return F(w) / B2F(x)
+		return divide(F(w), B2F(x))
 	case F:
-		return F(w) / x
+		return divide(F(w), x)
 	case I:
-		return F(w) / F(x)
+		return divide(F(w), F(x))
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(w) / B2F(x[i])
+			r[i] = divide(F(w), B2F(x[i]))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(w) / x[i]
+			r[i] = divide(F(w), x[i])
 		}
 		return r
 	case AI:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(w) / F(x[i])
+			r[i] = divide(F(w), F(x[i]))
 		}
 		return r
 	case AO:
@@ -1561,37 +1561,37 @@ func DivideABO(w AB, x Object) Object {
 	case B:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = B2F(w[i]) / B2F(x)
+			r[i] = divide(B2F(w[i]), B2F(x))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = B2F(w[i]) / x
+			r[i] = divide(B2F(w[i]), x)
 		}
 		return r
 	case I:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = B2F(w[i]) / F(x)
+			r[i] = divide(B2F(w[i]), F(x))
 		}
 		return r
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = B2F(w[i]) / B2F(x[i])
+			r[i] = divide(B2F(w[i]), B2F(x[i]))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = B2F(w[i]) / x[i]
+			r[i] = divide(B2F(w[i]), x[i])
 		}
 		return r
 	case AI:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = B2F(w[i]) / F(x[i])
+			r[i] = divide(B2F(w[i]), F(x[i]))
 		}
 		return r
 	case AO:
@@ -1617,37 +1617,37 @@ func DivideAFO(w AF, x Object) Object {
 	case B:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = w[i] / B2F(x)
+			r[i] = divide(w[i], B2F(x))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = w[i] / x
+			r[i] = divide(w[i], x)
 		}
 		return r
 	case I:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = w[i] / F(x)
+			r[i] = divide(w[i], F(x))
 		}
 		return r
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w[i] / B2F(x[i])
+			r[i] = divide(w[i], B2F(x[i]))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w[i] / x[i]
+			r[i] = divide(w[i], x[i])
 		}
 		return r
 	case AI:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w[i] / F(x[i])
+			r[i] = divide(w[i], F(x[i]))
 		}
 		return r
 	case AO:
@@ -1673,37 +1673,37 @@ func DivideAIO(w AI, x Object) Object {
 	case B:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = F(w[i]) / B2F(x)
+			r[i] = divide(F(w[i]), B2F(x))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = F(w[i]) / x
+			r[i] = divide(F(w[i]), x)
 		}
 		return r
 	case I:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = F(w[i]) / F(x)
+			r[i] = divide(F(w[i]), F(x))
 		}
 		return r
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(w[i]) / B2F(x[i])
+			r[i] = divide(F(w[i]), B2F(x[i]))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(w[i]) / x[i]
+			r[i] = divide(F(w[i]), x[i])
 		}
 		return r
 	case AI:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(w[i]) / F(x[i])
+			r[i] = divide(F(w[i]), F(x[i]))
 		}
 		return r
 	case AO:
