@@ -62,7 +62,7 @@ my %dyads = (
         F_I => ["w * F(x)", "F"],
         F_F => ["w * x", "F"],
     },
-    Divide =>  { # TODO: catch division by zero
+    Divide =>  {
         B_B => ["divide(B2F(w), B2F(x))", "F"],
         B_I => ["divide(B2F(w), F(x))", "F"],
         B_F => ["divide(B2F(w), x)", "F"],
