@@ -13,4 +13,6 @@ func main() {
 	fmt.Printf("Add2:%#v\n", Add(AF{1, 2, 3}, AI{5, 3, 8}))
 	fmt.Printf("Add2:%#v\n", Add(AF{1, 2, 3, 4}, AI{5, 3, 8}))
 	fmt.Printf("Add2:%#v\n", Add(AO{AF{1, 2}, AF{3, 4}}, AI{3, 8}))
+	fmt.Printf("Add2:%#v\n", Equal(AI{1, 3, 8, 2}, AI{5, 3, 8, 1}))
+	//fmt.Printf("Add2:%#v\n", float64(1.0)/float64(0.0))
 }
