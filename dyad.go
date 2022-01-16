@@ -1088,7 +1088,7 @@ func Multiply(w, x Object) Object {
 	case E:
 		return w
 	default:
-		return badtype("Ã")
+		return badtype("×")
 	}
 }
 
@@ -1132,7 +1132,7 @@ func MultiplyBO(w B, x Object) Object {
 	case E:
 		return w
 	default:
-		return badtype("Ã")
+		return badtype("×")
 	}
 }
 
@@ -1176,7 +1176,7 @@ func MultiplyFO(w F, x Object) Object {
 	case E:
 		return w
 	default:
-		return badtype("Ã")
+		return badtype("×")
 	}
 }
 
@@ -1220,7 +1220,7 @@ func MultiplyIO(w I, x Object) Object {
 	case E:
 		return w
 	default:
-		return badtype("Ã")
+		return badtype("×")
 	}
 }
 
@@ -1276,7 +1276,7 @@ func MultiplyABO(w AB, x Object) Object {
 	case E:
 		return w
 	default:
-		return badtype("Ã")
+		return badtype("×")
 	}
 }
 
@@ -1332,7 +1332,7 @@ func MultiplyAFO(w AF, x Object) Object {
 	case E:
 		return w
 	default:
-		return badtype("Ã")
+		return badtype("×")
 	}
 }
 
@@ -1388,7 +1388,7 @@ func MultiplyAIO(w AI, x Object) Object {
 	case E:
 		return w
 	default:
-		return badtype("Ã")
+		return badtype("×")
 	}
 }
 
@@ -1420,7 +1420,7 @@ func Divide(w, x Object) Object {
 	case E:
 		return w
 	default:
-		return badtype("Ã·")
+		return badtype("÷")
 	}
 }
 
@@ -1464,7 +1464,7 @@ func DivideBO(w B, x Object) Object {
 	case E:
 		return w
 	default:
-		return badtype("Ã·")
+		return badtype("÷")
 	}
 }
 
@@ -1508,7 +1508,7 @@ func DivideFO(w F, x Object) Object {
 	case E:
 		return w
 	default:
-		return badtype("Ã·")
+		return badtype("÷")
 	}
 }
 
@@ -1552,7 +1552,7 @@ func DivideIO(w I, x Object) Object {
 	case E:
 		return w
 	default:
-		return badtype("Ã·")
+		return badtype("÷")
 	}
 }
 
@@ -1608,7 +1608,7 @@ func DivideABO(w AB, x Object) Object {
 	case E:
 		return w
 	default:
-		return badtype("Ã·")
+		return badtype("÷")
 	}
 }
 
@@ -1664,7 +1664,7 @@ func DivideAFO(w AF, x Object) Object {
 	case E:
 		return w
 	default:
-		return badtype("Ã·")
+		return badtype("÷")
 	}
 }
 
@@ -1720,7 +1720,7 @@ func DivideAIO(w AI, x Object) Object {
 	case E:
 		return w
 	default:
-		return badtype("Ã·")
+		return badtype("÷")
 	}
 }
 

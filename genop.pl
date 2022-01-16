@@ -3,8 +3,6 @@
 use strict;
 use warnings;
 use v5.28;
-use utf8;
-use open qw(:std :utf8);
 
 my %dyads = (
     Equal =>  {
