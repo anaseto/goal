@@ -98,37 +98,37 @@ sub genOp {
     open my $out, '>', \$s;
     print $out <<EOS;
 func ${name}(w, x Object) Object {
-\tswitch w := w.(type) {
+	switch w := w.(type) {
 EOS
     for my $t (sort keys %types) {
         print $out <<EOS;
-\tcase $t:
-\t\treturn ${name}${t}O(w, x)
+	case $t:
+		return ${name}${t}O(w, x)
 EOS
     }
     for my $t (sort keys %types) {
         print $out <<EOS;
-\tcase A$t:
-\t\treturn ${name}A${t}O(w, x)
+	case A$t:
+		return ${name}A${t}O(w, x)
 EOS
     }
     print $out <<EOS;
-\tcase AO:
-\t\tr := make(AO, len(w))
-\t\tfor i := range r {
-\t\t\tv := ${name}(w[i], x)
-\t\t\te, ok := v.(E)
-\t\t\tif ok {
-\t\t\t\treturn e
-\t\t\t}
-\t\t\tr[i] = v
-\t\t}
-\t\treturn r
-\tcase E:
-\t\treturn w
-\tdefault:
-\t\treturn badtype("${op}")
-\t}
+	case AO:
+		r := make(AO, len(w))
+		for i := range r {
+			v := ${name}(w[i], x)
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("${op}")
+	}
 }\n
 EOS
     print $s;
@@ -147,13 +147,13 @@ sub genLeftExpanded {
     open my $out, '>', \$s;
     print $out <<EOS;
 func ${name}${t}O(w $t, x Object) Object {
-\tswitch x := x.(type) {
+	switch x := x.(type) {
 EOS
     for my $tt (sort keys %types) {
         my $expr = $cases->{"${t}_$tt"}->[0];
         print $out <<EOS;
-\tcase $tt:
-\t\treturn $expr
+	case $tt:
+		return $expr
 EOS
     }
     for my $tt (sort keys %types) {
@@ -161,31 +161,31 @@ EOS
         my $type = $cases->{"${t}_$tt"}->[1];
         my $iexpr = subst($expr, "w", "x[i]");
         print $out <<EOS;
-\tcase A$tt:
-\t\tr := make(A$type, len(x))
-\t\tfor i := range r {
-\t\t\tr[i] = $iexpr
-\t\t}
-\t\treturn r
+	case A$tt:
+		r := make(A$type, len(x))
+		for i := range r {
+			r[i] = $iexpr
+		}
+		return r
 EOS
     }
     print $out <<EOS if $t !~ /^A/;
-\tcase AO:
-\t\tr := make([]Object, len(x))
-\t\tfor i := range r {
-\t\t\tv := ${name}${t}O(w, x[i])
-\t\t\te, ok := v.(E)
-\t\t\tif ok {
-\t\t\t\treturn e
-\t\t\t}
-\t\t\tr[i] = v
-\t\t}
-\t\treturn r
-\tcase E:
-\t\treturn w
-\tdefault:
-\t\treturn badtype("${op}")
-\t}
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := ${name}${t}O(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("${op}")
+	}
 }\n
 EOS
     print $s;
@@ -198,19 +198,19 @@ sub genLeftArrayExpanded {
     open my $out, '>', \$s;
     print $out <<EOS;
 func ${name}A${t}O(w A$t, x Object) Object {
-\tswitch x := x.(type) {
+	switch x := x.(type) {
 EOS
     for my $tt (sort keys %types) {
         my $expr = $cases->{"${t}_$tt"}->[0];
         my $type = $cases->{"${t}_$tt"}->[1];
         my $iexpr = subst($expr, "w[i]", "x");
         print $out <<EOS;
-\tcase $tt:
-\t\tr := make(A$type, len(w))
-\t\tfor i := range r {
-\t\t\tr[i] = $iexpr
-\t\t}
-\t\treturn r
+	case $tt:
+		r := make(A$type, len(w))
+		for i := range r {
+			r[i] = $iexpr
+		}
+		return r
 EOS
     }
     for my $tt (sort keys %types) {
@@ -218,31 +218,31 @@ EOS
         my $type = $cases->{"${t}_$tt"}->[1];
         my $iexpr = subst($expr, "w[i]", "x[i]");
         print $out <<EOS;
-\tcase A$tt:
-\t\tr := make(A$type, len(x))
-\t\tfor i := range r {
-\t\t\tr[i] = $iexpr
-\t\t}
-\t\treturn r
+	case A$tt:
+		r := make(A$type, len(x))
+		for i := range r {
+			r[i] = $iexpr
+		}
+		return r
 EOS
     }
     print $out <<EOS if $t !~ /^A/;
-\tcase AO:
-\t\tr := make(AO, len(x))
-\t\tfor i := range r {
-\t\t\tv := ${name}A${t}O(w, x[i])
-\t\t\te, ok := v.(E)
-\t\t\tif ok {
-\t\t\t\treturn e
-\t\t\t}
-\t\t\tr[i] = v
-\t\t}
-\t\treturn r
-\tcase E:
-\t\treturn w
-\tdefault:
-\t\treturn badtype("${op}")
-\t}
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := ${name}A${t}O(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("${op}")
+	}
 }\n
 EOS
     print $s;
