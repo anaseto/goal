@@ -3,25 +3,56 @@
 # no operator precedence rules (BQN)
 1×(2+3) ≡ 1×2+3
 # list auto-flattening? (Perl, maybe not, unclear)
+# syntax: ; , {} [] ← ↩ () : "" ''
 # compiles to Go
-# Example:
-Add_fact ← {𝕊⟨question,answer,notes,type,tags⟩
-    ⟨question, answer, notes, type⟩ db.Eval "INSERT INTO facts(question, answer, notes, type) VALUES(?, ?, ?, ?)"
-		fact_uid ← db.last_insert_rowid
-		{"oneside": Add_card fact_uid;
-		 "twoside": Add_card¨ ⟨fact_uid,fact_data⟩;
-		 "cloze": 
-				Process ← {
-					cmd ← 1↓𝕩
-					Check_Cloze_End cmd
-					fact_data ← 𝕨 ∾ 1↓cmd
-					Add_card ⟨fact_uid,fact_data⟩
-				}
-			  clozes ← Get_clozes question
-				(↕≠clozes) Process clozes
-			_ : ! "invalid type: "∾type
-		}
-		tags ∾←all
-		# ....
-    fact_uid
-}
+# Primitives:
+# Glyph	Monadic			Dyadic
+# +			flip?				Add
+# - 		Negate			Subtract
+# × 		Sign				Multiply
+# ÷ 		Reciprocal	Divide
+# ⌊ 		Floor				Minimum
+# ⌈ 		Ceiling			Maximum
+# ∧ 		Sort Up			And*
+# ∨ 		Sort Down		Or*
+# ¬ 		Not*				Span*					use ~ ?
+# | 		Absolute		Modulus
+# ≤									Less or Equal
+# < 		Sort Up			Less Than
+# > 		Sort Down		Greater Than
+# ≥									Greater Than or Equal to
+# = 	  Classify		Equals
+# #			Length?			Replicate?
+# ≠ 		Length?			Not Equals
+# ≡ 		XXXXXX			Match
+# ≢ 		XXXXXX			Not Match
+# ⥊ 		Deshape			Reshape*
+# ∾ 		Join*				Join to
+# ⋈ 		Enlist*			Pair*
+# ↑ 		First				Take
+# ↓ 		Tail				Drop
+# ↕ 		Range				Windows*
+# » 		Nudge*			Shift Before*
+# « 		Nudge Back*	Shift After*
+# ⌽ 		Reverse			Rotate
+# / 		Indices			Replicate
+# ⍋ 		Grade Up		Bins Up
+# ⍒ 		Grade Down	Bins Down
+# ∊ 		Mark Firsts				Member of
+# ⍷ 		Occurrence Count*	Find
+# ? 		Deduplicate				Index Of
+# ⊔ 		Group Indices*		Group*
+# *,!		Indices Inv				Progressive Index of*
+#
+#
+# Removed:
+# ⋆ 		Exponential	Power
+# √ 		Square Root	Root
+# ≍ 		Solo*				Couple*
+# ⍉ 		Transpose*	Reorder axes*
+# ⊏ 		First Cell*	Select*					([] syntax for select)
+# ⍷ 		Deduplicate				Find
+# ⊑ 		First				Pick*
+# ⊣ 		Identity		Left
+# ⊢ 		Identity		Right
+# ⊒ 		Occurrence Count*	Progressive Index of*
