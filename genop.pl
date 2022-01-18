@@ -29,6 +29,54 @@ my %dyads = (
         F_F => ["w != x", "B"],
         S_S => ["w != x", "B"],
     },
+    Lesser =>  {
+        B_B => ["B2I(w) < B2I(x)", "B"],
+        B_I => ["B2I(w) < x", "B"],
+        B_F => ["B2F(w) < x", "B"],
+        I_B => ["w < B2I(x)", "B"],
+        I_I => ["w < x", "B"],
+        I_F => ["F(w) < x", "B"],
+        F_B => ["w < B2F(x)", "B"],
+        F_I => ["w < F(x)", "B"],
+        F_F => ["w < x", "B"],
+        S_S => ["w < x", "B"],
+    },
+    LesserEq =>  {
+        B_B => ["B2I(w) <= B2I(x)", "B"],
+        B_I => ["B2I(w) <= x", "B"],
+        B_F => ["B2F(w) <= x", "B"],
+        I_B => ["w <= B2I(x)", "B"],
+        I_I => ["w <= x", "B"],
+        I_F => ["F(w) <= x", "B"],
+        F_B => ["w <= B2F(x)", "B"],
+        F_I => ["w <= F(x)", "B"],
+        F_F => ["w <= x", "B"],
+        S_S => ["w <= x", "B"],
+    },
+    Greater =>  {
+        B_B => ["B2I(w) > B2I(x)", "B"],
+        B_I => ["B2I(w) > x", "B"],
+        B_F => ["B2F(w) > x", "B"],
+        I_B => ["w > B2I(x)", "B"],
+        I_I => ["w > x", "B"],
+        I_F => ["F(w) > x", "B"],
+        F_B => ["w > B2F(x)", "B"],
+        F_I => ["w > F(x)", "B"],
+        F_F => ["w > x", "B"],
+        S_S => ["w > x", "B"],
+    },
+    GreaterEq =>  {
+        B_B => ["B2I(w) >= B2I(x)", "B"],
+        B_I => ["B2I(w) >= x", "B"],
+        B_F => ["B2F(w) >= x", "B"],
+        I_B => ["w >= B2I(x)", "B"],
+        I_I => ["w >= x", "B"],
+        I_F => ["F(w) >= x", "B"],
+        F_B => ["w >= B2F(x)", "B"],
+        F_I => ["w >= F(x)", "B"],
+        F_F => ["w >= x", "B"],
+        S_S => ["w >= x", "B"],
+    },
     Add =>  {
         B_B => ["B2I(w) + B2I(x)", "I"],
         B_I => ["B2I(w) + x", "I"],
@@ -85,6 +133,11 @@ package main
 EOS
 
 genOp("Equal", "=");
+genOp("NotEqual", "≠");
+genOp("Lesser", "<");
+genOp("LesserEq", "≤");
+genOp("Greater", ">");
+genOp("GreaterEq", "≥");
 genOp("Add", "+");
 genOp("Subtract", "-");
 genOp("Multiply", "×");

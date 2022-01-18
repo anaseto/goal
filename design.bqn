@@ -13,16 +13,15 @@
 # ÷ 		Reciprocal	Divide
 # ⌊ 		Floor				Minimum
 # ⌈ 		Ceiling			Maximum
-# ∧ 		Sort Up			And*
-# ∨ 		Sort Down		Or*
+# ∧ 		XXXXXXXXX		And*
+# ∨ 		XXXXXXXXX		Or*
 # ¬ 		Not*				Span*					use ~ ?
 # | 		Absolute		Modulus
 # ≤									Less or Equal
 # < 		Sort Up			Less Than
 # > 		Sort Down		Greater Than
 # ≥									Greater Than or Equal to
-# = 	  Classify		Equals
-# #			Length?			Replicate?
+# = 	  Classify?		Equals
 # ≠ 		Length?			Not Equals
 # ≡ 		XXXXXX			Match
 # ≢ 		XXXXXX			Not Match
@@ -39,11 +38,17 @@
 # ⍋ 		Grade Up		Bins Up
 # ⍒ 		Grade Down	Bins Down
 # ∊ 		Mark Firsts				Member of
-# ⍷ 		Occurrence Count*	Find
-# ? 		Deduplicate				Index Of
+# ⍷ 		Deduplicate				Find
+# ⊒ 		Occurrence Count*	Progressive Index of*
+# ⊐ 		Classify				  Index Of
 # ⊔ 		Group Indices*		Group*
-# *,!		Indices Inv				Progressive Index of*
+# !			Error							Annotate
 #
+# Ideas:
+# *  		Indices Inv				Progressive Index of*
+# ? 		Deduplicate				Index Of
+# #			Length?			Replicate?
+# %			comment?
 #
 # Removed:
 # ⋆ 		Exponential	Power
@@ -51,8 +56,6 @@
 # ≍ 		Solo*				Couple*
 # ⍉ 		Transpose*	Reorder axes*
 # ⊏ 		First Cell*	Select*					([] syntax for select)
-# ⍷ 		Deduplicate				Find
 # ⊑ 		First				Pick*
 # ⊣ 		Identity		Left
 # ⊢ 		Identity		Right
-# ⊒ 		Occurrence Count*	Progressive Index of*

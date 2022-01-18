@@ -396,6 +396,1986 @@ func EqualASO(w AS, x Object) Object {
 	}
 }
 
+func NotEqual(w, x Object) Object {
+	switch w := w.(type) {
+	case B:
+		return NotEqualBO(w, x)
+	case F:
+		return NotEqualFO(w, x)
+	case I:
+		return NotEqualIO(w, x)
+	case S:
+		return NotEqualSO(w, x)
+	case AB:
+		return NotEqualABO(w, x)
+	case AF:
+		return NotEqualAFO(w, x)
+	case AI:
+		return NotEqualAIO(w, x)
+	case AS:
+		return NotEqualASO(w, x)
+	case AO:
+		r := make(AO, len(w))
+		for i := range r {
+			v := NotEqual(w[i], x)
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≠")
+	}
+}
+
+func NotEqualBO(w B, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return w != x
+	case F:
+		return B2F(w) != x
+	case I:
+		return B2I(w) != x
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w != x[i]
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2F(w) != x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2I(w) != x[i]
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := NotEqualBO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≠")
+	}
+}
+
+func NotEqualFO(w F, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return w != B2F(x)
+	case F:
+		return w != x
+	case I:
+		return w != F(x)
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w != B2F(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w != x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w != F(x[i])
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := NotEqualFO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≠")
+	}
+}
+
+func NotEqualIO(w I, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return w != B2I(x)
+	case F:
+		return F(w) != x
+	case I:
+		return w != x
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w != B2I(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = F(w) != x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w != x[i]
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := NotEqualIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≠")
+	}
+}
+
+func NotEqualSO(w S, x Object) Object {
+	switch x := x.(type) {
+	case S:
+		return w != x
+	case AS:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w != x[i]
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := NotEqualSO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≠")
+	}
+}
+
+func NotEqualABO(w AB, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] != x
+		}
+		return r
+	case F:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = B2F(w[i]) != x
+		}
+		return r
+	case I:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = B2I(w[i]) != x
+		}
+		return r
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] != x[i]
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2F(w[i]) != x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2I(w[i]) != x[i]
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := NotEqualABO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≠")
+	}
+}
+
+func NotEqualAFO(w AF, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] != B2F(x)
+		}
+		return r
+	case F:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] != x
+		}
+		return r
+	case I:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] != F(x)
+		}
+		return r
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] != B2F(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] != x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] != F(x[i])
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := NotEqualAFO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≠")
+	}
+}
+
+func NotEqualAIO(w AI, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] != B2I(x)
+		}
+		return r
+	case F:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = F(w[i]) != x
+		}
+		return r
+	case I:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] != x
+		}
+		return r
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] != B2I(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = F(w[i]) != x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] != x[i]
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := NotEqualAIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≠")
+	}
+}
+
+func NotEqualASO(w AS, x Object) Object {
+	switch x := x.(type) {
+	case S:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] != x
+		}
+		return r
+	case AS:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] != x[i]
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := NotEqualASO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≠")
+	}
+}
+
+func Lesser(w, x Object) Object {
+	switch w := w.(type) {
+	case B:
+		return LesserBO(w, x)
+	case F:
+		return LesserFO(w, x)
+	case I:
+		return LesserIO(w, x)
+	case S:
+		return LesserSO(w, x)
+	case AB:
+		return LesserABO(w, x)
+	case AF:
+		return LesserAFO(w, x)
+	case AI:
+		return LesserAIO(w, x)
+	case AS:
+		return LesserASO(w, x)
+	case AO:
+		r := make(AO, len(w))
+		for i := range r {
+			v := Lesser(w[i], x)
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("<")
+	}
+}
+
+func LesserBO(w B, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return B2I(w) < B2I(x)
+	case F:
+		return B2F(w) < x
+	case I:
+		return B2I(w) < x
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2I(w) < B2I(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2F(w) < x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2I(w) < x[i]
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := LesserBO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("<")
+	}
+}
+
+func LesserFO(w F, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return w < B2F(x)
+	case F:
+		return w < x
+	case I:
+		return w < F(x)
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w < B2F(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w < x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w < F(x[i])
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := LesserFO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("<")
+	}
+}
+
+func LesserIO(w I, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return w < B2I(x)
+	case F:
+		return F(w) < x
+	case I:
+		return w < x
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w < B2I(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = F(w) < x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w < x[i]
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := LesserIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("<")
+	}
+}
+
+func LesserSO(w S, x Object) Object {
+	switch x := x.(type) {
+	case S:
+		return w < x
+	case AS:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w < x[i]
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := LesserSO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("<")
+	}
+}
+
+func LesserABO(w AB, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = B2I(w[i]) < B2I(x)
+		}
+		return r
+	case F:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = B2F(w[i]) < x
+		}
+		return r
+	case I:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = B2I(w[i]) < x
+		}
+		return r
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2I(w[i]) < B2I(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2F(w[i]) < x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2I(w[i]) < x[i]
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := LesserABO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("<")
+	}
+}
+
+func LesserAFO(w AF, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] < B2F(x)
+		}
+		return r
+	case F:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] < x
+		}
+		return r
+	case I:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] < F(x)
+		}
+		return r
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] < B2F(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] < x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] < F(x[i])
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := LesserAFO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("<")
+	}
+}
+
+func LesserAIO(w AI, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] < B2I(x)
+		}
+		return r
+	case F:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = F(w[i]) < x
+		}
+		return r
+	case I:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] < x
+		}
+		return r
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] < B2I(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = F(w[i]) < x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] < x[i]
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := LesserAIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("<")
+	}
+}
+
+func LesserASO(w AS, x Object) Object {
+	switch x := x.(type) {
+	case S:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] < x
+		}
+		return r
+	case AS:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] < x[i]
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := LesserASO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("<")
+	}
+}
+
+func LesserEq(w, x Object) Object {
+	switch w := w.(type) {
+	case B:
+		return LesserEqBO(w, x)
+	case F:
+		return LesserEqFO(w, x)
+	case I:
+		return LesserEqIO(w, x)
+	case S:
+		return LesserEqSO(w, x)
+	case AB:
+		return LesserEqABO(w, x)
+	case AF:
+		return LesserEqAFO(w, x)
+	case AI:
+		return LesserEqAIO(w, x)
+	case AS:
+		return LesserEqASO(w, x)
+	case AO:
+		r := make(AO, len(w))
+		for i := range r {
+			v := LesserEq(w[i], x)
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≤")
+	}
+}
+
+func LesserEqBO(w B, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return B2I(w) <= B2I(x)
+	case F:
+		return B2F(w) <= x
+	case I:
+		return B2I(w) <= x
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2I(w) <= B2I(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2F(w) <= x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2I(w) <= x[i]
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := LesserEqBO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≤")
+	}
+}
+
+func LesserEqFO(w F, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return w <= B2F(x)
+	case F:
+		return w <= x
+	case I:
+		return w <= F(x)
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w <= B2F(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w <= x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w <= F(x[i])
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := LesserEqFO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≤")
+	}
+}
+
+func LesserEqIO(w I, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return w <= B2I(x)
+	case F:
+		return F(w) <= x
+	case I:
+		return w <= x
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w <= B2I(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = F(w) <= x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w <= x[i]
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := LesserEqIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≤")
+	}
+}
+
+func LesserEqSO(w S, x Object) Object {
+	switch x := x.(type) {
+	case S:
+		return w <= x
+	case AS:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w <= x[i]
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := LesserEqSO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≤")
+	}
+}
+
+func LesserEqABO(w AB, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = B2I(w[i]) <= B2I(x)
+		}
+		return r
+	case F:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = B2F(w[i]) <= x
+		}
+		return r
+	case I:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = B2I(w[i]) <= x
+		}
+		return r
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2I(w[i]) <= B2I(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2F(w[i]) <= x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2I(w[i]) <= x[i]
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := LesserEqABO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≤")
+	}
+}
+
+func LesserEqAFO(w AF, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] <= B2F(x)
+		}
+		return r
+	case F:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] <= x
+		}
+		return r
+	case I:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] <= F(x)
+		}
+		return r
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] <= B2F(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] <= x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] <= F(x[i])
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := LesserEqAFO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≤")
+	}
+}
+
+func LesserEqAIO(w AI, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] <= B2I(x)
+		}
+		return r
+	case F:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = F(w[i]) <= x
+		}
+		return r
+	case I:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] <= x
+		}
+		return r
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] <= B2I(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = F(w[i]) <= x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] <= x[i]
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := LesserEqAIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≤")
+	}
+}
+
+func LesserEqASO(w AS, x Object) Object {
+	switch x := x.(type) {
+	case S:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] <= x
+		}
+		return r
+	case AS:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] <= x[i]
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := LesserEqASO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≤")
+	}
+}
+
+func Greater(w, x Object) Object {
+	switch w := w.(type) {
+	case B:
+		return GreaterBO(w, x)
+	case F:
+		return GreaterFO(w, x)
+	case I:
+		return GreaterIO(w, x)
+	case S:
+		return GreaterSO(w, x)
+	case AB:
+		return GreaterABO(w, x)
+	case AF:
+		return GreaterAFO(w, x)
+	case AI:
+		return GreaterAIO(w, x)
+	case AS:
+		return GreaterASO(w, x)
+	case AO:
+		r := make(AO, len(w))
+		for i := range r {
+			v := Greater(w[i], x)
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype(">")
+	}
+}
+
+func GreaterBO(w B, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return B2I(w) > B2I(x)
+	case F:
+		return B2F(w) > x
+	case I:
+		return B2I(w) > x
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2I(w) > B2I(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2F(w) > x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2I(w) > x[i]
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := GreaterBO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype(">")
+	}
+}
+
+func GreaterFO(w F, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return w > B2F(x)
+	case F:
+		return w > x
+	case I:
+		return w > F(x)
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w > B2F(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w > x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w > F(x[i])
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := GreaterFO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype(">")
+	}
+}
+
+func GreaterIO(w I, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return w > B2I(x)
+	case F:
+		return F(w) > x
+	case I:
+		return w > x
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w > B2I(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = F(w) > x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w > x[i]
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := GreaterIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype(">")
+	}
+}
+
+func GreaterSO(w S, x Object) Object {
+	switch x := x.(type) {
+	case S:
+		return w > x
+	case AS:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w > x[i]
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := GreaterSO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype(">")
+	}
+}
+
+func GreaterABO(w AB, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = B2I(w[i]) > B2I(x)
+		}
+		return r
+	case F:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = B2F(w[i]) > x
+		}
+		return r
+	case I:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = B2I(w[i]) > x
+		}
+		return r
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2I(w[i]) > B2I(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2F(w[i]) > x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2I(w[i]) > x[i]
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := GreaterABO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype(">")
+	}
+}
+
+func GreaterAFO(w AF, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] > B2F(x)
+		}
+		return r
+	case F:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] > x
+		}
+		return r
+	case I:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] > F(x)
+		}
+		return r
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] > B2F(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] > x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] > F(x[i])
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := GreaterAFO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype(">")
+	}
+}
+
+func GreaterAIO(w AI, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] > B2I(x)
+		}
+		return r
+	case F:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = F(w[i]) > x
+		}
+		return r
+	case I:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] > x
+		}
+		return r
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] > B2I(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = F(w[i]) > x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] > x[i]
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := GreaterAIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype(">")
+	}
+}
+
+func GreaterASO(w AS, x Object) Object {
+	switch x := x.(type) {
+	case S:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] > x
+		}
+		return r
+	case AS:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] > x[i]
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := GreaterASO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype(">")
+	}
+}
+
+func GreaterEq(w, x Object) Object {
+	switch w := w.(type) {
+	case B:
+		return GreaterEqBO(w, x)
+	case F:
+		return GreaterEqFO(w, x)
+	case I:
+		return GreaterEqIO(w, x)
+	case S:
+		return GreaterEqSO(w, x)
+	case AB:
+		return GreaterEqABO(w, x)
+	case AF:
+		return GreaterEqAFO(w, x)
+	case AI:
+		return GreaterEqAIO(w, x)
+	case AS:
+		return GreaterEqASO(w, x)
+	case AO:
+		r := make(AO, len(w))
+		for i := range r {
+			v := GreaterEq(w[i], x)
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≥")
+	}
+}
+
+func GreaterEqBO(w B, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return B2I(w) >= B2I(x)
+	case F:
+		return B2F(w) >= x
+	case I:
+		return B2I(w) >= x
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2I(w) >= B2I(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2F(w) >= x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2I(w) >= x[i]
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := GreaterEqBO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≥")
+	}
+}
+
+func GreaterEqFO(w F, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return w >= B2F(x)
+	case F:
+		return w >= x
+	case I:
+		return w >= F(x)
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w >= B2F(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w >= x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w >= F(x[i])
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := GreaterEqFO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≥")
+	}
+}
+
+func GreaterEqIO(w I, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return w >= B2I(x)
+	case F:
+		return F(w) >= x
+	case I:
+		return w >= x
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w >= B2I(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = F(w) >= x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w >= x[i]
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := GreaterEqIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≥")
+	}
+}
+
+func GreaterEqSO(w S, x Object) Object {
+	switch x := x.(type) {
+	case S:
+		return w >= x
+	case AS:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w >= x[i]
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := GreaterEqSO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≥")
+	}
+}
+
+func GreaterEqABO(w AB, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = B2I(w[i]) >= B2I(x)
+		}
+		return r
+	case F:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = B2F(w[i]) >= x
+		}
+		return r
+	case I:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = B2I(w[i]) >= x
+		}
+		return r
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2I(w[i]) >= B2I(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2F(w[i]) >= x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = B2I(w[i]) >= x[i]
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := GreaterEqABO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≥")
+	}
+}
+
+func GreaterEqAFO(w AF, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] >= B2F(x)
+		}
+		return r
+	case F:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] >= x
+		}
+		return r
+	case I:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] >= F(x)
+		}
+		return r
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] >= B2F(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] >= x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] >= F(x[i])
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := GreaterEqAFO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≥")
+	}
+}
+
+func GreaterEqAIO(w AI, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] >= B2I(x)
+		}
+		return r
+	case F:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = F(w[i]) >= x
+		}
+		return r
+	case I:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] >= x
+		}
+		return r
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] >= B2I(x[i])
+		}
+		return r
+	case AF:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = F(w[i]) >= x[i]
+		}
+		return r
+	case AI:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] >= x[i]
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := GreaterEqAIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≥")
+	}
+}
+
+func GreaterEqASO(w AS, x Object) Object {
+	switch x := x.(type) {
+	case S:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] >= x
+		}
+		return r
+	case AS:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] >= x[i]
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := GreaterEqASO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("≥")
+	}
+}
+
 func Add(w, x Object) Object {
 	switch w := w.(type) {
 	case B:
