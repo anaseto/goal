@@ -25,7 +25,6 @@
 # ≠ 		Length?			Not Equals
 # ≡ 		XXXXXX			Match
 # ≢ 		XXXXXX			Not Match
-# ⥊ 		Deshape			Reshape*
 # ∾ 		Join*				Join to  (use ~ ?)
 # ⋈ 		Enlist*			Pair*
 # ↑ 		First				Take
@@ -59,3 +58,4 @@
 # ⊑ 		First				Pick*
 # ⊣ 		Identity		Left
 # ⊢ 		Identity		Right
+# ⥊ 		Deshape			Reshape*
