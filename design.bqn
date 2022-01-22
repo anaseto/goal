@@ -7,7 +7,7 @@
 # compiles to Go
 # Primitives:
 # Glyph	Monadic			Dyadic
-# +			flip?				Add
+# +			flip				Add
 # - 		Negate			Subtract
 # × 		Sign				Multiply
 # ÷ 		Reciprocal	Divide
@@ -15,7 +15,7 @@
 # ⌈ 		Ceiling			Maximum
 # ∧ 		XXXXXXXXX		And*
 # ∨ 		XXXXXXXXX		Or*
-# ¬ 		Not*				Span*					use ~ ?
+# ¬ 		Not*				Span*
 # | 		Absolute		Modulus
 # ≤									Less or Equal
 # < 		Sort Up			Less Than

@@ -50,6 +50,14 @@ func divide(w, x F) F {
 	return w / x
 }
 
+func modulus(w, x I) I {
+	if x == 0 {
+		// XXX: really?
+		return x
+	}
+	return x % w
+}
+
 func minI(w, x I) I {
 	if w < x {
 		return w

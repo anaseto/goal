@@ -5162,3 +5162,335 @@ func OrAIO(w AI, x O) O {
 	}
 }
 
+func Modulus(w, x O) O {
+	switch w := w.(type) {
+	case B:
+		return ModulusBO(w, x)
+	case F:
+		return ModulusFO(w, x)
+	case I:
+		return ModulusIO(w, x)
+	case AB:
+		return ModulusABO(w, x)
+	case AF:
+		return ModulusAFO(w, x)
+	case AI:
+		return ModulusAIO(w, x)
+	case AO:
+		r := make(AO, len(w))
+		for i := range r {
+			v := Modulus(w[i], x)
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("|")
+	}
+}
+
+func ModulusBO(w B, x O) O {
+	switch x := x.(type) {
+	case B:
+		return modulus(B2I(w), B2I(x))
+	case F:
+		return modulus(B2I(w), I(x))
+	case I:
+		return modulus(B2I(w), x)
+	case AB:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = modulus(B2I(w), B2I(x[i]))
+		}
+		return r
+	case AF:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = modulus(B2I(w), I(x[i]))
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = modulus(B2I(w), x[i])
+		}
+		return r
+	case AO:
+		r := make([]O, len(x))
+		for i := range r {
+			v := ModulusBO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("|")
+	}
+}
+
+func ModulusFO(w F, x O) O {
+	switch x := x.(type) {
+	case B:
+		return modulus(I(w), B2I(x))
+	case F:
+		return modulus(I(w), I(x))
+	case I:
+		return modulus(I(w), x)
+	case AB:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = modulus(I(w), B2I(x[i]))
+		}
+		return r
+	case AF:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = modulus(I(w), I(x[i]))
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = modulus(I(w), x[i])
+		}
+		return r
+	case AO:
+		r := make([]O, len(x))
+		for i := range r {
+			v := ModulusFO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("|")
+	}
+}
+
+func ModulusIO(w I, x O) O {
+	switch x := x.(type) {
+	case B:
+		return modulus(w, B2I(x))
+	case F:
+		return modulus(w, I(x))
+	case I:
+		return modulus(w, x)
+	case AB:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = modulus(w, B2I(x[i]))
+		}
+		return r
+	case AF:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = modulus(w, I(x[i]))
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = modulus(w, x[i])
+		}
+		return r
+	case AO:
+		r := make([]O, len(x))
+		for i := range r {
+			v := ModulusIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("|")
+	}
+}
+
+func ModulusABO(w AB, x O) O {
+	switch x := x.(type) {
+	case B:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = modulus(B2I(w[i]), B2I(x))
+		}
+		return r
+	case F:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = modulus(B2I(w[i]), I(x))
+		}
+		return r
+	case I:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = modulus(B2I(w[i]), x)
+		}
+		return r
+	case AB:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = modulus(B2I(w[i]), B2I(x[i]))
+		}
+		return r
+	case AF:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = modulus(B2I(w[i]), I(x[i]))
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = modulus(B2I(w[i]), x[i])
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := ModulusABO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("|")
+	}
+}
+
+func ModulusAFO(w AF, x O) O {
+	switch x := x.(type) {
+	case B:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = modulus(I(w[i]), B2I(x))
+		}
+		return r
+	case F:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = modulus(I(w[i]), I(x))
+		}
+		return r
+	case I:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = modulus(I(w[i]), x)
+		}
+		return r
+	case AB:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = modulus(I(w[i]), B2I(x[i]))
+		}
+		return r
+	case AF:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = modulus(I(w[i]), I(x[i]))
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = modulus(I(w[i]), x[i])
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := ModulusAFO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("|")
+	}
+}
+
+func ModulusAIO(w AI, x O) O {
+	switch x := x.(type) {
+	case B:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = modulus(w[i], B2I(x))
+		}
+		return r
+	case F:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = modulus(w[i], I(x))
+		}
+		return r
+	case I:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = modulus(w[i], x)
+		}
+		return r
+	case AB:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = modulus(w[i], B2I(x[i]))
+		}
+		return r
+	case AF:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = modulus(w[i], I(x[i]))
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = modulus(w[i], x[i])
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := ModulusAIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("|")
+	}
+}
+

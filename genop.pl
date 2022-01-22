@@ -167,6 +167,17 @@ my %dyads = (
         F_I => ["w * F(x)", "F"],
         F_F => ["w * x", "F"],
     },
+    Modulus =>  {
+        B_B => ["modulus(B2I(w), B2I(x))", "I"],
+        B_I => ["modulus(B2I(w), x)", "I"],
+        B_F => ["modulus(B2I(w), I(x))", "I"],
+        I_B => ["modulus(w, B2I(x))", "I"],
+        I_I => ["modulus(w, x)", "I"],
+        I_F => ["modulus(w, I(x))", "I"],
+        F_B => ["modulus(I(w), B2I(x))", "I"],
+        F_I => ["modulus(I(w), x)", "I"],
+        F_F => ["modulus(I(w), I(x))", "I"],
+    },
 );
 
 print <<EOS;
@@ -190,6 +201,7 @@ genOp("Minimum", "⌊");
 genOp("Maximum", "⌈");
 genOp("And", "∧"); # identical to Multiply
 genOp("Or", "∨"); # Multiply under Not
+genOp("Modulus", "|");
 
 sub genOp {
     my ($name, $op) = @_;
