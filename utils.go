@@ -50,14 +50,28 @@ func divide(w, x F) F {
 	return w / x
 }
 
-func minInt(w, x I) I {
+func minI(w, x I) I {
 	if w < x {
 		return w
 	}
 	return x
 }
 
-func maxInt(w, x I) I {
+func maxI(w, x I) I {
+	if w < x {
+		return x
+	}
+	return w
+}
+
+func minS(w, x S) S {
+	if w < x {
+		return w
+	}
+	return x
+}
+
+func maxS(w, x S) S {
 	if w < x {
 		return x
 	}

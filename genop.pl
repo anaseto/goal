@@ -16,7 +16,6 @@ my %dyads = (
         F_I => ["w == F(x)", "B"],
         F_F => ["w == x", "B"],
         S_S => ["w == x", "B"],
-        R_R => ["w == x", "B"],
     },
     NotEqual =>  {
         B_B => ["w != x", "B"],
@@ -29,7 +28,6 @@ my %dyads = (
         F_I => ["w != F(x)", "B"],
         F_F => ["w != x", "B"],
         S_S => ["w != x", "B"],
-        R_R => ["w != x", "B"],
     },
     Lesser =>  {
         B_B => ["B2I(w) < B2I(x)", "B"],
@@ -42,7 +40,6 @@ my %dyads = (
         F_I => ["w < F(x)", "B"],
         F_F => ["w < x", "B"],
         S_S => ["w < x", "B"],
-        R_R => ["w < x", "B"],
     },
     LesserEq =>  {
         B_B => ["B2I(w) <= B2I(x)", "B"],
@@ -55,7 +52,6 @@ my %dyads = (
         F_I => ["w <= F(x)", "B"],
         F_F => ["w <= x", "B"],
         S_S => ["w <= x", "B"],
-        R_R => ["w <= x", "B"],
     },
     Greater =>  {
         B_B => ["B2I(w) > B2I(x)", "B"],
@@ -68,7 +64,6 @@ my %dyads = (
         F_I => ["w > F(x)", "B"],
         F_F => ["w > x", "B"],
         S_S => ["w > x", "B"],
-        R_R => ["w > x", "B"],
     },
     GreaterEq =>  {
         B_B => ["B2I(w) >= B2I(x)", "B"],
@@ -81,7 +76,6 @@ my %dyads = (
         F_I => ["w >= F(x)", "B"],
         F_F => ["w >= x", "B"],
         S_S => ["w >= x", "B"],
-        R_R => ["w >= x", "B"],
     },
     Add =>  {
         B_B => ["B2I(w) + B2I(x)", "I"],
@@ -129,25 +123,27 @@ my %dyads = (
     },
     Minimum =>  {
         B_B => ["w && x", "B"],
-        B_I => ["minInt(B2I(w), x)", "I"],
+        B_I => ["minI(B2I(w), x)", "I"],
         B_F => ["F(math.Min(float64(B2F(w)), float64(x)))", "F"],
-        I_B => ["minInt(w, B2I(x))", "I"],
-        I_I => ["minInt(w, x)", "I"],
+        I_B => ["minI(w, B2I(x))", "I"],
+        I_I => ["minI(w, x)", "I"],
         I_F => ["F(math.Min(float64(w), float64(x)))", "F"],
         F_B => ["F(math.Min(float64(w), float64(B2F(x))))", "F"],
         F_I => ["F(math.Min(float64(w), float64(x)))", "F"],
         F_F => ["F(math.Min(float64(w), float64(x)))", "F"],
+        S_S => ["minS(w, x)", "S"],
     },
     Maximum =>  {
         B_B => ["w || x", "B"],
-        B_I => ["maxInt(B2I(w), x)", "I"],
+        B_I => ["maxI(B2I(w), x)", "I"],
         B_F => ["F(math.Max(float64(B2F(w)), float64(x)))", "F"],
-        I_B => ["maxInt(w, B2I(x))", "I"],
-        I_I => ["maxInt(w, x)", "I"],
+        I_B => ["maxI(w, B2I(x))", "I"],
+        I_I => ["maxI(w, x)", "I"],
         I_F => ["F(math.Max(float64(w), float64(x)))", "F"],
         F_B => ["F(math.Max(float64(w), float64(B2F(x))))", "F"],
         F_I => ["F(math.Max(float64(w), float64(x)))", "F"],
         F_F => ["F(math.Max(float64(w), float64(x)))", "F"],
+        S_S => ["maxS(w, x)", "S"],
     },
     Or =>  {
         B_B => ["w || x", "B"],
