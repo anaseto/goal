@@ -198,7 +198,7 @@ sub genOp {
     my $s = "";
     open my $out, '>', \$s;
     print $out <<EOS;
-func ${name}(w, x Object) Object {
+func ${name}(w, x O) O {
 	switch w := w.(type) {
 EOS
     for my $t (sort keys %types) {
@@ -247,7 +247,7 @@ sub genLeftExpanded {
     my $s = "";
     open my $out, '>', \$s;
     print $out <<EOS;
-func ${name}${t}O(w $t, x Object) Object {
+func ${name}${t}O(w $t, x O) O {
 	switch x := x.(type) {
 EOS
     for my $tt (sort keys %types) {
@@ -272,7 +272,7 @@ EOS
     }
     print $out <<EOS if $t !~ /^A/;
 	case AO:
-		r := make([]Object, len(x))
+		r := make([]O, len(x))
 		for i := range r {
 			v := ${name}${t}O(w, x[i])
 			e, ok := v.(E)
@@ -298,7 +298,7 @@ sub genLeftArrayExpanded {
     my $s = "";
     open my $out, '>', \$s;
     print $out <<EOS;
-func ${name}A${t}O(w A$t, x Object) Object {
+func ${name}A${t}O(w A$t, x O) O {
 	switch x := x.(type) {
 EOS
     for my $tt (sort keys %types) {

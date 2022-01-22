@@ -16,7 +16,7 @@ func B2F(b B) (f F) {
 	return
 }
 
-func isNum(x Object) bool {
+func isNum(x O) bool {
 	switch x.(type) {
 	case B, I, F:
 		return true
@@ -25,7 +25,7 @@ func isNum(x Object) bool {
 	}
 }
 
-func isArray(x Object) bool {
+func isArray(x O) bool {
 	switch x.(type) {
 	case AO, AB, AI, AF, AS:
 		return true

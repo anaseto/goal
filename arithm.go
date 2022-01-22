@@ -1,7 +1,7 @@
 package main
 
 // Conjugate returns +x.
-func Conjugate(x Object) Object {
+func Conjugate(x O) O {
 	switch x := x.(type) {
 	case I, F:
 		return x
