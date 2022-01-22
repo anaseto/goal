@@ -18,7 +18,7 @@ func B2F(b B) (f F) {
 
 func isNum(x Object) bool {
 	switch x.(type) {
-	case I, F:
+	case B, I, F:
 		return true
 	default:
 		return false
@@ -27,7 +27,7 @@ func isNum(x Object) bool {
 
 func isArray(x Object) bool {
 	switch x.(type) {
-	case AO, AI, AF, AS:
+	case AO, AB, AI, AF, AS:
 		return true
 	default:
 		return false
