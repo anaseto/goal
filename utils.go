@@ -49,3 +49,17 @@ func divide(w, x F) F {
 	}
 	return w / x
 }
+
+func minInt(w, x I) I {
+	if w < x {
+		return w
+	}
+	return x
+}
+
+func maxInt(w, x I) I {
+	if w < x {
+		return x
+	}
+	return w
+}

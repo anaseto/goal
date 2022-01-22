@@ -100,7 +100,7 @@ my %dyads = (
         F_F => ["w - x", "F"],
     },
     Multiply =>  {
-        B_B => ["B2I(w) * B2I(x)", "I"],
+        B_B => ["w && x", "B"],
         B_I => ["B2I(w) * x", "I"],
         B_F => ["B2F(w) * x", "F"],
         I_B => ["w * B2I(x)", "I"],
@@ -121,14 +121,56 @@ my %dyads = (
         F_I => ["divide(w, F(x))", "F"],
         F_F => ["divide(w, x)", "F"],
     },
-    #Lesser => "<",
-    #LesserEq => "<=",
-    #Greater => ">",
-    #GreaterEq => ">=",
+    Minimum =>  {
+        B_B => ["w && x", "B"],
+        B_I => ["minInt(B2I(w), x)", "I"],
+        B_F => ["F(math.Min(float64(B2F(w)), float64(x)))", "F"],
+        I_B => ["minInt(w, B2I(x))", "I"],
+        I_I => ["minInt(w, x)", "I"],
+        I_F => ["F(math.Min(float64(w), float64(x)))", "F"],
+        F_B => ["F(math.Min(float64(w), float64(B2F(x))))", "F"],
+        F_I => ["F(math.Min(float64(w), float64(x)))", "F"],
+        F_F => ["F(math.Min(float64(w), float64(x)))", "F"],
+    },
+    Maximum =>  {
+        B_B => ["w || x", "B"],
+        B_I => ["maxInt(B2I(w), x)", "I"],
+        B_F => ["F(math.Max(float64(B2F(w)), float64(x)))", "F"],
+        I_B => ["maxInt(w, B2I(x))", "I"],
+        I_I => ["maxInt(w, x)", "I"],
+        I_F => ["F(math.Max(float64(w), float64(x)))", "F"],
+        F_B => ["F(math.Max(float64(w), float64(B2F(x))))", "F"],
+        F_I => ["F(math.Max(float64(w), float64(x)))", "F"],
+        F_F => ["F(math.Max(float64(w), float64(x)))", "F"],
+    },
+    Or =>  {
+        B_B => ["w || x", "B"],
+        B_I => ["1-((1-B2I(w)) * (1-x))", "I"],
+        #B_F => ["1-((1-B2F(w)) * (1-x))", "F"],
+        I_B => ["1-((1-w) * (1-B2I(x)))", "I"],
+        I_I => ["1-((1-w) * (1-x))", "I"],
+        #I_F => ["1-((1-F(w)) * (1-x))", "F"],
+        #F_B => ["1-((1-w) * (1-B2F(x)))", "F"],
+        #F_I => ["1-((1-w) * F(1-x))", "F"],
+        #F_F => ["1-((1-w) * (1-x))", "F"],
+    },
+    And =>  {
+        B_B => ["w && x", "B"],
+        B_I => ["B2I(w) * x", "I"],
+        #B_F => ["B2F(w) * x", "F"],
+        I_B => ["w * B2I(x)", "I"],
+        I_I => ["w * x", "I"],
+        #I_F => ["F(w) * x", "F"],
+        #F_B => ["w * B2F(x)", "F"],
+        #F_I => ["w * F(x)", "F"],
+        #F_F => ["w * x", "F"],
+    },
 );
 
 print <<EOS;
 package main
+
+import "math"
 
 EOS
 
@@ -142,6 +184,10 @@ genOp("Add", "+");
 genOp("Subtract", "-");
 genOp("Multiply", "×");
 genOp("Divide", "÷");
+genOp("Minimum", "⌊");
+genOp("Maximum", "⌈");
+genOp("And", "∧"); # identical to Multiply
+genOp("Or", "∨"); # Multiply under Not
 
 sub genOp {
     my ($name, $op) = @_;

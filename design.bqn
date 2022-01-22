@@ -26,7 +26,7 @@
 # ≡ 		XXXXXX			Match
 # ≢ 		XXXXXX			Not Match
 # ⥊ 		Deshape			Reshape*
-# ∾ 		Join*				Join to
+# ∾ 		Join*				Join to  (use ~ ?)
 # ⋈ 		Enlist*			Pair*
 # ↑ 		First				Take
 # ↓ 		Tail				Drop
@@ -42,7 +42,7 @@
 # ⊒ 		Occurrence Count*	Progressive Index of*
 # ⊐ 		Classify				  Index Of
 # ⊔ 		Group Indices*		Group*
-# !			Error							Annotate
+# !			Error							Annotate?
 #
 # Ideas:
 # *  		Indices Inv				Progressive Index of*

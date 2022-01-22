@@ -1,5 +1,7 @@
 package main
 
+import "math"
+
 func Equal(w, x Object) Object {
 	switch w := w.(type) {
 	case B:
@@ -3075,15 +3077,15 @@ func Multiply(w, x Object) Object {
 func MultiplyBO(w B, x Object) Object {
 	switch x := x.(type) {
 	case B:
-		return B2I(w) * B2I(x)
+		return w && x
 	case F:
 		return B2F(w) * x
 	case I:
 		return B2I(w) * x
 	case AB:
-		r := make(AI, len(x))
+		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2I(w) * B2I(x[i])
+			r[i] = w && x[i]
 		}
 		return r
 	case AF:
@@ -3207,9 +3209,9 @@ func MultiplyIO(w I, x Object) Object {
 func MultiplyABO(w AB, x Object) Object {
 	switch x := x.(type) {
 	case B:
-		r := make(AI, len(w))
+		r := make(AB, len(w))
 		for i := range r {
-			r[i] = B2I(w[i]) * B2I(x)
+			r[i] = w[i] && x
 		}
 		return r
 	case F:
@@ -3225,9 +3227,9 @@ func MultiplyABO(w AB, x Object) Object {
 		}
 		return r
 	case AB:
-		r := make(AI, len(x))
+		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2I(w[i]) * B2I(x[i])
+			r[i] = w[i] && x[i]
 		}
 		return r
 	case AF:
@@ -3701,6 +3703,1046 @@ func DivideAIO(w AI, x Object) Object {
 		return w
 	default:
 		return badtype("÷")
+	}
+}
+
+func Minimum(w, x Object) Object {
+	switch w := w.(type) {
+	case B:
+		return MinimumBO(w, x)
+	case F:
+		return MinimumFO(w, x)
+	case I:
+		return MinimumIO(w, x)
+	case AB:
+		return MinimumABO(w, x)
+	case AF:
+		return MinimumAFO(w, x)
+	case AI:
+		return MinimumAIO(w, x)
+	case AO:
+		r := make(AO, len(w))
+		for i := range r {
+			v := Minimum(w[i], x)
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("⌊")
+	}
+}
+
+func MinimumBO(w B, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return w && x
+	case F:
+		return F(math.Min(float64(B2F(w)), float64(x)))
+	case I:
+		return minInt(B2I(w), x)
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w && x[i]
+		}
+		return r
+	case AF:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = F(math.Min(float64(B2F(w)), float64(x[i])))
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = minInt(B2I(w), x[i])
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := MinimumBO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("⌊")
+	}
+}
+
+func MinimumFO(w F, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return F(math.Min(float64(w), float64(B2F(x))))
+	case F:
+		return F(math.Min(float64(w), float64(x)))
+	case I:
+		return F(math.Min(float64(w), float64(x)))
+	case AB:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = F(math.Min(float64(w), float64(B2F(x[i]))))
+		}
+		return r
+	case AF:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = F(math.Min(float64(w), float64(x[i])))
+		}
+		return r
+	case AI:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = F(math.Min(float64(w), float64(x[i])))
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := MinimumFO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("⌊")
+	}
+}
+
+func MinimumIO(w I, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return minInt(w, B2I(x))
+	case F:
+		return F(math.Min(float64(w), float64(x)))
+	case I:
+		return minInt(w, x)
+	case AB:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = minInt(w, B2I(x[i]))
+		}
+		return r
+	case AF:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = F(math.Min(float64(w), float64(x[i])))
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = minInt(w, x[i])
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := MinimumIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("⌊")
+	}
+}
+
+func MinimumABO(w AB, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] && x
+		}
+		return r
+	case F:
+		r := make(AF, len(w))
+		for i := range r {
+			r[i] = F(math.Min(float64(B2F(w[i])), float64(x)))
+		}
+		return r
+	case I:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = minInt(B2I(w[i]), x)
+		}
+		return r
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] && x[i]
+		}
+		return r
+	case AF:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = F(math.Min(float64(B2F(w[i])), float64(x[i])))
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = minInt(B2I(w[i]), x[i])
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := MinimumABO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("⌊")
+	}
+}
+
+func MinimumAFO(w AF, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AF, len(w))
+		for i := range r {
+			r[i] = F(math.Min(float64(w[i]), float64(B2F(x))))
+		}
+		return r
+	case F:
+		r := make(AF, len(w))
+		for i := range r {
+			r[i] = F(math.Min(float64(w[i]), float64(x)))
+		}
+		return r
+	case I:
+		r := make(AF, len(w))
+		for i := range r {
+			r[i] = F(math.Min(float64(w[i]), float64(x)))
+		}
+		return r
+	case AB:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = F(math.Min(float64(w[i]), float64(B2F(x[i]))))
+		}
+		return r
+	case AF:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = F(math.Min(float64(w[i]), float64(x[i])))
+		}
+		return r
+	case AI:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = F(math.Min(float64(w[i]), float64(x[i])))
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := MinimumAFO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("⌊")
+	}
+}
+
+func MinimumAIO(w AI, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = minInt(w[i], B2I(x))
+		}
+		return r
+	case F:
+		r := make(AF, len(w))
+		for i := range r {
+			r[i] = F(math.Min(float64(w[i]), float64(x)))
+		}
+		return r
+	case I:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = minInt(w[i], x)
+		}
+		return r
+	case AB:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = minInt(w[i], B2I(x[i]))
+		}
+		return r
+	case AF:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = F(math.Min(float64(w[i]), float64(x[i])))
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = minInt(w[i], x[i])
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := MinimumAIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("⌊")
+	}
+}
+
+func Maximum(w, x Object) Object {
+	switch w := w.(type) {
+	case B:
+		return MaximumBO(w, x)
+	case F:
+		return MaximumFO(w, x)
+	case I:
+		return MaximumIO(w, x)
+	case AB:
+		return MaximumABO(w, x)
+	case AF:
+		return MaximumAFO(w, x)
+	case AI:
+		return MaximumAIO(w, x)
+	case AO:
+		r := make(AO, len(w))
+		for i := range r {
+			v := Maximum(w[i], x)
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("⌈")
+	}
+}
+
+func MaximumBO(w B, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return w || x
+	case F:
+		return F(math.Max(float64(B2F(w)), float64(x)))
+	case I:
+		return maxInt(B2I(w), x)
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w || x[i]
+		}
+		return r
+	case AF:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = F(math.Max(float64(B2F(w)), float64(x[i])))
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = maxInt(B2I(w), x[i])
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := MaximumBO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("⌈")
+	}
+}
+
+func MaximumFO(w F, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return F(math.Max(float64(w), float64(B2F(x))))
+	case F:
+		return F(math.Max(float64(w), float64(x)))
+	case I:
+		return F(math.Max(float64(w), float64(x)))
+	case AB:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = F(math.Max(float64(w), float64(B2F(x[i]))))
+		}
+		return r
+	case AF:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = F(math.Max(float64(w), float64(x[i])))
+		}
+		return r
+	case AI:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = F(math.Max(float64(w), float64(x[i])))
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := MaximumFO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("⌈")
+	}
+}
+
+func MaximumIO(w I, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return maxInt(w, B2I(x))
+	case F:
+		return F(math.Max(float64(w), float64(x)))
+	case I:
+		return maxInt(w, x)
+	case AB:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = maxInt(w, B2I(x[i]))
+		}
+		return r
+	case AF:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = F(math.Max(float64(w), float64(x[i])))
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = maxInt(w, x[i])
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := MaximumIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("⌈")
+	}
+}
+
+func MaximumABO(w AB, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] || x
+		}
+		return r
+	case F:
+		r := make(AF, len(w))
+		for i := range r {
+			r[i] = F(math.Max(float64(B2F(w[i])), float64(x)))
+		}
+		return r
+	case I:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = maxInt(B2I(w[i]), x)
+		}
+		return r
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] || x[i]
+		}
+		return r
+	case AF:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = F(math.Max(float64(B2F(w[i])), float64(x[i])))
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = maxInt(B2I(w[i]), x[i])
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := MaximumABO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("⌈")
+	}
+}
+
+func MaximumAFO(w AF, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AF, len(w))
+		for i := range r {
+			r[i] = F(math.Max(float64(w[i]), float64(B2F(x))))
+		}
+		return r
+	case F:
+		r := make(AF, len(w))
+		for i := range r {
+			r[i] = F(math.Max(float64(w[i]), float64(x)))
+		}
+		return r
+	case I:
+		r := make(AF, len(w))
+		for i := range r {
+			r[i] = F(math.Max(float64(w[i]), float64(x)))
+		}
+		return r
+	case AB:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = F(math.Max(float64(w[i]), float64(B2F(x[i]))))
+		}
+		return r
+	case AF:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = F(math.Max(float64(w[i]), float64(x[i])))
+		}
+		return r
+	case AI:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = F(math.Max(float64(w[i]), float64(x[i])))
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := MaximumAFO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("⌈")
+	}
+}
+
+func MaximumAIO(w AI, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = maxInt(w[i], B2I(x))
+		}
+		return r
+	case F:
+		r := make(AF, len(w))
+		for i := range r {
+			r[i] = F(math.Max(float64(w[i]), float64(x)))
+		}
+		return r
+	case I:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = maxInt(w[i], x)
+		}
+		return r
+	case AB:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = maxInt(w[i], B2I(x[i]))
+		}
+		return r
+	case AF:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = F(math.Max(float64(w[i]), float64(x[i])))
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = maxInt(w[i], x[i])
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := MaximumAIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("⌈")
+	}
+}
+
+func And(w, x Object) Object {
+	switch w := w.(type) {
+	case B:
+		return AndBO(w, x)
+	case I:
+		return AndIO(w, x)
+	case AB:
+		return AndABO(w, x)
+	case AI:
+		return AndAIO(w, x)
+	case AO:
+		r := make(AO, len(w))
+		for i := range r {
+			v := And(w[i], x)
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("∧")
+	}
+}
+
+func AndBO(w B, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return w && x
+	case I:
+		return B2I(w) * x
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w && x[i]
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = B2I(w) * x[i]
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := AndBO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("∧")
+	}
+}
+
+func AndIO(w I, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return w * B2I(x)
+	case I:
+		return w * x
+	case AB:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = w * B2I(x[i])
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = w * x[i]
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := AndIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("∧")
+	}
+}
+
+func AndABO(w AB, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] && x
+		}
+		return r
+	case I:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = B2I(w[i]) * x
+		}
+		return r
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] && x[i]
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = B2I(w[i]) * x[i]
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := AndABO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("∧")
+	}
+}
+
+func AndAIO(w AI, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = w[i] * B2I(x)
+		}
+		return r
+	case I:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = w[i] * x
+		}
+		return r
+	case AB:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = w[i] * B2I(x[i])
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = w[i] * x[i]
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := AndAIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("∧")
+	}
+}
+
+func Or(w, x Object) Object {
+	switch w := w.(type) {
+	case B:
+		return OrBO(w, x)
+	case I:
+		return OrIO(w, x)
+	case AB:
+		return OrABO(w, x)
+	case AI:
+		return OrAIO(w, x)
+	case AO:
+		r := make(AO, len(w))
+		for i := range r {
+			v := Or(w[i], x)
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("∨")
+	}
+}
+
+func OrBO(w B, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return w || x
+	case I:
+		return 1-((1-B2I(w)) * (1-x))
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w || x[i]
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = 1-((1-B2I(w)) * (1-x[i]))
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := OrBO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("∨")
+	}
+}
+
+func OrIO(w I, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		return 1-((1-w) * (1-B2I(x)))
+	case I:
+		return 1-((1-w) * (1-x))
+	case AB:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = 1-((1-w) * (1-B2I(x[i])))
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = 1-((1-w) * (1-x[i]))
+		}
+		return r
+	case AO:
+		r := make([]Object, len(x))
+		for i := range r {
+			v := OrIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("∨")
+	}
+}
+
+func OrABO(w AB, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AB, len(w))
+		for i := range r {
+			r[i] = w[i] || x
+		}
+		return r
+	case I:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = 1-((1-B2I(w[i])) * (1-x))
+		}
+		return r
+	case AB:
+		r := make(AB, len(x))
+		for i := range r {
+			r[i] = w[i] || x[i]
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = 1-((1-B2I(w[i])) * (1-x[i]))
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := OrABO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("∨")
+	}
+}
+
+func OrAIO(w AI, x Object) Object {
+	switch x := x.(type) {
+	case B:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = 1-((1-w[i]) * (1-B2I(x)))
+		}
+		return r
+	case I:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = 1-((1-w[i]) * (1-x))
+		}
+		return r
+	case AB:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = 1-((1-w[i]) * (1-B2I(x[i])))
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = 1-((1-w[i]) * (1-x[i]))
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := OrAIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("∨")
 	}
 }
 
