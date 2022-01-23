@@ -30,7 +30,7 @@ my %dyads = (
         S_S => ["w != x", "B"],
     },
     Lesser =>  {
-        B_B => ["B2I(w) < B2I(x)", "B"],
+        B_B => ["!w && x", "B"],
         B_I => ["B2I(w) < x", "B"],
         B_F => ["B2F(w) < x", "B"],
         I_B => ["w < B2I(x)", "B"],
@@ -42,7 +42,7 @@ my %dyads = (
         S_S => ["w < x", "B"],
     },
     LesserEq =>  {
-        B_B => ["B2I(w) <= B2I(x)", "B"],
+        B_B => ["x || !w", "B"],
         B_I => ["B2I(w) <= x", "B"],
         B_F => ["B2F(w) <= x", "B"],
         I_B => ["w <= B2I(x)", "B"],
@@ -54,7 +54,7 @@ my %dyads = (
         S_S => ["w <= x", "B"],
     },
     Greater =>  {
-        B_B => ["B2I(w) > B2I(x)", "B"],
+        B_B => ["w && !x", "B"],
         B_I => ["B2I(w) > x", "B"],
         B_F => ["B2F(w) > x", "B"],
         I_B => ["w > B2I(x)", "B"],
@@ -66,7 +66,7 @@ my %dyads = (
         S_S => ["w > x", "B"],
     },
     GreaterEq =>  {
-        B_B => ["B2I(w) >= B2I(x)", "B"],
+        B_B => ["w || !x", "B"],
         B_I => ["B2I(w) >= x", "B"],
         B_F => ["B2F(w) >= x", "B"],
         I_B => ["w >= B2I(x)", "B"],

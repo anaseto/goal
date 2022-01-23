@@ -833,7 +833,7 @@ func Lesser(w, x O) O {
 func LesserBO(w B, x O) O {
 	switch x := x.(type) {
 	case B:
-		return B2I(w) < B2I(x)
+		return !w && x
 	case F:
 		return B2F(w) < x
 	case I:
@@ -841,7 +841,7 @@ func LesserBO(w B, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2I(w) < B2I(x[i])
+			r[i] = !w && x[i]
 		}
 		return r
 	case AF:
@@ -995,7 +995,7 @@ func LesserABO(w AB, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = B2I(w[i]) < B2I(x)
+			r[i] = !w[i] && x
 		}
 		return r
 	case F:
@@ -1013,7 +1013,7 @@ func LesserABO(w AB, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2I(w[i]) < B2I(x[i])
+			r[i] = !w[i] && x[i]
 		}
 		return r
 	case AF:
@@ -1229,7 +1229,7 @@ func LesserEq(w, x O) O {
 func LesserEqBO(w B, x O) O {
 	switch x := x.(type) {
 	case B:
-		return B2I(w) <= B2I(x)
+		return x || !w
 	case F:
 		return B2F(w) <= x
 	case I:
@@ -1237,7 +1237,7 @@ func LesserEqBO(w B, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2I(w) <= B2I(x[i])
+			r[i] = x[i] || !w
 		}
 		return r
 	case AF:
@@ -1391,7 +1391,7 @@ func LesserEqABO(w AB, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = B2I(w[i]) <= B2I(x)
+			r[i] = x || !w[i]
 		}
 		return r
 	case F:
@@ -1409,7 +1409,7 @@ func LesserEqABO(w AB, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2I(w[i]) <= B2I(x[i])
+			r[i] = x[i] || !w[i]
 		}
 		return r
 	case AF:
@@ -1625,7 +1625,7 @@ func Greater(w, x O) O {
 func GreaterBO(w B, x O) O {
 	switch x := x.(type) {
 	case B:
-		return B2I(w) > B2I(x)
+		return w && !x
 	case F:
 		return B2F(w) > x
 	case I:
@@ -1633,7 +1633,7 @@ func GreaterBO(w B, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2I(w) > B2I(x[i])
+			r[i] = w && !x[i]
 		}
 		return r
 	case AF:
@@ -1787,7 +1787,7 @@ func GreaterABO(w AB, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = B2I(w[i]) > B2I(x)
+			r[i] = w[i] && !x
 		}
 		return r
 	case F:
@@ -1805,7 +1805,7 @@ func GreaterABO(w AB, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2I(w[i]) > B2I(x[i])
+			r[i] = w[i] && !x[i]
 		}
 		return r
 	case AF:
@@ -2021,7 +2021,7 @@ func GreaterEq(w, x O) O {
 func GreaterEqBO(w B, x O) O {
 	switch x := x.(type) {
 	case B:
-		return B2I(w) >= B2I(x)
+		return w || !x
 	case F:
 		return B2F(w) >= x
 	case I:
@@ -2029,7 +2029,7 @@ func GreaterEqBO(w B, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2I(w) >= B2I(x[i])
+			r[i] = w || !x[i]
 		}
 		return r
 	case AF:
@@ -2183,7 +2183,7 @@ func GreaterEqABO(w AB, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = B2I(w[i]) >= B2I(x)
+			r[i] = w[i] || !x
 		}
 		return r
 	case F:
@@ -2201,7 +2201,7 @@ func GreaterEqABO(w AB, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2I(w[i]) >= B2I(x[i])
+			r[i] = w[i] || !x[i]
 		}
 		return r
 	case AF:
