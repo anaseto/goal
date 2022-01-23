@@ -87,6 +87,7 @@ my %dyads = (
         F_B => ["w + B2F(x)", "F"],
         F_I => ["w + F(x)", "F"],
         F_F => ["w + x", "F"],
+        S_S => ["w + x", "S"],
     },
     Subtract =>  {
         B_B => ["B2I(w) - B2I(x)", "I"],
@@ -103,12 +104,18 @@ my %dyads = (
         B_B => ["w && x", "B"],
         B_I => ["B2I(w) * x", "I"],
         B_F => ["B2F(w) * x", "F"],
+        B_S => ["strings.Repeat(x, B2I(w))", "S"],
         I_B => ["w * B2I(x)", "I"],
         I_I => ["w * x", "I"],
         I_F => ["F(w) * x", "F"],
+        I_S => ["strings.Repeat(x, w)", "S"],
         F_B => ["w * B2F(x)", "F"],
         F_I => ["w * F(x)", "F"],
         F_F => ["w * x", "F"],
+        F_S => ["strings.Repeat(x, I(math.Round(w)))", "S"],
+        S_B => ["strings.Repeat(w, B2I(x))", "S"],
+        S_I => ["strings.Repeat(w, x)", "S"],
+        S_F => ["strings.Repeat(w, I(math.Round(x)))", "S"],
     },
     Divide =>  {
         B_B => ["divide(B2F(w), B2F(x))", "F"],
@@ -183,7 +190,10 @@ my %dyads = (
 print <<EOS;
 package main
 
-import "math"
+import (
+    "math"
+    "strings"
+)
 
 EOS
 

@@ -1,6 +1,9 @@
 package main
 
-import "math"
+import (
+	"math"
+	"strings"
+)
 
 func Equal(w, x O) O {
 	switch w := w.(type) {
@@ -2476,12 +2479,16 @@ func Add(w, x O) O {
 		return AddFO(w, x)
 	case I:
 		return AddIO(w, x)
+	case S:
+		return AddSO(w, x)
 	case AB:
 		return AddABO(w, x)
 	case AF:
 		return AddAFO(w, x)
 	case AI:
 		return AddAIO(w, x)
+	case AS:
+		return AddASO(w, x)
 	case AO:
 		if isArray(x) {
 			if length(x) != len(w) {
@@ -2633,6 +2640,34 @@ func AddIO(w I, x O) O {
 		r := make([]O, len(x))
 		for i := range r {
 			v := AddIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("+")
+	}
+}
+
+func AddSO(w S, x O) O {
+	switch x := x.(type) {
+	case S:
+		return w + x
+	case AS:
+		r := make(AS, len(x))
+		for i := range r {
+			r[i] = w + x[i]
+		}
+		return r
+	case AO:
+		r := make([]O, len(x))
+		for i := range r {
+			v := AddSO(w, x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -2801,6 +2836,38 @@ func AddAIO(w AI, x O) O {
 		r := make(AO, len(x))
 		for i := range r {
 			v := AddAIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("+")
+	}
+}
+
+func AddASO(w AS, x O) O {
+	switch x := x.(type) {
+	case S:
+		r := make(AS, len(w))
+		for i := range r {
+			r[i] = w[i] + x
+		}
+		return r
+	case AS:
+		r := make(AS, len(x))
+		for i := range r {
+			r[i] = w[i] + x[i]
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := AddASO(w, x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -3170,12 +3237,16 @@ func Multiply(w, x O) O {
 		return MultiplyFO(w, x)
 	case I:
 		return MultiplyIO(w, x)
+	case S:
+		return MultiplySO(w, x)
 	case AB:
 		return MultiplyABO(w, x)
 	case AF:
 		return MultiplyAFO(w, x)
 	case AI:
 		return MultiplyAIO(w, x)
+	case AS:
+		return MultiplyASO(w, x)
 	case AO:
 		if isArray(x) {
 			if length(x) != len(w) {
@@ -3217,6 +3288,8 @@ func MultiplyBO(w B, x O) O {
 		return B2F(w) * x
 	case I:
 		return B2I(w) * x
+	case S:
+		return strings.Repeat(x, B2I(w))
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -3233,6 +3306,12 @@ func MultiplyBO(w B, x O) O {
 		r := make(AI, len(x))
 		for i := range r {
 			r[i] = B2I(w) * x[i]
+		}
+		return r
+	case AS:
+		r := make(AS, len(x))
+		for i := range r {
+			r[i] = strings.Repeat(x[i], B2I(w))
 		}
 		return r
 	case AO:
@@ -3261,6 +3340,8 @@ func MultiplyFO(w F, x O) O {
 		return w * x
 	case I:
 		return w * F(x)
+	case S:
+		return strings.Repeat(x, I(math.Round(w)))
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
@@ -3277,6 +3358,12 @@ func MultiplyFO(w F, x O) O {
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = w * F(x[i])
+		}
+		return r
+	case AS:
+		r := make(AS, len(x))
+		for i := range r {
+			r[i] = strings.Repeat(x[i], I(math.Round(w)))
 		}
 		return r
 	case AO:
@@ -3305,6 +3392,8 @@ func MultiplyIO(w I, x O) O {
 		return F(w) * x
 	case I:
 		return w * x
+	case S:
+		return strings.Repeat(x, w)
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
@@ -3323,10 +3412,60 @@ func MultiplyIO(w I, x O) O {
 			r[i] = w * x[i]
 		}
 		return r
+	case AS:
+		r := make(AS, len(x))
+		for i := range r {
+			r[i] = strings.Repeat(x[i], w)
+		}
+		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
 			v := MultiplyIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("×")
+	}
+}
+
+func MultiplySO(w S, x O) O {
+	switch x := x.(type) {
+	case B:
+		return strings.Repeat(w, B2I(x))
+	case F:
+		return strings.Repeat(w, I(math.Round(x)))
+	case I:
+		return strings.Repeat(w, x)
+	case AB:
+		r := make(AS, len(x))
+		for i := range r {
+			r[i] = strings.Repeat(w, B2I(x[i]))
+		}
+		return r
+	case AF:
+		r := make(AS, len(x))
+		for i := range r {
+			r[i] = strings.Repeat(w, I(math.Round(x[i])))
+		}
+		return r
+	case AI:
+		r := make(AS, len(x))
+		for i := range r {
+			r[i] = strings.Repeat(w, x[i])
+		}
+		return r
+	case AO:
+		r := make([]O, len(x))
+		for i := range r {
+			v := MultiplySO(w, x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -3361,6 +3500,12 @@ func MultiplyABO(w AB, x O) O {
 			r[i] = B2I(w[i]) * x
 		}
 		return r
+	case S:
+		r := make(AS, len(w))
+		for i := range r {
+			r[i] = strings.Repeat(x, B2I(w[i]))
+		}
+		return r
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -3377,6 +3522,12 @@ func MultiplyABO(w AB, x O) O {
 		r := make(AI, len(x))
 		for i := range r {
 			r[i] = B2I(w[i]) * x[i]
+		}
+		return r
+	case AS:
+		r := make(AS, len(x))
+		for i := range r {
+			r[i] = strings.Repeat(x[i], B2I(w[i]))
 		}
 		return r
 	case AO:
@@ -3417,6 +3568,12 @@ func MultiplyAFO(w AF, x O) O {
 			r[i] = w[i] * F(x)
 		}
 		return r
+	case S:
+		r := make(AS, len(w))
+		for i := range r {
+			r[i] = strings.Repeat(x, I(math.Round(w[i])))
+		}
+		return r
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
@@ -3433,6 +3590,12 @@ func MultiplyAFO(w AF, x O) O {
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = w[i] * F(x[i])
+		}
+		return r
+	case AS:
+		r := make(AS, len(x))
+		for i := range r {
+			r[i] = strings.Repeat(x[i], I(math.Round(w[i])))
 		}
 		return r
 	case AO:
@@ -3473,6 +3636,12 @@ func MultiplyAIO(w AI, x O) O {
 			r[i] = w[i] * x
 		}
 		return r
+	case S:
+		r := make(AS, len(w))
+		for i := range r {
+			r[i] = strings.Repeat(x, w[i])
+		}
+		return r
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
@@ -3491,10 +3660,72 @@ func MultiplyAIO(w AI, x O) O {
 			r[i] = w[i] * x[i]
 		}
 		return r
+	case AS:
+		r := make(AS, len(x))
+		for i := range r {
+			r[i] = strings.Repeat(x[i], w[i])
+		}
+		return r
 	case AO:
 		r := make(AO, len(x))
 		for i := range r {
 			v := MultiplyAIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("×")
+	}
+}
+
+func MultiplyASO(w AS, x O) O {
+	switch x := x.(type) {
+	case B:
+		r := make(AS, len(w))
+		for i := range r {
+			r[i] = strings.Repeat(w[i], B2I(x))
+		}
+		return r
+	case F:
+		r := make(AS, len(w))
+		for i := range r {
+			r[i] = strings.Repeat(w[i], I(math.Round(x)))
+		}
+		return r
+	case I:
+		r := make(AS, len(w))
+		for i := range r {
+			r[i] = strings.Repeat(w[i], x)
+		}
+		return r
+	case AB:
+		r := make(AS, len(x))
+		for i := range r {
+			r[i] = strings.Repeat(w[i], B2I(x[i]))
+		}
+		return r
+	case AF:
+		r := make(AS, len(x))
+		for i := range r {
+			r[i] = strings.Repeat(w[i], I(math.Round(x[i])))
+		}
+		return r
+	case AI:
+		r := make(AS, len(x))
+		for i := range r {
+			r[i] = strings.Repeat(w[i], x[i])
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := MultiplyASO(w, x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
