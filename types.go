@@ -6,10 +6,15 @@ type F float64      // F represents real numbers.
 type I int64        // I represents integers.
 type S string       // S represents (immutable) strings of bytes.
 type E error        // Errors (TODO: think about it)
-type D func(O, O) O // D represents dyadic operators (TODO: distinct type for more arguments?)
 type M func(O) O    // M represents monadic functions
-type AO []O         // generic array
-type AB []B         // boolean array
-type AF []F         // real array
-type AI []I         // integer array
-type AS []S         // string array
+type D func(O, O) O // D represents dyadic operators
+// V represents a variadic function with more than two arguments
+type V struct {
+	Arity int          // Number of arguments
+	Fun   func(...O) O // Function
+}
+type AO []O // generic array
+type AB []B // boolean array
+type AF []F // real array
+type AI []I // integer array (TODO: optimization: add Range type)
+type AS []S // string array
