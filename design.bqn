@@ -8,43 +8,43 @@
 # Primitives:
 # Glyph	Monadic			Dyadic
 # +			flip				Add
-# - 		Negate			Subtract
-# × 		Sign				Multiply
-# ÷ 		Reciprocal	Divide
-# ⌊ 		Floor				Minimum
-# ⌈ 		Ceiling			Maximum
-# ∧ 		XXXXXXXXX		And*
-# ∨ 		XXXXXXXXX		Or*
-# ¬ 		Not*				Span*
-# | 		Absolute		Modulus
+# -			Negate			Subtract
+# ×			Sign				Multiply
+# ÷			Reciprocal	Divide
+# ⌊			Floor				Minimum
+# ⌈			Ceiling			Maximum
+# ∧			XXXXXXXXX		And*
+# ∨			XXXXXXXXX		Or*
+# ¬			Not*				Span*
+# |			Absolute		Modulus
 # ≤									Less or Equal
-# < 		Sort Up			Less Than
-# > 		Sort Down		Greater Than
+# <			Sort Up			Less Than
+# >			Sort Down		Greater Than
 # ≥									Greater Than or Equal to
-# = 	  Classify?		Equals
-# ≠ 		Length?			Not Equals
-# ≡ 		XXXXXX			Match
-# ≢ 		XXXXXX			Not Match
-# ∾ 		Join*				Join to  (use ~ ?)
-# ⋈ 		Enlist*			Pair*
-# ↑ 		First				Take
-# ↓ 		Tail				Drop
-# ↕ 		Range				Windows*
-# » 		Nudge*			Shift Before*
-# « 		Nudge Back*	Shift After*
-# ⌽ 		Reverse			Rotate
-# / 		Indices			Replicate
-# ⍋ 		Grade Up		Bins Up
-# ⍒ 		Grade Down	Bins Down
-# ∊ 		Mark Firsts				Member of
-# ⍷ 		Deduplicate				Find
-# ⊒ 		Occurrence Count*	Progressive Index of*
-# ⊐ 		Classify				  Index Of
-# ⊔ 		Group Indices*		Group*
+# =		  Classify?		Equals
+# ≠			Length?			Not Equals
+# ≡			XXXXXX			Match
+# ≢			XXXXXX			Not Match
+# ∾			Join*				Join to  (use ~ ?)
+# ⋈			Enlist*			Pair*
+# ↑			First				Take
+# ↓			Tail				Drop
+# ↕			Range				Windows*
+# »			Nudge*			Shift Before*
+# «			Nudge Back*	Shift After*
+# ⌽			Reverse			Rotate
+# /			Indices			Replicate
+# \			Indices Inv	Expand (APL)
+# ⍋			Grade Up		Bins Up
+# ⍒			Grade Down	Bins Down
+# ∊			Mark Firsts				Member of
+# ⍷			Deduplicate				Find
+# ⊒			Occurrence Count*	Progressive Index of*
+# ⊐			Classify				  Index Of
+# ⊔			Group Indices*		Group*
 # !			Error							Annotate?
 #
 # Ideas:
-# *  		Indices Inv				Progressive Index of*
 # ? 		Deduplicate				Index Of
 # #			Length?			Replicate?
 # %			comment?
