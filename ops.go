@@ -21,6 +21,21 @@ func Equal(w, x O) O {
 	case AS:
 		return EqualASO(w, x)
 	case AO:
+		if isArray(x) {
+			if length(x) != len(w) {
+				return badlen("=")
+			}
+			r := make(AO, len(w))
+			for i := range r {
+				v := Equal(w[i], at(x, i))
+				e, ok := v.(E)
+				if ok {
+					return e
+				}
+				r[i] = v
+			}
+			return r
+		}
 		r := make(AO, len(w))
 		for i := range r {
 			v := Equal(w[i], x)
@@ -417,6 +432,21 @@ func NotEqual(w, x O) O {
 	case AS:
 		return NotEqualASO(w, x)
 	case AO:
+		if isArray(x) {
+			if length(x) != len(w) {
+				return badlen("≠")
+			}
+			r := make(AO, len(w))
+			for i := range r {
+				v := NotEqual(w[i], at(x, i))
+				e, ok := v.(E)
+				if ok {
+					return e
+				}
+				r[i] = v
+			}
+			return r
+		}
 		r := make(AO, len(w))
 		for i := range r {
 			v := NotEqual(w[i], x)
@@ -813,6 +843,21 @@ func Lesser(w, x O) O {
 	case AS:
 		return LesserASO(w, x)
 	case AO:
+		if isArray(x) {
+			if length(x) != len(w) {
+				return badlen("<")
+			}
+			r := make(AO, len(w))
+			for i := range r {
+				v := Lesser(w[i], at(x, i))
+				e, ok := v.(E)
+				if ok {
+					return e
+				}
+				r[i] = v
+			}
+			return r
+		}
 		r := make(AO, len(w))
 		for i := range r {
 			v := Lesser(w[i], x)
@@ -1209,6 +1254,21 @@ func LesserEq(w, x O) O {
 	case AS:
 		return LesserEqASO(w, x)
 	case AO:
+		if isArray(x) {
+			if length(x) != len(w) {
+				return badlen("≤")
+			}
+			r := make(AO, len(w))
+			for i := range r {
+				v := LesserEq(w[i], at(x, i))
+				e, ok := v.(E)
+				if ok {
+					return e
+				}
+				r[i] = v
+			}
+			return r
+		}
 		r := make(AO, len(w))
 		for i := range r {
 			v := LesserEq(w[i], x)
@@ -1605,6 +1665,21 @@ func Greater(w, x O) O {
 	case AS:
 		return GreaterASO(w, x)
 	case AO:
+		if isArray(x) {
+			if length(x) != len(w) {
+				return badlen(">")
+			}
+			r := make(AO, len(w))
+			for i := range r {
+				v := Greater(w[i], at(x, i))
+				e, ok := v.(E)
+				if ok {
+					return e
+				}
+				r[i] = v
+			}
+			return r
+		}
 		r := make(AO, len(w))
 		for i := range r {
 			v := Greater(w[i], x)
@@ -2001,6 +2076,21 @@ func GreaterEq(w, x O) O {
 	case AS:
 		return GreaterEqASO(w, x)
 	case AO:
+		if isArray(x) {
+			if length(x) != len(w) {
+				return badlen("≥")
+			}
+			r := make(AO, len(w))
+			for i := range r {
+				v := GreaterEq(w[i], at(x, i))
+				e, ok := v.(E)
+				if ok {
+					return e
+				}
+				r[i] = v
+			}
+			return r
+		}
 		r := make(AO, len(w))
 		for i := range r {
 			v := GreaterEq(w[i], x)
@@ -2393,6 +2483,21 @@ func Add(w, x O) O {
 	case AI:
 		return AddAIO(w, x)
 	case AO:
+		if isArray(x) {
+			if length(x) != len(w) {
+				return badlen("+")
+			}
+			r := make(AO, len(w))
+			for i := range r {
+				v := Add(w[i], at(x, i))
+				e, ok := v.(E)
+				if ok {
+					return e
+				}
+				r[i] = v
+			}
+			return r
+		}
 		r := make(AO, len(w))
 		for i := range r {
 			v := Add(w[i], x)
@@ -2725,6 +2830,21 @@ func Subtract(w, x O) O {
 	case AI:
 		return SubtractAIO(w, x)
 	case AO:
+		if isArray(x) {
+			if length(x) != len(w) {
+				return badlen("-")
+			}
+			r := make(AO, len(w))
+			for i := range r {
+				v := Subtract(w[i], at(x, i))
+				e, ok := v.(E)
+				if ok {
+					return e
+				}
+				r[i] = v
+			}
+			return r
+		}
 		r := make(AO, len(w))
 		for i := range r {
 			v := Subtract(w[i], x)
@@ -3057,6 +3177,21 @@ func Multiply(w, x O) O {
 	case AI:
 		return MultiplyAIO(w, x)
 	case AO:
+		if isArray(x) {
+			if length(x) != len(w) {
+				return badlen("×")
+			}
+			r := make(AO, len(w))
+			for i := range r {
+				v := Multiply(w[i], at(x, i))
+				e, ok := v.(E)
+				if ok {
+					return e
+				}
+				r[i] = v
+			}
+			return r
+		}
 		r := make(AO, len(w))
 		for i := range r {
 			v := Multiply(w[i], x)
@@ -3389,6 +3524,21 @@ func Divide(w, x O) O {
 	case AI:
 		return DivideAIO(w, x)
 	case AO:
+		if isArray(x) {
+			if length(x) != len(w) {
+				return badlen("÷")
+			}
+			r := make(AO, len(w))
+			for i := range r {
+				v := Divide(w[i], at(x, i))
+				e, ok := v.(E)
+				if ok {
+					return e
+				}
+				r[i] = v
+			}
+			return r
+		}
 		r := make(AO, len(w))
 		for i := range r {
 			v := Divide(w[i], x)
@@ -3725,6 +3875,21 @@ func Minimum(w, x O) O {
 	case AS:
 		return MinimumASO(w, x)
 	case AO:
+		if isArray(x) {
+			if length(x) != len(w) {
+				return badlen("⌊")
+			}
+			r := make(AO, len(w))
+			for i := range r {
+				v := Minimum(w[i], at(x, i))
+				e, ok := v.(E)
+				if ok {
+					return e
+				}
+				r[i] = v
+			}
+			return r
+		}
 		r := make(AO, len(w))
 		for i := range r {
 			v := Minimum(w[i], x)
@@ -4121,6 +4286,21 @@ func Maximum(w, x O) O {
 	case AS:
 		return MaximumASO(w, x)
 	case AO:
+		if isArray(x) {
+			if length(x) != len(w) {
+				return badlen("⌈")
+			}
+			r := make(AO, len(w))
+			for i := range r {
+				v := Maximum(w[i], at(x, i))
+				e, ok := v.(E)
+				if ok {
+					return e
+				}
+				r[i] = v
+			}
+			return r
+		}
 		r := make(AO, len(w))
 		for i := range r {
 			v := Maximum(w[i], x)
@@ -4513,6 +4693,21 @@ func And(w, x O) O {
 	case AI:
 		return AndAIO(w, x)
 	case AO:
+		if isArray(x) {
+			if length(x) != len(w) {
+				return badlen("∧")
+			}
+			r := make(AO, len(w))
+			for i := range r {
+				v := And(w[i], at(x, i))
+				e, ok := v.(E)
+				if ok {
+					return e
+				}
+				r[i] = v
+			}
+			return r
+		}
 		r := make(AO, len(w))
 		for i := range r {
 			v := And(w[i], x)
@@ -4845,6 +5040,21 @@ func Or(w, x O) O {
 	case AI:
 		return OrAIO(w, x)
 	case AO:
+		if isArray(x) {
+			if length(x) != len(w) {
+				return badlen("∨")
+			}
+			r := make(AO, len(w))
+			for i := range r {
+				v := Or(w[i], at(x, i))
+				e, ok := v.(E)
+				if ok {
+					return e
+				}
+				r[i] = v
+			}
+			return r
+		}
 		r := make(AO, len(w))
 		for i := range r {
 			v := Or(w[i], x)
@@ -4867,9 +5077,9 @@ func OrBO(w B, x O) O {
 	case B:
 		return w || x
 	case F:
-		return 1-((1-B2F(w)) * (1-x))
+		return 1 - ((1 - B2F(w)) * (1 - x))
 	case I:
-		return 1-((1-B2I(w)) * (1-x))
+		return 1 - ((1 - B2I(w)) * (1 - x))
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -4879,13 +5089,13 @@ func OrBO(w B, x O) O {
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1-((1-B2F(w)) * (1-x[i]))
+			r[i] = 1 - ((1 - B2F(w)) * (1 - x[i]))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = 1-((1-B2I(w)) * (1-x[i]))
+			r[i] = 1 - ((1 - B2I(w)) * (1 - x[i]))
 		}
 		return r
 	case AO:
@@ -4909,27 +5119,27 @@ func OrBO(w B, x O) O {
 func OrFO(w F, x O) O {
 	switch x := x.(type) {
 	case B:
-		return 1-((1-w) * (1-B2F(x)))
+		return 1 - ((1 - w) * (1 - B2F(x)))
 	case F:
-		return 1-((1-w) * (1-x))
+		return 1 - ((1 - w) * (1 - x))
 	case I:
-		return 1-((1-w) * F(1-x))
+		return 1 - ((1 - w) * F(1-x))
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1-((1-w) * (1-B2F(x[i])))
+			r[i] = 1 - ((1 - w) * (1 - B2F(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1-((1-w) * (1-x[i]))
+			r[i] = 1 - ((1 - w) * (1 - x[i]))
 		}
 		return r
 	case AI:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1-((1-w) * F(1-x[i]))
+			r[i] = 1 - ((1 - w) * F(1-x[i]))
 		}
 		return r
 	case AO:
@@ -4953,27 +5163,27 @@ func OrFO(w F, x O) O {
 func OrIO(w I, x O) O {
 	switch x := x.(type) {
 	case B:
-		return 1-((1-w) * (1-B2I(x)))
+		return 1 - ((1 - w) * (1 - B2I(x)))
 	case F:
-		return 1-((1-F(w)) * (1-x))
+		return 1 - ((1 - F(w)) * (1 - x))
 	case I:
-		return 1-((1-w) * (1-x))
+		return 1 - ((1 - w) * (1 - x))
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = 1-((1-w) * (1-B2I(x[i])))
+			r[i] = 1 - ((1 - w) * (1 - B2I(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1-((1-F(w)) * (1-x[i]))
+			r[i] = 1 - ((1 - F(w)) * (1 - x[i]))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = 1-((1-w) * (1-x[i]))
+			r[i] = 1 - ((1 - w) * (1 - x[i]))
 		}
 		return r
 	case AO:
@@ -5005,13 +5215,13 @@ func OrABO(w AB, x O) O {
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = 1-((1-B2F(w[i])) * (1-x))
+			r[i] = 1 - ((1 - B2F(w[i])) * (1 - x))
 		}
 		return r
 	case I:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = 1-((1-B2I(w[i])) * (1-x))
+			r[i] = 1 - ((1 - B2I(w[i])) * (1 - x))
 		}
 		return r
 	case AB:
@@ -5023,13 +5233,13 @@ func OrABO(w AB, x O) O {
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1-((1-B2F(w[i])) * (1-x[i]))
+			r[i] = 1 - ((1 - B2F(w[i])) * (1 - x[i]))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = 1-((1-B2I(w[i])) * (1-x[i]))
+			r[i] = 1 - ((1 - B2I(w[i])) * (1 - x[i]))
 		}
 		return r
 	case AO:
@@ -5055,37 +5265,37 @@ func OrAFO(w AF, x O) O {
 	case B:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = 1-((1-w[i]) * (1-B2F(x)))
+			r[i] = 1 - ((1 - w[i]) * (1 - B2F(x)))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = 1-((1-w[i]) * (1-x))
+			r[i] = 1 - ((1 - w[i]) * (1 - x))
 		}
 		return r
 	case I:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = 1-((1-w[i]) * F(1-x))
+			r[i] = 1 - ((1 - w[i]) * F(1-x))
 		}
 		return r
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1-((1-w[i]) * (1-B2F(x[i])))
+			r[i] = 1 - ((1 - w[i]) * (1 - B2F(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1-((1-w[i]) * (1-x[i]))
+			r[i] = 1 - ((1 - w[i]) * (1 - x[i]))
 		}
 		return r
 	case AI:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1-((1-w[i]) * F(1-x[i]))
+			r[i] = 1 - ((1 - w[i]) * F(1-x[i]))
 		}
 		return r
 	case AO:
@@ -5111,37 +5321,37 @@ func OrAIO(w AI, x O) O {
 	case B:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = 1-((1-w[i]) * (1-B2I(x)))
+			r[i] = 1 - ((1 - w[i]) * (1 - B2I(x)))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = 1-((1-F(w[i])) * (1-x))
+			r[i] = 1 - ((1 - F(w[i])) * (1 - x))
 		}
 		return r
 	case I:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = 1-((1-w[i]) * (1-x))
+			r[i] = 1 - ((1 - w[i]) * (1 - x))
 		}
 		return r
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = 1-((1-w[i]) * (1-B2I(x[i])))
+			r[i] = 1 - ((1 - w[i]) * (1 - B2I(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1-((1-F(w[i])) * (1-x[i]))
+			r[i] = 1 - ((1 - F(w[i])) * (1 - x[i]))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = 1-((1-w[i]) * (1-x[i]))
+			r[i] = 1 - ((1 - w[i]) * (1 - x[i]))
 		}
 		return r
 	case AO:
@@ -5177,6 +5387,21 @@ func Modulus(w, x O) O {
 	case AI:
 		return ModulusAIO(w, x)
 	case AO:
+		if isArray(x) {
+			if length(x) != len(w) {
+				return badlen("|")
+			}
+			r := make(AO, len(w))
+			for i := range r {
+				v := Modulus(w[i], at(x, i))
+				e, ok := v.(E)
+				if ok {
+					return e
+				}
+				r[i] = v
+			}
+			return r
+		}
 		r := make(AO, len(w))
 		for i := range r {
 			v := Modulus(w[i], x)
@@ -5493,4 +5718,3 @@ func ModulusAIO(w AI, x O) O {
 		return badtype("|")
 	}
 }
-

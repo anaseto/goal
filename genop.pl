@@ -227,16 +227,31 @@ EOS
     }
     print $out <<EOS;
 	case AO:
-		r := make(AO, len(w))
-		for i := range r {
-			v := ${name}(w[i], x)
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
+                if isArray(x) {
+                        if length(x) != len(w) {
+                                return badlen("$op")
+                        }
+                        r := make(AO, len(w))
+                        for i := range r {
+                                v := ${name}(w[i], at(x, i))
+                                e, ok := v.(E)
+                                if ok {
+                                        return e
+                                }
+                                r[i] = v
+                        }
+                        return r
+                }
+                r := make(AO, len(w))
+                for i := range r {
+                        v := ${name}(w[i], x)
+                        e, ok := v.(E)
+                        if ok {
+                                return e
+                        }
+                        r[i] = v
+                }
+                return r
 	case E:
 		return w
 	default:
