@@ -1,5 +1,10 @@
 package main
 
+import (
+	"math"
+	"strings"
+)
+
 func Negate(x O) O {
 	switch x := x.(type) {
 	case B:
@@ -132,5 +137,83 @@ func Reciprocal(x O) O {
 		return x
 	default:
 		return badtype("÷")
+	}
+}
+
+func Floor(x O) O {
+	switch x := x.(type) {
+	case B:
+		return x
+	case F:
+		return math.Floor(x)
+	case I:
+		return x
+	case S:
+		return strings.ToLower(x)
+	case AB:
+		return x
+	case AF:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = math.Floor(x[i])
+		}
+		return r
+	case AI:
+		return x
+	case AS:
+		r := make(AS, len(x))
+		for i := range r {
+			r[i] = strings.ToLower(x[i])
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			r[i] = Floor(x[i])
+		}
+		return r
+	case E:
+		return x
+	default:
+		return badtype("⌊")
+	}
+}
+
+func Ceil(x O) O {
+	switch x := x.(type) {
+	case B:
+		return x
+	case F:
+		return math.Ceil(x)
+	case I:
+		return x
+	case S:
+		return strings.ToUpper(x)
+	case AB:
+		return x
+	case AF:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = math.Ceil(x[i])
+		}
+		return r
+	case AI:
+		return x
+	case AS:
+		r := make(AS, len(x))
+		for i := range r {
+			r[i] = strings.ToUpper(x[i])
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			r[i] = Floor(x[i])
+		}
+		return r
+	case E:
+		return x
+	default:
+		return badtype("⌈")
 	}
 }
