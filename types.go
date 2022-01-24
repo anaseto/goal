@@ -5,7 +5,7 @@ type B = bool       // B represents booleans (0 and 1 but less memory)
 type F = float64    // F represents real numbers.
 type I = int        // I represents integers.
 type S = string     // S represents (immutable) strings of bytes.
-type E error        // Errors (TODO: think about it)
+type E = error      // Errors (TODO: think about it)
 type M func(O) O    // M represents monadic functions
 type D func(O, O) O // D represents dyadic operators
 // V represents a variadic function with more than two arguments
