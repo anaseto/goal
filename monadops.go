@@ -2,6 +2,7 @@ package main
 
 import (
 	"math"
+	"sort"
 	"strings"
 )
 
@@ -748,40 +749,36 @@ func lessAO(w AO, x O) bool {
 	}
 }
 
-//func SortUp(x O) O {
-//x = cloneShallow(x)
-//switch x := x.(type) {
-//case B:
-//return x
-//case F:
-//return x
-//case I:
-//return x
-//case S:
-//return x
-//case AB:
-//sort.Stable(ABUp(x))
-//return x
-//case AF:
-//sort.Stable(sort.Float64Slice(x))
-//return x
-//case AI:
-//sort.Stable(sort.IntSlice(x))
-//return x
-//case AS:
-//sort.Stable(sort.StringSlice(x))
-//return x
-//case AO:
-//// TODO:
-////r := make(AO, len(x))
-////for i := range r {
-////r[i] = SortUp(x[i])
-////}
-////return r
-//return x
-//case E:
-//return x
-//default:
-//return badtype("<")
-//}
-//}
+func SortUp(x O) O {
+	// XXX: error if length is zero?
+	x = cloneShallow(x)
+	switch x := x.(type) {
+	case B:
+		return x
+	case F:
+		return x
+	case I:
+		return x
+	case S:
+		return x
+	case AB:
+		sort.Stable(ABUp(x))
+		return x
+	case AF:
+		sort.Stable(sort.Float64Slice(x))
+		return x
+	case AI:
+		sort.Stable(sort.IntSlice(x))
+		return x
+	case AS:
+		sort.Stable(sort.StringSlice(x))
+		return x
+	case AO:
+		sort.Stable(AOUp(x))
+		return x
+	case E:
+		return x
+	default:
+		return badtype("<")
+	}
+}

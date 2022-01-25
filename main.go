@@ -15,4 +15,7 @@ func main() {
 	fmt.Printf("Equal:%#v\n", Equal(AI{1, 3, 8, 2}, AI{5, 3, 8, 1}))
 	//fmt.Printf("Add2:%#v\n", float64(1.0)/float64(0.0))
 	fmt.Printf("Divide:%#v\n", Divide(F(2), F(0)))
+	fmt.Printf("Sort:%#v\n", SortUp(AI{3, 2, 1}))
+	fmt.Printf("Sort:%#v\n", SortUp(AO{3, 2, 1}))
+	fmt.Printf("Sort:%#v\n", SortUp(AO{3, 2, AI{}, 1, AI{2, 2}}))
 }
