@@ -6,6 +6,23 @@ import (
 	"strings"
 )
 
+func Length(x O) I {
+	switch x := x.(type) {
+	case AB:
+		return len(x)
+	case AF:
+		return len(x)
+	case AI:
+		return len(x)
+	case AS:
+		return len(x)
+	case AO:
+		return len(x)
+	default:
+		return 1
+	}
+}
+
 func Negate(x O) O {
 	switch x := x.(type) {
 	case B:
@@ -416,27 +433,27 @@ func less(w, x O) bool {
 		return lessS(w, x)
 	case AB:
 		if len(w) == 0 {
-			return length(x) > 0
+			return Length(x) > 0
 		}
 		return lessAB(w, x)
 	case AF:
 		if len(w) == 0 {
-			return length(x) > 0
+			return Length(x) > 0
 		}
 		return lessAF(w, x)
 	case AI:
 		if len(w) == 0 {
-			return length(x) > 0
+			return Length(x) > 0
 		}
 		return lessAI(w, x)
 	case AS:
 		if len(w) == 0 {
-			return length(x) > 0
+			return Length(x) > 0
 		}
 		return lessAS(w, x)
 	case AO:
 		if len(w) == 0 {
-			return length(x) > 0
+			return Length(x) > 0
 		}
 		return lessAO(w, x)
 	default:
@@ -751,29 +768,25 @@ func lessAO(w AO, x O) bool {
 
 func SortUp(x O) O {
 	// XXX: error if length is zero?
-	x = cloneShallow(x)
 	switch x := x.(type) {
-	case B:
-		return x
-	case F:
-		return x
-	case I:
-		return x
-	case S:
-		return x
 	case AB:
+		x = cloneShallow(x)
 		sort.Stable(ABUp(x))
 		return x
 	case AF:
+		x = cloneShallow(x)
 		sort.Stable(sort.Float64Slice(x))
 		return x
 	case AI:
+		x = cloneShallow(x)
 		sort.Stable(sort.IntSlice(x))
 		return x
 	case AS:
+		x = cloneShallow(x)
 		sort.Stable(sort.StringSlice(x))
 		return x
 	case AO:
+		x = cloneShallow(x)
 		sort.Stable(AOUp(x))
 		return x
 	case E:
@@ -781,4 +794,49 @@ func SortUp(x O) O {
 	default:
 		return badtype("<")
 	}
+}
+
+func SortDown(x O) O {
+	x = SortUp(x)
+	switch x := x.(type) {
+	case E:
+		return badtype(">")
+	}
+	reverse(x)
+	return x
+}
+
+func reverse(x O) {
+	switch x := x.(type) {
+	case AB:
+		for i := 0; i < len(x)/2; i++ {
+			x[i], x[len(x)-i-1] = x[len(x)-i-1], x[i]
+		}
+	case AF:
+		for i := 0; i < len(x)/2; i++ {
+			x[i], x[len(x)-i-1] = x[len(x)-i-1], x[i]
+		}
+	case AI:
+		for i := 0; i < len(x)/2; i++ {
+			x[i], x[len(x)-i-1] = x[len(x)-i-1], x[i]
+		}
+	case AS:
+		for i := 0; i < len(x)/2; i++ {
+			x[i], x[len(x)-i-1] = x[len(x)-i-1], x[i]
+		}
+	case AO:
+		for i := 0; i < len(x)/2; i++ {
+			x[i], x[len(x)-i-1] = x[len(x)-i-1], x[i]
+		}
+	}
+}
+
+// Reverse applies to a list and returns a new list in reverse order.
+func Reverse(x O) O {
+	if !isArray(x) {
+		return badtype("⌽")
+	}
+	x = cloneShallow(x)
+	reverse(x)
+	return x
 }
