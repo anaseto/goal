@@ -222,6 +222,7 @@ sub genOp {
     my $s = "";
     open my $out, '>', \$s;
     print $out <<EOS;
+// ${name} returns w${op}x.
 func ${name}(w, x O) O {
 	switch w := w.(type) {
 EOS
@@ -240,7 +241,7 @@ EOS
     print $out <<EOS;
 	case AO:
                 if isArray(x) {
-                        if length(x) != len(w) {
+                        if Length(x) != len(w) {
                                 return badlen("$op")
                         }
                         r := make(AO, len(w))

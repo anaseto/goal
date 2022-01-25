@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// Length returns ≠x.
 func Length(x O) I {
 	switch x := x.(type) {
 	case AB:
@@ -23,6 +24,7 @@ func Length(x O) I {
 	}
 }
 
+// Negate returns -x.
 func Negate(x O) O {
 	switch x := x.(type) {
 	case B:
@@ -84,6 +86,7 @@ func signI(x I) I {
 	}
 }
 
+// Sign returns ×x.
 func Sign(x O) O {
 	switch x := x.(type) {
 	case B:
@@ -119,6 +122,7 @@ func Sign(x O) O {
 	}
 }
 
+// Reciprocal returns ÷x.
 func Reciprocal(x O) O {
 	switch x := x.(type) {
 	case B:
@@ -158,6 +162,7 @@ func Reciprocal(x O) O {
 	}
 }
 
+// Floor returns ⌊x.
 func Floor(x O) O {
 	switch x := x.(type) {
 	case B:
@@ -197,6 +202,7 @@ func Floor(x O) O {
 	}
 }
 
+// Ceil returns ⌈x.
 func Ceil(x O) O {
 	switch x := x.(type) {
 	case B:
@@ -236,6 +242,7 @@ func Ceil(x O) O {
 	}
 }
 
+// Not returns ¬x.
 func Not(x O) O {
 	switch x := x.(type) {
 	case B:
@@ -282,6 +289,7 @@ func absI(x I) I {
 	return x
 }
 
+// Abs returns |x.
 func Abs(x O) O {
 	switch x := x.(type) {
 	case B:
@@ -358,14 +366,6 @@ func clone(x O) O {
 
 func cloneShallow(x O) O {
 	switch x := x.(type) {
-	case B:
-		return x
-	case F:
-		return x
-	case I:
-		return x
-	case S:
-		return x
 	case AB:
 		r := make(AB, len(x))
 		copy(r, x)
@@ -386,8 +386,6 @@ func cloneShallow(x O) O {
 		r := make(AO, len(x))
 		copy(r, x)
 		return r
-	case E:
-		return x
 	default:
 		return x
 	}
@@ -766,27 +764,24 @@ func lessAO(w AO, x O) bool {
 	}
 }
 
+// SortUp returns <x.
 func SortUp(x O) O {
 	// XXX: error if length is zero?
+	x = cloneShallow(x)
 	switch x := x.(type) {
 	case AB:
-		x = cloneShallow(x)
 		sort.Stable(ABUp(x))
 		return x
 	case AF:
-		x = cloneShallow(x)
 		sort.Stable(sort.Float64Slice(x))
 		return x
 	case AI:
-		x = cloneShallow(x)
 		sort.Stable(sort.IntSlice(x))
 		return x
 	case AS:
-		x = cloneShallow(x)
 		sort.Stable(sort.StringSlice(x))
 		return x
 	case AO:
-		x = cloneShallow(x)
 		sort.Stable(AOUp(x))
 		return x
 	case E:
@@ -796,10 +791,12 @@ func SortUp(x O) O {
 	}
 }
 
+// SortDown returns >x.
 func SortDown(x O) O {
 	x = SortUp(x)
-	switch x := x.(type) {
+	switch x.(type) {
 	case E:
+		// TODO: match only < error type
 		return badtype(">")
 	}
 	reverse(x)
@@ -831,7 +828,7 @@ func reverse(x O) {
 	}
 }
 
-// Reverse applies to a list and returns a new list in reverse order.
+// Reverse returns ⌽x.
 func Reverse(x O) O {
 	if !isArray(x) {
 		return badtype("⌽")
