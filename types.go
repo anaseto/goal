@@ -20,9 +20,11 @@ type AI []I // integer array (TODO: optimization: add Range type)
 type AS []S // string array
 
 // Array interface is satisfied by the different kind of supported arrays.
+// Typical implementation is given in comments.
 type Array interface {
-	At(i I) O
-	Len() I
+	At(i I) O           // x[i]
+	Len() I             // len(x)
+	Slice(i, j I) Array // x[i:j]
 }
 
 func (x AO) At(i I) O {
@@ -33,12 +35,20 @@ func (x AO) Len() I {
 	return len(x)
 }
 
+func (x AO) Slice(i, j I) Array {
+	return x[i:j]
+}
+
 func (x AB) At(i I) O {
 	return x[i]
 }
 
 func (x AB) Len() I {
 	return len(x)
+}
+
+func (x AB) Slice(i, j I) Array {
+	return x[i:j]
 }
 
 func (x AI) At(i I) O {
@@ -49,6 +59,10 @@ func (x AI) Len() I {
 	return len(x)
 }
 
+func (x AI) Slice(i, j I) Array {
+	return x[i:j]
+}
+
 func (x AF) At(i I) O {
 	return x[i]
 }
@@ -57,10 +71,18 @@ func (x AF) Len() I {
 	return len(x)
 }
 
+func (x AF) Slice(i, j I) Array {
+	return x[i:j]
+}
+
 func (x AS) At(i I) O {
 	return x[i]
 }
 
 func (x AS) Len() I {
 	return len(x)
+}
+
+func (x AS) Slice(i, j I) Array {
+	return x[i:j]
 }
