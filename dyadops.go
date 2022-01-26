@@ -3239,6 +3239,354 @@ func SubtractAIO(w AI, x O) O {
 	}
 }
 
+// Span returns w¬x.
+func Span(w, x O) O {
+	switch w := w.(type) {
+	case B:
+		return SpanBO(w, x)
+	case F:
+		return SpanFO(w, x)
+	case I:
+		return SpanIO(w, x)
+	case AB:
+		return SpanABO(w, x)
+	case AF:
+		return SpanAFO(w, x)
+	case AI:
+		return SpanAIO(w, x)
+	case AO:
+		if isArray(x) {
+			if Length(x) != len(w) {
+				return badlen("¬")
+			}
+			r := make(AO, len(w))
+			for i := range r {
+				v := Span(w[i], at(x, i))
+				e, ok := v.(E)
+				if ok {
+					return e
+				}
+				r[i] = v
+			}
+			return r
+		}
+		r := make(AO, len(w))
+		for i := range r {
+			v := Span(w[i], x)
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("¬")
+	}
+}
+
+func SpanBO(w B, x O) O {
+	switch x := x.(type) {
+	case B:
+		return 1 + B2I(w) - B2I(x)
+	case F:
+		return 1 + B2F(w) - x
+	case I:
+		return 1 + B2I(w) - x
+	case AB:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = 1 + B2I(w) - B2I(x[i])
+		}
+		return r
+	case AF:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = 1 + B2F(w) - x[i]
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = 1 + B2I(w) - x[i]
+		}
+		return r
+	case AO:
+		r := make([]O, len(x))
+		for i := range r {
+			v := SpanBO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("¬")
+	}
+}
+
+func SpanFO(w F, x O) O {
+	switch x := x.(type) {
+	case B:
+		return 1 + w - B2F(x)
+	case F:
+		return 1 + w - x
+	case I:
+		return 1 + w - F(x)
+	case AB:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = 1 + w - B2F(x[i])
+		}
+		return r
+	case AF:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = 1 + w - x[i]
+		}
+		return r
+	case AI:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = 1 + w - F(x[i])
+		}
+		return r
+	case AO:
+		r := make([]O, len(x))
+		for i := range r {
+			v := SpanFO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("¬")
+	}
+}
+
+func SpanIO(w I, x O) O {
+	switch x := x.(type) {
+	case B:
+		return 1 + w - B2I(x)
+	case F:
+		return 1 + F(w) - x
+	case I:
+		return 1 + w - x
+	case AB:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = 1 + w - B2I(x[i])
+		}
+		return r
+	case AF:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = 1 + F(w) - x[i]
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = 1 + w - x[i]
+		}
+		return r
+	case AO:
+		r := make([]O, len(x))
+		for i := range r {
+			v := SpanIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("¬")
+	}
+}
+
+func SpanABO(w AB, x O) O {
+	switch x := x.(type) {
+	case B:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = 1 + B2I(w[i]) - B2I(x)
+		}
+		return r
+	case F:
+		r := make(AF, len(w))
+		for i := range r {
+			r[i] = 1 + B2F(w[i]) - x
+		}
+		return r
+	case I:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = 1 + B2I(w[i]) - x
+		}
+		return r
+	case AB:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = 1 + B2I(w[i]) - B2I(x[i])
+		}
+		return r
+	case AF:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = 1 + B2F(w[i]) - x[i]
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = 1 + B2I(w[i]) - x[i]
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := SpanABO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("¬")
+	}
+}
+
+func SpanAFO(w AF, x O) O {
+	switch x := x.(type) {
+	case B:
+		r := make(AF, len(w))
+		for i := range r {
+			r[i] = 1 + w[i] - B2F(x)
+		}
+		return r
+	case F:
+		r := make(AF, len(w))
+		for i := range r {
+			r[i] = 1 + w[i] - x
+		}
+		return r
+	case I:
+		r := make(AF, len(w))
+		for i := range r {
+			r[i] = 1 + w[i] - F(x)
+		}
+		return r
+	case AB:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = 1 + w[i] - B2F(x[i])
+		}
+		return r
+	case AF:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = 1 + w[i] - x[i]
+		}
+		return r
+	case AI:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = 1 + w[i] - F(x[i])
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := SpanAFO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("¬")
+	}
+}
+
+func SpanAIO(w AI, x O) O {
+	switch x := x.(type) {
+	case B:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = 1 + w[i] - B2I(x)
+		}
+		return r
+	case F:
+		r := make(AF, len(w))
+		for i := range r {
+			r[i] = 1 + F(w[i]) - x
+		}
+		return r
+	case I:
+		r := make(AI, len(w))
+		for i := range r {
+			r[i] = 1 + w[i] - x
+		}
+		return r
+	case AB:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = 1 + w[i] - B2I(x[i])
+		}
+		return r
+	case AF:
+		r := make(AF, len(x))
+		for i := range r {
+			r[i] = 1 + F(w[i]) - x[i]
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		for i := range r {
+			r[i] = 1 + w[i] - x[i]
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := SpanAIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("¬")
+	}
+}
+
 // Multiply returns w×x.
 func Multiply(w, x O) O {
 	switch w := w.(type) {

@@ -100,6 +100,17 @@ my %dyads = (
         F_I => ["w - F(x)", "F"],
         F_F => ["w - x", "F"],
     },
+    Span =>  {
+        B_B => ["1+ B2I(w) - B2I(x)", "I"],
+        B_I => ["1 + B2I(w) - x", "I"],
+        B_F => ["1 + B2F(w) - x", "F"],
+        I_B => ["1 + w - B2I(x)", "I"],
+        I_I => ["1 + w - x", "I"],
+        I_F => ["1 + F(w) - x", "F"],
+        F_B => ["1 + w - B2F(x)", "F"],
+        F_I => ["1 + w - F(x)", "F"],
+        F_F => ["1 + w - x", "F"],
+    },
     Multiply =>  {
         B_B => ["w && x", "B"],
         B_I => ["B2I(w) * x", "I"],
@@ -207,6 +218,7 @@ genOp("Greater", ">");
 genOp("GreaterEq", "≥");
 genOp("Add", "+");
 genOp("Subtract", "-");
+genOp("Span", "¬");
 genOp("Multiply", "×");
 genOp("Divide", "÷");
 genOp("Minimum", "⌊");

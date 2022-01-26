@@ -18,3 +18,23 @@ type AB []B // boolean array
 type AF []F // real array
 type AI []I // integer array (TODO: optimization: add Range type)
 type AS []S // string array
+
+type Array interface {
+	At(i I) O
+}
+
+func (x AO) At(i I) O {
+	return x[i]
+}
+
+func (x AB) At(i I) O {
+	return x[i]
+}
+
+func (x AI) At(i I) O {
+	return x[i]
+}
+
+func (x AF) At(i I) O {
+	return x[i]
+}

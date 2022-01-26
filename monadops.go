@@ -9,6 +9,8 @@ import (
 // Length returns ≠x.
 func Length(x O) I {
 	switch x := x.(type) {
+	case nil:
+		return 0
 	case AB:
 		return len(x)
 	case AF:
