@@ -832,10 +832,12 @@ func reverse(x O) {
 
 // Reverse returns ⌽x.
 func Reverse(x O) O {
-	if !isArray(x) {
+	switch x := x.(type) {
+	case Array:
+		r := cloneShallow(x)
+		reverse(r)
+		return r
+	default:
 		return badtype("⌽")
 	}
-	x = cloneShallow(x)
-	reverse(x)
-	return x
 }

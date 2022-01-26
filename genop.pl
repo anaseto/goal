@@ -252,13 +252,14 @@ EOS
     }
     print $out <<EOS;
 	case AO:
-                if isArray(x) {
-                        if Length(x) != len(w) {
+                switch x := x.(type) {
+                case Array:
+                        if x.Len() != len(w) {
                                 return badlen("$op")
                         }
                         r := make(AO, len(w))
                         for i := range r {
-                                v := ${name}(w[i], at(x, i))
+                                v := ${name}(w[i], x.At(i))
                                 e, ok := v.(E)
                                 if ok {
                                         return e

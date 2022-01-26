@@ -27,13 +27,14 @@ func Equal(w, x O) O {
 	case AS:
 		return EqualASO(w, x)
 	case AO:
-		if isArray(x) {
-			if Length(x) != len(w) {
+		switch x := x.(type) {
+		case Array:
+			if x.Len() != len(w) {
 				return badlen("=")
 			}
 			r := make(AO, len(w))
 			for i := range r {
-				v := Equal(w[i], at(x, i))
+				v := Equal(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -439,13 +440,14 @@ func NotEqual(w, x O) O {
 	case AS:
 		return NotEqualASO(w, x)
 	case AO:
-		if isArray(x) {
-			if Length(x) != len(w) {
+		switch x := x.(type) {
+		case Array:
+			if x.Len() != len(w) {
 				return badlen("≠")
 			}
 			r := make(AO, len(w))
 			for i := range r {
-				v := NotEqual(w[i], at(x, i))
+				v := NotEqual(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -851,13 +853,14 @@ func Lesser(w, x O) O {
 	case AS:
 		return LesserASO(w, x)
 	case AO:
-		if isArray(x) {
-			if Length(x) != len(w) {
+		switch x := x.(type) {
+		case Array:
+			if x.Len() != len(w) {
 				return badlen("<")
 			}
 			r := make(AO, len(w))
 			for i := range r {
-				v := Lesser(w[i], at(x, i))
+				v := Lesser(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -1263,13 +1266,14 @@ func LesserEq(w, x O) O {
 	case AS:
 		return LesserEqASO(w, x)
 	case AO:
-		if isArray(x) {
-			if Length(x) != len(w) {
+		switch x := x.(type) {
+		case Array:
+			if x.Len() != len(w) {
 				return badlen("≤")
 			}
 			r := make(AO, len(w))
 			for i := range r {
-				v := LesserEq(w[i], at(x, i))
+				v := LesserEq(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -1675,13 +1679,14 @@ func Greater(w, x O) O {
 	case AS:
 		return GreaterASO(w, x)
 	case AO:
-		if isArray(x) {
-			if Length(x) != len(w) {
+		switch x := x.(type) {
+		case Array:
+			if x.Len() != len(w) {
 				return badlen(">")
 			}
 			r := make(AO, len(w))
 			for i := range r {
-				v := Greater(w[i], at(x, i))
+				v := Greater(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -2087,13 +2092,14 @@ func GreaterEq(w, x O) O {
 	case AS:
 		return GreaterEqASO(w, x)
 	case AO:
-		if isArray(x) {
-			if Length(x) != len(w) {
+		switch x := x.(type) {
+		case Array:
+			if x.Len() != len(w) {
 				return badlen("≥")
 			}
 			r := make(AO, len(w))
 			for i := range r {
-				v := GreaterEq(w[i], at(x, i))
+				v := GreaterEq(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -2499,13 +2505,14 @@ func Add(w, x O) O {
 	case AS:
 		return AddASO(w, x)
 	case AO:
-		if isArray(x) {
-			if Length(x) != len(w) {
+		switch x := x.(type) {
+		case Array:
+			if x.Len() != len(w) {
 				return badlen("+")
 			}
 			r := make(AO, len(w))
 			for i := range r {
-				v := Add(w[i], at(x, i))
+				v := Add(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -2907,13 +2914,14 @@ func Subtract(w, x O) O {
 	case AI:
 		return SubtractAIO(w, x)
 	case AO:
-		if isArray(x) {
-			if Length(x) != len(w) {
+		switch x := x.(type) {
+		case Array:
+			if x.Len() != len(w) {
 				return badlen("-")
 			}
 			r := make(AO, len(w))
 			for i := range r {
-				v := Subtract(w[i], at(x, i))
+				v := Subtract(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -3255,13 +3263,14 @@ func Span(w, x O) O {
 	case AI:
 		return SpanAIO(w, x)
 	case AO:
-		if isArray(x) {
-			if Length(x) != len(w) {
+		switch x := x.(type) {
+		case Array:
+			if x.Len() != len(w) {
 				return badlen("¬")
 			}
 			r := make(AO, len(w))
 			for i := range r {
-				v := Span(w[i], at(x, i))
+				v := Span(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -3607,13 +3616,14 @@ func Multiply(w, x O) O {
 	case AS:
 		return MultiplyASO(w, x)
 	case AO:
-		if isArray(x) {
-			if Length(x) != len(w) {
+		switch x := x.(type) {
+		case Array:
+			if x.Len() != len(w) {
 				return badlen("×")
 			}
 			r := make(AO, len(w))
 			for i := range r {
-				v := Multiply(w[i], at(x, i))
+				v := Multiply(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -4115,13 +4125,14 @@ func Divide(w, x O) O {
 	case AI:
 		return DivideAIO(w, x)
 	case AO:
-		if isArray(x) {
-			if Length(x) != len(w) {
+		switch x := x.(type) {
+		case Array:
+			if x.Len() != len(w) {
 				return badlen("÷")
 			}
 			r := make(AO, len(w))
 			for i := range r {
-				v := Divide(w[i], at(x, i))
+				v := Divide(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -4467,13 +4478,14 @@ func Minimum(w, x O) O {
 	case AS:
 		return MinimumASO(w, x)
 	case AO:
-		if isArray(x) {
-			if Length(x) != len(w) {
+		switch x := x.(type) {
+		case Array:
+			if x.Len() != len(w) {
 				return badlen("⌊")
 			}
 			r := make(AO, len(w))
 			for i := range r {
-				v := Minimum(w[i], at(x, i))
+				v := Minimum(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -4879,13 +4891,14 @@ func Maximum(w, x O) O {
 	case AS:
 		return MaximumASO(w, x)
 	case AO:
-		if isArray(x) {
-			if Length(x) != len(w) {
+		switch x := x.(type) {
+		case Array:
+			if x.Len() != len(w) {
 				return badlen("⌈")
 			}
 			r := make(AO, len(w))
 			for i := range r {
-				v := Maximum(w[i], at(x, i))
+				v := Maximum(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -5287,13 +5300,14 @@ func And(w, x O) O {
 	case AI:
 		return AndAIO(w, x)
 	case AO:
-		if isArray(x) {
-			if Length(x) != len(w) {
+		switch x := x.(type) {
+		case Array:
+			if x.Len() != len(w) {
 				return badlen("∧")
 			}
 			r := make(AO, len(w))
 			for i := range r {
-				v := And(w[i], at(x, i))
+				v := And(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -5635,13 +5649,14 @@ func Or(w, x O) O {
 	case AI:
 		return OrAIO(w, x)
 	case AO:
-		if isArray(x) {
-			if Length(x) != len(w) {
+		switch x := x.(type) {
+		case Array:
+			if x.Len() != len(w) {
 				return badlen("∨")
 			}
 			r := make(AO, len(w))
 			for i := range r {
-				v := Or(w[i], at(x, i))
+				v := Or(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -5983,13 +5998,14 @@ func Modulus(w, x O) O {
 	case AI:
 		return ModulusAIO(w, x)
 	case AO:
-		if isArray(x) {
-			if Length(x) != len(w) {
+		switch x := x.(type) {
+		case Array:
+			if x.Len() != len(w) {
 				return badlen("|")
 			}
 			r := make(AO, len(w))
 			for i := range r {
-				v := Modulus(w[i], at(x, i))
+				v := Modulus(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e

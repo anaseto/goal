@@ -19,22 +19,48 @@ type AF []F // real array
 type AI []I // integer array (TODO: optimization: add Range type)
 type AS []S // string array
 
+// Array interface is satisfied by the different kind of supported arrays.
 type Array interface {
 	At(i I) O
+	Len() I
 }
 
 func (x AO) At(i I) O {
 	return x[i]
 }
 
+func (x AO) Len() I {
+	return len(x)
+}
+
 func (x AB) At(i I) O {
 	return x[i]
+}
+
+func (x AB) Len() I {
+	return len(x)
 }
 
 func (x AI) At(i I) O {
 	return x[i]
 }
 
+func (x AI) Len() I {
+	return len(x)
+}
+
 func (x AF) At(i I) O {
 	return x[i]
+}
+
+func (x AF) Len() I {
+	return len(x)
+}
+
+func (x AS) At(i I) O {
+	return x[i]
+}
+
+func (x AS) Len() I {
+	return len(x)
 }
