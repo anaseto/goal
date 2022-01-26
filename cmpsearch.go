@@ -1,7 +1,11 @@
 package main
 
 // Match returns w≡x.
-func Match(w, x O) bool {
+func Match(w, x O) O {
+	return match(w, x)
+}
+
+func match(w, x O) bool {
 	switch w := w.(type) {
 	case B:
 		switch x := x.(type) {
@@ -52,7 +56,7 @@ func Match(w, x O) bool {
 				return false
 			}
 			for i := 0; i < l; i++ {
-				if !Match(w.At(i), x.At(i)) {
+				if !match(w.At(i), x.At(i)) {
 					return false
 				}
 			}
@@ -61,6 +65,12 @@ func Match(w, x O) bool {
 			return false
 		}
 	default:
-		return false
+		// TODO: matching interface?
+		return w == x
 	}
+}
+
+// NotMatch returns w≢x.
+func NotMatch(w, x O) O {
+	return !match(w, x)
 }
