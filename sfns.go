@@ -70,6 +70,7 @@ func First(x O) O {
 
 // Tail returns ↓x.
 func Tail(x O) O {
+	x = toArray(x)
 	switch x := x.(type) {
 	case Array:
 		if x.Len() == 0 {
@@ -93,13 +94,11 @@ func Drop(w, x O) O {
 		i = I(w)
 	default:
 		// TODO: improve error messages
-		return badtype("↓")
+		return badtype("w↓")
 	}
+	x = toArray(x)
 	switch x := x.(type) {
 	case Array:
-		if x.Len() == 0 {
-			return badlen("↓")
-		}
 		switch {
 		case i >= 0:
 			if i > x.Len() {
@@ -112,6 +111,40 @@ func Drop(w, x O) O {
 				i = 0
 			}
 			return x.Slice(0, i)
+		}
+	default:
+		return x
+	}
+}
+
+// Take returns w↑x.
+func Take(w, x O) O {
+	i := 0
+	switch w := w.(type) {
+	case B:
+		i = B2I(w)
+	case I:
+		i = w
+	case F:
+		i = I(w)
+	default:
+		// TODO: improve error messages
+		return badtype("w↑")
+	}
+	x = toArray(x)
+	switch x := x.(type) {
+	case Array:
+		switch {
+		case i >= 0:
+			if i > x.Len() {
+				return growArray(x, i)
+			}
+			return x.Slice(0, i)
+		default:
+			if i < -x.Len() {
+				return growArray(x, i)
+			}
+			return x.Slice(x.Len()+i, x.Len())
 		}
 	default:
 		return x

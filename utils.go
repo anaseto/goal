@@ -151,3 +151,57 @@ func cloneShallow(x O) O {
 		return x
 	}
 }
+
+func toArray(x O) O {
+	switch x := x.(type) {
+	case B:
+		return AB{x}
+	case F:
+		return AF{x}
+	case I:
+		return AI{x}
+	case S:
+		return AS{x}
+	default:
+		return x
+	}
+}
+
+func growArray(x O, n I) O {
+	l := Length(x)
+	if l >= n && n >= -l {
+		return x
+	}
+	i := 0
+	if n < 0 {
+		i = l + n
+		n = -n
+		if i < 0 {
+			i = 0
+		}
+	}
+	switch x := x.(type) {
+	case AB:
+		r := make(AB, n)
+		copy(r[i:], x)
+		return r
+	case AF:
+		r := make(AF, n)
+		copy(r[i:], x)
+		return r
+	case AI:
+		r := make(AI, n)
+		copy(r[i:], x)
+		return r
+	case AS:
+		r := make(AS, n)
+		copy(r[i:], x)
+		return r
+	case AO:
+		r := make(AO, n)
+		copy(r[i:], x)
+		return r
+	default:
+		return x
+	}
+}

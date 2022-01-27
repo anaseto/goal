@@ -18,4 +18,8 @@ func main() {
 	fmt.Printf("Sort:%#v\n", SortUp(AI{3, 2, 1}))
 	fmt.Printf("Sort:%#v\n", SortUp(AO{3, 2, 1}))
 	fmt.Printf("Sort:%#v\n", SortUp(AO{3, 2, AI{}, 1, AI{2, 2}}))
+	fmt.Printf("Take:%#v\n", Take(5, AI{2, 3, 4}))
+	fmt.Printf("Take:%#v\n", Take(2, AI{2, 3, 4}))
+	fmt.Printf("Take:%#v\n", Take(-5, AI{2, 3, 4}))
+	fmt.Printf("Take:%#v\n", Take(-2, AI{2, 3, 4}))
 }
