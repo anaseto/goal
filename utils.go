@@ -205,3 +205,31 @@ func growArray(x O, n I) O {
 		return x
 	}
 }
+
+func isFalse(x O) bool {
+	switch x := x.(type) {
+	case B:
+		return x
+	case F:
+		return x == 0
+	case I:
+		return x == 0
+	case S:
+		return x == ""|x == nil
+	case AB:
+		return len(x) == 0
+	case AF:
+		return len(x) == 0
+	case AI:
+		return len(x) == 0
+	case AS:
+		return len(x) == 0
+	case AO:
+		return len(x) == 0
+	case E:
+		return true
+	default:
+		// TODO: Interface for other objects?
+		return false
+	}
+}

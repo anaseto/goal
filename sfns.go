@@ -60,7 +60,18 @@ func First(x O) O {
 	switch x := x.(type) {
 	case Array:
 		if x.Len() == 0 {
-			return badlen("↑")
+			switch x.(type) {
+			case AB:
+				return false
+			case AF:
+				return F(0)
+			case AI:
+				return I(0)
+			case AS:
+				return S(nil)
+			default:
+				return O(nil)
+			}
 		}
 		return x.At(0)
 	default:
