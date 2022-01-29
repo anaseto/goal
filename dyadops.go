@@ -2907,12 +2907,16 @@ func Subtract(w, x O) O {
 		return SubtractFO(w, x)
 	case I:
 		return SubtractIO(w, x)
+	case S:
+		return SubtractSO(w, x)
 	case AB:
 		return SubtractABO(w, x)
 	case AF:
 		return SubtractAFO(w, x)
 	case AI:
 		return SubtractAIO(w, x)
+	case AS:
+		return SubtractASO(w, x)
 	case AO:
 		switch x := x.(type) {
 		case Array:
@@ -3065,6 +3069,34 @@ func SubtractIO(w I, x O) O {
 		r := make([]O, len(x))
 		for i := range r {
 			v := SubtractIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("-")
+	}
+}
+
+func SubtractSO(w S, x O) O {
+	switch x := x.(type) {
+	case S:
+		return strings.TrimSuffix(w, x)
+	case AS:
+		r := make(AS, len(x))
+		for i := range r {
+			r[i] = strings.TrimSuffix(w, x[i])
+		}
+		return r
+	case AO:
+		r := make([]O, len(x))
+		for i := range r {
+			v := SubtractSO(w, x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -3233,6 +3265,38 @@ func SubtractAIO(w AI, x O) O {
 		r := make(AO, len(x))
 		for i := range r {
 			v := SubtractAIO(w, x[i])
+			e, ok := v.(E)
+			if ok {
+				return e
+			}
+			r[i] = v
+		}
+		return r
+	case E:
+		return w
+	default:
+		return badtype("-")
+	}
+}
+
+func SubtractASO(w AS, x O) O {
+	switch x := x.(type) {
+	case S:
+		r := make(AS, len(w))
+		for i := range r {
+			r[i] = strings.TrimSuffix(w[i], x)
+		}
+		return r
+	case AS:
+		r := make(AS, len(x))
+		for i := range r {
+			r[i] = strings.TrimSuffix(w[i], x[i])
+		}
+		return r
+	case AO:
+		r := make(AO, len(x))
+		for i := range r {
+			v := SubtractASO(w, x[i])
 			e, ok := v.(E)
 			if ok {
 				return e

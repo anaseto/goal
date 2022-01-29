@@ -99,6 +99,7 @@ my %dyads = (
         F_B => ["w - B2F(x)", "F"],
         F_I => ["w - F(x)", "F"],
         F_F => ["w - x", "F"],
+        S_S => ["strings.TrimSuffix(w, x)", "S"],
     },
     Span =>  {
         B_B => ["1+ B2I(w) - B2I(x)", "I"],
