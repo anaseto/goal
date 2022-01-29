@@ -150,3 +150,245 @@ func Take(w, x O) O {
 		return x
 	}
 }
+
+// ShiftBefore returns w»x.
+func ShiftBefore(w, x O) O {
+	w = toArray(w)
+	max := minI(Length(w), Length(x))
+	if max == 0 {
+		return x
+	}
+	switch x := x.(type) {
+	case AB:
+		switch w := w.(type) {
+		case AB:
+			r := make(AB, len(x))
+			for i := 0; i < max; i++ {
+				r[i] = w[i]
+			}
+			copy(r[max:], x[:len(x)-max])
+			return r
+		case AF:
+			r := make(AF, len(x))
+			for i := 0; i < max; i++ {
+				r[i] = w[i]
+			}
+			for i := max; i < len(x); i++ {
+				r[i] = B2F(x[i-max])
+			}
+			return r
+		case AI:
+			r := make(AI, len(x))
+			for i := 0; i < max; i++ {
+				r[i] = w[i]
+			}
+			for i := max; i < len(x); i++ {
+				r[i] = B2I(x[i-max])
+			}
+			return r
+		default:
+			return badtype("» : type mismatch")
+		}
+	case AF:
+		switch w := w.(type) {
+		case AB:
+			r := make(AF, len(x))
+			for i := 0; i < max; i++ {
+				r[i] = B2F(w[i])
+			}
+			copy(r[max:], x[:len(x)-max])
+			return r
+		case AF:
+			r := make(AF, len(x))
+			for i := 0; i < max; i++ {
+				r[i] = w[i]
+			}
+			copy(r[max:], x[:len(x)-max])
+			return r
+		case AI:
+			r := make(AF, len(x))
+			for i := 0; i < max; i++ {
+				r[i] = F(w[i])
+			}
+			copy(r[max:], x[:len(x)-max])
+			return r
+		default:
+			return badtype("» : type mismatch")
+		}
+	case AI:
+		switch w := w.(type) {
+		case AB:
+			r := make(AI, len(x))
+			for i := 0; i < max; i++ {
+				r[i] = B2I(w[i])
+			}
+			copy(r[max:], x[:len(x)-max])
+			return r
+		case AF:
+			r := make(AF, len(x))
+			for i := 0; i < max; i++ {
+				r[i] = w[i]
+			}
+			for i := max; i < len(x); i++ {
+				r[i] = F(x[i-max])
+			}
+			return r
+		case AI:
+			r := make(AI, len(x))
+			for i := 0; i < max; i++ {
+				r[i] = w[i]
+			}
+			copy(r[max:], x[:len(x)-max])
+			return r
+		default:
+			return badtype("» : type mismatch")
+		}
+	case AS:
+		switch w := w.(type) {
+		case AS:
+			r := make(AS, len(x))
+			for i := 0; i < max; i++ {
+				r[i] = w[i]
+			}
+			copy(r[max:], x[:len(x)-max])
+			return r
+		default:
+			return badtype("» : type mismatch")
+		}
+	case AO:
+		switch w := w.(type) {
+		case Array:
+			r := make(AO, len(x))
+			for i := 0; i < max; i++ {
+				r[i] = w.At(i)
+			}
+			copy(r[max:], x[:len(x)-max])
+			return r
+		default:
+			return badtype("» : type mismatch")
+		}
+	default:
+		return badtype("» : x must be an array")
+	}
+}
+
+// ShiftAfter returns w«x.
+func ShiftAfter(w, x O) O {
+	w = toArray(w)
+	max := minI(Length(w), Length(x))
+	if max == 0 {
+		return x
+	}
+	switch x := x.(type) {
+	case AB:
+		switch w := w.(type) {
+		case AB:
+			r := make(AB, len(x))
+			for i := 0; i < max; i++ {
+				r[len(x)-1-i] = w[i]
+			}
+			copy(r[:len(x)-max], x[max:])
+			return r
+		case AF:
+			r := make(AF, len(x))
+			for i := 0; i < max; i++ {
+				r[len(x)-1-i] = w[i]
+			}
+			for i := max; i < len(x); i++ {
+				r[i-max] = B2F(x[i])
+			}
+			return r
+		case AI:
+			r := make(AI, len(x))
+			for i := 0; i < max; i++ {
+				r[len(x)-1-i] = w[i]
+			}
+			for i := max; i < len(x); i++ {
+				r[i-max] = B2I(x[i])
+			}
+			return r
+		default:
+			return badtype("« : type mismatch")
+		}
+	case AF:
+		switch w := w.(type) {
+		case AB:
+			r := make(AF, len(x))
+			for i := 0; i < max; i++ {
+				r[len(x)-1-i] = B2F(w[i])
+			}
+			copy(r[:len(x)-max], x[max:])
+			return r
+		case AF:
+			r := make(AF, len(x))
+			for i := 0; i < max; i++ {
+				r[len(x)-1-i] = w[i]
+			}
+			copy(r[:len(x)-max], x[max:])
+			return r
+		case AI:
+			r := make(AF, len(x))
+			for i := 0; i < max; i++ {
+				r[len(x)-1-i] = F(w[i])
+			}
+			copy(r[:len(x)-max], x[max:])
+			return r
+		default:
+			return badtype("« : type mismatch")
+		}
+	case AI:
+		switch w := w.(type) {
+		case AB:
+			r := make(AI, len(x))
+			for i := 0; i < max; i++ {
+				r[len(x)-1-i] = B2I(w[i])
+			}
+			copy(r[:len(x)-max], x[max:])
+			return r
+		case AF:
+			r := make(AF, len(x))
+			for i := 0; i < max; i++ {
+				r[len(x)-1-i] = w[i]
+			}
+			for i := max; i < len(x); i++ {
+				r[i-max] = F(x[max])
+			}
+			return r
+		case AI:
+			r := make(AI, len(x))
+			for i := 0; i < max; i++ {
+				r[len(x)-1-i] = w[i]
+			}
+			copy(r[:len(x)-max], x[max:])
+			return r
+		default:
+			return badtype("« : type mismatch")
+		}
+	case AS:
+		switch w := w.(type) {
+		case AS:
+			r := make(AS, len(x))
+			for i := 0; i < max; i++ {
+				r[len(x)-1-i] = w[i]
+			}
+			copy(r[:len(x)-max], x[max:])
+			return r
+		default:
+			return badtype("« : type mismatch")
+		}
+	case AO:
+		switch w := w.(type) {
+		case Array:
+			r := make(AO, len(x))
+			for i := 0; i < max; i++ {
+				r[len(x)-1-i] = w.At(i)
+			}
+			copy(r[:len(x)-max], x[max:])
+			return r
+		default:
+			return badtype("« : type mismatch")
+		}
+	default:
+		return badtype("« : x must be an array")
+	}
+}
