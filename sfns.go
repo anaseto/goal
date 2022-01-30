@@ -55,6 +55,64 @@ func Reverse(x O) O {
 	}
 }
 
+// Rotate returns w⌽x.
+func Rotate(w, x O) O {
+	i := 0
+	switch w := w.(type) {
+	case B:
+		i = B2I(w)
+	case I:
+		i = w
+	case F:
+		i = I(w)
+	default:
+		// TODO: improve error messages
+		return badtype("w⌽")
+	}
+	lenx := Length(x)
+	if lenx == 0 {
+		return x
+	}
+	i %= lenx
+	if i < 0 {
+		i += lenx
+	}
+	switch x := x.(type) {
+	case AB:
+		r := make(AB, lenx)
+		for j := 0; j < lenx; j++ {
+			r[j] = x[(j+i)%lenx]
+		}
+		return r
+	case AF:
+		r := make(AF, lenx)
+		for j := 0; j < lenx; j++ {
+			r[j] = x[(j+i)%lenx]
+		}
+		return r
+	case AI:
+		r := make(AI, lenx)
+		for j := 0; j < lenx; j++ {
+			r[j] = x[(j+i)%lenx]
+		}
+		return r
+	case AS:
+		r := make(AS, lenx)
+		for j := 0; j < lenx; j++ {
+			r[j] = x[(j+i)%lenx]
+		}
+		return r
+	case AO:
+		r := make(AO, lenx)
+		for j := 0; j < lenx; j++ {
+			r[j] = x[(j+i)%lenx]
+		}
+		return r
+	default:
+		return badtype("⌽x")
+	}
+}
+
 // First returns ↑x.
 func First(x O) O {
 	switch x := x.(type) {
@@ -283,7 +341,8 @@ func ShiftBefore(w, x O) O {
 	}
 }
 
-func NudgeBefore(x O) O {
+// Nudge returns »x.
+func Nudge(x O) O {
 	switch x := x.(type) {
 	case AB:
 		r := make(AB, len(x))
@@ -431,7 +490,11 @@ func ShiftAfter(w, x O) O {
 	}
 }
 
-func NudgeAfter(x O) O {
+// NudgeBack returns «x.
+func NudgeBack(x O) O {
+	if Length(x) == 0 {
+		return x
+	}
 	switch x := x.(type) {
 	case AB:
 		r := make(AB, len(x))
@@ -454,6 +517,6 @@ func NudgeAfter(x O) O {
 		copy(r[0:len(x)-1], x[1:])
 		return r
 	default:
-		return badtype("» : x must be an array")
+		return badtype("« : x must be an array")
 	}
 }
