@@ -520,3 +520,115 @@ func NudgeBack(x O) O {
 		return badtype("« : x must be an array")
 	}
 }
+
+func Flip(x O) O {
+	x = toArray(x)
+	switch x := x.(type) {
+	case AO:
+		cols := len(x)
+		if cols == 0 {
+			// (+⟨⟩) ≡ ⋈⟨⟩
+			return AO{x}
+		}
+		lines := -1
+		for _, o := range x {
+			nl := Length(o)
+			switch {
+			case lines < 0:
+				lines = nl
+			case lines == 0:
+				if nl != 0 {
+					return badlen("+")
+				}
+			case lines == 1:
+				if nl == 0 {
+					return badlen("+")
+				}
+				lines = nl
+			case nl > 1 && nl != lines:
+				return badlen("+")
+			}
+		}
+		t := dType(x)
+		switch {
+		case lines <= 0:
+			// (+⟨⟨⟩,…⟩) ≡ ⟨⟩
+			return x[0]
+		case lines == 1:
+			switch t {
+			case tB:
+				r := make(AB, cols)
+				for i, y := range x {
+					switch y := y.(type) {
+					case B:
+						r[i] = y
+					case AB:
+						r[i] = y[0]
+					}
+				}
+				return r
+			case tF:
+				r := make(AF, cols)
+				for i, y := range x {
+					switch y := y.(type) {
+					case B:
+						r[i] = B2F(y)
+					case AB:
+						r[i] = B2F(y[0])
+					case F:
+						r[i] = y
+					case AF:
+						r[i] = y[0]
+					case I:
+						r[i] = F(y)
+					case AI:
+						r[i] = F(y[0])
+					}
+				}
+				return r
+			case tI:
+				r := make(AI, cols)
+				for i, y := range x {
+					switch y := y.(type) {
+					case B:
+						r[i] = B2I(y)
+					case AB:
+						r[i] = B2I(y[0])
+					case I:
+						r[i] = y
+					case AI:
+						r[i] = y[0]
+					}
+				}
+				return r
+			case tS:
+				r := make(AS, cols)
+				for i, y := range x {
+					switch y := y.(type) {
+					case S:
+						r[i] = y
+					case AS:
+						r[i] = y[0]
+					}
+				}
+				return r
+			default:
+				r := make(AO, cols)
+				for i, y := range x {
+					switch y := y.(type) {
+					case Array:
+						r[i] = y.At(0)
+					default:
+						r[i] = y
+					}
+				}
+				return r
+			}
+		default:
+			// TODO
+			return x
+		}
+	default:
+		return AO{x}
+	}
+}
