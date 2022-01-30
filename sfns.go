@@ -68,7 +68,7 @@ func First(x O) O {
 			case AI:
 				return I(0)
 			case AS:
-				return S(nil)
+				return S("")
 			default:
 				return O(nil)
 			}
@@ -283,6 +283,33 @@ func ShiftBefore(w, x O) O {
 	}
 }
 
+func NudgeBefore(x O) O {
+	switch x := x.(type) {
+	case AB:
+		r := make(AB, len(x))
+		copy(r[1:], x[0:len(x)-1])
+		return r
+	case AI:
+		r := make(AI, len(x))
+		copy(r[1:], x[0:len(x)-1])
+		return r
+	case AF:
+		r := make(AF, len(x))
+		copy(r[1:], x[0:len(x)-1])
+		return r
+	case AS:
+		r := make(AS, len(x))
+		copy(r[1:], x[0:len(x)-1])
+		return r
+	case AO:
+		r := make(AO, len(x))
+		copy(r[1:], x[0:len(x)-1])
+		return r
+	default:
+		return badtype("» : x must be an array")
+	}
+}
+
 // ShiftAfter returns w«x.
 func ShiftAfter(w, x O) O {
 	w = toArray(w)
@@ -401,5 +428,32 @@ func ShiftAfter(w, x O) O {
 		}
 	default:
 		return badtype("« : x must be an array")
+	}
+}
+
+func NudgeAfter(x O) O {
+	switch x := x.(type) {
+	case AB:
+		r := make(AB, len(x))
+		copy(r[0:len(x)-1], x[1:])
+		return r
+	case AI:
+		r := make(AI, len(x))
+		copy(r[0:len(x)-1], x[1:])
+		return r
+	case AF:
+		r := make(AF, len(x))
+		copy(r[0:len(x)-1], x[1:])
+		return r
+	case AS:
+		r := make(AS, len(x))
+		copy(r[0:len(x)-1], x[1:])
+		return r
+	case AO:
+		r := make(AO, len(x))
+		copy(r[0:len(x)-1], x[1:])
+		return r
+	default:
+		return badtype("» : x must be an array")
 	}
 }

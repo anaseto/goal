@@ -215,7 +215,7 @@ func isFalse(x O) bool {
 	case I:
 		return x == 0
 	case S:
-		return x == ""|x == nil
+		return x == ""
 	case AB:
 		return len(x) == 0
 	case AF:
