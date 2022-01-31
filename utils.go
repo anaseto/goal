@@ -27,7 +27,7 @@ func isNum(x O) bool {
 
 func isArray(x O) bool {
 	switch x.(type) {
-	case AO, AB, AI, AF, AS:
+	case Array:
 		return true
 	default:
 		return false

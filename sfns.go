@@ -521,6 +521,7 @@ func NudgeBack(x O) O {
 	}
 }
 
+// Flip returns +x.
 func Flip(x O) O {
 	x = toArray(x)
 	switch x := x.(type) {
@@ -533,19 +534,13 @@ func Flip(x O) O {
 		lines := -1
 		for _, o := range x {
 			nl := Length(o)
+			if !isArray(o) {
+				continue
+			}
 			switch {
 			case lines < 0:
 				lines = nl
-			case lines == 0:
-				if nl != 0 {
-					return badlen("+")
-				}
-			case lines == 1:
-				if nl == 0 {
-					return badlen("+")
-				}
-				lines = nl
-			case nl > 1 && nl != lines:
+			case nl >= 1 && nl != lines:
 				return badlen("+")
 			}
 		}
@@ -553,6 +548,7 @@ func Flip(x O) O {
 		switch {
 		case lines <= 0:
 			// (+⟨⟨⟩,…⟩) ≡ ⟨⟩
+			// TODO: error if atoms?
 			return x[0]
 		case lines == 1:
 			switch t {
@@ -625,8 +621,95 @@ func Flip(x O) O {
 				return r
 			}
 		default:
-			// TODO
-			return x
+			switch t {
+			case tB:
+				r := make(AO, lines)
+				for j := range r {
+					q := make(AB, cols)
+					for i, y := range x {
+						switch y := y.(type) {
+						case B:
+							q[i] = y
+						case AB:
+							q[i] = y[j]
+						}
+					}
+					r[j] = q
+				}
+				return r
+			case tF:
+				r := make(AO, lines)
+				for j := range r {
+					q := make(AF, cols)
+					for i, y := range x {
+						switch y := y.(type) {
+						case B:
+							q[i] = B2F(y)
+						case AB:
+							q[i] = B2F(y[j])
+						case F:
+							q[i] = y
+						case AF:
+							q[i] = y[j]
+						case I:
+							q[i] = F(y)
+						case AI:
+							q[i] = F(y[j])
+						}
+					}
+					r[j] = q
+				}
+				return r
+			case tI:
+				r := make(AO, lines)
+				for j := range r {
+					q := make(AI, cols)
+					for i, y := range x {
+						switch y := y.(type) {
+						case B:
+							q[i] = B2I(y)
+						case AB:
+							q[i] = B2I(y[j])
+						case I:
+							q[i] = y
+						case AI:
+							q[i] = y[j]
+						}
+					}
+					r[j] = q
+				}
+				return r
+			case tS:
+				r := make(AO, lines)
+				for j := range r {
+					q := make(AS, cols)
+					for i, y := range x {
+						switch y := y.(type) {
+						case S:
+							q[i] = y
+						case AS:
+							q[i] = y[j]
+						}
+					}
+					r[j] = q
+				}
+				return r
+			default:
+				r := make(AO, lines)
+				for j := range r {
+					q := make(AO, cols)
+					for i, y := range x {
+						switch y := y.(type) {
+						case Array:
+							q[i] = y.At(j)
+						default:
+							q[i] = y
+						}
+					}
+					r[j] = q
+				}
+				return r
+			}
 		}
 	default:
 		return AO{x}
