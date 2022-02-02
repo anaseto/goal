@@ -2,7 +2,9 @@
 
 package main
 
-import "sort"
+import (
+	"sort"
+)
 
 // Length returns ≠x.
 func Length(x O) I {

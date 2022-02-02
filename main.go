@@ -25,4 +25,10 @@ func main() {
 	fmt.Printf("ShiftBefore:%#v\n", ShiftBefore(AI{2, 3}, AI{1, 4, 5}))
 	fmt.Printf("ShiftBefore:%#v\n", ShiftBefore(7, AF{1, 4, 5}))
 	fmt.Printf("ShiftAfter:%#v\n", ShiftAfter(7, AF{1, 4, 5}))
+	fmt.Printf("Flip:%#v\n", Flip(AI{1, 2, 3}))
+	fmt.Printf("Flip:%#v\n", Flip(AO{AF{1}, AF{4}, AF{5}}))
+	fmt.Printf("Flip:%#v\n", Flip(AO{AF{1, 2}, I(4), I(5)}))
+	fmt.Printf("Flip:%#v\n", Flip(AO{AF{1, 2}, I(4), I(5), "patata"}))
+	fmt.Printf("Classify:%#v\n", Classify(AO{AF{1, 2}, I(4), AF{1, 2}, "patata"}))
+	fmt.Printf("Classify:%#v\n", Classify(AI{1, 2, 3, 2, 2, 4, 5, 3}))
 }

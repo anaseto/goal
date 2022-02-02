@@ -74,3 +74,86 @@ func match(w, x O) bool {
 func NotMatch(w, x O) O {
 	return !match(w, x)
 }
+
+// Classify returns ⊐x.
+func Classify(x O) O {
+	if Length(x) == 0 {
+		return AB{}
+	}
+	switch x := x.(type) {
+	case B, F, I, S:
+		return badtype("⊐ : expected array")
+	case AB:
+		v := x[0]
+		if !v {
+			return x
+		}
+		return Not(x)
+	case AF:
+		r := make(AI, len(x))
+		m := map[F]I{}
+		n := 0
+		for i, v := range x {
+			c, ok := m[v]
+			if !ok {
+				r[i] = n
+				m[v] = n
+				n++
+				continue
+			}
+			r[i] = c
+		}
+		return r
+	case AI:
+		r := make(AI, len(x))
+		m := map[I]I{}
+		n := 0
+		for i, v := range x {
+			c, ok := m[v]
+			if !ok {
+				r[i] = n
+				m[v] = n
+				n++
+				continue
+			}
+			r[i] = c
+		}
+		return r
+	case AS:
+		r := make(AI, len(x))
+		m := map[S]I{}
+		n := 0
+		for i, v := range x {
+			c, ok := m[v]
+			if !ok {
+				r[i] = n
+				m[v] = n
+				n++
+				continue
+			}
+			r[i] = c
+		}
+		return r
+	case AO:
+		// TODO: optimize common cases? (quadratic algorithm, worst
+		// case complexity could be improved by sorting or string
+		// hashing, but that would be quite bad for short lengths)
+		r := make(AI, len(x))
+		n := 0
+	loop:
+		for i := range r {
+			v := x[i]
+			for j := range x[:i] {
+				if match(v, x[j]) {
+					r[i] = r[j]
+					continue loop
+				}
+			}
+			r[i] = n
+			n++
+		}
+		return r
+	default:
+		return badtype("⊐ : expected array")
+	}
+}
