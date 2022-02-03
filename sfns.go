@@ -717,3 +717,519 @@ func Flip(x O) O {
 		return AO{x}
 	}
 }
+
+// JoinTo returns w~x.
+func JoinTo(w, x O) O {
+	switch w := w.(type) {
+	case B:
+		return joinToB(w, x, true)
+	case F:
+		return joinToF(w, x, true)
+	case I:
+		return joinToI(w, x, true)
+	case S:
+		return joinToS(w, x, true)
+	case AB:
+		return joinToAB(x, w, false)
+	case AF:
+		return joinToAF(x, w, false)
+	case AI:
+		return joinToAI(x, w, false)
+	case AS:
+		return joinToAS(x, w, false)
+	case AO:
+		return joinToAO(x, w, false)
+	default:
+		switch x := x.(type) {
+		case Array:
+			return joinAtomToArray(w, x)
+		default:
+			return AO{w, x}
+		}
+	}
+}
+
+func joinToB(w B, x O, left bool) O {
+	switch x := x.(type) {
+	case B:
+		if left {
+			return AB{w, x}
+		}
+		return AB{x, w}
+	case F:
+		if left {
+			return AF{B2F(w), x}
+		}
+		return AF{x, B2F(w)}
+	case I:
+		if left {
+			return AI{B2I(w), x}
+		}
+		return AI{x, B2I(w)}
+	case S:
+		if left {
+			return AO{w, x}
+		}
+		return AO{x, w}
+	case AB:
+		return joinToAB(w, x, left)
+	case AF:
+		return joinToAF(w, x, left)
+	case AI:
+		return joinToAI(w, x, left)
+	case AS:
+		return joinToAS(w, x, left)
+	case AO:
+		return joinToAO(w, x, left)
+	default:
+		return AO{w, x}
+	}
+}
+
+func joinToI(w I, x O, left bool) O {
+	switch x := x.(type) {
+	case B:
+		if left {
+			return AI{w, B2I(x)}
+		}
+		return AI{B2I(x), w}
+	case F:
+		if left {
+			return AF{F(w), x}
+		}
+		return AF{x, F(w)}
+	case I:
+		if left {
+			return AI{w, x}
+		}
+		return AI{x, w}
+	case S:
+		if left {
+			return AO{w, x}
+		}
+		return AO{x, w}
+	case AB:
+		return joinToAB(w, x, left)
+	case AF:
+		return joinToAF(w, x, left)
+	case AI:
+		return joinToAI(w, x, left)
+	case AS:
+		return joinToAS(w, x, left)
+	case AO:
+		return joinToAO(w, x, left)
+	default:
+		return AO{w, x}
+	}
+}
+
+func joinToF(w F, x O, left bool) O {
+	switch x := x.(type) {
+	case B:
+		if left {
+			return AF{w, B2F(x)}
+		}
+		return AF{B2F(x), w}
+	case F:
+		if left {
+			return AF{w, x}
+		}
+		return AF{x, w}
+	case I:
+		if left {
+			return AF{w, F(x)}
+		}
+		return AF{F(x), w}
+	case S:
+		if left {
+			return AO{w, x}
+		}
+		return AO{x, w}
+	case AB:
+		return joinToAB(w, x, left)
+	case AF:
+		return joinToAF(w, x, left)
+	case AI:
+		return joinToAI(w, x, left)
+	case AS:
+		return joinToAS(w, x, left)
+	case AO:
+		return joinToAO(w, x, left)
+	default:
+		return AO{w, x}
+	}
+}
+
+func joinToS(w S, x O, left bool) O {
+	switch x := x.(type) {
+	case B:
+		if left {
+			return AO{w, x}
+		}
+		return AO{x, w}
+	case F:
+		if left {
+			return AO{w, x}
+		}
+		return AO{x, w}
+	case I:
+		if left {
+			return AO{w, x}
+		}
+		return AO{x, w}
+	case S:
+		if left {
+			return AS{w, x}
+		}
+		return AS{x, w}
+	case AB:
+		return joinToAB(w, x, left)
+	case AF:
+		return joinToAF(w, x, left)
+	case AI:
+		return joinToAI(w, x, left)
+	case AS:
+		return joinToAS(w, x, left)
+	case AO:
+		return joinToAO(w, x, left)
+	default:
+		return AO{w, x}
+	}
+}
+
+func joinToAO(w O, x AO, left bool) O {
+	switch w := w.(type) {
+	case Array:
+		if left {
+			return joinArrays(w, x)
+		}
+		return joinArrays(x, w)
+	default:
+		r := make(AO, len(x)+1)
+		if left {
+			r[0] = w
+			copy(r[1:], x)
+		} else {
+			r[len(r)-1] = w
+			copy(r[:len(r)-1], x)
+		}
+		return r
+	}
+}
+
+func joinArrays(w, x Array) AO {
+	r := make(AO, x.Len()+w.Len())
+	for i := 0; i < w.Len(); i++ {
+		r[i] = w.At(i)
+	}
+	for i := w.Len(); i < len(r); i++ {
+		r[i] = x.At(i - w.Len())
+	}
+	return r
+}
+
+func joinAtomToArray(w O, x Array, left bool) AO {
+	r := make(AO, x.Len()+1)
+	if left {
+		r[0] = w
+		for i := 1; i < len(r); i++ {
+			r[i] = x.At(i - 1)
+		}
+	} else {
+		r[len(r)-1] = w
+		for i := 0; i < len(r)-1; i++ {
+			r[i] = x.At(i)
+		}
+	}
+	return r
+}
+
+func joinToAS(w O, x AS, left bool) O {
+	switch w := w.(type) {
+	case S:
+		r := make(AS, len(x)+1)
+		if left {
+			r[0] = w
+			copy(r[1:], x)
+		} else {
+			r[len(r)-1] = w
+			copy(r[:len(r)-1], x)
+		}
+		return r
+	case AS:
+		r := make(AS, len(x)+len(w))
+		if left {
+			copy(r[:len(w)], w)
+			copy(r[len(w):], x)
+		} else {
+			copy(r[:len(x)], x)
+			copy(r[len(x):], w)
+		}
+		return r
+	case Array:
+		if left {
+			return joinArrays(w, x)
+		}
+		return joinArrays(x, w)
+	default:
+		return joinAtomToArray(w, x, left)
+	}
+}
+
+func joinToAB(w O, x AB, left bool) O {
+	switch w := w.(type) {
+	case B:
+		r := make(AB, len(x)+1)
+		if left {
+			r[0] = w
+			copy(r[1:], x)
+		} else {
+			r[len(r)-1] = w
+			copy(r[:len(r)-1], x)
+		}
+		return r
+	case F:
+		r := make(AF, len(x)+1)
+		if left {
+			r[0] = w
+			for i := 1; i < len(r); i++ {
+				r[i] = B2F(x[i-1])
+			}
+		} else {
+			r[len(r)-1] = w
+			for i := 0; i < len(r); i++ {
+				r[i] = B2F(x[i])
+			}
+		}
+		return r
+	case I:
+		r := make(AI, len(x)+1)
+		if left {
+			r[0] = w
+			for i := 1; i < len(r); i++ {
+				r[i] = B2I(x[i-1])
+			}
+		} else {
+			r[len(r)-1] = w
+			for i := 0; i < len(r); i++ {
+				r[i] = B2I(x[i])
+			}
+		}
+		return r
+	case AB:
+		if left {
+			return joinABAB(w, x)
+		}
+		return joinABAB(x, w)
+	case AI:
+		if left {
+			return joinAIAB(w, x)
+		}
+		return joinABAI(x, w)
+	case AF:
+		if left {
+			return joinAFAB(w, x)
+		}
+		return joinABAF(x, w)
+	case Array:
+		if left {
+			return joinArrays(w, x)
+		}
+		return joinArrays(x, w)
+	default:
+		return joinAtomToArray(w, x, left)
+	}
+}
+
+func joinToAI(w O, x AI, left bool) O {
+	switch w := w.(type) {
+	case B:
+		r := make(AI, len(x)+1)
+		if left {
+			r[0] = B2I(w)
+			copy(r[1:], x)
+		} else {
+			r[len(r)-1] = B2I(w)
+			copy(r[:len(r)-1], x)
+		}
+		return r
+	case F:
+		r := make(AF, len(x)+1)
+		if left {
+			r[0] = w
+			for i := 1; i < len(r); i++ {
+				r[i] = F(x[i-1])
+			}
+		} else {
+			r[len(r)-1] = w
+			for i := 0; i < len(r)-1; i++ {
+				r[i] = F(x[i])
+			}
+		}
+		return r
+	case I:
+		r := make(AI, len(x)+1)
+		if left {
+			r[0] = w
+			copy(r[1:], x)
+		} else {
+			r[len(r)-1] = w
+			copy(r[:len(r)-1], x)
+		}
+		return r
+	case AB:
+		if left {
+			return joinABAI(w, x)
+		}
+		return joinAIAB(x, w)
+	case AI:
+		if left {
+			return joinAIAI(w, x)
+		}
+		return joinAIAI(x, w)
+	case AF:
+		if left {
+			return joinAFAI(w, x)
+		}
+		return joinAIAF(x, w)
+	case Array:
+		if left {
+			return joinArrays(w, x)
+		}
+		return joinArrays(x, w)
+	default:
+		return joinAtomToArray(w, x, left)
+	}
+}
+
+func joinToAF(w O, x AF, left bool) O {
+	switch w := w.(type) {
+	case B:
+		r := make(AF, len(x)+1)
+		if left {
+			r[0] = B2F(w)
+			copy(r[1:], x)
+		} else {
+			r[len(r)-1] = B2F(w)
+			copy(r[:len(r)-1], x)
+		}
+		return r
+	case F:
+		r := make(AF, len(x)+1)
+		if left {
+			r[0] = w
+			copy(r[1:], x)
+		} else {
+			r[len(r)-1] = w
+			copy(r[:len(r)-1], x)
+		}
+		return r
+	case I:
+		r := make(AF, len(x)+1)
+		if left {
+			r[0] = F(w)
+			copy(r[1:], x)
+		} else {
+			r[len(r)-1] = F(w)
+			copy(r[:len(r)-1], x)
+		}
+		return r
+	case AB:
+		if left {
+			return joinABAF(w, x)
+		}
+		return joinAFAB(x, w)
+	case AI:
+		if left {
+			return joinAIAF(w, x)
+		}
+		return joinAFAI(x, w)
+	case AF:
+		if left {
+			return joinAFAF(w, x)
+		}
+		return joinAFAF(x, w)
+	case Array:
+		if left {
+			return joinArrays(w, x)
+		}
+		return joinArrays(x, w)
+	default:
+		return joinAtomToArray(w, x, left)
+	}
+}
+
+func joinABAB(w AB, x AB) AB {
+	r := make(AB, len(x)+len(w))
+	copy(r[:len(w)], w)
+	copy(r[len(w):], x)
+	return r
+}
+
+func joinAIAI(w AI, x AI) AI {
+	r := make(AI, len(x)+len(w))
+	copy(r[:len(w)], w)
+	copy(r[len(w):], x)
+	return r
+}
+
+func joinAFAF(w AF, x AF) AF {
+	r := make(AF, len(x)+len(w))
+	copy(r[:len(w)], w)
+	copy(r[len(w):], x)
+	return r
+}
+
+func joinABAI(w AB, x AI) AI {
+	r := make(AI, len(w)+len(x))
+	for i := 0; i < len(w); i++ {
+		r[i] = B2I(w[i])
+	}
+	copy(r[len(w):], x)
+	return r
+}
+
+func joinAIAB(w AI, x AB) AI {
+	r := make(AI, len(w)+len(x))
+	copy(r[:len(w)], w)
+	for i := len(w); i < len(r); i++ {
+		r[i] = B2I(x[i-len(w)])
+	}
+	return r
+}
+
+func joinABAF(w AB, x AF) AF {
+	r := make(AF, len(w)+len(x))
+	for i := 0; i < len(w); i++ {
+		r[i] = B2F(w[i])
+	}
+	copy(r[len(w):], x)
+	return r
+}
+
+func joinAFAB(w AF, x AB) AF {
+	r := make(AF, len(w)+len(x))
+	copy(r[:len(w)], w)
+	for i := len(w); i < len(r); i++ {
+		r[i] = B2F(x[i-len(w)])
+	}
+	return r
+}
+
+func joinAIAF(w AI, x AF) AF {
+	r := make(AF, len(w)+len(x))
+	for i := 0; i < len(w); i++ {
+		r[i] = F(w[i])
+	}
+	copy(r[len(w):], x)
+	return r
+}
+
+func joinAFAI(w AF, x AI) AF {
+	r := make(AF, len(w)+len(x))
+	copy(r[:len(w)], w)
+	for i := len(w); i < len(r); i++ {
+		r[i] = F(x[i-len(w)])
+	}
+	return r
+}
