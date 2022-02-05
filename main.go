@@ -31,4 +31,6 @@ func main() {
 	fmt.Printf("Flip:%#v\n", Flip(AO{AF{1, 2}, I(4), I(5), "patata"}))
 	fmt.Printf("Classify:%#v\n", Classify(AO{AF{1, 2}, I(4), AF{1, 2}, "patata"}))
 	fmt.Printf("Classify:%#v\n", Classify(AI{1, 2, 3, 2, 2, 4, 5, 3}))
+	fmt.Printf("Range:%#v\n", Range(10))
+	fmt.Printf("Range:%#v\n", Range(AI{4, 2, 3}))
 }

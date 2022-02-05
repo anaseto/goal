@@ -1,10 +1,26 @@
 package main
 
-import "math"
+import (
+	"math"
+)
 
 // Range returns ↕x.
 func Range(x O) O {
 	switch x := x.(type) {
+	case B:
+		return rangeI(B2I(x))
+	case F:
+		if math.Floor(x) != x {
+			return badtype("↕ : non-integer range")
+		}
+		// TODO: check whether range is too big?
+		return rangeI(I(x))
+	case I:
+		return rangeI(x)
+	case Array:
+		return rangeArray(x)
+	default:
+		return badtype("↕")
 	}
 }
 
@@ -47,17 +63,18 @@ func rangeArray(x Array) O {
 	r := make(AO, x.Len())
 	reps := cols
 	for i := range r {
-		r[i] = make(AI, cols)
+		a := make(AI, cols)
 		reps /= y[i]
 		clen := reps * y[i]
 		for c := 0; c < cols/clen; c++ {
 			col := c * clen
 			for j := 0; j < y[i]; j++ {
 				for k := 0; k < reps; k++ {
-					r[i][col+j+k] = y[i]
+					a[col+j*reps+k] = j
 				}
 			}
 		}
+		r[i] = a
 	}
 	return r
 }

@@ -742,7 +742,7 @@ func JoinTo(w, x O) O {
 	default:
 		switch x := x.(type) {
 		case Array:
-			return joinAtomToArray(w, x)
+			return joinAtomToArray(w, x, true)
 		default:
 			return AO{w, x}
 		}
