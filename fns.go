@@ -1,16 +1,12 @@
 package main
 
-import (
-	"math"
-)
-
 // Range returns ↕x.
 func Range(x O) O {
 	switch x := x.(type) {
 	case B:
 		return rangeI(B2I(x))
 	case F:
-		if math.Floor(x) != x {
+		if !isI(x) {
 			return badtype("↕ : non-integer range")
 		}
 		// TODO: check whether range is too big?
@@ -45,7 +41,7 @@ func rangeArray(x Array) O {
 		case I:
 			y[i] = v
 		case F:
-			if math.Floor(v) != v {
+			if !isI(v) {
 				return badtype("↕ : non-integer range")
 			}
 			y[i] = I(v)
@@ -77,4 +73,86 @@ func rangeArray(x Array) O {
 		r[i] = a
 	}
 	return r
+}
+
+// Indices returns /x.
+func Indices(x O) O {
+	switch x := x.(type) {
+	case B:
+		if x {
+			return AI{0}
+		}
+		return AI{}
+	case I:
+		switch {
+		case x < 0:
+			return badtype("/ : negative integer")
+		case x == 0:
+			return AI{}
+		default:
+			r := make(AI, x)
+			return r
+		}
+	case F:
+		if !isI(x) {
+			return badtype("/ : not an integer")
+		}
+		n := I(x)
+		switch {
+		case n < 0:
+			return badtype("/ : negative integer")
+		case n == 0:
+			return AI{}
+		default:
+			r := make(AI, n)
+			return r
+		}
+	case AB:
+		n := 0
+		for _, v := range x {
+			n += B2I(v)
+		}
+		r := make(AI, 0, n)
+		for i, v := range x {
+			if v {
+				r = append(r, i)
+			}
+		}
+		return r
+	case AI:
+		n := 0
+		for _, v := range x {
+			if v < 0 {
+				return badtype("/ : negative integer")
+			}
+			n += v
+		}
+		r := make(AI, 0, n)
+		for i, v := range x {
+			for j := 0; j < v; j++ {
+				r = append(r, i)
+			}
+		}
+		return r
+	case AF:
+		n := 0
+		for _, v := range x {
+			if !isI(v) {
+				return badtype("/ : not an integer")
+			}
+			if v < 0 {
+				return badtype("/ : negative integer")
+			}
+			n += I(v)
+		}
+		r := make(AI, 0, n)
+		for i, v := range x {
+			for j := 0; j < I(v); j++ {
+				r = append(r, i)
+			}
+		}
+		return r
+	default:
+		return badtype("/ : expected integer(s)")
+	}
 }

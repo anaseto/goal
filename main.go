@@ -33,4 +33,6 @@ func main() {
 	fmt.Printf("Classify:%#v\n", Classify(AI{1, 2, 3, 2, 2, 4, 5, 3}))
 	fmt.Printf("Range:%#v\n", Range(10))
 	fmt.Printf("Range:%#v\n", Range(AI{4, 2, 3}))
+	fmt.Printf("Indices:%#v\n", Indices(AI{0, 1, 0, 0, 1}))
+	fmt.Printf("Indices:%#v\n", Indices(AI{3, 0, 1}))
 }

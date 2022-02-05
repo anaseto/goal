@@ -378,3 +378,7 @@ func dType(x O) eltype {
 		return tO
 	}
 }
+
+func isI(x F) bool {
+	return math.Floor(x) == x
+}
