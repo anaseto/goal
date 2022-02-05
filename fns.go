@@ -152,6 +152,48 @@ func Indices(x O) O {
 			}
 		}
 		return r
+	case AO:
+		switch aType(x) {
+		case tB, tF, tI:
+			n := 0
+			for _, v := range x {
+				switch v := v.(type) {
+				case B:
+					n += B2I(v)
+				case F:
+					if !isI(v) {
+						return badtype("/ : not an integer")
+					}
+					if v < 0 {
+						return badtype("/ : negative integer")
+					}
+					n += I(v)
+				case I:
+					if v < 0 {
+						return badtype("/ : negative integer")
+					}
+					n += v
+				}
+			}
+			r := make(AI, 0, n)
+			for i, v := range x {
+				var max I
+				switch v := v.(type) {
+				case B:
+					max = B2I(v)
+				case I:
+					max = v
+				case F:
+					max = I(v)
+				}
+				for j := 0; j < max; j++ {
+					r = append(r, i)
+				}
+			}
+			return r
+		default:
+			return badtype("/ : expected integer(s)")
+		}
 	default:
 		return badtype("/ : expected integer(s)")
 	}
