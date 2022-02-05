@@ -1233,3 +1233,67 @@ func joinAFAI(w AF, x AI) AF {
 	}
 	return r
 }
+
+// Enlist returns ⋈x.
+func Enlist(x O) O {
+	switch x := x.(type) {
+	case B:
+		return AB{x}
+	case F:
+		return AF{x}
+	case I:
+		return AI{x}
+	case S:
+		return AS{x}
+	default:
+		return AO{x}
+	}
+}
+
+// Pair returns w⋈x.
+func Pair(w, x O) O {
+	switch w := w.(type) {
+	case B:
+		switch x := x.(type) {
+		case B:
+			return AB{w, x}
+		case I:
+			return AI{B2I(w), x}
+		case F:
+			return AF{B2F(w), x}
+		default:
+			return AO{w, x}
+		}
+	case F:
+		switch x := x.(type) {
+		case B:
+			return AF{w, B2F(x)}
+		case I:
+			return AF{w, F(x)}
+		case F:
+			return AF{w, x}
+		default:
+			return AO{w, x}
+		}
+	case I:
+		switch x := x.(type) {
+		case B:
+			return AI{w, B2I(x)}
+		case I:
+			return AI{w, x}
+		case F:
+			return AF{F(w), x}
+		default:
+			return AO{w, x}
+		}
+	case S:
+		switch x := x.(type) {
+		case S:
+			return AS{w, x}
+		default:
+			return AO{w, x}
+		}
+	default:
+		return AO{w, x}
+	}
+}
