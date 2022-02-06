@@ -1,6 +1,8 @@
 package main
 
-import "math"
+import (
+	"math"
+)
 
 func B2I(b B) (i I) {
 	if b {
@@ -14,6 +16,19 @@ func B2F(b B) (f F) {
 		f = 1
 	}
 	return
+}
+
+func num2I(x O) (n I) {
+	switch x := x.(type) {
+	case B:
+		n = B2I(x)
+	case I:
+		n = x
+	case F:
+		n = I(x)
+	}
+	// x is assumed to be a number.
+	return n
 }
 
 func isNum(x O) bool {

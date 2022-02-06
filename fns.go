@@ -198,3 +198,316 @@ func Indices(x O) O {
 		return badtype("/ : expected integer(s)")
 	}
 }
+
+// Replicate returns w/x.
+func Replicate(w, x O) O {
+	if Length(w) != Length(x) {
+		return badlen("/ : w and x must have same length")
+	}
+	switch w := w.(type) {
+	case B:
+		return repeat(x, B2I(w))
+	case I:
+		switch {
+		case w < 0:
+			return badtype("/ : negative integer")
+		default:
+			return repeat(x, w)
+		}
+	case F:
+		if !isI(w) {
+			return badtype("/ : not an integer")
+		}
+		n := I(w)
+		switch {
+		case n < 0:
+			return badtype("/ : negative integer")
+		default:
+			return repeat(x, n)
+		}
+	case AB:
+		return repeatAB(w, x)
+	case AI:
+		return repeatAI(w, x)
+	case AF:
+		return repeatAF(w, x)
+	case AO:
+		return repeatAO(w, x)
+	default:
+		return badtype("/ : expected integer(s) for w")
+	}
+}
+
+func repeat(x O, n int) O {
+	switch x := x.(type) {
+	case B:
+		r := make(AB, n)
+		for i := range r {
+			r[i] = x
+		}
+		return r
+	case F:
+		r := make(AF, n)
+		for i := range r {
+			r[i] = x
+		}
+		return r
+	case I:
+		r := make(AI, n)
+		for i := range r {
+			r[i] = x
+		}
+		return r
+	case S:
+		r := make(AS, n)
+		for i := range r {
+			r[i] = x
+		}
+		return r
+	default:
+		r := make(AO, n)
+		for i := range r {
+			r[i] = x
+		}
+		return r
+	}
+}
+
+func repeatAB(w AB, x O) O {
+	n := 0
+	for _, v := range w {
+		n += B2I(v)
+	}
+	switch x := x.(type) {
+	case AB:
+		r := make(AB, 0, n)
+		for i, v := range w {
+			if v {
+				r = append(r, x[i])
+			}
+		}
+		return r
+	case AF:
+		r := make(AF, 0, n)
+		for i, v := range w {
+			if v {
+				r = append(r, x[i])
+			}
+		}
+		return r
+	case AI:
+		r := make(AI, 0, n)
+		for i, v := range w {
+			if v {
+				r = append(r, x[i])
+			}
+		}
+		return r
+	case AS:
+		r := make(AS, 0, n)
+		for i, v := range w {
+			if v {
+				r = append(r, x[i])
+			}
+		}
+		return r
+	case AO:
+		r := make(AO, 0, n)
+		for i, v := range w {
+			if v {
+				r = append(r, x.At(i))
+			}
+		}
+		return r
+	default:
+		return badtype("/ : expected array for x")
+	}
+}
+
+func repeatAI(w AI, x O) O {
+	n := 0
+	for _, v := range w {
+		if v < 0 {
+			return badtype("/ : negative integer")
+		}
+		n += v
+	}
+	switch x := x.(type) {
+	case AB:
+		r := make(AB, 0, n)
+		for i, v := range w {
+			for j := 0; j < v; j++ {
+				r = append(r, x[i])
+			}
+		}
+		return r
+	case AF:
+		r := make(AF, 0, n)
+		for i, v := range w {
+			for j := 0; j < v; j++ {
+				r = append(r, x[i])
+			}
+		}
+		return r
+	case AI:
+		r := make(AI, 0, n)
+		for i, v := range w {
+			for j := 0; j < v; j++ {
+				r = append(r, x[i])
+			}
+		}
+		return r
+	case AS:
+		r := make(AS, 0, n)
+		for i, v := range w {
+			for j := 0; j < v; j++ {
+				r = append(r, x[i])
+			}
+		}
+		return r
+	case AO:
+		r := make(AO, 0, n)
+		for i, v := range w {
+			for j := 0; j < v; j++ {
+				r = append(r, x[i])
+			}
+		}
+		return r
+	default:
+		return badtype("/ : expected array for x")
+	}
+}
+
+func repeatAF(w AF, x O) O {
+	n := 0
+	for _, v := range w {
+		if !isI(v) {
+			return badtype("/ : not an integer")
+		}
+		if v < 0 {
+			return badtype("/ : negative integer")
+		}
+		n += I(v)
+	}
+	switch x := x.(type) {
+	case AB:
+		r := make(AB, 0, n)
+		for i, v := range w {
+			for j := 0; j < I(v); j++ {
+				r = append(r, x[i])
+			}
+		}
+		return r
+	case AF:
+		r := make(AF, 0, n)
+		for i, v := range w {
+			for j := 0; j < I(v); j++ {
+				r = append(r, x[i])
+			}
+		}
+		return r
+	case AI:
+		r := make(AI, 0, n)
+		for i, v := range w {
+			for j := 0; j < I(v); j++ {
+				r = append(r, x[i])
+			}
+		}
+		return r
+	case AS:
+		r := make(AS, 0, n)
+		for i, v := range w {
+			for j := 0; j < I(v); j++ {
+				r = append(r, x[i])
+			}
+		}
+		return r
+	case AO:
+		r := make(AO, 0, n)
+		for i, v := range w {
+			for j := 0; j < I(v); j++ {
+				r = append(r, x[i])
+			}
+		}
+		return r
+	default:
+		return badtype("/ : expected array for x")
+	}
+}
+
+func repeatAO(w AO, x O) O {
+	switch aType(w) {
+	case tB, tF, tI:
+		n := 0
+		for _, v := range w {
+			switch v := v.(type) {
+			case B:
+				n += B2I(v)
+			case F:
+				if !isI(v) {
+					return badtype("/ : not an integer")
+				}
+				if v < 0 {
+					return badtype("/ : negative integer")
+				}
+				n += I(v)
+			case I:
+				if v < 0 {
+					return badtype("/ : negative integer")
+				}
+				n += v
+			}
+		}
+		switch x := x.(type) {
+		case AB:
+			r := make(AB, 0, n)
+			for i, v := range w {
+				max := num2I(v)
+				for j := 0; j < max; j++ {
+					r = append(r, x[i])
+				}
+			}
+			return r
+		case AI:
+			r := make(AI, 0, n)
+			for i, v := range w {
+				max := num2I(v)
+				for j := 0; j < max; j++ {
+					r = append(r, x[i])
+				}
+			}
+			return r
+		case AF:
+			r := make(AF, 0, n)
+			for i, v := range w {
+				max := num2I(v)
+				for j := 0; j < max; j++ {
+					r = append(r, x[i])
+				}
+			}
+			return r
+		case AS:
+			r := make(AS, 0, n)
+			for i, v := range w {
+				max := num2I(v)
+				for j := 0; j < max; j++ {
+					r = append(r, x[i])
+				}
+			}
+			return r
+		case AO:
+			r := make(AO, 0, n)
+			for i, v := range w {
+				max := num2I(v)
+				for j := 0; j < max; j++ {
+					r = append(r, x[i])
+				}
+			}
+			return r
+		default:
+			return badtype("/ : expected array for x")
+		}
+	default:
+		return badtype("/ : expected integer(s) for w")
+	}
+}
