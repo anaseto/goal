@@ -378,6 +378,7 @@ func lessAO(w AO, x O) bool {
 // SortUp returns <x.
 func SortUp(x O) O {
 	// XXX: error if length is zero?
+	x = canonical(x)
 	x = cloneShallow(x)
 	switch x := x.(type) {
 	case AB:

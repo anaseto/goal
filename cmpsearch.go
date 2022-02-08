@@ -179,6 +179,7 @@ func Classify(x O) O {
 	if Length(x) == 0 {
 		return AB{}
 	}
+	x = canonical(x)
 	switch x := x.(type) {
 	case B, F, I, S:
 		return badtype("⊐ : expected array")
@@ -261,6 +262,7 @@ func MarkFirts(x O) O {
 	if Length(x) == 0 {
 		return AB{}
 	}
+	x = canonical(x)
 	switch x := x.(type) {
 	case B, F, I, S:
 		return badtype("∊ : expected array")
@@ -336,6 +338,7 @@ func OccurrenceCount(x O) O {
 	if Length(x) == 0 {
 		return AB{}
 	}
+	x = canonical(x)
 	switch x := x.(type) {
 	case B, F, I, S:
 		return badtype("⊒ : expected array")

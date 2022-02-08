@@ -546,7 +546,7 @@ func Flip(x O) O {
 				return badlen("+")
 			}
 		}
-		t := dType(x)
+		t := aType(x)
 		switch {
 		case lines <= 0:
 			// (+⟨⟨⟩,…⟩) ≡ ⟨⟩
@@ -554,168 +554,208 @@ func Flip(x O) O {
 			return x[0]
 		case lines == 1:
 			switch t {
-			case tB:
-				r := make(AB, cols)
-				for i, y := range x {
-					switch y := y.(type) {
-					case B:
-						r[i] = y
-					case AB:
-						r[i] = y[0]
-					}
-				}
-				return r
-			case tF:
-				r := make(AF, cols)
-				for i, y := range x {
-					switch y := y.(type) {
-					case B:
-						r[i] = B2F(y)
-					case AB:
-						r[i] = B2F(y[0])
-					case F:
-						r[i] = y
-					case AF:
-						r[i] = y[0]
-					case I:
-						r[i] = F(y)
-					case AI:
-						r[i] = F(y[0])
-					}
-				}
-				return r
-			case tI:
-				r := make(AI, cols)
-				for i, y := range x {
-					switch y := y.(type) {
-					case B:
-						r[i] = B2I(y)
-					case AB:
-						r[i] = B2I(y[0])
-					case I:
-						r[i] = y
-					case AI:
-						r[i] = y[0]
-					}
-				}
-				return r
-			case tS:
-				r := make(AS, cols)
-				for i, y := range x {
-					switch y := y.(type) {
-					case S:
-						r[i] = y
-					case AS:
-						r[i] = y[0]
-					}
-				}
-				return r
+			case tB, tAB:
+				return flipAB(x)
+			case tF, tAF:
+				return flipAF(x)
+			case tI, tAI:
+				return flipAI(x)
+			case tS, tAS:
+				return flipAS(x)
 			default:
-				r := make(AO, cols)
-				for i, y := range x {
-					switch y := y.(type) {
-					case Array:
-						r[i] = y.At(0)
-					default:
-						r[i] = y
-					}
-				}
-				return r
+				return flipAO(x)
 			}
 		default:
 			switch t {
-			case tB:
-				r := make(AO, lines)
-				for j := range r {
-					q := make(AB, cols)
-					for i, y := range x {
-						switch y := y.(type) {
-						case B:
-							q[i] = y
-						case AB:
-							q[i] = y[j]
-						}
-					}
-					r[j] = q
-				}
-				return r
-			case tF:
-				r := make(AO, lines)
-				for j := range r {
-					q := make(AF, cols)
-					for i, y := range x {
-						switch y := y.(type) {
-						case B:
-							q[i] = B2F(y)
-						case AB:
-							q[i] = B2F(y[j])
-						case F:
-							q[i] = y
-						case AF:
-							q[i] = y[j]
-						case I:
-							q[i] = F(y)
-						case AI:
-							q[i] = F(y[j])
-						}
-					}
-					r[j] = q
-				}
-				return r
-			case tI:
-				r := make(AO, lines)
-				for j := range r {
-					q := make(AI, cols)
-					for i, y := range x {
-						switch y := y.(type) {
-						case B:
-							q[i] = B2I(y)
-						case AB:
-							q[i] = B2I(y[j])
-						case I:
-							q[i] = y
-						case AI:
-							q[i] = y[j]
-						}
-					}
-					r[j] = q
-				}
-				return r
-			case tS:
-				r := make(AO, lines)
-				for j := range r {
-					q := make(AS, cols)
-					for i, y := range x {
-						switch y := y.(type) {
-						case S:
-							q[i] = y
-						case AS:
-							q[i] = y[j]
-						}
-					}
-					r[j] = q
-				}
-				return r
+			case tB, tAB:
+				return flipAOAB(x, lines)
+			case tF, tAF:
+				return flipAOAF(x, lines)
+			case tI, tAI:
+				return flipAOAI(x, lines)
+			case tS, tAS:
+				return flipAOAS(x, lines)
 			default:
-				r := make(AO, lines)
-				for j := range r {
-					q := make(AO, cols)
-					for i, y := range x {
-						switch y := y.(type) {
-						case Array:
-							q[i] = y.At(j)
-						default:
-							q[i] = y
-						}
-					}
-					r[j] = q
-				}
-				return r
+				return flipAOAO(x, lines)
 			}
 		}
 	default:
 		return AO{x}
 	}
+}
+
+func flipAB(x AO) AB {
+	r := make(AB, len(x))
+	for i, y := range x {
+		switch y := y.(type) {
+		case B:
+			r[i] = y
+		case AB:
+			r[i] = y[0]
+		}
+	}
+	return r
+}
+
+func flipAOAB(x AO, lines int) AO {
+	r := make(AO, lines)
+	for j := range r {
+		q := make(AB, len(x))
+		for i, y := range x {
+			switch y := y.(type) {
+			case B:
+				q[i] = y
+			case AB:
+				q[i] = y[j]
+			}
+		}
+		r[j] = q
+	}
+	return r
+}
+
+func flipAF(x AO) AF {
+	r := make(AF, len(x))
+	for i, y := range x {
+		switch y := y.(type) {
+		case B:
+			r[i] = B2F(y)
+		case AB:
+			r[i] = B2F(y[0])
+		case F:
+			r[i] = y
+		case AF:
+			r[i] = y[0]
+		case I:
+			r[i] = F(y)
+		case AI:
+			r[i] = F(y[0])
+		}
+	}
+	return r
+}
+
+func flipAOAF(x AO, lines int) AO {
+	r := make(AO, lines)
+	for j := range r {
+		q := make(AF, len(x))
+		for i, y := range x {
+			switch y := y.(type) {
+			case B:
+				q[i] = B2F(y)
+			case AB:
+				q[i] = B2F(y[j])
+			case F:
+				q[i] = y
+			case AF:
+				q[i] = y[j]
+			case I:
+				q[i] = F(y)
+			case AI:
+				q[i] = F(y[j])
+			}
+		}
+		r[j] = q
+	}
+	return r
+}
+
+func flipAI(x AO) AI {
+	r := make(AI, len(x))
+	for i, y := range x {
+		switch y := y.(type) {
+		case B:
+			r[i] = B2I(y)
+		case AB:
+			r[i] = B2I(y[0])
+		case I:
+			r[i] = y
+		case AI:
+			r[i] = y[0]
+		}
+	}
+	return r
+}
+
+func flipAOAI(x AO, lines int) AO {
+	r := make(AO, lines)
+	for j := range r {
+		q := make(AI, len(x))
+		for i, y := range x {
+			switch y := y.(type) {
+			case B:
+				q[i] = B2I(y)
+			case AB:
+				q[i] = B2I(y[j])
+			case I:
+				q[i] = y
+			case AI:
+				q[i] = y[j]
+			}
+		}
+		r[j] = q
+	}
+	return r
+}
+
+func flipAS(x AO) AS {
+	r := make(AS, len(x))
+	for i, y := range x {
+		switch y := y.(type) {
+		case S:
+			r[i] = y
+		case AS:
+			r[i] = y[0]
+		}
+	}
+	return r
+}
+
+func flipAOAS(x AO, lines int) AO {
+	r := make(AO, lines)
+	for j := range r {
+		q := make(AS, len(x))
+		for i, y := range x {
+			switch y := y.(type) {
+			case S:
+				q[i] = y
+			case AS:
+				q[i] = y[j]
+			}
+		}
+		r[j] = q
+	}
+	return r
+}
+
+func flipAO(x AO) AO {
+	r := make(AO, len(x))
+	for i, y := range x {
+		switch y := y.(type) {
+		case Array:
+			r[i] = y.At(0)
+		default:
+			r[i] = y
+		}
+	}
+	return r
+}
+
+func flipAOAO(x AO, lines int) AO {
+	r := make(AO, lines)
+	for j := range r {
+		q := make(AO, len(x))
+		for i, y := range x {
+			switch y := y.(type) {
+			case Array:
+				q[i] = y.At(j)
+			default:
+				q[i] = y
+			}
+		}
+		r[j] = q
+	}
+	return r
 }
 
 // JoinTo returns w~x.

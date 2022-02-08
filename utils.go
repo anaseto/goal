@@ -262,63 +262,23 @@ func isFalse(x O) bool {
 type eltype int
 
 const (
-	tO eltype = iota
-	tB
-	tF
-	tI
-	tS
+	tO  eltype = 0b00000
+	tB  eltype = 0b00111
+	tF  eltype = 0b00001
+	tI  eltype = 0b00011
+	tS  eltype = 0b01000
+	tAB eltype = 0b10111
+	tAF eltype = 0b10001
+	tAI eltype = 0b10011
+	tAS eltype = 0b11000
+	tAO eltype = 0b10000
 )
 
 func mergeTypes(t, s eltype) eltype {
-	switch t {
-	case tB:
-		switch s {
-		case tB, tI, tF:
-			return s
-		default:
-			return tO
-		}
-	case tF:
-		switch s {
-		case tB, tI, tF:
-			return t
-		default:
-			return tO
-		}
-	case tI:
-		switch s {
-		case tB, tI:
-			return t
-		case tF:
-			return s
-		default:
-			return tO
-		}
-	case tS:
-		if s == tS {
-			return tS
-		}
-		return tO
-	default:
-		return t
+	if t&tAO == s&tAO {
+		return t & s
 	}
-}
-
-// sType returns the eltype of x or its elements (for specialized
-// arrays).
-func sType(x O) eltype {
-	switch x.(type) {
-	case B, AB:
-		return tB
-	case F, AF:
-		return tF
-	case I, AI:
-		return tI
-	case S, AS:
-		return tS
-	default:
-		return tO
-	}
+	return tO
 }
 
 // eType returns the eltype of x.
@@ -332,68 +292,140 @@ func eType(x O) eltype {
 		return tI
 	case S:
 		return tS
+	case AB:
+		return tAB
+	case AF:
+		return tAF
+	case AI:
+		return tAI
+	case AS:
+		return tAS
+	case AO:
+		return tAO
 	default:
 		return tO
 	}
 }
 
-// aType returns the eltype of x or its elements (including AO arrays).
-func aType(x O) eltype {
+// cType returns the canonical eltype of x. XXX: unused.
+func cType(x O) eltype {
 	switch x := x.(type) {
-	case B, AB:
+	case B:
 		return tB
-	case F, AF:
+	case AB:
+		return tAB
+	case F:
 		return tF
-	case I, AI:
+	case AF:
+		return tAF
+	case I:
 		return tI
-	case S, AS:
+	case AI:
+		return tAI
+	case S:
 		return tS
+	case AS:
+		return tAS
 	case AO:
-		if Length(x) == 0 {
-			return tO
-		}
-		t := eType(x[0])
-		if t == tO {
-			return tO
-		}
-		for i := 1; i < len(x); i++ {
-			t = mergeTypes(t, eType(x[i]))
-		}
-		return t
+		return cTypeAO(x)
 	default:
 		return tO
 	}
 }
 
-// dType is the same as aType but propagates type search one depth
-// further.
-func dType(x O) eltype {
-	switch x := x.(type) {
-	case B, AB:
-		return tB
-	case F, AF:
-		return tF
-	case I, AI:
-		return tI
-	case S, AS:
-		return tS
-	case AO:
-		if Length(x) == 0 {
-			return tO
-		}
-		t := sType(x[0])
-		if t == tO {
-			return tO
-		}
-		for i := 1; i < len(x); i++ {
-			t = mergeTypes(t, sType(x[i]))
-		}
-		return t
+func cTypeAO(x AO) eltype {
+	if x.Len() == 0 {
+		return tAO
+	}
+	t := eType(x[0])
+	for i := 1; i < len(x); i++ {
+		t = mergeTypes(t, eType(x[i]))
+	}
+	switch t {
+	case tB:
+		return tAB
+	case tF:
+		return tAF
+	case tI:
+		return tAI
+	case tS:
+		return tAS
 	default:
+		return tAO
+	}
+}
+
+// aType returns the most specific eltype of the elements of a generic array.
+func aType(x AO) eltype {
+	if x.Len() == 0 {
 		return tO
 	}
+	t := eType(x[0])
+	for i := 1; i < len(x); i++ {
+		t = mergeTypes(t, eType(x[i]))
+	}
+	return t
 }
 
 func isI(x F) bool {
 	return math.Floor(x) == x
+}
+
+func minMax(x AI) (min, max I) {
+	if len(x) == 0 {
+		return
+	}
+	min = x[0]
+	max = min
+	for _, v := range x[1:] {
+		switch {
+		case v > max:
+			max = v
+		case v < min:
+			min = v
+		}
+	}
+	return
+}
+
+func canonical(x O) O {
+	switch y := x.(type) {
+	case AO:
+		t := aType(y)
+		switch t {
+		case tB:
+			r := make(AB, len(y))
+			for i, v := range y {
+				r[i] = v.(B)
+			}
+			return r
+		case tI:
+			r := make(AI, len(y))
+			for i, v := range y {
+				r[i] = v.(I)
+			}
+			return r
+		case tF:
+			r := make(AF, len(y))
+			for i, v := range y {
+				r[i] = v.(F)
+			}
+			return r
+		case tS:
+			r := make(AS, len(y))
+			for i, v := range y {
+				r[i] = v.(S)
+			}
+			return r
+		case tO:
+			for i, v := range y {
+				y[i] = canonical(v)
+			}
+			return y
+		default:
+			return x
+		}
+	default:
+		return x
+	}
 }
