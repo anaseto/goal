@@ -1337,3 +1337,32 @@ func Pair(w, x O) O {
 		return AO{w, x}
 	}
 }
+
+// Windows returns w↕x.
+func Windows(w, x O) O {
+	i := 0
+	switch w := w.(type) {
+	case B:
+		i = B2I(w)
+	case I:
+		i = w
+	case F:
+		i = I(w)
+	default:
+		// TODO: improve error messages
+		return badtype("↕ : w must be un integer")
+	}
+	switch x := x.(type) {
+	case Array:
+		if i <= 0 || i >= x.Len()+1 {
+			return badtype("↕ : w must be between 0 and 1+≠x")
+		}
+		r := make(AO, 1+x.Len()-i)
+		for j := range r {
+			r[j] = x.Slice(j, j+i)
+		}
+		return r
+	default:
+		return badtype("↕ : x must be an array")
+	}
+}

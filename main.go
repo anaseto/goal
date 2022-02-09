@@ -37,4 +37,5 @@ func main() {
 	fmt.Printf("Indices:%#v\n", Indices(AI{3, 0, 1}))
 	fmt.Printf("MarkFirts:%#v\n", MarkFirts(AI{3, 3, 1, 2, 4, 2, 4}))
 	fmt.Printf("OccurrenceCount:%#v\n", OccurrenceCount(AB{false, false, true, false, true, true}))
+	fmt.Printf("Windows:%#v\n", Windows(3, Range(7)))
 }
