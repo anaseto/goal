@@ -25,7 +25,7 @@ func rangeI(n I) O {
 		return badtype("↕ : negative integer")
 	}
 	r := make(AI, n)
-	for i := 0; i < n; i++ {
+	for i := range r {
 		r[i] = i
 	}
 	return r

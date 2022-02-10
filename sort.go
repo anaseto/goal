@@ -377,7 +377,7 @@ func lessAO(w AO, x O) bool {
 
 // SortUp returns <x.
 func SortUp(x O) O {
-	// XXX: error if length is zero?
+	// XXX: error if atom?
 	x = canonical(x)
 	x = cloneShallow(x)
 	switch x := x.(type) {
@@ -396,8 +396,6 @@ func SortUp(x O) O {
 	case AO:
 		sort.Stable(AOUp(x))
 		return x
-	case E:
-		return x
 	default:
 		return badtype("<")
 	}
@@ -408,9 +406,140 @@ func SortDown(x O) O {
 	x = SortUp(x)
 	switch x.(type) {
 	case E:
-		// TODO: match only < error type
-		return badtype(">")
+		return x
 	}
 	reverse(x)
 	return x
+}
+
+type PermutationAO struct {
+	Perm []I
+	X    AOUp
+}
+
+func (p *PermutationAO) Len() int {
+	return p.X.Len()
+}
+
+func (p *PermutationAO) Swap(i, j int) {
+	p.Perm[i], p.Perm[j] = p.Perm[j], p.Perm[i]
+}
+
+func (p *PermutationAO) Less(i, j int) bool {
+	return p.X.Less(p.Perm[i], p.Perm[j])
+}
+
+type PermutationAB struct {
+	Perm AI
+	X    ABUp
+}
+
+func (p *PermutationAB) Len() int {
+	return p.X.Len()
+}
+
+func (p *PermutationAB) Swap(i, j int) {
+	p.Perm[i], p.Perm[j] = p.Perm[j], p.Perm[i]
+}
+
+func (p *PermutationAB) Less(i, j int) bool {
+	return p.X.Less(p.Perm[i], p.Perm[j])
+}
+
+type PermutationAI struct {
+	Perm AI
+	X    sort.IntSlice
+}
+
+func (p *PermutationAI) Len() int {
+	return p.X.Len()
+}
+
+func (p *PermutationAI) Swap(i, j int) {
+	p.Perm[i], p.Perm[j] = p.Perm[j], p.Perm[i]
+}
+
+func (p *PermutationAI) Less(i, j int) bool {
+	return p.X.Less(p.Perm[i], p.Perm[j])
+}
+
+type PermutationAF struct {
+	Perm AI
+	X    sort.Float64Slice
+}
+
+func (p *PermutationAF) Len() int {
+	return p.X.Len()
+}
+
+func (p *PermutationAF) Swap(i, j int) {
+	p.Perm[i], p.Perm[j] = p.Perm[j], p.Perm[i]
+}
+
+func (p *PermutationAF) Less(i, j int) bool {
+	return p.X.Less(p.Perm[i], p.Perm[j])
+}
+
+type PermutationAS struct {
+	Perm AI
+	X    sort.StringSlice
+}
+
+func (p *PermutationAS) Len() int {
+	return p.X.Len()
+}
+
+func (p *PermutationAS) Swap(i, j int) {
+	p.Perm[i], p.Perm[j] = p.Perm[j], p.Perm[i]
+}
+
+func (p *PermutationAS) Less(i, j int) bool {
+	return p.X.Less(p.Perm[i], p.Perm[j])
+}
+
+func permRange(n I) AI {
+	r := make(AI, n)
+	for i := range r {
+		r[i] = i
+	}
+	return r
+}
+
+// GradeUp returns ⍋x.
+func GradeUp(x O) O {
+	switch x := x.(type) {
+	case AB:
+		p := &PermutationAB{Perm: permRange(len(x)), X: ABUp(x)}
+		sort.Stable(p)
+		return p.Perm
+	case AF:
+		p := &PermutationAF{Perm: permRange(len(x)), X: sort.Float64Slice(x)}
+		sort.Stable(p)
+		return p.Perm
+	case AI:
+		p := &PermutationAI{Perm: permRange(len(x)), X: sort.IntSlice(x)}
+		sort.Stable(p)
+		return p.Perm
+	case AS:
+		p := &PermutationAS{Perm: permRange(len(x)), X: sort.StringSlice(x)}
+		sort.Stable(p)
+		return p.Perm
+	case AO:
+		p := &PermutationAO{Perm: permRange(len(x)), X: AOUp(x)}
+		sort.Stable(p)
+		return p.Perm
+	default:
+		return badtype("⍋ : x must be an array")
+	}
+}
+
+// GradeDown returns ⍒x.
+func GradeDown(x O) O {
+	p := GradeUp(x)
+	switch p.(type) {
+	case E:
+		return p
+	}
+	reverse(p)
+	return p
 }
