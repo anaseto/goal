@@ -374,6 +374,9 @@ EOS
         my $iexpr = subst($expr, "w[i]", "x[i]");
         print $out <<EOS;
 	case A$tt:
+                if len(w) != len(x) {
+                        return badlen("$op")
+                }
 		r := make(A$type, len(x))
 		for i := range r {
 			r[i] = $iexpr
@@ -383,9 +386,12 @@ EOS
     }
     print $out <<EOS if $t !~ /^A/;
 	case AO:
+                if len(w) != len(x) {
+                        return badlen("$op")
+                }
 		r := make(AO, len(x))
 		for i := range r {
-			v := ${name}A${t}O(w, x[i])
+			v := ${name}${t}O(w[i], x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
