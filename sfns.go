@@ -526,6 +526,7 @@ func NudgeBack(x O) O {
 // Flip returns +x.
 func Flip(x O) O {
 	x = toArray(x)
+	x = canonical(x) // XXX really?
 	switch x := x.(type) {
 	case AO:
 		cols := len(x)
@@ -555,15 +556,15 @@ func Flip(x O) O {
 		case lines == 1:
 			switch t {
 			case tB, tAB:
-				return flipAB(x)
+				return AO{flipAB(x)}
 			case tF, tAF:
-				return flipAF(x)
+				return AO{flipAF(x)}
 			case tI, tAI:
-				return flipAI(x)
+				return AO{flipAI(x)}
 			case tS, tAS:
-				return flipAS(x)
+				return AO{flipAS(x)}
 			default:
-				return flipAO(x)
+				return AO{flipAO(x)}
 			}
 		default:
 			switch t {
@@ -599,8 +600,9 @@ func flipAB(x AO) AB {
 
 func flipAOAB(x AO, lines int) AO {
 	r := make(AO, lines)
+	a := make(AB, lines*len(x))
 	for j := range r {
-		q := make(AB, len(x))
+		q := a[j*len(x) : (j+1)*len(x)]
 		for i, y := range x {
 			switch y := y.(type) {
 			case B:
@@ -637,8 +639,9 @@ func flipAF(x AO) AF {
 
 func flipAOAF(x AO, lines int) AO {
 	r := make(AO, lines)
+	a := make(AF, lines*len(x))
 	for j := range r {
-		q := make(AF, len(x))
+		q := a[j*len(x) : (j+1)*len(x)]
 		for i, y := range x {
 			switch y := y.(type) {
 			case B:
@@ -679,8 +682,9 @@ func flipAI(x AO) AI {
 
 func flipAOAI(x AO, lines int) AO {
 	r := make(AO, lines)
+	a := make(AI, lines*len(x))
 	for j := range r {
-		q := make(AI, len(x))
+		q := a[j*len(x) : (j+1)*len(x)]
 		for i, y := range x {
 			switch y := y.(type) {
 			case B:
@@ -713,8 +717,9 @@ func flipAS(x AO) AS {
 
 func flipAOAS(x AO, lines int) AO {
 	r := make(AO, lines)
+	a := make(AS, lines*len(x))
 	for j := range r {
-		q := make(AS, len(x))
+		q := a[j*len(x) : (j+1)*len(x)]
 		for i, y := range x {
 			switch y := y.(type) {
 			case S:
@@ -743,8 +748,9 @@ func flipAO(x AO) AO {
 
 func flipAOAO(x AO, lines int) AO {
 	r := make(AO, lines)
+	a := make(AO, lines*len(x))
 	for j := range r {
-		q := make(AO, len(x))
+		q := a[j*len(x) : (j+1)*len(x)]
 		for i, y := range x {
 			switch y := y.(type) {
 			case Array:
