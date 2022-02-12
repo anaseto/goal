@@ -38,4 +38,8 @@ func main() {
 	fmt.Printf("MarkFirts:%#v\n", MarkFirts(AI{3, 3, 1, 2, 4, 2, 4}))
 	fmt.Printf("OccurrenceCount:%#v\n", OccurrenceCount(AB{false, false, true, false, true, true}))
 	fmt.Printf("Windows:%#v\n", Windows(3, Range(7)))
+	fmt.Printf("MemberOf:%#v\n", MemberOf(AS{"two", "twelve", "five", "one", "one", "nine"}, AS{"one", "two", "four"}))
+	fmt.Printf("MemberOf:%#v\n", MemberOf(5, AI{2, 3, 6}))
+	fmt.Printf("MemberOf:%#v\n", MemberOf(3, AO{2, 3, 6}))
+	fmt.Printf("MemberOf:%#v\n", MemberOf(AI{4, 3, 3, 3, 5, 2, 6}, AI{2, 3, 6}))
 }

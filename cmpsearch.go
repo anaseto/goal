@@ -235,9 +235,9 @@ func Classify(x O) O {
 		}
 		return r
 	case AO:
-		// TODO: optimize common cases? (quadratic algorithm, worst
-		// case complexity could be improved by sorting or string
-		// hashing, but that would be quite bad for short lengths)
+		// NOTE: quadratic algorithm, worst case complexity could be
+		// improved by sorting or string hashing, but that would be
+		// quite bad for short lengths.
 		r := make(AI, len(x))
 		n := 0
 	loop:
@@ -314,9 +314,9 @@ func MarkFirts(x O) O {
 		}
 		return r
 	case AO:
-		// TODO: optimize common cases? (quadratic algorithm, worst
-		// case complexity could be improved by sorting or string
-		// hashing, but that would be quite bad for short lengths)
+		// NOTE: quadratic algorithm, worst case complexity could be
+		// improved by sorting or string hashing, but that would be
+		// quite bad for short lengths.
 		r := make(AB, len(x))
 	loop:
 		for i, v := range x {
@@ -329,7 +329,200 @@ func MarkFirts(x O) O {
 		}
 		return r
 	default:
-		return badtype("⊐ : expected array")
+		return badtype("∊ : expected array")
+	}
+}
+
+// MemberOf returns w∊x.
+func MemberOf(w, x O) O {
+	if Length(x) == 0 || Length(w) == 0 {
+		switch x.(type) {
+		case Array:
+			switch w := w.(type) {
+			case Array:
+				r := make(AB, Length(w))
+				return r
+			default:
+				return false
+			}
+		default:
+			return badtype("∊ : x must be an array")
+		}
+	}
+	x = canonical(x)
+	w = canonical(w)
+	switch x := x.(type) {
+	case AB:
+		return memberOfAB(w, x)
+	case AF:
+		return memberOfAF(w, x)
+	case AI:
+		return memberOfAI(w, x)
+	case AS:
+		return memberOfAS(w, x)
+	case AO:
+		return memberOfAO(w, x)
+	default:
+		return badtype("∊ : x must be an array")
+	}
+}
+
+func memberOfAB(w O, x AB) O {
+	var t, f bool
+	for _, v := range x {
+		if t && f {
+			break
+		}
+		t, f = t || v, f || !v
+	}
+	if t && f {
+		r := make(AB, Length(w))
+		for i := range r {
+			r[i] = true
+		}
+		return r
+	}
+	if t {
+		return Equal(w, true)
+	}
+	return Equal(w, false)
+}
+
+func memberOfAF(w O, x AF) O {
+	m := map[F]struct{}{}
+	for _, v := range x {
+		_, ok := m[v]
+		if !ok {
+			m[v] = struct{}{}
+			continue
+		}
+	}
+	switch w := w.(type) {
+	case B:
+		_, ok := m[B2F(w)]
+		return ok
+	case I:
+		_, ok := m[F(w)]
+		return ok
+	case F:
+		_, ok := m[w]
+		return ok
+	case AB:
+		r := make(AB, len(w))
+		for i, v := range w {
+			_, r[i] = m[B2F(v)]
+		}
+		return r
+	case AI:
+		r := make(AB, len(w))
+		for i, v := range w {
+			_, r[i] = m[F(v)]
+		}
+		return r
+	case AF:
+		r := make(AB, len(w))
+		for i, v := range w {
+			_, r[i] = m[v]
+		}
+		return r
+	default:
+		return make(AB, Length(w))
+	}
+}
+
+func memberOfAI(w O, x AI) O {
+	m := map[I]struct{}{}
+	for _, v := range x {
+		_, ok := m[v]
+		if !ok {
+			m[v] = struct{}{}
+			continue
+		}
+	}
+	switch w := w.(type) {
+	case B:
+		_, ok := m[B2I(w)]
+		return ok
+	case I:
+		_, ok := m[w]
+		return ok
+	case F:
+		if !isI(w) {
+			return false
+		}
+		_, ok := m[I(w)]
+		return ok
+	case AB:
+		r := make(AB, len(w))
+		for i, v := range w {
+			_, r[i] = m[B2I(v)]
+		}
+		return r
+	case AI:
+		r := make(AB, len(w))
+		for i, v := range w {
+			_, r[i] = m[v]
+		}
+		return r
+	case AF:
+		r := make(AB, len(w))
+		for i, v := range w {
+			if !isI(v) {
+				continue
+			}
+			_, r[i] = m[I(v)]
+		}
+		return r
+	default:
+		return make(AB, Length(w))
+	}
+}
+
+func memberOfAS(w O, x AS) O {
+	m := map[S]struct{}{}
+	for _, v := range x {
+		_, ok := m[v]
+		if !ok {
+			m[v] = struct{}{}
+			continue
+		}
+	}
+	switch w := w.(type) {
+	case S:
+		_, ok := m[w]
+		return ok
+	case AS:
+		r := make(AB, len(w))
+		for i, v := range w {
+			_, r[i] = m[v]
+		}
+		return r
+	default:
+		return make(AB, Length(w))
+	}
+}
+
+func memberOfAO(w O, x AO) O {
+	switch w := w.(type) {
+	case Array:
+		// NOTE: quadratic algorithm
+		r := make(AB, w.Len())
+		for i := 0; i < w.Len(); i++ {
+			for _, v := range x {
+				if match(w.At(i), v) {
+					r[i] = true
+					break
+				}
+			}
+		}
+		return r
+	default:
+		for _, v := range x {
+			if match(w, v) {
+				return true
+			}
+		}
+		return false
 	}
 }
 
@@ -395,9 +588,9 @@ func OccurrenceCount(x O) O {
 		}
 		return r
 	case AO:
-		// TODO: optimize common cases? (quadratic algorithm, worst
-		// case complexity could be improved by sorting or string
-		// hashing, but that would be quite bad for short lengths)
+		// NOTE: quadratic algorithm, worst case complexity could be
+		// improved by sorting or string hashing, but that would be
+		// quite bad for short lengths.
 		r := make(AI, len(x))
 	loop:
 		for i, v := range x {
