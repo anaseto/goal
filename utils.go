@@ -388,6 +388,21 @@ func minMax(x AI) (min, max I) {
 	return
 }
 
+func minMaxB(x AB) (min, max B) {
+	if len(x) == 0 {
+		return
+	}
+	min = true
+	max = false
+	for _, v := range x {
+		max, min = max || v, min && !v
+		if max && !min {
+			break
+		}
+	}
+	return
+}
+
 func canonical(x O) O {
 	switch y := x.(type) {
 	case AO:

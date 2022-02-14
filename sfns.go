@@ -1372,3 +1372,41 @@ func Windows(w, x O) O {
 		return badtype("↕ : x must be an array")
 	}
 }
+
+// Group returns ⊔x.
+func Group(x O) O {
+	if Length(x) == 0 {
+		return AO{}
+	}
+	switch x := x.(type) {
+	case AB:
+		_, max := minMaxB(x)
+		r := make(AO, B2I(max)+1)
+		for i := range r {
+			r[i] = AI{}
+		}
+		for i, v := range x {
+			j := B2I(v)
+			rj := r[j].(AI)
+			r[j] = append(rj, i)
+		}
+		return r
+	case AI:
+		min, max := minMax(x)
+		if min < 0 {
+			return badtype("⊔ : x must not contain negative values")
+		}
+		r := make(AO, max+1)
+		for i := range r {
+			r[i] = AI{}
+		}
+		for i, j := range x {
+			rj := r[j].(AI)
+			r[j] = append(rj, i)
+		}
+		return r
+		// TODO: AF and AO
+	default:
+		return badtype("⊔ : x must be a non negative integer array")
+	}
+}

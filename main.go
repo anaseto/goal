@@ -42,4 +42,6 @@ func main() {
 	fmt.Printf("MemberOf:%#v\n", MemberOf(5, AI{2, 3, 6}))
 	fmt.Printf("MemberOf:%#v\n", MemberOf(3, AO{2, 3, 6}))
 	fmt.Printf("MemberOf:%#v\n", MemberOf(AI{4, 3, 3, 3, 5, 2, 6}, AI{2, 3, 6}))
+	fmt.Printf("Group:%#v\n", Group(AI{0, 3, 2, 2, 0, 3}))
+	fmt.Printf("Group:%#v\n", Group(AB{false, true, false}))
 }
