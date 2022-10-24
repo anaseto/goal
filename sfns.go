@@ -1378,6 +1378,7 @@ func Group(x O) O {
 	if Length(x) == 0 {
 		return AO{}
 	}
+	// TODO: optimize allocations
 	switch x := x.(type) {
 	case AB:
 		_, max := minMaxB(x)

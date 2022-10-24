@@ -62,3 +62,42 @@
 # ⟨⟩
 # TODO:
 # Optimization: avoid unecessary cloning using in-place operations
+#
+# Alternative Primitives:
+# Glyph	Monadic			Dyadic
+# +			flip				Add
+# -			Negate			Subtract
+# ×			Sign				Multiply
+# ÷			?						Divide
+# ⌊			Floor				Minimum
+# ⌈			Ceiling			Maximum
+# ∧			XXXXXXXXX		And*
+# ∨			XXXXXXXXX		Or*
+# ¬			Not*				Span*
+# |			Absolute		Modulus
+# ≤									Less or Equal
+# <			Sort Up			Less Than
+# >			Sort Down		Greater Than
+# ≥									Greater Than or Equal to
+# =		  Classify?		Equals
+# ≠			Length?			Not Equals
+# ≡			XXXXXX			Match
+# ≢			XXXXXX			Not Match
+# ∾			Join*				Join to  (use ~ ?)
+# ⋈			Enlist*			Pair*
+# ↑			First				Take
+# ↓			Tail				Drop
+# ↕			Range				Windows*
+# »			Nudge*			Shift Before*
+# «			Nudge Back*	Shift After*
+# ⌽			Reverse			Rotate
+# /			Indices			Replicate
+# \			Indices Inv	Expand (APL)
+# ⍋			Grade Up		Bins Up
+# ⍒			Grade Down	Bins Down
+# ∊			Mark Firsts				Member of
+# ⍷			Deduplicate				Find
+# ⊒			Occurrence Count*	Progressive Index of*
+# ⊐			Classify				  Index Of
+# ⊔			Group Indices*		Group*
+# !			Error							Annotate?
