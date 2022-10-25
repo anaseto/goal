@@ -21,8 +21,6 @@ const (
 	EOF TokenType = iota
 	ERROR
 	ADVERB
-	COLON
-	DOUBLECOLON
 	IDENT
 	LEFTBRACE
 	LEFTBRACKET
@@ -41,7 +39,6 @@ var tokenStrings = [...]string{
 	EOF:          "EOF",
 	ERROR:        "ERROR",
 	ADVERB:       "ADVERB",
-	COLON:        ":",
 	IDENT:        "IDENT",
 	LEFTBRACE:    "{",
 	LEFTBRACKET:  "[",
@@ -126,14 +123,14 @@ func (s *Scanner) next() rune {
 		return eof
 	}
 	//fmt.Printf("[%c]", r)
-	if r == '\n' {
-		s.line++
-	}
 	return r
 }
 
 func (s *Scanner) emit(t TokenType) stateFn {
 	s.token = Token{t, s.line, s.buf.String()}
+	if t == NEWLINE {
+		s.line++
+	}
 	s.buf.Reset()
 	return nil
 }
@@ -150,10 +147,6 @@ func scanAny(s *Scanner) stateFn {
 	case '\'', '/', '\\':
 		s.buf.WriteRune(r)
 		return scanAdverb
-	case ':':
-		// TODO: actually, definitions should follow identifier
-		s.buf.WriteRune(r)
-		return scanColon
 	case '{':
 		return s.emit(LEFTBRACE)
 	case '[':
@@ -169,7 +162,7 @@ func scanAny(s *Scanner) stateFn {
 	case ';':
 		return s.emit(SEMICOLON)
 	case '+', '-', '*', '%', '!', '&', '|', '<', '>',
-		'=', '~', ',', '^', '#', '_', '$', '?', '@', '.':
+		'=', '~', ',', '^', '#', '_', '$', '?', '@', '.', ':':
 		s.buf.WriteRune(r)
 		return scanVerb
 	case '"':
@@ -227,18 +220,6 @@ func scanComment(s *Scanner) stateFn {
 		case '\n':
 			return s.emit(NEWLINE)
 		}
-	}
-}
-
-func scanColon(s *Scanner) stateFn {
-	r := s.peek()
-	switch r {
-	case ':':
-		s.buf.WriteRune(':')
-		s.next()
-		return s.emit(DOUBLECOLON)
-	default:
-		return s.emit(COLON)
 	}
 }
 
