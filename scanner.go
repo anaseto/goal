@@ -161,8 +161,8 @@ func scanAny(s *Scanner) stateFn {
 		return s.emit(RIGHTPAREN)
 	case ';':
 		return s.emit(SEMICOLON)
-	case '+', '-', '*', '%', '!', '&', '|', '<', '>',
-		'=', '~', ',', '^', '#', '_', '$', '?', '@', '.', ':':
+	case ':', '+', '-', '*', '%', '!', '&', '|', '<', '>',
+		'=', '~', ',', '^', '#', '_', '$', '?', '@', '.':
 		s.buf.WriteRune(r)
 		return scanVerb
 	case '"':
