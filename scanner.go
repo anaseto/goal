@@ -67,8 +67,7 @@ type Scanner struct {
 	wError  io.Writer     // writer for scanning errors
 	bReader *bufio.Reader // buffered reader
 	buf     bytes.Buffer  // buffer
-	col     int           // current column number
-	colprev int           // previous column number
+	pos     int           // current position in the input
 	line    int           // current line number
 	token   Token
 }
@@ -81,10 +80,10 @@ func (s *Scanner) Init() {
 	if s.wError == nil {
 		s.wError = os.Stderr
 	}
+	s.token = Token{Type: EOF, Line: s.line}
 }
 
 func (s *Scanner) Next() Token {
-	s.token = Token{Type: EOF, Line: s.line}
 	state := scanAny
 	for {
 		state = state(s)
@@ -95,22 +94,32 @@ func (s *Scanner) Next() Token {
 }
 
 func (s *Scanner) error(msg string) {
-	line := s.line
-	col := s.col
-	if s.ch == '\n' {
-		line--
-		col = s.prevcol
+	if s.wError == nil {
+		return
 	}
-	fmt.Fprintf(s.Werror, "scan error:%d:%d: %s\n", line, col, msg)
+	line := s.line
+	if s.token.Type == NEWLINE {
+		line--
+	}
+	fmt.Fprintf(s.wError, "scan error:%d: %s\n", line, msg)
 }
 
 const eof = -1
 
-func (s *Scanner) next() rune {
+func (s *Scanner) peek() rune {
 	r, _, err := s.bReader.ReadRune()
 	if err != nil {
+		return eof
+	}
+	s.bReader.UnreadRune()
+	return r
+}
+
+func (s *Scanner) next() rune {
+	r, sz, err := s.bReader.ReadRune()
+	s.pos += sz
+	if err != nil {
 		// end of file
-		//s.state = scanEnd
 		if err != io.EOF {
 			s.error(err.Error())
 		}
@@ -119,24 +128,21 @@ func (s *Scanner) next() rune {
 	//fmt.Printf("[%c]", r)
 	if r == '\n' {
 		s.line++
-		s.colprev = s.col
-		s.col = 0
-	} else {
-		s.col++
 	}
 	return r
 }
 
 func (s *Scanner) emit(t TokenType) stateFn {
-	s.token = Token{t, t.line, s.buf.String()}
+	s.token = Token{t, s.line, s.buf.String()}
 	s.buf.Reset()
 	return nil
 }
 
 func scanAny(s *Scanner) stateFn {
-	switch r := s.next(); r {
+	r := s.next()
+	switch r {
 	case eof:
-		return nil
+		return s.emit(EOF)
 	case '\n':
 		return s.emit(NEWLINE)
 	case ' ', '\t':
@@ -169,27 +175,44 @@ func scanAny(s *Scanner) stateFn {
 	case '"':
 		return scanString
 	}
-	//switch {
-	//case
-	//}
-	// TODO: identifiers, numbers
+	switch {
+	case isDigit(r):
+		s.buf.WriteRune(r)
+		return scanNumber
+	case isAlpha(r):
+		s.buf.WriteRune(r)
+		return scanIdent
+	default:
+		s.buf.WriteRune(r)
+		return s.emit(ERROR)
+	}
 	return nil
+}
+
+func isDigit(r rune) bool {
+	return r >= '0' && r <= '9'
+}
+
+func isAlpha(r rune) bool {
+	return r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z'
+}
+
+func isAlphaNum(r rune) bool {
+	return isAlpha(r) || isDigit(r)
 }
 
 func scanSpace(s *Scanner) stateFn {
 	for {
-		r, _, err := s.bReader.ReadRune()
+		r := s.peek()
 		switch {
-		case err != nil:
-			s.bReader.UnreadRune()
+		case r == eof:
 			return scanAny
 		case r == '/':
-			s.col++
+			s.next()
 			return scanComment
 		case r == ' ' || r == '\t':
-			s.col++
+			s.next()
 		default:
-			s.bReader.UnreadRune()
 			return scanAny
 		}
 	}
@@ -197,58 +220,86 @@ func scanSpace(s *Scanner) stateFn {
 
 func scanComment(s *Scanner) stateFn {
 	for {
-		r, _, err := s.bReader.ReadRune()
-		if err != nil || r == '\n' {
-			s.bReader.UnreadRune()
-			return scanAny
+		r := s.next()
+		switch r {
+		case eof:
+			return s.emit(EOF)
+		case '\n':
+			return s.emit(NEWLINE)
 		}
-		s.col++
 	}
 }
 
 func scanColon(s *Scanner) stateFn {
-	r, _, err := s.bReader.ReadRune()
-	if err != nil || r != ':' {
-		s.bReader.UnreadRune()
+	r := s.peek()
+	switch r {
+	case ':':
+		s.buf.WriteRune(':')
+		s.next()
+		return s.emit(DOUBLECOLON)
+	default:
 		return s.emit(COLON)
 	}
-	s.buf.WriteRune(':')
-	return s.emit(DOUBLECOLON)
 }
 
 func scanAdverb(s *Scanner) stateFn {
-	r, _, err := s.bReader.ReadRune()
-	if err != nil || r != ':' {
-		s.bReader.UnreadRune()
-	} else {
+	r := s.peek()
+	if r == ':' {
 		s.buf.WriteRune(':')
+		s.next()
 	}
 	return s.emit(ADVERB)
 }
 
 func scanVerb(s *Scanner) stateFn {
-	r, _, err := s.bReader.ReadRune()
-	if err != nil || r != ':' {
-		s.bReader.UnreadRune()
-	} else {
+	r := s.peek()
+	if r == ':' {
 		s.buf.WriteRune(':')
+		s.next()
 	}
 	return s.emit(VERB)
 }
 
 func scanString(s *Scanner) stateFn {
-	// TODO: improve
 	for {
-		r, _, err := s.bReader.ReadRune()
-		switch {
-		case err != nil:
-			s.bReader.UnreadRune()
-			return scanAny
-		case r == '"':
+		r := s.next()
+		switch r {
+		case eof:
+			return s.emit(ERROR)
+		case '"':
 			return s.emit(STRING)
 		default:
-			s.col++
 			s.buf.WriteRune(r)
+		}
+	}
+}
+
+func scanNumber(s *Scanner) stateFn {
+	for {
+		r := s.peek()
+		switch {
+		case r == eof:
+			return s.emit(NUMBER)
+		case !isDigit(r):
+			return s.emit(NUMBER)
+		default:
+			s.buf.WriteRune(r)
+			s.next()
+		}
+	}
+}
+
+func scanIdent(s *Scanner) stateFn {
+	for {
+		r := s.peek()
+		switch {
+		case r == eof:
+			return s.emit(IDENT)
+		case !isAlphaNum(r):
+			return s.emit(IDENT)
+		default:
+			s.buf.WriteRune(r)
+			s.next()
 		}
 	}
 }

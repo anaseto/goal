@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
 func main() {
@@ -44,4 +45,15 @@ func main() {
 	fmt.Printf("MemberOf:%#v\n", MemberOf(AI{4, 3, 3, 3, 5, 2, 6}, AI{2, 3, 6}))
 	fmt.Printf("Group:%#v\n", Group(AI{0, 3, 2, 2, 0, 3}))
 	fmt.Printf("Group:%#v\n", Group(AB{false, true, false}))
+
+	sr := strings.NewReader("%!:+/\n&/: /comment\nident 23 \"string\"")
+	sc := &Scanner{reader: sr}
+	sc.Init()
+	for tk := sc.Next(); tk.Type != EOF; tk = sc.Next() {
+		fmt.Printf("%v", tk)
+		if tk.Type == NEWLINE {
+			fmt.Print("\n")
+		}
+	}
+	fmt.Print("\n")
 }
