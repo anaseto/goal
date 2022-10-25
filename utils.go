@@ -179,12 +179,6 @@ func toArray(x O) O {
 		return AS{x}
 	case E:
 		return AO{x}
-	case M:
-		return AO{x}
-	case D:
-		return AO{x}
-	case V:
-		return AO{x}
 	default:
 		return x
 	}

@@ -59,7 +59,7 @@ func (t TokenType) String() string {
 
 // Scanner represents the state of the scanner.
 type Scanner struct {
-	ctx     *Context
+	ctx     *Context      // unused (for now)
 	reader  io.Reader     // reader to scan from
 	wError  io.Writer     // writer for scanning errors
 	bReader *bufio.Reader // buffered reader
