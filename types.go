@@ -7,75 +7,68 @@ type I = int       // I represents integers.
 type S = string    // S represents (immutable) strings of bytes.
 type E = error     // E represents errors (TODO: think about it)
 
-// Q represents a verb composition.
-type Q struct {
-	Verbs []O
-}
-
-// R represents a derived verb.
-type R struct {
-}
-
-type U int // U represents monadic verbs.
+// MonadicVerb represents monadic (unary) verbs.
+type MonadicVerb int
 
 const (
-	USelf     U = iota // ::
-	UFlip              // +:
-	UNegate            // -:
-	UFirst             // *:
-	UClassify          // %: (classify instead of sqrt? or abs?)
-	UEnum              // !:
-	UWhere             // &:
-	UReverse           // |:
-	UAscend            // <:
-	UDescend           // >:
-	UGroup             // =:
-	UNot               // ~:
-	UEnlist            // ,:
-	UNull              // ^: (maybe change)
-	ULength            // #:
-	UFloor             // _:
-	UString            // $:
-	UUniq              // ?:
-	UType              // @:
-	UEval              // .:
+	MSelf     MonadicVerb = iota // ::
+	MFlip                        // +:
+	MNegate                      // -:
+	MFirst                       // *:
+	MClassify                    // %: (classify instead of sqrt? or abs?)
+	MEnum                        // !:
+	MWhere                       // &:
+	MReverse                     // |:
+	MAscend                      // <:
+	MDescend                     // >:
+	MGroup                       // =:
+	MNot                         // ~:
+	MEnlist                      // ,:
+	MNull                        // ^: (maybe change)
+	MLength                      // #:
+	MFloor                       // _:
+	MString                      // $:
+	MUniq                        // ?:
+	MType                        // @:
+	MEval                        // .:
 )
 
-type V int // dyadic verbs
+// DyadicVerb represents dyadic (binary) verbs.
+type DyadicVerb int
 
 const (
-	VRight    V = iota // :
-	VAdd               // +
-	VSubtract          // -
-	VMultiply          // *
-	VDivide            // %
-	VMod               // !
-	VAnd               // &
-	VOr                // |
-	VLess              // <
-	VMore              // >
-	VEqual             // =
-	VMatch             // ~
-	VConcat            // ,
-	VWithout           // ^
-	VTake              // #
-	VDrop              // _
-	VCast              // $
-	VFind              // ?
-	VApply             // @
-	VApplyN            // .
+	DRight    V = iota // :
+	DAdd               // +
+	DSubtract          // -
+	DMultiply          // *
+	DDivide            // %
+	DMod               // !
+	DAnd               // &
+	DOr                // |
+	DLess              // <
+	DMore              // >
+	DEqual             // =
+	DMatch             // ~
+	DConcat            // ,
+	DWithout           // ^
+	DTake              // #
+	DDrop              // _
+	DCast              // $
+	DFind              // ?
+	DApply             // @
+	DApplyN            // .
 )
 
-// W represents adverbs.
-type W int
+// Adverb represents verb modifiers.
+type Adverb int
 
 const (
-	WEach      W = iota // '
-	WEachPrior          // ':
-	WFold               // /
-	WScan               // \
-	WEachRight          // /:
-	WEachLeft           // \:
+	AEach      W = iota // '
+	AEachPrior          // ':
+	AFold               // /
+	AScan               // \
+	AEachRight          // /:
+	AEachLeft           // \:
 )
 
 type AO []O // generic array
