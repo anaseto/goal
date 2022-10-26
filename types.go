@@ -37,38 +37,38 @@ const (
 type DyadicVerb int
 
 const (
-	DRight    V = iota // :
-	DAdd               // +
-	DSubtract          // -
-	DMultiply          // *
-	DDivide            // %
-	DMod               // !
-	DAnd               // &
-	DOr                // |
-	DLess              // <
-	DMore              // >
-	DEqual             // =
-	DMatch             // ~
-	DConcat            // ,
-	DWithout           // ^
-	DTake              // #
-	DDrop              // _
-	DCast              // $
-	DFind              // ?
-	DApply             // @
-	DApplyN            // .
+	DRight    DyadicVerb = iota // :
+	DAdd                        // +
+	DSubtract                   // -
+	DMultiply                   // *
+	DDivide                     // %
+	DMod                        // !
+	DAnd                        // &
+	DOr                         // |
+	DLess                       // <
+	DMore                       // >
+	DEqual                      // =
+	DMatch                      // ~
+	DConcat                     // ,
+	DWithout                    // ^
+	DTake                       // #
+	DDrop                       // _
+	DCast                       // $
+	DFind                       // ?
+	DApply                      // @
+	DApplyN                     // .
 )
 
 // Adverb represents verb modifiers.
 type Adverb int
 
 const (
-	AEach      W = iota // '
-	AEachPrior          // ':
-	AFold               // /
-	AScan               // \
-	AEachRight          // /:
-	AEachLeft           // \:
+	AEach      Adverb = iota // '
+	AEachPrior               // ':
+	AFold                    // /
+	AScan                    // \
+	AEachRight               // /:
+	AEachLeft                // \:
 )
 
 type AO []O // generic array
