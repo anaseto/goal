@@ -66,6 +66,7 @@ type Scanner struct {
 	buf     bytes.Buffer  // buffer
 	pos     int           // current position in the input
 	line    int           // current line number
+	start   bool	      // at line start
 	token   Token
 }
 
@@ -130,6 +131,9 @@ func (s *Scanner) emit(t TokenType) stateFn {
 	s.token = Token{t, s.line, s.buf.String()}
 	if t == NEWLINE {
 		s.line++
+		s.start = true
+	} else {
+		s.start = false
 	}
 	s.buf.Reset()
 	return nil
@@ -144,7 +148,13 @@ func scanAny(s *Scanner) stateFn {
 		return s.emit(NEWLINE)
 	case ' ', '\t':
 		return scanSpace
-	case '\'', '/', '\\':
+	case '/':
+		if s.start {
+			return scanComment
+		}
+		s.buf.WriteRune(r)
+		return scanAdverb
+	case '\'', '\\':
 		s.buf.WriteRune(r)
 		return scanAdverb
 	case '{':

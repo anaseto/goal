@@ -58,8 +58,8 @@ const (
 	ppVERB
 )
 
-type ppBracket []ppExpr
 type ppBrace []ppExpr
+type ppBracket []ppExpr
 type ppParen []ppExpr
 type ppStrand []ppToken // for stranding, like 1 23 456
 
