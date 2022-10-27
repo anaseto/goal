@@ -123,6 +123,12 @@ func (s *Scanner) next() rune {
 		}
 		return eof
 	}
+	if r == '\n' {
+		s.line++
+		s.start = true
+	} else {
+		s.start = false
+	}
 	//fmt.Printf("[%c]", r)
 	return r
 }
@@ -130,10 +136,7 @@ func (s *Scanner) next() rune {
 func (s *Scanner) emit(t TokenType) stateFn {
 	s.token = Token{t, s.line, s.buf.String()}
 	if t == NEWLINE {
-		s.line++
-		s.start = true
-	} else {
-		s.start = false
+		s.token.Line--
 	}
 	s.buf.Reset()
 	return nil
@@ -150,7 +153,7 @@ func scanAny(s *Scanner) stateFn {
 		return scanSpace
 	case '/':
 		if s.start {
-			return scanComment
+			return scanCommentLine
 		}
 		s.buf.WriteRune(r)
 		return scanAdverb
@@ -231,6 +234,29 @@ func scanComment(s *Scanner) stateFn {
 			return s.emit(EOF)
 		case '\n':
 			return s.emit(NEWLINE)
+		}
+	}
+}
+
+func scanCommentLine(s *Scanner) stateFn {
+	r := s.peek()
+	if r == '\n' {
+		return scanMultiLineComment
+	}
+	return scanComment
+}
+
+func scanMultiLineComment(s *Scanner) stateFn {
+	for {
+		r := s.next()
+		switch {
+		case r == eof:
+			return s.emit(EOF)
+		case r == '\\' && s.start:
+			r := s.next()
+			if r == '\n' {
+				return scanAny
+			}
 		}
 	}
 }
