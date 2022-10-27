@@ -36,3 +36,18 @@ func (e astInt) expr()    {}
 func (e astString) expr() {}
 func (e astUnary) expr()  {}
 func (e astBinary) expr() {}
+
+type ppExpr interface {
+	ppexpr()
+}
+
+type ppBracket []ppExpr
+type ppBrace []ppExpr
+type ppParen []ppExpr
+type ppStrand []Token // for stranding, like 1 23 456
+
+func (pps ppBracket) ppexpr() {}
+func (pps ppBrace) ppexpr()   {}
+func (pps ppParen) ppexpr()   {}
+func (pps ppStrand) ppexpr()  {}
+func (t Token) ppexpr()       {}

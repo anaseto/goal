@@ -1,8 +1,8 @@
 package main
 
 import (
-	"io"
 	"fmt"
+	"io"
 )
 
 type Parser struct {
@@ -11,8 +11,9 @@ type Parser struct {
 	wError io.Writer // where non-fatal error messages go (unused for now)
 	s      *Scanner
 	token  Token
-	expr Expr // building expression
-	err error
+	pToken Token
+	peeked bool
+	err    error
 }
 
 // ParseWithReader parses a frundis source from a reader and returns a list of
@@ -21,70 +22,66 @@ func (p *Parser) ParseWithReader(reader io.Reader) error {
 	s := &Scanner{reader: reader, wError: p.wError}
 	s.Init()
 	p.s = s
-	_, err := p.parseExpr()
+	// TODO
+	expr, err := p.ppExpr()
 	if err != nil {
 		return err
 	}
+	fmt.Printf("%v", expr)
 	return nil
 }
 
-func (p *Parser) next() {
+func (p *Parser) peek() Token {
+	if p.peeked {
+		return p.pToken
+	}
+	p.pToken = p.s.Next()
+	p.peeked = true
+	return p.pToken
+}
+
+func (p *Parser) next() Token {
+	if p.peeked {
+		p.token = p.pToken
+		p.peeked = false
+		return p.token
+	}
 	p.token = p.s.Next()
+	return p.token
 }
 
-type pStateFn func(*Parser) (pStateFn, error)
+func (p *Parser) errorf(format string, a ...interface{}) error {
+	return fmt.Errorf("goal:%d:"+format, append([]interface{}{p.token.Line}, a...))
+}
 
-func (p *Parser) parseExpr() (Expr, error) {
-	state := parseAny
-	var err error
+func (p *Parser) ppExprs() ([]ppExpr, error) {
+	pps := []ppExpr{}
 	for {
-		state, err = state(p)
-		if state == nil || err != nil {
-			return p.expr, err
-		}
-	}
-}
-
-func parseAny(p *Parser) (pStateFn, error) {
-	p.next()
-	switch p.token.Type {
-	case EOF:
-		return nil, nil
-	case ERROR:
-		return nil, fmt.Errorf("token:%d:%s", p.token.Line, p.token.Text)
-	case NUMBER:
-		err := p.parseNum()
+		ppe, err := p.ppExpr()
 		if err != nil {
-			return nil, err
+			return pps, err
 		}
-		return parseNounExpr, nil
-	case SEMICOLON:
-		if p.expr != nil {
-			p.expr = nil
+		tok, ok := ppe.(Token)
+		if ok && (tok.Type == EOF || tok.Type == NEWLINE || tok.Type == SEMICOLON) {
+			return pps, nil
 		}
-		return nil, nil
-	default:
-		err := fmt.Errorf("unexpected token: %v", p.token)
-		return nil, err
+		pps = append(pps, ppe)
 	}
+	return pps, nil
 }
 
-func (p *Parser) parseNum() error {
-	n := 0
-	_, err := fmt.Sscanf(p.token.Text, "%v", &n) 
-	if err != nil {
-		return fmt.Errorf("token:%d:%s: %s", p.token.Line, p.token.Text, err)
-	}
-	p.expr = astInt{value: n}
-	return nil
-}
-
-func parseNounExpr(p *Parser) (pStateFn, error) {
-	p.next()
-	switch p.token.Type {
-	case VERB:
-		//vt := p.token
-		//p.next()
+func (p *Parser) ppExpr() (ppExpr, error) {
+	switch tok := p.next(); tok.Type {
+	case EOF:
+		return tok, nil
+	case ERROR:
+		return nil, p.errorf("invalid token:%s:%s", tok.Type, tok.Text)
+	case ADVERB:
+		return nil, p.errorf("adverb:%s:syntax:should follow verb", tok.Text)
+	case IDENT:
+		return tok, nil
+	case LEFTBRACE:
+		//pps := []ppExpr{}
 	}
 	return nil, nil
 }
