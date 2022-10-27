@@ -51,7 +51,7 @@ func (p *Parser) next() Token {
 }
 
 func (p *Parser) errorf(format string, a ...interface{}) error {
-	return fmt.Errorf("goal:%d:"+format, append([]interface{}{p.token.Line}, a...))
+	return fmt.Errorf("error:%d:"+format, append([]interface{}{p.token.Line}, a...))
 }
 
 func (p *Parser) ppExprs() ([]ppExpr, error) {
@@ -61,8 +61,8 @@ func (p *Parser) ppExprs() ([]ppExpr, error) {
 		if err != nil {
 			return pps, err
 		}
-		tok, ok := ppe.(Token)
-		if ok && (tok.Type == EOF || tok.Type == NEWLINE || tok.Type == SEMICOLON) {
+		tok, ok := ppe.(ppToken)
+		if ok && (tok.Type == ppSEP) {
 			return pps, nil
 		}
 		pps = append(pps, ppe)
@@ -72,16 +72,44 @@ func (p *Parser) ppExprs() ([]ppExpr, error) {
 
 func (p *Parser) ppExpr() (ppExpr, error) {
 	switch tok := p.next(); tok.Type {
-	case EOF:
-		return tok, nil
+	case EOF, NEWLINE, SEMICOLON:
+		return ppToken{Type: ppSEP, Line: tok.Line}, nil
 	case ERROR:
 		return nil, p.errorf("invalid token:%s:%s", tok.Type, tok.Text)
 	case ADVERB:
-		return nil, p.errorf("adverb:%s:syntax:should follow verb", tok.Text)
+		return nil, p.errorf("syntax:adverb %s at start of expression", tok.Text)
 	case IDENT:
-		return tok, nil
+		return ppToken{Type: ppIDENT, Line: tok.Line, Text: tok.Text}, nil
 	case LEFTBRACE:
-		//pps := []ppExpr{}
+		return p.ppExprBrace()
+	case LEFTBRACKET:
+		return p.ppExprBracket()
+	case LEFTPAREN:
+		return p.ppExprParen()
+	case NUMBER, STRING:
+		return p.ppExprStrand()
+	case RIGHTBRACE, RIGHTBRACKET, RIGHTPAREN:
+		return nil, p.errorf("syntax:unexpected %s at start of expression", tok.Text)
+	case VERB:
+		return ppToken{Type: ppVERB, Line: tok.Line, Text: tok.Text}, nil
+	default:
+		// should not happen
+		return nil, p.errorf("invalid token type:%s:%s", tok.Type, tok.Text)
 	}
+}
+
+func (p *Parser) ppExprBrace() (ppExpr, error) {
+	return nil, nil
+}
+
+func (p *Parser) ppExprBracket() (ppExpr, error) {
+	return nil, nil
+}
+
+func (p *Parser) ppExprParen() (ppExpr, error) {
+	return nil, nil
+}
+
+func (p *Parser) ppExprStrand() (ppExpr, error) {
 	return nil, nil
 }

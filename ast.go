@@ -41,13 +41,30 @@ type ppExpr interface {
 	ppexpr()
 }
 
+type ppToken struct {
+	Type ppTokenType
+	Line int
+	Text string
+}
+
+type ppTokenType int
+
+const (
+	ppSEP ppTokenType = iota
+	ppADVERB
+	ppIDENT
+	ppNUMBER
+	ppSTRING
+	ppVERB
+)
+
 type ppBracket []ppExpr
 type ppBrace []ppExpr
 type ppParen []ppExpr
-type ppStrand []Token // for stranding, like 1 23 456
+type ppStrand []ppToken // for stranding, like 1 23 456
 
 func (pps ppBracket) ppexpr() {}
 func (pps ppBrace) ppexpr()   {}
 func (pps ppParen) ppexpr()   {}
 func (pps ppStrand) ppexpr()  {}
-func (t Token) ppexpr()       {}
+func (t ppToken) ppexpr()       {}
