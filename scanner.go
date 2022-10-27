@@ -260,10 +260,10 @@ func scanString(s *Scanner) stateFn {
 func scanSymbolString(s *Scanner) stateFn {
 	for {
 		r := s.peek()
-		switch r {
-		case eof:
+		switch {
+		case r == eof:
 			return s.emit(ERROR)
-		case !isAlpha(r) && s.buf.Len() == 0 || !isAlphaNum(r):
+		case !isAlpha(r) && (s.buf.Len() == 0) || !isAlphaNum(r):
 			return s.emit(STRING)
 		default:
 			s.next()
