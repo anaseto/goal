@@ -12,6 +12,7 @@ type Parser struct {
 	s      *Scanner
 	token  Token
 	pToken Token
+	depth []Token
 	peeked bool
 	err    error
 }
@@ -70,6 +71,19 @@ func (p *Parser) ppExprs() ([]ppExpr, error) {
 	return pps, nil
 }
 
+func closeToken(op TokenType) TokenType {
+	switch op {
+	case LEFTBRACE:
+		return RIGHTBRACE
+	case LEFTBRACKET:
+		return RIGHTBRACKET
+	case LEFTPAREN:
+		return RIGHTPAREN
+	default:
+		panic(fmt.Sprintf("not an opening token:%s", op.String()))
+	}
+}
+
 func (p *Parser) ppExpr() (ppExpr, error) {
 	switch tok := p.next(); tok.Type {
 	case EOF, NEWLINE, SEMICOLON:
@@ -80,16 +94,21 @@ func (p *Parser) ppExpr() (ppExpr, error) {
 		return nil, p.errorf("syntax:adverb %s at start of expression", tok.Text)
 	case IDENT:
 		return ppToken{Type: ppIDENT, Line: tok.Line, Text: tok.Text}, nil
-	case LEFTBRACE:
-		return p.ppExprBrace()
-	case LEFTBRACKET:
-		return p.ppExprBracket()
-	case LEFTPAREN:
-		return p.ppExprParen()
+	case LEFTBRACE, LEFTBRACKET, LEFTPAREN:
+		return p.ppExprBlock()
 	case NUMBER, STRING:
 		return p.ppExprStrand()
 	case RIGHTBRACE, RIGHTBRACKET, RIGHTPAREN:
-		return nil, p.errorf("syntax:unexpected %s at start of expression", tok.Text)
+		if len(p.depth) == 0 {
+			return nil, p.errorf("syntax:unexpected %s without opening matching pair", tok.Text)
+		}
+		opTok := p.depth[len(p.depth)-1]
+		clTokt := closeToken(opTok.Type)
+		if clTokt != tok.Type {
+			return nil, p.errorf("syntax:unexpected %s without closing previous %s at %d", tok.Text, opTok.Type.String(), opTok.Line)
+		}
+		p.depth = p.depth[:len(p.depth)-1]
+		return ppToken{Type: ppCLOSE, Line: tok.Line}, nil
 	case VERB:
 		return ppToken{Type: ppVERB, Line: tok.Line, Text: tok.Text}, nil
 	default:
@@ -98,16 +117,28 @@ func (p *Parser) ppExpr() (ppExpr, error) {
 	}
 }
 
-func (p *Parser) ppExprBrace() (ppExpr, error) {
-	return nil, nil
-}
-
-func (p *Parser) ppExprBracket() (ppExpr, error) {
-	return nil, nil
-}
-
-func (p *Parser) ppExprParen() (ppExpr, error) {
-	return nil, nil
+func (p *Parser) ppExprBlock() (ppExpr, error) {
+	p.depth = append(p.depth, p.token)
+	ppb := ppBlock{}
+	switch p.token.Type {
+	case LEFTBRACE:
+		ppb.Type = ppBRACE
+	case LEFTBRACKET:
+		ppb.Type = ppBRACKET
+	case LEFTPAREN:
+		ppb.Type = ppPAREN
+	}
+	for {
+		ppe, err := p.ppExpr()
+		if err != nil {
+			return ppb, err
+		}
+		tok, ok := ppe.(ppToken)
+		if ok && (tok.Type == ppCLOSE) {
+			return ppb, nil
+		}
+		ppb.ppexprs = append(ppb.ppexprs, ppe)
+	}
 }
 
 func (p *Parser) ppExprStrand() (ppExpr, error) {

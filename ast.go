@@ -51,6 +51,7 @@ type ppTokenType int
 
 const (
 	ppSEP ppTokenType = iota
+	ppCLOSE
 	ppADVERB
 	ppIDENT
 	ppNUMBER
@@ -58,13 +59,21 @@ const (
 	ppVERB
 )
 
-type ppBrace []ppExpr
-type ppBracket []ppExpr
-type ppParen []ppExpr
+type ppBlock struct {
+	Type ppBlockType
+	ppexprs []ppExpr
+}
+
+type ppBlockType int
+
+const (
+	ppBRACE ppBlockType = iota
+	ppBRACKET
+	ppPAREN
+)
+
 type ppStrand []ppToken // for stranding, like 1 23 456
 
-func (pps ppBracket) ppexpr() {}
-func (pps ppBrace) ppexpr()   {}
-func (pps ppParen) ppexpr()   {}
+func (ppb ppBlock) ppexpr()   {}
 func (pps ppStrand) ppexpr()  {}
 func (t ppToken) ppexpr()       {}
