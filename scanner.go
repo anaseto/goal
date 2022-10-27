@@ -167,6 +167,8 @@ func scanAny(s *Scanner) stateFn {
 		return scanVerb
 	case '"':
 		return scanString
+	case '`':
+		return scanSymbolString
 	}
 	switch {
 	case isDigit(r):
@@ -250,6 +252,21 @@ func scanString(s *Scanner) stateFn {
 		case '"':
 			return s.emit(STRING)
 		default:
+			s.buf.WriteRune(r)
+		}
+	}
+}
+
+func scanSymbolString(s *Scanner) stateFn {
+	for {
+		r := s.peek()
+		switch r {
+		case eof:
+			return s.emit(ERROR)
+		case !isAlpha(r) && s.buf.Len() == 0 || !isAlphaNum(r):
+			return s.emit(STRING)
+		default:
+			s.next()
 			s.buf.WriteRune(r)
 		}
 	}
