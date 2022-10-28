@@ -170,13 +170,13 @@ func cloneShallow(x O) O {
 func toArray(x O) O {
 	switch x := x.(type) {
 	case B:
-		return AB{x}
+		return AB{bool(x)}
 	case F:
-		return AF{x}
+		return AF{float64(x)}
 	case I:
-		return AI{x}
+		return AI{int(x)}
 	case S:
-		return AS{x}
+		return AS{string(x)}
 	case E:
 		return AO{x}
 	default:
@@ -226,7 +226,7 @@ func growArray(x O, n I) O {
 func isFalse(x O) bool {
 	switch x := x.(type) {
 	case B:
-		return x
+		return bool(x)
 	case F:
 		return x == 0
 	case I:
@@ -389,7 +389,7 @@ func minMaxB(x AB) (min, max B) {
 	min = true
 	max = false
 	for _, v := range x {
-		max, min = max || v, min && !v
+		max, min = max || B(v), min && !B(v)
 		if max && !min {
 			break
 		}
@@ -405,25 +405,25 @@ func canonical(x O) O {
 		case tB:
 			r := make(AB, len(y))
 			for i, v := range y {
-				r[i] = v.(B)
+				r[i] = bool(v.(B))
 			}
 			return r
 		case tI:
 			r := make(AI, len(y))
 			for i, v := range y {
-				r[i] = v.(I)
+				r[i] = int(v.(I))
 			}
 			return r
 		case tF:
 			r := make(AF, len(y))
 			for i, v := range y {
-				r[i] = v.(F)
+				r[i] = float64(v.(F))
 			}
 			return r
 		case tS:
 			r := make(AS, len(y))
 			for i, v := range y {
-				r[i] = v.(S)
+				r[i] = string(v.(S))
 			}
 			return r
 		case tO:

@@ -110,7 +110,7 @@ func Indices(x O) O {
 	case AB:
 		n := 0
 		for _, v := range x {
-			n += B2I(v)
+			n += B2I(B(v))
 		}
 		r := make(AI, 0, n)
 		for i, v := range x {
@@ -243,7 +243,7 @@ func repeat(x O, n int) O {
 	case B:
 		r := make(AB, n)
 		for i := range r {
-			r[i] = x
+			r[i] = bool(x)
 		}
 		return r
 	case F:
@@ -276,7 +276,7 @@ func repeat(x O, n int) O {
 func repeatAB(w AB, x O) O {
 	n := 0
 	for _, v := range w {
-		n += B2I(v)
+		n += B2I(B(v))
 	}
 	switch x := x.(type) {
 	case AB:

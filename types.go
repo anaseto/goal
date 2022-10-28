@@ -1,7 +1,7 @@
 package main
 
 type O interface{} // O represents any kind of value.
-type B = bool      // B represents booleans (0 and 1 but less memory)
+type B bool        // B represents booleans (0 and 1 but less memory)
 type F = float64   // F represents real numbers.
 type I = int       // I represents integers.
 type S = string    // S represents (immutable) strings of bytes.
@@ -42,11 +42,11 @@ const (
 	AScan               // \
 )
 
-type AO []O // generic array
-type AB []B // boolean array
-type AF []F // real array
-type AI []I // integer array (TODO: optimization: add Range type)
-type AS []S // string array
+type AO []O    // generic array
+type AB []bool // boolean array
+type AF []F    // real array
+type AI []I    // integer array (TODO: optimization: add Range type)
+type AS []S    // string array
 
 // Array interface is satisfied by the different kind of supported arrays.
 // Typical implementation is given in comments.

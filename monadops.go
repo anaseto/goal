@@ -17,7 +17,7 @@ func Negate(x O) O {
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = -B2I(x[i])
+			r[i] = -B2I(B(x[i]))
 		}
 		return r
 	case AF:
@@ -115,7 +115,7 @@ func Reciprocal(x O) O {
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = divide(1, B2F(x[i]))
+			r[i] = divide(1, B2F(B(x[i])))
 		}
 		return r
 	case AF:

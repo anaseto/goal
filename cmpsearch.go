@@ -126,7 +126,7 @@ func matchAB(w, x AB) bool {
 
 func matchABAI(w AB, x AI) bool {
 	for i, v := range x {
-		if v != B2I(w[i]) {
+		if v != B2I(B(w[i])) {
 			return false
 		}
 	}
@@ -135,7 +135,7 @@ func matchABAI(w AB, x AI) bool {
 
 func matchABAF(w AB, x AF) bool {
 	for i, v := range x {
-		if v != B2F(w[i]) {
+		if v != B2F(B(w[i])) {
 			return false
 		}
 	}
@@ -410,7 +410,7 @@ func memberOfAF(w O, x AF) O {
 	case AB:
 		r := make(AB, len(w))
 		for i, v := range w {
-			_, r[i] = m[B2F(v)]
+			_, r[i] = m[B2F(B(v))]
 		}
 		return r
 	case AI:
@@ -455,7 +455,7 @@ func memberOfAI(w O, x AI) O {
 	case AB:
 		r := make(AB, len(w))
 		for i, v := range w {
-			_, r[i] = m[B2I(v)]
+			_, r[i] = m[B2I(B(v))]
 		}
 		return r
 	case AI:

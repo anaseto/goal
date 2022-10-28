@@ -2,7 +2,7 @@ package main
 
 import "sort"
 
-type ABUp []B
+type ABUp []bool
 
 func (bs ABUp) Len() int {
 	return len(bs)
@@ -73,7 +73,7 @@ func less(w, x O) bool {
 func lessB(w B, x O) bool {
 	switch x := x.(type) {
 	case B:
-		return !w && x
+		return bool(!w && x)
 	case F:
 		return B2F(w) < x
 	case I:
@@ -82,7 +82,7 @@ func lessB(w B, x O) bool {
 		if len(x) == 0 {
 			return false
 		}
-		return !w && x[0] || w == x[0] && len(x) > 1
+		return bool(!w && B(x[0]) || w == B(x[0]) && len(x) > 1)
 	case AF:
 		if len(x) == 0 {
 			return false
@@ -115,7 +115,7 @@ func lessF(w F, x O) bool {
 		if len(x) == 0 {
 			return false
 		}
-		return w < B2F(x[0]) || w == B2F(x[0]) && len(x) > 1
+		return w < B2F(B(x[0])) || w == B2F(B(x[0])) && len(x) > 1
 	case AF:
 		if len(x) == 0 {
 			return false
@@ -148,7 +148,7 @@ func lessI(w I, x O) bool {
 		if len(x) == 0 {
 			return false
 		}
-		return w < B2I(x[0]) || w == B2I(x[0]) && len(x) > 1
+		return w < B2I(B(x[0])) || w == B2I(B(x[0])) && len(x) > 1
 	case AF:
 		if len(x) == 0 {
 			return false
@@ -205,14 +205,14 @@ func lessAB(w AB, x O) bool {
 		return len(w) < len(x)
 	case AF:
 		for i := 0; i < len(w) && i < len(x); i++ {
-			if B2F(w[i]) > x[i] {
+			if B2F(B(w[i])) > x[i] {
 				return false
 			}
 		}
 		return len(w) < len(x)
 	case AI:
 		for i := 0; i < len(w) && i < len(x); i++ {
-			if B2I(w[i]) > x[i] {
+			if B2I(B(w[i])) > x[i] {
 				return false
 			}
 		}
@@ -239,7 +239,7 @@ func lessAI(w AI, x O) bool {
 		return !lessI(x, w)
 	case AB:
 		for i := 0; i < len(w) && i < len(x); i++ {
-			if w[i] > B2I(x[i]) {
+			if w[i] > B2I(B(x[i])) {
 				return false
 			}
 		}
@@ -280,7 +280,7 @@ func lessAF(w AF, x O) bool {
 		return !lessI(x, w)
 	case AB:
 		for i := 0; i < len(w) && i < len(x); i++ {
-			if w[i] > B2F(x[i]) {
+			if w[i] > B2F(B(x[i])) {
 				return false
 			}
 		}

@@ -71,25 +71,25 @@ func EqualBO(w B, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w == x[i]
+			r[i] = bool(B(w) == B(x[i]))
 		}
 		return r
 	case AF:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2F(w) == x[i]
+			r[i] = bool(B2F(B(w)) == F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2I(w) == x[i]
+			r[i] = bool(B2I(B(w)) == I(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := EqualBO(w, x[i])
+			v := EqualBO(B(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -115,25 +115,25 @@ func EqualFO(w F, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w == B2F(x[i])
+			r[i] = bool(F(w) == B2F(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w == x[i]
+			r[i] = bool(F(w) == F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w == F(x[i])
+			r[i] = bool(F(w) == F(I(x[i])))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := EqualFO(w, x[i])
+			v := EqualFO(F(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -159,25 +159,25 @@ func EqualIO(w I, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w == B2I(x[i])
+			r[i] = bool(I(w) == B2I(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = F(w) == x[i]
+			r[i] = bool(F(I(w)) == F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w == x[i]
+			r[i] = bool(I(w) == I(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := EqualIO(w, x[i])
+			v := EqualIO(I(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -199,13 +199,13 @@ func EqualSO(w S, x O) O {
 	case AS:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w == x[i]
+			r[i] = bool(S(w) == S(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := EqualSO(w, x[i])
+			v := EqualSO(S(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -225,19 +225,19 @@ func EqualABO(w AB, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] == x
+			r[i] = bool(B(w[i]) == B(x))
 		}
 		return r
 	case F:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = B2F(w[i]) == x
+			r[i] = bool(B2F(B(w[i])) == F(x))
 		}
 		return r
 	case I:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = B2I(w[i]) == x
+			r[i] = bool(B2I(B(w[i])) == I(x))
 		}
 		return r
 	case AB:
@@ -246,7 +246,7 @@ func EqualABO(w AB, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] == x[i]
+			r[i] = bool(B(w[i]) == B(x[i]))
 		}
 		return r
 	case AF:
@@ -255,7 +255,7 @@ func EqualABO(w AB, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2F(w[i]) == x[i]
+			r[i] = bool(B2F(B(w[i])) == F(x[i]))
 		}
 		return r
 	case AI:
@@ -264,7 +264,7 @@ func EqualABO(w AB, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2I(w[i]) == x[i]
+			r[i] = bool(B2I(B(w[i])) == I(x[i]))
 		}
 		return r
 	case AO:
@@ -273,7 +273,7 @@ func EqualABO(w AB, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := EqualBO(w[i], x[i])
+			v := EqualBO(B(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -293,19 +293,19 @@ func EqualAFO(w AF, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] == B2F(x)
+			r[i] = bool(F(w[i]) == B2F(B(x)))
 		}
 		return r
 	case F:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] == x
+			r[i] = bool(F(w[i]) == F(x))
 		}
 		return r
 	case I:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] == F(x)
+			r[i] = bool(F(w[i]) == F(I(x)))
 		}
 		return r
 	case AB:
@@ -314,7 +314,7 @@ func EqualAFO(w AF, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] == B2F(x[i])
+			r[i] = bool(F(w[i]) == B2F(B(x[i])))
 		}
 		return r
 	case AF:
@@ -323,7 +323,7 @@ func EqualAFO(w AF, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] == x[i]
+			r[i] = bool(F(w[i]) == F(x[i]))
 		}
 		return r
 	case AI:
@@ -332,7 +332,7 @@ func EqualAFO(w AF, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] == F(x[i])
+			r[i] = bool(F(w[i]) == F(I(x[i])))
 		}
 		return r
 	case AO:
@@ -341,7 +341,7 @@ func EqualAFO(w AF, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := EqualFO(w[i], x[i])
+			v := EqualFO(F(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -361,19 +361,19 @@ func EqualAIO(w AI, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] == B2I(x)
+			r[i] = bool(I(w[i]) == B2I(B(x)))
 		}
 		return r
 	case F:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = F(w[i]) == x
+			r[i] = bool(F(I(w[i])) == F(x))
 		}
 		return r
 	case I:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] == x
+			r[i] = bool(I(w[i]) == I(x))
 		}
 		return r
 	case AB:
@@ -382,7 +382,7 @@ func EqualAIO(w AI, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] == B2I(x[i])
+			r[i] = bool(I(w[i]) == B2I(B(x[i])))
 		}
 		return r
 	case AF:
@@ -391,7 +391,7 @@ func EqualAIO(w AI, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = F(w[i]) == x[i]
+			r[i] = bool(F(I(w[i])) == F(x[i]))
 		}
 		return r
 	case AI:
@@ -400,7 +400,7 @@ func EqualAIO(w AI, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] == x[i]
+			r[i] = bool(I(w[i]) == I(x[i]))
 		}
 		return r
 	case AO:
@@ -409,7 +409,7 @@ func EqualAIO(w AI, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := EqualIO(w[i], x[i])
+			v := EqualIO(I(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -429,7 +429,7 @@ func EqualASO(w AS, x O) O {
 	case S:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] == x
+			r[i] = bool(S(w[i]) == S(x))
 		}
 		return r
 	case AS:
@@ -438,7 +438,7 @@ func EqualASO(w AS, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] == x[i]
+			r[i] = bool(S(w[i]) == S(x[i]))
 		}
 		return r
 	case AO:
@@ -447,7 +447,7 @@ func EqualASO(w AS, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := EqualSO(w[i], x[i])
+			v := EqualSO(S(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -526,25 +526,25 @@ func NotEqualBO(w B, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w != x[i]
+			r[i] = bool(B(w) != B(x[i]))
 		}
 		return r
 	case AF:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2F(w) != x[i]
+			r[i] = bool(B2F(B(w)) != F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2I(w) != x[i]
+			r[i] = bool(B2I(B(w)) != I(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := NotEqualBO(w, x[i])
+			v := NotEqualBO(B(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -570,25 +570,25 @@ func NotEqualFO(w F, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w != B2F(x[i])
+			r[i] = bool(F(w) != B2F(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w != x[i]
+			r[i] = bool(F(w) != F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w != F(x[i])
+			r[i] = bool(F(w) != F(I(x[i])))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := NotEqualFO(w, x[i])
+			v := NotEqualFO(F(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -614,25 +614,25 @@ func NotEqualIO(w I, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w != B2I(x[i])
+			r[i] = bool(I(w) != B2I(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = F(w) != x[i]
+			r[i] = bool(F(I(w)) != F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w != x[i]
+			r[i] = bool(I(w) != I(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := NotEqualIO(w, x[i])
+			v := NotEqualIO(I(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -654,13 +654,13 @@ func NotEqualSO(w S, x O) O {
 	case AS:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w != x[i]
+			r[i] = bool(S(w) != S(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := NotEqualSO(w, x[i])
+			v := NotEqualSO(S(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -680,19 +680,19 @@ func NotEqualABO(w AB, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] != x
+			r[i] = bool(B(w[i]) != B(x))
 		}
 		return r
 	case F:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = B2F(w[i]) != x
+			r[i] = bool(B2F(B(w[i])) != F(x))
 		}
 		return r
 	case I:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = B2I(w[i]) != x
+			r[i] = bool(B2I(B(w[i])) != I(x))
 		}
 		return r
 	case AB:
@@ -701,7 +701,7 @@ func NotEqualABO(w AB, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] != x[i]
+			r[i] = bool(B(w[i]) != B(x[i]))
 		}
 		return r
 	case AF:
@@ -710,7 +710,7 @@ func NotEqualABO(w AB, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2F(w[i]) != x[i]
+			r[i] = bool(B2F(B(w[i])) != F(x[i]))
 		}
 		return r
 	case AI:
@@ -719,7 +719,7 @@ func NotEqualABO(w AB, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2I(w[i]) != x[i]
+			r[i] = bool(B2I(B(w[i])) != I(x[i]))
 		}
 		return r
 	case AO:
@@ -728,7 +728,7 @@ func NotEqualABO(w AB, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := NotEqualBO(w[i], x[i])
+			v := NotEqualBO(B(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -748,19 +748,19 @@ func NotEqualAFO(w AF, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] != B2F(x)
+			r[i] = bool(F(w[i]) != B2F(B(x)))
 		}
 		return r
 	case F:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] != x
+			r[i] = bool(F(w[i]) != F(x))
 		}
 		return r
 	case I:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] != F(x)
+			r[i] = bool(F(w[i]) != F(I(x)))
 		}
 		return r
 	case AB:
@@ -769,7 +769,7 @@ func NotEqualAFO(w AF, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] != B2F(x[i])
+			r[i] = bool(F(w[i]) != B2F(B(x[i])))
 		}
 		return r
 	case AF:
@@ -778,7 +778,7 @@ func NotEqualAFO(w AF, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] != x[i]
+			r[i] = bool(F(w[i]) != F(x[i]))
 		}
 		return r
 	case AI:
@@ -787,7 +787,7 @@ func NotEqualAFO(w AF, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] != F(x[i])
+			r[i] = bool(F(w[i]) != F(I(x[i])))
 		}
 		return r
 	case AO:
@@ -796,7 +796,7 @@ func NotEqualAFO(w AF, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := NotEqualFO(w[i], x[i])
+			v := NotEqualFO(F(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -816,19 +816,19 @@ func NotEqualAIO(w AI, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] != B2I(x)
+			r[i] = bool(I(w[i]) != B2I(B(x)))
 		}
 		return r
 	case F:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = F(w[i]) != x
+			r[i] = bool(F(I(w[i])) != F(x))
 		}
 		return r
 	case I:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] != x
+			r[i] = bool(I(w[i]) != I(x))
 		}
 		return r
 	case AB:
@@ -837,7 +837,7 @@ func NotEqualAIO(w AI, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] != B2I(x[i])
+			r[i] = bool(I(w[i]) != B2I(B(x[i])))
 		}
 		return r
 	case AF:
@@ -846,7 +846,7 @@ func NotEqualAIO(w AI, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = F(w[i]) != x[i]
+			r[i] = bool(F(I(w[i])) != F(x[i]))
 		}
 		return r
 	case AI:
@@ -855,7 +855,7 @@ func NotEqualAIO(w AI, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] != x[i]
+			r[i] = bool(I(w[i]) != I(x[i]))
 		}
 		return r
 	case AO:
@@ -864,7 +864,7 @@ func NotEqualAIO(w AI, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := NotEqualIO(w[i], x[i])
+			v := NotEqualIO(I(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -884,7 +884,7 @@ func NotEqualASO(w AS, x O) O {
 	case S:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] != x
+			r[i] = bool(S(w[i]) != S(x))
 		}
 		return r
 	case AS:
@@ -893,7 +893,7 @@ func NotEqualASO(w AS, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] != x[i]
+			r[i] = bool(S(w[i]) != S(x[i]))
 		}
 		return r
 	case AO:
@@ -902,7 +902,7 @@ func NotEqualASO(w AS, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := NotEqualSO(w[i], x[i])
+			v := NotEqualSO(S(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -981,25 +981,25 @@ func LesserBO(w B, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = !w && x[i]
+			r[i] = bool(B(!w) && B(x[i]))
 		}
 		return r
 	case AF:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2F(w) < x[i]
+			r[i] = bool(B2F(B(w)) < F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2I(w) < x[i]
+			r[i] = bool(B2I(B(w)) < I(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := LesserBO(w, x[i])
+			v := LesserBO(B(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -1025,25 +1025,25 @@ func LesserFO(w F, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w < B2F(x[i])
+			r[i] = bool(F(w) < B2F(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w < x[i]
+			r[i] = bool(F(w) < F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w < F(x[i])
+			r[i] = bool(F(w) < F(I(x[i])))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := LesserFO(w, x[i])
+			v := LesserFO(F(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -1069,25 +1069,25 @@ func LesserIO(w I, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w < B2I(x[i])
+			r[i] = bool(I(w) < B2I(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = F(w) < x[i]
+			r[i] = bool(F(I(w)) < F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w < x[i]
+			r[i] = bool(I(w) < I(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := LesserIO(w, x[i])
+			v := LesserIO(I(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -1109,13 +1109,13 @@ func LesserSO(w S, x O) O {
 	case AS:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w < x[i]
+			r[i] = bool(S(w) < S(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := LesserSO(w, x[i])
+			v := LesserSO(S(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -1135,19 +1135,19 @@ func LesserABO(w AB, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = !w[i] && x
+			r[i] = bool(B(!w[i]) && B(x))
 		}
 		return r
 	case F:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = B2F(w[i]) < x
+			r[i] = bool(B2F(B(w[i])) < F(x))
 		}
 		return r
 	case I:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = B2I(w[i]) < x
+			r[i] = bool(B2I(B(w[i])) < I(x))
 		}
 		return r
 	case AB:
@@ -1156,7 +1156,7 @@ func LesserABO(w AB, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = !w[i] && x[i]
+			r[i] = bool(B(!w[i]) && B(x[i]))
 		}
 		return r
 	case AF:
@@ -1165,7 +1165,7 @@ func LesserABO(w AB, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2F(w[i]) < x[i]
+			r[i] = bool(B2F(B(w[i])) < F(x[i]))
 		}
 		return r
 	case AI:
@@ -1174,7 +1174,7 @@ func LesserABO(w AB, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2I(w[i]) < x[i]
+			r[i] = bool(B2I(B(w[i])) < I(x[i]))
 		}
 		return r
 	case AO:
@@ -1183,7 +1183,7 @@ func LesserABO(w AB, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := LesserBO(w[i], x[i])
+			v := LesserBO(B(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -1203,19 +1203,19 @@ func LesserAFO(w AF, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] < B2F(x)
+			r[i] = bool(F(w[i]) < B2F(B(x)))
 		}
 		return r
 	case F:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] < x
+			r[i] = bool(F(w[i]) < F(x))
 		}
 		return r
 	case I:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] < F(x)
+			r[i] = bool(F(w[i]) < F(I(x)))
 		}
 		return r
 	case AB:
@@ -1224,7 +1224,7 @@ func LesserAFO(w AF, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] < B2F(x[i])
+			r[i] = bool(F(w[i]) < B2F(B(x[i])))
 		}
 		return r
 	case AF:
@@ -1233,7 +1233,7 @@ func LesserAFO(w AF, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] < x[i]
+			r[i] = bool(F(w[i]) < F(x[i]))
 		}
 		return r
 	case AI:
@@ -1242,7 +1242,7 @@ func LesserAFO(w AF, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] < F(x[i])
+			r[i] = bool(F(w[i]) < F(I(x[i])))
 		}
 		return r
 	case AO:
@@ -1251,7 +1251,7 @@ func LesserAFO(w AF, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := LesserFO(w[i], x[i])
+			v := LesserFO(F(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -1271,19 +1271,19 @@ func LesserAIO(w AI, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] < B2I(x)
+			r[i] = bool(I(w[i]) < B2I(B(x)))
 		}
 		return r
 	case F:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = F(w[i]) < x
+			r[i] = bool(F(I(w[i])) < F(x))
 		}
 		return r
 	case I:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] < x
+			r[i] = bool(I(w[i]) < I(x))
 		}
 		return r
 	case AB:
@@ -1292,7 +1292,7 @@ func LesserAIO(w AI, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] < B2I(x[i])
+			r[i] = bool(I(w[i]) < B2I(B(x[i])))
 		}
 		return r
 	case AF:
@@ -1301,7 +1301,7 @@ func LesserAIO(w AI, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = F(w[i]) < x[i]
+			r[i] = bool(F(I(w[i])) < F(x[i]))
 		}
 		return r
 	case AI:
@@ -1310,7 +1310,7 @@ func LesserAIO(w AI, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] < x[i]
+			r[i] = bool(I(w[i]) < I(x[i]))
 		}
 		return r
 	case AO:
@@ -1319,7 +1319,7 @@ func LesserAIO(w AI, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := LesserIO(w[i], x[i])
+			v := LesserIO(I(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -1339,7 +1339,7 @@ func LesserASO(w AS, x O) O {
 	case S:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] < x
+			r[i] = bool(S(w[i]) < S(x))
 		}
 		return r
 	case AS:
@@ -1348,7 +1348,7 @@ func LesserASO(w AS, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] < x[i]
+			r[i] = bool(S(w[i]) < S(x[i]))
 		}
 		return r
 	case AO:
@@ -1357,7 +1357,7 @@ func LesserASO(w AS, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := LesserSO(w[i], x[i])
+			v := LesserSO(S(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -1436,25 +1436,25 @@ func LesserEqBO(w B, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = x[i] || !w
+			r[i] = bool(B(x[i]) || B(!w))
 		}
 		return r
 	case AF:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2F(w) <= x[i]
+			r[i] = bool(B2F(B(w)) <= F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2I(w) <= x[i]
+			r[i] = bool(B2I(B(w)) <= I(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := LesserEqBO(w, x[i])
+			v := LesserEqBO(B(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -1480,25 +1480,25 @@ func LesserEqFO(w F, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w <= B2F(x[i])
+			r[i] = bool(F(w) <= B2F(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w <= x[i]
+			r[i] = bool(F(w) <= F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w <= F(x[i])
+			r[i] = bool(F(w) <= F(I(x[i])))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := LesserEqFO(w, x[i])
+			v := LesserEqFO(F(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -1524,25 +1524,25 @@ func LesserEqIO(w I, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w <= B2I(x[i])
+			r[i] = bool(I(w) <= B2I(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = F(w) <= x[i]
+			r[i] = bool(F(I(w)) <= F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w <= x[i]
+			r[i] = bool(I(w) <= I(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := LesserEqIO(w, x[i])
+			v := LesserEqIO(I(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -1564,13 +1564,13 @@ func LesserEqSO(w S, x O) O {
 	case AS:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w <= x[i]
+			r[i] = bool(S(w) <= S(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := LesserEqSO(w, x[i])
+			v := LesserEqSO(S(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -1590,19 +1590,19 @@ func LesserEqABO(w AB, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = x || !w[i]
+			r[i] = bool(B(x) || B(!w[i]))
 		}
 		return r
 	case F:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = B2F(w[i]) <= x
+			r[i] = bool(B2F(B(w[i])) <= F(x))
 		}
 		return r
 	case I:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = B2I(w[i]) <= x
+			r[i] = bool(B2I(B(w[i])) <= I(x))
 		}
 		return r
 	case AB:
@@ -1611,7 +1611,7 @@ func LesserEqABO(w AB, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = x[i] || !w[i]
+			r[i] = bool(B(x[i]) || B(!w[i]))
 		}
 		return r
 	case AF:
@@ -1620,7 +1620,7 @@ func LesserEqABO(w AB, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2F(w[i]) <= x[i]
+			r[i] = bool(B2F(B(w[i])) <= F(x[i]))
 		}
 		return r
 	case AI:
@@ -1629,7 +1629,7 @@ func LesserEqABO(w AB, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2I(w[i]) <= x[i]
+			r[i] = bool(B2I(B(w[i])) <= I(x[i]))
 		}
 		return r
 	case AO:
@@ -1638,7 +1638,7 @@ func LesserEqABO(w AB, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := LesserEqBO(w[i], x[i])
+			v := LesserEqBO(B(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -1658,19 +1658,19 @@ func LesserEqAFO(w AF, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] <= B2F(x)
+			r[i] = bool(F(w[i]) <= B2F(B(x)))
 		}
 		return r
 	case F:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] <= x
+			r[i] = bool(F(w[i]) <= F(x))
 		}
 		return r
 	case I:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] <= F(x)
+			r[i] = bool(F(w[i]) <= F(I(x)))
 		}
 		return r
 	case AB:
@@ -1679,7 +1679,7 @@ func LesserEqAFO(w AF, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] <= B2F(x[i])
+			r[i] = bool(F(w[i]) <= B2F(B(x[i])))
 		}
 		return r
 	case AF:
@@ -1688,7 +1688,7 @@ func LesserEqAFO(w AF, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] <= x[i]
+			r[i] = bool(F(w[i]) <= F(x[i]))
 		}
 		return r
 	case AI:
@@ -1697,7 +1697,7 @@ func LesserEqAFO(w AF, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] <= F(x[i])
+			r[i] = bool(F(w[i]) <= F(I(x[i])))
 		}
 		return r
 	case AO:
@@ -1706,7 +1706,7 @@ func LesserEqAFO(w AF, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := LesserEqFO(w[i], x[i])
+			v := LesserEqFO(F(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -1726,19 +1726,19 @@ func LesserEqAIO(w AI, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] <= B2I(x)
+			r[i] = bool(I(w[i]) <= B2I(B(x)))
 		}
 		return r
 	case F:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = F(w[i]) <= x
+			r[i] = bool(F(I(w[i])) <= F(x))
 		}
 		return r
 	case I:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] <= x
+			r[i] = bool(I(w[i]) <= I(x))
 		}
 		return r
 	case AB:
@@ -1747,7 +1747,7 @@ func LesserEqAIO(w AI, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] <= B2I(x[i])
+			r[i] = bool(I(w[i]) <= B2I(B(x[i])))
 		}
 		return r
 	case AF:
@@ -1756,7 +1756,7 @@ func LesserEqAIO(w AI, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = F(w[i]) <= x[i]
+			r[i] = bool(F(I(w[i])) <= F(x[i]))
 		}
 		return r
 	case AI:
@@ -1765,7 +1765,7 @@ func LesserEqAIO(w AI, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] <= x[i]
+			r[i] = bool(I(w[i]) <= I(x[i]))
 		}
 		return r
 	case AO:
@@ -1774,7 +1774,7 @@ func LesserEqAIO(w AI, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := LesserEqIO(w[i], x[i])
+			v := LesserEqIO(I(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -1794,7 +1794,7 @@ func LesserEqASO(w AS, x O) O {
 	case S:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] <= x
+			r[i] = bool(S(w[i]) <= S(x))
 		}
 		return r
 	case AS:
@@ -1803,7 +1803,7 @@ func LesserEqASO(w AS, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] <= x[i]
+			r[i] = bool(S(w[i]) <= S(x[i]))
 		}
 		return r
 	case AO:
@@ -1812,7 +1812,7 @@ func LesserEqASO(w AS, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := LesserEqSO(w[i], x[i])
+			v := LesserEqSO(S(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -1891,25 +1891,25 @@ func GreaterBO(w B, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w && !x[i]
+			r[i] = bool(B(w) && B(!x[i]))
 		}
 		return r
 	case AF:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2F(w) > x[i]
+			r[i] = bool(B2F(B(w)) > F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2I(w) > x[i]
+			r[i] = bool(B2I(B(w)) > I(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := GreaterBO(w, x[i])
+			v := GreaterBO(B(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -1935,25 +1935,25 @@ func GreaterFO(w F, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w > B2F(x[i])
+			r[i] = bool(F(w) > B2F(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w > x[i]
+			r[i] = bool(F(w) > F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w > F(x[i])
+			r[i] = bool(F(w) > F(I(x[i])))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := GreaterFO(w, x[i])
+			v := GreaterFO(F(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -1979,25 +1979,25 @@ func GreaterIO(w I, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w > B2I(x[i])
+			r[i] = bool(I(w) > B2I(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = F(w) > x[i]
+			r[i] = bool(F(I(w)) > F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w > x[i]
+			r[i] = bool(I(w) > I(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := GreaterIO(w, x[i])
+			v := GreaterIO(I(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -2019,13 +2019,13 @@ func GreaterSO(w S, x O) O {
 	case AS:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w > x[i]
+			r[i] = bool(S(w) > S(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := GreaterSO(w, x[i])
+			v := GreaterSO(S(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -2045,19 +2045,19 @@ func GreaterABO(w AB, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] && !x
+			r[i] = bool(B(w[i]) && B(!x))
 		}
 		return r
 	case F:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = B2F(w[i]) > x
+			r[i] = bool(B2F(B(w[i])) > F(x))
 		}
 		return r
 	case I:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = B2I(w[i]) > x
+			r[i] = bool(B2I(B(w[i])) > I(x))
 		}
 		return r
 	case AB:
@@ -2066,7 +2066,7 @@ func GreaterABO(w AB, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] && !x[i]
+			r[i] = bool(B(w[i]) && B(!x[i]))
 		}
 		return r
 	case AF:
@@ -2075,7 +2075,7 @@ func GreaterABO(w AB, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2F(w[i]) > x[i]
+			r[i] = bool(B2F(B(w[i])) > F(x[i]))
 		}
 		return r
 	case AI:
@@ -2084,7 +2084,7 @@ func GreaterABO(w AB, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2I(w[i]) > x[i]
+			r[i] = bool(B2I(B(w[i])) > I(x[i]))
 		}
 		return r
 	case AO:
@@ -2093,7 +2093,7 @@ func GreaterABO(w AB, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := GreaterBO(w[i], x[i])
+			v := GreaterBO(B(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -2113,19 +2113,19 @@ func GreaterAFO(w AF, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] > B2F(x)
+			r[i] = bool(F(w[i]) > B2F(B(x)))
 		}
 		return r
 	case F:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] > x
+			r[i] = bool(F(w[i]) > F(x))
 		}
 		return r
 	case I:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] > F(x)
+			r[i] = bool(F(w[i]) > F(I(x)))
 		}
 		return r
 	case AB:
@@ -2134,7 +2134,7 @@ func GreaterAFO(w AF, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] > B2F(x[i])
+			r[i] = bool(F(w[i]) > B2F(B(x[i])))
 		}
 		return r
 	case AF:
@@ -2143,7 +2143,7 @@ func GreaterAFO(w AF, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] > x[i]
+			r[i] = bool(F(w[i]) > F(x[i]))
 		}
 		return r
 	case AI:
@@ -2152,7 +2152,7 @@ func GreaterAFO(w AF, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] > F(x[i])
+			r[i] = bool(F(w[i]) > F(I(x[i])))
 		}
 		return r
 	case AO:
@@ -2161,7 +2161,7 @@ func GreaterAFO(w AF, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := GreaterFO(w[i], x[i])
+			v := GreaterFO(F(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -2181,19 +2181,19 @@ func GreaterAIO(w AI, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] > B2I(x)
+			r[i] = bool(I(w[i]) > B2I(B(x)))
 		}
 		return r
 	case F:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = F(w[i]) > x
+			r[i] = bool(F(I(w[i])) > F(x))
 		}
 		return r
 	case I:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] > x
+			r[i] = bool(I(w[i]) > I(x))
 		}
 		return r
 	case AB:
@@ -2202,7 +2202,7 @@ func GreaterAIO(w AI, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] > B2I(x[i])
+			r[i] = bool(I(w[i]) > B2I(B(x[i])))
 		}
 		return r
 	case AF:
@@ -2211,7 +2211,7 @@ func GreaterAIO(w AI, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = F(w[i]) > x[i]
+			r[i] = bool(F(I(w[i])) > F(x[i]))
 		}
 		return r
 	case AI:
@@ -2220,7 +2220,7 @@ func GreaterAIO(w AI, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] > x[i]
+			r[i] = bool(I(w[i]) > I(x[i]))
 		}
 		return r
 	case AO:
@@ -2229,7 +2229,7 @@ func GreaterAIO(w AI, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := GreaterIO(w[i], x[i])
+			v := GreaterIO(I(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -2249,7 +2249,7 @@ func GreaterASO(w AS, x O) O {
 	case S:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] > x
+			r[i] = bool(S(w[i]) > S(x))
 		}
 		return r
 	case AS:
@@ -2258,7 +2258,7 @@ func GreaterASO(w AS, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] > x[i]
+			r[i] = bool(S(w[i]) > S(x[i]))
 		}
 		return r
 	case AO:
@@ -2267,7 +2267,7 @@ func GreaterASO(w AS, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := GreaterSO(w[i], x[i])
+			v := GreaterSO(S(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -2346,25 +2346,25 @@ func GreaterEqBO(w B, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w || !x[i]
+			r[i] = bool(B(w) || B(!x[i]))
 		}
 		return r
 	case AF:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2F(w) >= x[i]
+			r[i] = bool(B2F(B(w)) >= F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2I(w) >= x[i]
+			r[i] = bool(B2I(B(w)) >= I(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := GreaterEqBO(w, x[i])
+			v := GreaterEqBO(B(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -2390,25 +2390,25 @@ func GreaterEqFO(w F, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w >= B2F(x[i])
+			r[i] = bool(F(w) >= B2F(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w >= x[i]
+			r[i] = bool(F(w) >= F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w >= F(x[i])
+			r[i] = bool(F(w) >= F(I(x[i])))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := GreaterEqFO(w, x[i])
+			v := GreaterEqFO(F(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -2434,25 +2434,25 @@ func GreaterEqIO(w I, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w >= B2I(x[i])
+			r[i] = bool(I(w) >= B2I(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = F(w) >= x[i]
+			r[i] = bool(F(I(w)) >= F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w >= x[i]
+			r[i] = bool(I(w) >= I(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := GreaterEqIO(w, x[i])
+			v := GreaterEqIO(I(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -2474,13 +2474,13 @@ func GreaterEqSO(w S, x O) O {
 	case AS:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w >= x[i]
+			r[i] = bool(S(w) >= S(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := GreaterEqSO(w, x[i])
+			v := GreaterEqSO(S(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -2500,19 +2500,19 @@ func GreaterEqABO(w AB, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] || !x
+			r[i] = bool(B(w[i]) || B(!x))
 		}
 		return r
 	case F:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = B2F(w[i]) >= x
+			r[i] = bool(B2F(B(w[i])) >= F(x))
 		}
 		return r
 	case I:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = B2I(w[i]) >= x
+			r[i] = bool(B2I(B(w[i])) >= I(x))
 		}
 		return r
 	case AB:
@@ -2521,7 +2521,7 @@ func GreaterEqABO(w AB, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] || !x[i]
+			r[i] = bool(B(w[i]) || B(!x[i]))
 		}
 		return r
 	case AF:
@@ -2530,7 +2530,7 @@ func GreaterEqABO(w AB, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2F(w[i]) >= x[i]
+			r[i] = bool(B2F(B(w[i])) >= F(x[i]))
 		}
 		return r
 	case AI:
@@ -2539,7 +2539,7 @@ func GreaterEqABO(w AB, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = B2I(w[i]) >= x[i]
+			r[i] = bool(B2I(B(w[i])) >= I(x[i]))
 		}
 		return r
 	case AO:
@@ -2548,7 +2548,7 @@ func GreaterEqABO(w AB, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := GreaterEqBO(w[i], x[i])
+			v := GreaterEqBO(B(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -2568,19 +2568,19 @@ func GreaterEqAFO(w AF, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] >= B2F(x)
+			r[i] = bool(F(w[i]) >= B2F(B(x)))
 		}
 		return r
 	case F:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] >= x
+			r[i] = bool(F(w[i]) >= F(x))
 		}
 		return r
 	case I:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] >= F(x)
+			r[i] = bool(F(w[i]) >= F(I(x)))
 		}
 		return r
 	case AB:
@@ -2589,7 +2589,7 @@ func GreaterEqAFO(w AF, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] >= B2F(x[i])
+			r[i] = bool(F(w[i]) >= B2F(B(x[i])))
 		}
 		return r
 	case AF:
@@ -2598,7 +2598,7 @@ func GreaterEqAFO(w AF, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] >= x[i]
+			r[i] = bool(F(w[i]) >= F(x[i]))
 		}
 		return r
 	case AI:
@@ -2607,7 +2607,7 @@ func GreaterEqAFO(w AF, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] >= F(x[i])
+			r[i] = bool(F(w[i]) >= F(I(x[i])))
 		}
 		return r
 	case AO:
@@ -2616,7 +2616,7 @@ func GreaterEqAFO(w AF, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := GreaterEqFO(w[i], x[i])
+			v := GreaterEqFO(F(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -2636,19 +2636,19 @@ func GreaterEqAIO(w AI, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] >= B2I(x)
+			r[i] = bool(I(w[i]) >= B2I(B(x)))
 		}
 		return r
 	case F:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = F(w[i]) >= x
+			r[i] = bool(F(I(w[i])) >= F(x))
 		}
 		return r
 	case I:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] >= x
+			r[i] = bool(I(w[i]) >= I(x))
 		}
 		return r
 	case AB:
@@ -2657,7 +2657,7 @@ func GreaterEqAIO(w AI, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] >= B2I(x[i])
+			r[i] = bool(I(w[i]) >= B2I(B(x[i])))
 		}
 		return r
 	case AF:
@@ -2666,7 +2666,7 @@ func GreaterEqAIO(w AI, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = F(w[i]) >= x[i]
+			r[i] = bool(F(I(w[i])) >= F(x[i]))
 		}
 		return r
 	case AI:
@@ -2675,7 +2675,7 @@ func GreaterEqAIO(w AI, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] >= x[i]
+			r[i] = bool(I(w[i]) >= I(x[i]))
 		}
 		return r
 	case AO:
@@ -2684,7 +2684,7 @@ func GreaterEqAIO(w AI, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := GreaterEqIO(w[i], x[i])
+			v := GreaterEqIO(I(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -2704,7 +2704,7 @@ func GreaterEqASO(w AS, x O) O {
 	case S:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] >= x
+			r[i] = bool(S(w[i]) >= S(x))
 		}
 		return r
 	case AS:
@@ -2713,7 +2713,7 @@ func GreaterEqASO(w AS, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] >= x[i]
+			r[i] = bool(S(w[i]) >= S(x[i]))
 		}
 		return r
 	case AO:
@@ -2722,7 +2722,7 @@ func GreaterEqASO(w AS, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := GreaterEqSO(w[i], x[i])
+			v := GreaterEqSO(S(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -2801,25 +2801,25 @@ func AddBO(w B, x O) O {
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = B2I(w) + B2I(x[i])
+			r[i] = int(B2I(B(w)) + B2I(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = B2F(w) + x[i]
+			r[i] = float64(B2F(B(w)) + F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = B2I(w) + x[i]
+			r[i] = int(B2I(B(w)) + I(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := AddBO(w, x[i])
+			v := AddBO(B(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -2845,25 +2845,25 @@ func AddFO(w F, x O) O {
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w + B2F(x[i])
+			r[i] = float64(F(w) + B2F(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w + x[i]
+			r[i] = float64(F(w) + F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w + F(x[i])
+			r[i] = float64(F(w) + F(I(x[i])))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := AddFO(w, x[i])
+			v := AddFO(F(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -2889,25 +2889,25 @@ func AddIO(w I, x O) O {
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = w + B2I(x[i])
+			r[i] = int(I(w) + B2I(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(w) + x[i]
+			r[i] = float64(F(I(w)) + F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = w + x[i]
+			r[i] = int(I(w) + I(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := AddIO(w, x[i])
+			v := AddIO(I(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -2929,13 +2929,13 @@ func AddSO(w S, x O) O {
 	case AS:
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = w + x[i]
+			r[i] = string(S(w) + S(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := AddSO(w, x[i])
+			v := AddSO(S(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -2955,19 +2955,19 @@ func AddABO(w AB, x O) O {
 	case B:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = B2I(w[i]) + B2I(x)
+			r[i] = int(B2I(B(w[i])) + B2I(B(x)))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = B2F(w[i]) + x
+			r[i] = float64(B2F(B(w[i])) + F(x))
 		}
 		return r
 	case I:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = B2I(w[i]) + x
+			r[i] = int(B2I(B(w[i])) + I(x))
 		}
 		return r
 	case AB:
@@ -2976,7 +2976,7 @@ func AddABO(w AB, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = B2I(w[i]) + B2I(x[i])
+			r[i] = int(B2I(B(w[i])) + B2I(B(x[i])))
 		}
 		return r
 	case AF:
@@ -2985,7 +2985,7 @@ func AddABO(w AB, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = B2F(w[i]) + x[i]
+			r[i] = float64(B2F(B(w[i])) + F(x[i]))
 		}
 		return r
 	case AI:
@@ -2994,7 +2994,7 @@ func AddABO(w AB, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = B2I(w[i]) + x[i]
+			r[i] = int(B2I(B(w[i])) + I(x[i]))
 		}
 		return r
 	case AO:
@@ -3003,7 +3003,7 @@ func AddABO(w AB, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := AddBO(w[i], x[i])
+			v := AddBO(B(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -3023,19 +3023,19 @@ func AddAFO(w AF, x O) O {
 	case B:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = w[i] + B2F(x)
+			r[i] = float64(F(w[i]) + B2F(B(x)))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = w[i] + x
+			r[i] = float64(F(w[i]) + F(x))
 		}
 		return r
 	case I:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = w[i] + F(x)
+			r[i] = float64(F(w[i]) + F(I(x)))
 		}
 		return r
 	case AB:
@@ -3044,7 +3044,7 @@ func AddAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w[i] + B2F(x[i])
+			r[i] = float64(F(w[i]) + B2F(B(x[i])))
 		}
 		return r
 	case AF:
@@ -3053,7 +3053,7 @@ func AddAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w[i] + x[i]
+			r[i] = float64(F(w[i]) + F(x[i]))
 		}
 		return r
 	case AI:
@@ -3062,7 +3062,7 @@ func AddAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w[i] + F(x[i])
+			r[i] = float64(F(w[i]) + F(I(x[i])))
 		}
 		return r
 	case AO:
@@ -3071,7 +3071,7 @@ func AddAFO(w AF, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := AddFO(w[i], x[i])
+			v := AddFO(F(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -3091,19 +3091,19 @@ func AddAIO(w AI, x O) O {
 	case B:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = w[i] + B2I(x)
+			r[i] = int(I(w[i]) + B2I(B(x)))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = F(w[i]) + x
+			r[i] = float64(F(I(w[i])) + F(x))
 		}
 		return r
 	case I:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = w[i] + x
+			r[i] = int(I(w[i]) + I(x))
 		}
 		return r
 	case AB:
@@ -3112,7 +3112,7 @@ func AddAIO(w AI, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = w[i] + B2I(x[i])
+			r[i] = int(I(w[i]) + B2I(B(x[i])))
 		}
 		return r
 	case AF:
@@ -3121,7 +3121,7 @@ func AddAIO(w AI, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(w[i]) + x[i]
+			r[i] = float64(F(I(w[i])) + F(x[i]))
 		}
 		return r
 	case AI:
@@ -3130,7 +3130,7 @@ func AddAIO(w AI, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = w[i] + x[i]
+			r[i] = int(I(w[i]) + I(x[i]))
 		}
 		return r
 	case AO:
@@ -3139,7 +3139,7 @@ func AddAIO(w AI, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := AddIO(w[i], x[i])
+			v := AddIO(I(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -3159,7 +3159,7 @@ func AddASO(w AS, x O) O {
 	case S:
 		r := make(AS, len(w))
 		for i := range r {
-			r[i] = w[i] + x
+			r[i] = string(S(w[i]) + S(x))
 		}
 		return r
 	case AS:
@@ -3168,7 +3168,7 @@ func AddASO(w AS, x O) O {
 		}
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = w[i] + x[i]
+			r[i] = string(S(w[i]) + S(x[i]))
 		}
 		return r
 	case AO:
@@ -3177,7 +3177,7 @@ func AddASO(w AS, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := AddSO(w[i], x[i])
+			v := AddSO(S(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -3256,25 +3256,25 @@ func SubtractBO(w B, x O) O {
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = B2I(w) - B2I(x[i])
+			r[i] = int(B2I(B(w)) - B2I(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = B2F(w) - x[i]
+			r[i] = float64(B2F(B(w)) - F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = B2I(w) - x[i]
+			r[i] = int(B2I(B(w)) - I(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := SubtractBO(w, x[i])
+			v := SubtractBO(B(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -3300,25 +3300,25 @@ func SubtractFO(w F, x O) O {
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w - B2F(x[i])
+			r[i] = float64(F(w) - B2F(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w - x[i]
+			r[i] = float64(F(w) - F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w - F(x[i])
+			r[i] = float64(F(w) - F(I(x[i])))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := SubtractFO(w, x[i])
+			v := SubtractFO(F(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -3344,25 +3344,25 @@ func SubtractIO(w I, x O) O {
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = w - B2I(x[i])
+			r[i] = int(I(w) - B2I(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(w) - x[i]
+			r[i] = float64(F(I(w)) - F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = w - x[i]
+			r[i] = int(I(w) - I(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := SubtractIO(w, x[i])
+			v := SubtractIO(I(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -3384,13 +3384,13 @@ func SubtractSO(w S, x O) O {
 	case AS:
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = strings.TrimSuffix(w, x[i])
+			r[i] = string(strings.TrimSuffix(S(w), S(x[i])))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := SubtractSO(w, x[i])
+			v := SubtractSO(S(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -3410,19 +3410,19 @@ func SubtractABO(w AB, x O) O {
 	case B:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = B2I(w[i]) - B2I(x)
+			r[i] = int(B2I(B(w[i])) - B2I(B(x)))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = B2F(w[i]) - x
+			r[i] = float64(B2F(B(w[i])) - F(x))
 		}
 		return r
 	case I:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = B2I(w[i]) - x
+			r[i] = int(B2I(B(w[i])) - I(x))
 		}
 		return r
 	case AB:
@@ -3431,7 +3431,7 @@ func SubtractABO(w AB, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = B2I(w[i]) - B2I(x[i])
+			r[i] = int(B2I(B(w[i])) - B2I(B(x[i])))
 		}
 		return r
 	case AF:
@@ -3440,7 +3440,7 @@ func SubtractABO(w AB, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = B2F(w[i]) - x[i]
+			r[i] = float64(B2F(B(w[i])) - F(x[i]))
 		}
 		return r
 	case AI:
@@ -3449,7 +3449,7 @@ func SubtractABO(w AB, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = B2I(w[i]) - x[i]
+			r[i] = int(B2I(B(w[i])) - I(x[i]))
 		}
 		return r
 	case AO:
@@ -3458,7 +3458,7 @@ func SubtractABO(w AB, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := SubtractBO(w[i], x[i])
+			v := SubtractBO(B(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -3478,19 +3478,19 @@ func SubtractAFO(w AF, x O) O {
 	case B:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = w[i] - B2F(x)
+			r[i] = float64(F(w[i]) - B2F(B(x)))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = w[i] - x
+			r[i] = float64(F(w[i]) - F(x))
 		}
 		return r
 	case I:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = w[i] - F(x)
+			r[i] = float64(F(w[i]) - F(I(x)))
 		}
 		return r
 	case AB:
@@ -3499,7 +3499,7 @@ func SubtractAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w[i] - B2F(x[i])
+			r[i] = float64(F(w[i]) - B2F(B(x[i])))
 		}
 		return r
 	case AF:
@@ -3508,7 +3508,7 @@ func SubtractAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w[i] - x[i]
+			r[i] = float64(F(w[i]) - F(x[i]))
 		}
 		return r
 	case AI:
@@ -3517,7 +3517,7 @@ func SubtractAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w[i] - F(x[i])
+			r[i] = float64(F(w[i]) - F(I(x[i])))
 		}
 		return r
 	case AO:
@@ -3526,7 +3526,7 @@ func SubtractAFO(w AF, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := SubtractFO(w[i], x[i])
+			v := SubtractFO(F(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -3546,19 +3546,19 @@ func SubtractAIO(w AI, x O) O {
 	case B:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = w[i] - B2I(x)
+			r[i] = int(I(w[i]) - B2I(B(x)))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = F(w[i]) - x
+			r[i] = float64(F(I(w[i])) - F(x))
 		}
 		return r
 	case I:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = w[i] - x
+			r[i] = int(I(w[i]) - I(x))
 		}
 		return r
 	case AB:
@@ -3567,7 +3567,7 @@ func SubtractAIO(w AI, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = w[i] - B2I(x[i])
+			r[i] = int(I(w[i]) - B2I(B(x[i])))
 		}
 		return r
 	case AF:
@@ -3576,7 +3576,7 @@ func SubtractAIO(w AI, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(w[i]) - x[i]
+			r[i] = float64(F(I(w[i])) - F(x[i]))
 		}
 		return r
 	case AI:
@@ -3585,7 +3585,7 @@ func SubtractAIO(w AI, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = w[i] - x[i]
+			r[i] = int(I(w[i]) - I(x[i]))
 		}
 		return r
 	case AO:
@@ -3594,7 +3594,7 @@ func SubtractAIO(w AI, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := SubtractIO(w[i], x[i])
+			v := SubtractIO(I(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -3614,7 +3614,7 @@ func SubtractASO(w AS, x O) O {
 	case S:
 		r := make(AS, len(w))
 		for i := range r {
-			r[i] = strings.TrimSuffix(w[i], x)
+			r[i] = string(strings.TrimSuffix(S(w[i]), S(x)))
 		}
 		return r
 	case AS:
@@ -3623,7 +3623,7 @@ func SubtractASO(w AS, x O) O {
 		}
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = strings.TrimSuffix(w[i], x[i])
+			r[i] = string(strings.TrimSuffix(S(w[i]), S(x[i])))
 		}
 		return r
 	case AO:
@@ -3632,7 +3632,7 @@ func SubtractASO(w AS, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := SubtractSO(w[i], x[i])
+			v := SubtractSO(S(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -3707,25 +3707,25 @@ func SpanBO(w B, x O) O {
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = 1 + B2I(w) - B2I(x[i])
+			r[i] = int(1 + B2I(B(w)) - B2I(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1 + B2F(w) - x[i]
+			r[i] = float64(1 + B2F(B(w)) - F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = 1 + B2I(w) - x[i]
+			r[i] = int(1 + B2I(B(w)) - I(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := SpanBO(w, x[i])
+			v := SpanBO(B(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -3751,25 +3751,25 @@ func SpanFO(w F, x O) O {
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1 + w - B2F(x[i])
+			r[i] = float64(1 + F(w) - B2F(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1 + w - x[i]
+			r[i] = float64(1 + F(w) - F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1 + w - F(x[i])
+			r[i] = float64(1 + F(w) - F(I(x[i])))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := SpanFO(w, x[i])
+			v := SpanFO(F(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -3795,25 +3795,25 @@ func SpanIO(w I, x O) O {
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = 1 + w - B2I(x[i])
+			r[i] = int(1 + I(w) - B2I(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1 + F(w) - x[i]
+			r[i] = float64(1 + F(I(w)) - F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = 1 + w - x[i]
+			r[i] = int(1 + I(w) - I(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := SpanIO(w, x[i])
+			v := SpanIO(I(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -3833,19 +3833,19 @@ func SpanABO(w AB, x O) O {
 	case B:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = 1 + B2I(w[i]) - B2I(x)
+			r[i] = int(1 + B2I(B(w[i])) - B2I(B(x)))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = 1 + B2F(w[i]) - x
+			r[i] = float64(1 + B2F(B(w[i])) - F(x))
 		}
 		return r
 	case I:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = 1 + B2I(w[i]) - x
+			r[i] = int(1 + B2I(B(w[i])) - I(x))
 		}
 		return r
 	case AB:
@@ -3854,7 +3854,7 @@ func SpanABO(w AB, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = 1 + B2I(w[i]) - B2I(x[i])
+			r[i] = int(1 + B2I(B(w[i])) - B2I(B(x[i])))
 		}
 		return r
 	case AF:
@@ -3863,7 +3863,7 @@ func SpanABO(w AB, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1 + B2F(w[i]) - x[i]
+			r[i] = float64(1 + B2F(B(w[i])) - F(x[i]))
 		}
 		return r
 	case AI:
@@ -3872,7 +3872,7 @@ func SpanABO(w AB, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = 1 + B2I(w[i]) - x[i]
+			r[i] = int(1 + B2I(B(w[i])) - I(x[i]))
 		}
 		return r
 	case AO:
@@ -3881,7 +3881,7 @@ func SpanABO(w AB, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := SpanBO(w[i], x[i])
+			v := SpanBO(B(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -3901,19 +3901,19 @@ func SpanAFO(w AF, x O) O {
 	case B:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = 1 + w[i] - B2F(x)
+			r[i] = float64(1 + F(w[i]) - B2F(B(x)))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = 1 + w[i] - x
+			r[i] = float64(1 + F(w[i]) - F(x))
 		}
 		return r
 	case I:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = 1 + w[i] - F(x)
+			r[i] = float64(1 + F(w[i]) - F(I(x)))
 		}
 		return r
 	case AB:
@@ -3922,7 +3922,7 @@ func SpanAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1 + w[i] - B2F(x[i])
+			r[i] = float64(1 + F(w[i]) - B2F(B(x[i])))
 		}
 		return r
 	case AF:
@@ -3931,7 +3931,7 @@ func SpanAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1 + w[i] - x[i]
+			r[i] = float64(1 + F(w[i]) - F(x[i]))
 		}
 		return r
 	case AI:
@@ -3940,7 +3940,7 @@ func SpanAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1 + w[i] - F(x[i])
+			r[i] = float64(1 + F(w[i]) - F(I(x[i])))
 		}
 		return r
 	case AO:
@@ -3949,7 +3949,7 @@ func SpanAFO(w AF, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := SpanFO(w[i], x[i])
+			v := SpanFO(F(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -3969,19 +3969,19 @@ func SpanAIO(w AI, x O) O {
 	case B:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = 1 + w[i] - B2I(x)
+			r[i] = int(1 + I(w[i]) - B2I(B(x)))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = 1 + F(w[i]) - x
+			r[i] = float64(1 + F(I(w[i])) - F(x))
 		}
 		return r
 	case I:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = 1 + w[i] - x
+			r[i] = int(1 + I(w[i]) - I(x))
 		}
 		return r
 	case AB:
@@ -3990,7 +3990,7 @@ func SpanAIO(w AI, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = 1 + w[i] - B2I(x[i])
+			r[i] = int(1 + I(w[i]) - B2I(B(x[i])))
 		}
 		return r
 	case AF:
@@ -3999,7 +3999,7 @@ func SpanAIO(w AI, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1 + F(w[i]) - x[i]
+			r[i] = float64(1 + F(I(w[i])) - F(x[i]))
 		}
 		return r
 	case AI:
@@ -4008,7 +4008,7 @@ func SpanAIO(w AI, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = 1 + w[i] - x[i]
+			r[i] = int(1 + I(w[i]) - I(x[i]))
 		}
 		return r
 	case AO:
@@ -4017,7 +4017,7 @@ func SpanAIO(w AI, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := SpanIO(w[i], x[i])
+			v := SpanIO(I(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -4098,31 +4098,31 @@ func MultiplyBO(w B, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w && x[i]
+			r[i] = bool(B(w) && B(x[i]))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = B2F(w) * x[i]
+			r[i] = float64(B2F(B(w)) * F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = B2I(w) * x[i]
+			r[i] = int(B2I(B(w)) * I(x[i]))
 		}
 		return r
 	case AS:
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = strings.Repeat(x[i], B2I(w))
+			r[i] = string(strings.Repeat(S(x[i]), B2I(B(w))))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := MultiplyBO(w, x[i])
+			v := MultiplyBO(B(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -4150,31 +4150,31 @@ func MultiplyFO(w F, x O) O {
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w * B2F(x[i])
+			r[i] = float64(F(w) * B2F(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w * x[i]
+			r[i] = float64(F(w) * F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w * F(x[i])
+			r[i] = float64(F(w) * F(I(x[i])))
 		}
 		return r
 	case AS:
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = strings.Repeat(x[i], I(math.Round(w)))
+			r[i] = string(strings.Repeat(S(x[i]), I(math.Round(F(w)))))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := MultiplyFO(w, x[i])
+			v := MultiplyFO(F(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -4202,31 +4202,31 @@ func MultiplyIO(w I, x O) O {
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = w * B2I(x[i])
+			r[i] = int(I(w) * B2I(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(w) * x[i]
+			r[i] = float64(F(I(w)) * F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = w * x[i]
+			r[i] = int(I(w) * I(x[i]))
 		}
 		return r
 	case AS:
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = strings.Repeat(x[i], w)
+			r[i] = string(strings.Repeat(S(x[i]), I(w)))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := MultiplyIO(w, x[i])
+			v := MultiplyIO(I(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -4252,25 +4252,25 @@ func MultiplySO(w S, x O) O {
 	case AB:
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = strings.Repeat(w, B2I(x[i]))
+			r[i] = string(strings.Repeat(S(w), B2I(B(x[i]))))
 		}
 		return r
 	case AF:
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = strings.Repeat(w, I(math.Round(x[i])))
+			r[i] = string(strings.Repeat(S(w), I(math.Round(F(x[i])))))
 		}
 		return r
 	case AI:
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = strings.Repeat(w, x[i])
+			r[i] = string(strings.Repeat(S(w), I(x[i])))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := MultiplySO(w, x[i])
+			v := MultiplySO(S(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -4290,25 +4290,25 @@ func MultiplyABO(w AB, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] && x
+			r[i] = bool(B(w[i]) && B(x))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = B2F(w[i]) * x
+			r[i] = float64(B2F(B(w[i])) * F(x))
 		}
 		return r
 	case I:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = B2I(w[i]) * x
+			r[i] = int(B2I(B(w[i])) * I(x))
 		}
 		return r
 	case S:
 		r := make(AS, len(w))
 		for i := range r {
-			r[i] = strings.Repeat(x, B2I(w[i]))
+			r[i] = string(strings.Repeat(S(x), B2I(B(w[i]))))
 		}
 		return r
 	case AB:
@@ -4317,7 +4317,7 @@ func MultiplyABO(w AB, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] && x[i]
+			r[i] = bool(B(w[i]) && B(x[i]))
 		}
 		return r
 	case AF:
@@ -4326,7 +4326,7 @@ func MultiplyABO(w AB, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = B2F(w[i]) * x[i]
+			r[i] = float64(B2F(B(w[i])) * F(x[i]))
 		}
 		return r
 	case AI:
@@ -4335,7 +4335,7 @@ func MultiplyABO(w AB, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = B2I(w[i]) * x[i]
+			r[i] = int(B2I(B(w[i])) * I(x[i]))
 		}
 		return r
 	case AS:
@@ -4344,7 +4344,7 @@ func MultiplyABO(w AB, x O) O {
 		}
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = strings.Repeat(x[i], B2I(w[i]))
+			r[i] = string(strings.Repeat(S(x[i]), B2I(B(w[i]))))
 		}
 		return r
 	case AO:
@@ -4353,7 +4353,7 @@ func MultiplyABO(w AB, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := MultiplyBO(w[i], x[i])
+			v := MultiplyBO(B(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -4373,25 +4373,25 @@ func MultiplyAFO(w AF, x O) O {
 	case B:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = w[i] * B2F(x)
+			r[i] = float64(F(w[i]) * B2F(B(x)))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = w[i] * x
+			r[i] = float64(F(w[i]) * F(x))
 		}
 		return r
 	case I:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = w[i] * F(x)
+			r[i] = float64(F(w[i]) * F(I(x)))
 		}
 		return r
 	case S:
 		r := make(AS, len(w))
 		for i := range r {
-			r[i] = strings.Repeat(x, I(math.Round(w[i])))
+			r[i] = string(strings.Repeat(S(x), I(math.Round(F(w[i])))))
 		}
 		return r
 	case AB:
@@ -4400,7 +4400,7 @@ func MultiplyAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w[i] * B2F(x[i])
+			r[i] = float64(F(w[i]) * B2F(B(x[i])))
 		}
 		return r
 	case AF:
@@ -4409,7 +4409,7 @@ func MultiplyAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w[i] * x[i]
+			r[i] = float64(F(w[i]) * F(x[i]))
 		}
 		return r
 	case AI:
@@ -4418,7 +4418,7 @@ func MultiplyAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w[i] * F(x[i])
+			r[i] = float64(F(w[i]) * F(I(x[i])))
 		}
 		return r
 	case AS:
@@ -4427,7 +4427,7 @@ func MultiplyAFO(w AF, x O) O {
 		}
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = strings.Repeat(x[i], I(math.Round(w[i])))
+			r[i] = string(strings.Repeat(S(x[i]), I(math.Round(F(w[i])))))
 		}
 		return r
 	case AO:
@@ -4436,7 +4436,7 @@ func MultiplyAFO(w AF, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := MultiplyFO(w[i], x[i])
+			v := MultiplyFO(F(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -4456,25 +4456,25 @@ func MultiplyAIO(w AI, x O) O {
 	case B:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = w[i] * B2I(x)
+			r[i] = int(I(w[i]) * B2I(B(x)))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = F(w[i]) * x
+			r[i] = float64(F(I(w[i])) * F(x))
 		}
 		return r
 	case I:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = w[i] * x
+			r[i] = int(I(w[i]) * I(x))
 		}
 		return r
 	case S:
 		r := make(AS, len(w))
 		for i := range r {
-			r[i] = strings.Repeat(x, w[i])
+			r[i] = string(strings.Repeat(S(x), I(w[i])))
 		}
 		return r
 	case AB:
@@ -4483,7 +4483,7 @@ func MultiplyAIO(w AI, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = w[i] * B2I(x[i])
+			r[i] = int(I(w[i]) * B2I(B(x[i])))
 		}
 		return r
 	case AF:
@@ -4492,7 +4492,7 @@ func MultiplyAIO(w AI, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(w[i]) * x[i]
+			r[i] = float64(F(I(w[i])) * F(x[i]))
 		}
 		return r
 	case AI:
@@ -4501,7 +4501,7 @@ func MultiplyAIO(w AI, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = w[i] * x[i]
+			r[i] = int(I(w[i]) * I(x[i]))
 		}
 		return r
 	case AS:
@@ -4510,7 +4510,7 @@ func MultiplyAIO(w AI, x O) O {
 		}
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = strings.Repeat(x[i], w[i])
+			r[i] = string(strings.Repeat(S(x[i]), I(w[i])))
 		}
 		return r
 	case AO:
@@ -4519,7 +4519,7 @@ func MultiplyAIO(w AI, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := MultiplyIO(w[i], x[i])
+			v := MultiplyIO(I(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -4539,19 +4539,19 @@ func MultiplyASO(w AS, x O) O {
 	case B:
 		r := make(AS, len(w))
 		for i := range r {
-			r[i] = strings.Repeat(w[i], B2I(x))
+			r[i] = string(strings.Repeat(S(w[i]), B2I(B(x))))
 		}
 		return r
 	case F:
 		r := make(AS, len(w))
 		for i := range r {
-			r[i] = strings.Repeat(w[i], I(math.Round(x)))
+			r[i] = string(strings.Repeat(S(w[i]), I(math.Round(F(x)))))
 		}
 		return r
 	case I:
 		r := make(AS, len(w))
 		for i := range r {
-			r[i] = strings.Repeat(w[i], x)
+			r[i] = string(strings.Repeat(S(w[i]), I(x)))
 		}
 		return r
 	case AB:
@@ -4560,7 +4560,7 @@ func MultiplyASO(w AS, x O) O {
 		}
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = strings.Repeat(w[i], B2I(x[i]))
+			r[i] = string(strings.Repeat(S(w[i]), B2I(B(x[i]))))
 		}
 		return r
 	case AF:
@@ -4569,7 +4569,7 @@ func MultiplyASO(w AS, x O) O {
 		}
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = strings.Repeat(w[i], I(math.Round(x[i])))
+			r[i] = string(strings.Repeat(S(w[i]), I(math.Round(F(x[i])))))
 		}
 		return r
 	case AI:
@@ -4578,7 +4578,7 @@ func MultiplyASO(w AS, x O) O {
 		}
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = strings.Repeat(w[i], x[i])
+			r[i] = string(strings.Repeat(S(w[i]), I(x[i])))
 		}
 		return r
 	case AO:
@@ -4587,7 +4587,7 @@ func MultiplyASO(w AS, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := MultiplySO(w[i], x[i])
+			v := MultiplySO(S(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -4662,25 +4662,25 @@ func DivideBO(w B, x O) O {
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = divide(B2F(w), B2F(x[i]))
+			r[i] = float64(divide(B2F(B(w)), B2F(B(x[i]))))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = divide(B2F(w), x[i])
+			r[i] = float64(divide(B2F(B(w)), F(x[i])))
 		}
 		return r
 	case AI:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = divide(B2F(w), F(x[i]))
+			r[i] = float64(divide(B2F(B(w)), F(I(x[i]))))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := DivideBO(w, x[i])
+			v := DivideBO(B(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -4706,25 +4706,25 @@ func DivideFO(w F, x O) O {
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = divide(w, B2F(x[i]))
+			r[i] = float64(divide(F(w), B2F(B(x[i]))))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = divide(w, x[i])
+			r[i] = float64(divide(F(w), F(x[i])))
 		}
 		return r
 	case AI:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = divide(w, F(x[i]))
+			r[i] = float64(divide(F(w), F(I(x[i]))))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := DivideFO(w, x[i])
+			v := DivideFO(F(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -4750,25 +4750,25 @@ func DivideIO(w I, x O) O {
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = divide(F(w), B2F(x[i]))
+			r[i] = float64(divide(F(I(w)), B2F(B(x[i]))))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = divide(F(w), x[i])
+			r[i] = float64(divide(F(I(w)), F(x[i])))
 		}
 		return r
 	case AI:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = divide(F(w), F(x[i]))
+			r[i] = float64(divide(F(I(w)), F(I(x[i]))))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := DivideIO(w, x[i])
+			v := DivideIO(I(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -4788,19 +4788,19 @@ func DivideABO(w AB, x O) O {
 	case B:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = divide(B2F(w[i]), B2F(x))
+			r[i] = float64(divide(B2F(B(w[i])), B2F(B(x))))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = divide(B2F(w[i]), x)
+			r[i] = float64(divide(B2F(B(w[i])), F(x)))
 		}
 		return r
 	case I:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = divide(B2F(w[i]), F(x))
+			r[i] = float64(divide(B2F(B(w[i])), F(I(x))))
 		}
 		return r
 	case AB:
@@ -4809,7 +4809,7 @@ func DivideABO(w AB, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = divide(B2F(w[i]), B2F(x[i]))
+			r[i] = float64(divide(B2F(B(w[i])), B2F(B(x[i]))))
 		}
 		return r
 	case AF:
@@ -4818,7 +4818,7 @@ func DivideABO(w AB, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = divide(B2F(w[i]), x[i])
+			r[i] = float64(divide(B2F(B(w[i])), F(x[i])))
 		}
 		return r
 	case AI:
@@ -4827,7 +4827,7 @@ func DivideABO(w AB, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = divide(B2F(w[i]), F(x[i]))
+			r[i] = float64(divide(B2F(B(w[i])), F(I(x[i]))))
 		}
 		return r
 	case AO:
@@ -4836,7 +4836,7 @@ func DivideABO(w AB, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := DivideBO(w[i], x[i])
+			v := DivideBO(B(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -4856,19 +4856,19 @@ func DivideAFO(w AF, x O) O {
 	case B:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = divide(w[i], B2F(x))
+			r[i] = float64(divide(F(w[i]), B2F(B(x))))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = divide(w[i], x)
+			r[i] = float64(divide(F(w[i]), F(x)))
 		}
 		return r
 	case I:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = divide(w[i], F(x))
+			r[i] = float64(divide(F(w[i]), F(I(x))))
 		}
 		return r
 	case AB:
@@ -4877,7 +4877,7 @@ func DivideAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = divide(w[i], B2F(x[i]))
+			r[i] = float64(divide(F(w[i]), B2F(B(x[i]))))
 		}
 		return r
 	case AF:
@@ -4886,7 +4886,7 @@ func DivideAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = divide(w[i], x[i])
+			r[i] = float64(divide(F(w[i]), F(x[i])))
 		}
 		return r
 	case AI:
@@ -4895,7 +4895,7 @@ func DivideAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = divide(w[i], F(x[i]))
+			r[i] = float64(divide(F(w[i]), F(I(x[i]))))
 		}
 		return r
 	case AO:
@@ -4904,7 +4904,7 @@ func DivideAFO(w AF, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := DivideFO(w[i], x[i])
+			v := DivideFO(F(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -4924,19 +4924,19 @@ func DivideAIO(w AI, x O) O {
 	case B:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = divide(F(w[i]), B2F(x))
+			r[i] = float64(divide(F(I(w[i])), B2F(B(x))))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = divide(F(w[i]), x)
+			r[i] = float64(divide(F(I(w[i])), F(x)))
 		}
 		return r
 	case I:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = divide(F(w[i]), F(x))
+			r[i] = float64(divide(F(I(w[i])), F(I(x))))
 		}
 		return r
 	case AB:
@@ -4945,7 +4945,7 @@ func DivideAIO(w AI, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = divide(F(w[i]), B2F(x[i]))
+			r[i] = float64(divide(F(I(w[i])), B2F(B(x[i]))))
 		}
 		return r
 	case AF:
@@ -4954,7 +4954,7 @@ func DivideAIO(w AI, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = divide(F(w[i]), x[i])
+			r[i] = float64(divide(F(I(w[i])), F(x[i])))
 		}
 		return r
 	case AI:
@@ -4963,7 +4963,7 @@ func DivideAIO(w AI, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = divide(F(w[i]), F(x[i]))
+			r[i] = float64(divide(F(I(w[i])), F(I(x[i]))))
 		}
 		return r
 	case AO:
@@ -4972,7 +4972,7 @@ func DivideAIO(w AI, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := DivideIO(w[i], x[i])
+			v := DivideIO(I(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -5051,25 +5051,25 @@ func MinimumBO(w B, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w && x[i]
+			r[i] = bool(B(w) && B(x[i]))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(math.Min(float64(B2F(w)), float64(x[i])))
+			r[i] = float64(F(math.Min(float64(B2F(B(w))), float64(F(x[i])))))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = minI(B2I(w), x[i])
+			r[i] = int(minI(B2I(B(w)), I(x[i])))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := MinimumBO(w, x[i])
+			v := MinimumBO(B(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -5095,25 +5095,25 @@ func MinimumFO(w F, x O) O {
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(math.Min(float64(w), float64(B2F(x[i]))))
+			r[i] = float64(F(math.Min(float64(F(w)), float64(B2F(B(x[i]))))))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(math.Min(float64(w), float64(x[i])))
+			r[i] = float64(F(math.Min(float64(F(w)), float64(F(x[i])))))
 		}
 		return r
 	case AI:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(math.Min(float64(w), float64(x[i])))
+			r[i] = float64(F(math.Min(float64(F(w)), float64(I(x[i])))))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := MinimumFO(w, x[i])
+			v := MinimumFO(F(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -5139,25 +5139,25 @@ func MinimumIO(w I, x O) O {
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = minI(w, B2I(x[i]))
+			r[i] = int(minI(I(w), B2I(B(x[i]))))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(math.Min(float64(w), float64(x[i])))
+			r[i] = float64(F(math.Min(float64(I(w)), float64(F(x[i])))))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = minI(w, x[i])
+			r[i] = int(minI(I(w), I(x[i])))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := MinimumIO(w, x[i])
+			v := MinimumIO(I(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -5179,13 +5179,13 @@ func MinimumSO(w S, x O) O {
 	case AS:
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = minS(w, x[i])
+			r[i] = string(minS(S(w), S(x[i])))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := MinimumSO(w, x[i])
+			v := MinimumSO(S(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -5205,19 +5205,19 @@ func MinimumABO(w AB, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] && x
+			r[i] = bool(B(w[i]) && B(x))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = F(math.Min(float64(B2F(w[i])), float64(x)))
+			r[i] = float64(F(math.Min(float64(B2F(B(w[i]))), float64(F(x)))))
 		}
 		return r
 	case I:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = minI(B2I(w[i]), x)
+			r[i] = int(minI(B2I(B(w[i])), I(x)))
 		}
 		return r
 	case AB:
@@ -5226,7 +5226,7 @@ func MinimumABO(w AB, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] && x[i]
+			r[i] = bool(B(w[i]) && B(x[i]))
 		}
 		return r
 	case AF:
@@ -5235,7 +5235,7 @@ func MinimumABO(w AB, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(math.Min(float64(B2F(w[i])), float64(x[i])))
+			r[i] = float64(F(math.Min(float64(B2F(B(w[i]))), float64(F(x[i])))))
 		}
 		return r
 	case AI:
@@ -5244,7 +5244,7 @@ func MinimumABO(w AB, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = minI(B2I(w[i]), x[i])
+			r[i] = int(minI(B2I(B(w[i])), I(x[i])))
 		}
 		return r
 	case AO:
@@ -5253,7 +5253,7 @@ func MinimumABO(w AB, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := MinimumBO(w[i], x[i])
+			v := MinimumBO(B(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -5273,19 +5273,19 @@ func MinimumAFO(w AF, x O) O {
 	case B:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = F(math.Min(float64(w[i]), float64(B2F(x))))
+			r[i] = float64(F(math.Min(float64(F(w[i])), float64(B2F(B(x))))))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = F(math.Min(float64(w[i]), float64(x)))
+			r[i] = float64(F(math.Min(float64(F(w[i])), float64(F(x)))))
 		}
 		return r
 	case I:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = F(math.Min(float64(w[i]), float64(x)))
+			r[i] = float64(F(math.Min(float64(F(w[i])), float64(I(x)))))
 		}
 		return r
 	case AB:
@@ -5294,7 +5294,7 @@ func MinimumAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(math.Min(float64(w[i]), float64(B2F(x[i]))))
+			r[i] = float64(F(math.Min(float64(F(w[i])), float64(B2F(B(x[i]))))))
 		}
 		return r
 	case AF:
@@ -5303,7 +5303,7 @@ func MinimumAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(math.Min(float64(w[i]), float64(x[i])))
+			r[i] = float64(F(math.Min(float64(F(w[i])), float64(F(x[i])))))
 		}
 		return r
 	case AI:
@@ -5312,7 +5312,7 @@ func MinimumAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(math.Min(float64(w[i]), float64(x[i])))
+			r[i] = float64(F(math.Min(float64(F(w[i])), float64(I(x[i])))))
 		}
 		return r
 	case AO:
@@ -5321,7 +5321,7 @@ func MinimumAFO(w AF, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := MinimumFO(w[i], x[i])
+			v := MinimumFO(F(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -5341,19 +5341,19 @@ func MinimumAIO(w AI, x O) O {
 	case B:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = minI(w[i], B2I(x))
+			r[i] = int(minI(I(w[i]), B2I(B(x))))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = F(math.Min(float64(w[i]), float64(x)))
+			r[i] = float64(F(math.Min(float64(I(w[i])), float64(F(x)))))
 		}
 		return r
 	case I:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = minI(w[i], x)
+			r[i] = int(minI(I(w[i]), I(x)))
 		}
 		return r
 	case AB:
@@ -5362,7 +5362,7 @@ func MinimumAIO(w AI, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = minI(w[i], B2I(x[i]))
+			r[i] = int(minI(I(w[i]), B2I(B(x[i]))))
 		}
 		return r
 	case AF:
@@ -5371,7 +5371,7 @@ func MinimumAIO(w AI, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(math.Min(float64(w[i]), float64(x[i])))
+			r[i] = float64(F(math.Min(float64(I(w[i])), float64(F(x[i])))))
 		}
 		return r
 	case AI:
@@ -5380,7 +5380,7 @@ func MinimumAIO(w AI, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = minI(w[i], x[i])
+			r[i] = int(minI(I(w[i]), I(x[i])))
 		}
 		return r
 	case AO:
@@ -5389,7 +5389,7 @@ func MinimumAIO(w AI, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := MinimumIO(w[i], x[i])
+			v := MinimumIO(I(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -5409,7 +5409,7 @@ func MinimumASO(w AS, x O) O {
 	case S:
 		r := make(AS, len(w))
 		for i := range r {
-			r[i] = minS(w[i], x)
+			r[i] = string(minS(S(w[i]), S(x)))
 		}
 		return r
 	case AS:
@@ -5418,7 +5418,7 @@ func MinimumASO(w AS, x O) O {
 		}
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = minS(w[i], x[i])
+			r[i] = string(minS(S(w[i]), S(x[i])))
 		}
 		return r
 	case AO:
@@ -5427,7 +5427,7 @@ func MinimumASO(w AS, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := MinimumSO(w[i], x[i])
+			v := MinimumSO(S(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -5506,25 +5506,25 @@ func MaximumBO(w B, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w || x[i]
+			r[i] = bool(B(w) || B(x[i]))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(math.Max(float64(B2F(w)), float64(x[i])))
+			r[i] = float64(F(math.Max(float64(B2F(B(w))), float64(F(x[i])))))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = maxI(B2I(w), x[i])
+			r[i] = int(maxI(B2I(B(w)), I(x[i])))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := MaximumBO(w, x[i])
+			v := MaximumBO(B(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -5550,25 +5550,25 @@ func MaximumFO(w F, x O) O {
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(math.Max(float64(w), float64(B2F(x[i]))))
+			r[i] = float64(F(math.Max(float64(F(w)), float64(B2F(B(x[i]))))))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(math.Max(float64(w), float64(x[i])))
+			r[i] = float64(F(math.Max(float64(F(w)), float64(F(x[i])))))
 		}
 		return r
 	case AI:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(math.Max(float64(w), float64(x[i])))
+			r[i] = float64(F(math.Max(float64(F(w)), float64(I(x[i])))))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := MaximumFO(w, x[i])
+			v := MaximumFO(F(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -5594,25 +5594,25 @@ func MaximumIO(w I, x O) O {
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = maxI(w, B2I(x[i]))
+			r[i] = int(maxI(I(w), B2I(B(x[i]))))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(math.Max(float64(w), float64(x[i])))
+			r[i] = float64(F(math.Max(float64(I(w)), float64(F(x[i])))))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = maxI(w, x[i])
+			r[i] = int(maxI(I(w), I(x[i])))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := MaximumIO(w, x[i])
+			v := MaximumIO(I(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -5634,13 +5634,13 @@ func MaximumSO(w S, x O) O {
 	case AS:
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = maxS(w, x[i])
+			r[i] = string(maxS(S(w), S(x[i])))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := MaximumSO(w, x[i])
+			v := MaximumSO(S(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -5660,19 +5660,19 @@ func MaximumABO(w AB, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] || x
+			r[i] = bool(B(w[i]) || B(x))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = F(math.Max(float64(B2F(w[i])), float64(x)))
+			r[i] = float64(F(math.Max(float64(B2F(B(w[i]))), float64(F(x)))))
 		}
 		return r
 	case I:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = maxI(B2I(w[i]), x)
+			r[i] = int(maxI(B2I(B(w[i])), I(x)))
 		}
 		return r
 	case AB:
@@ -5681,7 +5681,7 @@ func MaximumABO(w AB, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] || x[i]
+			r[i] = bool(B(w[i]) || B(x[i]))
 		}
 		return r
 	case AF:
@@ -5690,7 +5690,7 @@ func MaximumABO(w AB, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(math.Max(float64(B2F(w[i])), float64(x[i])))
+			r[i] = float64(F(math.Max(float64(B2F(B(w[i]))), float64(F(x[i])))))
 		}
 		return r
 	case AI:
@@ -5699,7 +5699,7 @@ func MaximumABO(w AB, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = maxI(B2I(w[i]), x[i])
+			r[i] = int(maxI(B2I(B(w[i])), I(x[i])))
 		}
 		return r
 	case AO:
@@ -5708,7 +5708,7 @@ func MaximumABO(w AB, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := MaximumBO(w[i], x[i])
+			v := MaximumBO(B(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -5728,19 +5728,19 @@ func MaximumAFO(w AF, x O) O {
 	case B:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = F(math.Max(float64(w[i]), float64(B2F(x))))
+			r[i] = float64(F(math.Max(float64(F(w[i])), float64(B2F(B(x))))))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = F(math.Max(float64(w[i]), float64(x)))
+			r[i] = float64(F(math.Max(float64(F(w[i])), float64(F(x)))))
 		}
 		return r
 	case I:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = F(math.Max(float64(w[i]), float64(x)))
+			r[i] = float64(F(math.Max(float64(F(w[i])), float64(I(x)))))
 		}
 		return r
 	case AB:
@@ -5749,7 +5749,7 @@ func MaximumAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(math.Max(float64(w[i]), float64(B2F(x[i]))))
+			r[i] = float64(F(math.Max(float64(F(w[i])), float64(B2F(B(x[i]))))))
 		}
 		return r
 	case AF:
@@ -5758,7 +5758,7 @@ func MaximumAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(math.Max(float64(w[i]), float64(x[i])))
+			r[i] = float64(F(math.Max(float64(F(w[i])), float64(F(x[i])))))
 		}
 		return r
 	case AI:
@@ -5767,7 +5767,7 @@ func MaximumAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(math.Max(float64(w[i]), float64(x[i])))
+			r[i] = float64(F(math.Max(float64(F(w[i])), float64(I(x[i])))))
 		}
 		return r
 	case AO:
@@ -5776,7 +5776,7 @@ func MaximumAFO(w AF, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := MaximumFO(w[i], x[i])
+			v := MaximumFO(F(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -5796,19 +5796,19 @@ func MaximumAIO(w AI, x O) O {
 	case B:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = maxI(w[i], B2I(x))
+			r[i] = int(maxI(I(w[i]), B2I(B(x))))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = F(math.Max(float64(w[i]), float64(x)))
+			r[i] = float64(F(math.Max(float64(I(w[i])), float64(F(x)))))
 		}
 		return r
 	case I:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = maxI(w[i], x)
+			r[i] = int(maxI(I(w[i]), I(x)))
 		}
 		return r
 	case AB:
@@ -5817,7 +5817,7 @@ func MaximumAIO(w AI, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = maxI(w[i], B2I(x[i]))
+			r[i] = int(maxI(I(w[i]), B2I(B(x[i]))))
 		}
 		return r
 	case AF:
@@ -5826,7 +5826,7 @@ func MaximumAIO(w AI, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(math.Max(float64(w[i]), float64(x[i])))
+			r[i] = float64(F(math.Max(float64(I(w[i])), float64(F(x[i])))))
 		}
 		return r
 	case AI:
@@ -5835,7 +5835,7 @@ func MaximumAIO(w AI, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = maxI(w[i], x[i])
+			r[i] = int(maxI(I(w[i]), I(x[i])))
 		}
 		return r
 	case AO:
@@ -5844,7 +5844,7 @@ func MaximumAIO(w AI, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := MaximumIO(w[i], x[i])
+			v := MaximumIO(I(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -5864,7 +5864,7 @@ func MaximumASO(w AS, x O) O {
 	case S:
 		r := make(AS, len(w))
 		for i := range r {
-			r[i] = maxS(w[i], x)
+			r[i] = string(maxS(S(w[i]), S(x)))
 		}
 		return r
 	case AS:
@@ -5873,7 +5873,7 @@ func MaximumASO(w AS, x O) O {
 		}
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = maxS(w[i], x[i])
+			r[i] = string(maxS(S(w[i]), S(x[i])))
 		}
 		return r
 	case AO:
@@ -5882,7 +5882,7 @@ func MaximumASO(w AS, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := MaximumSO(w[i], x[i])
+			v := MaximumSO(S(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -5957,25 +5957,25 @@ func AndBO(w B, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w && x[i]
+			r[i] = bool(B(w) && B(x[i]))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = B2F(w) * x[i]
+			r[i] = float64(B2F(B(w)) * F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = B2I(w) * x[i]
+			r[i] = int(B2I(B(w)) * I(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := AndBO(w, x[i])
+			v := AndBO(B(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -6001,25 +6001,25 @@ func AndFO(w F, x O) O {
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w * B2F(x[i])
+			r[i] = float64(F(w) * B2F(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w * x[i]
+			r[i] = float64(F(w) * F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w * F(x[i])
+			r[i] = float64(F(w) * F(I(x[i])))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := AndFO(w, x[i])
+			v := AndFO(F(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -6045,25 +6045,25 @@ func AndIO(w I, x O) O {
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = w * B2I(x[i])
+			r[i] = int(I(w) * B2I(B(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(w) * x[i]
+			r[i] = float64(F(I(w)) * F(x[i]))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = w * x[i]
+			r[i] = int(I(w) * I(x[i]))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := AndIO(w, x[i])
+			v := AndIO(I(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -6083,19 +6083,19 @@ func AndABO(w AB, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] && x
+			r[i] = bool(B(w[i]) && B(x))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = B2F(w[i]) * x
+			r[i] = float64(B2F(B(w[i])) * F(x))
 		}
 		return r
 	case I:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = B2I(w[i]) * x
+			r[i] = int(B2I(B(w[i])) * I(x))
 		}
 		return r
 	case AB:
@@ -6104,7 +6104,7 @@ func AndABO(w AB, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] && x[i]
+			r[i] = bool(B(w[i]) && B(x[i]))
 		}
 		return r
 	case AF:
@@ -6113,7 +6113,7 @@ func AndABO(w AB, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = B2F(w[i]) * x[i]
+			r[i] = float64(B2F(B(w[i])) * F(x[i]))
 		}
 		return r
 	case AI:
@@ -6122,7 +6122,7 @@ func AndABO(w AB, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = B2I(w[i]) * x[i]
+			r[i] = int(B2I(B(w[i])) * I(x[i]))
 		}
 		return r
 	case AO:
@@ -6131,7 +6131,7 @@ func AndABO(w AB, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := AndBO(w[i], x[i])
+			v := AndBO(B(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -6151,19 +6151,19 @@ func AndAFO(w AF, x O) O {
 	case B:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = w[i] * B2F(x)
+			r[i] = float64(F(w[i]) * B2F(B(x)))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = w[i] * x
+			r[i] = float64(F(w[i]) * F(x))
 		}
 		return r
 	case I:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = w[i] * F(x)
+			r[i] = float64(F(w[i]) * F(I(x)))
 		}
 		return r
 	case AB:
@@ -6172,7 +6172,7 @@ func AndAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w[i] * B2F(x[i])
+			r[i] = float64(F(w[i]) * B2F(B(x[i])))
 		}
 		return r
 	case AF:
@@ -6181,7 +6181,7 @@ func AndAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w[i] * x[i]
+			r[i] = float64(F(w[i]) * F(x[i]))
 		}
 		return r
 	case AI:
@@ -6190,7 +6190,7 @@ func AndAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = w[i] * F(x[i])
+			r[i] = float64(F(w[i]) * F(I(x[i])))
 		}
 		return r
 	case AO:
@@ -6199,7 +6199,7 @@ func AndAFO(w AF, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := AndFO(w[i], x[i])
+			v := AndFO(F(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -6219,19 +6219,19 @@ func AndAIO(w AI, x O) O {
 	case B:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = w[i] * B2I(x)
+			r[i] = int(I(w[i]) * B2I(B(x)))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = F(w[i]) * x
+			r[i] = float64(F(I(w[i])) * F(x))
 		}
 		return r
 	case I:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = w[i] * x
+			r[i] = int(I(w[i]) * I(x))
 		}
 		return r
 	case AB:
@@ -6240,7 +6240,7 @@ func AndAIO(w AI, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = w[i] * B2I(x[i])
+			r[i] = int(I(w[i]) * B2I(B(x[i])))
 		}
 		return r
 	case AF:
@@ -6249,7 +6249,7 @@ func AndAIO(w AI, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = F(w[i]) * x[i]
+			r[i] = float64(F(I(w[i])) * F(x[i]))
 		}
 		return r
 	case AI:
@@ -6258,7 +6258,7 @@ func AndAIO(w AI, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = w[i] * x[i]
+			r[i] = int(I(w[i]) * I(x[i]))
 		}
 		return r
 	case AO:
@@ -6267,7 +6267,7 @@ func AndAIO(w AI, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := AndIO(w[i], x[i])
+			v := AndIO(I(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -6342,25 +6342,25 @@ func OrBO(w B, x O) O {
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w || x[i]
+			r[i] = bool(B(w) || B(x[i]))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1 - ((1 - B2F(w)) * (1 - x[i]))
+			r[i] = float64(1 - ((1 - B2F(B(w))) * (1 - F(x[i]))))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = 1 - ((1 - B2I(w)) * (1 - x[i]))
+			r[i] = int(1 - ((1 - B2I(B(w))) * (1 - I(x[i]))))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := OrBO(w, x[i])
+			v := OrBO(B(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -6386,25 +6386,25 @@ func OrFO(w F, x O) O {
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1 - ((1 - w) * (1 - B2F(x[i])))
+			r[i] = float64(1 - ((1 - F(w)) * (1 - B2F(B(x[i])))))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1 - ((1 - w) * (1 - x[i]))
+			r[i] = float64(1 - ((1 - F(w)) * (1 - F(x[i]))))
 		}
 		return r
 	case AI:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1 - ((1 - w) * F(1-x[i]))
+			r[i] = float64(1 - ((1 - F(w)) * F(1-I(x[i]))))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := OrFO(w, x[i])
+			v := OrFO(F(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -6430,25 +6430,25 @@ func OrIO(w I, x O) O {
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = 1 - ((1 - w) * (1 - B2I(x[i])))
+			r[i] = int(1 - ((1 - I(w)) * (1 - B2I(B(x[i])))))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1 - ((1 - F(w)) * (1 - x[i]))
+			r[i] = float64(1 - ((1 - F(I(w))) * (1 - F(x[i]))))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = 1 - ((1 - w) * (1 - x[i]))
+			r[i] = int(1 - ((1 - I(w)) * (1 - I(x[i]))))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := OrIO(w, x[i])
+			v := OrIO(I(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -6468,19 +6468,19 @@ func OrABO(w AB, x O) O {
 	case B:
 		r := make(AB, len(w))
 		for i := range r {
-			r[i] = w[i] || x
+			r[i] = bool(B(w[i]) || B(x))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = 1 - ((1 - B2F(w[i])) * (1 - x))
+			r[i] = float64(1 - ((1 - B2F(B(w[i]))) * (1 - F(x))))
 		}
 		return r
 	case I:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = 1 - ((1 - B2I(w[i])) * (1 - x))
+			r[i] = int(1 - ((1 - B2I(B(w[i]))) * (1 - I(x))))
 		}
 		return r
 	case AB:
@@ -6489,7 +6489,7 @@ func OrABO(w AB, x O) O {
 		}
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = w[i] || x[i]
+			r[i] = bool(B(w[i]) || B(x[i]))
 		}
 		return r
 	case AF:
@@ -6498,7 +6498,7 @@ func OrABO(w AB, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1 - ((1 - B2F(w[i])) * (1 - x[i]))
+			r[i] = float64(1 - ((1 - B2F(B(w[i]))) * (1 - F(x[i]))))
 		}
 		return r
 	case AI:
@@ -6507,7 +6507,7 @@ func OrABO(w AB, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = 1 - ((1 - B2I(w[i])) * (1 - x[i]))
+			r[i] = int(1 - ((1 - B2I(B(w[i]))) * (1 - I(x[i]))))
 		}
 		return r
 	case AO:
@@ -6516,7 +6516,7 @@ func OrABO(w AB, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := OrBO(w[i], x[i])
+			v := OrBO(B(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -6536,19 +6536,19 @@ func OrAFO(w AF, x O) O {
 	case B:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = 1 - ((1 - w[i]) * (1 - B2F(x)))
+			r[i] = float64(1 - ((1 - F(w[i])) * (1 - B2F(B(x)))))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = 1 - ((1 - w[i]) * (1 - x))
+			r[i] = float64(1 - ((1 - F(w[i])) * (1 - F(x))))
 		}
 		return r
 	case I:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = 1 - ((1 - w[i]) * F(1-x))
+			r[i] = float64(1 - ((1 - F(w[i])) * F(1-I(x))))
 		}
 		return r
 	case AB:
@@ -6557,7 +6557,7 @@ func OrAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1 - ((1 - w[i]) * (1 - B2F(x[i])))
+			r[i] = float64(1 - ((1 - F(w[i])) * (1 - B2F(B(x[i])))))
 		}
 		return r
 	case AF:
@@ -6566,7 +6566,7 @@ func OrAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1 - ((1 - w[i]) * (1 - x[i]))
+			r[i] = float64(1 - ((1 - F(w[i])) * (1 - F(x[i]))))
 		}
 		return r
 	case AI:
@@ -6575,7 +6575,7 @@ func OrAFO(w AF, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1 - ((1 - w[i]) * F(1-x[i]))
+			r[i] = float64(1 - ((1 - F(w[i])) * F(1-I(x[i]))))
 		}
 		return r
 	case AO:
@@ -6584,7 +6584,7 @@ func OrAFO(w AF, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := OrFO(w[i], x[i])
+			v := OrFO(F(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -6604,19 +6604,19 @@ func OrAIO(w AI, x O) O {
 	case B:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = 1 - ((1 - w[i]) * (1 - B2I(x)))
+			r[i] = int(1 - ((1 - I(w[i])) * (1 - B2I(B(x)))))
 		}
 		return r
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = 1 - ((1 - F(w[i])) * (1 - x))
+			r[i] = float64(1 - ((1 - F(I(w[i]))) * (1 - F(x))))
 		}
 		return r
 	case I:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = 1 - ((1 - w[i]) * (1 - x))
+			r[i] = int(1 - ((1 - I(w[i])) * (1 - I(x))))
 		}
 		return r
 	case AB:
@@ -6625,7 +6625,7 @@ func OrAIO(w AI, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = 1 - ((1 - w[i]) * (1 - B2I(x[i])))
+			r[i] = int(1 - ((1 - I(w[i])) * (1 - B2I(B(x[i])))))
 		}
 		return r
 	case AF:
@@ -6634,7 +6634,7 @@ func OrAIO(w AI, x O) O {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = 1 - ((1 - F(w[i])) * (1 - x[i]))
+			r[i] = float64(1 - ((1 - F(I(w[i]))) * (1 - F(x[i]))))
 		}
 		return r
 	case AI:
@@ -6643,7 +6643,7 @@ func OrAIO(w AI, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = 1 - ((1 - w[i]) * (1 - x[i]))
+			r[i] = int(1 - ((1 - I(w[i])) * (1 - I(x[i]))))
 		}
 		return r
 	case AO:
@@ -6652,7 +6652,7 @@ func OrAIO(w AI, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := OrIO(w[i], x[i])
+			v := OrIO(I(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -6727,25 +6727,25 @@ func ModulusBO(w B, x O) O {
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = modulus(B2I(w), B2I(x[i]))
+			r[i] = int(modulus(B2I(B(w)), B2I(B(x[i]))))
 		}
 		return r
 	case AF:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = modulus(B2I(w), I(x[i]))
+			r[i] = int(modulus(B2I(B(w)), I(F(x[i]))))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = modulus(B2I(w), x[i])
+			r[i] = int(modulus(B2I(B(w)), I(x[i])))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := ModulusBO(w, x[i])
+			v := ModulusBO(B(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -6771,25 +6771,25 @@ func ModulusFO(w F, x O) O {
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = modulus(I(w), B2I(x[i]))
+			r[i] = int(modulus(I(F(w)), B2I(B(x[i]))))
 		}
 		return r
 	case AF:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = modulus(I(w), I(x[i]))
+			r[i] = int(modulus(I(F(w)), I(F(x[i]))))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = modulus(I(w), x[i])
+			r[i] = int(modulus(I(F(w)), I(x[i])))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := ModulusFO(w, x[i])
+			v := ModulusFO(F(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -6815,25 +6815,25 @@ func ModulusIO(w I, x O) O {
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = modulus(w, B2I(x[i]))
+			r[i] = int(modulus(I(w), B2I(B(x[i]))))
 		}
 		return r
 	case AF:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = modulus(w, I(x[i]))
+			r[i] = int(modulus(I(w), I(F(x[i]))))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = modulus(w, x[i])
+			r[i] = int(modulus(I(w), I(x[i])))
 		}
 		return r
 	case AO:
 		r := make([]O, len(x))
 		for i := range r {
-			v := ModulusIO(w, x[i])
+			v := ModulusIO(I(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -6853,19 +6853,19 @@ func ModulusABO(w AB, x O) O {
 	case B:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = modulus(B2I(w[i]), B2I(x))
+			r[i] = int(modulus(B2I(B(w[i])), B2I(B(x))))
 		}
 		return r
 	case F:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = modulus(B2I(w[i]), I(x))
+			r[i] = int(modulus(B2I(B(w[i])), I(F(x))))
 		}
 		return r
 	case I:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = modulus(B2I(w[i]), x)
+			r[i] = int(modulus(B2I(B(w[i])), I(x)))
 		}
 		return r
 	case AB:
@@ -6874,7 +6874,7 @@ func ModulusABO(w AB, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = modulus(B2I(w[i]), B2I(x[i]))
+			r[i] = int(modulus(B2I(B(w[i])), B2I(B(x[i]))))
 		}
 		return r
 	case AF:
@@ -6883,7 +6883,7 @@ func ModulusABO(w AB, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = modulus(B2I(w[i]), I(x[i]))
+			r[i] = int(modulus(B2I(B(w[i])), I(F(x[i]))))
 		}
 		return r
 	case AI:
@@ -6892,7 +6892,7 @@ func ModulusABO(w AB, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = modulus(B2I(w[i]), x[i])
+			r[i] = int(modulus(B2I(B(w[i])), I(x[i])))
 		}
 		return r
 	case AO:
@@ -6901,7 +6901,7 @@ func ModulusABO(w AB, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := ModulusBO(w[i], x[i])
+			v := ModulusBO(B(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -6921,19 +6921,19 @@ func ModulusAFO(w AF, x O) O {
 	case B:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = modulus(I(w[i]), B2I(x))
+			r[i] = int(modulus(I(F(w[i])), B2I(B(x))))
 		}
 		return r
 	case F:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = modulus(I(w[i]), I(x))
+			r[i] = int(modulus(I(F(w[i])), I(F(x))))
 		}
 		return r
 	case I:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = modulus(I(w[i]), x)
+			r[i] = int(modulus(I(F(w[i])), I(x)))
 		}
 		return r
 	case AB:
@@ -6942,7 +6942,7 @@ func ModulusAFO(w AF, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = modulus(I(w[i]), B2I(x[i]))
+			r[i] = int(modulus(I(F(w[i])), B2I(B(x[i]))))
 		}
 		return r
 	case AF:
@@ -6951,7 +6951,7 @@ func ModulusAFO(w AF, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = modulus(I(w[i]), I(x[i]))
+			r[i] = int(modulus(I(F(w[i])), I(F(x[i]))))
 		}
 		return r
 	case AI:
@@ -6960,7 +6960,7 @@ func ModulusAFO(w AF, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = modulus(I(w[i]), x[i])
+			r[i] = int(modulus(I(F(w[i])), I(x[i])))
 		}
 		return r
 	case AO:
@@ -6969,7 +6969,7 @@ func ModulusAFO(w AF, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := ModulusFO(w[i], x[i])
+			v := ModulusFO(F(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -6989,19 +6989,19 @@ func ModulusAIO(w AI, x O) O {
 	case B:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = modulus(w[i], B2I(x))
+			r[i] = int(modulus(I(w[i]), B2I(B(x))))
 		}
 		return r
 	case F:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = modulus(w[i], I(x))
+			r[i] = int(modulus(I(w[i]), I(F(x))))
 		}
 		return r
 	case I:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = modulus(w[i], x)
+			r[i] = int(modulus(I(w[i]), I(x)))
 		}
 		return r
 	case AB:
@@ -7010,7 +7010,7 @@ func ModulusAIO(w AI, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = modulus(w[i], B2I(x[i]))
+			r[i] = int(modulus(I(w[i]), B2I(B(x[i]))))
 		}
 		return r
 	case AF:
@@ -7019,7 +7019,7 @@ func ModulusAIO(w AI, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = modulus(w[i], I(x[i]))
+			r[i] = int(modulus(I(w[i]), I(F(x[i]))))
 		}
 		return r
 	case AI:
@@ -7028,7 +7028,7 @@ func ModulusAIO(w AI, x O) O {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = modulus(w[i], x[i])
+			r[i] = int(modulus(I(w[i]), I(x[i])))
 		}
 		return r
 	case AO:
@@ -7037,7 +7037,7 @@ func ModulusAIO(w AI, x O) O {
 		}
 		r := make(AO, len(x))
 		for i := range r {
-			v := ModulusIO(w[i], x[i])
+			v := ModulusIO(I(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
