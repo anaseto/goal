@@ -66,7 +66,7 @@ type Scanner struct {
 	buf     bytes.Buffer  // buffer
 	pos     int           // current position in the input
 	line    int           // current line number
-	start   bool	      // at line start
+	start   bool          // at line start
 	token   Token
 }
 
@@ -156,10 +156,10 @@ func scanAny(s *Scanner) stateFn {
 			return scanCommentLine
 		}
 		s.buf.WriteRune(r)
-		return scanAdverb
+		return s.emit(ADVERB)
 	case '\'', '\\':
 		s.buf.WriteRune(r)
-		return scanAdverb
+		return s.emit(ADVERB)
 	case '{':
 		return s.emit(LEFTBRACE)
 	case '[':
@@ -177,7 +177,7 @@ func scanAny(s *Scanner) stateFn {
 	case ':', '+', '-', '*', '%', '!', '&', '|', '<', '>',
 		'=', '~', ',', '^', '#', '_', '$', '?', '@', '.':
 		s.buf.WriteRune(r)
-		return scanVerb
+		return s.emit(VERB)
 	case '"':
 		return scanString
 	case '`':
@@ -259,24 +259,6 @@ func scanMultiLineComment(s *Scanner) stateFn {
 			}
 		}
 	}
-}
-
-func scanAdverb(s *Scanner) stateFn {
-	r := s.peek()
-	if r == ':' {
-		s.buf.WriteRune(':')
-		s.next()
-	}
-	return s.emit(ADVERB)
-}
-
-func scanVerb(s *Scanner) stateFn {
-	r := s.peek()
-	if r == ':' {
-		s.buf.WriteRune(':')
-		s.next()
-	}
-	return s.emit(VERB)
 }
 
 func scanString(s *Scanner) stateFn {

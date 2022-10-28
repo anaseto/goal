@@ -7,68 +7,39 @@ type I = int       // I represents integers.
 type S = string    // S represents (immutable) strings of bytes.
 type E = error     // E represents errors (TODO: think about it)
 
-// MonadicVerb represents monadic (unary) verbs.
-type MonadicVerb int
+// Verb represents built-in 1-symbol operators.
+type Verb int
 
 const (
-	MSelf     MonadicVerb = iota // ::
-	MFlip                        // +:
-	MNegate                      // -:
-	MFirst                       // *:
-	MClassify                    // %: (classify instead of sqrt? or abs?)
-	MEnum                        // !:
-	MWhere                       // &:
-	MReverse                     // |:
-	MAscend                      // <:
-	MDescend                     // >:
-	MGroup                       // =:
-	MNot                         // ~:
-	MEnlist                      // ,:
-	MNull                        // ^: (maybe change)
-	MLength                      // #:
-	MFloor                       // _:
-	MString                      // $:
-	MUniq                        // ?:
-	MType                        // @:
-	MEval                        // .:
-)
-
-// DyadicVerb represents dyadic (binary) verbs.
-type DyadicVerb int
-
-const (
-	DRight    DyadicVerb = iota // :
-	DAdd                        // +
-	DSubtract                   // -
-	DMultiply                   // *
-	DDivide                     // %
-	DMod                        // !
-	DAnd                        // &
-	DOr                         // |
-	DLess                       // <
-	DMore                       // >
-	DEqual                      // =
-	DMatch                      // ~
-	DConcat                     // ,
-	DWithout                    // ^
-	DTake                       // #
-	DDrop                       // _
-	DCast                       // $
-	DFind                       // ?
-	DApply                      // @
-	DApplyN                     // .
+	VRight    Verb = iota // :
+	VAdd                  // +
+	VSubtract             // -
+	VMultiply             // *
+	VDivide               // %
+	VMod                  // !
+	VAnd                  // &
+	VOr                   // |
+	VLess                 // <
+	VMore                 // >
+	VEqual                // =
+	VMatch                // ~
+	VConcat               // ,
+	VWithout              // ^
+	VTake                 // #
+	VDrop                 // _
+	VCast                 // $
+	VFind                 // ?
+	VApply                // @
+	VApplyN               // .
 )
 
 // Adverb represents verb modifiers.
 type Adverb int
 
 const (
-	AEach      Adverb = iota // '
-	AEachPrior               // ':
-	AFold                    // /
-	AScan                    // \
-	AEachRight               // /:
-	AEachLeft                // \:
+	AEach Adverb = iota // '
+	AFold               // /
+	AScan               // \
 )
 
 type AO []O // generic array
