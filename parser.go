@@ -12,7 +12,7 @@ type Parser struct {
 	s      *Scanner
 	token  Token
 	pToken Token
-	depth []Token
+	depth  []Token
 	peeked bool
 	err    error
 }
@@ -24,11 +24,13 @@ func (p *Parser) ParseWithReader(reader io.Reader) error {
 	s.Init()
 	p.s = s
 	// TODO
-	expr, err := p.ppExpr()
+	exprs, err := p.ppExprs()
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%v", expr)
+	for _, expr := range exprs {
+		fmt.Printf("%v\n", expr)
+	}
 	return nil
 }
 
@@ -63,12 +65,11 @@ func (p *Parser) ppExprs() ([]ppExpr, error) {
 			return pps, err
 		}
 		tok, ok := ppe.(ppToken)
-		if ok && (tok.Type == ppSEP) {
+		if ok && (tok.Type == ppSEP || tok.Type == ppEOF) {
 			return pps, nil
 		}
 		pps = append(pps, ppe)
 	}
-	return pps, nil
 }
 
 func closeToken(op TokenType) TokenType {
@@ -86,7 +87,9 @@ func closeToken(op TokenType) TokenType {
 
 func (p *Parser) ppExpr() (ppExpr, error) {
 	switch tok := p.next(); tok.Type {
-	case EOF, NEWLINE, SEMICOLON:
+	case EOF:
+		return ppToken{Type: ppEOF, Line: tok.Line}, nil
+	case NEWLINE, SEMICOLON:
 		return ppToken{Type: ppSEP, Line: tok.Line}, nil
 	case ERROR:
 		return nil, p.errorf("invalid token:%s:%s", tok.Type, tok.Text)
@@ -97,7 +100,20 @@ func (p *Parser) ppExpr() (ppExpr, error) {
 	case LEFTBRACE, LEFTBRACKET, LEFTPAREN:
 		return p.ppExprBlock()
 	case NUMBER, STRING:
-		return p.ppExprStrand()
+		ntok := p.peek()
+		switch ntok.Type {
+		case NUMBER, STRING:
+			return p.ppExprStrand()
+		default:
+			pptok := ppToken{Line: p.token.Line, Text: p.token.Text}
+			switch p.token.Type {
+			case NUMBER:
+				pptok.Type = ppNUMBER
+			case STRING:
+				pptok.Type = ppSTRING
+			}
+			return pptok, nil
+		}
 	case RIGHTBRACE, RIGHTBRACKET, RIGHTPAREN:
 		if len(p.depth) == 0 {
 			return nil, p.errorf("syntax:unexpected %s without opening matching pair", tok.Text)
@@ -134,13 +150,34 @@ func (p *Parser) ppExprBlock() (ppExpr, error) {
 			return ppb, err
 		}
 		tok, ok := ppe.(ppToken)
-		if ok && (tok.Type == ppCLOSE) {
-			return ppb, nil
+		if ok {
+			switch tok.Type {
+			case ppCLOSE:
+				return ppb, nil
+			case ppEOF:
+				opTok := p.depth[len(p.depth)-1]
+				return ppb, p.errorf("syntax:unexpected EOF without closing previous %s at %d", opTok.Type.String(), opTok.Line)
+			}
 		}
 		ppb.ppexprs = append(ppb.ppexprs, ppe)
 	}
 }
 
 func (p *Parser) ppExprStrand() (ppExpr, error) {
-	return nil, nil
+	ppb := ppStrand{}
+	for {
+		switch p.token.Type {
+		case NUMBER:
+			ppb = append(ppb, ppToken{Type: ppNUMBER, Line: p.token.Line, Text: p.token.Text})
+		case STRING:
+			ppb = append(ppb, ppToken{Type: ppSTRING, Line: p.token.Line, Text: p.token.Text})
+		}
+		ntok := p.peek()
+		switch ntok.Type {
+		case NUMBER, STRING:
+			p.next()
+		default:
+			return ppb, nil
+		}
+	}
 }

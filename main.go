@@ -6,7 +6,12 @@ import (
 )
 
 func main() {
-	fmt.Printf("Hello, world!\n")
+	testPrimitives()
+	testScanner()
+	testParser()
+}
+
+func testPrimitives() {
 	fmt.Printf("Add:%#v\n", Add(I(3), I(5)))
 	fmt.Printf("Add:%#v\n", Add(F(3), I(5)))
 	fmt.Printf("Add:%#v\n", Add(I(3), AI{5, 3, 8}))
@@ -45,7 +50,9 @@ func main() {
 	fmt.Printf("MemberOf:%#v\n", MemberOf(AI{4, 3, 3, 3, 5, 2, 6}, AI{2, 3, 6}))
 	fmt.Printf("Group:%#v\n", Group(AI{0, 3, 2, 2, 0, 3}))
 	fmt.Printf("Group:%#v\n", Group(AB{false, true, false}))
+}
 
+func testScanner() {
 	sr := strings.NewReader("%!:+/\n&/: /comment\nident 23 \"string\"")
 	sc := &Scanner{reader: sr}
 	sc.Init()
@@ -56,4 +63,12 @@ func main() {
 		}
 	}
 	fmt.Print("\n")
+}
+
+func testParser() {
+	s := "23 45 + {(x-23)+|x} 23 43 + fun[2;3];"
+	sr := strings.NewReader(s)
+	p := &Parser{}
+	fmt.Println(s)
+	p.ParseWithReader(sr)
 }

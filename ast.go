@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type Expr interface {
 	expr()
 }
@@ -47,10 +49,15 @@ type ppToken struct {
 	Text string
 }
 
+func (ppt ppToken) String() string {
+	return fmt.Sprintf("{%v %d %s}", ppt.Type, ppt.Line, ppt.Text)
+}
+
 type ppTokenType int
 
 const (
 	ppSEP ppTokenType = iota
+	ppEOF
 	ppCLOSE
 	ppADVERB
 	ppIDENT
@@ -59,9 +66,36 @@ const (
 	ppVERB
 )
 
+var ppTokenStrings = [...]string{
+	ppSEP:    "ppSEP",
+	ppEOF:    "ppEOF",
+	ppCLOSE:  "ppCLOSE",
+	ppADVERB: "ppADVERB",
+	ppIDENT:  "ppIDENT",
+	ppNUMBER: "ppNUMBER",
+	ppSTRING: "ppSTRING",
+	ppVERB:   "ppVERB",
+}
+
+func (pptt ppTokenType) String() string {
+	return ppTokenStrings[pptt]
+}
+
 type ppBlock struct {
-	Type ppBlockType
+	Type    ppBlockType
 	ppexprs []ppExpr
+}
+
+func (ppb ppBlock) String() (s string) {
+	switch ppb.Type {
+	case ppBRACE:
+		s = fmt.Sprintf("{%v %v}", ppb.Type, ppb.ppexprs)
+	case ppBRACKET:
+		s = fmt.Sprintf("[%v %v]", ppb.Type, ppb.ppexprs)
+	case ppPAREN:
+		s = fmt.Sprintf("(%v %v)", ppb.Type, ppb.ppexprs)
+	}
+	return s
 }
 
 type ppBlockType int
@@ -72,8 +106,18 @@ const (
 	ppPAREN
 )
 
+var ppBlockStrings = [...]string{
+	ppBRACE:   "ppBRACE",
+	ppBRACKET: "ppBRACKET",
+	ppPAREN:   "ppPAREN",
+}
+
+func (pptt ppBlockType) String() string {
+	return ppBlockStrings[pptt]
+}
+
 type ppStrand []ppToken // for stranding, like 1 23 456
 
-func (ppb ppBlock) ppexpr()   {}
-func (pps ppStrand) ppexpr()  {}
-func (t ppToken) ppexpr()       {}
+func (ppb ppBlock) ppexpr()  {}
+func (pps ppStrand) ppexpr() {}
+func (t ppToken) ppexpr()    {}
