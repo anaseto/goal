@@ -1,6 +1,6 @@
 package main
 
-type O interface{} // O represents any kind of value.
+type V interface{} // V represents any kind of value.
 type B bool        // B represents booleans (0 and 1 but less memory)
 type F float64     // F represents real numbers.
 type I = int       // I represents integers.
@@ -42,7 +42,7 @@ const (
 	AScan               // \
 )
 
-type AO []O       // generic array
+type AV []V       // generic array
 type AB []bool    // boolean array
 type AF []float64 // real array
 type AI []I       // integer array (TODO: optimization: add Range type)
@@ -51,24 +51,24 @@ type AS []S       // string array
 // Array interface is satisfied by the different kind of supported arrays.
 // Typical implementation is given in comments.
 type Array interface {
-	At(i I) O           // x[i]
+	At(i I) V           // x[i]
 	Len() I             // len(x)
 	Slice(i, j I) Array // x[i:j]
 }
 
-func (x AO) At(i I) O {
+func (x AV) At(i I) V {
 	return x[i]
 }
 
-func (x AO) Len() I {
+func (x AV) Len() I {
 	return len(x)
 }
 
-func (x AO) Slice(i, j I) Array {
+func (x AV) Slice(i, j I) Array {
 	return x[i:j]
 }
 
-func (x AB) At(i I) O {
+func (x AB) At(i I) V {
 	return x[i]
 }
 
@@ -80,7 +80,7 @@ func (x AB) Slice(i, j I) Array {
 	return x[i:j]
 }
 
-func (x AI) At(i I) O {
+func (x AI) At(i I) V {
 	return x[i]
 }
 
@@ -92,7 +92,7 @@ func (x AI) Slice(i, j I) Array {
 	return x[i:j]
 }
 
-func (x AF) At(i I) O {
+func (x AF) At(i I) V {
 	return x[i]
 }
 
@@ -104,7 +104,7 @@ func (x AF) Slice(i, j I) Array {
 	return x[i:j]
 }
 
-func (x AS) At(i I) O {
+func (x AS) At(i I) V {
 	return x[i]
 }
 

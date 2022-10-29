@@ -18,7 +18,7 @@ func B2F(b B) (f F) {
 	return
 }
 
-func num2I(x O) (n I) {
+func num2I(x V) (n I) {
 	switch x := x.(type) {
 	case B:
 		n = B2I(x)
@@ -31,7 +31,7 @@ func num2I(x O) (n I) {
 	return n
 }
 
-func isNum(x O) bool {
+func isNum(x V) bool {
 	switch x.(type) {
 	case B, I, F:
 		return true
@@ -40,7 +40,7 @@ func isNum(x O) bool {
 	}
 }
 
-func isArray(x O) bool {
+func isArray(x V) bool {
 	switch x.(type) {
 	case Array:
 		return true
@@ -101,7 +101,7 @@ func maxS(w, x S) S {
 	return w
 }
 
-func clone(x O) O {
+func clone(x V) V {
 	switch x := x.(type) {
 	case B:
 		return x
@@ -127,8 +127,8 @@ func clone(x O) O {
 		r := make(AS, len(x))
 		copy(r, x)
 		return r
-	case AO:
-		r := make(AO, len(x))
+	case AV:
+		r := make(AV, len(x))
 		for i := range r {
 			r[i] = clone(x[i])
 		}
@@ -140,7 +140,7 @@ func clone(x O) O {
 	}
 }
 
-func cloneShallow(x O) O {
+func cloneShallow(x V) V {
 	switch x := x.(type) {
 	case AB:
 		r := make(AB, len(x))
@@ -158,8 +158,8 @@ func cloneShallow(x O) O {
 		r := make(AS, len(x))
 		copy(r, x)
 		return r
-	case AO:
-		r := make(AO, len(x))
+	case AV:
+		r := make(AV, len(x))
 		copy(r, x)
 		return r
 	default:
@@ -167,7 +167,7 @@ func cloneShallow(x O) O {
 	}
 }
 
-func toArray(x O) O {
+func toArray(x V) V {
 	switch x := x.(type) {
 	case B:
 		return AB{bool(x)}
@@ -178,13 +178,13 @@ func toArray(x O) O {
 	case S:
 		return AS{string(x)}
 	case E:
-		return AO{x}
+		return AV{x}
 	default:
 		return x
 	}
 }
 
-func growArray(x O, n I) O {
+func growArray(x V, n I) V {
 	l := Length(x)
 	if l >= n && n >= -l {
 		return x
@@ -214,8 +214,8 @@ func growArray(x O, n I) O {
 		r := make(AS, n)
 		copy(r[i:], x)
 		return r
-	case AO:
-		r := make(AO, n)
+	case AV:
+		r := make(AV, n)
 		copy(r[i:], x)
 		return r
 	default:
@@ -223,7 +223,7 @@ func growArray(x O, n I) O {
 	}
 }
 
-func isFalse(x O) bool {
+func isFalse(x V) bool {
 	switch x := x.(type) {
 	case B:
 		return bool(x)
@@ -241,7 +241,7 @@ func isFalse(x O) bool {
 		return len(x) == 0
 	case AS:
 		return len(x) == 0
-	case AO:
+	case AV:
 		return len(x) == 0
 	case E:
 		return true
@@ -276,7 +276,7 @@ func mergeTypes(t, s eltype) eltype {
 }
 
 // eType returns the eltype of x.
-func eType(x O) eltype {
+func eType(x V) eltype {
 	switch x.(type) {
 	case B:
 		return tB
@@ -294,7 +294,7 @@ func eType(x O) eltype {
 		return tAI
 	case AS:
 		return tAS
-	case AO:
+	case AV:
 		return tAO
 	default:
 		return tO
@@ -302,7 +302,7 @@ func eType(x O) eltype {
 }
 
 // cType returns the canonical eltype of x. XXX: unused.
-func cType(x O) eltype {
+func cType(x V) eltype {
 	switch x := x.(type) {
 	case B:
 		return tB
@@ -320,14 +320,14 @@ func cType(x O) eltype {
 		return tS
 	case AS:
 		return tAS
-	case AO:
+	case AV:
 		return cTypeAO(x)
 	default:
 		return tO
 	}
 }
 
-func cTypeAO(x AO) eltype {
+func cTypeAO(x AV) eltype {
 	if x.Len() == 0 {
 		return tAO
 	}
@@ -350,7 +350,7 @@ func cTypeAO(x AO) eltype {
 }
 
 // aType returns the most specific eltype of the elements of a generic array.
-func aType(x AO) eltype {
+func aType(x AV) eltype {
 	if x.Len() == 0 {
 		return tO
 	}
@@ -397,9 +397,9 @@ func minMaxB(x AB) (min, max B) {
 	return
 }
 
-func canonical(x O) O {
+func canonical(x V) V {
 	switch y := x.(type) {
-	case AO:
+	case AV:
 		t := aType(y)
 		switch t {
 		case tB:

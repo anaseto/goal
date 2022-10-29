@@ -3,15 +3,15 @@ package main
 // Matcher is implemented by types that can be matched againts other objects
 // (typically a struct of the same type with fields that match).
 type Matcher interface {
-	Matches(x O) bool
+	Matches(x V) bool
 }
 
 // Match returns w≡x.
-func Match(w, x O) O {
+func Match(w, x V) V {
 	return match(w, x)
 }
 
-func match(w, x O) bool {
+func match(w, x V) bool {
 	switch w := w.(type) {
 	case B:
 		switch x := x.(type) {
@@ -170,12 +170,12 @@ func matchAF(w, x AF) bool {
 }
 
 // NotMatch returns w≢x.
-func NotMatch(w, x O) O {
+func NotMatch(w, x V) V {
 	return !match(w, x)
 }
 
 // Classify returns ⊐x.
-func Classify(x O) O {
+func Classify(x V) V {
 	if Length(x) == 0 {
 		return AB{}
 	}
@@ -234,7 +234,7 @@ func Classify(x O) O {
 			r[i] = c
 		}
 		return r
-	case AO:
+	case AV:
 		// NOTE: quadratic algorithm, worst case complexity could be
 		// improved by sorting or string hashing, but that would be
 		// quite bad for short lengths.
@@ -258,7 +258,7 @@ func Classify(x O) O {
 }
 
 // Mark Firts returns ∊x.
-func MarkFirts(x O) O {
+func MarkFirts(x V) V {
 	if Length(x) == 0 {
 		return AB{}
 	}
@@ -313,7 +313,7 @@ func MarkFirts(x O) O {
 			}
 		}
 		return r
-	case AO:
+	case AV:
 		// NOTE: quadratic algorithm, worst case complexity could be
 		// improved by sorting or string hashing, but that would be
 		// quite bad for short lengths.
@@ -334,7 +334,7 @@ func MarkFirts(x O) O {
 }
 
 // MemberOf returns w∊x.
-func MemberOf(w, x O) O {
+func MemberOf(w, x V) V {
 	if Length(x) == 0 || Length(w) == 0 {
 		switch x.(type) {
 		case Array:
@@ -360,14 +360,14 @@ func MemberOf(w, x O) O {
 		return memberOfAI(w, x)
 	case AS:
 		return memberOfAS(w, x)
-	case AO:
+	case AV:
 		return memberOfAO(w, x)
 	default:
 		return badtype("∊ : x must be an array")
 	}
 }
 
-func memberOfAB(w O, x AB) O {
+func memberOfAB(w V, x AB) V {
 	var t, f bool
 	for _, v := range x {
 		if t && f {
@@ -388,7 +388,7 @@ func memberOfAB(w O, x AB) O {
 	return Equal(w, false)
 }
 
-func memberOfAF(w O, x AF) O {
+func memberOfAF(w V, x AF) V {
 	m := map[F]struct{}{}
 	for _, v := range x {
 		_, ok := m[F(v)]
@@ -430,7 +430,7 @@ func memberOfAF(w O, x AF) O {
 	}
 }
 
-func memberOfAI(w O, x AI) O {
+func memberOfAI(w V, x AI) V {
 	m := map[I]struct{}{}
 	for _, v := range x {
 		_, ok := m[v]
@@ -478,7 +478,7 @@ func memberOfAI(w O, x AI) O {
 	}
 }
 
-func memberOfAS(w O, x AS) O {
+func memberOfAS(w V, x AS) V {
 	m := map[S]struct{}{}
 	for _, v := range x {
 		_, ok := m[v]
@@ -502,7 +502,7 @@ func memberOfAS(w O, x AS) O {
 	}
 }
 
-func memberOfAO(w O, x AO) O {
+func memberOfAO(w V, x AV) V {
 	switch w := w.(type) {
 	case Array:
 		// NOTE: quadratic algorithm
@@ -527,7 +527,7 @@ func memberOfAO(w O, x AO) O {
 }
 
 // OccurrenceCount returns ⊒x.
-func OccurrenceCount(x O) O {
+func OccurrenceCount(x V) V {
 	if Length(x) == 0 {
 		return AB{}
 	}
@@ -587,7 +587,7 @@ func OccurrenceCount(x O) O {
 			r[i] = c + 1
 		}
 		return r
-	case AO:
+	case AV:
 		// NOTE: quadratic algorithm, worst case complexity could be
 		// improved by sorting or string hashing, but that would be
 		// quite bad for short lengths.

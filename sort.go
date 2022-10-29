@@ -16,7 +16,7 @@ func (bs ABUp) Swap(i, j int) {
 	bs[i], bs[j] = bs[j], bs[i]
 }
 
-type AOUp []O
+type AOUp []V
 
 func (bs AOUp) Len() int {
 	return len(bs)
@@ -30,7 +30,7 @@ func (bs AOUp) Swap(i, j int) {
 	bs[i], bs[j] = bs[j], bs[i]
 }
 
-func less(w, x O) bool {
+func less(w, x V) bool {
 	switch w := w.(type) {
 	case B:
 		return lessB(w, x)
@@ -60,7 +60,7 @@ func less(w, x O) bool {
 			return Length(x) > 0
 		}
 		return lessAS(w, x)
-	case AO:
+	case AV:
 		if len(w) == 0 {
 			return Length(x) > 0
 		}
@@ -70,7 +70,7 @@ func less(w, x O) bool {
 	}
 }
 
-func lessB(w B, x O) bool {
+func lessB(w B, x V) bool {
 	switch x := x.(type) {
 	case B:
 		return bool(!w && x)
@@ -93,7 +93,7 @@ func lessB(w B, x O) bool {
 			return false
 		}
 		return B2I(w) < x[0] || B2I(w) == x[0] && len(x) > 1
-	case AO:
+	case AV:
 		if len(x) == 0 {
 			return false
 		}
@@ -103,7 +103,7 @@ func lessB(w B, x O) bool {
 	}
 }
 
-func lessF(w F, x O) bool {
+func lessF(w F, x V) bool {
 	switch x := x.(type) {
 	case B:
 		return w < B2F(x)
@@ -126,7 +126,7 @@ func lessF(w F, x O) bool {
 			return false
 		}
 		return w < F(x[0]) || w == F(x[0]) && len(x) > 1
-	case AO:
+	case AV:
 		if len(x) == 0 {
 			return false
 		}
@@ -136,7 +136,7 @@ func lessF(w F, x O) bool {
 	}
 }
 
-func lessI(w I, x O) bool {
+func lessI(w I, x V) bool {
 	switch x := x.(type) {
 	case B:
 		return w < B2I(x)
@@ -159,7 +159,7 @@ func lessI(w I, x O) bool {
 			return false
 		}
 		return w < x[0] || w == x[0] && len(x) > 1
-	case AO:
+	case AV:
 		if len(x) == 0 {
 			return false
 		}
@@ -169,7 +169,7 @@ func lessI(w I, x O) bool {
 	}
 }
 
-func lessS(w S, x O) bool {
+func lessS(w S, x V) bool {
 	switch x := x.(type) {
 	case S:
 		return w < x
@@ -178,7 +178,7 @@ func lessS(w S, x O) bool {
 			return false
 		}
 		return w < x[0] || w == x[0] && len(x) > 1
-	case AO:
+	case AV:
 		if len(x) == 0 {
 			return false
 		}
@@ -188,7 +188,7 @@ func lessS(w S, x O) bool {
 	}
 }
 
-func lessAB(w AB, x O) bool {
+func lessAB(w AB, x V) bool {
 	switch x := x.(type) {
 	case B:
 		return !lessB(x, w)
@@ -217,7 +217,7 @@ func lessAB(w AB, x O) bool {
 			}
 		}
 		return len(w) < len(x)
-	case AO:
+	case AV:
 		for i := 0; i < len(w) && i < len(x); i++ {
 			if less(x[i], w[i]) {
 				return false
@@ -229,7 +229,7 @@ func lessAB(w AB, x O) bool {
 	}
 }
 
-func lessAI(w AI, x O) bool {
+func lessAI(w AI, x V) bool {
 	switch x := x.(type) {
 	case B:
 		return !lessB(x, w)
@@ -258,7 +258,7 @@ func lessAI(w AI, x O) bool {
 			}
 		}
 		return len(w) < len(x)
-	case AO:
+	case AV:
 		for i := 0; i < len(w) && i < len(x); i++ {
 			if less(x[i], w[i]) {
 				return false
@@ -270,7 +270,7 @@ func lessAI(w AI, x O) bool {
 	}
 }
 
-func lessAF(w AF, x O) bool {
+func lessAF(w AF, x V) bool {
 	switch x := x.(type) {
 	case B:
 		return !lessB(x, w)
@@ -299,7 +299,7 @@ func lessAF(w AF, x O) bool {
 			}
 		}
 		return len(w) < len(x)
-	case AO:
+	case AV:
 		for i := 0; i < len(w) && i < len(x); i++ {
 			if less(x[i], w[i]) {
 				return false
@@ -311,7 +311,7 @@ func lessAF(w AF, x O) bool {
 	}
 }
 
-func lessAS(w AS, x O) bool {
+func lessAS(w AS, x V) bool {
 	switch x := x.(type) {
 	case S:
 		return !lessS(x, w)
@@ -322,7 +322,7 @@ func lessAS(w AS, x O) bool {
 			}
 		}
 		return len(w) < len(x)
-	case AO:
+	case AV:
 		for i := 0; i < len(w) && i < len(x); i++ {
 			if less(x[i], w[i]) {
 				return false
@@ -334,7 +334,7 @@ func lessAS(w AS, x O) bool {
 	}
 }
 
-func lessAO(w AO, x O) bool {
+func lessAO(w AV, x V) bool {
 	switch x := x.(type) {
 	case B:
 		return less(w[0], x)
@@ -363,7 +363,7 @@ func lessAO(w AO, x O) bool {
 			}
 		}
 		return len(w) < len(x)
-	case AO:
+	case AV:
 		for i := 0; i < len(w) && i < len(x); i++ {
 			if less(x[i], w[i]) {
 				return false
@@ -376,7 +376,7 @@ func lessAO(w AO, x O) bool {
 }
 
 // SortUp returns <x.
-func SortUp(x O) O {
+func SortUp(x V) V {
 	// XXX: error if atom?
 	x = canonical(x)
 	x = cloneShallow(x)
@@ -393,7 +393,7 @@ func SortUp(x O) O {
 	case AS:
 		sort.Stable(sort.StringSlice(x))
 		return x
-	case AO:
+	case AV:
 		sort.Stable(AOUp(x))
 		return x
 	default:
@@ -402,7 +402,7 @@ func SortUp(x O) O {
 }
 
 // SortDown returns >x.
-func SortDown(x O) O {
+func SortDown(x V) V {
 	x = SortUp(x)
 	switch x.(type) {
 	case E:
@@ -506,7 +506,7 @@ func permRange(n I) AI {
 }
 
 // GradeUp returns ⍋x.
-func GradeUp(x O) O {
+func GradeUp(x V) V {
 	switch x := x.(type) {
 	case AB:
 		p := &PermutationAB{Perm: permRange(len(x)), X: ABUp(x)}
@@ -524,7 +524,7 @@ func GradeUp(x O) O {
 		p := &PermutationAS{Perm: permRange(len(x)), X: sort.StringSlice(x)}
 		sort.Stable(p)
 		return p.Perm
-	case AO:
+	case AV:
 		p := &PermutationAO{Perm: permRange(len(x)), X: AOUp(x)}
 		sort.Stable(p)
 		return p.Perm
@@ -534,7 +534,7 @@ func GradeUp(x O) O {
 }
 
 // GradeDown returns ⍒x.
-func GradeDown(x O) O {
+func GradeDown(x V) V {
 	p := GradeUp(x)
 	switch p.(type) {
 	case E:

@@ -6,7 +6,7 @@ import (
 )
 
 // Negate returns -x.
-func Negate(x O) O {
+func Negate(x V) V {
 	switch x := x.(type) {
 	case B:
 		return -B2I(x)
@@ -32,8 +32,8 @@ func Negate(x O) O {
 			r[i] = -x[i]
 		}
 		return r
-	case AO:
-		r := make(AO, len(x))
+	case AV:
+		r := make(AV, len(x))
 		for i := range r {
 			r[i] = Negate(x[i])
 		}
@@ -68,7 +68,7 @@ func signI(x I) I {
 }
 
 // Sign returns ×x.
-func Sign(x O) O {
+func Sign(x V) V {
 	switch x := x.(type) {
 	case B:
 		return x
@@ -90,8 +90,8 @@ func Sign(x O) O {
 			r[i] = signI(x[i])
 		}
 		return r
-	case AO:
-		r := make(AO, len(x))
+	case AV:
+		r := make(AV, len(x))
 		for i := range r {
 			r[i] = Sign(x[i])
 		}
@@ -104,7 +104,7 @@ func Sign(x O) O {
 }
 
 // Floor returns _x.
-func Floor(x O) O {
+func Floor(x V) V {
 	switch x := x.(type) {
 	case B:
 		return x
@@ -130,8 +130,8 @@ func Floor(x O) O {
 			r[i] = strings.ToLower(x[i])
 		}
 		return r
-	case AO:
-		r := make(AO, len(x))
+	case AV:
+		r := make(AV, len(x))
 		for i := range r {
 			r[i] = Floor(x[i])
 		}
@@ -144,7 +144,7 @@ func Floor(x O) O {
 }
 
 // Ceil returns ⌈x.
-func Ceil(x O) O {
+func Ceil(x V) V {
 	switch x := x.(type) {
 	case B:
 		return x
@@ -170,8 +170,8 @@ func Ceil(x O) O {
 			r[i] = strings.ToUpper(x[i])
 		}
 		return r
-	case AO:
-		r := make(AO, len(x))
+	case AV:
+		r := make(AV, len(x))
 		for i := range r {
 			r[i] = Ceil(x[i])
 		}
@@ -184,7 +184,7 @@ func Ceil(x O) O {
 }
 
 // Not returns ~x.
-func Not(x O) O {
+func Not(x V) V {
 	switch x := x.(type) {
 	case B:
 		return !x
@@ -210,8 +210,8 @@ func Not(x O) O {
 			r[i] = 1 - x[i]
 		}
 		return r
-	case AO:
-		r := make(AO, len(x))
+	case AV:
+		r := make(AV, len(x))
 		for i := range r {
 			r[i] = Not(x[i])
 		}
@@ -231,7 +231,7 @@ func absI(x I) I {
 }
 
 // Abs returns |x.
-func Abs(x O) O {
+func Abs(x V) V {
 	switch x := x.(type) {
 	case B:
 		return x
@@ -253,8 +253,8 @@ func Abs(x O) O {
 			r[i] = absI(x[i])
 		}
 		return r
-	case AO:
-		r := make(AO, len(x))
+	case AV:
+		r := make(AV, len(x))
 		for i := range r {
 			r[i] = Abs(x[i])
 		}

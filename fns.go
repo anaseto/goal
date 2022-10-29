@@ -1,7 +1,7 @@
 package main
 
 // Range returns ↕x.
-func Range(x O) O {
+func Range(x V) V {
 	switch x := x.(type) {
 	case B:
 		return rangeI(B2I(x))
@@ -20,7 +20,7 @@ func Range(x O) O {
 	}
 }
 
-func rangeI(n I) O {
+func rangeI(n I) V {
 	if n < 0 {
 		return badtype("↕ : negative integer")
 	}
@@ -31,7 +31,7 @@ func rangeI(n I) O {
 	return r
 }
 
-func rangeArray(x Array) O {
+func rangeArray(x Array) V {
 	y := make(AI, x.Len())
 	for i := range y {
 		v := x.At(i)
@@ -52,11 +52,11 @@ func rangeArray(x Array) O {
 	cols := 1
 	for _, n := range y {
 		if n == 0 {
-			return AO{}
+			return AV{}
 		}
 		cols *= n
 	}
-	r := make(AO, x.Len())
+	r := make(AV, x.Len())
 	reps := cols
 	for i := range r {
 		a := make(AI, cols)
@@ -76,7 +76,7 @@ func rangeArray(x Array) O {
 }
 
 // Indices returns /x.
-func Indices(x O) O {
+func Indices(x V) V {
 	switch x := x.(type) {
 	case B:
 		if x {
@@ -152,7 +152,7 @@ func Indices(x O) O {
 			}
 		}
 		return r
-	case AO:
+	case AV:
 		switch aType(x) {
 		case tB, tF, tI:
 			n := 0
@@ -200,7 +200,7 @@ func Indices(x O) O {
 }
 
 // Replicate returns w/x.
-func Replicate(w, x O) O {
+func Replicate(w, x V) V {
 	if Length(w) != Length(x) {
 		return badlen("/ : w and x must have same length")
 	}
@@ -231,14 +231,14 @@ func Replicate(w, x O) O {
 		return repeatAI(w, x)
 	case AF:
 		return repeatAF(w, x)
-	case AO:
+	case AV:
 		return repeatAO(w, x)
 	default:
 		return badtype("/ : expected integer(s) for w")
 	}
 }
 
-func repeat(x O, n int) O {
+func repeat(x V, n int) V {
 	switch x := x.(type) {
 	case B:
 		r := make(AB, n)
@@ -265,7 +265,7 @@ func repeat(x O, n int) O {
 		}
 		return r
 	default:
-		r := make(AO, n)
+		r := make(AV, n)
 		for i := range r {
 			r[i] = x
 		}
@@ -273,7 +273,7 @@ func repeat(x O, n int) O {
 	}
 }
 
-func repeatAB(w AB, x O) O {
+func repeatAB(w AB, x V) V {
 	n := 0
 	for _, v := range w {
 		n += B2I(B(v))
@@ -311,8 +311,8 @@ func repeatAB(w AB, x O) O {
 			}
 		}
 		return r
-	case AO:
-		r := make(AO, 0, n)
+	case AV:
+		r := make(AV, 0, n)
 		for i, v := range w {
 			if v {
 				r = append(r, x.At(i))
@@ -324,7 +324,7 @@ func repeatAB(w AB, x O) O {
 	}
 }
 
-func repeatAI(w AI, x O) O {
+func repeatAI(w AI, x V) V {
 	n := 0
 	for _, v := range w {
 		if v < 0 {
@@ -365,8 +365,8 @@ func repeatAI(w AI, x O) O {
 			}
 		}
 		return r
-	case AO:
-		r := make(AO, 0, n)
+	case AV:
+		r := make(AV, 0, n)
 		for i, v := range w {
 			for j := 0; j < v; j++ {
 				r = append(r, x[i])
@@ -378,7 +378,7 @@ func repeatAI(w AI, x O) O {
 	}
 }
 
-func repeatAF(w AF, x O) O {
+func repeatAF(w AF, x V) V {
 	n := 0
 	for _, v := range w {
 		if !isI(F(v)) {
@@ -422,8 +422,8 @@ func repeatAF(w AF, x O) O {
 			}
 		}
 		return r
-	case AO:
-		r := make(AO, 0, n)
+	case AV:
+		r := make(AV, 0, n)
 		for i, v := range w {
 			for j := 0; j < I(v); j++ {
 				r = append(r, x[i])
@@ -435,7 +435,7 @@ func repeatAF(w AF, x O) O {
 	}
 }
 
-func repeatAO(w AO, x O) O {
+func repeatAO(w AV, x V) V {
 	switch aType(w) {
 	case tB, tF, tI:
 		n := 0
@@ -495,8 +495,8 @@ func repeatAO(w AO, x O) O {
 				}
 			}
 			return r
-		case AO:
-			r := make(AO, 0, n)
+		case AV:
+			r := make(AV, 0, n)
 			for i, v := range w {
 				max := num2I(v)
 				for j := 0; j < max; j++ {

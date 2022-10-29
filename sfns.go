@@ -7,7 +7,7 @@ import (
 )
 
 // Length returns ≠x.
-func Length(x O) I {
+func Length(x V) I {
 	switch x := x.(type) {
 	case nil:
 		return 0
@@ -18,7 +18,7 @@ func Length(x O) I {
 	}
 }
 
-func reverse(x O) {
+func reverse(x V) {
 	switch x := x.(type) {
 	case AB:
 		for i := 0; i < len(x)/2; i++ {
@@ -36,7 +36,7 @@ func reverse(x O) {
 		for i := 0; i < len(x)/2; i++ {
 			x[i], x[len(x)-i-1] = x[len(x)-i-1], x[i]
 		}
-	case AO:
+	case AV:
 		for i := 0; i < len(x)/2; i++ {
 			x[i], x[len(x)-i-1] = x[len(x)-i-1], x[i]
 		}
@@ -46,7 +46,7 @@ func reverse(x O) {
 }
 
 // Reverse returns ⌽x.
-func Reverse(x O) O {
+func Reverse(x V) V {
 	switch x := x.(type) {
 	case Array:
 		r := cloneShallow(x)
@@ -58,7 +58,7 @@ func Reverse(x O) O {
 }
 
 // Rotate returns w⌽x.
-func Rotate(w, x O) O {
+func Rotate(w, x V) V {
 	i := 0
 	switch w := w.(type) {
 	case B:
@@ -104,8 +104,8 @@ func Rotate(w, x O) O {
 			r[j] = x[(j+i)%lenx]
 		}
 		return r
-	case AO:
-		r := make(AO, lenx)
+	case AV:
+		r := make(AV, lenx)
 		for j := 0; j < lenx; j++ {
 			r[j] = x[(j+i)%lenx]
 		}
@@ -116,7 +116,7 @@ func Rotate(w, x O) O {
 }
 
 // First returns ↑x.
-func First(x O) O {
+func First(x V) V {
 	switch x := x.(type) {
 	case Array:
 		if x.Len() == 0 {
@@ -130,7 +130,7 @@ func First(x O) O {
 			case AS:
 				return S("")
 			default:
-				return O(nil)
+				return V(nil)
 			}
 		}
 		return x.At(0)
@@ -140,7 +140,7 @@ func First(x O) O {
 }
 
 // Tail returns ↓x.
-func Tail(x O) O {
+func Tail(x V) V {
 	x = toArray(x)
 	switch x := x.(type) {
 	case Array:
@@ -154,7 +154,7 @@ func Tail(x O) O {
 }
 
 // Drop returns i_x.
-func Drop(w, x O) O {
+func Drop(w, x V) V {
 	i := 0
 	switch w := w.(type) {
 	case B:
@@ -189,7 +189,7 @@ func Drop(w, x O) O {
 }
 
 // Take returns i#x.
-func Take(w, x O) O {
+func Take(w, x V) V {
 	i := 0
 	switch w := w.(type) {
 	case B:
@@ -223,7 +223,7 @@ func Take(w, x O) O {
 }
 
 // ShiftBefore returns w»x.
-func ShiftBefore(w, x O) O {
+func ShiftBefore(w, x V) V {
 	w = toArray(w)
 	max := minI(Length(w), Length(x))
 	if max == 0 {
@@ -326,10 +326,10 @@ func ShiftBefore(w, x O) O {
 		default:
 			return badtype("» : type mismatch")
 		}
-	case AO:
+	case AV:
 		switch w := w.(type) {
 		case Array:
-			r := make(AO, len(x))
+			r := make(AV, len(x))
 			for i := 0; i < max; i++ {
 				r[i] = w.At(i)
 			}
@@ -344,7 +344,7 @@ func ShiftBefore(w, x O) O {
 }
 
 // Nudge returns »x.
-func Nudge(x O) O {
+func Nudge(x V) V {
 	switch x := x.(type) {
 	case AB:
 		r := make(AB, len(x))
@@ -362,8 +362,8 @@ func Nudge(x O) O {
 		r := make(AS, len(x))
 		copy(r[1:], x[0:len(x)-1])
 		return r
-	case AO:
-		r := make(AO, len(x))
+	case AV:
+		r := make(AV, len(x))
 		copy(r[1:], x[0:len(x)-1])
 		return r
 	default:
@@ -372,7 +372,7 @@ func Nudge(x O) O {
 }
 
 // ShiftAfter returns w«x.
-func ShiftAfter(w, x O) O {
+func ShiftAfter(w, x V) V {
 	w = toArray(w)
 	max := minI(Length(w), Length(x))
 	if max == 0 {
@@ -475,10 +475,10 @@ func ShiftAfter(w, x O) O {
 		default:
 			return badtype("« : type mismatch")
 		}
-	case AO:
+	case AV:
 		switch w := w.(type) {
 		case Array:
-			r := make(AO, len(x))
+			r := make(AV, len(x))
 			for i := 0; i < max; i++ {
 				r[len(x)-1-i] = w.At(i)
 			}
@@ -493,7 +493,7 @@ func ShiftAfter(w, x O) O {
 }
 
 // NudgeBack returns «x.
-func NudgeBack(x O) O {
+func NudgeBack(x V) V {
 	if Length(x) == 0 {
 		return x
 	}
@@ -514,8 +514,8 @@ func NudgeBack(x O) O {
 		r := make(AS, len(x))
 		copy(r[0:len(x)-1], x[1:])
 		return r
-	case AO:
-		r := make(AO, len(x))
+	case AV:
+		r := make(AV, len(x))
 		copy(r[0:len(x)-1], x[1:])
 		return r
 	default:
@@ -524,15 +524,15 @@ func NudgeBack(x O) O {
 }
 
 // Flip returns +x.
-func Flip(x O) O {
+func Flip(x V) V {
 	x = toArray(x)
 	x = canonical(x) // XXX really?
 	switch x := x.(type) {
-	case AO:
+	case AV:
 		cols := len(x)
 		if cols == 0 {
 			// (+⟨⟩) ≡ ⋈⟨⟩
-			return AO{x}
+			return AV{x}
 		}
 		lines := -1
 		for _, o := range x {
@@ -556,15 +556,15 @@ func Flip(x O) O {
 		case lines == 1:
 			switch t {
 			case tB, tAB:
-				return AO{flipAB(x)}
+				return AV{flipAB(x)}
 			case tF, tAF:
-				return AO{flipAF(x)}
+				return AV{flipAF(x)}
 			case tI, tAI:
-				return AO{flipAI(x)}
+				return AV{flipAI(x)}
 			case tS, tAS:
-				return AO{flipAS(x)}
+				return AV{flipAS(x)}
 			default:
-				return AO{flipAO(x)}
+				return AV{flipAO(x)}
 			}
 		default:
 			switch t {
@@ -581,11 +581,11 @@ func Flip(x O) O {
 			}
 		}
 	default:
-		return AO{x}
+		return AV{x}
 	}
 }
 
-func flipAB(x AO) AB {
+func flipAB(x AV) AB {
 	r := make(AB, len(x))
 	for i, y := range x {
 		switch y := y.(type) {
@@ -598,8 +598,8 @@ func flipAB(x AO) AB {
 	return r
 }
 
-func flipAOAB(x AO, lines int) AO {
-	r := make(AO, lines)
+func flipAOAB(x AV, lines int) AV {
+	r := make(AV, lines)
 	a := make(AB, lines*len(x))
 	for j := range r {
 		q := a[j*len(x) : (j+1)*len(x)]
@@ -616,7 +616,7 @@ func flipAOAB(x AO, lines int) AO {
 	return r
 }
 
-func flipAF(x AO) AF {
+func flipAF(x AV) AF {
 	r := make(AF, len(x))
 	for i, y := range x {
 		switch y := y.(type) {
@@ -637,8 +637,8 @@ func flipAF(x AO) AF {
 	return r
 }
 
-func flipAOAF(x AO, lines int) AO {
-	r := make(AO, lines)
+func flipAOAF(x AV, lines int) AV {
+	r := make(AV, lines)
 	a := make(AF, lines*len(x))
 	for j := range r {
 		q := a[j*len(x) : (j+1)*len(x)]
@@ -663,7 +663,7 @@ func flipAOAF(x AO, lines int) AO {
 	return r
 }
 
-func flipAI(x AO) AI {
+func flipAI(x AV) AI {
 	r := make(AI, len(x))
 	for i, y := range x {
 		switch y := y.(type) {
@@ -680,8 +680,8 @@ func flipAI(x AO) AI {
 	return r
 }
 
-func flipAOAI(x AO, lines int) AO {
-	r := make(AO, lines)
+func flipAOAI(x AV, lines int) AV {
+	r := make(AV, lines)
 	a := make(AI, lines*len(x))
 	for j := range r {
 		q := a[j*len(x) : (j+1)*len(x)]
@@ -702,7 +702,7 @@ func flipAOAI(x AO, lines int) AO {
 	return r
 }
 
-func flipAS(x AO) AS {
+func flipAS(x AV) AS {
 	r := make(AS, len(x))
 	for i, y := range x {
 		switch y := y.(type) {
@@ -715,8 +715,8 @@ func flipAS(x AO) AS {
 	return r
 }
 
-func flipAOAS(x AO, lines int) AO {
-	r := make(AO, lines)
+func flipAOAS(x AV, lines int) AV {
+	r := make(AV, lines)
 	a := make(AS, lines*len(x))
 	for j := range r {
 		q := a[j*len(x) : (j+1)*len(x)]
@@ -733,8 +733,8 @@ func flipAOAS(x AO, lines int) AO {
 	return r
 }
 
-func flipAO(x AO) AO {
-	r := make(AO, len(x))
+func flipAO(x AV) AV {
+	r := make(AV, len(x))
 	for i, y := range x {
 		switch y := y.(type) {
 		case Array:
@@ -746,9 +746,9 @@ func flipAO(x AO) AO {
 	return r
 }
 
-func flipAOAO(x AO, lines int) AO {
-	r := make(AO, lines)
-	a := make(AO, lines*len(x))
+func flipAOAO(x AV, lines int) AV {
+	r := make(AV, lines)
+	a := make(AV, lines*len(x))
 	for j := range r {
 		q := a[j*len(x) : (j+1)*len(x)]
 		for i, y := range x {
@@ -765,7 +765,7 @@ func flipAOAO(x AO, lines int) AO {
 }
 
 // JoinTo returns w,x.
-func JoinTo(w, x O) O {
+func JoinTo(w, x V) V {
 	switch w := w.(type) {
 	case B:
 		return joinToB(w, x, true)
@@ -783,19 +783,19 @@ func JoinTo(w, x O) O {
 		return joinToAI(x, w, false)
 	case AS:
 		return joinToAS(x, w, false)
-	case AO:
+	case AV:
 		return joinToAO(x, w, false)
 	default:
 		switch x := x.(type) {
 		case Array:
 			return joinAtomToArray(w, x, true)
 		default:
-			return AO{w, x}
+			return AV{w, x}
 		}
 	}
 }
 
-func joinToB(w B, x O, left bool) O {
+func joinToB(w B, x V, left bool) V {
 	switch x := x.(type) {
 	case B:
 		if left {
@@ -814,9 +814,9 @@ func joinToB(w B, x O, left bool) O {
 		return AI{x, B2I(w)}
 	case S:
 		if left {
-			return AO{w, x}
+			return AV{w, x}
 		}
-		return AO{x, w}
+		return AV{x, w}
 	case AB:
 		return joinToAB(w, x, left)
 	case AF:
@@ -825,14 +825,14 @@ func joinToB(w B, x O, left bool) O {
 		return joinToAI(w, x, left)
 	case AS:
 		return joinToAS(w, x, left)
-	case AO:
+	case AV:
 		return joinToAO(w, x, left)
 	default:
-		return AO{w, x}
+		return AV{w, x}
 	}
 }
 
-func joinToI(w I, x O, left bool) O {
+func joinToI(w I, x V, left bool) V {
 	switch x := x.(type) {
 	case B:
 		if left {
@@ -851,9 +851,9 @@ func joinToI(w I, x O, left bool) O {
 		return AI{x, w}
 	case S:
 		if left {
-			return AO{w, x}
+			return AV{w, x}
 		}
-		return AO{x, w}
+		return AV{x, w}
 	case AB:
 		return joinToAB(w, x, left)
 	case AF:
@@ -862,14 +862,14 @@ func joinToI(w I, x O, left bool) O {
 		return joinToAI(w, x, left)
 	case AS:
 		return joinToAS(w, x, left)
-	case AO:
+	case AV:
 		return joinToAO(w, x, left)
 	default:
-		return AO{w, x}
+		return AV{w, x}
 	}
 }
 
-func joinToF(w F, x O, left bool) O {
+func joinToF(w F, x V, left bool) V {
 	switch x := x.(type) {
 	case B:
 		if left {
@@ -888,9 +888,9 @@ func joinToF(w F, x O, left bool) O {
 		return AF{float64(x), float64(w)}
 	case S:
 		if left {
-			return AO{w, x}
+			return AV{w, x}
 		}
-		return AO{x, w}
+		return AV{x, w}
 	case AB:
 		return joinToAB(w, x, left)
 	case AF:
@@ -899,30 +899,30 @@ func joinToF(w F, x O, left bool) O {
 		return joinToAI(w, x, left)
 	case AS:
 		return joinToAS(w, x, left)
-	case AO:
+	case AV:
 		return joinToAO(w, x, left)
 	default:
-		return AO{w, x}
+		return AV{w, x}
 	}
 }
 
-func joinToS(w S, x O, left bool) O {
+func joinToS(w S, x V, left bool) V {
 	switch x := x.(type) {
 	case B:
 		if left {
-			return AO{w, x}
+			return AV{w, x}
 		}
-		return AO{x, w}
+		return AV{x, w}
 	case F:
 		if left {
-			return AO{w, x}
+			return AV{w, x}
 		}
-		return AO{x, w}
+		return AV{x, w}
 	case I:
 		if left {
-			return AO{w, x}
+			return AV{w, x}
 		}
-		return AO{x, w}
+		return AV{x, w}
 	case S:
 		if left {
 			return AS{w, x}
@@ -936,14 +936,14 @@ func joinToS(w S, x O, left bool) O {
 		return joinToAI(w, x, left)
 	case AS:
 		return joinToAS(w, x, left)
-	case AO:
+	case AV:
 		return joinToAO(w, x, left)
 	default:
-		return AO{w, x}
+		return AV{w, x}
 	}
 }
 
-func joinToAO(w O, x AO, left bool) O {
+func joinToAO(w V, x AV, left bool) V {
 	switch w := w.(type) {
 	case Array:
 		if left {
@@ -951,7 +951,7 @@ func joinToAO(w O, x AO, left bool) O {
 		}
 		return joinArrays(x, w)
 	default:
-		r := make(AO, len(x)+1)
+		r := make(AV, len(x)+1)
 		if left {
 			r[0] = w
 			copy(r[1:], x)
@@ -963,8 +963,8 @@ func joinToAO(w O, x AO, left bool) O {
 	}
 }
 
-func joinArrays(w, x Array) AO {
-	r := make(AO, x.Len()+w.Len())
+func joinArrays(w, x Array) AV {
+	r := make(AV, x.Len()+w.Len())
 	for i := 0; i < w.Len(); i++ {
 		r[i] = w.At(i)
 	}
@@ -974,8 +974,8 @@ func joinArrays(w, x Array) AO {
 	return r
 }
 
-func joinAtomToArray(w O, x Array, left bool) AO {
-	r := make(AO, x.Len()+1)
+func joinAtomToArray(w V, x Array, left bool) AV {
+	r := make(AV, x.Len()+1)
 	if left {
 		r[0] = w
 		for i := 1; i < len(r); i++ {
@@ -990,7 +990,7 @@ func joinAtomToArray(w O, x Array, left bool) AO {
 	return r
 }
 
-func joinToAS(w O, x AS, left bool) O {
+func joinToAS(w V, x AS, left bool) V {
 	switch w := w.(type) {
 	case S:
 		r := make(AS, len(x)+1)
@@ -1022,7 +1022,7 @@ func joinToAS(w O, x AS, left bool) O {
 	}
 }
 
-func joinToAB(w O, x AB, left bool) O {
+func joinToAB(w V, x AB, left bool) V {
 	switch w := w.(type) {
 	case B:
 		r := make(AB, len(x)+1)
@@ -1087,7 +1087,7 @@ func joinToAB(w O, x AB, left bool) O {
 	}
 }
 
-func joinToAI(w O, x AI, left bool) O {
+func joinToAI(w V, x AI, left bool) V {
 	switch w := w.(type) {
 	case B:
 		r := make(AI, len(x)+1)
@@ -1148,7 +1148,7 @@ func joinToAI(w O, x AI, left bool) O {
 	}
 }
 
-func joinToAF(w O, x AF, left bool) O {
+func joinToAF(w V, x AF, left bool) V {
 	switch w := w.(type) {
 	case B:
 		r := make(AF, len(x)+1)
@@ -1281,7 +1281,7 @@ func joinAFAI(w AF, x AI) AF {
 }
 
 // Enlist returns ,x.
-func Enlist(x O) O {
+func Enlist(x V) V {
 	switch x := x.(type) {
 	case B:
 		return AB{bool(x)}
@@ -1292,7 +1292,7 @@ func Enlist(x O) O {
 	case S:
 		return AS{string(x)}
 	default:
-		return AO{x}
+		return AV{x}
 	}
 }
 
@@ -1345,7 +1345,7 @@ func Enlist(x O) O {
 //}
 
 // Windows returns w↕x.
-func Windows(w, x O) O {
+func Windows(w, x V) V {
 	i := 0
 	switch w := w.(type) {
 	case B:
@@ -1363,7 +1363,7 @@ func Windows(w, x O) O {
 		if i <= 0 || i >= x.Len()+1 {
 			return badtype("↕ : w must be between 0 and 1+≠x")
 		}
-		r := make(AO, 1+x.Len()-i)
+		r := make(AV, 1+x.Len()-i)
 		for j := range r {
 			r[j] = x.Slice(j, j+i)
 		}
@@ -1374,15 +1374,15 @@ func Windows(w, x O) O {
 }
 
 // Group returns ⊔x.
-func Group(x O) O {
+func Group(x V) V {
 	if Length(x) == 0 {
-		return AO{}
+		return AV{}
 	}
 	// TODO: optimize allocations
 	switch x := x.(type) {
 	case AB:
 		_, max := minMaxB(x)
-		r := make(AO, B2I(max)+1)
+		r := make(AV, B2I(max)+1)
 		for i := range r {
 			r[i] = AI{}
 		}
@@ -1397,7 +1397,7 @@ func Group(x O) O {
 		if min < 0 {
 			return badtype("⊔ : x must not contain negative values")
 		}
-		r := make(AO, max+1)
+		r := make(AV, max+1)
 		for i := range r {
 			r[i] = AI{}
 		}

@@ -243,29 +243,29 @@ sub genOp {
     open my $out, '>', \$s;
     print $out <<EOS;
 // ${name} returns w${op}x.
-func ${name}(w, x O) O {
+func ${name}(w, x V) V {
 	switch w := w.(type) {
 EOS
     for my $t (sort keys %types) {
         print $out <<EOS;
 	case $t:
-		return ${name}${t}O(w, x)
+		return ${name}${t}V(w, x)
 EOS
     }
     for my $t (sort keys %types) {
         print $out <<EOS;
 	case A$t:
-		return ${name}A${t}O(w, x)
+		return ${name}A${t}V(w, x)
 EOS
     }
     print $out <<EOS;
-	case AO:
+	case AV:
                 switch x := x.(type) {
                 case Array:
                         if x.Len() != len(w) {
                                 return badlen("$op")
                         }
-                        r := make(AO, len(w))
+                        r := make(AV, len(w))
                         for i := range r {
                                 v := ${name}(w[i], x.At(i))
                                 e, ok := v.(E)
@@ -276,7 +276,7 @@ EOS
                         }
                         return r
                 }
-                r := make(AO, len(w))
+                r := make(AV, len(w))
                 for i := range r {
                         v := ${name}(w[i], x)
                         e, ok := v.(E)
@@ -308,7 +308,7 @@ sub genLeftExpanded {
     my $s = "";
     open my $out, '>', \$s;
     print $out <<EOS;
-func ${name}${t}O(w $t, x O) O {
+func ${name}${t}V(w $t, x V) V {
 	switch x := x.(type) {
 EOS
     for my $tt (sort keys %types) {
@@ -333,10 +333,10 @@ EOS
 EOS
     }
     print $out <<EOS if $t !~ /^A/;
-	case AO:
-		r := make([]O, len(x))
+	case AV:
+		r := make([]V, len(x))
 		for i := range r {
-			v := ${name}${t}O($t(w), x[i])
+			v := ${name}${t}V($t(w), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -360,7 +360,7 @@ sub genLeftArrayExpanded {
     my $s = "";
     open my $out, '>', \$s;
     print $out <<EOS;
-func ${name}A${t}O(w A$t, x O) O {
+func ${name}A${t}V(w A$t, x V) V {
 	switch x := x.(type) {
 EOS
     for my $tt (sort keys %types) {
@@ -395,13 +395,13 @@ EOS
 EOS
     }
     print $out <<EOS if $t !~ /^A/;
-	case AO:
+	case AV:
                 if len(w) != len(x) {
                         return badlen("$op")
                 }
-		r := make(AO, len(x))
+		r := make(AV, len(x))
 		for i := range r {
-			v := ${name}${t}O($t(w[i]), x[i])
+			v := ${name}${t}V($t(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
