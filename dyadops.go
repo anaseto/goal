@@ -4146,7 +4146,7 @@ func MultiplyFO(w F, x O) O {
 	case I:
 		return w * F(x)
 	case S:
-		return strings.Repeat(x, I(math.Round(w)))
+		return strings.Repeat(x, I(math.Round(float64(w))))
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
@@ -4168,7 +4168,7 @@ func MultiplyFO(w F, x O) O {
 	case AS:
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = string(strings.Repeat(S(x[i]), I(math.Round(F(w)))))
+			r[i] = string(strings.Repeat(S(x[i]), I(math.Round(float64(F(w))))))
 		}
 		return r
 	case AO:
@@ -4246,7 +4246,7 @@ func MultiplySO(w S, x O) O {
 	case B:
 		return strings.Repeat(w, B2I(x))
 	case F:
-		return strings.Repeat(w, I(math.Round(x)))
+		return strings.Repeat(w, I(math.Round(float64(x))))
 	case I:
 		return strings.Repeat(w, x)
 	case AB:
@@ -4258,7 +4258,7 @@ func MultiplySO(w S, x O) O {
 	case AF:
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = string(strings.Repeat(S(w), I(math.Round(F(x[i])))))
+			r[i] = string(strings.Repeat(S(w), I(math.Round(float64(F(x[i]))))))
 		}
 		return r
 	case AI:
@@ -4391,7 +4391,7 @@ func MultiplyAFO(w AF, x O) O {
 	case S:
 		r := make(AS, len(w))
 		for i := range r {
-			r[i] = string(strings.Repeat(S(x), I(math.Round(F(w[i])))))
+			r[i] = string(strings.Repeat(S(x), I(math.Round(float64(F(w[i]))))))
 		}
 		return r
 	case AB:
@@ -4427,7 +4427,7 @@ func MultiplyAFO(w AF, x O) O {
 		}
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = string(strings.Repeat(S(x[i]), I(math.Round(F(w[i])))))
+			r[i] = string(strings.Repeat(S(x[i]), I(math.Round(float64(F(w[i]))))))
 		}
 		return r
 	case AO:
@@ -4545,7 +4545,7 @@ func MultiplyASO(w AS, x O) O {
 	case F:
 		r := make(AS, len(w))
 		for i := range r {
-			r[i] = string(strings.Repeat(S(w[i]), I(math.Round(F(x)))))
+			r[i] = string(strings.Repeat(S(w[i]), I(math.Round(float64(F(x))))))
 		}
 		return r
 	case I:
@@ -4569,7 +4569,7 @@ func MultiplyASO(w AS, x O) O {
 		}
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = string(strings.Repeat(S(w[i]), I(math.Round(F(x[i])))))
+			r[i] = string(strings.Repeat(S(w[i]), I(math.Round(float64(F(x[i]))))))
 		}
 		return r
 	case AI:

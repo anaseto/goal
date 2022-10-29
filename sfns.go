@@ -245,7 +245,7 @@ func ShiftBefore(w, x O) O {
 				r[i] = w[i]
 			}
 			for i := max; i < len(x); i++ {
-				r[i] = B2F(B(x[i-max]))
+				r[i] = float64(B2F(B(x[i-max])))
 			}
 			return r
 		case AI:
@@ -265,7 +265,7 @@ func ShiftBefore(w, x O) O {
 		case AB:
 			r := make(AF, len(x))
 			for i := 0; i < max; i++ {
-				r[i] = B2F(B(w[i]))
+				r[i] = float64(B2F(B(w[i])))
 			}
 			copy(r[max:], x[:len(x)-max])
 			return r
@@ -279,7 +279,7 @@ func ShiftBefore(w, x O) O {
 		case AI:
 			r := make(AF, len(x))
 			for i := 0; i < max; i++ {
-				r[i] = F(w[i])
+				r[i] = float64(w[i])
 			}
 			copy(r[max:], x[:len(x)-max])
 			return r
@@ -301,7 +301,7 @@ func ShiftBefore(w, x O) O {
 				r[i] = w[i]
 			}
 			for i := max; i < len(x); i++ {
-				r[i] = F(x[i-max])
+				r[i] = float64(x[i-max])
 			}
 			return r
 		case AI:
@@ -394,7 +394,7 @@ func ShiftAfter(w, x O) O {
 				r[len(x)-1-i] = w[i]
 			}
 			for i := max; i < len(x); i++ {
-				r[i-max] = B2F(B(x[i]))
+				r[i-max] = float64(B2F(B(x[i])))
 			}
 			return r
 		case AI:
@@ -414,7 +414,7 @@ func ShiftAfter(w, x O) O {
 		case AB:
 			r := make(AF, len(x))
 			for i := 0; i < max; i++ {
-				r[len(x)-1-i] = B2F(B(w[i]))
+				r[len(x)-1-i] = float64(B2F(B(w[i])))
 			}
 			copy(r[:len(x)-max], x[max:])
 			return r
@@ -428,7 +428,7 @@ func ShiftAfter(w, x O) O {
 		case AI:
 			r := make(AF, len(x))
 			for i := 0; i < max; i++ {
-				r[len(x)-1-i] = F(w[i])
+				r[len(x)-1-i] = float64(w[i])
 			}
 			copy(r[:len(x)-max], x[max:])
 			return r
@@ -450,7 +450,7 @@ func ShiftAfter(w, x O) O {
 				r[len(x)-1-i] = w[i]
 			}
 			for i := max; i < len(x); i++ {
-				r[i-max] = F(x[max])
+				r[i-max] = float64(x[max])
 			}
 			return r
 		case AI:
@@ -621,17 +621,17 @@ func flipAF(x AO) AF {
 	for i, y := range x {
 		switch y := y.(type) {
 		case B:
-			r[i] = B2F(y)
+			r[i] = float64(B2F(y))
 		case AB:
-			r[i] = B2F(B(y[0]))
+			r[i] = float64(B2F(B(y[0])))
 		case F:
-			r[i] = y
+			r[i] = float64(y)
 		case AF:
 			r[i] = y[0]
 		case I:
-			r[i] = F(y)
+			r[i] = float64(y)
 		case AI:
-			r[i] = F(y[0])
+			r[i] = float64(y[0])
 		}
 	}
 	return r
@@ -645,17 +645,17 @@ func flipAOAF(x AO, lines int) AO {
 		for i, y := range x {
 			switch y := y.(type) {
 			case B:
-				q[i] = B2F(y)
+				q[i] = float64(B2F(y))
 			case AB:
-				q[i] = B2F(B(y[j]))
+				q[i] = float64(B2F(B(y[j])))
 			case F:
-				q[i] = y
+				q[i] = float64(y)
 			case AF:
 				q[i] = y[j]
 			case I:
-				q[i] = F(y)
+				q[i] = float64(y)
 			case AI:
-				q[i] = F(y[j])
+				q[i] = float64(y[j])
 			}
 		}
 		r[j] = q
@@ -804,9 +804,9 @@ func joinToB(w B, x O, left bool) O {
 		return AB{bool(x), bool(w)}
 	case F:
 		if left {
-			return AF{B2F(w), x}
+			return AF{float64(B2F(w)), float64(x)}
 		}
-		return AF{x, B2F(w)}
+		return AF{float64(x), float64(B2F(w))}
 	case I:
 		if left {
 			return AI{B2I(w), x}
@@ -841,9 +841,9 @@ func joinToI(w I, x O, left bool) O {
 		return AI{B2I(x), w}
 	case F:
 		if left {
-			return AF{F(w), x}
+			return AF{float64(w), float64(x)}
 		}
-		return AF{x, F(w)}
+		return AF{float64(x), float64(w)}
 	case I:
 		if left {
 			return AI{w, x}
@@ -873,19 +873,19 @@ func joinToF(w F, x O, left bool) O {
 	switch x := x.(type) {
 	case B:
 		if left {
-			return AF{w, B2F(x)}
+			return AF{float64(w), float64(B2F(x))}
 		}
-		return AF{B2F(x), w}
+		return AF{float64(B2F(x)), float64(w)}
 	case F:
 		if left {
-			return AF{w, x}
+			return AF{float64(w), float64(x)}
 		}
-		return AF{x, w}
+		return AF{float64(x), float64(w)}
 	case I:
 		if left {
-			return AF{w, F(x)}
+			return AF{float64(w), float64(x)}
 		}
-		return AF{F(x), w}
+		return AF{float64(x), float64(w)}
 	case S:
 		if left {
 			return AO{w, x}
@@ -1037,14 +1037,14 @@ func joinToAB(w O, x AB, left bool) O {
 	case F:
 		r := make(AF, len(x)+1)
 		if left {
-			r[0] = w
+			r[0] = float64(w)
 			for i := 1; i < len(r); i++ {
-				r[i] = B2F(B(x[i-1]))
+				r[i] = float64(B2F(B(x[i-1])))
 			}
 		} else {
-			r[len(r)-1] = w
+			r[len(r)-1] = float64(w)
 			for i := 0; i < len(r); i++ {
-				r[i] = B2F(B(x[i]))
+				r[i] = float64(B2F(B(x[i])))
 			}
 		}
 		return r
@@ -1102,14 +1102,14 @@ func joinToAI(w O, x AI, left bool) O {
 	case F:
 		r := make(AF, len(x)+1)
 		if left {
-			r[0] = w
+			r[0] = float64(w)
 			for i := 1; i < len(r); i++ {
-				r[i] = F(x[i-1])
+				r[i] = float64(x[i-1])
 			}
 		} else {
-			r[len(r)-1] = w
+			r[len(r)-1] = float64(w)
 			for i := 0; i < len(r)-1; i++ {
-				r[i] = F(x[i])
+				r[i] = float64(x[i])
 			}
 		}
 		return r
@@ -1153,30 +1153,30 @@ func joinToAF(w O, x AF, left bool) O {
 	case B:
 		r := make(AF, len(x)+1)
 		if left {
-			r[0] = B2F(w)
+			r[0] = float64(B2F(w))
 			copy(r[1:], x)
 		} else {
-			r[len(r)-1] = B2F(w)
+			r[len(r)-1] = float64(B2F(w))
 			copy(r[:len(r)-1], x)
 		}
 		return r
 	case F:
 		r := make(AF, len(x)+1)
 		if left {
-			r[0] = w
+			r[0] = float64(w)
 			copy(r[1:], x)
 		} else {
-			r[len(r)-1] = w
+			r[len(r)-1] = float64(w)
 			copy(r[:len(r)-1], x)
 		}
 		return r
 	case I:
 		r := make(AF, len(x)+1)
 		if left {
-			r[0] = F(w)
+			r[0] = float64(w)
 			copy(r[1:], x)
 		} else {
-			r[len(r)-1] = F(w)
+			r[len(r)-1] = float64(w)
 			copy(r[:len(r)-1], x)
 		}
 		return r
@@ -1247,7 +1247,7 @@ func joinAIAB(w AI, x AB) AI {
 func joinABAF(w AB, x AF) AF {
 	r := make(AF, len(w)+len(x))
 	for i := 0; i < len(w); i++ {
-		r[i] = B2F(B(w[i]))
+		r[i] = float64(B2F(B(w[i])))
 	}
 	copy(r[len(w):], x)
 	return r
@@ -1257,7 +1257,7 @@ func joinAFAB(w AF, x AB) AF {
 	r := make(AF, len(w)+len(x))
 	copy(r[:len(w)], w)
 	for i := len(w); i < len(r); i++ {
-		r[i] = B2F(B(x[i-len(w)]))
+		r[i] = float64(B2F(B(x[i-len(w)])))
 	}
 	return r
 }
@@ -1265,7 +1265,7 @@ func joinAFAB(w AF, x AB) AF {
 func joinAIAF(w AI, x AF) AF {
 	r := make(AF, len(w)+len(x))
 	for i := 0; i < len(w); i++ {
-		r[i] = F(w[i])
+		r[i] = float64(w[i])
 	}
 	copy(r[len(w):], x)
 	return r
@@ -1275,7 +1275,7 @@ func joinAFAI(w AF, x AI) AF {
 	r := make(AF, len(w)+len(x))
 	copy(r[:len(w)], w)
 	for i := len(w); i < len(r); i++ {
-		r[i] = F(x[i-len(w)])
+		r[i] = float64(x[i-len(w)])
 	}
 	return r
 }

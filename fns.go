@@ -137,7 +137,7 @@ func Indices(x O) O {
 	case AF:
 		n := 0
 		for _, v := range x {
-			if !isI(v) {
+			if !isI(F(v)) {
 				return badtype("/ : not an integer")
 			}
 			if v < 0 {
@@ -249,7 +249,7 @@ func repeat(x O, n int) O {
 	case F:
 		r := make(AF, n)
 		for i := range r {
-			r[i] = x
+			r[i] = float64(x)
 		}
 		return r
 	case I:
@@ -381,7 +381,7 @@ func repeatAI(w AI, x O) O {
 func repeatAF(w AF, x O) O {
 	n := 0
 	for _, v := range w {
-		if !isI(v) {
+		if !isI(F(v)) {
 			return badtype("/ : not an integer")
 		}
 		if v < 0 {

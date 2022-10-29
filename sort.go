@@ -87,7 +87,7 @@ func lessB(w B, x O) bool {
 		if len(x) == 0 {
 			return false
 		}
-		return B2F(w) < x[0] || B2F(w) == x[0] && len(x) > 1
+		return B2F(w) < F(x[0]) || B2F(w) == F(x[0]) && len(x) > 1
 	case AI:
 		if len(x) == 0 {
 			return false
@@ -120,7 +120,7 @@ func lessF(w F, x O) bool {
 		if len(x) == 0 {
 			return false
 		}
-		return w < x[0] || w == x[0] && len(x) > 1
+		return w < F(x[0]) || w == F(x[0]) && len(x) > 1
 	case AI:
 		if len(x) == 0 {
 			return false
@@ -153,7 +153,7 @@ func lessI(w I, x O) bool {
 		if len(x) == 0 {
 			return false
 		}
-		return F(w) < x[0] || F(w) == x[0] && len(x) > 1
+		return float64(w) < x[0] || float64(w) == x[0] && len(x) > 1
 	case AI:
 		if len(x) == 0 {
 			return false
@@ -205,7 +205,7 @@ func lessAB(w AB, x O) bool {
 		return len(w) < len(x)
 	case AF:
 		for i := 0; i < len(w) && i < len(x); i++ {
-			if B2F(B(w[i])) > x[i] {
+			if B2F(B(w[i])) > F(x[i]) {
 				return false
 			}
 		}
@@ -246,7 +246,7 @@ func lessAI(w AI, x O) bool {
 		return len(w) < len(x)
 	case AF:
 		for i := 0; i < len(w) && i < len(x); i++ {
-			if F(w[i]) > x[i] {
+			if F(w[i]) > F(x[i]) {
 				return false
 			}
 		}
@@ -280,7 +280,7 @@ func lessAF(w AF, x O) bool {
 		return !lessI(x, w)
 	case AB:
 		for i := 0; i < len(w) && i < len(x); i++ {
-			if w[i] > B2F(B(x[i])) {
+			if F(w[i]) > B2F(B(x[i])) {
 				return false
 			}
 		}
@@ -294,7 +294,7 @@ func lessAF(w AF, x O) bool {
 		return len(w) < len(x)
 	case AI:
 		for i := 0; i < len(w) && i < len(x); i++ {
-			if w[i] > F(x[i]) {
+			if w[i] > float64(x[i]) {
 				return false
 			}
 		}

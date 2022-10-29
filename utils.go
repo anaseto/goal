@@ -362,7 +362,7 @@ func aType(x AO) eltype {
 }
 
 func isI(x F) bool {
-	return math.Floor(x) == x
+	return math.Floor(float64(x)) == float64(x)
 }
 
 func minMax(x AI) (min, max I) {

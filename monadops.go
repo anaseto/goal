@@ -81,7 +81,7 @@ func Sign(x O) O {
 	case AF:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = signF(x[i])
+			r[i] = signF(F(x[i]))
 		}
 		return r
 	case AI:
@@ -103,53 +103,13 @@ func Sign(x O) O {
 	}
 }
 
-// Reciprocal returns ÷x.
-func Reciprocal(x O) O {
-	switch x := x.(type) {
-	case B:
-		return divide(1, B2F(x))
-	case F:
-		return divide(1, x)
-	case I:
-		return divide(1, F(x))
-	case AB:
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = divide(1, B2F(B(x[i])))
-		}
-		return r
-	case AF:
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = divide(1, x[i])
-		}
-		return r
-	case AI:
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = divide(1, F(x[i]))
-		}
-		return r
-	case AO:
-		r := make(AO, len(x))
-		for i := range r {
-			r[i] = Reciprocal(x[i])
-		}
-		return r
-	case E:
-		return x
-	default:
-		return badtype("÷")
-	}
-}
-
-// Floor returns ⌊x.
+// Floor returns _x.
 func Floor(x O) O {
 	switch x := x.(type) {
 	case B:
 		return x
 	case F:
-		return math.Floor(x)
+		return math.Floor(float64(x))
 	case I:
 		return x
 	case S:
@@ -189,7 +149,7 @@ func Ceil(x O) O {
 	case B:
 		return x
 	case F:
-		return math.Ceil(x)
+		return math.Ceil(float64(x))
 	case I:
 		return x
 	case S:
@@ -223,7 +183,7 @@ func Ceil(x O) O {
 	}
 }
 
-// Not returns ¬x.
+// Not returns ~x.
 func Not(x O) O {
 	switch x := x.(type) {
 	case B:
@@ -276,7 +236,7 @@ func Abs(x O) O {
 	case B:
 		return x
 	case F:
-		return math.Abs(x)
+		return F(math.Abs(float64(x)))
 	case I:
 		return absI(x)
 	case AB:

@@ -135,7 +135,7 @@ func matchABAI(w AB, x AI) bool {
 
 func matchABAF(w AB, x AF) bool {
 	for i, v := range x {
-		if v != B2F(B(w[i])) {
+		if F(v) != B2F(B(w[i])) {
 			return false
 		}
 	}
@@ -153,7 +153,7 @@ func matchAI(w, x AI) bool {
 
 func matchAIAF(w AI, x AF) bool {
 	for i, v := range x {
-		if v != F(w[i]) {
+		if F(v) != F(w[i]) {
 			return false
 		}
 	}
@@ -191,7 +191,7 @@ func Classify(x O) O {
 		return Not(x)
 	case AF:
 		r := make(AI, len(x))
-		m := map[F]I{}
+		m := map[float64]I{}
 		n := 0
 		for i, v := range x {
 			c, ok := m[v]
@@ -279,7 +279,7 @@ func MarkFirts(x O) O {
 		return r
 	case AF:
 		r := make(AB, len(x))
-		m := map[F]struct{}{}
+		m := map[float64]struct{}{}
 		for i, v := range x {
 			_, ok := m[v]
 			if !ok {
@@ -391,9 +391,9 @@ func memberOfAB(w O, x AB) O {
 func memberOfAF(w O, x AF) O {
 	m := map[F]struct{}{}
 	for _, v := range x {
-		_, ok := m[v]
+		_, ok := m[F(v)]
 		if !ok {
-			m[v] = struct{}{}
+			m[F(v)] = struct{}{}
 			continue
 		}
 	}
@@ -422,7 +422,7 @@ func memberOfAF(w O, x AF) O {
 	case AF:
 		r := make(AB, len(w))
 		for i, v := range w {
-			_, r[i] = m[v]
+			_, r[i] = m[F(v)]
 		}
 		return r
 	default:
@@ -467,7 +467,7 @@ func memberOfAI(w O, x AI) O {
 	case AF:
 		r := make(AB, len(w))
 		for i, v := range w {
-			if !isI(v) {
+			if !isI(F(v)) {
 				continue
 			}
 			_, r[i] = m[I(v)]
@@ -550,7 +550,7 @@ func OccurrenceCount(x O) O {
 		return r
 	case AF:
 		r := make(AI, len(x))
-		m := map[F]I{}
+		m := map[float64]I{}
 		for i, v := range x {
 			c, ok := m[v]
 			if !ok {
