@@ -2396,7 +2396,7 @@ func MultiplyFV(w F, x V) V {
 	case I:
 		return F(w * F(x))
 	case S:
-		return S(strings.Repeat(string(x), int(math.Round(float64(w)))))
+		return S(strings.Repeat(string(x), int(float64(w))))
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
@@ -2418,7 +2418,7 @@ func MultiplyFV(w F, x V) V {
 	case AS:
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = string(strings.Repeat(string(S(x[i])), int(math.Round(float64(F(w))))))
+			r[i] = string(strings.Repeat(string(S(x[i])), int(float64(F(w)))))
 		}
 		return r
 	case AV:
@@ -2496,7 +2496,7 @@ func MultiplySV(w S, x V) V {
 	case B:
 		return S(strings.Repeat(string(w), int(B2I(x))))
 	case F:
-		return S(strings.Repeat(string(w), int(math.Round(float64(x)))))
+		return S(strings.Repeat(string(w), int(float64(x))))
 	case I:
 		return S(strings.Repeat(string(w), int(x)))
 	case AB:
@@ -2508,7 +2508,7 @@ func MultiplySV(w S, x V) V {
 	case AF:
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = string(strings.Repeat(string(S(w)), int(math.Round(float64(F(x[i]))))))
+			r[i] = string(strings.Repeat(string(S(w)), int(float64(F(x[i])))))
 		}
 		return r
 	case AI:
@@ -2641,7 +2641,7 @@ func MultiplyAFV(w AF, x V) V {
 	case S:
 		r := make(AS, len(w))
 		for i := range r {
-			r[i] = string(strings.Repeat(string(S(x)), int(math.Round(float64(F(w[i]))))))
+			r[i] = string(strings.Repeat(string(S(x)), int(float64(F(w[i])))))
 		}
 		return r
 	case AB:
@@ -2677,7 +2677,7 @@ func MultiplyAFV(w AF, x V) V {
 		}
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = string(strings.Repeat(string(S(x[i])), int(math.Round(float64(F(w[i]))))))
+			r[i] = string(strings.Repeat(string(S(x[i])), int(float64(F(w[i])))))
 		}
 		return r
 	case AV:
@@ -2795,7 +2795,7 @@ func MultiplyASV(w AS, x V) V {
 	case F:
 		r := make(AS, len(w))
 		for i := range r {
-			r[i] = string(strings.Repeat(string(S(w[i])), int(math.Round(float64(F(x))))))
+			r[i] = string(strings.Repeat(string(S(w[i])), int(float64(F(x)))))
 		}
 		return r
 	case I:
@@ -2819,7 +2819,7 @@ func MultiplyASV(w AS, x V) V {
 		}
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = string(strings.Repeat(string(S(w[i])), int(math.Round(float64(F(x[i]))))))
+			r[i] = string(strings.Repeat(string(S(w[i])), int(float64(F(x[i])))))
 		}
 		return r
 	case AI:

@@ -124,10 +124,10 @@ my %dyads = (
         F_B => ["w * B2F(x)", "F"],
         F_I => ["w * F(x)", "F"],
         F_F => ["w * x", "F"],
-        F_S => ["strings.Repeat(string(x), int(math.Round(float64(w))))", "S"],
+        F_S => ["strings.Repeat(string(x), int(float64(w)))", "S"],
         S_B => ["strings.Repeat(string(w), int(B2I(x)))", "S"],
         S_I => ["strings.Repeat(string(w), int(x))", "S"],
-        S_F => ["strings.Repeat(string(w), int(math.Round(float64(x))))", "S"],
+        S_F => ["strings.Repeat(string(w), int(float64(x)))", "S"],
     },
     Divide =>  {
         B_B => ["divide(B2F(w), B2F(x))", "F"],

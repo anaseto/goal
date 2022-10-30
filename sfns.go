@@ -3,7 +3,6 @@
 package main
 
 import (
-	"math"
 	"sort"
 )
 
@@ -65,6 +64,9 @@ func Rotate(w, x V) V {
 	case I:
 		i = int(w)
 	case F:
+		if !isI(w) {
+			return errsw("not an integer")
+		}
 		i = int(w)
 	default:
 		return errsw("not an integer")
@@ -160,7 +162,10 @@ func Drop(w, x V) V {
 	case I:
 		i = int(w)
 	case F:
-		i = int(math.Round(float64(w)))
+		if !isI(w) {
+			return errsw("not an integer")
+		}
+		i = int(w)
 	default:
 		return errsw("not an integer")
 	}
@@ -194,7 +199,10 @@ func Take(w, x V) V {
 	case I:
 		i = int(w)
 	case F:
-		i = int(math.Round(float64(w)))
+		if !isI(w) {
+			return errsw("not an integer")
+		}
+		i = int(w)
 	default:
 		return errsw("not an integer")
 	}
@@ -1349,7 +1357,10 @@ func Windows(w, x V) V {
 	case I:
 		i = int(w)
 	case F:
-		i = int(math.Round(float64(w)))
+		if !isI(w) {
+			return errsw("not an integer")
+		}
+		i = int(w)
 	default:
 		return errsw("not an integer")
 	}
