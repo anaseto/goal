@@ -1,0 +1,14 @@
+*.[oa]
+*~
+*.swp
+*.tar.gz
+*.nogit
+*.zip
+*.bz
+*.pdf
+*.bak
+*.prof
+*.js
+*.map
+*.html
+rewrite.sh
