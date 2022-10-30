@@ -263,7 +263,7 @@ EOS
                 switch x := x.(type) {
                 case Array:
                         if x.Len() != len(w) {
-                                return badlen("$op")
+                                return errf("length mismatch: %d vs %d", len(w), x.Len())
                         }
                         r := make(AV, len(w))
                         for i := range r {
@@ -289,7 +289,7 @@ EOS
 	case E:
 		return w
 	default:
-		return badtype("${op}")
+		return errsw("bad type")
 	}
 }\n
 EOS
@@ -348,7 +348,7 @@ EOS
 	case E:
 		return w
 	default:
-		return badtype("${op}")
+		return errs("bad type")
 	}
 }\n
 EOS
@@ -386,7 +386,7 @@ EOS
         print $out <<EOS;
 	case A$tt:
                 if len(w) != len(x) {
-                        return badlen("$op")
+                        return errf("length mismatch: %d vs %d", len(w), len(x))
                 }
 		r := make(A$type, len(x))
 		for i := range r {
@@ -398,7 +398,7 @@ EOS
     print $out <<EOS if $t !~ /^A/;
 	case AV:
                 if len(w) != len(x) {
-                        return badlen("$op")
+                        return errf("length mismatch: %d vs %d", len(w), len(x))
                 }
 		r := make(AV, len(x))
 		for i := range r {
@@ -413,7 +413,7 @@ EOS
 	case E:
 		return w
 	default:
-		return badtype("${op}")
+		return errs("bad type")
 	}
 }\n
 EOS

@@ -52,7 +52,7 @@ func Reverse(x V) V {
 		reverse(r)
 		return r
 	default:
-		return badtype("|")
+		return errs("bad type")
 	}
 }
 
@@ -67,8 +67,7 @@ func Rotate(w, x V) V {
 	case F:
 		i = int(w)
 	default:
-		// TODO: improve error messages
-		return badtype("w⌽")
+		return errsw("not an integer")
 	}
 	lenx := int(Length(x))
 	if lenx == 0 {
@@ -110,7 +109,7 @@ func Rotate(w, x V) V {
 		}
 		return r
 	default:
-		return badtype("⌽x")
+		return errs("bad type")
 	}
 }
 
@@ -144,11 +143,11 @@ func Tail(x V) V {
 	switch x := x.(type) {
 	case Array:
 		if x.Len() == 0 {
-			return badlen("↓")
+			return errs("zero length")
 		}
 		return x.Slice(1, x.Len())
 	default:
-		return badtype("↓")
+		return errs("bad type")
 	}
 }
 
@@ -163,8 +162,7 @@ func Drop(w, x V) V {
 	case F:
 		i = int(math.Round(float64(w)))
 	default:
-		// TODO: improve error messages
-		return badtype("_")
+		return errsw("not an integer")
 	}
 	x = toArray(x)
 	switch x := x.(type) {
@@ -198,8 +196,7 @@ func Take(w, x V) V {
 	case F:
 		i = int(math.Round(float64(w)))
 	default:
-		// TODO: improve error messages
-		return badtype("w↑")
+		return errsw("not an integer")
 	}
 	x = toArray(x)
 	switch x := x.(type) {
@@ -257,7 +254,7 @@ func ShiftBefore(w, x V) V {
 			}
 			return r
 		default:
-			return badtype("» : type mismatch")
+			return errs("bad type")
 		}
 	case AF:
 		switch w := w.(type) {
@@ -283,7 +280,7 @@ func ShiftBefore(w, x V) V {
 			copy(r[max:], x[:len(x)-max])
 			return r
 		default:
-			return badtype("» : type mismatch")
+			return errs("bad type")
 		}
 	case AI:
 		switch w := w.(type) {
@@ -311,7 +308,7 @@ func ShiftBefore(w, x V) V {
 			copy(r[max:], x[:len(x)-max])
 			return r
 		default:
-			return badtype("» : type mismatch")
+			return errs("bad type")
 		}
 	case AS:
 		switch w := w.(type) {
@@ -323,7 +320,7 @@ func ShiftBefore(w, x V) V {
 			copy(r[max:], x[:len(x)-max])
 			return r
 		default:
-			return badtype("» : type mismatch")
+			return errs("bad type")
 		}
 	case AV:
 		switch w := w.(type) {
@@ -335,10 +332,10 @@ func ShiftBefore(w, x V) V {
 			copy(r[max:], x[:len(x)-max])
 			return r
 		default:
-			return badtype("» : type mismatch")
+			return errs("bad type")
 		}
 	default:
-		return badtype("» : x must be an array")
+		return errs("not an array")
 	}
 }
 
@@ -366,7 +363,7 @@ func Nudge(x V) V {
 		copy(r[1:], x[0:len(x)-1])
 		return r
 	default:
-		return badtype("» : x must be an array")
+		return errs("not an array")
 	}
 }
 
@@ -406,7 +403,7 @@ func ShiftAfter(w, x V) V {
 			}
 			return r
 		default:
-			return badtype("« : type mismatch")
+			return errs("bad type")
 		}
 	case AF:
 		switch w := w.(type) {
@@ -432,7 +429,7 @@ func ShiftAfter(w, x V) V {
 			copy(r[:len(x)-max], x[max:])
 			return r
 		default:
-			return badtype("« : type mismatch")
+			return errs("bad type")
 		}
 	case AI:
 		switch w := w.(type) {
@@ -460,7 +457,7 @@ func ShiftAfter(w, x V) V {
 			copy(r[:len(x)-max], x[max:])
 			return r
 		default:
-			return badtype("« : type mismatch")
+			return errs("bad type")
 		}
 	case AS:
 		switch w := w.(type) {
@@ -472,7 +469,7 @@ func ShiftAfter(w, x V) V {
 			copy(r[:len(x)-max], x[max:])
 			return r
 		default:
-			return badtype("« : type mismatch")
+			return errs("bad type")
 		}
 	case AV:
 		switch w := w.(type) {
@@ -484,10 +481,10 @@ func ShiftAfter(w, x V) V {
 			copy(r[:len(x)-max], x[max:])
 			return r
 		default:
-			return badtype("« : type mismatch")
+			return errs("bad type")
 		}
 	default:
-		return badtype("« : x must be an array")
+		return errs("not an array")
 	}
 }
 
@@ -518,7 +515,7 @@ func NudgeBack(x V) V {
 		copy(r[0:len(x)-1], x[1:])
 		return r
 	default:
-		return badtype("« : x must be an array")
+		return errs("not an array")
 	}
 }
 
@@ -543,7 +540,7 @@ func Flip(x V) V {
 			case lines < 0:
 				lines = nl
 			case nl >= 1 && nl != lines:
-				return badlen("+")
+				return errf("line length mismatch: %d vs %d", nl, lines)
 			}
 		}
 		t := aType(x)
@@ -1354,13 +1351,12 @@ func Windows(w, x V) V {
 	case F:
 		i = int(math.Round(float64(w)))
 	default:
-		// TODO: improve error messages
-		return badtype("↕ : w must be un integer")
+		return errsw("not an integer")
 	}
 	switch x := x.(type) {
 	case Array:
 		if i <= 0 || i >= x.Len()+1 {
-			return badtype("↕ : w must be between 0 and 1+≠x")
+			return errsw("out of range [0, length]")
 		}
 		r := make(AV, 1+x.Len()-i)
 		for j := range r {
@@ -1368,7 +1364,7 @@ func Windows(w, x V) V {
 		}
 		return r
 	default:
-		return badtype("↕ : x must be an array")
+		return errs("not an array")
 	}
 }
 
@@ -1394,7 +1390,7 @@ func Group(x V) V {
 	case AI:
 		min, max := minMax(x)
 		if min < 0 {
-			return badtype("⊔ : x must not contain negative values")
+			return errs("negative integer")
 		}
 		r := make(AV, max+1)
 		for i := range r {
@@ -1407,6 +1403,6 @@ func Group(x V) V {
 		return r
 		// TODO: AF and AO
 	default:
-		return badtype("⊔ : x must be a non negative integer array")
+		return errs("non-integer array")
 	}
 }

@@ -30,7 +30,7 @@ func Equal(w, x V) V {
 		switch x := x.(type) {
 		case Array:
 			if x.Len() != len(w) {
-				return badlen("=")
+				return errf("length mismatch: %d vs %d", len(w), x.Len())
 			}
 			r := make(AV, len(w))
 			for i := range r {
@@ -56,7 +56,7 @@ func Equal(w, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("=")
+		return errs("bad type")
 	}
 }
 
@@ -100,7 +100,7 @@ func EqualBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("=")
+		return errs("bad type")
 	}
 }
 
@@ -144,7 +144,7 @@ func EqualFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("=")
+		return errs("bad type")
 	}
 }
 
@@ -188,7 +188,7 @@ func EqualIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("=")
+		return errs("bad type")
 	}
 }
 
@@ -216,7 +216,7 @@ func EqualSV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("=")
+		return errs("bad type")
 	}
 }
 
@@ -242,7 +242,7 @@ func EqualABV(w AB, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("=")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -251,7 +251,7 @@ func EqualABV(w AB, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("=")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -260,7 +260,7 @@ func EqualABV(w AB, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("=")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -269,7 +269,7 @@ func EqualABV(w AB, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("=")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -284,7 +284,7 @@ func EqualABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("=")
+		return errs("bad type")
 	}
 }
 
@@ -310,7 +310,7 @@ func EqualAFV(w AF, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("=")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -319,7 +319,7 @@ func EqualAFV(w AF, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("=")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -328,7 +328,7 @@ func EqualAFV(w AF, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("=")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -337,7 +337,7 @@ func EqualAFV(w AF, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("=")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -352,7 +352,7 @@ func EqualAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("=")
+		return errs("bad type")
 	}
 }
 
@@ -378,7 +378,7 @@ func EqualAIV(w AI, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("=")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -387,7 +387,7 @@ func EqualAIV(w AI, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("=")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -396,7 +396,7 @@ func EqualAIV(w AI, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("=")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -405,7 +405,7 @@ func EqualAIV(w AI, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("=")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -420,7 +420,7 @@ func EqualAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("=")
+		return errs("bad type")
 	}
 }
 
@@ -434,7 +434,7 @@ func EqualASV(w AS, x V) V {
 		return r
 	case AS:
 		if len(w) != len(x) {
-			return badlen("=")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -443,7 +443,7 @@ func EqualASV(w AS, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("=")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -458,7 +458,7 @@ func EqualASV(w AS, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("=")
+		return errs("bad type")
 	}
 }
 
@@ -485,7 +485,7 @@ func Lesser(w, x V) V {
 		switch x := x.(type) {
 		case Array:
 			if x.Len() != len(w) {
-				return badlen("<")
+				return errf("length mismatch: %d vs %d", len(w), x.Len())
 			}
 			r := make(AV, len(w))
 			for i := range r {
@@ -511,7 +511,7 @@ func Lesser(w, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("<")
+		return errs("bad type")
 	}
 }
 
@@ -555,7 +555,7 @@ func LesserBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("<")
+		return errs("bad type")
 	}
 }
 
@@ -599,7 +599,7 @@ func LesserFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("<")
+		return errs("bad type")
 	}
 }
 
@@ -643,7 +643,7 @@ func LesserIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("<")
+		return errs("bad type")
 	}
 }
 
@@ -671,7 +671,7 @@ func LesserSV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("<")
+		return errs("bad type")
 	}
 }
 
@@ -697,7 +697,7 @@ func LesserABV(w AB, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("<")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -706,7 +706,7 @@ func LesserABV(w AB, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("<")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -715,7 +715,7 @@ func LesserABV(w AB, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("<")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -724,7 +724,7 @@ func LesserABV(w AB, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("<")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -739,7 +739,7 @@ func LesserABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("<")
+		return errs("bad type")
 	}
 }
 
@@ -765,7 +765,7 @@ func LesserAFV(w AF, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("<")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -774,7 +774,7 @@ func LesserAFV(w AF, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("<")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -783,7 +783,7 @@ func LesserAFV(w AF, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("<")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -792,7 +792,7 @@ func LesserAFV(w AF, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("<")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -807,7 +807,7 @@ func LesserAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("<")
+		return errs("bad type")
 	}
 }
 
@@ -833,7 +833,7 @@ func LesserAIV(w AI, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("<")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -842,7 +842,7 @@ func LesserAIV(w AI, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("<")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -851,7 +851,7 @@ func LesserAIV(w AI, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("<")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -860,7 +860,7 @@ func LesserAIV(w AI, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("<")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -875,7 +875,7 @@ func LesserAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("<")
+		return errs("bad type")
 	}
 }
 
@@ -889,7 +889,7 @@ func LesserASV(w AS, x V) V {
 		return r
 	case AS:
 		if len(w) != len(x) {
-			return badlen("<")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -898,7 +898,7 @@ func LesserASV(w AS, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("<")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -913,7 +913,7 @@ func LesserASV(w AS, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("<")
+		return errs("bad type")
 	}
 }
 
@@ -940,7 +940,7 @@ func Greater(w, x V) V {
 		switch x := x.(type) {
 		case Array:
 			if x.Len() != len(w) {
-				return badlen(">")
+				return errf("length mismatch: %d vs %d", len(w), x.Len())
 			}
 			r := make(AV, len(w))
 			for i := range r {
@@ -966,7 +966,7 @@ func Greater(w, x V) V {
 	case E:
 		return w
 	default:
-		return badtype(">")
+		return errs("bad type")
 	}
 }
 
@@ -1010,7 +1010,7 @@ func GreaterBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return badtype(">")
+		return errs("bad type")
 	}
 }
 
@@ -1054,7 +1054,7 @@ func GreaterFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return badtype(">")
+		return errs("bad type")
 	}
 }
 
@@ -1098,7 +1098,7 @@ func GreaterIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return badtype(">")
+		return errs("bad type")
 	}
 }
 
@@ -1126,7 +1126,7 @@ func GreaterSV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return badtype(">")
+		return errs("bad type")
 	}
 }
 
@@ -1152,7 +1152,7 @@ func GreaterABV(w AB, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen(">")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -1161,7 +1161,7 @@ func GreaterABV(w AB, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen(">")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -1170,7 +1170,7 @@ func GreaterABV(w AB, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen(">")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -1179,7 +1179,7 @@ func GreaterABV(w AB, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen(">")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -1194,7 +1194,7 @@ func GreaterABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return badtype(">")
+		return errs("bad type")
 	}
 }
 
@@ -1220,7 +1220,7 @@ func GreaterAFV(w AF, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen(">")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -1229,7 +1229,7 @@ func GreaterAFV(w AF, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen(">")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -1238,7 +1238,7 @@ func GreaterAFV(w AF, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen(">")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -1247,7 +1247,7 @@ func GreaterAFV(w AF, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen(">")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -1262,7 +1262,7 @@ func GreaterAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return badtype(">")
+		return errs("bad type")
 	}
 }
 
@@ -1288,7 +1288,7 @@ func GreaterAIV(w AI, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen(">")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -1297,7 +1297,7 @@ func GreaterAIV(w AI, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen(">")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -1306,7 +1306,7 @@ func GreaterAIV(w AI, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen(">")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -1315,7 +1315,7 @@ func GreaterAIV(w AI, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen(">")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -1330,7 +1330,7 @@ func GreaterAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return badtype(">")
+		return errs("bad type")
 	}
 }
 
@@ -1344,7 +1344,7 @@ func GreaterASV(w AS, x V) V {
 		return r
 	case AS:
 		if len(w) != len(x) {
-			return badlen(">")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -1353,7 +1353,7 @@ func GreaterASV(w AS, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen(">")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -1368,7 +1368,7 @@ func GreaterASV(w AS, x V) V {
 	case E:
 		return w
 	default:
-		return badtype(">")
+		return errs("bad type")
 	}
 }
 
@@ -1395,7 +1395,7 @@ func Add(w, x V) V {
 		switch x := x.(type) {
 		case Array:
 			if x.Len() != len(w) {
-				return badlen("+")
+				return errf("length mismatch: %d vs %d", len(w), x.Len())
 			}
 			r := make(AV, len(w))
 			for i := range r {
@@ -1421,7 +1421,7 @@ func Add(w, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("+")
+		return errs("bad type")
 	}
 }
 
@@ -1465,7 +1465,7 @@ func AddBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("+")
+		return errs("bad type")
 	}
 }
 
@@ -1509,7 +1509,7 @@ func AddFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("+")
+		return errs("bad type")
 	}
 }
 
@@ -1553,7 +1553,7 @@ func AddIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("+")
+		return errs("bad type")
 	}
 }
 
@@ -1581,7 +1581,7 @@ func AddSV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("+")
+		return errs("bad type")
 	}
 }
 
@@ -1607,7 +1607,7 @@ func AddABV(w AB, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("+")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -1616,7 +1616,7 @@ func AddABV(w AB, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("+")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -1625,7 +1625,7 @@ func AddABV(w AB, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("+")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -1634,7 +1634,7 @@ func AddABV(w AB, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("+")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -1649,7 +1649,7 @@ func AddABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("+")
+		return errs("bad type")
 	}
 }
 
@@ -1675,7 +1675,7 @@ func AddAFV(w AF, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("+")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -1684,7 +1684,7 @@ func AddAFV(w AF, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("+")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -1693,7 +1693,7 @@ func AddAFV(w AF, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("+")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -1702,7 +1702,7 @@ func AddAFV(w AF, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("+")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -1717,7 +1717,7 @@ func AddAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("+")
+		return errs("bad type")
 	}
 }
 
@@ -1743,7 +1743,7 @@ func AddAIV(w AI, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("+")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -1752,7 +1752,7 @@ func AddAIV(w AI, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("+")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -1761,7 +1761,7 @@ func AddAIV(w AI, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("+")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -1770,7 +1770,7 @@ func AddAIV(w AI, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("+")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -1785,7 +1785,7 @@ func AddAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("+")
+		return errs("bad type")
 	}
 }
 
@@ -1799,7 +1799,7 @@ func AddASV(w AS, x V) V {
 		return r
 	case AS:
 		if len(w) != len(x) {
-			return badlen("+")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AS, len(x))
 		for i := range r {
@@ -1808,7 +1808,7 @@ func AddASV(w AS, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("+")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -1823,7 +1823,7 @@ func AddASV(w AS, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("+")
+		return errs("bad type")
 	}
 }
 
@@ -1850,7 +1850,7 @@ func Subtract(w, x V) V {
 		switch x := x.(type) {
 		case Array:
 			if x.Len() != len(w) {
-				return badlen("-")
+				return errf("length mismatch: %d vs %d", len(w), x.Len())
 			}
 			r := make(AV, len(w))
 			for i := range r {
@@ -1876,7 +1876,7 @@ func Subtract(w, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("-")
+		return errs("bad type")
 	}
 }
 
@@ -1920,7 +1920,7 @@ func SubtractBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("-")
+		return errs("bad type")
 	}
 }
 
@@ -1964,7 +1964,7 @@ func SubtractFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("-")
+		return errs("bad type")
 	}
 }
 
@@ -2008,7 +2008,7 @@ func SubtractIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("-")
+		return errs("bad type")
 	}
 }
 
@@ -2036,7 +2036,7 @@ func SubtractSV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("-")
+		return errs("bad type")
 	}
 }
 
@@ -2062,7 +2062,7 @@ func SubtractABV(w AB, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("-")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -2071,7 +2071,7 @@ func SubtractABV(w AB, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("-")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -2080,7 +2080,7 @@ func SubtractABV(w AB, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("-")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -2089,7 +2089,7 @@ func SubtractABV(w AB, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("-")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -2104,7 +2104,7 @@ func SubtractABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("-")
+		return errs("bad type")
 	}
 }
 
@@ -2130,7 +2130,7 @@ func SubtractAFV(w AF, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("-")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -2139,7 +2139,7 @@ func SubtractAFV(w AF, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("-")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -2148,7 +2148,7 @@ func SubtractAFV(w AF, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("-")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -2157,7 +2157,7 @@ func SubtractAFV(w AF, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("-")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -2172,7 +2172,7 @@ func SubtractAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("-")
+		return errs("bad type")
 	}
 }
 
@@ -2198,7 +2198,7 @@ func SubtractAIV(w AI, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("-")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -2207,7 +2207,7 @@ func SubtractAIV(w AI, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("-")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -2216,7 +2216,7 @@ func SubtractAIV(w AI, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("-")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -2225,7 +2225,7 @@ func SubtractAIV(w AI, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("-")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -2240,7 +2240,7 @@ func SubtractAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("-")
+		return errs("bad type")
 	}
 }
 
@@ -2254,7 +2254,7 @@ func SubtractASV(w AS, x V) V {
 		return r
 	case AS:
 		if len(w) != len(x) {
-			return badlen("-")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AS, len(x))
 		for i := range r {
@@ -2263,7 +2263,7 @@ func SubtractASV(w AS, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("-")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -2278,7 +2278,7 @@ func SubtractASV(w AS, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("-")
+		return errs("bad type")
 	}
 }
 
@@ -2305,7 +2305,7 @@ func Multiply(w, x V) V {
 		switch x := x.(type) {
 		case Array:
 			if x.Len() != len(w) {
-				return badlen("*")
+				return errf("length mismatch: %d vs %d", len(w), x.Len())
 			}
 			r := make(AV, len(w))
 			for i := range r {
@@ -2331,7 +2331,7 @@ func Multiply(w, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("*")
+		return errs("bad type")
 	}
 }
 
@@ -2383,7 +2383,7 @@ func MultiplyBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("*")
+		return errs("bad type")
 	}
 }
 
@@ -2435,7 +2435,7 @@ func MultiplyFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("*")
+		return errs("bad type")
 	}
 }
 
@@ -2487,7 +2487,7 @@ func MultiplyIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("*")
+		return errs("bad type")
 	}
 }
 
@@ -2531,7 +2531,7 @@ func MultiplySV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("*")
+		return errs("bad type")
 	}
 }
 
@@ -2563,7 +2563,7 @@ func MultiplyABV(w AB, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("*")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -2572,7 +2572,7 @@ func MultiplyABV(w AB, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("*")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -2581,7 +2581,7 @@ func MultiplyABV(w AB, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("*")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -2590,7 +2590,7 @@ func MultiplyABV(w AB, x V) V {
 		return r
 	case AS:
 		if len(w) != len(x) {
-			return badlen("*")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AS, len(x))
 		for i := range r {
@@ -2599,7 +2599,7 @@ func MultiplyABV(w AB, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("*")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -2614,7 +2614,7 @@ func MultiplyABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("*")
+		return errs("bad type")
 	}
 }
 
@@ -2646,7 +2646,7 @@ func MultiplyAFV(w AF, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("*")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -2655,7 +2655,7 @@ func MultiplyAFV(w AF, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("*")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -2664,7 +2664,7 @@ func MultiplyAFV(w AF, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("*")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -2673,7 +2673,7 @@ func MultiplyAFV(w AF, x V) V {
 		return r
 	case AS:
 		if len(w) != len(x) {
-			return badlen("*")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AS, len(x))
 		for i := range r {
@@ -2682,7 +2682,7 @@ func MultiplyAFV(w AF, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("*")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -2697,7 +2697,7 @@ func MultiplyAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("*")
+		return errs("bad type")
 	}
 }
 
@@ -2729,7 +2729,7 @@ func MultiplyAIV(w AI, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("*")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -2738,7 +2738,7 @@ func MultiplyAIV(w AI, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("*")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -2747,7 +2747,7 @@ func MultiplyAIV(w AI, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("*")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -2756,7 +2756,7 @@ func MultiplyAIV(w AI, x V) V {
 		return r
 	case AS:
 		if len(w) != len(x) {
-			return badlen("*")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AS, len(x))
 		for i := range r {
@@ -2765,7 +2765,7 @@ func MultiplyAIV(w AI, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("*")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -2780,7 +2780,7 @@ func MultiplyAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("*")
+		return errs("bad type")
 	}
 }
 
@@ -2806,7 +2806,7 @@ func MultiplyASV(w AS, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("*")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AS, len(x))
 		for i := range r {
@@ -2815,7 +2815,7 @@ func MultiplyASV(w AS, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("*")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AS, len(x))
 		for i := range r {
@@ -2824,7 +2824,7 @@ func MultiplyASV(w AS, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("*")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AS, len(x))
 		for i := range r {
@@ -2833,7 +2833,7 @@ func MultiplyASV(w AS, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("*")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -2848,7 +2848,7 @@ func MultiplyASV(w AS, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("*")
+		return errs("bad type")
 	}
 }
 
@@ -2871,7 +2871,7 @@ func Divide(w, x V) V {
 		switch x := x.(type) {
 		case Array:
 			if x.Len() != len(w) {
-				return badlen("%")
+				return errf("length mismatch: %d vs %d", len(w), x.Len())
 			}
 			r := make(AV, len(w))
 			for i := range r {
@@ -2897,7 +2897,7 @@ func Divide(w, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("%")
+		return errs("bad type")
 	}
 }
 
@@ -2941,7 +2941,7 @@ func DivideBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("%")
+		return errs("bad type")
 	}
 }
 
@@ -2985,7 +2985,7 @@ func DivideFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("%")
+		return errs("bad type")
 	}
 }
 
@@ -3029,7 +3029,7 @@ func DivideIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("%")
+		return errs("bad type")
 	}
 }
 
@@ -3055,7 +3055,7 @@ func DivideABV(w AB, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("%")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3064,7 +3064,7 @@ func DivideABV(w AB, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("%")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3073,7 +3073,7 @@ func DivideABV(w AB, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("%")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3082,7 +3082,7 @@ func DivideABV(w AB, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("%")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -3097,7 +3097,7 @@ func DivideABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("%")
+		return errs("bad type")
 	}
 }
 
@@ -3123,7 +3123,7 @@ func DivideAFV(w AF, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("%")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3132,7 +3132,7 @@ func DivideAFV(w AF, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("%")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3141,7 +3141,7 @@ func DivideAFV(w AF, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("%")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3150,7 +3150,7 @@ func DivideAFV(w AF, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("%")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -3165,7 +3165,7 @@ func DivideAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("%")
+		return errs("bad type")
 	}
 }
 
@@ -3191,7 +3191,7 @@ func DivideAIV(w AI, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("%")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3200,7 +3200,7 @@ func DivideAIV(w AI, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("%")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3209,7 +3209,7 @@ func DivideAIV(w AI, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("%")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3218,7 +3218,7 @@ func DivideAIV(w AI, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("%")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -3233,7 +3233,7 @@ func DivideAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("%")
+		return errs("bad type")
 	}
 }
 
@@ -3260,7 +3260,7 @@ func Minimum(w, x V) V {
 		switch x := x.(type) {
 		case Array:
 			if x.Len() != len(w) {
-				return badlen("&")
+				return errf("length mismatch: %d vs %d", len(w), x.Len())
 			}
 			r := make(AV, len(w))
 			for i := range r {
@@ -3286,7 +3286,7 @@ func Minimum(w, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("&")
+		return errs("bad type")
 	}
 }
 
@@ -3330,7 +3330,7 @@ func MinimumBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("&")
+		return errs("bad type")
 	}
 }
 
@@ -3374,7 +3374,7 @@ func MinimumFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("&")
+		return errs("bad type")
 	}
 }
 
@@ -3418,7 +3418,7 @@ func MinimumIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("&")
+		return errs("bad type")
 	}
 }
 
@@ -3446,7 +3446,7 @@ func MinimumSV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("&")
+		return errs("bad type")
 	}
 }
 
@@ -3472,7 +3472,7 @@ func MinimumABV(w AB, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("&")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -3481,7 +3481,7 @@ func MinimumABV(w AB, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("&")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3490,7 +3490,7 @@ func MinimumABV(w AB, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("&")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -3499,7 +3499,7 @@ func MinimumABV(w AB, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("&")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -3514,7 +3514,7 @@ func MinimumABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("&")
+		return errs("bad type")
 	}
 }
 
@@ -3540,7 +3540,7 @@ func MinimumAFV(w AF, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("&")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3549,7 +3549,7 @@ func MinimumAFV(w AF, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("&")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3558,7 +3558,7 @@ func MinimumAFV(w AF, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("&")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3567,7 +3567,7 @@ func MinimumAFV(w AF, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("&")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -3582,7 +3582,7 @@ func MinimumAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("&")
+		return errs("bad type")
 	}
 }
 
@@ -3608,7 +3608,7 @@ func MinimumAIV(w AI, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("&")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -3617,7 +3617,7 @@ func MinimumAIV(w AI, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("&")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3626,7 +3626,7 @@ func MinimumAIV(w AI, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("&")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -3635,7 +3635,7 @@ func MinimumAIV(w AI, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("&")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -3650,7 +3650,7 @@ func MinimumAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("&")
+		return errs("bad type")
 	}
 }
 
@@ -3664,7 +3664,7 @@ func MinimumASV(w AS, x V) V {
 		return r
 	case AS:
 		if len(w) != len(x) {
-			return badlen("&")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AS, len(x))
 		for i := range r {
@@ -3673,7 +3673,7 @@ func MinimumASV(w AS, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("&")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -3688,7 +3688,7 @@ func MinimumASV(w AS, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("&")
+		return errs("bad type")
 	}
 }
 
@@ -3715,7 +3715,7 @@ func Maximum(w, x V) V {
 		switch x := x.(type) {
 		case Array:
 			if x.Len() != len(w) {
-				return badlen("|")
+				return errf("length mismatch: %d vs %d", len(w), x.Len())
 			}
 			r := make(AV, len(w))
 			for i := range r {
@@ -3741,7 +3741,7 @@ func Maximum(w, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("|")
+		return errs("bad type")
 	}
 }
 
@@ -3785,7 +3785,7 @@ func MaximumBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("|")
+		return errs("bad type")
 	}
 }
 
@@ -3829,7 +3829,7 @@ func MaximumFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("|")
+		return errs("bad type")
 	}
 }
 
@@ -3873,7 +3873,7 @@ func MaximumIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("|")
+		return errs("bad type")
 	}
 }
 
@@ -3901,7 +3901,7 @@ func MaximumSV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("|")
+		return errs("bad type")
 	}
 }
 
@@ -3927,7 +3927,7 @@ func MaximumABV(w AB, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("|")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -3936,7 +3936,7 @@ func MaximumABV(w AB, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("|")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3945,7 +3945,7 @@ func MaximumABV(w AB, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("|")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -3954,7 +3954,7 @@ func MaximumABV(w AB, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("|")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -3969,7 +3969,7 @@ func MaximumABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("|")
+		return errs("bad type")
 	}
 }
 
@@ -3995,7 +3995,7 @@ func MaximumAFV(w AF, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("|")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -4004,7 +4004,7 @@ func MaximumAFV(w AF, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("|")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -4013,7 +4013,7 @@ func MaximumAFV(w AF, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("|")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -4022,7 +4022,7 @@ func MaximumAFV(w AF, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("|")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -4037,7 +4037,7 @@ func MaximumAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("|")
+		return errs("bad type")
 	}
 }
 
@@ -4063,7 +4063,7 @@ func MaximumAIV(w AI, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("|")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -4072,7 +4072,7 @@ func MaximumAIV(w AI, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("|")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -4081,7 +4081,7 @@ func MaximumAIV(w AI, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("|")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -4090,7 +4090,7 @@ func MaximumAIV(w AI, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("|")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -4105,7 +4105,7 @@ func MaximumAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("|")
+		return errs("bad type")
 	}
 }
 
@@ -4119,7 +4119,7 @@ func MaximumASV(w AS, x V) V {
 		return r
 	case AS:
 		if len(w) != len(x) {
-			return badlen("|")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AS, len(x))
 		for i := range r {
@@ -4128,7 +4128,7 @@ func MaximumASV(w AS, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("|")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -4143,7 +4143,7 @@ func MaximumASV(w AS, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("|")
+		return errs("bad type")
 	}
 }
 
@@ -4166,7 +4166,7 @@ func Modulus(w, x V) V {
 		switch x := x.(type) {
 		case Array:
 			if x.Len() != len(w) {
-				return badlen("!")
+				return errf("length mismatch: %d vs %d", len(w), x.Len())
 			}
 			r := make(AV, len(w))
 			for i := range r {
@@ -4192,7 +4192,7 @@ func Modulus(w, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("!")
+		return errs("bad type")
 	}
 }
 
@@ -4236,7 +4236,7 @@ func ModulusBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("!")
+		return errs("bad type")
 	}
 }
 
@@ -4280,7 +4280,7 @@ func ModulusFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("!")
+		return errs("bad type")
 	}
 }
 
@@ -4324,7 +4324,7 @@ func ModulusIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("!")
+		return errs("bad type")
 	}
 }
 
@@ -4350,7 +4350,7 @@ func ModulusABV(w AB, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("!")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -4359,7 +4359,7 @@ func ModulusABV(w AB, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("!")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -4368,7 +4368,7 @@ func ModulusABV(w AB, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("!")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -4377,7 +4377,7 @@ func ModulusABV(w AB, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("!")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -4392,7 +4392,7 @@ func ModulusABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("!")
+		return errs("bad type")
 	}
 }
 
@@ -4418,7 +4418,7 @@ func ModulusAFV(w AF, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("!")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -4427,7 +4427,7 @@ func ModulusAFV(w AF, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("!")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -4436,7 +4436,7 @@ func ModulusAFV(w AF, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("!")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -4445,7 +4445,7 @@ func ModulusAFV(w AF, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("!")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -4460,7 +4460,7 @@ func ModulusAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("!")
+		return errs("bad type")
 	}
 }
 
@@ -4486,7 +4486,7 @@ func ModulusAIV(w AI, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("!")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -4495,7 +4495,7 @@ func ModulusAIV(w AI, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("!")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -4504,7 +4504,7 @@ func ModulusAIV(w AI, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("!")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -4513,7 +4513,7 @@ func ModulusAIV(w AI, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("!")
+			return errf("length mismatch: %d vs %d", len(w), len(x))
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -4528,6 +4528,6 @@ func ModulusAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("!")
+		return errs("bad type")
 	}
 }

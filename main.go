@@ -41,7 +41,7 @@ func testPrimitives() {
 	fmt.Printf("Range:%#v\n", Range(AI{4, 2, 3}))
 	fmt.Printf("Indices:%#v\n", Indices(AI{0, 1, 0, 0, 1}))
 	fmt.Printf("Indices:%#v\n", Indices(AI{3, 0, 1}))
-	fmt.Printf("MarkFirts:%#v\n", MarkFirts(AI{3, 3, 1, 2, 4, 2, 4}))
+	fmt.Printf("MarkFirsts:%#v\n", MarkFirsts(AI{3, 3, 1, 2, 4, 2, 4}))
 	fmt.Printf("OccurrenceCount:%#v\n", OccurrenceCount(AB{false, false, true, false, true, true}))
 	fmt.Printf("Windows:%#v\n", Windows(I(3), Range(I(7))))
 	fmt.Printf("MemberOf:%#v\n", MemberOf(AS{"two", "twelve", "five", "one", "one", "nine"}, AS{"one", "two", "four"}))

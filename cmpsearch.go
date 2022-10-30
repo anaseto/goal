@@ -177,7 +177,7 @@ func Classify(x V) V {
 	x = canonical(x)
 	switch x := x.(type) {
 	case B, F, I, S:
-		return badtype("⊐ : expected array")
+		return errs("not an array")
 	case AB:
 		v := x[0]
 		if !v {
@@ -248,19 +248,19 @@ func Classify(x V) V {
 		}
 		return r
 	default:
-		return badtype("⊐ : expected array")
+		return errs("not an array")
 	}
 }
 
-// Mark Firts returns ∊x.
-func MarkFirts(x V) V {
+// Mark Firsts returns ∊x.
+func MarkFirsts(x V) V {
 	if Length(x) == 0 {
 		return AB{}
 	}
 	x = canonical(x)
 	switch x := x.(type) {
 	case B, F, I, S:
-		return badtype("∊ : expected array")
+		return errs("not an array")
 	case AB:
 		r := make(AB, len(x))
 		r[0] = true
@@ -324,7 +324,7 @@ func MarkFirts(x V) V {
 		}
 		return r
 	default:
-		return badtype("∊ : expected array")
+		return errs("not an array")
 	}
 }
 
@@ -341,7 +341,7 @@ func MemberOf(w, x V) V {
 				return B(false)
 			}
 		default:
-			return badtype("∊ : x must be an array")
+			return errs("not an array")
 		}
 	}
 	x = canonical(x)
@@ -358,7 +358,7 @@ func MemberOf(w, x V) V {
 	case AV:
 		return memberOfAO(w, x)
 	default:
-		return badtype("∊ : x must be an array")
+		return errs("not an array")
 	}
 }
 
@@ -529,7 +529,7 @@ func OccurrenceCount(x V) V {
 	x = canonical(x)
 	switch x := x.(type) {
 	case B, F, I, S:
-		return badtype("⊒ : expected array")
+		return errs("not an array")
 	case AB:
 		r := make(AI, len(x))
 		var f, t int
@@ -598,6 +598,6 @@ func OccurrenceCount(x V) V {
 		}
 		return r
 	default:
-		return badtype("⊒ : expected array")
+		return errs("not an array")
 	}
 }

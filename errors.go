@@ -2,10 +2,14 @@ package main
 
 import "fmt"
 
-func badtype(s string) E {
-	return E(fmt.Sprintf("type error %s", s))
+func errs(s string) E {
+	return E(s)
 }
 
-func badlen(s string) E {
-	return E(fmt.Sprintf("length error %s", s))
+func errsw(s string) E {
+	return E("left argument:" + s)
+}
+
+func errf(format string, a ...interface{}) E {
+	return E(fmt.Sprintf(format, a...))
 }
