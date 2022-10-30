@@ -2,6 +2,10 @@ package main
 
 import "fmt"
 
+func badType(x V) E {
+	return E("bad type: `" + x.Type())
+}
+
 func errs(s string) E {
 	return E(s)
 }
