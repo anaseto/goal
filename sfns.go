@@ -12,10 +12,8 @@ func Length(x V) I {
 	switch x := x.(type) {
 	case nil:
 		return 0
-	case Array:
-		return I(x.Len())
 	default:
-		return 1
+		return I(x.Len())
 	}
 }
 
