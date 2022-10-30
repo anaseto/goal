@@ -75,7 +75,7 @@ func rangeArray(x Array) V {
 	return r
 }
 
-// Indices returns /x.
+// Indices returns &x.
 func Indices(x V) V {
 	switch x := x.(type) {
 	case B:
@@ -199,7 +199,7 @@ func Indices(x V) V {
 	}
 }
 
-// Replicate returns w/x.
+// Replicate returns {w}#x.
 func Replicate(w, x V) V {
 	if Length(w) != Length(x) {
 		return badlen("/ : w and x must have same length")
@@ -320,7 +320,7 @@ func repeatAB(w AB, x V) V {
 		}
 		return r
 	default:
-		return badtype("/ : expected array for x")
+		return badtype("expected array")
 	}
 }
 
@@ -328,7 +328,7 @@ func repeatAI(w AI, x V) V {
 	n := 0
 	for _, v := range w {
 		if v < 0 {
-			return badtype("/ : negative integer")
+			return badtype("negative integer")
 		}
 		n += v
 	}
@@ -374,7 +374,7 @@ func repeatAI(w AI, x V) V {
 		}
 		return r
 	default:
-		return badtype("/ : expected array for x")
+		return badtype("expected array")
 	}
 }
 
@@ -382,10 +382,10 @@ func repeatAF(w AF, x V) V {
 	n := 0
 	for _, v := range w {
 		if !isI(F(v)) {
-			return badtype("/ : not an integer")
+			return badtype("not an integer")
 		}
 		if v < 0 {
-			return badtype("/ : negative integer")
+			return badtype("negative integer")
 		}
 		n += int(v)
 	}
@@ -445,15 +445,15 @@ func repeatAO(w AV, x V) V {
 				n += int(B2I(v))
 			case F:
 				if !isI(v) {
-					return badtype("/ : not an integer")
+					return badtype("not an integer")
 				}
 				if v < 0 {
-					return badtype("/ : negative integer")
+					return badtype("negative integer")
 				}
 				n += int(v)
 			case I:
 				if v < 0 {
-					return badtype("/ : negative integer")
+					return badtype("negative integer")
 				}
 				n += int(v)
 			}
@@ -505,9 +505,9 @@ func repeatAO(w AV, x V) V {
 			}
 			return r
 		default:
-			return badtype("/ : expected array for x")
+			return badtype("expected array")
 		}
 	default:
-		return badtype("/ : expected integer(s) for w")
+		return badtype("expected integer left argument")
 	}
 }
