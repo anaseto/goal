@@ -261,7 +261,7 @@ func repeat(x V, n int) V {
 	case S:
 		r := make(AS, n)
 		for i := range r {
-			r[i] = x
+			r[i] = string(x)
 		}
 		return r
 	default:

@@ -113,7 +113,7 @@ func Floor(x V) V {
 	case I:
 		return x
 	case S:
-		return strings.ToLower(x)
+		return strings.ToLower(string(x))
 	case AB:
 		return x
 	case AF:
@@ -153,7 +153,7 @@ func Ceil(x V) V {
 	case I:
 		return x
 	case S:
-		return strings.ToUpper(x)
+		return strings.ToUpper(string(x))
 	case AB:
 		return x
 	case AF:

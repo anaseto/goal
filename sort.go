@@ -177,7 +177,7 @@ func lessS(w S, x V) bool {
 		if len(x) == 0 {
 			return false
 		}
-		return w < x[0] || w == x[0] && len(x) > 1
+		return string(w) < x[0] || string(w) == x[0] && len(x) > 1
 	case AV:
 		if len(x) == 0 {
 			return false

@@ -3380,11 +3380,11 @@ func SubtractIV(w I, x V) V {
 func SubtractSV(w S, x V) V {
 	switch x := x.(type) {
 	case S:
-		return strings.TrimSuffix(w, x)
+		return strings.TrimSuffix(string(w), string(x))
 	case AS:
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = string(strings.TrimSuffix(S(w), S(x[i])))
+			r[i] = string(strings.TrimSuffix(string(S(w)), string(S(x[i]))))
 		}
 		return r
 	case AV:
@@ -3614,7 +3614,7 @@ func SubtractASV(w AS, x V) V {
 	case S:
 		r := make(AS, len(w))
 		for i := range r {
-			r[i] = string(strings.TrimSuffix(S(w[i]), S(x)))
+			r[i] = string(strings.TrimSuffix(string(S(w[i])), string(S(x))))
 		}
 		return r
 	case AS:
@@ -3623,7 +3623,7 @@ func SubtractASV(w AS, x V) V {
 		}
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = string(strings.TrimSuffix(S(w[i]), S(x[i])))
+			r[i] = string(strings.TrimSuffix(string(S(w[i])), string(S(x[i]))))
 		}
 		return r
 	case AV:
@@ -4094,7 +4094,7 @@ func MultiplyBV(w B, x V) V {
 	case I:
 		return B2I(w) * x
 	case S:
-		return strings.Repeat(x, B2I(w))
+		return strings.Repeat(string(x), int(B2I(w)))
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -4116,7 +4116,7 @@ func MultiplyBV(w B, x V) V {
 	case AS:
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = string(strings.Repeat(S(x[i]), B2I(B(w))))
+			r[i] = string(strings.Repeat(string(S(x[i])), int(B2I(B(w)))))
 		}
 		return r
 	case AV:
@@ -4146,7 +4146,7 @@ func MultiplyFV(w F, x V) V {
 	case I:
 		return w * F(x)
 	case S:
-		return strings.Repeat(x, I(math.Round(float64(w))))
+		return strings.Repeat(string(x), int(math.Round(float64(w))))
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
@@ -4168,7 +4168,7 @@ func MultiplyFV(w F, x V) V {
 	case AS:
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = string(strings.Repeat(S(x[i]), I(math.Round(float64(F(w))))))
+			r[i] = string(strings.Repeat(string(S(x[i])), int(math.Round(float64(F(w))))))
 		}
 		return r
 	case AV:
@@ -4198,7 +4198,7 @@ func MultiplyIV(w I, x V) V {
 	case I:
 		return w * x
 	case S:
-		return strings.Repeat(x, w)
+		return strings.Repeat(string(x), int(w))
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
@@ -4220,7 +4220,7 @@ func MultiplyIV(w I, x V) V {
 	case AS:
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = string(strings.Repeat(S(x[i]), I(w)))
+			r[i] = string(strings.Repeat(string(S(x[i])), int(I(w))))
 		}
 		return r
 	case AV:
@@ -4244,27 +4244,27 @@ func MultiplyIV(w I, x V) V {
 func MultiplySV(w S, x V) V {
 	switch x := x.(type) {
 	case B:
-		return strings.Repeat(w, B2I(x))
+		return strings.Repeat(string(w), int(B2I(x)))
 	case F:
-		return strings.Repeat(w, I(math.Round(float64(x))))
+		return strings.Repeat(string(w), int(math.Round(float64(x))))
 	case I:
-		return strings.Repeat(w, x)
+		return strings.Repeat(string(w), int(x))
 	case AB:
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = string(strings.Repeat(S(w), B2I(B(x[i]))))
+			r[i] = string(strings.Repeat(string(S(w)), int(B2I(B(x[i])))))
 		}
 		return r
 	case AF:
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = string(strings.Repeat(S(w), I(math.Round(float64(F(x[i]))))))
+			r[i] = string(strings.Repeat(string(S(w)), int(math.Round(float64(F(x[i]))))))
 		}
 		return r
 	case AI:
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = string(strings.Repeat(S(w), I(x[i])))
+			r[i] = string(strings.Repeat(string(S(w)), int(I(x[i]))))
 		}
 		return r
 	case AV:
@@ -4308,7 +4308,7 @@ func MultiplyABV(w AB, x V) V {
 	case S:
 		r := make(AS, len(w))
 		for i := range r {
-			r[i] = string(strings.Repeat(S(x), B2I(B(w[i]))))
+			r[i] = string(strings.Repeat(string(S(x)), int(B2I(B(w[i])))))
 		}
 		return r
 	case AB:
@@ -4344,7 +4344,7 @@ func MultiplyABV(w AB, x V) V {
 		}
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = string(strings.Repeat(S(x[i]), B2I(B(w[i]))))
+			r[i] = string(strings.Repeat(string(S(x[i])), int(B2I(B(w[i])))))
 		}
 		return r
 	case AV:
@@ -4391,7 +4391,7 @@ func MultiplyAFV(w AF, x V) V {
 	case S:
 		r := make(AS, len(w))
 		for i := range r {
-			r[i] = string(strings.Repeat(S(x), I(math.Round(float64(F(w[i]))))))
+			r[i] = string(strings.Repeat(string(S(x)), int(math.Round(float64(F(w[i]))))))
 		}
 		return r
 	case AB:
@@ -4427,7 +4427,7 @@ func MultiplyAFV(w AF, x V) V {
 		}
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = string(strings.Repeat(S(x[i]), I(math.Round(float64(F(w[i]))))))
+			r[i] = string(strings.Repeat(string(S(x[i])), int(math.Round(float64(F(w[i]))))))
 		}
 		return r
 	case AV:
@@ -4474,7 +4474,7 @@ func MultiplyAIV(w AI, x V) V {
 	case S:
 		r := make(AS, len(w))
 		for i := range r {
-			r[i] = string(strings.Repeat(S(x), I(w[i])))
+			r[i] = string(strings.Repeat(string(S(x)), int(I(w[i]))))
 		}
 		return r
 	case AB:
@@ -4510,7 +4510,7 @@ func MultiplyAIV(w AI, x V) V {
 		}
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = string(strings.Repeat(S(x[i]), I(w[i])))
+			r[i] = string(strings.Repeat(string(S(x[i])), int(I(w[i]))))
 		}
 		return r
 	case AV:
@@ -4539,19 +4539,19 @@ func MultiplyASV(w AS, x V) V {
 	case B:
 		r := make(AS, len(w))
 		for i := range r {
-			r[i] = string(strings.Repeat(S(w[i]), B2I(B(x))))
+			r[i] = string(strings.Repeat(string(S(w[i])), int(B2I(B(x)))))
 		}
 		return r
 	case F:
 		r := make(AS, len(w))
 		for i := range r {
-			r[i] = string(strings.Repeat(S(w[i]), I(math.Round(float64(F(x))))))
+			r[i] = string(strings.Repeat(string(S(w[i])), int(math.Round(float64(F(x))))))
 		}
 		return r
 	case I:
 		r := make(AS, len(w))
 		for i := range r {
-			r[i] = string(strings.Repeat(S(w[i]), I(x)))
+			r[i] = string(strings.Repeat(string(S(w[i])), int(I(x))))
 		}
 		return r
 	case AB:
@@ -4560,7 +4560,7 @@ func MultiplyASV(w AS, x V) V {
 		}
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = string(strings.Repeat(S(w[i]), B2I(B(x[i]))))
+			r[i] = string(strings.Repeat(string(S(w[i])), int(B2I(B(x[i])))))
 		}
 		return r
 	case AF:
@@ -4569,7 +4569,7 @@ func MultiplyASV(w AS, x V) V {
 		}
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = string(strings.Repeat(S(w[i]), I(math.Round(float64(F(x[i]))))))
+			r[i] = string(strings.Repeat(string(S(w[i])), int(math.Round(float64(F(x[i]))))))
 		}
 		return r
 	case AI:
@@ -4578,7 +4578,7 @@ func MultiplyASV(w AS, x V) V {
 		}
 		r := make(AS, len(x))
 		for i := range r {
-			r[i] = string(strings.Repeat(S(w[i]), I(x[i])))
+			r[i] = string(strings.Repeat(string(S(w[i])), int(I(x[i]))))
 		}
 		return r
 	case AV:

@@ -221,7 +221,7 @@ func Classify(x V) V {
 		return r
 	case AS:
 		r := make(AI, len(x))
-		m := map[S]I{}
+		m := map[string]I{}
 		n := 0
 		for i, v := range x {
 			c, ok := m[v]
@@ -303,7 +303,7 @@ func MarkFirts(x V) V {
 		return r
 	case AS:
 		r := make(AB, len(x))
-		m := map[S]struct{}{}
+		m := map[string]struct{}{}
 		for i, v := range x {
 			_, ok := m[v]
 			if !ok {
@@ -479,7 +479,7 @@ func memberOfAI(w V, x AI) V {
 }
 
 func memberOfAS(w V, x AS) V {
-	m := map[S]struct{}{}
+	m := map[string]struct{}{}
 	for _, v := range x {
 		_, ok := m[v]
 		if !ok {
@@ -489,7 +489,7 @@ func memberOfAS(w V, x AS) V {
 	}
 	switch w := w.(type) {
 	case S:
-		_, ok := m[w]
+		_, ok := m[string(w)]
 		return ok
 	case AS:
 		r := make(AB, len(w))
@@ -576,7 +576,7 @@ func OccurrenceCount(x V) V {
 		return r
 	case AS:
 		r := make(AI, len(x))
-		m := map[S]I{}
+		m := map[string]I{}
 		for i, v := range x {
 			c, ok := m[v]
 			if !ok {

@@ -707,7 +707,7 @@ func flipAS(x AV) AS {
 	for i, y := range x {
 		switch y := y.(type) {
 		case S:
-			r[i] = y
+			r[i] = string(y)
 		case AS:
 			r[i] = y[0]
 		}
@@ -723,7 +723,7 @@ func flipAOAS(x AV, lines int) AV {
 		for i, y := range x {
 			switch y := y.(type) {
 			case S:
-				q[i] = y
+				q[i] = string(y)
 			case AS:
 				q[i] = y[j]
 			}
@@ -925,9 +925,9 @@ func joinToS(w S, x V, left bool) V {
 		return AV{x, w}
 	case S:
 		if left {
-			return AS{w, x}
+			return AS{string(w), string(x)}
 		}
-		return AS{x, w}
+		return AS{string(x), string(w)}
 	case AB:
 		return joinToAB(w, x, left)
 	case AF:
@@ -995,10 +995,10 @@ func joinToAS(w V, x AS, left bool) V {
 	case S:
 		r := make(AS, len(x)+1)
 		if left {
-			r[0] = w
+			r[0] = string(w)
 			copy(r[1:], x)
 		} else {
-			r[len(r)-1] = w
+			r[len(r)-1] = string(w)
 			copy(r[:len(r)-1], x)
 		}
 		return r
