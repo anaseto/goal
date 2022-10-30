@@ -2282,7 +2282,7 @@ func SubtractASV(w AS, x V) V {
 	}
 }
 
-// Multiply returns w×x.
+// Multiply returns w*x.
 func Multiply(w, x V) V {
 	switch w := w.(type) {
 	case B:
@@ -2305,7 +2305,7 @@ func Multiply(w, x V) V {
 		switch x := x.(type) {
 		case Array:
 			if x.Len() != len(w) {
-				return badlen("×")
+				return badlen("*")
 			}
 			r := make(AV, len(w))
 			for i := range r {
@@ -2331,7 +2331,7 @@ func Multiply(w, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("×")
+		return badtype("*")
 	}
 }
 
@@ -2383,7 +2383,7 @@ func MultiplyBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("×")
+		return badtype("*")
 	}
 }
 
@@ -2435,7 +2435,7 @@ func MultiplyFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("×")
+		return badtype("*")
 	}
 }
 
@@ -2487,7 +2487,7 @@ func MultiplyIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("×")
+		return badtype("*")
 	}
 }
 
@@ -2531,7 +2531,7 @@ func MultiplySV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("×")
+		return badtype("*")
 	}
 }
 
@@ -2563,7 +2563,7 @@ func MultiplyABV(w AB, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("×")
+			return badlen("*")
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -2572,7 +2572,7 @@ func MultiplyABV(w AB, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("×")
+			return badlen("*")
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -2581,7 +2581,7 @@ func MultiplyABV(w AB, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("×")
+			return badlen("*")
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -2590,7 +2590,7 @@ func MultiplyABV(w AB, x V) V {
 		return r
 	case AS:
 		if len(w) != len(x) {
-			return badlen("×")
+			return badlen("*")
 		}
 		r := make(AS, len(x))
 		for i := range r {
@@ -2599,7 +2599,7 @@ func MultiplyABV(w AB, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("×")
+			return badlen("*")
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -2614,7 +2614,7 @@ func MultiplyABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("×")
+		return badtype("*")
 	}
 }
 
@@ -2646,7 +2646,7 @@ func MultiplyAFV(w AF, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("×")
+			return badlen("*")
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -2655,7 +2655,7 @@ func MultiplyAFV(w AF, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("×")
+			return badlen("*")
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -2664,7 +2664,7 @@ func MultiplyAFV(w AF, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("×")
+			return badlen("*")
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -2673,7 +2673,7 @@ func MultiplyAFV(w AF, x V) V {
 		return r
 	case AS:
 		if len(w) != len(x) {
-			return badlen("×")
+			return badlen("*")
 		}
 		r := make(AS, len(x))
 		for i := range r {
@@ -2682,7 +2682,7 @@ func MultiplyAFV(w AF, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("×")
+			return badlen("*")
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -2697,7 +2697,7 @@ func MultiplyAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("×")
+		return badtype("*")
 	}
 }
 
@@ -2729,7 +2729,7 @@ func MultiplyAIV(w AI, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("×")
+			return badlen("*")
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -2738,7 +2738,7 @@ func MultiplyAIV(w AI, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("×")
+			return badlen("*")
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -2747,7 +2747,7 @@ func MultiplyAIV(w AI, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("×")
+			return badlen("*")
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -2756,7 +2756,7 @@ func MultiplyAIV(w AI, x V) V {
 		return r
 	case AS:
 		if len(w) != len(x) {
-			return badlen("×")
+			return badlen("*")
 		}
 		r := make(AS, len(x))
 		for i := range r {
@@ -2765,7 +2765,7 @@ func MultiplyAIV(w AI, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("×")
+			return badlen("*")
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -2780,7 +2780,7 @@ func MultiplyAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("×")
+		return badtype("*")
 	}
 }
 
@@ -2806,7 +2806,7 @@ func MultiplyASV(w AS, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("×")
+			return badlen("*")
 		}
 		r := make(AS, len(x))
 		for i := range r {
@@ -2815,7 +2815,7 @@ func MultiplyASV(w AS, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("×")
+			return badlen("*")
 		}
 		r := make(AS, len(x))
 		for i := range r {
@@ -2824,7 +2824,7 @@ func MultiplyASV(w AS, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("×")
+			return badlen("*")
 		}
 		r := make(AS, len(x))
 		for i := range r {
@@ -2833,7 +2833,7 @@ func MultiplyASV(w AS, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("×")
+			return badlen("*")
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -2848,11 +2848,11 @@ func MultiplyASV(w AS, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("×")
+		return badtype("*")
 	}
 }
 
-// Divide returns w÷x.
+// Divide returns w%x.
 func Divide(w, x V) V {
 	switch w := w.(type) {
 	case B:
@@ -2871,7 +2871,7 @@ func Divide(w, x V) V {
 		switch x := x.(type) {
 		case Array:
 			if x.Len() != len(w) {
-				return badlen("÷")
+				return badlen("%")
 			}
 			r := make(AV, len(w))
 			for i := range r {
@@ -2897,7 +2897,7 @@ func Divide(w, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("÷")
+		return badtype("%")
 	}
 }
 
@@ -2941,7 +2941,7 @@ func DivideBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("÷")
+		return badtype("%")
 	}
 }
 
@@ -2985,7 +2985,7 @@ func DivideFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("÷")
+		return badtype("%")
 	}
 }
 
@@ -3029,7 +3029,7 @@ func DivideIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("÷")
+		return badtype("%")
 	}
 }
 
@@ -3055,7 +3055,7 @@ func DivideABV(w AB, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("÷")
+			return badlen("%")
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3064,7 +3064,7 @@ func DivideABV(w AB, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("÷")
+			return badlen("%")
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3073,7 +3073,7 @@ func DivideABV(w AB, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("÷")
+			return badlen("%")
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3082,7 +3082,7 @@ func DivideABV(w AB, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("÷")
+			return badlen("%")
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -3097,7 +3097,7 @@ func DivideABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("÷")
+		return badtype("%")
 	}
 }
 
@@ -3123,7 +3123,7 @@ func DivideAFV(w AF, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("÷")
+			return badlen("%")
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3132,7 +3132,7 @@ func DivideAFV(w AF, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("÷")
+			return badlen("%")
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3141,7 +3141,7 @@ func DivideAFV(w AF, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("÷")
+			return badlen("%")
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3150,7 +3150,7 @@ func DivideAFV(w AF, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("÷")
+			return badlen("%")
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -3165,7 +3165,7 @@ func DivideAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("÷")
+		return badtype("%")
 	}
 }
 
@@ -3191,7 +3191,7 @@ func DivideAIV(w AI, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("÷")
+			return badlen("%")
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3200,7 +3200,7 @@ func DivideAIV(w AI, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("÷")
+			return badlen("%")
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3209,7 +3209,7 @@ func DivideAIV(w AI, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("÷")
+			return badlen("%")
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3218,7 +3218,7 @@ func DivideAIV(w AI, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("÷")
+			return badlen("%")
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -3233,11 +3233,11 @@ func DivideAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("÷")
+		return badtype("%")
 	}
 }
 
-// Minimum returns w⌊x.
+// Minimum returns w&x.
 func Minimum(w, x V) V {
 	switch w := w.(type) {
 	case B:
@@ -3260,7 +3260,7 @@ func Minimum(w, x V) V {
 		switch x := x.(type) {
 		case Array:
 			if x.Len() != len(w) {
-				return badlen("⌊")
+				return badlen("&")
 			}
 			r := make(AV, len(w))
 			for i := range r {
@@ -3286,7 +3286,7 @@ func Minimum(w, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("⌊")
+		return badtype("&")
 	}
 }
 
@@ -3330,7 +3330,7 @@ func MinimumBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("⌊")
+		return badtype("&")
 	}
 }
 
@@ -3374,7 +3374,7 @@ func MinimumFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("⌊")
+		return badtype("&")
 	}
 }
 
@@ -3418,7 +3418,7 @@ func MinimumIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("⌊")
+		return badtype("&")
 	}
 }
 
@@ -3446,7 +3446,7 @@ func MinimumSV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("⌊")
+		return badtype("&")
 	}
 }
 
@@ -3472,7 +3472,7 @@ func MinimumABV(w AB, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("⌊")
+			return badlen("&")
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -3481,7 +3481,7 @@ func MinimumABV(w AB, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("⌊")
+			return badlen("&")
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3490,7 +3490,7 @@ func MinimumABV(w AB, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("⌊")
+			return badlen("&")
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -3499,7 +3499,7 @@ func MinimumABV(w AB, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("⌊")
+			return badlen("&")
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -3514,7 +3514,7 @@ func MinimumABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("⌊")
+		return badtype("&")
 	}
 }
 
@@ -3540,7 +3540,7 @@ func MinimumAFV(w AF, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("⌊")
+			return badlen("&")
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3549,7 +3549,7 @@ func MinimumAFV(w AF, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("⌊")
+			return badlen("&")
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3558,7 +3558,7 @@ func MinimumAFV(w AF, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("⌊")
+			return badlen("&")
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3567,7 +3567,7 @@ func MinimumAFV(w AF, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("⌊")
+			return badlen("&")
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -3582,7 +3582,7 @@ func MinimumAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("⌊")
+		return badtype("&")
 	}
 }
 
@@ -3608,7 +3608,7 @@ func MinimumAIV(w AI, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("⌊")
+			return badlen("&")
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -3617,7 +3617,7 @@ func MinimumAIV(w AI, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("⌊")
+			return badlen("&")
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3626,7 +3626,7 @@ func MinimumAIV(w AI, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("⌊")
+			return badlen("&")
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -3635,7 +3635,7 @@ func MinimumAIV(w AI, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("⌊")
+			return badlen("&")
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -3650,7 +3650,7 @@ func MinimumAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("⌊")
+		return badtype("&")
 	}
 }
 
@@ -3664,7 +3664,7 @@ func MinimumASV(w AS, x V) V {
 		return r
 	case AS:
 		if len(w) != len(x) {
-			return badlen("⌊")
+			return badlen("&")
 		}
 		r := make(AS, len(x))
 		for i := range r {
@@ -3673,7 +3673,7 @@ func MinimumASV(w AS, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("⌊")
+			return badlen("&")
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -3688,11 +3688,11 @@ func MinimumASV(w AS, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("⌊")
+		return badtype("&")
 	}
 }
 
-// Maximum returns w⌈x.
+// Maximum returns w|x.
 func Maximum(w, x V) V {
 	switch w := w.(type) {
 	case B:
@@ -3715,7 +3715,7 @@ func Maximum(w, x V) V {
 		switch x := x.(type) {
 		case Array:
 			if x.Len() != len(w) {
-				return badlen("⌈")
+				return badlen("|")
 			}
 			r := make(AV, len(w))
 			for i := range r {
@@ -3741,7 +3741,7 @@ func Maximum(w, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("⌈")
+		return badtype("|")
 	}
 }
 
@@ -3785,7 +3785,7 @@ func MaximumBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("⌈")
+		return badtype("|")
 	}
 }
 
@@ -3829,7 +3829,7 @@ func MaximumFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("⌈")
+		return badtype("|")
 	}
 }
 
@@ -3873,7 +3873,7 @@ func MaximumIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("⌈")
+		return badtype("|")
 	}
 }
 
@@ -3901,7 +3901,7 @@ func MaximumSV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("⌈")
+		return badtype("|")
 	}
 }
 
@@ -3927,7 +3927,7 @@ func MaximumABV(w AB, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("⌈")
+			return badlen("|")
 		}
 		r := make(AB, len(x))
 		for i := range r {
@@ -3936,7 +3936,7 @@ func MaximumABV(w AB, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("⌈")
+			return badlen("|")
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -3945,7 +3945,7 @@ func MaximumABV(w AB, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("⌈")
+			return badlen("|")
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -3954,7 +3954,7 @@ func MaximumABV(w AB, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("⌈")
+			return badlen("|")
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -3969,7 +3969,7 @@ func MaximumABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("⌈")
+		return badtype("|")
 	}
 }
 
@@ -3995,7 +3995,7 @@ func MaximumAFV(w AF, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("⌈")
+			return badlen("|")
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -4004,7 +4004,7 @@ func MaximumAFV(w AF, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("⌈")
+			return badlen("|")
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -4013,7 +4013,7 @@ func MaximumAFV(w AF, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("⌈")
+			return badlen("|")
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -4022,7 +4022,7 @@ func MaximumAFV(w AF, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("⌈")
+			return badlen("|")
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -4037,7 +4037,7 @@ func MaximumAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("⌈")
+		return badtype("|")
 	}
 }
 
@@ -4063,7 +4063,7 @@ func MaximumAIV(w AI, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("⌈")
+			return badlen("|")
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -4072,7 +4072,7 @@ func MaximumAIV(w AI, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("⌈")
+			return badlen("|")
 		}
 		r := make(AF, len(x))
 		for i := range r {
@@ -4081,7 +4081,7 @@ func MaximumAIV(w AI, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("⌈")
+			return badlen("|")
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -4090,7 +4090,7 @@ func MaximumAIV(w AI, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("⌈")
+			return badlen("|")
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -4105,7 +4105,7 @@ func MaximumAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("⌈")
+		return badtype("|")
 	}
 }
 
@@ -4119,7 +4119,7 @@ func MaximumASV(w AS, x V) V {
 		return r
 	case AS:
 		if len(w) != len(x) {
-			return badlen("⌈")
+			return badlen("|")
 		}
 		r := make(AS, len(x))
 		for i := range r {
@@ -4128,7 +4128,7 @@ func MaximumASV(w AS, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("⌈")
+			return badlen("|")
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -4143,11 +4143,11 @@ func MaximumASV(w AS, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("⌈")
+		return badtype("|")
 	}
 }
 
-// Modulus returns w|x.
+// Modulus returns w!x.
 func Modulus(w, x V) V {
 	switch w := w.(type) {
 	case B:
@@ -4166,7 +4166,7 @@ func Modulus(w, x V) V {
 		switch x := x.(type) {
 		case Array:
 			if x.Len() != len(w) {
-				return badlen("|")
+				return badlen("!")
 			}
 			r := make(AV, len(w))
 			for i := range r {
@@ -4192,7 +4192,7 @@ func Modulus(w, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("|")
+		return badtype("!")
 	}
 }
 
@@ -4236,7 +4236,7 @@ func ModulusBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("|")
+		return badtype("!")
 	}
 }
 
@@ -4280,7 +4280,7 @@ func ModulusFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("|")
+		return badtype("!")
 	}
 }
 
@@ -4324,7 +4324,7 @@ func ModulusIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("|")
+		return badtype("!")
 	}
 }
 
@@ -4350,7 +4350,7 @@ func ModulusABV(w AB, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("|")
+			return badlen("!")
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -4359,7 +4359,7 @@ func ModulusABV(w AB, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("|")
+			return badlen("!")
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -4368,7 +4368,7 @@ func ModulusABV(w AB, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("|")
+			return badlen("!")
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -4377,7 +4377,7 @@ func ModulusABV(w AB, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("|")
+			return badlen("!")
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -4392,7 +4392,7 @@ func ModulusABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("|")
+		return badtype("!")
 	}
 }
 
@@ -4418,7 +4418,7 @@ func ModulusAFV(w AF, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("|")
+			return badlen("!")
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -4427,7 +4427,7 @@ func ModulusAFV(w AF, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("|")
+			return badlen("!")
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -4436,7 +4436,7 @@ func ModulusAFV(w AF, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("|")
+			return badlen("!")
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -4445,7 +4445,7 @@ func ModulusAFV(w AF, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("|")
+			return badlen("!")
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -4460,7 +4460,7 @@ func ModulusAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("|")
+		return badtype("!")
 	}
 }
 
@@ -4486,7 +4486,7 @@ func ModulusAIV(w AI, x V) V {
 		return r
 	case AB:
 		if len(w) != len(x) {
-			return badlen("|")
+			return badlen("!")
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -4495,7 +4495,7 @@ func ModulusAIV(w AI, x V) V {
 		return r
 	case AF:
 		if len(w) != len(x) {
-			return badlen("|")
+			return badlen("!")
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -4504,7 +4504,7 @@ func ModulusAIV(w AI, x V) V {
 		return r
 	case AI:
 		if len(w) != len(x) {
-			return badlen("|")
+			return badlen("!")
 		}
 		r := make(AI, len(x))
 		for i := range r {
@@ -4513,7 +4513,7 @@ func ModulusAIV(w AI, x V) V {
 		return r
 	case AV:
 		if len(w) != len(x) {
-			return badlen("|")
+			return badlen("!")
 		}
 		r := make(AV, len(x))
 		for i := range r {
@@ -4528,6 +4528,6 @@ func ModulusAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return badtype("|")
+		return badtype("!")
 	}
 }

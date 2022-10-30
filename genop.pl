@@ -227,13 +227,13 @@ genOp("Greater", ">");
 genOp("Add", "+");
 genOp("Subtract", "-");
 #genOp("Span", "¬");
-genOp("Multiply", "×");
-genOp("Divide", "÷");
-genOp("Minimum", "⌊");
-genOp("Maximum", "⌈");
+genOp("Multiply", "*");
+genOp("Divide", "%");
+genOp("Minimum", "&");
+genOp("Maximum", "|");
 #genOp("And", "∧"); # identical to Multiply
 #genOp("Or", "∨"); # Multiply under Not
-genOp("Modulus", "|");
+genOp("Modulus", "!");
 
 sub genOp {
     my ($name, $op) = @_;

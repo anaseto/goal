@@ -7,7 +7,7 @@ import (
 	"sort"
 )
 
-// Length returns ≠x.
+// Length returns #x.
 func Length(x V) I {
 	switch x := x.(type) {
 	case nil:
@@ -44,7 +44,7 @@ func reverse(x V) {
 	}
 }
 
-// Reverse returns ⌽x.
+// Reverse returns |x.
 func Reverse(x V) V {
 	switch x := x.(type) {
 	case Array:
@@ -52,11 +52,11 @@ func Reverse(x V) V {
 		reverse(r)
 		return r
 	default:
-		return badtype("⌽")
+		return badtype("|")
 	}
 }
 
-// Rotate returns w⌽x.
+// Rotate returns TODO
 func Rotate(w, x V) V {
 	i := 0
 	switch w := w.(type) {
@@ -114,7 +114,7 @@ func Rotate(w, x V) V {
 	}
 }
 
-// First returns ↑x.
+// First returns *x.
 func First(x V) V {
 	switch x := x.(type) {
 	case Array:
@@ -138,7 +138,7 @@ func First(x V) V {
 	}
 }
 
-// Tail returns ↓x.
+// Tail returns 1_x. XXX unused?
 func Tail(x V) V {
 	x = toArray(x)
 	switch x := x.(type) {
@@ -164,7 +164,7 @@ func Drop(w, x V) V {
 		i = int(math.Round(float64(w)))
 	default:
 		// TODO: improve error messages
-		return badtype("w↓")
+		return badtype("_")
 	}
 	x = toArray(x)
 	switch x := x.(type) {
