@@ -65,12 +65,18 @@ func divide(w, x F) F {
 	return w / x
 }
 
-func modulus(w, x I) I {
+func modI(w, x I) I {
 	if x == 0 {
-		// XXX: really?
 		return x
 	}
 	return x % w
+}
+
+func modF(w, x F) F {
+	if x == 0 {
+		return x
+	}
+	return F(math.Mod(float64(x), float64(w)))
 }
 
 func minI(w, x I) I {

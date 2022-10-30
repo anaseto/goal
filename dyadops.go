@@ -465,22 +465,6 @@ func EqualASV(w AS, x V) V {
 // NotEqual returns w≠x.
 func NotEqual(w, x V) V {
 	switch w := w.(type) {
-	case B:
-		return NotEqualBV(w, x)
-	case F:
-		return NotEqualFV(w, x)
-	case I:
-		return NotEqualIV(w, x)
-	case S:
-		return NotEqualSV(w, x)
-	case AB:
-		return NotEqualABV(w, x)
-	case AF:
-		return NotEqualAFV(w, x)
-	case AI:
-		return NotEqualAIV(w, x)
-	case AS:
-		return NotEqualASV(w, x)
 	case AV:
 		switch x := x.(type) {
 		case Array:
@@ -501,408 +485,6 @@ func NotEqual(w, x V) V {
 		r := make(AV, len(w))
 		for i := range r {
 			v := NotEqual(w[i], x)
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≠")
-	}
-}
-
-func NotEqualBV(w B, x V) V {
-	switch x := x.(type) {
-	case B:
-		return B(w != x)
-	case F:
-		return B(B2F(w) != x)
-	case I:
-		return B(B2I(w) != x)
-	case AB:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(B(w) != B(x[i]))
-		}
-		return r
-	case AF:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(B2F(B(w)) != F(x[i]))
-		}
-		return r
-	case AI:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(B2I(B(w)) != I(x[i]))
-		}
-		return r
-	case AV:
-		r := make(AV, len(x))
-		for i := range r {
-			v := NotEqualBV(B(w), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≠")
-	}
-}
-
-func NotEqualFV(w F, x V) V {
-	switch x := x.(type) {
-	case B:
-		return B(w != B2F(x))
-	case F:
-		return B(w != x)
-	case I:
-		return B(w != F(x))
-	case AB:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(F(w) != B2F(B(x[i])))
-		}
-		return r
-	case AF:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(F(w) != F(x[i]))
-		}
-		return r
-	case AI:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(F(w) != F(I(x[i])))
-		}
-		return r
-	case AV:
-		r := make(AV, len(x))
-		for i := range r {
-			v := NotEqualFV(F(w), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≠")
-	}
-}
-
-func NotEqualIV(w I, x V) V {
-	switch x := x.(type) {
-	case B:
-		return B(w != B2I(x))
-	case F:
-		return B(F(w) != x)
-	case I:
-		return B(w != x)
-	case AB:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(I(w) != B2I(B(x[i])))
-		}
-		return r
-	case AF:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(F(I(w)) != F(x[i]))
-		}
-		return r
-	case AI:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(I(w) != I(x[i]))
-		}
-		return r
-	case AV:
-		r := make(AV, len(x))
-		for i := range r {
-			v := NotEqualIV(I(w), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≠")
-	}
-}
-
-func NotEqualSV(w S, x V) V {
-	switch x := x.(type) {
-	case S:
-		return B(w != x)
-	case AS:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(S(w) != S(x[i]))
-		}
-		return r
-	case AV:
-		r := make(AV, len(x))
-		for i := range r {
-			v := NotEqualSV(S(w), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≠")
-	}
-}
-
-func NotEqualABV(w AB, x V) V {
-	switch x := x.(type) {
-	case B:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(B(w[i]) != B(x))
-		}
-		return r
-	case F:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(B2F(B(w[i])) != F(x))
-		}
-		return r
-	case I:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(B2I(B(w[i])) != I(x))
-		}
-		return r
-	case AB:
-		if len(w) != len(x) {
-			return badlen("≠")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(B(w[i]) != B(x[i]))
-		}
-		return r
-	case AF:
-		if len(w) != len(x) {
-			return badlen("≠")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(B2F(B(w[i])) != F(x[i]))
-		}
-		return r
-	case AI:
-		if len(w) != len(x) {
-			return badlen("≠")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(B2I(B(w[i])) != I(x[i]))
-		}
-		return r
-	case AV:
-		if len(w) != len(x) {
-			return badlen("≠")
-		}
-		r := make(AV, len(x))
-		for i := range r {
-			v := NotEqualBV(B(w[i]), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≠")
-	}
-}
-
-func NotEqualAFV(w AF, x V) V {
-	switch x := x.(type) {
-	case B:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(F(w[i]) != B2F(B(x)))
-		}
-		return r
-	case F:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(F(w[i]) != F(x))
-		}
-		return r
-	case I:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(F(w[i]) != F(I(x)))
-		}
-		return r
-	case AB:
-		if len(w) != len(x) {
-			return badlen("≠")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(F(w[i]) != B2F(B(x[i])))
-		}
-		return r
-	case AF:
-		if len(w) != len(x) {
-			return badlen("≠")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(F(w[i]) != F(x[i]))
-		}
-		return r
-	case AI:
-		if len(w) != len(x) {
-			return badlen("≠")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(F(w[i]) != F(I(x[i])))
-		}
-		return r
-	case AV:
-		if len(w) != len(x) {
-			return badlen("≠")
-		}
-		r := make(AV, len(x))
-		for i := range r {
-			v := NotEqualFV(F(w[i]), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≠")
-	}
-}
-
-func NotEqualAIV(w AI, x V) V {
-	switch x := x.(type) {
-	case B:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(I(w[i]) != B2I(B(x)))
-		}
-		return r
-	case F:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(F(I(w[i])) != F(x))
-		}
-		return r
-	case I:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(I(w[i]) != I(x))
-		}
-		return r
-	case AB:
-		if len(w) != len(x) {
-			return badlen("≠")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(I(w[i]) != B2I(B(x[i])))
-		}
-		return r
-	case AF:
-		if len(w) != len(x) {
-			return badlen("≠")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(F(I(w[i])) != F(x[i]))
-		}
-		return r
-	case AI:
-		if len(w) != len(x) {
-			return badlen("≠")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(I(w[i]) != I(x[i]))
-		}
-		return r
-	case AV:
-		if len(w) != len(x) {
-			return badlen("≠")
-		}
-		r := make(AV, len(x))
-		for i := range r {
-			v := NotEqualIV(I(w[i]), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≠")
-	}
-}
-
-func NotEqualASV(w AS, x V) V {
-	switch x := x.(type) {
-	case S:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(S(w[i]) != S(x))
-		}
-		return r
-	case AS:
-		if len(w) != len(x) {
-			return badlen("≠")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(S(w[i]) != S(x[i]))
-		}
-		return r
-	case AV:
-		if len(w) != len(x) {
-			return badlen("≠")
-		}
-		r := make(AV, len(x))
-		for i := range r {
-			v := NotEqualSV(S(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -1375,22 +957,6 @@ func LesserASV(w AS, x V) V {
 // LesserEq returns w≤x.
 func LesserEq(w, x V) V {
 	switch w := w.(type) {
-	case B:
-		return LesserEqBV(w, x)
-	case F:
-		return LesserEqFV(w, x)
-	case I:
-		return LesserEqIV(w, x)
-	case S:
-		return LesserEqSV(w, x)
-	case AB:
-		return LesserEqABV(w, x)
-	case AF:
-		return LesserEqAFV(w, x)
-	case AI:
-		return LesserEqAIV(w, x)
-	case AS:
-		return LesserEqASV(w, x)
 	case AV:
 		switch x := x.(type) {
 		case Array:
@@ -1411,408 +977,6 @@ func LesserEq(w, x V) V {
 		r := make(AV, len(w))
 		for i := range r {
 			v := LesserEq(w[i], x)
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≤")
-	}
-}
-
-func LesserEqBV(w B, x V) V {
-	switch x := x.(type) {
-	case B:
-		return B(x || !w)
-	case F:
-		return B(B2F(w) <= x)
-	case I:
-		return B(B2I(w) <= x)
-	case AB:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(B(x[i]) || B(!w))
-		}
-		return r
-	case AF:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(B2F(B(w)) <= F(x[i]))
-		}
-		return r
-	case AI:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(B2I(B(w)) <= I(x[i]))
-		}
-		return r
-	case AV:
-		r := make(AV, len(x))
-		for i := range r {
-			v := LesserEqBV(B(w), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≤")
-	}
-}
-
-func LesserEqFV(w F, x V) V {
-	switch x := x.(type) {
-	case B:
-		return B(w <= B2F(x))
-	case F:
-		return B(w <= x)
-	case I:
-		return B(w <= F(x))
-	case AB:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(F(w) <= B2F(B(x[i])))
-		}
-		return r
-	case AF:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(F(w) <= F(x[i]))
-		}
-		return r
-	case AI:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(F(w) <= F(I(x[i])))
-		}
-		return r
-	case AV:
-		r := make(AV, len(x))
-		for i := range r {
-			v := LesserEqFV(F(w), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≤")
-	}
-}
-
-func LesserEqIV(w I, x V) V {
-	switch x := x.(type) {
-	case B:
-		return B(w <= B2I(x))
-	case F:
-		return B(F(w) <= x)
-	case I:
-		return B(w <= x)
-	case AB:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(I(w) <= B2I(B(x[i])))
-		}
-		return r
-	case AF:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(F(I(w)) <= F(x[i]))
-		}
-		return r
-	case AI:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(I(w) <= I(x[i]))
-		}
-		return r
-	case AV:
-		r := make(AV, len(x))
-		for i := range r {
-			v := LesserEqIV(I(w), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≤")
-	}
-}
-
-func LesserEqSV(w S, x V) V {
-	switch x := x.(type) {
-	case S:
-		return B(w <= x)
-	case AS:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(S(w) <= S(x[i]))
-		}
-		return r
-	case AV:
-		r := make(AV, len(x))
-		for i := range r {
-			v := LesserEqSV(S(w), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≤")
-	}
-}
-
-func LesserEqABV(w AB, x V) V {
-	switch x := x.(type) {
-	case B:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(B(x) || B(!w[i]))
-		}
-		return r
-	case F:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(B2F(B(w[i])) <= F(x))
-		}
-		return r
-	case I:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(B2I(B(w[i])) <= I(x))
-		}
-		return r
-	case AB:
-		if len(w) != len(x) {
-			return badlen("≤")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(B(x[i]) || B(!w[i]))
-		}
-		return r
-	case AF:
-		if len(w) != len(x) {
-			return badlen("≤")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(B2F(B(w[i])) <= F(x[i]))
-		}
-		return r
-	case AI:
-		if len(w) != len(x) {
-			return badlen("≤")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(B2I(B(w[i])) <= I(x[i]))
-		}
-		return r
-	case AV:
-		if len(w) != len(x) {
-			return badlen("≤")
-		}
-		r := make(AV, len(x))
-		for i := range r {
-			v := LesserEqBV(B(w[i]), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≤")
-	}
-}
-
-func LesserEqAFV(w AF, x V) V {
-	switch x := x.(type) {
-	case B:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(F(w[i]) <= B2F(B(x)))
-		}
-		return r
-	case F:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(F(w[i]) <= F(x))
-		}
-		return r
-	case I:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(F(w[i]) <= F(I(x)))
-		}
-		return r
-	case AB:
-		if len(w) != len(x) {
-			return badlen("≤")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(F(w[i]) <= B2F(B(x[i])))
-		}
-		return r
-	case AF:
-		if len(w) != len(x) {
-			return badlen("≤")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(F(w[i]) <= F(x[i]))
-		}
-		return r
-	case AI:
-		if len(w) != len(x) {
-			return badlen("≤")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(F(w[i]) <= F(I(x[i])))
-		}
-		return r
-	case AV:
-		if len(w) != len(x) {
-			return badlen("≤")
-		}
-		r := make(AV, len(x))
-		for i := range r {
-			v := LesserEqFV(F(w[i]), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≤")
-	}
-}
-
-func LesserEqAIV(w AI, x V) V {
-	switch x := x.(type) {
-	case B:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(I(w[i]) <= B2I(B(x)))
-		}
-		return r
-	case F:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(F(I(w[i])) <= F(x))
-		}
-		return r
-	case I:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(I(w[i]) <= I(x))
-		}
-		return r
-	case AB:
-		if len(w) != len(x) {
-			return badlen("≤")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(I(w[i]) <= B2I(B(x[i])))
-		}
-		return r
-	case AF:
-		if len(w) != len(x) {
-			return badlen("≤")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(F(I(w[i])) <= F(x[i]))
-		}
-		return r
-	case AI:
-		if len(w) != len(x) {
-			return badlen("≤")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(I(w[i]) <= I(x[i]))
-		}
-		return r
-	case AV:
-		if len(w) != len(x) {
-			return badlen("≤")
-		}
-		r := make(AV, len(x))
-		for i := range r {
-			v := LesserEqIV(I(w[i]), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≤")
-	}
-}
-
-func LesserEqASV(w AS, x V) V {
-	switch x := x.(type) {
-	case S:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(S(w[i]) <= S(x))
-		}
-		return r
-	case AS:
-		if len(w) != len(x) {
-			return badlen("≤")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(S(w[i]) <= S(x[i]))
-		}
-		return r
-	case AV:
-		if len(w) != len(x) {
-			return badlen("≤")
-		}
-		r := make(AV, len(x))
-		for i := range r {
-			v := LesserEqSV(S(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -2285,22 +1449,6 @@ func GreaterASV(w AS, x V) V {
 // GreaterEq returns w≥x.
 func GreaterEq(w, x V) V {
 	switch w := w.(type) {
-	case B:
-		return GreaterEqBV(w, x)
-	case F:
-		return GreaterEqFV(w, x)
-	case I:
-		return GreaterEqIV(w, x)
-	case S:
-		return GreaterEqSV(w, x)
-	case AB:
-		return GreaterEqABV(w, x)
-	case AF:
-		return GreaterEqAFV(w, x)
-	case AI:
-		return GreaterEqAIV(w, x)
-	case AS:
-		return GreaterEqASV(w, x)
 	case AV:
 		switch x := x.(type) {
 		case Array:
@@ -2321,408 +1469,6 @@ func GreaterEq(w, x V) V {
 		r := make(AV, len(w))
 		for i := range r {
 			v := GreaterEq(w[i], x)
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≥")
-	}
-}
-
-func GreaterEqBV(w B, x V) V {
-	switch x := x.(type) {
-	case B:
-		return B(w || !x)
-	case F:
-		return B(B2F(w) >= x)
-	case I:
-		return B(B2I(w) >= x)
-	case AB:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(B(w) || B(!x[i]))
-		}
-		return r
-	case AF:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(B2F(B(w)) >= F(x[i]))
-		}
-		return r
-	case AI:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(B2I(B(w)) >= I(x[i]))
-		}
-		return r
-	case AV:
-		r := make(AV, len(x))
-		for i := range r {
-			v := GreaterEqBV(B(w), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≥")
-	}
-}
-
-func GreaterEqFV(w F, x V) V {
-	switch x := x.(type) {
-	case B:
-		return B(w >= B2F(x))
-	case F:
-		return B(w >= x)
-	case I:
-		return B(w >= F(x))
-	case AB:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(F(w) >= B2F(B(x[i])))
-		}
-		return r
-	case AF:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(F(w) >= F(x[i]))
-		}
-		return r
-	case AI:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(F(w) >= F(I(x[i])))
-		}
-		return r
-	case AV:
-		r := make(AV, len(x))
-		for i := range r {
-			v := GreaterEqFV(F(w), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≥")
-	}
-}
-
-func GreaterEqIV(w I, x V) V {
-	switch x := x.(type) {
-	case B:
-		return B(w >= B2I(x))
-	case F:
-		return B(F(w) >= x)
-	case I:
-		return B(w >= x)
-	case AB:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(I(w) >= B2I(B(x[i])))
-		}
-		return r
-	case AF:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(F(I(w)) >= F(x[i]))
-		}
-		return r
-	case AI:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(I(w) >= I(x[i]))
-		}
-		return r
-	case AV:
-		r := make(AV, len(x))
-		for i := range r {
-			v := GreaterEqIV(I(w), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≥")
-	}
-}
-
-func GreaterEqSV(w S, x V) V {
-	switch x := x.(type) {
-	case S:
-		return B(w >= x)
-	case AS:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(S(w) >= S(x[i]))
-		}
-		return r
-	case AV:
-		r := make(AV, len(x))
-		for i := range r {
-			v := GreaterEqSV(S(w), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≥")
-	}
-}
-
-func GreaterEqABV(w AB, x V) V {
-	switch x := x.(type) {
-	case B:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(B(w[i]) || B(!x))
-		}
-		return r
-	case F:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(B2F(B(w[i])) >= F(x))
-		}
-		return r
-	case I:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(B2I(B(w[i])) >= I(x))
-		}
-		return r
-	case AB:
-		if len(w) != len(x) {
-			return badlen("≥")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(B(w[i]) || B(!x[i]))
-		}
-		return r
-	case AF:
-		if len(w) != len(x) {
-			return badlen("≥")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(B2F(B(w[i])) >= F(x[i]))
-		}
-		return r
-	case AI:
-		if len(w) != len(x) {
-			return badlen("≥")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(B2I(B(w[i])) >= I(x[i]))
-		}
-		return r
-	case AV:
-		if len(w) != len(x) {
-			return badlen("≥")
-		}
-		r := make(AV, len(x))
-		for i := range r {
-			v := GreaterEqBV(B(w[i]), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≥")
-	}
-}
-
-func GreaterEqAFV(w AF, x V) V {
-	switch x := x.(type) {
-	case B:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(F(w[i]) >= B2F(B(x)))
-		}
-		return r
-	case F:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(F(w[i]) >= F(x))
-		}
-		return r
-	case I:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(F(w[i]) >= F(I(x)))
-		}
-		return r
-	case AB:
-		if len(w) != len(x) {
-			return badlen("≥")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(F(w[i]) >= B2F(B(x[i])))
-		}
-		return r
-	case AF:
-		if len(w) != len(x) {
-			return badlen("≥")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(F(w[i]) >= F(x[i]))
-		}
-		return r
-	case AI:
-		if len(w) != len(x) {
-			return badlen("≥")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(F(w[i]) >= F(I(x[i])))
-		}
-		return r
-	case AV:
-		if len(w) != len(x) {
-			return badlen("≥")
-		}
-		r := make(AV, len(x))
-		for i := range r {
-			v := GreaterEqFV(F(w[i]), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≥")
-	}
-}
-
-func GreaterEqAIV(w AI, x V) V {
-	switch x := x.(type) {
-	case B:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(I(w[i]) >= B2I(B(x)))
-		}
-		return r
-	case F:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(F(I(w[i])) >= F(x))
-		}
-		return r
-	case I:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(I(w[i]) >= I(x))
-		}
-		return r
-	case AB:
-		if len(w) != len(x) {
-			return badlen("≥")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(I(w[i]) >= B2I(B(x[i])))
-		}
-		return r
-	case AF:
-		if len(w) != len(x) {
-			return badlen("≥")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(F(I(w[i])) >= F(x[i]))
-		}
-		return r
-	case AI:
-		if len(w) != len(x) {
-			return badlen("≥")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(I(w[i]) >= I(x[i]))
-		}
-		return r
-	case AV:
-		if len(w) != len(x) {
-			return badlen("≥")
-		}
-		r := make(AV, len(x))
-		for i := range r {
-			v := GreaterEqIV(I(w[i]), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≥")
-	}
-}
-
-func GreaterEqASV(w AS, x V) V {
-	switch x := x.(type) {
-	case S:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(S(w[i]) >= S(x))
-		}
-		return r
-	case AS:
-		if len(w) != len(x) {
-			return badlen("≥")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(S(w[i]) >= S(x[i]))
-		}
-		return r
-	case AV:
-		if len(w) != len(x) {
-			return badlen("≥")
-		}
-		r := make(AV, len(x))
-		for i := range r {
-			v := GreaterEqSV(S(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -3650,18 +2396,6 @@ func SubtractASV(w AS, x V) V {
 // Span returns w¬x.
 func Span(w, x V) V {
 	switch w := w.(type) {
-	case B:
-		return SpanBV(w, x)
-	case F:
-		return SpanFV(w, x)
-	case I:
-		return SpanIV(w, x)
-	case AB:
-		return SpanABV(w, x)
-	case AF:
-		return SpanAFV(w, x)
-	case AI:
-		return SpanAIV(w, x)
 	case AV:
 		switch x := x.(type) {
 		case Array:
@@ -3682,342 +2416,6 @@ func Span(w, x V) V {
 		r := make(AV, len(w))
 		for i := range r {
 			v := Span(w[i], x)
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("¬")
-	}
-}
-
-func SpanBV(w B, x V) V {
-	switch x := x.(type) {
-	case B:
-		return I(1 + B2I(w) - B2I(x))
-	case F:
-		return F(1 + B2F(w) - x)
-	case I:
-		return I(1 + B2I(w) - x)
-	case AB:
-		r := make(AI, len(x))
-		for i := range r {
-			r[i] = int(1 + B2I(B(w)) - B2I(B(x[i])))
-		}
-		return r
-	case AF:
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(1 + B2F(B(w)) - F(x[i]))
-		}
-		return r
-	case AI:
-		r := make(AI, len(x))
-		for i := range r {
-			r[i] = int(1 + B2I(B(w)) - I(x[i]))
-		}
-		return r
-	case AV:
-		r := make(AV, len(x))
-		for i := range r {
-			v := SpanBV(B(w), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("¬")
-	}
-}
-
-func SpanFV(w F, x V) V {
-	switch x := x.(type) {
-	case B:
-		return F(1 + w - B2F(x))
-	case F:
-		return F(1 + w - x)
-	case I:
-		return F(1 + w - F(x))
-	case AB:
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(1 + F(w) - B2F(B(x[i])))
-		}
-		return r
-	case AF:
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(1 + F(w) - F(x[i]))
-		}
-		return r
-	case AI:
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(1 + F(w) - F(I(x[i])))
-		}
-		return r
-	case AV:
-		r := make(AV, len(x))
-		for i := range r {
-			v := SpanFV(F(w), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("¬")
-	}
-}
-
-func SpanIV(w I, x V) V {
-	switch x := x.(type) {
-	case B:
-		return I(1 + w - B2I(x))
-	case F:
-		return F(1 + F(w) - x)
-	case I:
-		return I(1 + w - x)
-	case AB:
-		r := make(AI, len(x))
-		for i := range r {
-			r[i] = int(1 + I(w) - B2I(B(x[i])))
-		}
-		return r
-	case AF:
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(1 + F(I(w)) - F(x[i]))
-		}
-		return r
-	case AI:
-		r := make(AI, len(x))
-		for i := range r {
-			r[i] = int(1 + I(w) - I(x[i]))
-		}
-		return r
-	case AV:
-		r := make(AV, len(x))
-		for i := range r {
-			v := SpanIV(I(w), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("¬")
-	}
-}
-
-func SpanABV(w AB, x V) V {
-	switch x := x.(type) {
-	case B:
-		r := make(AI, len(w))
-		for i := range r {
-			r[i] = int(1 + B2I(B(w[i])) - B2I(B(x)))
-		}
-		return r
-	case F:
-		r := make(AF, len(w))
-		for i := range r {
-			r[i] = float64(1 + B2F(B(w[i])) - F(x))
-		}
-		return r
-	case I:
-		r := make(AI, len(w))
-		for i := range r {
-			r[i] = int(1 + B2I(B(w[i])) - I(x))
-		}
-		return r
-	case AB:
-		if len(w) != len(x) {
-			return badlen("¬")
-		}
-		r := make(AI, len(x))
-		for i := range r {
-			r[i] = int(1 + B2I(B(w[i])) - B2I(B(x[i])))
-		}
-		return r
-	case AF:
-		if len(w) != len(x) {
-			return badlen("¬")
-		}
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(1 + B2F(B(w[i])) - F(x[i]))
-		}
-		return r
-	case AI:
-		if len(w) != len(x) {
-			return badlen("¬")
-		}
-		r := make(AI, len(x))
-		for i := range r {
-			r[i] = int(1 + B2I(B(w[i])) - I(x[i]))
-		}
-		return r
-	case AV:
-		if len(w) != len(x) {
-			return badlen("¬")
-		}
-		r := make(AV, len(x))
-		for i := range r {
-			v := SpanBV(B(w[i]), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("¬")
-	}
-}
-
-func SpanAFV(w AF, x V) V {
-	switch x := x.(type) {
-	case B:
-		r := make(AF, len(w))
-		for i := range r {
-			r[i] = float64(1 + F(w[i]) - B2F(B(x)))
-		}
-		return r
-	case F:
-		r := make(AF, len(w))
-		for i := range r {
-			r[i] = float64(1 + F(w[i]) - F(x))
-		}
-		return r
-	case I:
-		r := make(AF, len(w))
-		for i := range r {
-			r[i] = float64(1 + F(w[i]) - F(I(x)))
-		}
-		return r
-	case AB:
-		if len(w) != len(x) {
-			return badlen("¬")
-		}
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(1 + F(w[i]) - B2F(B(x[i])))
-		}
-		return r
-	case AF:
-		if len(w) != len(x) {
-			return badlen("¬")
-		}
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(1 + F(w[i]) - F(x[i]))
-		}
-		return r
-	case AI:
-		if len(w) != len(x) {
-			return badlen("¬")
-		}
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(1 + F(w[i]) - F(I(x[i])))
-		}
-		return r
-	case AV:
-		if len(w) != len(x) {
-			return badlen("¬")
-		}
-		r := make(AV, len(x))
-		for i := range r {
-			v := SpanFV(F(w[i]), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("¬")
-	}
-}
-
-func SpanAIV(w AI, x V) V {
-	switch x := x.(type) {
-	case B:
-		r := make(AI, len(w))
-		for i := range r {
-			r[i] = int(1 + I(w[i]) - B2I(B(x)))
-		}
-		return r
-	case F:
-		r := make(AF, len(w))
-		for i := range r {
-			r[i] = float64(1 + F(I(w[i])) - F(x))
-		}
-		return r
-	case I:
-		r := make(AI, len(w))
-		for i := range r {
-			r[i] = int(1 + I(w[i]) - I(x))
-		}
-		return r
-	case AB:
-		if len(w) != len(x) {
-			return badlen("¬")
-		}
-		r := make(AI, len(x))
-		for i := range r {
-			r[i] = int(1 + I(w[i]) - B2I(B(x[i])))
-		}
-		return r
-	case AF:
-		if len(w) != len(x) {
-			return badlen("¬")
-		}
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(1 + F(I(w[i])) - F(x[i]))
-		}
-		return r
-	case AI:
-		if len(w) != len(x) {
-			return badlen("¬")
-		}
-		r := make(AI, len(x))
-		for i := range r {
-			r[i] = int(1 + I(w[i]) - I(x[i]))
-		}
-		return r
-	case AV:
-		if len(w) != len(x) {
-			return badlen("¬")
-		}
-		r := make(AV, len(x))
-		for i := range r {
-			v := SpanIV(I(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -5900,18 +4298,6 @@ func MaximumASV(w AS, x V) V {
 // And returns w∧x.
 func And(w, x V) V {
 	switch w := w.(type) {
-	case B:
-		return AndBV(w, x)
-	case F:
-		return AndFV(w, x)
-	case I:
-		return AndIV(w, x)
-	case AB:
-		return AndABV(w, x)
-	case AF:
-		return AndAFV(w, x)
-	case AI:
-		return AndAIV(w, x)
 	case AV:
 		switch x := x.(type) {
 		case Array:
@@ -5946,357 +4332,9 @@ func And(w, x V) V {
 	}
 }
 
-func AndBV(w B, x V) V {
-	switch x := x.(type) {
-	case B:
-		return B(w && x)
-	case F:
-		return F(B2F(w) * x)
-	case I:
-		return I(B2I(w) * x)
-	case AB:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(B(w) && B(x[i]))
-		}
-		return r
-	case AF:
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(B2F(B(w)) * F(x[i]))
-		}
-		return r
-	case AI:
-		r := make(AI, len(x))
-		for i := range r {
-			r[i] = int(B2I(B(w)) * I(x[i]))
-		}
-		return r
-	case AV:
-		r := make(AV, len(x))
-		for i := range r {
-			v := AndBV(B(w), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("∧")
-	}
-}
-
-func AndFV(w F, x V) V {
-	switch x := x.(type) {
-	case B:
-		return F(w * B2F(x))
-	case F:
-		return F(w * x)
-	case I:
-		return F(w * F(x))
-	case AB:
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(F(w) * B2F(B(x[i])))
-		}
-		return r
-	case AF:
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(F(w) * F(x[i]))
-		}
-		return r
-	case AI:
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(F(w) * F(I(x[i])))
-		}
-		return r
-	case AV:
-		r := make(AV, len(x))
-		for i := range r {
-			v := AndFV(F(w), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("∧")
-	}
-}
-
-func AndIV(w I, x V) V {
-	switch x := x.(type) {
-	case B:
-		return I(w * B2I(x))
-	case F:
-		return F(F(w) * x)
-	case I:
-		return I(w * x)
-	case AB:
-		r := make(AI, len(x))
-		for i := range r {
-			r[i] = int(I(w) * B2I(B(x[i])))
-		}
-		return r
-	case AF:
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(F(I(w)) * F(x[i]))
-		}
-		return r
-	case AI:
-		r := make(AI, len(x))
-		for i := range r {
-			r[i] = int(I(w) * I(x[i]))
-		}
-		return r
-	case AV:
-		r := make(AV, len(x))
-		for i := range r {
-			v := AndIV(I(w), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("∧")
-	}
-}
-
-func AndABV(w AB, x V) V {
-	switch x := x.(type) {
-	case B:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(B(w[i]) && B(x))
-		}
-		return r
-	case F:
-		r := make(AF, len(w))
-		for i := range r {
-			r[i] = float64(B2F(B(w[i])) * F(x))
-		}
-		return r
-	case I:
-		r := make(AI, len(w))
-		for i := range r {
-			r[i] = int(B2I(B(w[i])) * I(x))
-		}
-		return r
-	case AB:
-		if len(w) != len(x) {
-			return badlen("∧")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(B(w[i]) && B(x[i]))
-		}
-		return r
-	case AF:
-		if len(w) != len(x) {
-			return badlen("∧")
-		}
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(B2F(B(w[i])) * F(x[i]))
-		}
-		return r
-	case AI:
-		if len(w) != len(x) {
-			return badlen("∧")
-		}
-		r := make(AI, len(x))
-		for i := range r {
-			r[i] = int(B2I(B(w[i])) * I(x[i]))
-		}
-		return r
-	case AV:
-		if len(w) != len(x) {
-			return badlen("∧")
-		}
-		r := make(AV, len(x))
-		for i := range r {
-			v := AndBV(B(w[i]), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("∧")
-	}
-}
-
-func AndAFV(w AF, x V) V {
-	switch x := x.(type) {
-	case B:
-		r := make(AF, len(w))
-		for i := range r {
-			r[i] = float64(F(w[i]) * B2F(B(x)))
-		}
-		return r
-	case F:
-		r := make(AF, len(w))
-		for i := range r {
-			r[i] = float64(F(w[i]) * F(x))
-		}
-		return r
-	case I:
-		r := make(AF, len(w))
-		for i := range r {
-			r[i] = float64(F(w[i]) * F(I(x)))
-		}
-		return r
-	case AB:
-		if len(w) != len(x) {
-			return badlen("∧")
-		}
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(F(w[i]) * B2F(B(x[i])))
-		}
-		return r
-	case AF:
-		if len(w) != len(x) {
-			return badlen("∧")
-		}
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(F(w[i]) * F(x[i]))
-		}
-		return r
-	case AI:
-		if len(w) != len(x) {
-			return badlen("∧")
-		}
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(F(w[i]) * F(I(x[i])))
-		}
-		return r
-	case AV:
-		if len(w) != len(x) {
-			return badlen("∧")
-		}
-		r := make(AV, len(x))
-		for i := range r {
-			v := AndFV(F(w[i]), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("∧")
-	}
-}
-
-func AndAIV(w AI, x V) V {
-	switch x := x.(type) {
-	case B:
-		r := make(AI, len(w))
-		for i := range r {
-			r[i] = int(I(w[i]) * B2I(B(x)))
-		}
-		return r
-	case F:
-		r := make(AF, len(w))
-		for i := range r {
-			r[i] = float64(F(I(w[i])) * F(x))
-		}
-		return r
-	case I:
-		r := make(AI, len(w))
-		for i := range r {
-			r[i] = int(I(w[i]) * I(x))
-		}
-		return r
-	case AB:
-		if len(w) != len(x) {
-			return badlen("∧")
-		}
-		r := make(AI, len(x))
-		for i := range r {
-			r[i] = int(I(w[i]) * B2I(B(x[i])))
-		}
-		return r
-	case AF:
-		if len(w) != len(x) {
-			return badlen("∧")
-		}
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(F(I(w[i])) * F(x[i]))
-		}
-		return r
-	case AI:
-		if len(w) != len(x) {
-			return badlen("∧")
-		}
-		r := make(AI, len(x))
-		for i := range r {
-			r[i] = int(I(w[i]) * I(x[i]))
-		}
-		return r
-	case AV:
-		if len(w) != len(x) {
-			return badlen("∧")
-		}
-		r := make(AV, len(x))
-		for i := range r {
-			v := AndIV(I(w[i]), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("∧")
-	}
-}
-
 // Or returns w∨x.
 func Or(w, x V) V {
 	switch w := w.(type) {
-	case B:
-		return OrBV(w, x)
-	case F:
-		return OrFV(w, x)
-	case I:
-		return OrIV(w, x)
-	case AB:
-		return OrABV(w, x)
-	case AF:
-		return OrAFV(w, x)
-	case AI:
-		return OrAIV(w, x)
 	case AV:
 		switch x := x.(type) {
 		case Array:
@@ -6317,342 +4355,6 @@ func Or(w, x V) V {
 		r := make(AV, len(w))
 		for i := range r {
 			v := Or(w[i], x)
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("∨")
-	}
-}
-
-func OrBV(w B, x V) V {
-	switch x := x.(type) {
-	case B:
-		return B(w || x)
-	case F:
-		return F(1 - ((1 - B2F(w)) * (1 - x)))
-	case I:
-		return I(1 - ((1 - B2I(w)) * (1 - x)))
-	case AB:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(B(w) || B(x[i]))
-		}
-		return r
-	case AF:
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(1 - ((1 - B2F(B(w))) * (1 - F(x[i]))))
-		}
-		return r
-	case AI:
-		r := make(AI, len(x))
-		for i := range r {
-			r[i] = int(1 - ((1 - B2I(B(w))) * (1 - I(x[i]))))
-		}
-		return r
-	case AV:
-		r := make(AV, len(x))
-		for i := range r {
-			v := OrBV(B(w), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("∨")
-	}
-}
-
-func OrFV(w F, x V) V {
-	switch x := x.(type) {
-	case B:
-		return F(1 - ((1 - w) * (1 - B2F(x))))
-	case F:
-		return F(1 - ((1 - w) * (1 - x)))
-	case I:
-		return F(1 - ((1 - w) * F(1-x)))
-	case AB:
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(1 - ((1 - F(w)) * (1 - B2F(B(x[i])))))
-		}
-		return r
-	case AF:
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(1 - ((1 - F(w)) * (1 - F(x[i]))))
-		}
-		return r
-	case AI:
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(1 - ((1 - F(w)) * F(1-I(x[i]))))
-		}
-		return r
-	case AV:
-		r := make(AV, len(x))
-		for i := range r {
-			v := OrFV(F(w), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("∨")
-	}
-}
-
-func OrIV(w I, x V) V {
-	switch x := x.(type) {
-	case B:
-		return I(1 - ((1 - w) * (1 - B2I(x))))
-	case F:
-		return F(1 - ((1 - F(w)) * (1 - x)))
-	case I:
-		return I(1 - ((1 - w) * (1 - x)))
-	case AB:
-		r := make(AI, len(x))
-		for i := range r {
-			r[i] = int(1 - ((1 - I(w)) * (1 - B2I(B(x[i])))))
-		}
-		return r
-	case AF:
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(1 - ((1 - F(I(w))) * (1 - F(x[i]))))
-		}
-		return r
-	case AI:
-		r := make(AI, len(x))
-		for i := range r {
-			r[i] = int(1 - ((1 - I(w)) * (1 - I(x[i]))))
-		}
-		return r
-	case AV:
-		r := make(AV, len(x))
-		for i := range r {
-			v := OrIV(I(w), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("∨")
-	}
-}
-
-func OrABV(w AB, x V) V {
-	switch x := x.(type) {
-	case B:
-		r := make(AB, len(w))
-		for i := range r {
-			r[i] = bool(B(w[i]) || B(x))
-		}
-		return r
-	case F:
-		r := make(AF, len(w))
-		for i := range r {
-			r[i] = float64(1 - ((1 - B2F(B(w[i]))) * (1 - F(x))))
-		}
-		return r
-	case I:
-		r := make(AI, len(w))
-		for i := range r {
-			r[i] = int(1 - ((1 - B2I(B(w[i]))) * (1 - I(x))))
-		}
-		return r
-	case AB:
-		if len(w) != len(x) {
-			return badlen("∨")
-		}
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = bool(B(w[i]) || B(x[i]))
-		}
-		return r
-	case AF:
-		if len(w) != len(x) {
-			return badlen("∨")
-		}
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(1 - ((1 - B2F(B(w[i]))) * (1 - F(x[i]))))
-		}
-		return r
-	case AI:
-		if len(w) != len(x) {
-			return badlen("∨")
-		}
-		r := make(AI, len(x))
-		for i := range r {
-			r[i] = int(1 - ((1 - B2I(B(w[i]))) * (1 - I(x[i]))))
-		}
-		return r
-	case AV:
-		if len(w) != len(x) {
-			return badlen("∨")
-		}
-		r := make(AV, len(x))
-		for i := range r {
-			v := OrBV(B(w[i]), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("∨")
-	}
-}
-
-func OrAFV(w AF, x V) V {
-	switch x := x.(type) {
-	case B:
-		r := make(AF, len(w))
-		for i := range r {
-			r[i] = float64(1 - ((1 - F(w[i])) * (1 - B2F(B(x)))))
-		}
-		return r
-	case F:
-		r := make(AF, len(w))
-		for i := range r {
-			r[i] = float64(1 - ((1 - F(w[i])) * (1 - F(x))))
-		}
-		return r
-	case I:
-		r := make(AF, len(w))
-		for i := range r {
-			r[i] = float64(1 - ((1 - F(w[i])) * F(1-I(x))))
-		}
-		return r
-	case AB:
-		if len(w) != len(x) {
-			return badlen("∨")
-		}
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(1 - ((1 - F(w[i])) * (1 - B2F(B(x[i])))))
-		}
-		return r
-	case AF:
-		if len(w) != len(x) {
-			return badlen("∨")
-		}
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(1 - ((1 - F(w[i])) * (1 - F(x[i]))))
-		}
-		return r
-	case AI:
-		if len(w) != len(x) {
-			return badlen("∨")
-		}
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(1 - ((1 - F(w[i])) * F(1-I(x[i]))))
-		}
-		return r
-	case AV:
-		if len(w) != len(x) {
-			return badlen("∨")
-		}
-		r := make(AV, len(x))
-		for i := range r {
-			v := OrFV(F(w[i]), x[i])
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("∨")
-	}
-}
-
-func OrAIV(w AI, x V) V {
-	switch x := x.(type) {
-	case B:
-		r := make(AI, len(w))
-		for i := range r {
-			r[i] = int(1 - ((1 - I(w[i])) * (1 - B2I(B(x)))))
-		}
-		return r
-	case F:
-		r := make(AF, len(w))
-		for i := range r {
-			r[i] = float64(1 - ((1 - F(I(w[i]))) * (1 - F(x))))
-		}
-		return r
-	case I:
-		r := make(AI, len(w))
-		for i := range r {
-			r[i] = int(1 - ((1 - I(w[i])) * (1 - I(x))))
-		}
-		return r
-	case AB:
-		if len(w) != len(x) {
-			return badlen("∨")
-		}
-		r := make(AI, len(x))
-		for i := range r {
-			r[i] = int(1 - ((1 - I(w[i])) * (1 - B2I(B(x[i])))))
-		}
-		return r
-	case AF:
-		if len(w) != len(x) {
-			return badlen("∨")
-		}
-		r := make(AF, len(x))
-		for i := range r {
-			r[i] = float64(1 - ((1 - F(I(w[i]))) * (1 - F(x[i]))))
-		}
-		return r
-	case AI:
-		if len(w) != len(x) {
-			return badlen("∨")
-		}
-		r := make(AI, len(x))
-		for i := range r {
-			r[i] = int(1 - ((1 - I(w[i])) * (1 - I(x[i]))))
-		}
-		return r
-	case AV:
-		if len(w) != len(x) {
-			return badlen("∨")
-		}
-		r := make(AV, len(x))
-		for i := range r {
-			v := OrIV(I(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -6719,27 +4421,27 @@ func Modulus(w, x V) V {
 func ModulusBV(w B, x V) V {
 	switch x := x.(type) {
 	case B:
-		return I(modulus(B2I(w), B2I(x)))
+		return I(modI(B2I(w), B2I(x)))
 	case F:
-		return I(modulus(B2I(w), I(x)))
+		return I(modF(F(B2I(w)), x))
 	case I:
-		return I(modulus(B2I(w), x))
+		return I(modI(B2I(w), x))
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = int(modulus(B2I(B(w)), B2I(B(x[i]))))
+			r[i] = int(modI(B2I(B(w)), B2I(B(x[i]))))
 		}
 		return r
 	case AF:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = int(modulus(B2I(B(w)), I(F(x[i]))))
+			r[i] = int(modF(F(B2I(B(w))), F(x[i])))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = int(modulus(B2I(B(w)), I(x[i])))
+			r[i] = int(modI(B2I(B(w)), I(x[i])))
 		}
 		return r
 	case AV:
@@ -6763,27 +4465,27 @@ func ModulusBV(w B, x V) V {
 func ModulusFV(w F, x V) V {
 	switch x := x.(type) {
 	case B:
-		return I(modulus(I(w), B2I(x)))
+		return I(modF(w, F(B2I(x))))
 	case F:
-		return I(modulus(I(w), I(x)))
+		return I(modF(w, x))
 	case I:
-		return I(modulus(I(w), x))
+		return I(modF(w, F(x)))
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = int(modulus(I(F(w)), B2I(B(x[i]))))
+			r[i] = int(modF(F(w), F(B2I(B(x[i])))))
 		}
 		return r
 	case AF:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = int(modulus(I(F(w)), I(F(x[i]))))
+			r[i] = int(modF(F(w), F(x[i])))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = int(modulus(I(F(w)), I(x[i])))
+			r[i] = int(modF(F(w), F(I(x[i]))))
 		}
 		return r
 	case AV:
@@ -6807,27 +4509,27 @@ func ModulusFV(w F, x V) V {
 func ModulusIV(w I, x V) V {
 	switch x := x.(type) {
 	case B:
-		return I(modulus(w, B2I(x)))
+		return I(modI(w, B2I(x)))
 	case F:
-		return I(modulus(w, I(x)))
+		return I(modF(F(w), x))
 	case I:
-		return I(modulus(w, x))
+		return I(modI(w, x))
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = int(modulus(I(w), B2I(B(x[i]))))
+			r[i] = int(modI(I(w), B2I(B(x[i]))))
 		}
 		return r
 	case AF:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = int(modulus(I(w), I(F(x[i]))))
+			r[i] = int(modF(F(I(w)), F(x[i])))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = int(modulus(I(w), I(x[i])))
+			r[i] = int(modI(I(w), I(x[i])))
 		}
 		return r
 	case AV:
@@ -6853,19 +4555,19 @@ func ModulusABV(w AB, x V) V {
 	case B:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = int(modulus(B2I(B(w[i])), B2I(B(x))))
+			r[i] = int(modI(B2I(B(w[i])), B2I(B(x))))
 		}
 		return r
 	case F:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = int(modulus(B2I(B(w[i])), I(F(x))))
+			r[i] = int(modF(F(B2I(B(w[i]))), F(x)))
 		}
 		return r
 	case I:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = int(modulus(B2I(B(w[i])), I(x)))
+			r[i] = int(modI(B2I(B(w[i])), I(x)))
 		}
 		return r
 	case AB:
@@ -6874,7 +4576,7 @@ func ModulusABV(w AB, x V) V {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = int(modulus(B2I(B(w[i])), B2I(B(x[i]))))
+			r[i] = int(modI(B2I(B(w[i])), B2I(B(x[i]))))
 		}
 		return r
 	case AF:
@@ -6883,7 +4585,7 @@ func ModulusABV(w AB, x V) V {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = int(modulus(B2I(B(w[i])), I(F(x[i]))))
+			r[i] = int(modF(F(B2I(B(w[i]))), F(x[i])))
 		}
 		return r
 	case AI:
@@ -6892,7 +4594,7 @@ func ModulusABV(w AB, x V) V {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = int(modulus(B2I(B(w[i])), I(x[i])))
+			r[i] = int(modI(B2I(B(w[i])), I(x[i])))
 		}
 		return r
 	case AV:
@@ -6921,19 +4623,19 @@ func ModulusAFV(w AF, x V) V {
 	case B:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = int(modulus(I(F(w[i])), B2I(B(x))))
+			r[i] = int(modF(F(w[i]), F(B2I(B(x)))))
 		}
 		return r
 	case F:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = int(modulus(I(F(w[i])), I(F(x))))
+			r[i] = int(modF(F(w[i]), F(x)))
 		}
 		return r
 	case I:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = int(modulus(I(F(w[i])), I(x)))
+			r[i] = int(modF(F(w[i]), F(I(x))))
 		}
 		return r
 	case AB:
@@ -6942,7 +4644,7 @@ func ModulusAFV(w AF, x V) V {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = int(modulus(I(F(w[i])), B2I(B(x[i]))))
+			r[i] = int(modF(F(w[i]), F(B2I(B(x[i])))))
 		}
 		return r
 	case AF:
@@ -6951,7 +4653,7 @@ func ModulusAFV(w AF, x V) V {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = int(modulus(I(F(w[i])), I(F(x[i]))))
+			r[i] = int(modF(F(w[i]), F(x[i])))
 		}
 		return r
 	case AI:
@@ -6960,7 +4662,7 @@ func ModulusAFV(w AF, x V) V {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = int(modulus(I(F(w[i])), I(x[i])))
+			r[i] = int(modF(F(w[i]), F(I(x[i]))))
 		}
 		return r
 	case AV:
@@ -6989,19 +4691,19 @@ func ModulusAIV(w AI, x V) V {
 	case B:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = int(modulus(I(w[i]), B2I(B(x))))
+			r[i] = int(modI(I(w[i]), B2I(B(x))))
 		}
 		return r
 	case F:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = int(modulus(I(w[i]), I(F(x))))
+			r[i] = int(modF(F(I(w[i])), F(x)))
 		}
 		return r
 	case I:
 		r := make(AI, len(w))
 		for i := range r {
-			r[i] = int(modulus(I(w[i]), I(x)))
+			r[i] = int(modI(I(w[i]), I(x)))
 		}
 		return r
 	case AB:
@@ -7010,7 +4712,7 @@ func ModulusAIV(w AI, x V) V {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = int(modulus(I(w[i]), B2I(B(x[i]))))
+			r[i] = int(modI(I(w[i]), B2I(B(x[i]))))
 		}
 		return r
 	case AF:
@@ -7019,7 +4721,7 @@ func ModulusAIV(w AI, x V) V {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = int(modulus(I(w[i]), I(F(x[i]))))
+			r[i] = int(modF(F(I(w[i])), F(x[i])))
 		}
 		return r
 	case AI:
@@ -7028,7 +4730,7 @@ func ModulusAIV(w AI, x V) V {
 		}
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = int(modulus(I(w[i]), I(x[i])))
+			r[i] = int(modI(I(w[i]), I(x[i])))
 		}
 		return r
 	case AV:
