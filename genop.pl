@@ -233,7 +233,7 @@ genOp("Minimum", "&");
 genOp("Maximum", "|");
 #genOp("And", "∧"); # identical to Multiply
 #genOp("Or", "∨"); # Multiply under Not
-genOp("Modulus", "!");
+genOp("Modulus", " mod ");
 
 sub genOp {
     my ($name, $op) = @_;
@@ -295,15 +295,15 @@ EOS
 EOS
     print $s;
     for my $t (sort keys %types) {
-        genLeftExpanded($name, $op, $cases, $t);
+        genLeftExpanded($name, $cases, $t);
     }
     for my $t (sort keys %types) {
-        genLeftArrayExpanded($name, $op, $cases, $t);
+        genLeftArrayExpanded($name, $cases, $t);
     }
 }
 
 sub genLeftExpanded {
-    my ($name, $op, $cases, $t) = @_;
+    my ($name, $cases, $t) = @_;
     my %types = map { /_(\w)/; $1 => $cases->{"${t}_$1"}} grep { /${t}_(\w)/ } keys $cases->%*;
     my $s = "";
     open my $out, '>', \$s;
@@ -356,7 +356,7 @@ EOS
 }
 
 sub genLeftArrayExpanded {
-    my ($name, $op, $cases, $t) = @_;
+    my ($name, $cases, $t) = @_;
     my %types = map { /_(\w)/; $1 => $cases->{"${t}_$1"}} grep { /${t}_(\w)/ } keys $cases->%*;
     my $s = "";
     open my $out, '>', \$s;

@@ -4147,7 +4147,7 @@ func MaximumASV(w AS, x V) V {
 	}
 }
 
-// Modulus returns w!x.
+// Modulus returns w mod x.
 func Modulus(w, x V) V {
 	switch w := w.(type) {
 	case B:
