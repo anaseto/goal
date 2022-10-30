@@ -3,6 +3,7 @@
 package main
 
 import (
+	"math"
 	"sort"
 )
 
@@ -12,7 +13,7 @@ func Length(x V) I {
 	case nil:
 		return 0
 	case Array:
-		return x.Len()
+		return I(x.Len())
 	default:
 		return 1
 	}
@@ -62,16 +63,16 @@ func Rotate(w, x V) V {
 	i := 0
 	switch w := w.(type) {
 	case B:
-		i = B2I(w)
+		i = int(B2I(w))
 	case I:
-		i = w
+		i = int(w)
 	case F:
-		i = I(w)
+		i = int(w)
 	default:
 		// TODO: improve error messages
 		return badtype("w⌽")
 	}
-	lenx := Length(x)
+	lenx := int(Length(x))
 	if lenx == 0 {
 		return x
 	}
@@ -158,11 +159,11 @@ func Drop(w, x V) V {
 	i := 0
 	switch w := w.(type) {
 	case B:
-		i = B2I(w)
+		i = int(B2I(w))
 	case I:
-		i = w
+		i = int(w)
 	case F:
-		i = I(w)
+		i = int(math.Round(float64(w)))
 	default:
 		// TODO: improve error messages
 		return badtype("w↓")
@@ -193,11 +194,11 @@ func Take(w, x V) V {
 	i := 0
 	switch w := w.(type) {
 	case B:
-		i = B2I(w)
+		i = int(B2I(w))
 	case I:
-		i = w
+		i = int(w)
 	case F:
-		i = I(w)
+		i = int(math.Round(float64(w)))
 	default:
 		// TODO: improve error messages
 		return badtype("w↑")
@@ -225,7 +226,7 @@ func Take(w, x V) V {
 // ShiftBefore returns w»x.
 func ShiftBefore(w, x V) V {
 	w = toArray(w)
-	max := minI(Length(w), Length(x))
+	max := int(minI(Length(w), Length(x)))
 	if max == 0 {
 		return x
 	}
@@ -254,7 +255,7 @@ func ShiftBefore(w, x V) V {
 				r[i] = w[i]
 			}
 			for i := max; i < len(x); i++ {
-				r[i] = B2I(B(x[i-max]))
+				r[i] = int(B2I(B(x[i-max])))
 			}
 			return r
 		default:
@@ -291,7 +292,7 @@ func ShiftBefore(w, x V) V {
 		case AB:
 			r := make(AI, len(x))
 			for i := 0; i < max; i++ {
-				r[i] = B2I(B(w[i]))
+				r[i] = int(B2I(B(w[i])))
 			}
 			copy(r[max:], x[:len(x)-max])
 			return r
@@ -374,7 +375,7 @@ func Nudge(x V) V {
 // ShiftAfter returns w«x.
 func ShiftAfter(w, x V) V {
 	w = toArray(w)
-	max := minI(Length(w), Length(x))
+	max := int(minI(Length(w), Length(x)))
 	if max == 0 {
 		return x
 	}
@@ -403,7 +404,7 @@ func ShiftAfter(w, x V) V {
 				r[len(x)-1-i] = w[i]
 			}
 			for i := max; i < len(x); i++ {
-				r[i-max] = B2I(B(x[i]))
+				r[i-max] = int(B2I(B(x[i])))
 			}
 			return r
 		default:
@@ -440,7 +441,7 @@ func ShiftAfter(w, x V) V {
 		case AB:
 			r := make(AI, len(x))
 			for i := 0; i < max; i++ {
-				r[len(x)-1-i] = B2I(B(w[i]))
+				r[len(x)-1-i] = int(B2I(B(w[i])))
 			}
 			copy(r[:len(x)-max], x[max:])
 			return r
@@ -536,7 +537,7 @@ func Flip(x V) V {
 		}
 		lines := -1
 		for _, o := range x {
-			nl := Length(o)
+			nl := int(Length(o))
 			if !isArray(o) {
 				continue
 			}
@@ -668,11 +669,11 @@ func flipAI(x AV) AI {
 	for i, y := range x {
 		switch y := y.(type) {
 		case B:
-			r[i] = B2I(y)
+			r[i] = int(B2I(y))
 		case AB:
-			r[i] = B2I(B(y[0]))
+			r[i] = int(B2I(B(y[0])))
 		case I:
-			r[i] = y
+			r[i] = int(y)
 		case AI:
 			r[i] = y[0]
 		}
@@ -688,11 +689,11 @@ func flipAOAI(x AV, lines int) AV {
 		for i, y := range x {
 			switch y := y.(type) {
 			case B:
-				q[i] = B2I(y)
+				q[i] = int(B2I(y))
 			case AB:
-				q[i] = B2I(B(y[j]))
+				q[i] = int(B2I(B(y[j])))
 			case I:
-				q[i] = y
+				q[i] = int(y)
 			case AI:
 				q[i] = y[j]
 			}
@@ -809,9 +810,9 @@ func joinToB(w B, x V, left bool) V {
 		return AF{float64(x), float64(B2F(w))}
 	case I:
 		if left {
-			return AI{B2I(w), x}
+			return AI{int(B2I(w)), int(x)}
 		}
-		return AI{x, B2I(w)}
+		return AI{int(x), int(B2I(w))}
 	case S:
 		if left {
 			return AV{w, x}
@@ -836,9 +837,9 @@ func joinToI(w I, x V, left bool) V {
 	switch x := x.(type) {
 	case B:
 		if left {
-			return AI{w, B2I(x)}
+			return AI{int(w), int(B2I(x))}
 		}
-		return AI{B2I(x), w}
+		return AI{int(B2I(x)), int(w)}
 	case F:
 		if left {
 			return AF{float64(w), float64(x)}
@@ -846,9 +847,9 @@ func joinToI(w I, x V, left bool) V {
 		return AF{float64(x), float64(w)}
 	case I:
 		if left {
-			return AI{w, x}
+			return AI{int(w), int(x)}
 		}
-		return AI{x, w}
+		return AI{int(x), int(w)}
 	case S:
 		if left {
 			return AV{w, x}
@@ -1051,14 +1052,14 @@ func joinToAB(w V, x AB, left bool) V {
 	case I:
 		r := make(AI, len(x)+1)
 		if left {
-			r[0] = w
+			r[0] = int(w)
 			for i := 1; i < len(r); i++ {
-				r[i] = B2I(B(x[i-1]))
+				r[i] = int(B2I(B(x[i-1])))
 			}
 		} else {
-			r[len(r)-1] = w
+			r[len(r)-1] = int(w)
 			for i := 0; i < len(r); i++ {
-				r[i] = B2I(B(x[i]))
+				r[i] = int(B2I(B(x[i])))
 			}
 		}
 		return r
@@ -1092,10 +1093,10 @@ func joinToAI(w V, x AI, left bool) V {
 	case B:
 		r := make(AI, len(x)+1)
 		if left {
-			r[0] = B2I(w)
+			r[0] = int(B2I(w))
 			copy(r[1:], x)
 		} else {
-			r[len(r)-1] = B2I(w)
+			r[len(r)-1] = int(B2I(w))
 			copy(r[:len(r)-1], x)
 		}
 		return r
@@ -1116,10 +1117,10 @@ func joinToAI(w V, x AI, left bool) V {
 	case I:
 		r := make(AI, len(x)+1)
 		if left {
-			r[0] = w
+			r[0] = int(w)
 			copy(r[1:], x)
 		} else {
-			r[len(r)-1] = w
+			r[len(r)-1] = int(w)
 			copy(r[:len(r)-1], x)
 		}
 		return r
@@ -1229,7 +1230,7 @@ func joinAFAF(w AF, x AF) AF {
 func joinABAI(w AB, x AI) AI {
 	r := make(AI, len(w)+len(x))
 	for i := 0; i < len(w); i++ {
-		r[i] = B2I(B(w[i]))
+		r[i] = int(B2I(B(w[i])))
 	}
 	copy(r[len(w):], x)
 	return r
@@ -1239,7 +1240,7 @@ func joinAIAB(w AI, x AB) AI {
 	r := make(AI, len(w)+len(x))
 	copy(r[:len(w)], w)
 	for i := len(w); i < len(r); i++ {
-		r[i] = B2I(B(x[i-len(w)]))
+		r[i] = int(B2I(B(x[i-len(w)])))
 	}
 	return r
 }
@@ -1349,11 +1350,11 @@ func Windows(w, x V) V {
 	i := 0
 	switch w := w.(type) {
 	case B:
-		i = B2I(w)
+		i = int(B2I(w))
 	case I:
-		i = w
+		i = int(w)
 	case F:
-		i = I(w)
+		i = int(math.Round(float64(w)))
 	default:
 		// TODO: improve error messages
 		return badtype("↕ : w must be un integer")

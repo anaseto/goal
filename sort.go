@@ -92,7 +92,7 @@ func lessB(w B, x V) bool {
 		if len(x) == 0 {
 			return false
 		}
-		return B2I(w) < x[0] || B2I(w) == x[0] && len(x) > 1
+		return B2I(w) < I(x[0]) || B2I(w) == I(x[0]) && len(x) > 1
 	case AV:
 		if len(x) == 0 {
 			return false
@@ -158,7 +158,7 @@ func lessI(w I, x V) bool {
 		if len(x) == 0 {
 			return false
 		}
-		return w < x[0] || w == x[0] && len(x) > 1
+		return w < I(x[0]) || w == I(x[0]) && len(x) > 1
 	case AV:
 		if len(x) == 0 {
 			return false
@@ -212,7 +212,7 @@ func lessAB(w AB, x V) bool {
 		return len(w) < len(x)
 	case AI:
 		for i := 0; i < len(w) && i < len(x); i++ {
-			if B2I(B(w[i])) > x[i] {
+			if B2I(B(w[i])) > I(x[i]) {
 				return false
 			}
 		}
@@ -239,7 +239,7 @@ func lessAI(w AI, x V) bool {
 		return !lessI(x, w)
 	case AB:
 		for i := 0; i < len(w) && i < len(x); i++ {
-			if w[i] > B2I(B(x[i])) {
+			if I(w[i]) > B2I(B(x[i])) {
 				return false
 			}
 		}
@@ -413,7 +413,7 @@ func SortDown(x V) V {
 }
 
 type PermutationAO struct {
-	Perm []I
+	Perm []int
 	X    AOUp
 }
 
@@ -497,7 +497,7 @@ func (p *PermutationAS) Less(i, j int) bool {
 	return p.X.Less(p.Perm[i], p.Perm[j])
 }
 
-func permRange(n I) AI {
+func permRange(n int) AI {
 	r := make(AI, n)
 	for i := range r {
 		r[i] = i
@@ -505,7 +505,7 @@ func permRange(n I) AI {
 	return r
 }
 
-// GradeUp returns ⍋x.
+// GradeUp returns <x.
 func GradeUp(x V) V {
 	switch x := x.(type) {
 	case AB:
@@ -533,7 +533,7 @@ func GradeUp(x V) V {
 	}
 }
 
-// GradeDown returns ⍒x.
+// GradeDown returns >x.
 func GradeDown(x V) V {
 	p := GradeUp(x)
 	switch p.(type) {

@@ -126,7 +126,7 @@ func matchAB(w, x AB) bool {
 
 func matchABAI(w AB, x AI) bool {
 	for i, v := range x {
-		if v != B2I(B(w[i])) {
+		if v != int(B2I(B(w[i]))) {
 			return false
 		}
 	}
@@ -191,7 +191,7 @@ func Classify(x V) V {
 		return Not(x)
 	case AF:
 		r := make(AI, len(x))
-		m := map[float64]I{}
+		m := map[float64]int{}
 		n := 0
 		for i, v := range x {
 			c, ok := m[v]
@@ -206,7 +206,7 @@ func Classify(x V) V {
 		return r
 	case AI:
 		r := make(AI, len(x))
-		m := map[I]I{}
+		m := map[int]int{}
 		n := 0
 		for i, v := range x {
 			c, ok := m[v]
@@ -221,7 +221,7 @@ func Classify(x V) V {
 		return r
 	case AS:
 		r := make(AI, len(x))
-		m := map[string]I{}
+		m := map[string]int{}
 		n := 0
 		for i, v := range x {
 			c, ok := m[v]
@@ -291,7 +291,7 @@ func MarkFirts(x V) V {
 		return r
 	case AI:
 		r := make(AB, len(x))
-		m := map[I]struct{}{}
+		m := map[int]struct{}{}
 		for i, v := range x {
 			_, ok := m[v]
 			if !ok {
@@ -431,7 +431,7 @@ func memberOfAF(w V, x AF) V {
 }
 
 func memberOfAI(w V, x AI) V {
-	m := map[I]struct{}{}
+	m := map[int]struct{}{}
 	for _, v := range x {
 		_, ok := m[v]
 		if !ok {
@@ -441,21 +441,21 @@ func memberOfAI(w V, x AI) V {
 	}
 	switch w := w.(type) {
 	case B:
-		_, ok := m[B2I(w)]
+		_, ok := m[int(B2I(w))]
 		return ok
 	case I:
-		_, ok := m[w]
+		_, ok := m[int(w)]
 		return ok
 	case F:
 		if !isI(w) {
 			return false
 		}
-		_, ok := m[I(w)]
+		_, ok := m[int(w)]
 		return ok
 	case AB:
 		r := make(AB, len(w))
 		for i, v := range w {
-			_, r[i] = m[B2I(B(v))]
+			_, r[i] = m[int(B2I(B(v)))]
 		}
 		return r
 	case AI:
@@ -470,7 +470,7 @@ func memberOfAI(w V, x AI) V {
 			if !isI(F(v)) {
 				continue
 			}
-			_, r[i] = m[I(v)]
+			_, r[i] = m[int(v)]
 		}
 		return r
 	default:
@@ -550,7 +550,7 @@ func OccurrenceCount(x V) V {
 		return r
 	case AF:
 		r := make(AI, len(x))
-		m := map[float64]I{}
+		m := map[float64]int{}
 		for i, v := range x {
 			c, ok := m[v]
 			if !ok {
@@ -563,7 +563,7 @@ func OccurrenceCount(x V) V {
 		return r
 	case AI:
 		r := make(AI, len(x))
-		m := map[I]I{}
+		m := map[int]int{}
 		for i, v := range x {
 			c, ok := m[v]
 			if !ok {
@@ -576,7 +576,7 @@ func OccurrenceCount(x V) V {
 		return r
 	case AS:
 		r := make(AI, len(x))
-		m := map[string]I{}
+		m := map[string]int{}
 		for i, v := range x {
 			c, ok := m[v]
 			if !ok {

@@ -184,8 +184,8 @@ func toArray(x V) V {
 	}
 }
 
-func growArray(x V, n I) V {
-	l := Length(x)
+func growArray(x V, n int) V {
+	l := int(Length(x))
 	if l >= n && n >= -l {
 		return x
 	}
@@ -365,7 +365,7 @@ func isI(x F) bool {
 	return math.Floor(float64(x)) == float64(x)
 }
 
-func minMax(x AI) (min, max I) {
+func minMax(x AI) (min, max int) {
 	if len(x) == 0 {
 		return
 	}

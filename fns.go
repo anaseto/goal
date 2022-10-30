@@ -37,14 +37,14 @@ func rangeArray(x Array) V {
 		v := x.At(i)
 		switch v := v.(type) {
 		case B:
-			y[i] = B2I(v)
+			y[i] = int(B2I(v))
 		case I:
-			y[i] = v
+			y[i] = int(v)
 		case F:
 			if !isI(v) {
 				return badtype("↕ : non-integer range")
 			}
-			y[i] = I(v)
+			y[i] = int(v)
 		default:
 			return badtype("↕ : non-numeric argument")
 		}
@@ -110,7 +110,7 @@ func Indices(x V) V {
 	case AB:
 		n := 0
 		for _, v := range x {
-			n += B2I(B(v))
+			n += int(B2I(B(v)))
 		}
 		r := make(AI, 0, n)
 		for i, v := range x {
@@ -143,11 +143,11 @@ func Indices(x V) V {
 			if v < 0 {
 				return badtype("/ : negative integer")
 			}
-			n += I(v)
+			n += int(v)
 		}
 		r := make(AI, 0, n)
 		for i, v := range x {
-			for j := 0; j < I(v); j++ {
+			for j := 0; j < int(v); j++ {
 				r = append(r, i)
 			}
 		}
@@ -159,7 +159,7 @@ func Indices(x V) V {
 			for _, v := range x {
 				switch v := v.(type) {
 				case B:
-					n += B2I(v)
+					n += int(B2I(v))
 				case F:
 					if !isI(v) {
 						return badtype("/ : not an integer")
@@ -167,12 +167,12 @@ func Indices(x V) V {
 					if v < 0 {
 						return badtype("/ : negative integer")
 					}
-					n += I(v)
+					n += int(v)
 				case I:
 					if v < 0 {
 						return badtype("/ : negative integer")
 					}
-					n += v
+					n += int(v)
 				}
 			}
 			r := make(AI, 0, n)
@@ -186,7 +186,7 @@ func Indices(x V) V {
 				case F:
 					max = I(v)
 				}
-				for j := 0; j < max; j++ {
+				for j := 0; j < int(max); j++ {
 					r = append(r, i)
 				}
 			}
@@ -206,19 +206,19 @@ func Replicate(w, x V) V {
 	}
 	switch w := w.(type) {
 	case B:
-		return repeat(x, B2I(w))
+		return repeat(x, int(B2I(w)))
 	case I:
 		switch {
 		case w < 0:
 			return badtype("/ : negative integer")
 		default:
-			return repeat(x, w)
+			return repeat(x, int(w))
 		}
 	case F:
 		if !isI(w) {
 			return badtype("/ : not an integer")
 		}
-		n := I(w)
+		n := int(w)
 		switch {
 		case n < 0:
 			return badtype("/ : negative integer")
@@ -255,7 +255,7 @@ func repeat(x V, n int) V {
 	case I:
 		r := make(AI, n)
 		for i := range r {
-			r[i] = x
+			r[i] = int(x)
 		}
 		return r
 	case S:
@@ -276,7 +276,7 @@ func repeat(x V, n int) V {
 func repeatAB(w AB, x V) V {
 	n := 0
 	for _, v := range w {
-		n += B2I(B(v))
+		n += int(B2I(B(v)))
 	}
 	switch x := x.(type) {
 	case AB:
@@ -387,13 +387,13 @@ func repeatAF(w AF, x V) V {
 		if v < 0 {
 			return badtype("/ : negative integer")
 		}
-		n += I(v)
+		n += int(v)
 	}
 	switch x := x.(type) {
 	case AB:
 		r := make(AB, 0, n)
 		for i, v := range w {
-			for j := 0; j < I(v); j++ {
+			for j := 0; j < int(v); j++ {
 				r = append(r, x[i])
 			}
 		}
@@ -401,7 +401,7 @@ func repeatAF(w AF, x V) V {
 	case AF:
 		r := make(AF, 0, n)
 		for i, v := range w {
-			for j := 0; j < I(v); j++ {
+			for j := 0; j < int(v); j++ {
 				r = append(r, x[i])
 			}
 		}
@@ -409,7 +409,7 @@ func repeatAF(w AF, x V) V {
 	case AI:
 		r := make(AI, 0, n)
 		for i, v := range w {
-			for j := 0; j < I(v); j++ {
+			for j := 0; j < int(v); j++ {
 				r = append(r, x[i])
 			}
 		}
@@ -417,7 +417,7 @@ func repeatAF(w AF, x V) V {
 	case AS:
 		r := make(AS, 0, n)
 		for i, v := range w {
-			for j := 0; j < I(v); j++ {
+			for j := 0; j < int(v); j++ {
 				r = append(r, x[i])
 			}
 		}
@@ -425,7 +425,7 @@ func repeatAF(w AF, x V) V {
 	case AV:
 		r := make(AV, 0, n)
 		for i, v := range w {
-			for j := 0; j < I(v); j++ {
+			for j := 0; j < int(v); j++ {
 				r = append(r, x[i])
 			}
 		}
@@ -442,7 +442,7 @@ func repeatAO(w AV, x V) V {
 		for _, v := range w {
 			switch v := v.(type) {
 			case B:
-				n += B2I(v)
+				n += int(B2I(v))
 			case F:
 				if !isI(v) {
 					return badtype("/ : not an integer")
@@ -450,12 +450,12 @@ func repeatAO(w AV, x V) V {
 				if v < 0 {
 					return badtype("/ : negative integer")
 				}
-				n += I(v)
+				n += int(v)
 			case I:
 				if v < 0 {
 					return badtype("/ : negative integer")
 				}
-				n += v
+				n += int(v)
 			}
 		}
 		switch x := x.(type) {
@@ -463,7 +463,7 @@ func repeatAO(w AV, x V) V {
 			r := make(AB, 0, n)
 			for i, v := range w {
 				max := num2I(v)
-				for j := 0; j < max; j++ {
+				for j := 0; j < int(max); j++ {
 					r = append(r, x[i])
 				}
 			}
@@ -472,7 +472,7 @@ func repeatAO(w AV, x V) V {
 			r := make(AI, 0, n)
 			for i, v := range w {
 				max := num2I(v)
-				for j := 0; j < max; j++ {
+				for j := 0; j < int(max); j++ {
 					r = append(r, x[i])
 				}
 			}
@@ -481,7 +481,7 @@ func repeatAO(w AV, x V) V {
 			r := make(AF, 0, n)
 			for i, v := range w {
 				max := num2I(v)
-				for j := 0; j < max; j++ {
+				for j := 0; j < int(max); j++ {
 					r = append(r, x[i])
 				}
 			}
@@ -490,7 +490,7 @@ func repeatAO(w AV, x V) V {
 			r := make(AS, 0, n)
 			for i, v := range w {
 				max := num2I(v)
-				for j := 0; j < max; j++ {
+				for j := 0; j < int(max); j++ {
 					r = append(r, x[i])
 				}
 			}
@@ -499,7 +499,7 @@ func repeatAO(w AV, x V) V {
 			r := make(AV, 0, n)
 			for i, v := range w {
 				max := num2I(v)
-				for j := 0; j < max; j++ {
+				for j := 0; j < int(max); j++ {
 					r = append(r, x[i])
 				}
 			}

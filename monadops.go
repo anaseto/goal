@@ -17,7 +17,7 @@ func Negate(x V) V {
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = -B2I(B(x[i]))
+			r[i] = int(-B2I(B(x[i])))
 		}
 		return r
 	case AF:
@@ -81,13 +81,13 @@ func Sign(x V) V {
 	case AF:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = signF(F(x[i]))
+			r[i] = int(signF(F(x[i])))
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = signI(x[i])
+			r[i] = int(signI(I(x[i])))
 		}
 		return r
 	case AV:
@@ -250,7 +250,7 @@ func Abs(x V) V {
 	case AI:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = absI(x[i])
+			r[i] = int(absI(I(x[i])))
 		}
 		return r
 	case AV:
