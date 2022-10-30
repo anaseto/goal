@@ -397,7 +397,7 @@ func SortUp(x V) V {
 		sort.Stable(AOUp(x))
 		return x
 	default:
-		return badtype("<")
+		return badtype("expected array")
 	}
 }
 
@@ -529,7 +529,7 @@ func GradeUp(x V) V {
 		sort.Stable(p)
 		return p.Perm
 	default:
-		return badtype("⍋ : x must be an array")
+		return badtype("expected array")
 	}
 }
 
