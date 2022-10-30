@@ -8,7 +8,7 @@ type Matcher interface {
 
 // Match returns w≡x.
 func Match(w, x V) V {
-	return match(w, x)
+	return B(match(w, x))
 }
 
 func match(w, x V) bool {
@@ -167,11 +167,6 @@ func matchAF(w, x AF) bool {
 		}
 	}
 	return true
-}
-
-// NotMatch returns w≢x.
-func NotMatch(w, x V) V {
-	return !match(w, x)
 }
 
 // Classify returns ⊐x.
@@ -343,7 +338,7 @@ func MemberOf(w, x V) V {
 				r := make(AB, Length(w))
 				return r
 			default:
-				return false
+				return B(false)
 			}
 		default:
 			return badtype("∊ : x must be an array")
@@ -383,9 +378,9 @@ func memberOfAB(w V, x AB) V {
 		return r
 	}
 	if t {
-		return Equal(w, true)
+		return Equal(w, B(true))
 	}
-	return Equal(w, false)
+	return Equal(w, B(false))
 }
 
 func memberOfAF(w V, x AF) V {
@@ -400,13 +395,13 @@ func memberOfAF(w V, x AF) V {
 	switch w := w.(type) {
 	case B:
 		_, ok := m[B2F(w)]
-		return ok
+		return B(ok)
 	case I:
 		_, ok := m[F(w)]
-		return ok
+		return B(ok)
 	case F:
 		_, ok := m[w]
-		return ok
+		return B(ok)
 	case AB:
 		r := make(AB, len(w))
 		for i, v := range w {
@@ -442,16 +437,16 @@ func memberOfAI(w V, x AI) V {
 	switch w := w.(type) {
 	case B:
 		_, ok := m[int(B2I(w))]
-		return ok
+		return B(ok)
 	case I:
 		_, ok := m[int(w)]
-		return ok
+		return B(ok)
 	case F:
 		if !isI(w) {
-			return false
+			return B(false)
 		}
 		_, ok := m[int(w)]
-		return ok
+		return B(ok)
 	case AB:
 		r := make(AB, len(w))
 		for i, v := range w {
@@ -490,7 +485,7 @@ func memberOfAS(w V, x AS) V {
 	switch w := w.(type) {
 	case S:
 		_, ok := m[string(w)]
-		return ok
+		return B(ok)
 	case AS:
 		r := make(AB, len(w))
 		for i, v := range w {
@@ -519,10 +514,10 @@ func memberOfAO(w V, x AV) V {
 	default:
 		for _, v := range x {
 			if match(w, v) {
-				return true
+				return B(true)
 			}
 		}
-		return false
+		return B(false)
 	}
 }
 

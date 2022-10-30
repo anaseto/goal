@@ -109,11 +109,11 @@ func Floor(x V) V {
 	case B:
 		return x
 	case F:
-		return math.Floor(float64(x))
+		return F(math.Floor(float64(x)))
 	case I:
 		return x
 	case S:
-		return strings.ToLower(string(x))
+		return S(strings.ToLower(string(x)))
 	case AB:
 		return x
 	case AF:
@@ -149,11 +149,11 @@ func Ceil(x V) V {
 	case B:
 		return x
 	case F:
-		return math.Ceil(float64(x))
+		return F(math.Ceil(float64(x)))
 	case I:
 		return x
 	case S:
-		return strings.ToUpper(string(x))
+		return S(strings.ToUpper(string(x)))
 	case AB:
 		return x
 	case AF:

@@ -313,9 +313,10 @@ func ${name}${t}V(w $t, x V) V {
 EOS
     for my $tt (sort keys %types) {
         my $expr = $cases->{"${t}_$tt"}->[0];
+        my $type = $cases->{"${t}_$tt"}->[1];
         print $out <<EOS;
 	case $tt:
-		return $expr
+		return $type($expr)
 EOS
     }
     for my $tt (sort keys %types) {
@@ -334,7 +335,7 @@ EOS
     }
     print $out <<EOS if $t !~ /^A/;
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := ${name}${t}V($t(w), x[i])
 			e, ok := v.(E)

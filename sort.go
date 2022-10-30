@@ -219,7 +219,7 @@ func lessAB(w AB, x V) bool {
 		return len(w) < len(x)
 	case AV:
 		for i := 0; i < len(w) && i < len(x); i++ {
-			if less(x[i], w[i]) {
+			if less(x[i], B(w[i])) {
 				return false
 			}
 		}
@@ -260,7 +260,7 @@ func lessAI(w AI, x V) bool {
 		return len(w) < len(x)
 	case AV:
 		for i := 0; i < len(w) && i < len(x); i++ {
-			if less(x[i], w[i]) {
+			if less(x[i], I(w[i])) {
 				return false
 			}
 		}
@@ -301,7 +301,7 @@ func lessAF(w AF, x V) bool {
 		return len(w) < len(x)
 	case AV:
 		for i := 0; i < len(w) && i < len(x); i++ {
-			if less(x[i], w[i]) {
+			if less(x[i], F(w[i])) {
 				return false
 			}
 		}
@@ -324,7 +324,7 @@ func lessAS(w AS, x V) bool {
 		return len(w) < len(x)
 	case AV:
 		for i := 0; i < len(w) && i < len(x); i++ {
-			if less(x[i], w[i]) {
+			if less(x[i], S(w[i])) {
 				return false
 			}
 		}
@@ -344,21 +344,21 @@ func lessAO(w AV, x V) bool {
 		return less(w[0], x)
 	case AB:
 		for i := 0; i < len(w) && i < len(x); i++ {
-			if less(x[i], w[i]) {
+			if less(B(x[i]), w[i]) {
 				return false
 			}
 		}
 		return len(w) < len(x)
 	case AF:
 		for i := 0; i < len(w) && i < len(x); i++ {
-			if less(x[i], w[i]) {
+			if less(F(x[i]), w[i]) {
 				return false
 			}
 		}
 		return len(w) < len(x)
 	case AI:
 		for i := 0; i < len(w) && i < len(x); i++ {
-			if less(x[i], w[i]) {
+			if less(I(x[i]), w[i]) {
 				return false
 			}
 		}
@@ -413,7 +413,7 @@ func SortDown(x V) V {
 }
 
 type PermutationAO struct {
-	Perm []int
+	Perm AI
 	X    AOUp
 }
 

@@ -1,11 +1,22 @@
 package main
 
-type V interface{} // V represents any kind of value.
-type B bool        // B represents booleans (0 and 1 but less memory)
-type F float64     // F represents real numbers.
-type I int         // I represents integers.
-type S string      // S represents (immutable) strings of bytes.
-type E = error     // E represents errors (TODO: think about it)
+// V represents any kind of value.
+type V interface {
+	Len() int
+}
+
+type B bool    // B represents booleans (0 and 1 but less memory)
+type F float64 // F represents real numbers.
+type I int     // I represents integers.
+type S string  // S represents (immutable) strings of bytes.
+type E string  // E represents errors
+
+func (b B) Len() int      { return 1 }
+func (f F) Len() int      { return 1 }
+func (i I) Len() int      { return 1 }
+func (s S) Len() int      { return 1 }
+func (e E) Len() int      { return 1 }
+func (e E) Error() string { return string(e) }
 
 // Verb represents built-in 1-symbol operators.
 type Verb int
@@ -33,7 +44,7 @@ const (
 	VApplyN               // .
 )
 
-// Adverb represents verb modifiers.
+// Adverb represents verb modifiers. They are not values by themselves.
 type Adverb int
 
 const (
@@ -51,8 +62,8 @@ type AS []string  // string array
 // Array interface is satisfied by the different kind of supported arrays.
 // Typical implementation is given in comments.
 type Array interface {
+	V
 	At(i int) V           // x[i]
-	Len() int             // len(x)
 	Slice(i, j int) Array // x[i:j]
 }
 
@@ -69,7 +80,7 @@ func (x AV) Slice(i, j int) Array {
 }
 
 func (x AB) At(i int) V {
-	return x[i]
+	return B(x[i])
 }
 
 func (x AB) Len() int {
@@ -81,7 +92,7 @@ func (x AB) Slice(i, j int) Array {
 }
 
 func (x AI) At(i int) V {
-	return x[i]
+	return I(x[i])
 }
 
 func (x AI) Len() int {
@@ -93,7 +104,7 @@ func (x AI) Slice(i, j int) Array {
 }
 
 func (x AF) At(i int) V {
-	return x[i]
+	return F(x[i])
 }
 
 func (x AF) Len() int {
@@ -105,7 +116,7 @@ func (x AF) Slice(i, j int) Array {
 }
 
 func (x AS) At(i int) V {
-	return x[i]
+	return S(x[i])
 }
 
 func (x AS) Len() int {

@@ -63,11 +63,11 @@ func Equal(w, x V) V {
 func EqualBV(w B, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w == x
+		return B(w == x)
 	case F:
-		return B2F(w) == x
+		return B(B2F(w) == x)
 	case I:
-		return B2I(w) == x
+		return B(B2I(w) == x)
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -87,7 +87,7 @@ func EqualBV(w B, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := EqualBV(B(w), x[i])
 			e, ok := v.(E)
@@ -107,11 +107,11 @@ func EqualBV(w B, x V) V {
 func EqualFV(w F, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w == B2F(x)
+		return B(w == B2F(x))
 	case F:
-		return w == x
+		return B(w == x)
 	case I:
-		return w == F(x)
+		return B(w == F(x))
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -131,7 +131,7 @@ func EqualFV(w F, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := EqualFV(F(w), x[i])
 			e, ok := v.(E)
@@ -151,11 +151,11 @@ func EqualFV(w F, x V) V {
 func EqualIV(w I, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w == B2I(x)
+		return B(w == B2I(x))
 	case F:
-		return F(w) == x
+		return B(F(w) == x)
 	case I:
-		return w == x
+		return B(w == x)
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -175,7 +175,7 @@ func EqualIV(w I, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := EqualIV(I(w), x[i])
 			e, ok := v.(E)
@@ -195,7 +195,7 @@ func EqualIV(w I, x V) V {
 func EqualSV(w S, x V) V {
 	switch x := x.(type) {
 	case S:
-		return w == x
+		return B(w == x)
 	case AS:
 		r := make(AB, len(x))
 		for i := range r {
@@ -203,7 +203,7 @@ func EqualSV(w S, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := EqualSV(S(w), x[i])
 			e, ok := v.(E)
@@ -518,11 +518,11 @@ func NotEqual(w, x V) V {
 func NotEqualBV(w B, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w != x
+		return B(w != x)
 	case F:
-		return B2F(w) != x
+		return B(B2F(w) != x)
 	case I:
-		return B2I(w) != x
+		return B(B2I(w) != x)
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -542,7 +542,7 @@ func NotEqualBV(w B, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := NotEqualBV(B(w), x[i])
 			e, ok := v.(E)
@@ -562,11 +562,11 @@ func NotEqualBV(w B, x V) V {
 func NotEqualFV(w F, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w != B2F(x)
+		return B(w != B2F(x))
 	case F:
-		return w != x
+		return B(w != x)
 	case I:
-		return w != F(x)
+		return B(w != F(x))
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -586,7 +586,7 @@ func NotEqualFV(w F, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := NotEqualFV(F(w), x[i])
 			e, ok := v.(E)
@@ -606,11 +606,11 @@ func NotEqualFV(w F, x V) V {
 func NotEqualIV(w I, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w != B2I(x)
+		return B(w != B2I(x))
 	case F:
-		return F(w) != x
+		return B(F(w) != x)
 	case I:
-		return w != x
+		return B(w != x)
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -630,7 +630,7 @@ func NotEqualIV(w I, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := NotEqualIV(I(w), x[i])
 			e, ok := v.(E)
@@ -650,7 +650,7 @@ func NotEqualIV(w I, x V) V {
 func NotEqualSV(w S, x V) V {
 	switch x := x.(type) {
 	case S:
-		return w != x
+		return B(w != x)
 	case AS:
 		r := make(AB, len(x))
 		for i := range r {
@@ -658,7 +658,7 @@ func NotEqualSV(w S, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := NotEqualSV(S(w), x[i])
 			e, ok := v.(E)
@@ -973,11 +973,11 @@ func Lesser(w, x V) V {
 func LesserBV(w B, x V) V {
 	switch x := x.(type) {
 	case B:
-		return !w && x
+		return B(!w && x)
 	case F:
-		return B2F(w) < x
+		return B(B2F(w) < x)
 	case I:
-		return B2I(w) < x
+		return B(B2I(w) < x)
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -997,7 +997,7 @@ func LesserBV(w B, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := LesserBV(B(w), x[i])
 			e, ok := v.(E)
@@ -1017,11 +1017,11 @@ func LesserBV(w B, x V) V {
 func LesserFV(w F, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w < B2F(x)
+		return B(w < B2F(x))
 	case F:
-		return w < x
+		return B(w < x)
 	case I:
-		return w < F(x)
+		return B(w < F(x))
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -1041,7 +1041,7 @@ func LesserFV(w F, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := LesserFV(F(w), x[i])
 			e, ok := v.(E)
@@ -1061,11 +1061,11 @@ func LesserFV(w F, x V) V {
 func LesserIV(w I, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w < B2I(x)
+		return B(w < B2I(x))
 	case F:
-		return F(w) < x
+		return B(F(w) < x)
 	case I:
-		return w < x
+		return B(w < x)
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -1085,7 +1085,7 @@ func LesserIV(w I, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := LesserIV(I(w), x[i])
 			e, ok := v.(E)
@@ -1105,7 +1105,7 @@ func LesserIV(w I, x V) V {
 func LesserSV(w S, x V) V {
 	switch x := x.(type) {
 	case S:
-		return w < x
+		return B(w < x)
 	case AS:
 		r := make(AB, len(x))
 		for i := range r {
@@ -1113,7 +1113,7 @@ func LesserSV(w S, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := LesserSV(S(w), x[i])
 			e, ok := v.(E)
@@ -1428,11 +1428,11 @@ func LesserEq(w, x V) V {
 func LesserEqBV(w B, x V) V {
 	switch x := x.(type) {
 	case B:
-		return x || !w
+		return B(x || !w)
 	case F:
-		return B2F(w) <= x
+		return B(B2F(w) <= x)
 	case I:
-		return B2I(w) <= x
+		return B(B2I(w) <= x)
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -1452,7 +1452,7 @@ func LesserEqBV(w B, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := LesserEqBV(B(w), x[i])
 			e, ok := v.(E)
@@ -1472,11 +1472,11 @@ func LesserEqBV(w B, x V) V {
 func LesserEqFV(w F, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w <= B2F(x)
+		return B(w <= B2F(x))
 	case F:
-		return w <= x
+		return B(w <= x)
 	case I:
-		return w <= F(x)
+		return B(w <= F(x))
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -1496,7 +1496,7 @@ func LesserEqFV(w F, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := LesserEqFV(F(w), x[i])
 			e, ok := v.(E)
@@ -1516,11 +1516,11 @@ func LesserEqFV(w F, x V) V {
 func LesserEqIV(w I, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w <= B2I(x)
+		return B(w <= B2I(x))
 	case F:
-		return F(w) <= x
+		return B(F(w) <= x)
 	case I:
-		return w <= x
+		return B(w <= x)
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -1540,7 +1540,7 @@ func LesserEqIV(w I, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := LesserEqIV(I(w), x[i])
 			e, ok := v.(E)
@@ -1560,7 +1560,7 @@ func LesserEqIV(w I, x V) V {
 func LesserEqSV(w S, x V) V {
 	switch x := x.(type) {
 	case S:
-		return w <= x
+		return B(w <= x)
 	case AS:
 		r := make(AB, len(x))
 		for i := range r {
@@ -1568,7 +1568,7 @@ func LesserEqSV(w S, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := LesserEqSV(S(w), x[i])
 			e, ok := v.(E)
@@ -1883,11 +1883,11 @@ func Greater(w, x V) V {
 func GreaterBV(w B, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w && !x
+		return B(w && !x)
 	case F:
-		return B2F(w) > x
+		return B(B2F(w) > x)
 	case I:
-		return B2I(w) > x
+		return B(B2I(w) > x)
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -1907,7 +1907,7 @@ func GreaterBV(w B, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := GreaterBV(B(w), x[i])
 			e, ok := v.(E)
@@ -1927,11 +1927,11 @@ func GreaterBV(w B, x V) V {
 func GreaterFV(w F, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w > B2F(x)
+		return B(w > B2F(x))
 	case F:
-		return w > x
+		return B(w > x)
 	case I:
-		return w > F(x)
+		return B(w > F(x))
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -1951,7 +1951,7 @@ func GreaterFV(w F, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := GreaterFV(F(w), x[i])
 			e, ok := v.(E)
@@ -1971,11 +1971,11 @@ func GreaterFV(w F, x V) V {
 func GreaterIV(w I, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w > B2I(x)
+		return B(w > B2I(x))
 	case F:
-		return F(w) > x
+		return B(F(w) > x)
 	case I:
-		return w > x
+		return B(w > x)
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -1995,7 +1995,7 @@ func GreaterIV(w I, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := GreaterIV(I(w), x[i])
 			e, ok := v.(E)
@@ -2015,7 +2015,7 @@ func GreaterIV(w I, x V) V {
 func GreaterSV(w S, x V) V {
 	switch x := x.(type) {
 	case S:
-		return w > x
+		return B(w > x)
 	case AS:
 		r := make(AB, len(x))
 		for i := range r {
@@ -2023,7 +2023,7 @@ func GreaterSV(w S, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := GreaterSV(S(w), x[i])
 			e, ok := v.(E)
@@ -2338,11 +2338,11 @@ func GreaterEq(w, x V) V {
 func GreaterEqBV(w B, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w || !x
+		return B(w || !x)
 	case F:
-		return B2F(w) >= x
+		return B(B2F(w) >= x)
 	case I:
-		return B2I(w) >= x
+		return B(B2I(w) >= x)
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -2362,7 +2362,7 @@ func GreaterEqBV(w B, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := GreaterEqBV(B(w), x[i])
 			e, ok := v.(E)
@@ -2382,11 +2382,11 @@ func GreaterEqBV(w B, x V) V {
 func GreaterEqFV(w F, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w >= B2F(x)
+		return B(w >= B2F(x))
 	case F:
-		return w >= x
+		return B(w >= x)
 	case I:
-		return w >= F(x)
+		return B(w >= F(x))
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -2406,7 +2406,7 @@ func GreaterEqFV(w F, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := GreaterEqFV(F(w), x[i])
 			e, ok := v.(E)
@@ -2426,11 +2426,11 @@ func GreaterEqFV(w F, x V) V {
 func GreaterEqIV(w I, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w >= B2I(x)
+		return B(w >= B2I(x))
 	case F:
-		return F(w) >= x
+		return B(F(w) >= x)
 	case I:
-		return w >= x
+		return B(w >= x)
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -2450,7 +2450,7 @@ func GreaterEqIV(w I, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := GreaterEqIV(I(w), x[i])
 			e, ok := v.(E)
@@ -2470,7 +2470,7 @@ func GreaterEqIV(w I, x V) V {
 func GreaterEqSV(w S, x V) V {
 	switch x := x.(type) {
 	case S:
-		return w >= x
+		return B(w >= x)
 	case AS:
 		r := make(AB, len(x))
 		for i := range r {
@@ -2478,7 +2478,7 @@ func GreaterEqSV(w S, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := GreaterEqSV(S(w), x[i])
 			e, ok := v.(E)
@@ -2793,11 +2793,11 @@ func Add(w, x V) V {
 func AddBV(w B, x V) V {
 	switch x := x.(type) {
 	case B:
-		return B2I(w) + B2I(x)
+		return I(B2I(w) + B2I(x))
 	case F:
-		return B2F(w) + x
+		return F(B2F(w) + x)
 	case I:
-		return B2I(w) + x
+		return I(B2I(w) + x)
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
@@ -2817,7 +2817,7 @@ func AddBV(w B, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := AddBV(B(w), x[i])
 			e, ok := v.(E)
@@ -2837,11 +2837,11 @@ func AddBV(w B, x V) V {
 func AddFV(w F, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w + B2F(x)
+		return F(w + B2F(x))
 	case F:
-		return w + x
+		return F(w + x)
 	case I:
-		return w + F(x)
+		return F(w + F(x))
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
@@ -2861,7 +2861,7 @@ func AddFV(w F, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := AddFV(F(w), x[i])
 			e, ok := v.(E)
@@ -2881,11 +2881,11 @@ func AddFV(w F, x V) V {
 func AddIV(w I, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w + B2I(x)
+		return I(w + B2I(x))
 	case F:
-		return F(w) + x
+		return F(F(w) + x)
 	case I:
-		return w + x
+		return I(w + x)
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
@@ -2905,7 +2905,7 @@ func AddIV(w I, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := AddIV(I(w), x[i])
 			e, ok := v.(E)
@@ -2925,7 +2925,7 @@ func AddIV(w I, x V) V {
 func AddSV(w S, x V) V {
 	switch x := x.(type) {
 	case S:
-		return w + x
+		return S(w + x)
 	case AS:
 		r := make(AS, len(x))
 		for i := range r {
@@ -2933,7 +2933,7 @@ func AddSV(w S, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := AddSV(S(w), x[i])
 			e, ok := v.(E)
@@ -3248,11 +3248,11 @@ func Subtract(w, x V) V {
 func SubtractBV(w B, x V) V {
 	switch x := x.(type) {
 	case B:
-		return B2I(w) - B2I(x)
+		return I(B2I(w) - B2I(x))
 	case F:
-		return B2F(w) - x
+		return F(B2F(w) - x)
 	case I:
-		return B2I(w) - x
+		return I(B2I(w) - x)
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
@@ -3272,7 +3272,7 @@ func SubtractBV(w B, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := SubtractBV(B(w), x[i])
 			e, ok := v.(E)
@@ -3292,11 +3292,11 @@ func SubtractBV(w B, x V) V {
 func SubtractFV(w F, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w - B2F(x)
+		return F(w - B2F(x))
 	case F:
-		return w - x
+		return F(w - x)
 	case I:
-		return w - F(x)
+		return F(w - F(x))
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
@@ -3316,7 +3316,7 @@ func SubtractFV(w F, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := SubtractFV(F(w), x[i])
 			e, ok := v.(E)
@@ -3336,11 +3336,11 @@ func SubtractFV(w F, x V) V {
 func SubtractIV(w I, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w - B2I(x)
+		return I(w - B2I(x))
 	case F:
-		return F(w) - x
+		return F(F(w) - x)
 	case I:
-		return w - x
+		return I(w - x)
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
@@ -3360,7 +3360,7 @@ func SubtractIV(w I, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := SubtractIV(I(w), x[i])
 			e, ok := v.(E)
@@ -3380,7 +3380,7 @@ func SubtractIV(w I, x V) V {
 func SubtractSV(w S, x V) V {
 	switch x := x.(type) {
 	case S:
-		return strings.TrimSuffix(string(w), string(x))
+		return S(strings.TrimSuffix(string(w), string(x)))
 	case AS:
 		r := make(AS, len(x))
 		for i := range r {
@@ -3388,7 +3388,7 @@ func SubtractSV(w S, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := SubtractSV(S(w), x[i])
 			e, ok := v.(E)
@@ -3699,11 +3699,11 @@ func Span(w, x V) V {
 func SpanBV(w B, x V) V {
 	switch x := x.(type) {
 	case B:
-		return 1 + B2I(w) - B2I(x)
+		return I(1 + B2I(w) - B2I(x))
 	case F:
-		return 1 + B2F(w) - x
+		return F(1 + B2F(w) - x)
 	case I:
-		return 1 + B2I(w) - x
+		return I(1 + B2I(w) - x)
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
@@ -3723,7 +3723,7 @@ func SpanBV(w B, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := SpanBV(B(w), x[i])
 			e, ok := v.(E)
@@ -3743,11 +3743,11 @@ func SpanBV(w B, x V) V {
 func SpanFV(w F, x V) V {
 	switch x := x.(type) {
 	case B:
-		return 1 + w - B2F(x)
+		return F(1 + w - B2F(x))
 	case F:
-		return 1 + w - x
+		return F(1 + w - x)
 	case I:
-		return 1 + w - F(x)
+		return F(1 + w - F(x))
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
@@ -3767,7 +3767,7 @@ func SpanFV(w F, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := SpanFV(F(w), x[i])
 			e, ok := v.(E)
@@ -3787,11 +3787,11 @@ func SpanFV(w F, x V) V {
 func SpanIV(w I, x V) V {
 	switch x := x.(type) {
 	case B:
-		return 1 + w - B2I(x)
+		return I(1 + w - B2I(x))
 	case F:
-		return 1 + F(w) - x
+		return F(1 + F(w) - x)
 	case I:
-		return 1 + w - x
+		return I(1 + w - x)
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
@@ -3811,7 +3811,7 @@ func SpanIV(w I, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := SpanIV(I(w), x[i])
 			e, ok := v.(E)
@@ -4088,13 +4088,13 @@ func Multiply(w, x V) V {
 func MultiplyBV(w B, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w && x
+		return B(w && x)
 	case F:
-		return B2F(w) * x
+		return F(B2F(w) * x)
 	case I:
-		return B2I(w) * x
+		return I(B2I(w) * x)
 	case S:
-		return strings.Repeat(string(x), int(B2I(w)))
+		return S(strings.Repeat(string(x), int(B2I(w))))
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -4120,7 +4120,7 @@ func MultiplyBV(w B, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := MultiplyBV(B(w), x[i])
 			e, ok := v.(E)
@@ -4140,13 +4140,13 @@ func MultiplyBV(w B, x V) V {
 func MultiplyFV(w F, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w * B2F(x)
+		return F(w * B2F(x))
 	case F:
-		return w * x
+		return F(w * x)
 	case I:
-		return w * F(x)
+		return F(w * F(x))
 	case S:
-		return strings.Repeat(string(x), int(math.Round(float64(w))))
+		return S(strings.Repeat(string(x), int(math.Round(float64(w)))))
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
@@ -4172,7 +4172,7 @@ func MultiplyFV(w F, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := MultiplyFV(F(w), x[i])
 			e, ok := v.(E)
@@ -4192,13 +4192,13 @@ func MultiplyFV(w F, x V) V {
 func MultiplyIV(w I, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w * B2I(x)
+		return I(w * B2I(x))
 	case F:
-		return F(w) * x
+		return F(F(w) * x)
 	case I:
-		return w * x
+		return I(w * x)
 	case S:
-		return strings.Repeat(string(x), int(w))
+		return S(strings.Repeat(string(x), int(w)))
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
@@ -4224,7 +4224,7 @@ func MultiplyIV(w I, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := MultiplyIV(I(w), x[i])
 			e, ok := v.(E)
@@ -4244,11 +4244,11 @@ func MultiplyIV(w I, x V) V {
 func MultiplySV(w S, x V) V {
 	switch x := x.(type) {
 	case B:
-		return strings.Repeat(string(w), int(B2I(x)))
+		return S(strings.Repeat(string(w), int(B2I(x))))
 	case F:
-		return strings.Repeat(string(w), int(math.Round(float64(x))))
+		return S(strings.Repeat(string(w), int(math.Round(float64(x)))))
 	case I:
-		return strings.Repeat(string(w), int(x))
+		return S(strings.Repeat(string(w), int(x)))
 	case AB:
 		r := make(AS, len(x))
 		for i := range r {
@@ -4268,7 +4268,7 @@ func MultiplySV(w S, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := MultiplySV(S(w), x[i])
 			e, ok := v.(E)
@@ -4654,11 +4654,11 @@ func Divide(w, x V) V {
 func DivideBV(w B, x V) V {
 	switch x := x.(type) {
 	case B:
-		return divide(B2F(w), B2F(x))
+		return F(divide(B2F(w), B2F(x)))
 	case F:
-		return divide(B2F(w), x)
+		return F(divide(B2F(w), x))
 	case I:
-		return divide(B2F(w), F(x))
+		return F(divide(B2F(w), F(x)))
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
@@ -4678,7 +4678,7 @@ func DivideBV(w B, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := DivideBV(B(w), x[i])
 			e, ok := v.(E)
@@ -4698,11 +4698,11 @@ func DivideBV(w B, x V) V {
 func DivideFV(w F, x V) V {
 	switch x := x.(type) {
 	case B:
-		return divide(w, B2F(x))
+		return F(divide(w, B2F(x)))
 	case F:
-		return divide(w, x)
+		return F(divide(w, x))
 	case I:
-		return divide(w, F(x))
+		return F(divide(w, F(x)))
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
@@ -4722,7 +4722,7 @@ func DivideFV(w F, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := DivideFV(F(w), x[i])
 			e, ok := v.(E)
@@ -4742,11 +4742,11 @@ func DivideFV(w F, x V) V {
 func DivideIV(w I, x V) V {
 	switch x := x.(type) {
 	case B:
-		return divide(F(w), B2F(x))
+		return F(divide(F(w), B2F(x)))
 	case F:
-		return divide(F(w), x)
+		return F(divide(F(w), x))
 	case I:
-		return divide(F(w), F(x))
+		return F(divide(F(w), F(x)))
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
@@ -4766,7 +4766,7 @@ func DivideIV(w I, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := DivideIV(I(w), x[i])
 			e, ok := v.(E)
@@ -5043,11 +5043,11 @@ func Minimum(w, x V) V {
 func MinimumBV(w B, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w && x
+		return B(w && x)
 	case F:
-		return F(math.Min(float64(B2F(w)), float64(x)))
+		return F(F(math.Min(float64(B2F(w)), float64(x))))
 	case I:
-		return minI(B2I(w), x)
+		return I(minI(B2I(w), x))
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -5067,7 +5067,7 @@ func MinimumBV(w B, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := MinimumBV(B(w), x[i])
 			e, ok := v.(E)
@@ -5087,11 +5087,11 @@ func MinimumBV(w B, x V) V {
 func MinimumFV(w F, x V) V {
 	switch x := x.(type) {
 	case B:
-		return F(math.Min(float64(w), float64(B2F(x))))
+		return F(F(math.Min(float64(w), float64(B2F(x)))))
 	case F:
-		return F(math.Min(float64(w), float64(x)))
+		return F(F(math.Min(float64(w), float64(x))))
 	case I:
-		return F(math.Min(float64(w), float64(x)))
+		return F(F(math.Min(float64(w), float64(x))))
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
@@ -5111,7 +5111,7 @@ func MinimumFV(w F, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := MinimumFV(F(w), x[i])
 			e, ok := v.(E)
@@ -5131,11 +5131,11 @@ func MinimumFV(w F, x V) V {
 func MinimumIV(w I, x V) V {
 	switch x := x.(type) {
 	case B:
-		return minI(w, B2I(x))
+		return I(minI(w, B2I(x)))
 	case F:
-		return F(math.Min(float64(w), float64(x)))
+		return F(F(math.Min(float64(w), float64(x))))
 	case I:
-		return minI(w, x)
+		return I(minI(w, x))
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
@@ -5155,7 +5155,7 @@ func MinimumIV(w I, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := MinimumIV(I(w), x[i])
 			e, ok := v.(E)
@@ -5175,7 +5175,7 @@ func MinimumIV(w I, x V) V {
 func MinimumSV(w S, x V) V {
 	switch x := x.(type) {
 	case S:
-		return minS(w, x)
+		return S(minS(w, x))
 	case AS:
 		r := make(AS, len(x))
 		for i := range r {
@@ -5183,7 +5183,7 @@ func MinimumSV(w S, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := MinimumSV(S(w), x[i])
 			e, ok := v.(E)
@@ -5498,11 +5498,11 @@ func Maximum(w, x V) V {
 func MaximumBV(w B, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w || x
+		return B(w || x)
 	case F:
-		return F(math.Max(float64(B2F(w)), float64(x)))
+		return F(F(math.Max(float64(B2F(w)), float64(x))))
 	case I:
-		return maxI(B2I(w), x)
+		return I(maxI(B2I(w), x))
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -5522,7 +5522,7 @@ func MaximumBV(w B, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := MaximumBV(B(w), x[i])
 			e, ok := v.(E)
@@ -5542,11 +5542,11 @@ func MaximumBV(w B, x V) V {
 func MaximumFV(w F, x V) V {
 	switch x := x.(type) {
 	case B:
-		return F(math.Max(float64(w), float64(B2F(x))))
+		return F(F(math.Max(float64(w), float64(B2F(x)))))
 	case F:
-		return F(math.Max(float64(w), float64(x)))
+		return F(F(math.Max(float64(w), float64(x))))
 	case I:
-		return F(math.Max(float64(w), float64(x)))
+		return F(F(math.Max(float64(w), float64(x))))
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
@@ -5566,7 +5566,7 @@ func MaximumFV(w F, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := MaximumFV(F(w), x[i])
 			e, ok := v.(E)
@@ -5586,11 +5586,11 @@ func MaximumFV(w F, x V) V {
 func MaximumIV(w I, x V) V {
 	switch x := x.(type) {
 	case B:
-		return maxI(w, B2I(x))
+		return I(maxI(w, B2I(x)))
 	case F:
-		return F(math.Max(float64(w), float64(x)))
+		return F(F(math.Max(float64(w), float64(x))))
 	case I:
-		return maxI(w, x)
+		return I(maxI(w, x))
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
@@ -5610,7 +5610,7 @@ func MaximumIV(w I, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := MaximumIV(I(w), x[i])
 			e, ok := v.(E)
@@ -5630,7 +5630,7 @@ func MaximumIV(w I, x V) V {
 func MaximumSV(w S, x V) V {
 	switch x := x.(type) {
 	case S:
-		return maxS(w, x)
+		return S(maxS(w, x))
 	case AS:
 		r := make(AS, len(x))
 		for i := range r {
@@ -5638,7 +5638,7 @@ func MaximumSV(w S, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := MaximumSV(S(w), x[i])
 			e, ok := v.(E)
@@ -5949,11 +5949,11 @@ func And(w, x V) V {
 func AndBV(w B, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w && x
+		return B(w && x)
 	case F:
-		return B2F(w) * x
+		return F(B2F(w) * x)
 	case I:
-		return B2I(w) * x
+		return I(B2I(w) * x)
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -5973,7 +5973,7 @@ func AndBV(w B, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := AndBV(B(w), x[i])
 			e, ok := v.(E)
@@ -5993,11 +5993,11 @@ func AndBV(w B, x V) V {
 func AndFV(w F, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w * B2F(x)
+		return F(w * B2F(x))
 	case F:
-		return w * x
+		return F(w * x)
 	case I:
-		return w * F(x)
+		return F(w * F(x))
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
@@ -6017,7 +6017,7 @@ func AndFV(w F, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := AndFV(F(w), x[i])
 			e, ok := v.(E)
@@ -6037,11 +6037,11 @@ func AndFV(w F, x V) V {
 func AndIV(w I, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w * B2I(x)
+		return I(w * B2I(x))
 	case F:
-		return F(w) * x
+		return F(F(w) * x)
 	case I:
-		return w * x
+		return I(w * x)
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
@@ -6061,7 +6061,7 @@ func AndIV(w I, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := AndIV(I(w), x[i])
 			e, ok := v.(E)
@@ -6334,11 +6334,11 @@ func Or(w, x V) V {
 func OrBV(w B, x V) V {
 	switch x := x.(type) {
 	case B:
-		return w || x
+		return B(w || x)
 	case F:
-		return 1 - ((1 - B2F(w)) * (1 - x))
+		return F(1 - ((1 - B2F(w)) * (1 - x)))
 	case I:
-		return 1 - ((1 - B2I(w)) * (1 - x))
+		return I(1 - ((1 - B2I(w)) * (1 - x)))
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -6358,7 +6358,7 @@ func OrBV(w B, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := OrBV(B(w), x[i])
 			e, ok := v.(E)
@@ -6378,11 +6378,11 @@ func OrBV(w B, x V) V {
 func OrFV(w F, x V) V {
 	switch x := x.(type) {
 	case B:
-		return 1 - ((1 - w) * (1 - B2F(x)))
+		return F(1 - ((1 - w) * (1 - B2F(x))))
 	case F:
-		return 1 - ((1 - w) * (1 - x))
+		return F(1 - ((1 - w) * (1 - x)))
 	case I:
-		return 1 - ((1 - w) * F(1-x))
+		return F(1 - ((1 - w) * F(1-x)))
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
@@ -6402,7 +6402,7 @@ func OrFV(w F, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := OrFV(F(w), x[i])
 			e, ok := v.(E)
@@ -6422,11 +6422,11 @@ func OrFV(w F, x V) V {
 func OrIV(w I, x V) V {
 	switch x := x.(type) {
 	case B:
-		return 1 - ((1 - w) * (1 - B2I(x)))
+		return I(1 - ((1 - w) * (1 - B2I(x))))
 	case F:
-		return 1 - ((1 - F(w)) * (1 - x))
+		return F(1 - ((1 - F(w)) * (1 - x)))
 	case I:
-		return 1 - ((1 - w) * (1 - x))
+		return I(1 - ((1 - w) * (1 - x)))
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
@@ -6446,7 +6446,7 @@ func OrIV(w I, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := OrIV(I(w), x[i])
 			e, ok := v.(E)
@@ -6719,11 +6719,11 @@ func Modulus(w, x V) V {
 func ModulusBV(w B, x V) V {
 	switch x := x.(type) {
 	case B:
-		return modulus(B2I(w), B2I(x))
+		return I(modulus(B2I(w), B2I(x)))
 	case F:
-		return modulus(B2I(w), I(x))
+		return I(modulus(B2I(w), I(x)))
 	case I:
-		return modulus(B2I(w), x)
+		return I(modulus(B2I(w), x))
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
@@ -6743,7 +6743,7 @@ func ModulusBV(w B, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := ModulusBV(B(w), x[i])
 			e, ok := v.(E)
@@ -6763,11 +6763,11 @@ func ModulusBV(w B, x V) V {
 func ModulusFV(w F, x V) V {
 	switch x := x.(type) {
 	case B:
-		return modulus(I(w), B2I(x))
+		return I(modulus(I(w), B2I(x)))
 	case F:
-		return modulus(I(w), I(x))
+		return I(modulus(I(w), I(x)))
 	case I:
-		return modulus(I(w), x)
+		return I(modulus(I(w), x))
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
@@ -6787,7 +6787,7 @@ func ModulusFV(w F, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := ModulusFV(F(w), x[i])
 			e, ok := v.(E)
@@ -6807,11 +6807,11 @@ func ModulusFV(w F, x V) V {
 func ModulusIV(w I, x V) V {
 	switch x := x.(type) {
 	case B:
-		return modulus(w, B2I(x))
+		return I(modulus(w, B2I(x)))
 	case F:
-		return modulus(w, I(x))
+		return I(modulus(w, I(x)))
 	case I:
-		return modulus(w, x)
+		return I(modulus(w, x))
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
@@ -6831,7 +6831,7 @@ func ModulusIV(w I, x V) V {
 		}
 		return r
 	case AV:
-		r := make([]V, len(x))
+		r := make(AV, len(x))
 		for i := range r {
 			v := ModulusIV(I(w), x[i])
 			e, ok := v.(E)

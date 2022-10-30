@@ -123,7 +123,7 @@ func First(x V) V {
 		if x.Len() == 0 {
 			switch x.(type) {
 			case AB:
-				return false
+				return B(false)
 			case AF:
 				return F(0)
 			case AI:
