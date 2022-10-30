@@ -56,7 +56,7 @@ func Equal(w, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errsw("bad type")
 	}
 }
 
@@ -100,7 +100,7 @@ func EqualBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -144,7 +144,7 @@ func EqualFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -188,7 +188,7 @@ func EqualIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -216,7 +216,7 @@ func EqualSV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -284,7 +284,7 @@ func EqualABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -352,7 +352,7 @@ func EqualAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -420,7 +420,7 @@ func EqualAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -458,7 +458,7 @@ func EqualASV(w AS, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -511,7 +511,7 @@ func Lesser(w, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errsw("bad type")
 	}
 }
 
@@ -555,7 +555,7 @@ func LesserBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -599,7 +599,7 @@ func LesserFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -643,7 +643,7 @@ func LesserIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -671,7 +671,7 @@ func LesserSV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -739,7 +739,7 @@ func LesserABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -807,7 +807,7 @@ func LesserAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -875,7 +875,7 @@ func LesserAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -913,7 +913,7 @@ func LesserASV(w AS, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -966,7 +966,7 @@ func Greater(w, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errsw("bad type")
 	}
 }
 
@@ -1010,7 +1010,7 @@ func GreaterBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -1054,7 +1054,7 @@ func GreaterFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -1098,7 +1098,7 @@ func GreaterIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -1126,7 +1126,7 @@ func GreaterSV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -1194,7 +1194,7 @@ func GreaterABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -1262,7 +1262,7 @@ func GreaterAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -1330,7 +1330,7 @@ func GreaterAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -1368,7 +1368,7 @@ func GreaterASV(w AS, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -1421,7 +1421,7 @@ func Add(w, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errsw("bad type")
 	}
 }
 
@@ -1465,7 +1465,7 @@ func AddBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -1509,7 +1509,7 @@ func AddFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -1553,7 +1553,7 @@ func AddIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -1581,7 +1581,7 @@ func AddSV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -1649,7 +1649,7 @@ func AddABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -1717,7 +1717,7 @@ func AddAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -1785,7 +1785,7 @@ func AddAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -1823,7 +1823,7 @@ func AddASV(w AS, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -1876,7 +1876,7 @@ func Subtract(w, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errsw("bad type")
 	}
 }
 
@@ -1920,7 +1920,7 @@ func SubtractBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -1964,7 +1964,7 @@ func SubtractFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -2008,7 +2008,7 @@ func SubtractIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -2036,7 +2036,7 @@ func SubtractSV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -2104,7 +2104,7 @@ func SubtractABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -2172,7 +2172,7 @@ func SubtractAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -2240,7 +2240,7 @@ func SubtractAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -2278,7 +2278,7 @@ func SubtractASV(w AS, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -2331,7 +2331,7 @@ func Multiply(w, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errsw("bad type")
 	}
 }
 
@@ -2383,7 +2383,7 @@ func MultiplyBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -2435,7 +2435,7 @@ func MultiplyFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -2487,7 +2487,7 @@ func MultiplyIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -2531,7 +2531,7 @@ func MultiplySV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -2614,7 +2614,7 @@ func MultiplyABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -2697,7 +2697,7 @@ func MultiplyAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -2780,7 +2780,7 @@ func MultiplyAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -2848,7 +2848,7 @@ func MultiplyASV(w AS, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -2897,7 +2897,7 @@ func Divide(w, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errsw("bad type")
 	}
 }
 
@@ -2941,7 +2941,7 @@ func DivideBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -2985,7 +2985,7 @@ func DivideFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -3029,7 +3029,7 @@ func DivideIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -3097,7 +3097,7 @@ func DivideABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -3165,7 +3165,7 @@ func DivideAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -3233,7 +3233,7 @@ func DivideAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -3286,7 +3286,7 @@ func Minimum(w, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errsw("bad type")
 	}
 }
 
@@ -3330,7 +3330,7 @@ func MinimumBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -3374,7 +3374,7 @@ func MinimumFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -3418,7 +3418,7 @@ func MinimumIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -3446,7 +3446,7 @@ func MinimumSV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -3514,7 +3514,7 @@ func MinimumABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -3582,7 +3582,7 @@ func MinimumAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -3650,7 +3650,7 @@ func MinimumAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -3688,7 +3688,7 @@ func MinimumASV(w AS, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -3741,7 +3741,7 @@ func Maximum(w, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errsw("bad type")
 	}
 }
 
@@ -3785,7 +3785,7 @@ func MaximumBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -3829,7 +3829,7 @@ func MaximumFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -3873,7 +3873,7 @@ func MaximumIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -3901,7 +3901,7 @@ func MaximumSV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -3969,7 +3969,7 @@ func MaximumABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -4037,7 +4037,7 @@ func MaximumAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -4105,7 +4105,7 @@ func MaximumAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -4143,7 +4143,7 @@ func MaximumASV(w AS, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -4192,7 +4192,7 @@ func Modulus(w, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errsw("bad type")
 	}
 }
 
@@ -4236,7 +4236,7 @@ func ModulusBV(w B, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -4280,7 +4280,7 @@ func ModulusFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -4324,7 +4324,7 @@ func ModulusIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -4392,7 +4392,7 @@ func ModulusABV(w AB, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -4460,7 +4460,7 @@ func ModulusAFV(w AF, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -4528,6 +4528,6 @@ func ModulusAIV(w AI, x V) V {
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }

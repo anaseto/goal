@@ -52,7 +52,7 @@ func Reverse(x V) V {
 		reverse(r)
 		return r
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -109,7 +109,7 @@ func Rotate(w, x V) V {
 		}
 		return r
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -147,7 +147,7 @@ func Tail(x V) V {
 		}
 		return x.Slice(1, x.Len())
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -254,7 +254,7 @@ func ShiftBefore(w, x V) V {
 			}
 			return r
 		default:
-			return errs("bad type")
+			return errType(x)
 		}
 	case AF:
 		switch w := w.(type) {
@@ -280,7 +280,7 @@ func ShiftBefore(w, x V) V {
 			copy(r[max:], x[:len(x)-max])
 			return r
 		default:
-			return errs("bad type")
+			return errType(x)
 		}
 	case AI:
 		switch w := w.(type) {
@@ -308,7 +308,7 @@ func ShiftBefore(w, x V) V {
 			copy(r[max:], x[:len(x)-max])
 			return r
 		default:
-			return errs("bad type")
+			return errType(x)
 		}
 	case AS:
 		switch w := w.(type) {
@@ -320,7 +320,7 @@ func ShiftBefore(w, x V) V {
 			copy(r[max:], x[:len(x)-max])
 			return r
 		default:
-			return errs("bad type")
+			return errType(x)
 		}
 	case AV:
 		switch w := w.(type) {
@@ -332,7 +332,7 @@ func ShiftBefore(w, x V) V {
 			copy(r[max:], x[:len(x)-max])
 			return r
 		default:
-			return errs("bad type")
+			return errType(x)
 		}
 	default:
 		return errs("not an array")
@@ -403,7 +403,7 @@ func ShiftAfter(w, x V) V {
 			}
 			return r
 		default:
-			return errs("bad type")
+			return errType(x)
 		}
 	case AF:
 		switch w := w.(type) {
@@ -429,7 +429,7 @@ func ShiftAfter(w, x V) V {
 			copy(r[:len(x)-max], x[max:])
 			return r
 		default:
-			return errs("bad type")
+			return errType(x)
 		}
 	case AI:
 		switch w := w.(type) {
@@ -457,7 +457,7 @@ func ShiftAfter(w, x V) V {
 			copy(r[:len(x)-max], x[max:])
 			return r
 		default:
-			return errs("bad type")
+			return errType(x)
 		}
 	case AS:
 		switch w := w.(type) {
@@ -469,7 +469,7 @@ func ShiftAfter(w, x V) V {
 			copy(r[:len(x)-max], x[max:])
 			return r
 		default:
-			return errs("bad type")
+			return errType(x)
 		}
 	case AV:
 		switch w := w.(type) {
@@ -481,7 +481,7 @@ func ShiftAfter(w, x V) V {
 			copy(r[:len(x)-max], x[max:])
 			return r
 		default:
-			return errs("bad type")
+			return errType(x)
 		}
 	default:
 		return errs("not an array")

@@ -16,7 +16,7 @@ func Range(x V) V {
 	case Array:
 		return rangeArray(x)
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 

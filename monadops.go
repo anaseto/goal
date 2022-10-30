@@ -41,7 +41,7 @@ func Negate(x V) V {
 	case E:
 		return x
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -99,7 +99,7 @@ func Sign(x V) V {
 	case E:
 		return x
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -139,7 +139,7 @@ func Floor(x V) V {
 	case E:
 		return x
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -179,7 +179,7 @@ func Ceil(x V) V {
 	case E:
 		return x
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -219,7 +219,7 @@ func Not(x V) V {
 	case E:
 		return x
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }
 
@@ -262,6 +262,6 @@ func Abs(x V) V {
 	case E:
 		return x
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }

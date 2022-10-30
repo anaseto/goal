@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func badType(x V) E {
+func errType(x V) E {
 	return E("bad type: `" + x.Type())
 }
 

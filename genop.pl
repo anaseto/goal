@@ -348,7 +348,7 @@ EOS
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }\n
 EOS
@@ -413,7 +413,7 @@ EOS
 	case E:
 		return w
 	default:
-		return errs("bad type")
+		return errType(x)
 	}
 }\n
 EOS

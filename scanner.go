@@ -11,7 +11,7 @@ import (
 // Token represents a token information.
 type Token struct {
 	Type TokenType // token type
-	Pos int       // token's line in the source
+	Pos  int       // token's line in the source
 	Text string    // content text (identifier, string, number)
 }
 
@@ -67,7 +67,7 @@ type Scanner struct {
 	peeked  bool          // peeked next
 	pos     int           // current position in the input
 	pr      rune          // peeked rune
-	psize    int
+	psize   int
 	start   bool // at line start
 	token   Token
 }
