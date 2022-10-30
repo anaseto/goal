@@ -56,7 +56,7 @@ func Equal(w, x V) V {
 	case E:
 		return w
 	default:
-		return errsw("bad type")
+		return errwType(w)
 	}
 }
 
@@ -511,7 +511,7 @@ func Lesser(w, x V) V {
 	case E:
 		return w
 	default:
-		return errsw("bad type")
+		return errwType(w)
 	}
 }
 
@@ -966,7 +966,7 @@ func Greater(w, x V) V {
 	case E:
 		return w
 	default:
-		return errsw("bad type")
+		return errwType(w)
 	}
 }
 
@@ -1421,7 +1421,7 @@ func Add(w, x V) V {
 	case E:
 		return w
 	default:
-		return errsw("bad type")
+		return errwType(w)
 	}
 }
 
@@ -1876,7 +1876,7 @@ func Subtract(w, x V) V {
 	case E:
 		return w
 	default:
-		return errsw("bad type")
+		return errwType(w)
 	}
 }
 
@@ -2331,7 +2331,7 @@ func Multiply(w, x V) V {
 	case E:
 		return w
 	default:
-		return errsw("bad type")
+		return errwType(w)
 	}
 }
 
@@ -2897,7 +2897,7 @@ func Divide(w, x V) V {
 	case E:
 		return w
 	default:
-		return errsw("bad type")
+		return errwType(w)
 	}
 }
 
@@ -3286,7 +3286,7 @@ func Minimum(w, x V) V {
 	case E:
 		return w
 	default:
-		return errsw("bad type")
+		return errwType(w)
 	}
 }
 
@@ -3741,7 +3741,7 @@ func Maximum(w, x V) V {
 	case E:
 		return w
 	default:
-		return errsw("bad type")
+		return errwType(w)
 	}
 }
 
@@ -4192,7 +4192,7 @@ func Modulus(w, x V) V {
 	case E:
 		return w
 	default:
-		return errsw("bad type")
+		return errwType(w)
 	}
 }
 

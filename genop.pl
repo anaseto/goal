@@ -289,7 +289,7 @@ EOS
 	case E:
 		return w
 	default:
-		return errsw("bad type")
+		return errwType(w)
 	}
 }\n
 EOS
