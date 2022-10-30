@@ -45,12 +45,12 @@ type ppExpr interface {
 
 type ppToken struct {
 	Type ppTokenType
-	Line int
+	Pos  int
 	Text string
 }
 
 func (ppt ppToken) String() string {
-	return fmt.Sprintf("{%v %d %s}", ppt.Type, ppt.Line, ppt.Text)
+	return fmt.Sprintf("{%v %d %s}", ppt.Type, ppt.Pos, ppt.Text)
 }
 
 type ppTokenType int

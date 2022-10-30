@@ -11,7 +11,7 @@ import (
 // Token represents a token information.
 type Token struct {
 	Type TokenType // token type
-	Line int       // token's line in the source
+	Pos int       // token's line in the source
 	Text string    // content text (identifier, string, number)
 }
 
@@ -64,9 +64,11 @@ type Scanner struct {
 	wError  io.Writer     // writer for scanning errors
 	bReader *bufio.Reader // buffered reader
 	buf     bytes.Buffer  // buffer
+	peeked  bool          // peeked next
 	pos     int           // current position in the input
-	line    int           // current line number
-	start   bool          // at line start
+	pr      rune          // peeked rune
+	psize    int
+	start   bool // at line start
 	token   Token
 }
 
@@ -74,11 +76,10 @@ type stateFn func(*Scanner) stateFn
 
 func (s *Scanner) Init() {
 	s.bReader = bufio.NewReader(s.reader)
-	s.line = 1
 	if s.wError == nil {
 		s.wError = os.Stderr
 	}
-	s.token = Token{Type: EOF, Line: s.line}
+	s.token = Token{Type: EOF, Pos: s.pos}
 }
 
 func (s *Scanner) Next() Token {
@@ -95,25 +96,37 @@ func (s *Scanner) error(msg string) {
 	if s.wError == nil {
 		return
 	}
-	line := s.line
-	if s.token.Type == NEWLINE {
-		line--
-	}
-	fmt.Fprintf(s.wError, "scan error:%d: %s\n", line, msg)
+	// TODO: in case of error, read the file again to get from pos the line
+	// and print the line that produced the error with some column marker.
+	fmt.Fprintf(s.wError, "scan error:%d: %s\n", s.pos, msg)
 }
 
 const eof = -1
 
 func (s *Scanner) peek() rune {
-	r, _, err := s.bReader.ReadRune()
-	if err != nil {
-		return eof
+	if s.peeked {
+		return s.pr
 	}
-	s.bReader.UnreadRune()
-	return r
+	r, size, err := s.bReader.ReadRune()
+	if err != nil {
+		if err != io.EOF {
+			s.error(err.Error())
+		}
+		r = eof
+	}
+	s.peeked = true
+	s.pr = r
+	s.psize = size
+	return s.pr
 }
 
 func (s *Scanner) next() rune {
+	if s.peeked {
+		s.updateInfo(s.pr)
+		s.peeked = false
+		s.pos += s.psize
+		return s.pr
+	}
 	r, sz, err := s.bReader.ReadRune()
 	s.pos += sz
 	if err != nil {
@@ -123,21 +136,21 @@ func (s *Scanner) next() rune {
 		}
 		return eof
 	}
-	if r == '\n' {
-		s.line++
-		s.start = true
-	} else {
-		s.start = false
-	}
+	s.updateInfo(r)
 	//fmt.Printf("[%c]", r)
 	return r
 }
 
-func (s *Scanner) emit(t TokenType) stateFn {
-	s.token = Token{t, s.line, s.buf.String()}
-	if t == NEWLINE {
-		s.token.Line--
+func (s *Scanner) updateInfo(r rune) {
+	if r == '\n' {
+		s.start = true
+	} else {
+		s.start = false
 	}
+}
+
+func (s *Scanner) emit(t TokenType) stateFn {
+	s.token = Token{t, s.pos, s.buf.String()}
 	s.buf.Reset()
 	return nil
 }
