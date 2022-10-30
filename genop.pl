@@ -219,20 +219,20 @@ import (
 EOS
 
 genOp("Equal", "=");
-genOp("NotEqual", "≠");
+#genOp("NotEqual", "≠");
 genOp("Lesser", "<");
-genOp("LesserEq", "≤");
+#genOp("LesserEq", "≤");
 genOp("Greater", ">");
-genOp("GreaterEq", "≥");
+#genOp("GreaterEq", "≥");
 genOp("Add", "+");
 genOp("Subtract", "-");
-genOp("Span", "¬");
+#genOp("Span", "¬");
 genOp("Multiply", "×");
 genOp("Divide", "÷");
 genOp("Minimum", "⌊");
 genOp("Maximum", "⌈");
-genOp("And", "∧"); # identical to Multiply
-genOp("Or", "∨"); # Multiply under Not
+#genOp("And", "∧"); # identical to Multiply
+#genOp("Or", "∨"); # Multiply under Not
 genOp("Modulus", "|");
 
 sub genOp {

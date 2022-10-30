@@ -462,43 +462,6 @@ func EqualASV(w AS, x V) V {
 	}
 }
 
-// NotEqual returns w≠x.
-func NotEqual(w, x V) V {
-	switch w := w.(type) {
-	case AV:
-		switch x := x.(type) {
-		case Array:
-			if x.Len() != len(w) {
-				return badlen("≠")
-			}
-			r := make(AV, len(w))
-			for i := range r {
-				v := NotEqual(w[i], x.At(i))
-				e, ok := v.(E)
-				if ok {
-					return e
-				}
-				r[i] = v
-			}
-			return r
-		}
-		r := make(AV, len(w))
-		for i := range r {
-			v := NotEqual(w[i], x)
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≠")
-	}
-}
-
 // Lesser returns w<x.
 func Lesser(w, x V) V {
 	switch w := w.(type) {
@@ -954,43 +917,6 @@ func LesserASV(w AS, x V) V {
 	}
 }
 
-// LesserEq returns w≤x.
-func LesserEq(w, x V) V {
-	switch w := w.(type) {
-	case AV:
-		switch x := x.(type) {
-		case Array:
-			if x.Len() != len(w) {
-				return badlen("≤")
-			}
-			r := make(AV, len(w))
-			for i := range r {
-				v := LesserEq(w[i], x.At(i))
-				e, ok := v.(E)
-				if ok {
-					return e
-				}
-				r[i] = v
-			}
-			return r
-		}
-		r := make(AV, len(w))
-		for i := range r {
-			v := LesserEq(w[i], x)
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≤")
-	}
-}
-
 // Greater returns w>x.
 func Greater(w, x V) V {
 	switch w := w.(type) {
@@ -1443,43 +1369,6 @@ func GreaterASV(w AS, x V) V {
 		return w
 	default:
 		return badtype(">")
-	}
-}
-
-// GreaterEq returns w≥x.
-func GreaterEq(w, x V) V {
-	switch w := w.(type) {
-	case AV:
-		switch x := x.(type) {
-		case Array:
-			if x.Len() != len(w) {
-				return badlen("≥")
-			}
-			r := make(AV, len(w))
-			for i := range r {
-				v := GreaterEq(w[i], x.At(i))
-				e, ok := v.(E)
-				if ok {
-					return e
-				}
-				r[i] = v
-			}
-			return r
-		}
-		r := make(AV, len(w))
-		for i := range r {
-			v := GreaterEq(w[i], x)
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("≥")
 	}
 }
 
@@ -2390,43 +2279,6 @@ func SubtractASV(w AS, x V) V {
 		return w
 	default:
 		return badtype("-")
-	}
-}
-
-// Span returns w¬x.
-func Span(w, x V) V {
-	switch w := w.(type) {
-	case AV:
-		switch x := x.(type) {
-		case Array:
-			if x.Len() != len(w) {
-				return badlen("¬")
-			}
-			r := make(AV, len(w))
-			for i := range r {
-				v := Span(w[i], x.At(i))
-				e, ok := v.(E)
-				if ok {
-					return e
-				}
-				r[i] = v
-			}
-			return r
-		}
-		r := make(AV, len(w))
-		for i := range r {
-			v := Span(w[i], x)
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("¬")
 	}
 }
 
@@ -4292,80 +4144,6 @@ func MaximumASV(w AS, x V) V {
 		return w
 	default:
 		return badtype("⌈")
-	}
-}
-
-// And returns w∧x.
-func And(w, x V) V {
-	switch w := w.(type) {
-	case AV:
-		switch x := x.(type) {
-		case Array:
-			if x.Len() != len(w) {
-				return badlen("∧")
-			}
-			r := make(AV, len(w))
-			for i := range r {
-				v := And(w[i], x.At(i))
-				e, ok := v.(E)
-				if ok {
-					return e
-				}
-				r[i] = v
-			}
-			return r
-		}
-		r := make(AV, len(w))
-		for i := range r {
-			v := And(w[i], x)
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("∧")
-	}
-}
-
-// Or returns w∨x.
-func Or(w, x V) V {
-	switch w := w.(type) {
-	case AV:
-		switch x := x.(type) {
-		case Array:
-			if x.Len() != len(w) {
-				return badlen("∨")
-			}
-			r := make(AV, len(w))
-			for i := range r {
-				v := Or(w[i], x.At(i))
-				e, ok := v.(E)
-				if ok {
-					return e
-				}
-				r[i] = v
-			}
-			return r
-		}
-		r := make(AV, len(w))
-		for i := range r {
-			v := Or(w[i], x)
-			e, ok := v.(E)
-			if ok {
-				return e
-			}
-			r[i] = v
-		}
-		return r
-	case E:
-		return w
-	default:
-		return badtype("∨")
 	}
 }
 
