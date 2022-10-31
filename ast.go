@@ -2,21 +2,26 @@ package main
 
 import "fmt"
 
+// Program represents a program writter in goal.
 type Program struct {
-	Body      []Expr
-	Constants []V
-	Globals   []V
+	Body      []Expr // program body ast
+	Constants []V    // constants indexed by ID
+	Globals   []V    // globals indexed by ID
 
 	constants map[string]int // for generating symbols
 	globals   map[string]int // for generating symbols
 }
 
+// Expr is used to represent the ast of the program.
 type Expr interface {
 	node()
 }
 
+// Exprs represent a list of stack-based ast expressions, to be evaluated from
+// right to left.
 type Exprs []Expr
 
+// AstConst represents a constant.
 type AstConst struct {
 	ID  int
 	Pos int
@@ -34,6 +39,8 @@ type AstLocal struct {
 	Pos  int
 }
 
+// AstAssignGlobal represents a global variable assignment. A global variable
+// can only be assigned once, that is, they are immutable.
 type AstAssignGlobal struct {
 	Name string
 	ID   int
@@ -55,7 +62,7 @@ type AstCond struct {
 
 type AstMonad Monad
 type AstDyad Dyad
-type AstAdverb Dyad
+type AstAdverb Adverb
 
 type AstApply struct {
 	Value Expr
@@ -64,8 +71,12 @@ type AstApply struct {
 }
 
 type AstLambda struct {
-	Body   []Expr
-	Locals []Symbol
+	Body    []Expr   // body ast
+	Locals  []Symbol // vars, args
+	Globals []Symbol
+	Vars    int // number of vars from enclosing lambda
+
+	args   map[string]int // for generating symbols
 	locals map[string]int // for generating symbols
 }
 
@@ -87,8 +98,8 @@ func (n AstAdverb) node()       {}
 func (n AstApply) node()        {}
 func (n AstLambda) node()       {}
 
-// ppExpr represents a preprocessing builds blocks and forms nouns
-// without giving meaning yet.
+// ppExpr represents a pre-ast that builds blocks and forms nouns without
+// giving meaning yet.
 type ppExpr interface {
 	ppexpr()
 }
