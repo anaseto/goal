@@ -125,8 +125,8 @@ const (
 
 // DerivedVerb represents a value modified by an adverb.
 type DerivedVerb struct {
-	Value  V
 	Adverb Adverb
+	Value  V
 }
 
 // Projection represents a partial application of a function. Because many
@@ -138,15 +138,16 @@ type Projection struct {
 }
 
 // Composition represents a composition of several functions. All except the
-// last will be called monadically.
+// last will be called monadically. XXX: not really any Function.
 type Composition struct {
 	Funs []Function
 }
 
 // Lambda represents an user defined function.
 type Lambda struct {
-	Arity int
-	Body  []opcode
+	Arity  int
+	Body   []opcode
+	Locals []int
 }
 
 // Function represents any kind of callable value that can be projected.
@@ -160,18 +161,20 @@ func (v Dyad) Len() int        { return 1 }
 func (w Adverb) Len() int      { return 1 }
 func (r DerivedVerb) Len() int { return 1 }
 func (p Projection) Len() int  { return 1 }
-func (q Composition) Len() int { return 1 }
+func (c Composition) Len() int { return 1 }
+func (l Lambda) Len() int      { return 1 }
 
 func (u Monad) Type() string       { return "u" }
 func (v Dyad) Type() string        { return "v" }
 func (w Adverb) Type() string      { return "w" }
 func (r DerivedVerb) Type() string { return "r" }
 func (p Projection) Type() string  { return "p" }
-func (q Composition) Type() string { return "q" }
+func (c Composition) Type() string { return "c" }
+func (l Lambda) Type() string      { return "l" }
 
 func (u Monad) Project(vs AV) Projection       { return Projection{Fun: u, Args: vs} }
 func (v Dyad) Project(vs AV) Projection        { return Projection{Fun: v, Args: vs} }
 func (w Adverb) Project(vs AV) Projection      { return Projection{Fun: w, Args: vs} }
 func (r DerivedVerb) Project(vs AV) Projection { return Projection{Fun: r, Args: vs} }
 func (p Projection) Project(vs AV) Projection  { return Projection{Fun: p, Args: vs} }
-func (q Composition) Project(vs AV) Projection { return Projection{Fun: q, Args: vs} }
+func (c Composition) Project(vs AV) Projection { return Projection{Fun: c, Args: vs} }

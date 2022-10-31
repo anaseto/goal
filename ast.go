@@ -2,43 +2,93 @@ package main
 
 import "fmt"
 
+type Program struct {
+	Body      []Expr
+	Constants []V
+	Globals   []V
+
+	constants map[string]int // for generating symbols
+	globals   map[string]int // for generating symbols
+}
+
 type Expr interface {
-	expr()
+	node()
 }
 
-type astExprs []Expr
+type Exprs []Expr
 
-type astIdent struct {
-	index int
-	name  string
+type AstConst struct {
+	ID  int
+	Pos int
 }
 
-type astInt struct {
-	value I
+type AstGlobal struct {
+	Name string
+	ID   int
+	Pos  int
 }
 
-type astString struct {
-	value S
+type AstLocal struct {
+	Name string
+	ID   int
+	Pos  int
 }
 
-type astUnary struct {
-	token Token
-	right Expr
+type AstAssignGlobal struct {
+	Name string
+	ID   int
+	Pos  int
 }
 
-type astBinary struct {
-	token Token
-	left  Expr
-	right Expr
+type AstAssignLocal struct {
+	Name string
+	ID   int
+	Pos  int
 }
 
-func (e astExprs) expr()  {}
-func (e astIdent) expr()  {}
-func (e astInt) expr()    {}
-func (e astString) expr() {}
-func (e astUnary) expr()  {}
-func (e astBinary) expr() {}
+type AstCond struct {
+	If   Expr
+	Then Expr
+	Else Expr
+	Pos  int
+}
 
+type AstMonad Monad
+type AstDyad Dyad
+type AstAdverb Dyad
+
+type AstApply struct {
+	Value Expr
+	Arity int
+	Pos   int
+}
+
+type AstLambda struct {
+	Body   []Expr
+	Locals []Symbol
+	locals map[string]int // for generating symbols
+}
+
+type Symbol struct {
+	ID   int
+	Name string
+}
+
+func (n Exprs) node()           {}
+func (n AstConst) node()        {}
+func (n AstGlobal) node()       {}
+func (n AstLocal) node()        {}
+func (n AstAssignGlobal) node() {}
+func (n AstAssignLocal) node()  {}
+func (n AstCond) node()         {}
+func (n AstMonad) node()        {}
+func (n AstDyad) node()         {}
+func (n AstAdverb) node()       {}
+func (n AstApply) node()        {}
+func (n AstLambda) node()       {}
+
+// ppExpr represents a preprocessing builds blocks and forms nouns
+// without giving meaning yet.
 type ppExpr interface {
 	ppexpr()
 }
