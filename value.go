@@ -62,11 +62,37 @@ func (x AI) Slice(i, j int) Array { return x[i:j] }
 func (x AF) Slice(i, j int) Array { return x[i:j] }
 func (x AS) Slice(i, j int) Array { return x[i:j] }
 
-// Verb represents built-in 1-symbol operators.
-type Verb int
+// Monad represents built-in 1-symbol unary operators.
+type Monad int
 
 const (
-	VRight    Verb = iota // :
+	VReturn   Monad = iota // :
+	VFlip                  // +
+	VNegate                // -
+	VFirst                 // *
+	VClassify              // %
+	VEnum                  // !
+	VWhere                 // &
+	VReverse               // |
+	VAscend                // <
+	VDescend               // >
+	VGroup                 // =
+	VNot                   // ~
+	VEnlist                // ,
+	VSort                  // ^
+	VLen                   // #
+	VFloor                 // _
+	VString                // $
+	VNub                   // ?
+	VType                  // @
+	VValues                // . (from string or map)
+)
+
+// Dyad represents built-in 1-symbol binary operators.
+type Dyad int
+
+const (
+	VRight    Dyad = iota // :
 	VAdd                  // +
 	VSubtract             // -
 	VMultiply             // *
@@ -79,7 +105,7 @@ const (
 	VEqual                // =
 	VMatch                // ~
 	VConcat               // ,
-	VWithout              // ^
+	VCut                  // ^
 	VTake                 // #
 	VDrop                 // _
 	VCast                 // $
@@ -88,7 +114,7 @@ const (
 	VApplyN               // .
 )
 
-// Adverb represents verb modifiers. They are not values by themselves.
+// Adverb represents verb modifiers.
 type Adverb int
 
 const (
@@ -96,3 +122,56 @@ const (
 	AFold               // /
 	AScan               // \
 )
+
+// DerivedVerb represents a value modified by an adverb.
+type DerivedVerb struct {
+	Value  V
+	Adverb Adverb
+}
+
+// Projection represents a partial application of a function. Because many
+// functions do not have a fixed arity, the number of provided arguments can be
+// arbitrary.
+type Projection struct {
+	Fun  Function
+	Args AV
+}
+
+// Composition represents a composition of several functions. All except the
+// last will be called monadically.
+type Composition struct {
+	Funs []Function
+}
+
+// Lambda represents an user defined function.
+type Lambda struct {
+	Arity int
+	Body  []opcode
+}
+
+// Function represents any kind of callable value that can be projected.
+type Function interface {
+	V
+	Project(AV) Projection
+}
+
+func (u Monad) Len() int       { return 1 }
+func (v Dyad) Len() int        { return 1 }
+func (w Adverb) Len() int      { return 1 }
+func (r DerivedVerb) Len() int { return 1 }
+func (p Projection) Len() int  { return 1 }
+func (q Composition) Len() int { return 1 }
+
+func (u Monad) Type() string       { return "u" }
+func (v Dyad) Type() string        { return "v" }
+func (w Adverb) Type() string      { return "w" }
+func (r DerivedVerb) Type() string { return "r" }
+func (p Projection) Type() string  { return "p" }
+func (q Composition) Type() string { return "q" }
+
+func (u Monad) Project(vs AV) Projection       { return Projection{Fun: u, Args: vs} }
+func (v Dyad) Project(vs AV) Projection        { return Projection{Fun: v, Args: vs} }
+func (w Adverb) Project(vs AV) Projection      { return Projection{Fun: w, Args: vs} }
+func (r DerivedVerb) Project(vs AV) Projection { return Projection{Fun: r, Args: vs} }
+func (p Projection) Project(vs AV) Projection  { return Projection{Fun: p, Args: vs} }
+func (q Composition) Project(vs AV) Projection { return Projection{Fun: q, Args: vs} }
