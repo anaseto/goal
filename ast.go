@@ -117,8 +117,9 @@ func (n AstLambda) node()       {}
 
 // ppExpr are built by the first left to right pass, resulting in a tree
 // of blocks producing a whole expression, with simplified token
-// information. The representation of the stack-like semantics of the
-// language is left to a second IR builtin on type Expr.
+// information, and stack-like order). The representation of specific
+// semantics of the language is left to a second IR builtin on type
+// Expr.
 type ppExpr interface {
 	ppNode()
 }
@@ -143,6 +144,7 @@ const (
 	ppSEP ppTokenType = iota
 	ppEOF
 	ppCLOSE
+
 	ppADVERB
 	ppIDENT
 	ppNUMBER
@@ -152,7 +154,7 @@ const (
 
 type ppBlock struct {
 	Type    ppBlockType
-	ppexprs []ppExpr
+	ppexprs []ppExprs
 }
 
 func (ppb ppBlock) String() (s string) {
@@ -165,6 +167,10 @@ func (ppb ppBlock) String() (s string) {
 		s = fmt.Sprintf("(%v %v)", ppb.Type, ppb.ppexprs)
 	}
 	return s
+}
+
+func (ppb ppBlock) push(ppe ppExpr) {
+	ppb.ppexprs[len(ppb.ppexprs)-1] = append(ppb.ppexprs[len(ppb.ppexprs)-1], ppe)
 }
 
 type ppBlockType int

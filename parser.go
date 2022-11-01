@@ -2,20 +2,31 @@ package main
 
 import (
 	"fmt"
-	"io"
 )
 
 // Parser builds an Expr AST from a ppExpr.
 type Parser struct {
+	pp *parser
 }
 
-func (p *Parser) Next() {
+func (p *Parser) Init(s *Scanner) {
+	pp := &parser{}
+	pp.Init(s)
+	p.pp = pp
+}
+
+func (p *Parser) Next() ([]Expr, error) {
+	//pps, err := p.Next()
+	//if err != nil {
+	//return err
+	//}
+	//exprs := []Expr{}
+	return nil, nil
 }
 
 // parser builds a ppExpr pre-AST
 type parser struct {
-	ctx    *Context  // unused (for now)
-	wError io.Writer // where non-fatal error messages go (unused for now)
+	ctx    *Context // unused (for now)
 	s      *Scanner
 	token  Token
 	pToken Token
@@ -54,16 +65,18 @@ func (p *parser) next() Token {
 	return p.token
 }
 
-// Next returns a whole expression.
+// Next returns a whole expression, in stack-based order.
 func (p *parser) Next() ([]ppExpr, error) {
 	pps := []ppExpr{}
 	for {
 		ppe, err := p.ppExpr()
 		if err != nil {
+			ppRev(pps)
 			return pps, err
 		}
 		tok, ok := ppe.(ppToken)
 		if ok && (tok.Type == ppSEP || tok.Type == ppEOF) {
+			ppRev(pps)
 			return pps, nil
 		}
 		pps = append(pps, ppe)
@@ -134,6 +147,7 @@ func (p *parser) ppExpr() (ppExpr, error) {
 func (p *parser) ppExprBlock() (ppExpr, error) {
 	p.depth = append(p.depth, p.token)
 	ppb := ppBlock{}
+	ppb.ppexprs = []ppExprs{}
 	switch p.token.Type {
 	case LEFTBRACE:
 		ppb.Type = ppBRACE
@@ -142,22 +156,31 @@ func (p *parser) ppExprBlock() (ppExpr, error) {
 	case LEFTPAREN:
 		ppb.Type = ppPAREN
 	}
+	ppb.ppexprs = append(ppb.ppexprs, ppExprs{})
 	for {
 		ppe, err := p.ppExpr()
 		if err != nil {
 			return ppb, err
 		}
 		tok, ok := ppe.(ppToken)
-		if ok {
-			switch tok.Type {
-			case ppCLOSE:
-				return ppb, nil
-			case ppEOF:
-				opTok := p.depth[len(p.depth)-1]
-				return ppb, p.errorf("syntax:unexpected EOF without closing previous %s at %d", opTok.Type.String(), opTok.Pos)
-			}
+		if !ok {
+			ppb.push(ppe)
+			continue
 		}
-		ppb.ppexprs = append(ppb.ppexprs, ppe)
+		switch tok.Type {
+		case ppCLOSE:
+			ppRev(ppb.ppexprs[len(ppb.ppexprs)-1])
+			return ppb, nil
+		case ppEOF:
+			ppRev(ppb.ppexprs[len(ppb.ppexprs)-1])
+			opTok := p.depth[len(p.depth)-1]
+			return ppb, p.errorf("syntax:unexpected EOF without closing previous %s at %d", opTok.Type.String(), opTok.Pos)
+		case ppSEP:
+			ppRev(ppb.ppexprs[len(ppb.ppexprs)-1])
+			ppb.ppexprs = append(ppb.ppexprs, ppExprs{})
+		default:
+			ppb.push(ppe)
+		}
 	}
 }
 
@@ -177,5 +200,11 @@ func (p *parser) ppExprStrand() (ppExpr, error) {
 		default:
 			return ppb, nil
 		}
+	}
+}
+
+func ppRev(pps []ppExpr) {
+	for i := 0; i < len(pps)/2; i++ {
+		pps[i], pps[len(pps)-i-1] = pps[len(pps)-i-1], pps[i]
 	}
 }
