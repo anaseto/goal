@@ -2,14 +2,26 @@ package main
 
 import "fmt"
 
-// Program represents a program writter in goal.
-type Program struct {
-	Body      []Expr // program body AST
-	Constants []V    // constants indexed by ID
-	Globals   []V    // globals indexed by ID
+// AstProgram represents a program written in goal.
+type AstProgram struct {
+	Body      []Expr          // program body AST
+	Constants []V             // constants indexed by ID
+	Globals   []V             // globals indexed by ID
+	Lambdas   []AstLambdaCode // list of user defined lambdas
 
 	constants map[string]int // for generating symbols
 	globals   map[string]int // for generating symbols
+}
+
+// AstLambdaCode represents an user defined lambda like {x+1}.
+type AstLambdaCode struct {
+	Body   []Expr // body AST
+	Args   []Symbol
+	Locals []Symbol
+	Pos    int
+
+	args   map[string]int // for generating symbols
+	locals map[string]int // for generating symbols
 }
 
 // Expr is used to represent the AST of the program with stack-like
@@ -70,6 +82,12 @@ type AstAdverb struct {
 	Pos    int
 }
 
+// AstLambda represents an user Lambda.
+type AstLambda struct {
+	Lambda Lambda
+	Pos    int
+}
+
 // AstApply represents a value that should be applied.
 type AstApply struct {
 	Value Expr
@@ -83,18 +101,6 @@ type AstCond struct {
 	Then Expr
 	Else Expr
 	Pos  int
-}
-
-// AstLambda represents an user defined lambda like {x+1}.
-type AstLambda struct {
-	Body    []Expr   // body AST
-	Locals  []Symbol // vars, args
-	Globals []Symbol
-	Vars    int // number of vars from enclosing lambda
-	Pos     int
-
-	args   map[string]int // for generating symbols
-	locals map[string]int // for generating symbols
 }
 
 // Symbol represents an identifier name along its ID.
@@ -124,8 +130,8 @@ type ppExpr interface {
 	ppNode()
 }
 
-// ppExprs represents a whole expression. It is not a ppExpr. A program
-// is a sequence of ppExprs.
+// ppExprs is used to represent a whole expression or a parenthesized
+// sub-expression.
 type ppExprs []ppExpr
 
 type ppToken struct {
@@ -159,11 +165,11 @@ type ppBlock struct {
 
 func (ppb ppBlock) String() (s string) {
 	switch ppb.Type {
-	case ppBRACE:
+	case ppLAMBDA:
 		s = fmt.Sprintf("{%v %v}", ppb.Type, ppb.ppexprs)
-	case ppBRACKET:
+	case ppARGS:
 		s = fmt.Sprintf("[%v %v]", ppb.Type, ppb.ppexprs)
-	case ppPAREN:
+	case ppLIST:
 		s = fmt.Sprintf("(%v %v)", ppb.Type, ppb.ppexprs)
 	}
 	return s
@@ -176,13 +182,14 @@ func (ppb ppBlock) push(ppe ppExpr) {
 type ppBlockType int
 
 const (
-	ppBRACE ppBlockType = iota
-	ppBRACKET
-	ppPAREN
+	ppLAMBDA ppBlockType = iota
+	ppARGS
+	ppLIST
 )
 
 type ppStrand []ppToken // for stranding, like 1 23 456
 
 func (ppb ppBlock) ppNode()  {}
 func (pps ppStrand) ppNode() {}
+func (pps ppExprs) ppNode()  {}
 func (t ppToken) ppNode()    {}

@@ -145,12 +145,8 @@ type Composition struct {
 	Funs []Function
 }
 
-// Lambda represents an user defined function.
-type Lambda struct {
-	Arity  int
-	Body   []opcode
-	Locals []int
-}
+// Lambda represents an user defined function by ID.
+type Lambda int
 
 // Function represents any kind of callable value that can be projected.
 type Function interface {
@@ -180,3 +176,4 @@ func (w Adverb) Project(vs AV) Projection      { return Projection{Fun: w, Args:
 func (r DerivedVerb) Project(vs AV) Projection { return Projection{Fun: r, Args: vs} }
 func (p Projection) Project(vs AV) Projection  { return Projection{Fun: p, Args: vs} }
 func (c Composition) Project(vs AV) Projection { return Projection{Fun: c, Args: vs} }
+func (l Lambda) Project(vs AV) Projection      { return Projection{Fun: l, Args: vs} }

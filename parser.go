@@ -6,7 +6,8 @@ import (
 
 // Parser builds an Expr AST from a ppExpr.
 type Parser struct {
-	pp *parser
+	pp   *parser
+	prog *AstProgram
 }
 
 func (p *Parser) Init(s *Scanner) {
@@ -66,17 +67,17 @@ func (p *parser) next() Token {
 }
 
 // Next returns a whole expression, in stack-based order.
-func (p *parser) Next() ([]ppExpr, error) {
-	pps := []ppExpr{}
+func (p *parser) Next() (ppExprs, error) {
+	pps := ppExprs{}
 	for {
 		ppe, err := p.ppExpr()
 		if err != nil {
-			ppRev(pps)
+			ppRev([]ppExpr(pps))
 			return pps, err
 		}
 		tok, ok := ppe.(ppToken)
 		if ok && (tok.Type == ppSEP || tok.Type == ppEOF) {
-			ppRev(pps)
+			ppRev([]ppExpr(pps))
 			return pps, nil
 		}
 		pps = append(pps, ppe)
@@ -150,11 +151,11 @@ func (p *parser) ppExprBlock() (ppExpr, error) {
 	ppb.ppexprs = []ppExprs{}
 	switch p.token.Type {
 	case LEFTBRACE:
-		ppb.Type = ppBRACE
+		ppb.Type = ppLAMBDA
 	case LEFTBRACKET:
-		ppb.Type = ppBRACKET
+		ppb.Type = ppARGS
 	case LEFTPAREN:
-		ppb.Type = ppPAREN
+		ppb.Type = ppLIST
 	}
 	ppb.ppexprs = append(ppb.ppexprs, ppExprs{})
 	for {
@@ -170,6 +171,12 @@ func (p *parser) ppExprBlock() (ppExpr, error) {
 		switch tok.Type {
 		case ppCLOSE:
 			ppRev(ppb.ppexprs[len(ppb.ppexprs)-1])
+			if ppb.Type == ppLIST && len(ppb.ppexprs) == 1 &&
+				len(ppb.ppexprs[0]) > 0 {
+				// not a list, but a parenthesized
+				// expression.
+				return ppb.ppexprs[0], nil
+			}
 			return ppb, nil
 		case ppEOF:
 			ppRev(ppb.ppexprs[len(ppb.ppexprs)-1])
