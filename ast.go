@@ -27,32 +27,60 @@ type AstConst struct {
 	Pos int
 }
 
+// AstGlobal represents a global variable read.
 type AstGlobal struct {
 	Name string
 	ID   int
 	Pos  int
 }
 
+// AstLocal represents a local variable read.
 type AstLocal struct {
 	Name string
 	ID   int
 	Pos  int
 }
 
-// AstAssignGlobal represents a global variable assignment. A global variable
-// can only be assigned once, that is, they are immutable.
+// AstAssignGlobal represents a global variable assignment.
 type AstAssignGlobal struct {
 	Name string
 	ID   int
 	Pos  int
 }
 
+// AstAssignLocal represents a local variable assignment.
 type AstAssignLocal struct {
 	Name string
 	ID   int
 	Pos  int
 }
 
+// AstMonad represents a monadic verb.
+type AstMonad struct {
+	Monad Monad
+	Pos   int
+}
+
+// AstDyad represents a dyadic verb.
+type AstDyad struct {
+	Dyad Dyad
+	Pos  int
+}
+
+// AstAdverb represents an adverb.
+type AstAdverb struct {
+	Adverb Adverb
+	Pos    int
+}
+
+// AstApply represents a value that should be applied.
+type AstApply struct {
+	Value Expr
+	Arity int
+	Pos   int
+}
+
+// AstCond represents $[cond; then; else].
 type AstCond struct {
 	If   Expr
 	Then Expr
@@ -60,29 +88,22 @@ type AstCond struct {
 	Pos  int
 }
 
-type AstMonad Monad
-type AstDyad Dyad
-type AstAdverb Adverb
-
-type AstApply struct {
-	Value Expr
-	Arity int
-	Pos   int
-}
-
+// AstLambda represents an user defined lambda like {x+1}.
 type AstLambda struct {
 	Body    []Expr   // body ast
 	Locals  []Symbol // vars, args
 	Globals []Symbol
 	Vars    int // number of vars from enclosing lambda
+	Pos     int
 
 	args   map[string]int // for generating symbols
 	locals map[string]int // for generating symbols
 }
 
+// Symbol represents an identifier name along its ID.
 type Symbol struct {
-	ID   int
 	Name string
+	ID   int
 }
 
 func (n Exprs) node()           {}
@@ -98,8 +119,10 @@ func (n AstAdverb) node()       {}
 func (n AstApply) node()        {}
 func (n AstLambda) node()       {}
 
-// ppExpr represents a pre-ast that builds blocks and forms nouns without
-// giving meaning yet.
+// ppExpr is built by the first left to right pass, allowing to build a
+// tree of blocks, delimit expressions, and simplify token information,
+// but leaving the representation of the stack-like semantics of the
+// language to a second IR builtin on type Expr.
 type ppExpr interface {
 	ppexpr()
 }
