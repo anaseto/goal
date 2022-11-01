@@ -1,5 +1,7 @@
 package main
 
+//go:generate stringer -type=Monad,Dyad,Adverb,TokenType,ppTokenType,ppBlockType -output stringer.go
+
 // V represents any kind of value.
 type V interface {
 	Len() int

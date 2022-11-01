@@ -127,21 +127,6 @@ const (
 	ppVERB
 )
 
-var ppTokenStrings = [...]string{
-	ppSEP:    "ppSEP",
-	ppEOF:    "ppEOF",
-	ppCLOSE:  "ppCLOSE",
-	ppADVERB: "ppADVERB",
-	ppIDENT:  "ppIDENT",
-	ppNUMBER: "ppNUMBER",
-	ppSTRING: "ppSTRING",
-	ppVERB:   "ppVERB",
-}
-
-func (pptt ppTokenType) String() string {
-	return ppTokenStrings[pptt]
-}
-
 type ppBlock struct {
 	Type    ppBlockType
 	ppexprs []ppExpr
@@ -166,16 +151,6 @@ const (
 	ppBRACKET
 	ppPAREN
 )
-
-var ppBlockStrings = [...]string{
-	ppBRACE:   "ppBRACE",
-	ppBRACKET: "ppBRACKET",
-	ppPAREN:   "ppPAREN",
-}
-
-func (pptt ppBlockType) String() string {
-	return ppBlockStrings[pptt]
-}
 
 type ppStrand []ppToken // for stranding, like 1 23 456
 

@@ -35,28 +35,6 @@ const (
 	VERB
 )
 
-var tokenStrings = [...]string{
-	EOF:          "EOF",
-	ERROR:        "ERROR",
-	ADVERB:       "ADVERB",
-	IDENT:        "IDENT",
-	LEFTBRACE:    "{",
-	LEFTBRACKET:  "[",
-	LEFTPAREN:    "(",
-	NEWLINE:      "NEWLINE",
-	NUMBER:       "NUMBER",
-	RIGHTBRACE:   "}",
-	RIGHTBRACKET: "]",
-	RIGHTPAREN:   ")",
-	SEMICOLON:    ";",
-	STRING:       "STRING",
-	VERB:         "VERB",
-}
-
-func (t TokenType) String() string {
-	return tokenStrings[t]
-}
-
 // Scanner represents the state of the scanner.
 type Scanner struct {
 	ctx     *Context      // unused (for now)
