@@ -7,11 +7,12 @@ import (
 
 // Parser builds an Expr AST from a ppExpr.
 type Parser struct {
-	pp    *parser
-	prog  *AstProgram
-	argc  int
-	scope *AstLambdaCode
-	pos   int
+	pp     *parser
+	prog   *AstProgram
+	argc   int
+	pscope *AstLambdaCode
+	scope  *AstLambdaCode
+	pos    int
 }
 
 func (p *Parser) Init(s *Scanner) {
@@ -74,9 +75,15 @@ func (p *Parser) ppToken(tok ppToken, it ppIter) (ppIter, error) {
 	case ppIDENT:
 		if p.scope == nil {
 			p.ppGlobal(tok)
+			if p.argc == 0 {
+				p.argc = 1
+			}
 			return it, nil
 		}
 		p.ppLocal(tok)
+		if p.argc == 0 {
+			p.argc = 1
+		}
 		return it, nil
 	default:
 		// should not happen
@@ -100,6 +107,16 @@ func (p *Parser) ppLocal(tok ppToken) {
 			Pos: tok.Pos, Argc: p.argc,
 		})
 		return
+	}
+	if p.pscope != nil {
+		id, ok := p.pscope.locals[tok.Text]
+		if ok {
+			p.prog.pushExpr(AstParentLocal{
+				Name: tok.Text, ID: id,
+				Pos: tok.Pos, Argc: p.argc,
+			})
+			return
+		}
 	}
 	p.ppGlobal(tok)
 }

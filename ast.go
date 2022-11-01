@@ -34,13 +34,15 @@ func (prog *AstProgram) global(s string) int {
 
 // AstLambdaCode represents an user defined lambda like {x+1}.
 type AstLambdaCode struct {
-	Body   []Expr // body AST
-	Args   []Symbol
-	Locals []Symbol
-	Pos    int
+	Body         []Expr // body AST
+	Args         []Symbol
+	ParentLocals []Symbol
+	Locals       []Symbol
+	Pos          int
 
-	args   map[string]int // for generating symbols
-	locals map[string]int // for generating symbols
+	args         map[string]int // for generating symbols
+	parentLocals map[string]int // for generating symbols
+	locals       map[string]int // for generating symbols
 }
 
 // Expr is used to represent the AST of the program with stack-like
@@ -66,6 +68,16 @@ type AstGlobal struct {
 
 // AstLocal represents a local variable read.
 type AstLocal struct {
+	Name string
+	ID   int
+	Pos  int
+	Argc int
+}
+
+// AstParentLocal represents a local variable read from the
+// parent function. It will actually be passed as an argument,
+// and work like a local, but treated separately in parsing.
+type AstParentLocal struct {
 	Name string
 	ID   int
 	Pos  int
@@ -136,6 +148,7 @@ type Symbol struct {
 func (n AstConst) node()        {}
 func (n AstGlobal) node()       {}
 func (n AstLocal) node()        {}
+func (n AstParentLocal) node()  {}
 func (n AstAssignGlobal) node() {}
 func (n AstAssignLocal) node()  {}
 func (n AstCond) node()         {}
