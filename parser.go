@@ -14,14 +14,23 @@ func (p *Parser) Init(s *Scanner) {
 	pp := &parser{}
 	pp.Init(s)
 	p.pp = pp
+	p.prog = &AstProgram{}
 }
 
 func (p *Parser) Next() ([]Expr, error) {
-	//pps, err := p.Next()
-	//if err != nil {
-	//return err
-	//}
-	//exprs := []Expr{}
+	pps, err := p.pp.Next()
+	if err != nil {
+		return nil, err
+	}
+	for _, ppe := range pps {
+		//switch ppe := ppe.(type) {
+		switch ppe.(type) {
+		case ppBlock:
+		case ppStrand:
+		case ppExprs:
+		case ppToken:
+		}
+	}
 	return nil, nil
 }
 

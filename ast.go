@@ -144,8 +144,11 @@ func (ppt ppToken) String() string {
 	return fmt.Sprintf("{%v %d %s}", ppt.Type, ppt.Pos, ppt.Text)
 }
 
+// ppTokenType represents tokens in a ppExpr.
 type ppTokenType int
 
+// These constants represent the possible tokens in a ppExpr. The SEP,
+// EOF and CLOSE types are not emitted in the final result.
 const (
 	ppSEP ppTokenType = iota
 	ppEOF
