@@ -9,7 +9,9 @@ import (
 type Parser struct {
 	pp    *parser
 	prog  *AstProgram
-	start bool
+	argc  int
+	scope *AstLambdaCode
+	pos   int
 }
 
 func (p *Parser) Init(s *Scanner) {
@@ -17,7 +19,7 @@ func (p *Parser) Init(s *Scanner) {
 	pp.Init(s)
 	p.pp = pp
 	p.prog = &AstProgram{}
-	p.start = true
+	p.argc = 0
 }
 
 func (p *Parser) Next() ([]Expr, error) {
@@ -28,9 +30,12 @@ func (p *Parser) Next() ([]Expr, error) {
 	it := newppIter(pps)
 	for it.Next() {
 		ppe := it.Expr()
-		//switch ppe := ppe.(type) {
-		switch ppe.(type) {
+		switch ppe := ppe.(type) {
 		case ppToken:
+			it, err = p.ppToken(ppe, it)
+			if err != nil {
+				return nil, err
+			}
 		case ppStrand:
 		case ppExprs:
 		case ppBlock:
@@ -40,37 +45,69 @@ func (p *Parser) Next() ([]Expr, error) {
 }
 
 func (p *Parser) ppToken(tok ppToken, it ppIter) (ppIter, error) {
+	p.pos = tok.Pos
 	switch tok.Type {
 	case ppNUMBER:
 		v, err := parseNumber(tok.Text)
 		if err != nil {
 			return it, err
 		}
-		if !p.start {
-			return it, p.errorf("number atoms cannot be applied", tok.Pos)
+		if p.argc > 0 {
+			return it, p.errorf("number atoms cannot be applied")
 		}
 		id := p.prog.storeConst(v)
-		p.prog.pushExpr(AstConst{ID: id, Pos: tok.Pos})
-		p.start = false
+		p.prog.pushExpr(AstConst{ID: id, Pos: tok.Pos, Argc: p.argc})
+		p.argc = 1
+		return it, nil
 	case ppSTRING:
 		s, err := strconv.Unquote(tok.Text)
 		if err != nil {
 			return it, err
 		}
-		if !p.start {
-			return it, p.errorf("strings atoms cannot be applied", tok.Pos)
+		if p.argc > 0 {
+			return it, p.errorf("strings atoms cannot be applied")
 		}
 		id := p.prog.storeConst(S(s))
-		p.prog.pushExpr(AstConst{ID: id, Pos: tok.Pos})
-		p.start = false
+		p.prog.pushExpr(AstConst{ID: id, Pos: tok.Pos, Argc: p.argc})
+		p.argc = 1
+		return it, nil
+	case ppIDENT:
+		if p.scope == nil {
+			p.ppGlobal(tok)
+			return it, nil
+		}
+		p.ppLocal(tok)
+		return it, nil
+	default:
+		// should not happen
+		return it, p.errorf("unexpected token type:%v", tok.Type)
 	}
-	return it, nil
 }
 
-func (p *Parser) errorf(format string, pos int, a ...interface{}) error {
+func (p *Parser) ppGlobal(tok ppToken) {
+	id := p.prog.global(tok.Text)
+	p.prog.pushExpr(AstGlobal{
+		Name: tok.Text, ID: id,
+		Pos: tok.Pos, Argc: p.argc,
+	})
+}
+
+func (p *Parser) ppLocal(tok ppToken) {
+	id, ok := p.scope.locals[tok.Text]
+	if ok {
+		p.prog.pushExpr(AstLocal{
+			Name: tok.Text, ID: id,
+			Pos: tok.Pos, Argc: p.argc,
+		})
+		return
+	}
+	p.ppGlobal(tok)
+}
+
+func (p *Parser) errorf(format string, a ...interface{}) error {
 	// TODO: in case of error, read the file again to get from pos the line
 	// and print the line that produced the error with some column marker.
-	return fmt.Errorf("error:%d:"+format, append([]interface{}{pos}, a...))
+	return fmt.Errorf("error:%d:"+format, append([]interface{}{p.pos}, a...))
 }
 
 func parseNumber(s string) (V, error) {

@@ -4,10 +4,10 @@ import "fmt"
 
 // AstProgram represents a program written in goal.
 type AstProgram struct {
-	Body      []Expr          // program body AST
-	Constants []V             // constants indexed by ID
-	Globals   []V             // globals indexed by ID
-	Lambdas   []AstLambdaCode // list of user defined lambdas
+	Body      []Expr           // program body AST
+	Constants []V              // constants indexed by ID
+	Globals   []V              // globals indexed by ID
+	Lambdas   []*AstLambdaCode // list of user defined lambdas
 
 	constants map[string]int // for generating symbols
 	globals   map[string]int // for generating symbols
@@ -20,6 +20,16 @@ func (prog *AstProgram) storeConst(v V) int {
 
 func (prog *AstProgram) pushExpr(e Expr) {
 	prog.Body = append(prog.Body, e)
+}
+
+func (prog *AstProgram) global(s string) int {
+	id, ok := prog.globals[s]
+	if ok {
+		return id
+	}
+	prog.Globals = append(prog.Globals, nil)
+	prog.globals[s] = len(prog.Globals) - 1
+	return len(prog.Globals) - 1
 }
 
 // AstLambdaCode represents an user defined lambda like {x+1}.
@@ -36,13 +46,14 @@ type AstLambdaCode struct {
 // Expr is used to represent the AST of the program with stack-like
 // semantics.
 type Expr interface {
-	node()
+	node() // AST node
 }
 
 // AstConst represents a constant.
 type AstConst struct {
-	ID  int
-	Pos int
+	ID   int
+	Pos  int
+	Argc int
 }
 
 // AstGlobal represents a global variable read.
@@ -50,6 +61,7 @@ type AstGlobal struct {
 	Name string
 	ID   int
 	Pos  int
+	Argc int
 }
 
 // AstLocal represents a local variable read.
@@ -57,6 +69,7 @@ type AstLocal struct {
 	Name string
 	ID   int
 	Pos  int
+	Argc int
 }
 
 // AstAssignGlobal represents a global variable assignment.
@@ -77,39 +90,37 @@ type AstAssignLocal struct {
 type AstMonad struct {
 	Monad Monad
 	Pos   int
+	Argc  int
 }
 
 // AstDyad represents a dyadic verb.
 type AstDyad struct {
 	Dyad Dyad
 	Pos  int
+	Argc int
 }
 
 // AstAdverb represents an adverb.
 type AstAdverb struct {
 	Adverb Adverb
 	Pos    int
+	Argc   int
 }
 
 // AstLambda represents an user Lambda.
 type AstLambda struct {
 	Lambda Lambda
 	Pos    int
-}
-
-// AstApply represents a value that should be applied.
-type AstApply struct {
-	Value Expr
-	Arity int
-	Pos   int
+	Argc   int
 }
 
 // AstCond represents $[cond; then; else].
 type AstCond struct {
-	If   Expr
-	Then Expr
-	Else Expr
+	If   []Expr
+	Then []Expr
+	Else []Expr
 	Pos  int
+	Argc int
 }
 
 // AstDrop represents a separator, in practice discarding the final
@@ -131,7 +142,6 @@ func (n AstCond) node()         {}
 func (n AstMonad) node()        {}
 func (n AstDyad) node()         {}
 func (n AstAdverb) node()       {}
-func (n AstApply) node()        {}
 func (n AstLambda) node()       {}
 func (n AstDrop) node()         {}
 
