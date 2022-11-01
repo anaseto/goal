@@ -9,6 +9,9 @@ import (
 type Parser struct {
 }
 
+func (p *Parser) Next() {
+}
+
 // parser builds a ppExpr pre-AST
 type parser struct {
 	ctx    *Context  // unused (for now)

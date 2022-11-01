@@ -12,14 +12,11 @@ type Program struct {
 	globals   map[string]int // for generating symbols
 }
 
-// Expr is used to represent the AST of the program.
+// Expr is used to represent the AST of the program with stack-like
+// semantics.
 type Expr interface {
 	node()
 }
-
-// Exprs represent a list of stack-based AST expressions, to be evaluated from
-// right to left.
-type Exprs []Expr
 
 // AstConst represents a constant.
 type AstConst struct {
@@ -106,7 +103,6 @@ type Symbol struct {
 	ID   int
 }
 
-func (n Exprs) node()           {}
 func (n AstConst) node()        {}
 func (n AstGlobal) node()       {}
 func (n AstLocal) node()        {}
@@ -119,13 +115,17 @@ func (n AstAdverb) node()       {}
 func (n AstApply) node()        {}
 func (n AstLambda) node()       {}
 
-// ppExpr is built by the first left to right pass, allowing to build a
-// tree of blocks, delimit expressions, and simplify token information,
-// but leaving the representation of the stack-like semantics of the
-// language to a second IR builtin on type Expr.
+// ppExpr are built by the first left to right pass, resulting in a tree
+// of blocks producing a whole expression, with simplified token
+// information. The representation of the stack-like semantics of the
+// language is left to a second IR builtin on type Expr.
 type ppExpr interface {
-	ppexpr()
+	ppNode()
 }
+
+// ppExprs represents a whole expression. It is not a ppExpr. A program
+// is a sequence of ppExprs.
+type ppExprs []ppExpr
 
 type ppToken struct {
 	Type ppTokenType
@@ -177,6 +177,6 @@ const (
 
 type ppStrand []ppToken // for stranding, like 1 23 456
 
-func (ppb ppBlock) ppexpr()  {}
-func (pps ppStrand) ppexpr() {}
-func (t ppToken) ppexpr()    {}
+func (ppb ppBlock) ppNode()  {}
+func (pps ppStrand) ppNode() {}
+func (t ppToken) ppNode()    {}
