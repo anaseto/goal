@@ -5,36 +5,34 @@ import (
 	"io"
 )
 
+// Parser builds an Expr AST from a ppExpr.
 type Parser struct {
+}
+
+// parser builds a ppExpr pre-AST
+type parser struct {
 	ctx    *Context  // unused (for now)
-	Source string    // for error messages location information (e.g. filename)
 	wError io.Writer // where non-fatal error messages go (unused for now)
 	s      *Scanner
 	token  Token
 	pToken Token
 	depth  []Token
 	peeked bool
-	err    error
 }
 
-// ParseWithReader parses a frundis source from a reader and returns a list of
-// AST blocks.
-func (p *Parser) ParseWithReader(reader io.Reader) error {
-	s := &Scanner{reader: reader, wError: p.wError}
+func (p *parser) errorf(format string, a ...interface{}) error {
+	// TODO: in case of error, read the file again to get from pos the line
+	// and print the line that produced the error with some column marker.
+	return fmt.Errorf("error:%d:"+format, append([]interface{}{p.token.Pos}, a...))
+}
+
+// Init initializes the parser.
+func (p *parser) Init(s *Scanner) {
 	s.Init()
 	p.s = s
-	// TODO
-	exprs, err := p.ppExprs()
-	if err != nil {
-		return err
-	}
-	for _, expr := range exprs {
-		fmt.Printf("%v\n", expr)
-	}
-	return nil
 }
 
-func (p *Parser) peek() Token {
+func (p *parser) peek() Token {
 	if p.peeked {
 		return p.pToken
 	}
@@ -43,7 +41,7 @@ func (p *Parser) peek() Token {
 	return p.pToken
 }
 
-func (p *Parser) next() Token {
+func (p *parser) next() Token {
 	if p.peeked {
 		p.token = p.pToken
 		p.peeked = false
@@ -53,13 +51,8 @@ func (p *Parser) next() Token {
 	return p.token
 }
 
-func (p *Parser) errorf(format string, a ...interface{}) error {
-	// TODO: in case of error, read the file again to get from pos the line
-	// and print the line that produced the error with some column marker.
-	return fmt.Errorf("error:%d:"+format, append([]interface{}{p.token.Pos}, a...))
-}
-
-func (p *Parser) ppExprs() ([]ppExpr, error) {
+// Next returns a whole expression.
+func (p *parser) Next() ([]ppExpr, error) {
 	pps := []ppExpr{}
 	for {
 		ppe, err := p.ppExpr()
@@ -87,7 +80,7 @@ func closeToken(op TokenType) TokenType {
 	}
 }
 
-func (p *Parser) ppExpr() (ppExpr, error) {
+func (p *parser) ppExpr() (ppExpr, error) {
 	switch tok := p.next(); tok.Type {
 	case EOF:
 		return ppToken{Type: ppEOF, Pos: tok.Pos}, nil
@@ -135,7 +128,7 @@ func (p *Parser) ppExpr() (ppExpr, error) {
 	}
 }
 
-func (p *Parser) ppExprBlock() (ppExpr, error) {
+func (p *parser) ppExprBlock() (ppExpr, error) {
 	p.depth = append(p.depth, p.token)
 	ppb := ppBlock{}
 	switch p.token.Type {
@@ -165,7 +158,7 @@ func (p *Parser) ppExprBlock() (ppExpr, error) {
 	}
 }
 
-func (p *Parser) ppExprStrand() (ppExpr, error) {
+func (p *parser) ppExprStrand() (ppExpr, error) {
 	ppb := ppStrand{}
 	for {
 		switch p.token.Type {

@@ -4,7 +4,7 @@ import "fmt"
 
 // Program represents a program writter in goal.
 type Program struct {
-	Body      []Expr // program body ast
+	Body      []Expr // program body AST
 	Constants []V    // constants indexed by ID
 	Globals   []V    // globals indexed by ID
 
@@ -12,12 +12,12 @@ type Program struct {
 	globals   map[string]int // for generating symbols
 }
 
-// Expr is used to represent the ast of the program.
+// Expr is used to represent the AST of the program.
 type Expr interface {
 	node()
 }
 
-// Exprs represent a list of stack-based ast expressions, to be evaluated from
+// Exprs represent a list of stack-based AST expressions, to be evaluated from
 // right to left.
 type Exprs []Expr
 
@@ -90,7 +90,7 @@ type AstCond struct {
 
 // AstLambda represents an user defined lambda like {x+1}.
 type AstLambda struct {
-	Body    []Expr   // body ast
+	Body    []Expr   // body AST
 	Locals  []Symbol // vars, args
 	Globals []Symbol
 	Vars    int // number of vars from enclosing lambda

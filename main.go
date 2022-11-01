@@ -68,7 +68,14 @@ func testScanner() {
 func testParser() {
 	s := "23 45 + {(x-23)+|x} 23 43 + fun[2;3];"
 	sr := strings.NewReader(s)
-	p := &Parser{}
+	p := &parser{}
+	p.Init(&Scanner{reader: sr})
 	fmt.Println(s)
-	p.ParseWithReader(sr)
+	exprs, err := p.Next()
+	if err != nil {
+		fmt.Printf("parser:%v", err)
+	}
+	for _, expr := range exprs {
+		fmt.Printf("%v\n", expr)
+	}
 }

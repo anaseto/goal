@@ -45,9 +45,9 @@ type Scanner struct {
 	peeked  bool          // peeked next
 	pos     int           // current position in the input
 	pr      rune          // peeked rune
-	psize   int
-	start   bool // at line start
-	token   Token
+	psize   int           // size of last peeked rune
+	start   bool          // at line start
+	token   Token         // last token
 }
 
 type stateFn func(*Scanner) stateFn
