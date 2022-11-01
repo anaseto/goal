@@ -133,16 +133,16 @@ func _() {
 	_ = x[ppSEP-0]
 	_ = x[ppEOF-1]
 	_ = x[ppCLOSE-2]
-	_ = x[ppADVERB-3]
-	_ = x[ppIDENT-4]
-	_ = x[ppNUMBER-5]
-	_ = x[ppSTRING-6]
-	_ = x[ppVERB-7]
+	_ = x[ppNUMBER-3]
+	_ = x[ppSTRING-4]
+	_ = x[ppIDENT-5]
+	_ = x[ppVERB-6]
+	_ = x[ppADVERB-7]
 }
 
-const _ppTokenType_name = "ppSEPppEOFppCLOSEppADVERBppIDENTppNUMBERppSTRINGppVERB"
+const _ppTokenType_name = "ppSEPppEOFppCLOSEppNUMBERppSTRINGppIDENTppVERBppADVERB"
 
-var _ppTokenType_index = [...]uint8{0, 5, 10, 17, 25, 32, 40, 48, 54}
+var _ppTokenType_index = [...]uint8{0, 5, 10, 17, 25, 33, 40, 46, 54}
 
 func (i ppTokenType) String() string {
 	if i < 0 || i >= ppTokenType(len(_ppTokenType_index)-1) {

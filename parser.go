@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 )
 
 // Parser builds an Expr AST from a ppExpr.
 type Parser struct {
-	pp   *parser
-	prog *AstProgram
+	pp    *parser
+	prog  *AstProgram
+	start bool
 }
 
 func (p *Parser) Init(s *Scanner) {
@@ -15,6 +17,7 @@ func (p *Parser) Init(s *Scanner) {
 	pp.Init(s)
 	p.pp = pp
 	p.prog = &AstProgram{}
+	p.start = true
 }
 
 func (p *Parser) Next() ([]Expr, error) {
@@ -22,19 +25,67 @@ func (p *Parser) Next() ([]Expr, error) {
 	if err != nil {
 		return nil, err
 	}
-	for _, ppe := range pps {
+	it := newppIter(pps)
+	for it.Next() {
+		ppe := it.Expr()
 		//switch ppe := ppe.(type) {
 		switch ppe.(type) {
-		case ppBlock:
+		case ppToken:
 		case ppStrand:
 		case ppExprs:
-		case ppToken:
+		case ppBlock:
 		}
 	}
 	return nil, nil
 }
 
-// parser builds a ppExpr pre-AST
+func (p *Parser) ppToken(tok ppToken, it ppIter) (ppIter, error) {
+	switch tok.Type {
+	case ppNUMBER:
+		v, err := parseNumber(tok.Text)
+		if err != nil {
+			return it, err
+		}
+		if !p.start {
+			return it, p.errorf("number atoms cannot be applied", tok.Pos)
+		}
+		id := p.prog.storeConst(v)
+		p.prog.pushExpr(AstConst{ID: id, Pos: tok.Pos})
+		p.start = false
+	case ppSTRING:
+		s, err := strconv.Unquote(tok.Text)
+		if err != nil {
+			return it, err
+		}
+		if !p.start {
+			return it, p.errorf("strings atoms cannot be applied", tok.Pos)
+		}
+		id := p.prog.storeConst(S(s))
+		p.prog.pushExpr(AstConst{ID: id, Pos: tok.Pos})
+		p.start = false
+	}
+	return it, nil
+}
+
+func (p *Parser) errorf(format string, pos int, a ...interface{}) error {
+	// TODO: in case of error, read the file again to get from pos the line
+	// and print the line that produced the error with some column marker.
+	return fmt.Errorf("error:%d:"+format, append([]interface{}{pos}, a...))
+}
+
+func parseNumber(s string) (V, error) {
+	i, errI := strconv.ParseInt(s, 0, 0)
+	if errI == nil {
+		return I(i), nil
+	}
+	f, errF := strconv.ParseFloat(s, 64)
+	if errF == nil {
+		return F(f), nil
+	}
+	return nil, errF
+}
+
+// parser builds a ppExpr pre-AST.
 type parser struct {
 	ctx    *Context // unused (for now)
 	s      *Scanner

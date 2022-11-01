@@ -13,6 +13,15 @@ type AstProgram struct {
 	globals   map[string]int // for generating symbols
 }
 
+func (prog *AstProgram) storeConst(v V) int {
+	prog.Constants = append(prog.Constants, v)
+	return len(prog.Constants) - 1
+}
+
+func (prog *AstProgram) pushExpr(e Expr) {
+	prog.Body = append(prog.Body, e)
+}
+
 // AstLambdaCode represents an user defined lambda like {x+1}.
 type AstLambdaCode struct {
 	Body   []Expr // body AST
@@ -103,6 +112,10 @@ type AstCond struct {
 	Pos  int
 }
 
+// AstDrop represents a separator, in practice discarding the final
+// value of the previous expression.
+type AstDrop struct{}
+
 // Symbol represents an identifier name along its ID.
 type Symbol struct {
 	Name string
@@ -120,12 +133,13 @@ func (n AstDyad) node()         {}
 func (n AstAdverb) node()       {}
 func (n AstApply) node()        {}
 func (n AstLambda) node()       {}
+func (n AstDrop) node()         {}
 
 // ppExpr are built by the first left to right pass, resulting in a tree
 // of blocks producing a whole expression, with simplified token
-// information, and stack-like order). The representation of specific
-// semantics of the language is left to a second IR builtin on type
-// Expr.
+// information, and stack-like order. It is a pre-processing IR. The
+// representation of specific semantics of the language is left to a
+// second IR built around type Expr.
 type ppExpr interface {
 	ppNode()
 }
@@ -134,6 +148,40 @@ type ppExpr interface {
 // sub-expression.
 type ppExprs []ppExpr
 
+// ppIter is an iterator for ppExprs slices, with peek functionality.
+type ppIter struct {
+	pps ppExprs
+	i   int
+}
+
+func newppIter(pps ppExprs) ppIter {
+	return ppIter{pps: pps, i: -1}
+}
+
+func (it *ppIter) Next() bool {
+	it.i++
+	return it.i < len(it.pps)
+}
+
+func (it *ppIter) Expr() ppExpr {
+	return it.pps[it.i]
+}
+
+func (it *ppIter) Peek() ppExpr {
+	if it.i+1 >= len(it.pps) {
+		return nil
+	}
+	return it.pps[it.i+1]
+}
+
+func (it *ppIter) PeekN(n int) ppExpr {
+	if it.i+n >= len(it.pps) {
+		return nil
+	}
+	return it.pps[it.i+n]
+}
+
+// ppToken represents a simplified token after processing into ppExpr.
 type ppToken struct {
 	Type ppTokenType
 	Pos  int
@@ -154,12 +202,14 @@ const (
 	ppEOF
 	ppCLOSE
 
-	ppADVERB
-	ppIDENT
 	ppNUMBER
 	ppSTRING
+	ppIDENT
 	ppVERB
+	ppADVERB
 )
+
+type ppStrand []ppToken // for stranding, like 1 23 456
 
 type ppBlock struct {
 	Type    ppBlockType
@@ -190,9 +240,7 @@ const (
 	ppLIST
 )
 
-type ppStrand []ppToken // for stranding, like 1 23 456
-
-func (ppb ppBlock) ppNode()  {}
+func (tok ppToken) ppNode()  {}
 func (pps ppStrand) ppNode() {}
 func (pps ppExprs) ppNode()  {}
-func (t ppToken) ppNode()    {}
+func (ppb ppBlock) ppNode()  {}
