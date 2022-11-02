@@ -34,31 +34,31 @@ func (prog *AstProgram) global(s string) int {
 // AstLambdaCode represents an user defined lambda like {x+1}.
 type AstLambdaCode struct {
 	Body      []Expr           // body AST
-	Params    map[string]Param // arguments and locals
-	NamedArgs bool
+	Locals    map[string]Local // arguments and variables
+	NamedArgs bool             // named arguments instead of x, y, z
 	Pos       int
 
-	nLocals int
+	nVars int // number of variables
 }
 
-// Param represents a lambda's parameter. It can be an argument or
+// Local represents a lambda's parameter. It can be an argument or
 // local variable.
-type Param struct {
-	Type ParamType
+type Local struct {
+	Type LocalType
 	ID   int
 }
 
-// ParamType represents different kinds of parameters.
-type ParamType int
+// LocalType represents different kinds of parameters.
+type LocalType int
 
 // These constants describe the supported kinds of parameters.
 const (
-	ParamArg ParamType = iota
-	ParamLocal
+	LocalArg LocalType = iota
+	LocalVar
 )
 
-func (l *AstLambdaCode) local(s string) (Param, bool) {
-	param, ok := l.Params[s]
+func (l *AstLambdaCode) local(s string) (Local, bool) {
+	param, ok := l.Locals[s]
 	if ok {
 		return param, true
 	}
@@ -66,12 +66,12 @@ func (l *AstLambdaCode) local(s string) (Param, bool) {
 		switch r := rune(s[0]); r {
 		case 'x', 'y', 'z':
 			id := r - 'x'
-			arg := Param{Type: ParamArg, ID: int(id)}
-			l.Params[s] = arg
+			arg := Local{Type: LocalArg, ID: int(id)}
+			l.Locals[s] = arg
 			return arg, true
 		}
 	}
-	return Param{}, false
+	return Local{}, false
 }
 
 // Expr is used to represent the AST of the program with stack-like
@@ -98,7 +98,7 @@ type AstGlobal struct {
 // AstLocal represents a local variable read.
 type AstLocal struct {
 	Name  string
-	Param Param
+	Local Local
 	Pos   int
 	Argc  int
 }
@@ -113,7 +113,7 @@ type AstAssignGlobal struct {
 // AstAssignLocal represents a local variable assignment.
 type AstAssignLocal struct {
 	Name  string
-	Param Param
+	Local Local
 	Pos   int
 }
 

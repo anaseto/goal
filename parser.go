@@ -112,7 +112,7 @@ func (p *Parser) ppLocal(tok ppToken) {
 	param, ok := p.scope().local(tok.Text)
 	if ok {
 		p.prog.pushExpr(AstLocal{
-			Name: tok.Text, Param: param,
+			Name: tok.Text, Local: param,
 			Pos: tok.Pos, Argc: p.argc,
 		})
 		return
