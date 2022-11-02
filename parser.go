@@ -12,6 +12,7 @@ type Parser struct {
 	argc       int
 	scopeStack []*AstLambdaCode
 	pos        int
+	it         ppIter
 }
 
 func (p *Parser) Init(s *Scanner) {
@@ -29,79 +30,135 @@ func (p *Parser) scope() *AstLambdaCode {
 	return p.scopeStack[len(p.scopeStack)-1]
 }
 
-func (p *Parser) Next() ([]Expr, error) {
-	pps, err := p.pp.Next()
-	if err != nil {
-		return nil, err
-	}
-	it := newppIter(pps)
-	for it.Next() {
-		ppe := it.Expr()
-		switch ppe := ppe.(type) {
-		case ppToken:
-			it, err = p.ppToken(ppe, it)
-			if err != nil {
-				return nil, err
-			}
-		case ppStrand:
-		case ppParenExpr:
-		case ppBlock:
+func (p *Parser) Parse() error {
+	for {
+		pps, eof, err := p.pp.Next()
+		if err != nil {
+			return err
+		}
+		if eof {
+			return nil
+		}
+		_, err = p.ppExprs(pps)
+		if err != nil {
+			return err
 		}
 	}
-	return nil, nil
 }
 
-func (p *Parser) ppToken(tok ppToken, it ppIter) (ppIter, error) {
+func (p *Parser) ppExprs(pps ppExprs) (ppIter, error) {
+	it := p.it
+	p.it = newppIter(pps)
+	for p.it.Next() {
+		ppe := p.it.Expr()
+		err := p.ppExpr(ppe)
+		if err != nil {
+			return it, err
+		}
+	}
+	return it, nil
+}
+
+func (p *Parser) ppExpr(ppe ppExpr) error {
+	switch ppe := ppe.(type) {
+	case ppToken:
+		err := p.ppToken(ppe)
+		if err != nil {
+			return err
+		}
+	case ppStrand:
+		err := p.ppStrand(ppe)
+		if err != nil {
+			return err
+		}
+	case ppParenExpr:
+		err := p.ppParenExpr(ppe)
+		if err != nil {
+			return err
+		}
+	case ppBlock:
+		err := p.ppBlock(ppe)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (p *Parser) ppToken(tok ppToken) error {
 	p.pos = tok.Pos
 	switch tok.Type {
 	case ppNUMBER:
 		v, err := parseNumber(tok.Text)
 		if err != nil {
-			return it, err
+			return err
 		}
 		if p.argc > 0 {
-			return it, p.errorf("number atoms cannot be applied")
+			return p.errorf("number atoms cannot be applied")
 		}
 		id := p.prog.storeConst(v)
 		p.prog.pushExpr(AstConst{ID: id, Pos: tok.Pos, Argc: p.argc})
 		p.argc = 1
-		return it, nil
+		return nil
 	case ppSTRING:
 		s, err := strconv.Unquote(tok.Text)
 		if err != nil {
-			return it, err
+			return err
 		}
 		if p.argc > 0 {
-			return it, p.errorf("strings atoms cannot be applied")
+			return p.errorf("string atoms cannot be applied")
 		}
 		id := p.prog.storeConst(S(s))
 		p.prog.pushExpr(AstConst{ID: id, Pos: tok.Pos, Argc: p.argc})
 		p.argc = 1
-		return it, nil
+		return nil
 	case ppIDENT:
 		// read or apply, not assign
 		if p.scope() == nil {
 			// global scope: global variable
 			p.ppGlobal(tok)
-			if p.argc == 0 {
-				p.argc = 1
-			}
-			return it, nil
+			p.argc = 1
+			return nil
 		}
 		// local scope: argument, local or global variable
 		p.ppLocal(tok)
-		if p.argc == 0 {
-			p.argc = 1
-		}
-		return it, nil
+		p.argc = 1
+		return nil
 	case ppVERB:
-		return it, nil
+		return p.ppVerb(tok)
 	case ppADVERB:
-		return it, nil
+		return nil
 	default:
 		// should not happen
-		return it, p.errorf("unexpected token type:%v", tok.Type)
+		return p.errorf("unexpected token type:%v", tok.Type)
 	}
+}
+
+func (p *Parser) ppStrand(pps ppStrand) error {
+	// TODO
+	return nil
+}
+
+func (p *Parser) ppParenExpr(ppp ppParenExpr) error {
+	// TODO
+	return nil
+}
+
+func (p *Parser) ppBlock(ppb ppBlock) error {
+	// TODO
+	return nil
+}
+
+func parseNumber(s string) (V, error) {
+	i, errI := strconv.ParseInt(s, 0, 0)
+	if errI == nil {
+		return I(i), nil
+	}
+	f, errF := strconv.ParseFloat(s, 64)
+	if errF == nil {
+		return F(f), nil
+	}
+	return nil, errF
 }
 
 func (p *Parser) ppGlobal(tok ppToken) {
@@ -124,22 +181,143 @@ func (p *Parser) ppLocal(tok ppToken) {
 	p.ppGlobal(tok)
 }
 
+func (p *Parser) ppVerb(tok ppToken) error {
+	ppe := p.it.Peek()
+	argc := p.argc
+	if ppe != nil {
+		switch ppe := ppe.(type) {
+		case ppToken:
+			switch ppe.Type {
+			case ppNUMBER, ppSTRING, ppIDENT:
+				p.it.Next()
+				p.argc = 0
+				err := p.ppToken(ppe)
+				if err != nil {
+					return err
+				}
+				p.argc += argc
+			}
+		case ppStrand:
+		case ppParenExpr:
+		case ppBlock:
+		}
+	}
+	switch p.argc {
+	case 1:
+		monad := parseMonad(tok.Text)
+		p.prog.pushExpr(AstMonad{
+			Monad: monad,
+			Pos:   tok.Pos,
+			Argc:  1,
+		})
+	default:
+		dyad := parseDyad(tok.Text)
+		p.prog.pushExpr(AstDyad{
+			Dyad: dyad,
+			Pos:  tok.Pos,
+			Argc: p.argc,
+		})
+		p.argc = 1
+	}
+	return nil
+}
+
+func parseDyad(s string) (verb Dyad) {
+	switch s {
+	case ":":
+		verb = VRight
+	case "+":
+		verb = VAdd
+	case "-":
+		verb = VSubtract
+	case "*":
+		verb = VMultiply
+	case "%":
+		verb = VDivide
+	case "!":
+		verb = VMod
+	case "&":
+		verb = VMin
+	case "|":
+		verb = VMax
+	case "<":
+		verb = VLess
+	case ">":
+		verb = VMore
+	case "=":
+		verb = VEqual
+	case "~":
+		verb = VMatch
+	case ",":
+		verb = VConcat
+	case "^":
+		verb = VCut
+	case "#":
+		verb = VTake
+	case "_":
+		verb = VDrop
+	case "$":
+		verb = VCast
+	case "?":
+		verb = VFind
+	case "@":
+		verb = VApply
+	case ".":
+		verb = VApplyN
+	}
+	return verb
+}
+
+func parseMonad(s string) (verb Monad) {
+	switch s {
+	case ":":
+		verb = VReturn
+	case "+":
+		verb = VFlip
+	case "-":
+		verb = VNegate
+	case "*":
+		verb = VFirst
+	case "%":
+		verb = VClassify
+	case "!":
+		verb = VEnum
+	case "&":
+		verb = VWhere
+	case "|":
+		verb = VReverse
+	case "<":
+		verb = VAscend
+	case ">":
+		verb = VDescend
+	case "=":
+		verb = VGroup
+	case "~":
+		verb = VNot
+	case ",":
+		verb = VEnlist
+	case "^":
+		verb = VSort
+	case "#":
+		verb = VLen
+	case "_":
+		verb = VFloor
+	case "$":
+		verb = VString
+	case "?":
+		verb = VNub
+	case "@":
+		verb = VType
+	case ".":
+		verb = VEval
+	}
+	return verb
+}
+
 func (p *Parser) errorf(format string, a ...interface{}) error {
 	// TODO: in case of error, read the file again to get from pos the line
 	// and print the line that produced the error with some column marker.
 	return fmt.Errorf("error:%d:"+format, append([]interface{}{p.pos}, a...))
-}
-
-func parseNumber(s string) (V, error) {
-	i, errI := strconv.ParseInt(s, 0, 0)
-	if errI == nil {
-		return I(i), nil
-	}
-	f, errF := strconv.ParseFloat(s, 64)
-	if errF == nil {
-		return F(f), nil
-	}
-	return nil, errF
 }
 
 // parser builds a ppExpr pre-AST.
@@ -186,18 +364,18 @@ func (p *parser) next() Token {
 }
 
 // Next returns a whole expression, in stack-based order.
-func (p *parser) Next() (ppExprs, error) {
+func (p *parser) Next() (ppExprs, bool, error) {
 	pps := ppExprs{}
 	for {
 		ppe, err := p.ppExpr()
 		if err != nil {
 			ppRev([]ppExpr(pps))
-			return pps, err
+			return pps, false, err
 		}
 		tok, ok := ppe.(ppToken)
 		if ok && (tok.Type == ppSEP || tok.Type == ppEOF) {
 			ppRev([]ppExpr(pps))
-			return pps, nil
+			return pps, tok.Type == ppEOF, nil
 		}
 		pps = append(pps, ppe)
 	}

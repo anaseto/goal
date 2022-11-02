@@ -81,9 +81,9 @@ type Expr interface {
 
 // AstConst represents a constant.
 type AstConst struct {
-	ID   int
-	Pos  int
-	Argc int
+	ID   int // identifier
+	Pos  int // position information
+	Argc int // argument count: 0 (push), >0 (apply)
 }
 
 // AstGlobal represents a global variable read.
@@ -278,5 +278,5 @@ const (
 
 func (tok ppToken) ppNode()     {}
 func (pps ppStrand) ppNode()    {}
-func (pps ppParenExpr) ppNode() {}
+func (ppp ppParenExpr) ppNode() {}
 func (ppb ppBlock) ppNode()     {}

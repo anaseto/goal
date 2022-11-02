@@ -71,7 +71,7 @@ func testParser() {
 	p := &parser{}
 	p.Init(&Scanner{reader: sr})
 	fmt.Println(s)
-	exprs, err := p.Next()
+	exprs, _, err := p.Next()
 	if err != nil {
 		fmt.Printf("parser:%v", err)
 	}

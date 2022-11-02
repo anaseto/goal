@@ -87,7 +87,7 @@ const (
 	VString                // $
 	VNub                   // ?
 	VType                  // @
-	VValues                // . (from string or map)
+	VEval                  // .
 )
 
 // Dyad represents built-in 1-symbol binary operators.
@@ -100,8 +100,8 @@ const (
 	VMultiply             // *
 	VDivide               // %
 	VMod                  // !
-	VAnd                  // &
-	VOr                   // |
+	VMin                  // &
+	VMax                  // |
 	VLess                 // <
 	VMore                 // >
 	VEqual                // =

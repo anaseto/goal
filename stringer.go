@@ -27,12 +27,12 @@ func _() {
 	_ = x[VString-16]
 	_ = x[VNub-17]
 	_ = x[VType-18]
-	_ = x[VValues-19]
+	_ = x[VEval-19]
 }
 
-const _Monad_name = "VReturnVFlipVNegateVFirstVClassifyVEnumVWhereVReverseVAscendVDescendVGroupVNotVEnlistVSortVLenVFloorVStringVNubVTypeVValues"
+const _Monad_name = "VReturnVFlipVNegateVFirstVClassifyVEnumVWhereVReverseVAscendVDescendVGroupVNotVEnlistVSortVLenVFloorVStringVNubVTypeVEval"
 
-var _Monad_index = [...]uint8{0, 7, 12, 19, 25, 34, 39, 45, 53, 60, 68, 74, 78, 85, 90, 94, 100, 107, 111, 116, 123}
+var _Monad_index = [...]uint8{0, 7, 12, 19, 25, 34, 39, 45, 53, 60, 68, 74, 78, 85, 90, 94, 100, 107, 111, 116, 121}
 
 func (i Monad) String() string {
 	if i < 0 || i >= Monad(len(_Monad_index)-1) {
@@ -50,8 +50,8 @@ func _() {
 	_ = x[VMultiply-3]
 	_ = x[VDivide-4]
 	_ = x[VMod-5]
-	_ = x[VAnd-6]
-	_ = x[VOr-7]
+	_ = x[VMin-6]
+	_ = x[VMax-7]
 	_ = x[VLess-8]
 	_ = x[VMore-9]
 	_ = x[VEqual-10]
@@ -66,9 +66,9 @@ func _() {
 	_ = x[VApplyN-19]
 }
 
-const _Dyad_name = "VRightVAddVSubtractVMultiplyVDivideVModVAndVOrVLessVMoreVEqualVMatchVConcatVCutVTakeVDropVCastVFindVApplyVApplyN"
+const _Dyad_name = "VRightVAddVSubtractVMultiplyVDivideVModVMinVMaxVLessVMoreVEqualVMatchVConcatVCutVTakeVDropVCastVFindVApplyVApplyN"
 
-var _Dyad_index = [...]uint8{0, 6, 10, 19, 28, 35, 39, 43, 46, 51, 56, 62, 68, 75, 79, 84, 89, 94, 99, 105, 112}
+var _Dyad_index = [...]uint8{0, 6, 10, 19, 28, 35, 39, 43, 47, 52, 57, 63, 69, 76, 80, 85, 90, 95, 100, 106, 113}
 
 func (i Dyad) String() string {
 	if i < 0 || i >= Dyad(len(_Dyad_index)-1) {
