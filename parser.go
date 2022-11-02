@@ -23,6 +23,12 @@ func (p *Parser) Init(s *Scanner) {
 	p.argc = 0
 }
 
+func (p *Parser) errorf(format string, a ...interface{}) error {
+	// TODO: in case of error, read the file again to get from pos the line
+	// and print the line that produced the error with some column marker.
+	return fmt.Errorf("error:%d:"+format, append([]interface{}{p.pos}, a...))
+}
+
 func (p *Parser) scope() *AstLambdaCode {
 	if len(p.scopeStack) == 0 {
 		return nil
@@ -82,6 +88,7 @@ func (p *Parser) ppExpr(ppe ppExpr) error {
 			return err
 		}
 	}
+	// unreachable
 	return nil
 }
 
@@ -127,7 +134,7 @@ func (p *Parser) ppToken(tok ppToken) error {
 	case ppVERB:
 		return p.ppVerb(tok)
 	case ppADVERB:
-		return nil
+		return p.ppAdVerb(tok)
 	default:
 		// should not happen
 		return p.errorf("unexpected token type:%v", tok.Type)
@@ -198,8 +205,29 @@ func (p *Parser) ppVerb(tok ppToken) error {
 				p.argc += argc
 			}
 		case ppStrand:
+			p.it.Next()
+			p.argc = 0
+			err := p.ppStrand(ppe)
+			if err != nil {
+				return err
+			}
+			p.argc += argc
 		case ppParenExpr:
+			p.it.Next()
+			p.argc = 0
+			err := p.ppParenExpr(ppe)
+			if err != nil {
+				return err
+			}
+			p.argc += argc
 		case ppBlock:
+			p.it.Next()
+			p.argc = 0
+			err := p.ppBlock(ppe)
+			if err != nil {
+				return err
+			}
+			p.argc += argc
 		}
 	}
 	switch p.argc {
@@ -217,8 +245,8 @@ func (p *Parser) ppVerb(tok ppToken) error {
 			Pos:  tok.Pos,
 			Argc: p.argc,
 		})
-		p.argc = 1
 	}
+	p.argc = 1
 	return nil
 }
 
@@ -314,10 +342,9 @@ func parseMonad(s string) (verb Monad) {
 	return verb
 }
 
-func (p *Parser) errorf(format string, a ...interface{}) error {
-	// TODO: in case of error, read the file again to get from pos the line
-	// and print the line that produced the error with some column marker.
-	return fmt.Errorf("error:%d:"+format, append([]interface{}{p.pos}, a...))
+func (p *Parser) ppAdVerb(tok ppToken) error {
+	// TODO
+	return nil
 }
 
 // parser builds a ppExpr pre-AST.
