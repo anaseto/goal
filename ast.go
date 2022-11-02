@@ -41,17 +41,16 @@ type AstLambdaCode struct {
 	nVars int // number of variables
 }
 
-// Local represents a lambda's parameter. It can be an argument or
-// local variable.
+// Local represents either an argument or a local variable.
 type Local struct {
 	Type LocalType
 	ID   int
 }
 
-// LocalType represents different kinds of parameters.
+// LocalType represents different kinds of locals.
 type LocalType int
 
-// These constants describe the supported kinds of parameters.
+// These constants describe the supported kinds of locals.
 const (
 	LocalArg LocalType = iota
 	LocalVar
