@@ -178,8 +178,7 @@ type ppExpr interface {
 	ppNode()
 }
 
-// ppExprs is used to represent a whole expression or a parenthesized
-// sub-expression.
+// ppExprs is used to represent a whole expression. It is not a ppExpr.
 type ppExprs []ppExpr
 
 // ppIter is an iterator for ppExprs slices, with peek functionality.
@@ -245,25 +244,27 @@ const (
 
 type ppStrand []ppToken // for stranding, like 1 23 456
 
+type ppParenExpr ppExprs // for parenthesized sub-expressions
+
 type ppBlock struct {
-	Type    ppBlockType
-	ppexprs []ppExprs
+	Type ppBlockType
+	Body []ppExprs
 }
 
 func (ppb ppBlock) String() (s string) {
 	switch ppb.Type {
 	case ppLAMBDA:
-		s = fmt.Sprintf("{%v %v}", ppb.Type, ppb.ppexprs)
+		s = fmt.Sprintf("{%v %v}", ppb.Type, ppb.Body)
 	case ppARGS:
-		s = fmt.Sprintf("[%v %v]", ppb.Type, ppb.ppexprs)
+		s = fmt.Sprintf("[%v %v]", ppb.Type, ppb.Body)
 	case ppLIST:
-		s = fmt.Sprintf("(%v %v)", ppb.Type, ppb.ppexprs)
+		s = fmt.Sprintf("(%v %v)", ppb.Type, ppb.Body)
 	}
 	return s
 }
 
 func (ppb ppBlock) push(ppe ppExpr) {
-	ppb.ppexprs[len(ppb.ppexprs)-1] = append(ppb.ppexprs[len(ppb.ppexprs)-1], ppe)
+	ppb.Body[len(ppb.Body)-1] = append(ppb.Body[len(ppb.Body)-1], ppe)
 }
 
 type ppBlockType int
@@ -275,7 +276,7 @@ const (
 	ppLIST
 )
 
-func (tok ppToken) ppNode()  {}
-func (pps ppStrand) ppNode() {}
-func (pps ppExprs) ppNode()  {}
-func (ppb ppBlock) ppNode()  {}
+func (tok ppToken) ppNode()     {}
+func (pps ppStrand) ppNode()    {}
+func (pps ppParenExpr) ppNode() {}
+func (ppb ppBlock) ppNode()     {}

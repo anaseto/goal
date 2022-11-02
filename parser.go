@@ -44,7 +44,7 @@ func (p *Parser) Next() ([]Expr, error) {
 				return nil, err
 			}
 		case ppStrand:
-		case ppExprs:
+		case ppParenExpr:
 		case ppBlock:
 		}
 	}
@@ -94,6 +94,10 @@ func (p *Parser) ppToken(tok ppToken, it ppIter) (ppIter, error) {
 			p.argc = 1
 		}
 		return it, nil
+	case ppVERB:
+		return it, nil
+	case ppADVERB:
+		return it, nil
 	default:
 		// should not happen
 		return it, p.errorf("unexpected token type:%v", tok.Type)
@@ -109,10 +113,10 @@ func (p *Parser) ppGlobal(tok ppToken) {
 }
 
 func (p *Parser) ppLocal(tok ppToken) {
-	param, ok := p.scope().local(tok.Text)
+	local, ok := p.scope().local(tok.Text)
 	if ok {
 		p.prog.pushExpr(AstLocal{
-			Name: tok.Text, Local: param,
+			Name: tok.Text, Local: local,
 			Pos: tok.Pos, Argc: p.argc,
 		})
 		return
@@ -263,7 +267,7 @@ func (p *parser) ppExpr() (ppExpr, error) {
 func (p *parser) ppExprBlock() (ppExpr, error) {
 	p.depth = append(p.depth, p.token)
 	ppb := ppBlock{}
-	ppb.ppexprs = []ppExprs{}
+	ppb.Body = []ppExprs{}
 	switch p.token.Type {
 	case LEFTBRACE:
 		ppb.Type = ppLAMBDA
@@ -277,7 +281,7 @@ func (p *parser) ppExprBlock() (ppExpr, error) {
 	case LEFTPAREN:
 		ppb.Type = ppLIST
 	}
-	ppb.ppexprs = append(ppb.ppexprs, ppExprs{})
+	ppb.Body = append(ppb.Body, ppExprs{})
 	for {
 		ppe, err := p.ppExpr()
 		if err != nil {
@@ -290,21 +294,21 @@ func (p *parser) ppExprBlock() (ppExpr, error) {
 		}
 		switch tok.Type {
 		case ppCLOSE:
-			ppRev(ppb.ppexprs[len(ppb.ppexprs)-1])
-			if ppb.Type == ppLIST && len(ppb.ppexprs) == 1 &&
-				len(ppb.ppexprs[0]) > 0 {
+			ppRev(ppb.Body[len(ppb.Body)-1])
+			if ppb.Type == ppLIST && len(ppb.Body) == 1 &&
+				len(ppb.Body[0]) > 0 {
 				// not a list, but a parenthesized
 				// expression.
-				return ppb.ppexprs[0], nil
+				return ppParenExpr(ppb.Body[0]), nil
 			}
 			return ppb, nil
 		case ppEOF:
-			ppRev(ppb.ppexprs[len(ppb.ppexprs)-1])
+			ppRev(ppb.Body[len(ppb.Body)-1])
 			opTok := p.depth[len(p.depth)-1]
 			return ppb, p.errorf("syntax:unexpected EOF without closing previous %s at %d", opTok.Type.String(), opTok.Pos)
 		case ppSEP:
-			ppRev(ppb.ppexprs[len(ppb.ppexprs)-1])
-			ppb.ppexprs = append(ppb.ppexprs, ppExprs{})
+			ppRev(ppb.Body[len(ppb.Body)-1])
+			ppb.Body = append(ppb.Body, ppExprs{})
 		default:
 			ppb.push(ppe)
 		}
