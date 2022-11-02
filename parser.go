@@ -142,8 +142,9 @@ func parseNumber(s string) (V, error) {
 type parser struct {
 	ctx    *Context // unused (for now)
 	s      *Scanner
-	token  Token
-	pToken Token
+	token  Token // current token
+	pToken Token // peeked token
+	oToken Token // old (previous) token
 	depth  []Token
 	peeked bool
 }
@@ -170,6 +171,7 @@ func (p *parser) peek() Token {
 }
 
 func (p *parser) next() Token {
+	p.oToken = p.token
 	if p.peeked {
 		p.token = p.pToken
 		p.peeked = false
@@ -266,7 +268,12 @@ func (p *parser) ppExprBlock() (ppExpr, error) {
 	case LEFTBRACE:
 		ppb.Type = ppLAMBDA
 	case LEFTBRACKET:
-		ppb.Type = ppARGS
+		switch p.oToken.Type {
+		case NEWLINE, SEMICOLON, LEFTBRACKET, LEFTPAREN:
+			ppb.Type = ppSEQ
+		default:
+			ppb.Type = ppARGS
+		}
 	case LEFTPAREN:
 		ppb.Type = ppLIST
 	}

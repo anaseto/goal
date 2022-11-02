@@ -156,12 +156,13 @@ func _() {
 	var x [1]struct{}
 	_ = x[ppLAMBDA-0]
 	_ = x[ppARGS-1]
-	_ = x[ppLIST-2]
+	_ = x[ppSEQ-2]
+	_ = x[ppLIST-3]
 }
 
-const _ppBlockType_name = "ppLAMBDAppARGSppLIST"
+const _ppBlockType_name = "ppLAMBDAppARGSppSEQppLIST"
 
-var _ppBlockType_index = [...]uint8{0, 8, 14, 20}
+var _ppBlockType_index = [...]uint8{0, 8, 14, 19, 25}
 
 func (i ppBlockType) String() string {
 	if i < 0 || i >= ppBlockType(len(_ppBlockType_index)-1) {

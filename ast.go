@@ -271,6 +271,7 @@ type ppBlockType int
 const (
 	ppLAMBDA ppBlockType = iota
 	ppARGS
+	ppSEQ
 	ppLIST
 )
 
