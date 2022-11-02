@@ -6,11 +6,10 @@ import "fmt"
 type AstProgram struct {
 	Body      []Expr           // program body AST
 	Constants []V              // constants indexed by ID
-	Globals   []V              // globals indexed by ID
+	Globals   map[string]int   // name: ID
 	Lambdas   []*AstLambdaCode // list of user defined lambdas
 
-	constants map[string]int // for generating symbols
-	globals   map[string]int // for generating symbols
+	nglobals int // number of globals
 }
 
 func (prog *AstProgram) storeConst(v V) int {
@@ -23,26 +22,56 @@ func (prog *AstProgram) pushExpr(e Expr) {
 }
 
 func (prog *AstProgram) global(s string) int {
-	id, ok := prog.globals[s]
+	id, ok := prog.Globals[s]
 	if ok {
 		return id
 	}
-	prog.Globals = append(prog.Globals, nil)
-	prog.globals[s] = len(prog.Globals) - 1
-	return len(prog.Globals) - 1
+	prog.Globals[s] = prog.nglobals
+	prog.nglobals++
+	return prog.nglobals - 1
 }
 
 // AstLambdaCode represents an user defined lambda like {x+1}.
 type AstLambdaCode struct {
-	Body         []Expr // body AST
-	Args         []Symbol
-	ParentLocals []Symbol
-	Locals       []Symbol
-	Pos          int
+	Body      []Expr           // body AST
+	Params    map[string]Param // arguments and locals
+	NamedArgs bool
+	Pos       int
 
-	args         map[string]int // for generating symbols
-	parentLocals map[string]int // for generating symbols
-	locals       map[string]int // for generating symbols
+	nLocals int
+}
+
+// Param represents a lambda's parameter. It can be an argument or
+// local variable.
+type Param struct {
+	Type ParamType
+	ID   int
+}
+
+// ParamType represents different kinds of parameters.
+type ParamType int
+
+// These constants describe the supported kinds of parameters.
+const (
+	ParamArg ParamType = iota
+	ParamLocal
+)
+
+func (l *AstLambdaCode) local(s string) (Param, bool) {
+	param, ok := l.Params[s]
+	if ok {
+		return param, true
+	}
+	if !l.NamedArgs && len(s) == 1 {
+		switch r := rune(s[0]); r {
+		case 'x', 'y', 'z':
+			id := r - 'x'
+			arg := Param{Type: ParamArg, ID: int(id)}
+			l.Params[s] = arg
+			return arg, true
+		}
+	}
+	return Param{}, false
 }
 
 // Expr is used to represent the AST of the program with stack-like
@@ -68,20 +97,10 @@ type AstGlobal struct {
 
 // AstLocal represents a local variable read.
 type AstLocal struct {
-	Name string
-	ID   int
-	Pos  int
-	Argc int
-}
-
-// AstParentLocal represents a local variable read from the
-// parent function. It will actually be passed as an argument,
-// and work like a local, but treated separately in parsing.
-type AstParentLocal struct {
-	Name string
-	ID   int
-	Pos  int
-	Argc int
+	Name  string
+	Param Param
+	Pos   int
+	Argc  int
 }
 
 // AstAssignGlobal represents a global variable assignment.
@@ -93,9 +112,9 @@ type AstAssignGlobal struct {
 
 // AstAssignLocal represents a local variable assignment.
 type AstAssignLocal struct {
-	Name string
-	ID   int
-	Pos  int
+	Name  string
+	Param Param
+	Pos   int
 }
 
 // AstMonad represents a monadic verb.
@@ -139,16 +158,9 @@ type AstCond struct {
 // value of the previous expression.
 type AstDrop struct{}
 
-// Symbol represents an identifier name along its ID.
-type Symbol struct {
-	Name string
-	ID   int
-}
-
 func (n AstConst) node()        {}
 func (n AstGlobal) node()       {}
 func (n AstLocal) node()        {}
-func (n AstParentLocal) node()  {}
 func (n AstAssignGlobal) node() {}
 func (n AstAssignLocal) node()  {}
 func (n AstCond) node()         {}

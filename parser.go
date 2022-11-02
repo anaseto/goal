@@ -7,12 +7,11 @@ import (
 
 // Parser builds an Expr AST from a ppExpr.
 type Parser struct {
-	pp     *parser
-	prog   *AstProgram
-	argc   int
-	pscope *AstLambdaCode
-	scope  *AstLambdaCode
-	pos    int
+	pp         *parser
+	prog       *AstProgram
+	argc       int
+	scopeStack []*AstLambdaCode
+	pos        int
 }
 
 func (p *Parser) Init(s *Scanner) {
@@ -21,6 +20,13 @@ func (p *Parser) Init(s *Scanner) {
 	p.pp = pp
 	p.prog = &AstProgram{}
 	p.argc = 0
+}
+
+func (p *Parser) scope() *AstLambdaCode {
+	if len(p.scopeStack) == 0 {
+		return nil
+	}
+	return p.scopeStack[len(p.scopeStack)-1]
 }
 
 func (p *Parser) Next() ([]Expr, error) {
@@ -73,13 +79,16 @@ func (p *Parser) ppToken(tok ppToken, it ppIter) (ppIter, error) {
 		p.argc = 1
 		return it, nil
 	case ppIDENT:
-		if p.scope == nil {
+		// read or apply, not assign
+		if p.scope() == nil {
+			// global scope: global variable
 			p.ppGlobal(tok)
 			if p.argc == 0 {
 				p.argc = 1
 			}
 			return it, nil
 		}
+		// local scope: argument, local or global variable
 		p.ppLocal(tok)
 		if p.argc == 0 {
 			p.argc = 1
@@ -100,23 +109,13 @@ func (p *Parser) ppGlobal(tok ppToken) {
 }
 
 func (p *Parser) ppLocal(tok ppToken) {
-	id, ok := p.scope.locals[tok.Text]
+	param, ok := p.scope().local(tok.Text)
 	if ok {
 		p.prog.pushExpr(AstLocal{
-			Name: tok.Text, ID: id,
+			Name: tok.Text, Param: param,
 			Pos: tok.Pos, Argc: p.argc,
 		})
 		return
-	}
-	if p.pscope != nil {
-		id, ok := p.pscope.locals[tok.Text]
-		if ok {
-			p.prog.pushExpr(AstParentLocal{
-				Name: tok.Text, ID: id,
-				Pos: tok.Pos, Argc: p.argc,
-			})
-			return
-		}
 	}
 	p.ppGlobal(tok)
 }
