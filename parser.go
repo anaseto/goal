@@ -87,6 +87,11 @@ func (p *Parser) ppExpr(ppe ppExpr) error {
 		if err != nil {
 			return err
 		}
+	case ppLambdaArgs:
+		err := p.ppLambdaArgs(ppe)
+		if err != nil {
+			return err
+		}
 	}
 	// unreachable
 	return nil
@@ -428,6 +433,11 @@ func (p *Parser) ppLambda(body []ppExprs) error {
 	return nil
 }
 
+func (p *Parser) ppLambdaArgs(args ppLambdaArgs) error {
+	// TODO
+	return nil
+}
+
 func (p *Parser) ppArgs(body []ppExprs) error {
 	// TODO
 	return nil
@@ -504,8 +514,8 @@ func (p *parser) Next() (ppExprs, bool, error) {
 	}
 }
 
-func closeToken(op TokenType) TokenType {
-	switch op {
+func closeToken(opTok TokenType) TokenType {
+	switch opTok {
 	case LEFTBRACE:
 		return RIGHTBRACE
 	case LEFTBRACKET:
@@ -513,7 +523,7 @@ func closeToken(op TokenType) TokenType {
 	case LEFTPAREN:
 		return RIGHTPAREN
 	default:
-		panic(fmt.Sprintf("not an opening token:%s", op.String()))
+		panic(fmt.Sprintf("not an opening token:%s", opTok.String()))
 	}
 }
 
@@ -524,9 +534,9 @@ func (p *parser) ppExpr() (ppExpr, error) {
 	case NEWLINE, SEMICOLON:
 		return ppToken{Type: ppSEP, Pos: tok.Pos}, nil
 	case ERROR:
-		return nil, p.errorf("invalid token:%s:%s", tok.Type, tok.Text)
+		return nil, p.errorf("error token: %s", tok)
 	case ADVERB:
-		return nil, p.errorf("syntax:adverb %s at start of expression", tok.Text)
+		return nil, p.errorf("adverb %s at start of expression", tok)
 	case IDENT:
 		return ppToken{Type: ppIDENT, Pos: tok.Pos, Text: tok.Text}, nil
 	case LEFTBRACE, LEFTBRACKET, LEFTPAREN:
@@ -548,12 +558,12 @@ func (p *parser) ppExpr() (ppExpr, error) {
 		}
 	case RIGHTBRACE, RIGHTBRACKET, RIGHTPAREN:
 		if len(p.depth) == 0 {
-			return nil, p.errorf("syntax:unexpected %s without opening matching pair", tok.Text)
+			return nil, p.errorf("unexpected %s without opening matching pair", tok)
 		}
 		opTok := p.depth[len(p.depth)-1]
 		clTokt := closeToken(opTok.Type)
 		if clTokt != tok.Type {
-			return nil, p.errorf("syntax:unexpected %s without closing previous %s at %d", tok.Text, opTok.Type.String(), opTok.Pos)
+			return nil, p.errorf("unexpected %s without closing previous %s at %d", tok, opTok, opTok.Pos)
 		}
 		p.depth = p.depth[:len(p.depth)-1]
 		return ppToken{Type: ppCLOSE, Pos: tok.Pos}, nil
@@ -561,7 +571,7 @@ func (p *parser) ppExpr() (ppExpr, error) {
 		return ppToken{Type: ppVERB, Pos: tok.Pos, Text: tok.Text}, nil
 	default:
 		// should not happen
-		return nil, p.errorf("invalid token type:%s:%s", tok.Type, tok.Text)
+		return nil, p.errorf("invalid token '%s' of type %d", tok.Text, tok.Type)
 	}
 }
 
@@ -575,8 +585,9 @@ func (p *parser) ppExprBlock() (ppExpr, error) {
 		case NEWLINE, SEMICOLON, LEFTBRACKET, LEFTPAREN:
 			bt = ppSEQ
 		case LEFTBRACE:
-			return p.ppArgs()
+			return p.ppLambdaArgs()
 		default:
+			// arguments being applied to something
 			bt = ppARGS
 		}
 	case LEFTPAREN:
@@ -610,7 +621,7 @@ func (p *parser) ppExprBlock() (ppExpr, error) {
 		case ppEOF:
 			ppRev(ppb.Body[len(ppb.Body)-1])
 			opTok := p.depth[len(p.depth)-1]
-			return ppb, p.errorf("syntax:unexpected EOF without closing previous %s at %d", opTok.Type.String(), opTok.Pos)
+			return ppb, p.errorf("unexpected EOF without closing previous %s at %d", opTok, opTok.Pos)
 		case ppSEP:
 			ppRev(ppb.Body[len(ppb.Body)-1])
 			ppb.Body = append(ppb.Body, ppExprs{})
@@ -620,30 +631,32 @@ func (p *parser) ppExprBlock() (ppExpr, error) {
 	}
 }
 
-func (p *parser) ppArgs() (ppExpr, error) {
-	args := ppArgs{}
+func (p *parser) ppLambdaArgs() (ppExpr, error) {
+	// p.token.Type is LEFTBRACKET
+	args := ppLambdaArgs{}
 	for {
 		p.next()
 		switch p.token.Type {
 		case IDENT:
 			args = append(args, p.token.Text)
-		case RIGHTBRACE:
+		case RIGHTBRACKET:
 			return args, nil
 		default:
-			return args, p.errorf("unexpected token type:%v", p.token.Type)
+			return args, p.errorf("expected identifier or ] but got %s", p.token)
 		}
 		p.next()
 		switch p.token.Type {
-		case RIGHTBRACE:
+		case RIGHTBRACKET:
 			return args, nil
 		case SEMICOLON:
 		default:
-			return args, p.errorf("expected semicolon")
+			return args, p.errorf("expected ; or ] but got %s", p.token)
 		}
 	}
 }
 
 func (p *parser) ppExprStrand() (ppExpr, error) {
+	// p.token.Type is NUMBER or STRING for current and peek
 	ppb := ppStrand{}
 	for {
 		switch p.token.Type {

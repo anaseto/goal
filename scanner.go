@@ -15,6 +15,33 @@ type Token struct {
 	Text string    // content text (identifier, string, number)
 }
 
+func (t Token) String() string {
+	switch t.Type {
+	case ERROR:
+		return "error:" + t.Text
+	case ADVERB, IDENT, VERB, NUMBER:
+		return t.Text
+	case LEFTBRACE:
+		return "{"
+	case LEFTBRACKET:
+		return "["
+	case LEFTPAREN:
+		return "("
+	case RIGHTBRACE:
+		return "}"
+	case RIGHTBRACKET:
+		return "]"
+	case RIGHTPAREN:
+		return ")"
+	case SEMICOLON:
+		return ";"
+	case STRING:
+		return "\"" + t.Text + "\""
+	default:
+		return t.Type.String()
+	}
+}
+
 type TokenType int
 
 const (

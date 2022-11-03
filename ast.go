@@ -280,14 +280,14 @@ const (
 	ppLIST
 )
 
-type ppArgs []string
+type ppLambdaArgs []string
 
-func (ppa ppArgs) String() (s string) {
+func (ppa ppLambdaArgs) String() (s string) {
 	return "[ARGS: " + strings.Join([]string(ppa), ";") + "]"
 }
 
-func (tok ppToken) ppNode()     {}
-func (pps ppStrand) ppNode()    {}
-func (ppp ppParenExpr) ppNode() {}
-func (ppb ppBlock) ppNode()     {}
-func (ppa ppArgs) ppNode()      {}
+func (tok ppToken) ppNode()      {}
+func (pps ppStrand) ppNode()     {}
+func (ppp ppParenExpr) ppNode()  {}
+func (ppb ppBlock) ppNode()      {}
+func (ppa ppLambdaArgs) ppNode() {}
