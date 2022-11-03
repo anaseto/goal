@@ -137,23 +137,8 @@ func (p *Parser) ppToken(tok ppToken) error {
 		return p.ppAdVerb(tok)
 	default:
 		// should not happen
-		return p.errorf("unexpected token type:%v", tok.Type)
+		return p.errorf("unexpected token type: %v", tok.Type)
 	}
-}
-
-func (p *Parser) ppStrand(pps ppStrand) error {
-	// TODO
-	return nil
-}
-
-func (p *Parser) ppParenExpr(ppp ppParenExpr) error {
-	// TODO
-	return nil
-}
-
-func (p *Parser) ppBlock(ppb ppBlock) error {
-	// TODO
-	return nil
 }
 
 func parseNumber(s string) (V, error) {
@@ -201,6 +186,7 @@ func (p *Parser) ppVerb(tok ppToken) error {
 			switch ppe.Type {
 			case ppIDENT:
 				if p.ppAssign(tok, ppe) {
+					p.it.Next()
 					return nil
 				}
 				fallthrough
@@ -387,6 +373,72 @@ func parseMonad(s string) (verb Monad) {
 }
 
 func (p *Parser) ppAdVerb(tok ppToken) error {
+	// TODO: parse adverbs
+	return nil
+}
+
+func (p *Parser) ppStrand(pps ppStrand) error {
+	a := make(AV, 0, len(pps))
+	for _, tok := range pps {
+		switch tok.Type {
+		case ppNUMBER:
+			v, err := parseNumber(tok.Text)
+			if err != nil {
+				return p.errorf("string syntax: %v", err)
+			}
+			a = append(a, v)
+		case ppSTRING:
+			s, err := strconv.Unquote(tok.Text)
+			if err != nil {
+				return p.errorf("string syntax: %v", err)
+			}
+			a = append(a, S(s))
+		}
+	}
+	id := p.prog.storeConst(canonical(a))
+	// len(pps) > 0
+	p.prog.pushExpr(AstConst{ID: id, Pos: pps[0].Pos, Argc: p.argc})
+	p.argc = 1
+	return nil
+}
+
+func (p *Parser) ppParenExpr(ppp ppParenExpr) error {
+	it, err := p.ppExprs(ppExprs(ppp))
+	p.it = it
+	return err
+}
+
+func (p *Parser) ppBlock(ppb ppBlock) error {
+	switch ppb.Type {
+	case ppLAMBDA:
+		return p.ppLambda(ppb.Body)
+	case ppARGS:
+		return p.ppArgs(ppb.Body)
+	case ppSEQ:
+		return p.ppSeq(ppb.Body)
+	case ppLIST:
+		return p.ppList(ppb.Body)
+	default:
+		panic(fmt.Sprintf("unknown block type: %d", ppb.Type))
+	}
+}
+
+func (p *Parser) ppLambda(body []ppExprs) error {
+	// TODO
+	return nil
+}
+
+func (p *Parser) ppArgs(body []ppExprs) error {
+	// TODO
+	return nil
+}
+
+func (p *Parser) ppSeq(body []ppExprs) error {
+	// TODO
+	return nil
+}
+
+func (p *Parser) ppList(body []ppExprs) error {
 	// TODO
 	return nil
 }
@@ -514,22 +566,26 @@ func (p *parser) ppExpr() (ppExpr, error) {
 }
 
 func (p *parser) ppExprBlock() (ppExpr, error) {
-	p.depth = append(p.depth, p.token)
-	ppb := ppBlock{}
-	ppb.Body = []ppExprs{}
+	var bt ppBlockType
 	switch p.token.Type {
 	case LEFTBRACE:
-		ppb.Type = ppLAMBDA
+		bt = ppLAMBDA
 	case LEFTBRACKET:
 		switch p.oToken.Type {
 		case NEWLINE, SEMICOLON, LEFTBRACKET, LEFTPAREN:
-			ppb.Type = ppSEQ
+			bt = ppSEQ
+		case LEFTBRACE:
+			return p.ppArgs()
 		default:
-			ppb.Type = ppARGS
+			bt = ppARGS
 		}
 	case LEFTPAREN:
-		ppb.Type = ppLIST
+		bt = ppLIST
 	}
+	p.depth = append(p.depth, p.token)
+	ppb := ppBlock{}
+	ppb.Type = bt
+	ppb.Body = []ppExprs{}
 	ppb.Body = append(ppb.Body, ppExprs{})
 	for {
 		ppe, err := p.ppExpr()
@@ -560,6 +616,29 @@ func (p *parser) ppExprBlock() (ppExpr, error) {
 			ppb.Body = append(ppb.Body, ppExprs{})
 		default:
 			ppb.push(ppe)
+		}
+	}
+}
+
+func (p *parser) ppArgs() (ppExpr, error) {
+	args := ppArgs{}
+	for {
+		p.next()
+		switch p.token.Type {
+		case IDENT:
+			args = append(args, p.token.Text)
+		case RIGHTBRACE:
+			return args, nil
+		default:
+			return args, p.errorf("unexpected token type:%v", p.token.Type)
+		}
+		p.next()
+		switch p.token.Type {
+		case RIGHTBRACE:
+			return args, nil
+		case SEMICOLON:
+		default:
+			return args, p.errorf("expected semicolon")
 		}
 	}
 }

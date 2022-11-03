@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // AstProgram represents a program written in goal.
 type AstProgram struct {
@@ -277,7 +280,14 @@ const (
 	ppLIST
 )
 
+type ppArgs []string
+
+func (ppa ppArgs) String() (s string) {
+	return "[ARGS: " + strings.Join([]string(ppa), ";") + "]"
+}
+
 func (tok ppToken) ppNode()     {}
 func (pps ppStrand) ppNode()    {}
 func (ppp ppParenExpr) ppNode() {}
 func (ppb ppBlock) ppNode()     {}
+func (ppa ppArgs) ppNode()      {}

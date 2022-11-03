@@ -177,3 +177,9 @@ func (r DerivedVerb) Project(vs AV) Projection { return Projection{Fun: r, Args:
 func (p Projection) Project(vs AV) Projection  { return Projection{Fun: p, Args: vs} }
 func (c Composition) Project(vs AV) Projection { return Projection{Fun: c, Args: vs} }
 func (l Lambda) Project(vs AV) Projection      { return Projection{Fun: l, Args: vs} }
+
+// vReturn represents a return.
+type vReturn struct{}
+
+func (rv vReturn) Len() int     { return 1 }
+func (rv vReturn) Type() string { return "return" }
