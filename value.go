@@ -125,6 +125,14 @@ const (
 	AScan               // \
 )
 
+// Variadic represents verbs with variable arity > 2.
+type Variadic int
+
+const (
+	VList Variadic = iota
+	VAmend
+)
+
 // DerivedVerb represents a value modified by an adverb.
 type DerivedVerb struct {
 	Adverb Adverb

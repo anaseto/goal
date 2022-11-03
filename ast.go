@@ -15,13 +15,26 @@ type AstProgram struct {
 	nglobals int // number of globals
 }
 
+func (prog *AstProgram) String() string {
+	sb := &strings.Builder{}
+	fmt.Fprintln(sb, "Instructions:")
+	for _, expr := range prog.Body {
+		fmt.Fprintf(sb, "\t%#v\n", expr)
+	}
+	fmt.Fprintln(sb, "Globals:")
+	for name, id := range prog.Globals {
+		fmt.Fprintf(sb, "\t%s\t%d\n", name, id)
+	}
+	fmt.Fprintln(sb, "Constants:")
+	for id, v := range prog.Constants {
+		fmt.Fprintf(sb, "\t%d\t%v\n", id, v)
+	}
+	return sb.String()
+}
+
 func (prog *AstProgram) storeConst(v V) int {
 	prog.Constants = append(prog.Constants, v)
 	return len(prog.Constants) - 1
-}
-
-func (prog *AstProgram) pushExpr(e Expr) {
-	prog.Body = append(prog.Body, e)
 }
 
 func (prog *AstProgram) global(s string) int {
@@ -85,9 +98,8 @@ type Expr interface {
 
 // AstConst represents a constant.
 type AstConst struct {
-	ID   int // identifier
-	Pos  int // position information
-	Argc int // argument count: 0 (push), >0 (apply)
+	ID  int // identifier
+	Pos int // position information
 }
 
 // AstGlobal represents a global variable read.
@@ -95,7 +107,6 @@ type AstGlobal struct {
 	Name string
 	ID   int
 	Pos  int
-	Argc int
 }
 
 // AstLocal represents a local variable read.
@@ -103,7 +114,6 @@ type AstLocal struct {
 	Name  string
 	Local Local
 	Pos   int
-	Argc  int
 }
 
 // AstAssignGlobal represents a global variable assignment.
@@ -124,37 +134,39 @@ type AstAssignLocal struct {
 type AstMonad struct {
 	Monad Monad
 	Pos   int
-	Argc  int
 }
 
 // AstDyad represents a dyadic verb.
 type AstDyad struct {
 	Dyad Dyad
 	Pos  int
-	Argc int
+}
+
+// AstVariadic represents verbs with variable arity > 2.
+type AstVariadic struct {
+	Variadic Variadic
+	Pos      int
 }
 
 // AstAdverb represents an adverb.
 type AstAdverb struct {
 	Adverb Adverb
 	Pos    int
-	Argc   int
 }
 
 // AstLambda represents an user Lambda.
 type AstLambda struct {
 	Lambda Lambda
-	Pos    int
-	Argc   int
 }
 
-// AstCond represents $[cond; then; else].
-type AstCond struct {
-	If   []Expr
-	Then []Expr
-	Else []Expr
-	Pos  int
-	Argc int
+// AstApply applies the top stack value at the previous, dropping those values
+// and pushing the result. TODO: fast path for builtins.
+type AstApply struct{}
+
+// AstApplyN applies the top stack value at the N previous ones, dropping those
+// values and pushing the result. TODO: fast path for builtins.
+type AstApplyN struct {
+	N int
 }
 
 // AstDrop represents a separator, in practice discarding the final
@@ -166,11 +178,13 @@ func (n AstGlobal) node()       {}
 func (n AstLocal) node()        {}
 func (n AstAssignGlobal) node() {}
 func (n AstAssignLocal) node()  {}
-func (n AstCond) node()         {}
 func (n AstMonad) node()        {}
 func (n AstDyad) node()         {}
 func (n AstAdverb) node()       {}
+func (n AstVariadic) node()     {}
 func (n AstLambda) node()       {}
+func (n AstApply) node()        {}
+func (n AstApplyN) node()       {}
 func (n AstDrop) node()         {}
 
 // ppExpr are built by the first left to right pass, resulting in a tree

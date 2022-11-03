@@ -9,7 +9,7 @@ import (
 type Parser struct {
 	pp         *parser
 	prog       *AstProgram
-	argc       int
+	argc       int // stack length for current sub-expression
 	scopeStack []*AstLambdaCode
 	pos        int
 	it         ppIter
@@ -19,8 +19,43 @@ func (p *Parser) Init(s *Scanner) {
 	pp := &parser{}
 	pp.Init(s)
 	p.pp = pp
-	p.prog = &AstProgram{}
+	p.prog = &AstProgram{
+		Globals: map[string]int{},
+	}
 	p.argc = 0
+}
+
+func (p *Parser) pushExpr(e Expr) {
+	lc := p.scope()
+	if lc != nil {
+		lc.Body = append(lc.Body, e)
+	} else {
+		p.prog.Body = append(p.prog.Body, e)
+	}
+	switch e := e.(type) {
+	case AstApply:
+		// v v -> v
+		p.argc--
+	case AstApplyN:
+		// v ... v v -> v
+		p.argc -= e.N
+	case AstDrop:
+		// v ->
+		p.argc--
+	case AstAssignLocal, AstAssignGlobal:
+	default:
+		// -> v
+		p.argc++
+	}
+}
+
+func (p *Parser) apply() {
+	switch {
+	case p.argc == 2:
+		p.pushExpr(AstApply{})
+	case p.argc > 2:
+		p.pushExpr(AstApplyN{N: p.argc - 1})
+	}
 }
 
 func (p *Parser) errorf(format string, a ...interface{}) error {
@@ -45,24 +80,28 @@ func (p *Parser) Parse() error {
 		if eof {
 			return nil
 		}
-		_, err = p.ppExprs(pps)
+		err = p.ppExprs(pps)
 		if err != nil {
 			return err
 		}
 	}
 }
 
-func (p *Parser) ppExprs(pps ppExprs) (ppIter, error) {
+func (p *Parser) ppExprs(pps ppExprs) error {
+	argc := p.argc
+	p.argc = 0
 	it := p.it
 	p.it = newppIter(pps)
 	for p.it.Next() {
 		ppe := p.it.Expr()
 		err := p.ppExpr(ppe)
 		if err != nil {
-			return it, err
+			return err
 		}
 	}
-	return it, nil
+	p.it = it
+	p.argc = argc
+	return nil
 }
 
 func (p *Parser) ppExpr(ppe ppExpr) error {
@@ -92,8 +131,9 @@ func (p *Parser) ppExpr(ppe ppExpr) error {
 		if err != nil {
 			return err
 		}
+	default:
+		panic(p.errorf("unknown ppExpr type"))
 	}
-	// unreachable
 	return nil
 }
 
@@ -109,8 +149,7 @@ func (p *Parser) ppToken(tok ppToken) error {
 			return p.errorf("number atoms cannot be applied")
 		}
 		id := p.prog.storeConst(v)
-		p.prog.pushExpr(AstConst{ID: id, Pos: tok.Pos, Argc: p.argc})
-		p.argc = 1
+		p.pushExpr(AstConst{ID: id, Pos: tok.Pos})
 		return nil
 	case ppSTRING:
 		s, err := strconv.Unquote(tok.Text)
@@ -121,20 +160,17 @@ func (p *Parser) ppToken(tok ppToken) error {
 			return p.errorf("string atoms cannot be applied")
 		}
 		id := p.prog.storeConst(S(s))
-		p.prog.pushExpr(AstConst{ID: id, Pos: tok.Pos, Argc: p.argc})
-		p.argc = 1
+		p.pushExpr(AstConst{ID: id, Pos: tok.Pos})
 		return nil
 	case ppIDENT:
 		// read or apply, not assign
 		if p.scope() == nil {
 			// global scope: global variable
 			p.ppGlobal(tok)
-			p.argc = 1
 			return nil
 		}
 		// local scope: argument, local or global variable
 		p.ppLocal(tok)
-		p.argc = 1
 		return nil
 	case ppVERB:
 		return p.ppVerb(tok)
@@ -160,23 +196,23 @@ func parseNumber(s string) (V, error) {
 
 func (p *Parser) ppGlobal(tok ppToken) {
 	id := p.prog.global(tok.Text)
-	p.prog.pushExpr(AstGlobal{
+	p.pushExpr(AstGlobal{
 		Name: tok.Text,
 		ID:   id,
 		Pos:  tok.Pos,
-		Argc: p.argc,
 	})
+	p.apply()
 }
 
 func (p *Parser) ppLocal(tok ppToken) {
 	local, ok := p.scope().local(tok.Text)
 	if ok {
-		p.prog.pushExpr(AstLocal{
+		p.pushExpr(AstLocal{
 			Name:  tok.Text,
 			Local: local,
 			Pos:   tok.Pos,
-			Argc:  p.argc,
 		})
+		p.apply()
 		return
 	}
 	p.ppGlobal(tok)
@@ -185,7 +221,8 @@ func (p *Parser) ppLocal(tok ppToken) {
 func (p *Parser) ppVerb(tok ppToken) error {
 	ppe := p.it.Peek()
 	argc := p.argc
-	if ppe != nil {
+	fmt.Printf("argc: %d\ttok: %v\n", argc, tok)
+	if ppe != nil && argc == 1 {
 		switch ppe := ppe.(type) {
 		case ppToken:
 			switch ppe.Type {
@@ -214,7 +251,6 @@ func (p *Parser) ppVerb(tok ppToken) error {
 			p.argc += argc
 		case ppParenExpr:
 			p.it.Next()
-			p.argc = 0
 			err := p.ppParenExpr(ppe)
 			if err != nil {
 				return err
@@ -222,7 +258,6 @@ func (p *Parser) ppVerb(tok ppToken) error {
 			p.argc += argc
 		case ppBlock:
 			p.it.Next()
-			p.argc = 0
 			err := p.ppBlock(ppe)
 			if err != nil {
 				return err
@@ -233,20 +268,19 @@ func (p *Parser) ppVerb(tok ppToken) error {
 	switch p.argc {
 	case 1:
 		monad := parseMonad(tok.Text)
-		p.prog.pushExpr(AstMonad{
+		p.pushExpr(AstMonad{
 			Monad: monad,
 			Pos:   tok.Pos,
-			Argc:  1,
 		})
+		p.apply()
 	default:
 		dyad := parseDyad(tok.Text)
-		p.prog.pushExpr(AstDyad{
+		p.pushExpr(AstDyad{
 			Dyad: dyad,
 			Pos:  tok.Pos,
-			Argc: p.argc,
 		})
+		p.apply()
 	}
-	p.argc = 1
 	return nil
 }
 
@@ -257,31 +291,28 @@ func (p *Parser) ppAssign(verbTok, identTok ppToken) bool {
 	lc := p.scope()
 	if lc == nil {
 		id := p.prog.global(identTok.Text)
-		p.prog.pushExpr(AstAssignGlobal{
+		p.pushExpr(AstAssignGlobal{
 			Name: identTok.Text,
 			ID:   id,
 			Pos:  identTok.Pos,
 		})
-		p.argc = 1
 		return true
 	}
 	local, ok := lc.local(identTok.Text)
 	if ok {
-		p.prog.pushExpr(AstAssignLocal{
+		p.pushExpr(AstAssignLocal{
 			Name:  identTok.Text,
 			Local: local,
 			Pos:   identTok.Pos,
 		})
-		p.argc = 1
 		return true
 	}
-	p.prog.pushExpr(AstAssignLocal{
+	p.pushExpr(AstAssignLocal{
 		Name:  identTok.Text,
 		Local: Local{Type: LocalVar, ID: lc.nVars},
 		Pos:   identTok.Pos,
 	})
 	lc.nVars++
-	p.argc = 1
 	return true
 }
 
@@ -402,14 +433,12 @@ func (p *Parser) ppStrand(pps ppStrand) error {
 	}
 	id := p.prog.storeConst(canonical(a))
 	// len(pps) > 0
-	p.prog.pushExpr(AstConst{ID: id, Pos: pps[0].Pos, Argc: p.argc})
-	p.argc = 1
+	p.pushExpr(AstConst{ID: id, Pos: pps[0].Pos})
 	return nil
 }
 
 func (p *Parser) ppParenExpr(ppp ppParenExpr) error {
-	it, err := p.ppExprs(ppExprs(ppp))
-	p.it = it
+	err := p.ppExprs(ppExprs(ppp))
 	return err
 }
 
@@ -429,27 +458,109 @@ func (p *Parser) ppBlock(ppb ppBlock) error {
 }
 
 func (p *Parser) ppLambda(body []ppExprs) error {
-	// TODO
+	argc := p.argc
+	p.argc = 0
+	lc := &AstLambdaCode{
+		Locals: map[string]Local{},
+	}
+	p.scopeStack = append(p.scopeStack, lc)
+	for _, exprs := range body {
+		err := p.ppExprs(exprs)
+		if err != nil {
+			return err
+		}
+	}
+	p.scopeStack = p.scopeStack[:len(p.scopeStack)-1]
+	id := len(p.prog.Lambdas)
+	p.prog.Lambdas = append(p.prog.Lambdas, lc)
+	p.argc = argc
+	p.pushExpr(AstLambda{Lambda: Lambda(id)})
+	p.apply()
 	return nil
 }
 
 func (p *Parser) ppLambdaArgs(args ppLambdaArgs) error {
-	// TODO
+	lc := p.scope()
+	lc.NamedArgs = true
+	for i, arg := range args {
+		_, ok := lc.Locals[arg]
+		if ok {
+			return p.errorf("name %s appears twice in signature", arg)
+		}
+		lc.Locals[arg] = Local{
+			Type: LocalArg,
+			ID:   i,
+		}
+	}
 	return nil
 }
 
 func (p *Parser) ppArgs(body []ppExprs) error {
+	if len(body) >= 3 {
+		expr := p.it.Peek()
+		switch expr := expr.(type) {
+		case ppToken:
+			if expr.Type == ppVERB && expr.Text == "$" {
+				return p.parseCond(body)
+			}
+		}
+	}
+	argc := p.argc
+	for _, exprs := range body {
+		err := p.ppExprs(exprs)
+		if err != nil {
+			return err
+		}
+	}
+	if !p.it.Next() {
+		// should not happpen: it would be a sequence
+		panic(p.errorf("used as a sequence, but args").Error())
+	}
+	ppe := p.it.Expr()
+	p.argc = len(body)
+	err := p.ppExpr(ppe)
+	if err != nil {
+		return err
+	}
+	if argc > 0 {
+		p.argc = argc + 1
+		p.apply()
+	}
+	return nil
+}
+
+func (p *Parser) parseCond(body []ppExprs) error {
+	panic("TODO: parseCond")
 	// TODO
 	return nil
 }
 
 func (p *Parser) ppSeq(body []ppExprs) error {
-	// TODO
+	argc := p.argc
+	for i, exprs := range body {
+		err := p.ppExprs(exprs)
+		if err != nil {
+			return err
+		}
+		if i < len(body)-1 {
+			p.pushExpr(AstDrop{})
+		}
+	}
+	p.argc = argc
 	return nil
 }
 
 func (p *Parser) ppList(body []ppExprs) error {
-	// TODO
+	argc := p.argc
+	for _, exprs := range body {
+		err := p.ppExprs(exprs)
+		if err != nil {
+			return err
+		}
+	}
+	p.pushExpr(AstVariadic{Variadic: VList})
+	p.pushExpr(AstApplyN{N: len(body)})
+	p.argc = argc
 	return nil
 }
 
