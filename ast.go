@@ -38,10 +38,11 @@ type AstLambdaCode struct {
 	NamedArgs bool             // named arguments instead of x, y, z
 	Pos       int
 
-	nVars int // number of variables
+	nVars int // number of non-argument local variables
 }
 
-// Local represents either an argument or a local variable.
+// Local represents either an argument or a local variable. IDs are
+// unique for a given type only.
 type Local struct {
 	Type LocalType
 	ID   int

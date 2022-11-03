@@ -171,8 +171,10 @@ func parseNumber(s string) (V, error) {
 func (p *Parser) ppGlobal(tok ppToken) {
 	id := p.prog.global(tok.Text)
 	p.prog.pushExpr(AstGlobal{
-		Name: tok.Text, ID: id,
-		Pos: tok.Pos, Argc: p.argc,
+		Name: tok.Text,
+		ID:   id,
+		Pos:  tok.Pos,
+		Argc: p.argc,
 	})
 }
 
@@ -180,8 +182,10 @@ func (p *Parser) ppLocal(tok ppToken) {
 	local, ok := p.scope().local(tok.Text)
 	if ok {
 		p.prog.pushExpr(AstLocal{
-			Name: tok.Text, Local: local,
-			Pos: tok.Pos, Argc: p.argc,
+			Name:  tok.Text,
+			Local: local,
+			Pos:   tok.Pos,
+			Argc:  p.argc,
 		})
 		return
 	}
@@ -195,7 +199,12 @@ func (p *Parser) ppVerb(tok ppToken) error {
 		switch ppe := ppe.(type) {
 		case ppToken:
 			switch ppe.Type {
-			case ppNUMBER, ppSTRING, ppIDENT:
+			case ppIDENT:
+				if p.ppAssign(tok, ppe) {
+					return nil
+				}
+				fallthrough
+			case ppNUMBER, ppSTRING:
 				p.it.Next()
 				p.argc = 0
 				err := p.ppToken(ppe)
@@ -248,6 +257,41 @@ func (p *Parser) ppVerb(tok ppToken) error {
 	}
 	p.argc = 1
 	return nil
+}
+
+func (p *Parser) ppAssign(verbTok, identTok ppToken) bool {
+	if verbTok.Text != ":" || p.argc != 1 {
+		return false
+	}
+	lc := p.scope()
+	if lc == nil {
+		id := p.prog.global(identTok.Text)
+		p.prog.pushExpr(AstAssignGlobal{
+			Name: identTok.Text,
+			ID:   id,
+			Pos:  identTok.Pos,
+		})
+		p.argc = 1
+		return true
+	}
+	local, ok := lc.local(identTok.Text)
+	if ok {
+		p.prog.pushExpr(AstAssignLocal{
+			Name:  identTok.Text,
+			Local: local,
+			Pos:   identTok.Pos,
+		})
+		p.argc = 1
+		return true
+	}
+	p.prog.pushExpr(AstAssignLocal{
+		Name:  identTok.Text,
+		Local: Local{Type: LocalVar, ID: lc.nVars},
+		Pos:   identTok.Pos,
+	})
+	lc.nVars++
+	p.argc = 1
+	return true
 }
 
 func parseDyad(s string) (verb Dyad) {
