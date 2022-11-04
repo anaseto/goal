@@ -506,6 +506,7 @@ func (p *Parser) ppArgs(body []ppExprs) error {
 		}
 	}
 	argc := p.argc
+	bodyRev(body)
 	for _, exprs := range body {
 		err := p.ppExprs(exprs)
 		if err != nil {
@@ -552,6 +553,7 @@ func (p *Parser) ppSeq(body []ppExprs) error {
 
 func (p *Parser) ppList(body []ppExprs) error {
 	argc := p.argc
+	bodyRev(body)
 	for _, exprs := range body {
 		err := p.ppExprs(exprs)
 		if err != nil {
@@ -789,5 +791,11 @@ func (p *parser) ppExprStrand() (ppExpr, error) {
 func ppRev(pps []ppExpr) {
 	for i := 0; i < len(pps)/2; i++ {
 		pps[i], pps[len(pps)-i-1] = pps[len(pps)-i-1], pps[i]
+	}
+}
+
+func bodyRev(body []ppExprs) {
+	for i := 0; i < len(body)/2; i++ {
+		body[i], body[len(body)-i-1] = body[len(body)-i-1], body[i]
 	}
 }
