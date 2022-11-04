@@ -110,7 +110,7 @@ func testCompiler() {
 }
 
 func testVM() {
-	s := "| 23 45 + 1 2;"
+	s := "a:23 13;b:a+5;|b;"
 	sr := strings.NewReader(s)
 	p := &Parser{}
 	p.Init(&Scanner{reader: sr})
