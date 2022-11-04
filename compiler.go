@@ -91,6 +91,8 @@ func (prog *Program) opcodesString(ops []opcode, lc *LambdaCode) string {
 			i++
 		case opApply:
 			fmt.Fprintf(sb, "%d\t%s\n", i, op)
+		case opApply2:
+			fmt.Fprintf(sb, "%d\t%s\n", i, op)
 		case opApplyN:
 			fmt.Fprintf(sb, "%d\t%s\t%d\n", i, op, ops[i+1])
 			i++
@@ -140,10 +142,12 @@ func compileExpr(body []opcode, expr Expr) ([]opcode, bool) {
 		body = append(body, opLambda, opcode(expr.Lambda))
 	case AstApply:
 		body = append(body, opApply)
-	case AstDrop:
-		body = append(body, opDrop)
+	case AstApply2:
+		body = append(body, opApply2)
 	case AstApplyN:
 		body = append(body, opApplyN, opcode(expr.N))
+	case AstDrop:
+		body = append(body, opDrop)
 	default:
 		return body, false
 	}

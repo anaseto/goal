@@ -15,6 +15,7 @@ const (
 	opVariadic
 	opLambda
 	opApply
+	opApply2
 	opApplyN
 	opDrop
 )

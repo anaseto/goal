@@ -178,11 +178,15 @@ type AstLambda struct {
 }
 
 // AstApply applies the top stack value at the previous, dropping those values
-// and pushing the result. TODO: fast path for builtins.
+// and pushing the result.
 type AstApply struct{}
 
-// AstApplyN applies the top stack value at the N previous ones, dropping those
-// values and pushing the result. TODO: fast path for builtins.
+// AstApply2 applies the top stack value at the 2 previous ones, dropping those
+// values and pushing the result.
+type AstApply2 struct{}
+
+// AstApplyN applies the top stack value at the N previous ones, dropping
+// those values and pushing the result.
 type AstApplyN struct {
 	N int
 }
@@ -202,6 +206,7 @@ func (n AstAdverb) node()       {}
 func (n AstVariadic) node()     {}
 func (n AstLambda) node()       {}
 func (n AstApply) node()        {}
+func (n AstApply2) node()       {}
 func (n AstApplyN) node()       {}
 func (n AstDrop) node()         {}
 

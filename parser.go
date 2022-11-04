@@ -36,6 +36,9 @@ func (p *Parser) pushExpr(e Expr) {
 	case AstApply:
 		// v v -> v
 		p.argc--
+	case AstApply2:
+		// v v v -> v
+		p.argc -= 2
 	case AstApplyN:
 		// v ... v v -> v
 		p.argc -= e.N
@@ -53,7 +56,9 @@ func (p *Parser) apply() {
 	switch {
 	case p.argc == 2:
 		p.pushExpr(AstApply{})
-	case p.argc > 2:
+	case p.argc == 3:
+		p.pushExpr(AstApply2{})
+	case p.argc > 3:
 		p.pushExpr(AstApplyN{N: p.argc - 1})
 	}
 }
