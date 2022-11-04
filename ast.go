@@ -17,6 +17,7 @@ type AstProgram struct {
 
 func (prog *AstProgram) String() string {
 	sb := &strings.Builder{}
+	fmt.Fprintln(sb, "---- Program -----\n")
 	fmt.Fprintln(sb, "Instructions:")
 	for _, expr := range prog.Body {
 		fmt.Fprintf(sb, "\t%#v\n", expr)
@@ -28,6 +29,10 @@ func (prog *AstProgram) String() string {
 	fmt.Fprintln(sb, "Constants:")
 	for id, v := range prog.Constants {
 		fmt.Fprintf(sb, "\t%d\t%v\n", id, v)
+	}
+	for id, lc := range prog.Lambdas {
+		fmt.Fprintf(sb, "---- Lambda %d -----\n", id)
+		fmt.Fprintf(sb, "%s", lc)
 	}
 	return sb.String()
 }
@@ -55,6 +60,19 @@ type AstLambdaCode struct {
 	Pos       int
 
 	nVars int // number of non-argument local variables
+}
+
+func (lc *AstLambdaCode) String() string {
+	sb := &strings.Builder{}
+	fmt.Fprintln(sb, "Instructions:")
+	for _, expr := range lc.Body {
+		fmt.Fprintf(sb, "\t%#v\n", expr)
+	}
+	fmt.Fprintln(sb, "Locals:")
+	for name, local := range lc.Locals {
+		fmt.Fprintf(sb, "\t%s\tid:%d\ttype:%d\n", name, local.ID, local.Type)
+	}
+	return sb.String()
 }
 
 // Local represents either an argument or a local variable. IDs are
