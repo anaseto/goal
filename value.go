@@ -1,6 +1,6 @@
 package main
 
-//go:generate stringer -type=Monad,Dyad,Adverb,TokenType,ppTokenType,ppBlockType -output stringer.go
+//go:generate stringer -type=Monad,Dyad,Adverb,TokenType,ppTokenType,ppBlockType,opcode -output stringer.go
 
 // V represents any kind of value.
 type V interface {
@@ -65,7 +65,7 @@ func (x AF) Slice(i, j int) Array { return x[i:j] }
 func (x AS) Slice(i, j int) Array { return x[i:j] }
 
 // Monad represents built-in 1-symbol unary operators.
-type Monad int
+type Monad int32
 
 const (
 	VReturn   Monad = iota // :
@@ -91,7 +91,7 @@ const (
 )
 
 // Dyad represents built-in 1-symbol binary operators.
-type Dyad int
+type Dyad int32
 
 const (
 	VRight    Dyad = iota // :
@@ -117,7 +117,7 @@ const (
 )
 
 // Adverb represents verb modifiers.
-type Adverb int
+type Adverb int32
 
 const (
 	AEach Adverb = iota // '
@@ -126,7 +126,7 @@ const (
 )
 
 // Variadic represents verbs with variable arity > 2.
-type Variadic int
+type Variadic int32
 
 const (
 	VList Variadic = iota
@@ -154,7 +154,7 @@ type Composition struct {
 }
 
 // Lambda represents an user defined function by ID.
-type Lambda int
+type Lambda int32
 
 // Function represents any kind of callable value that can be projected.
 type Function interface {

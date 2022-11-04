@@ -8,8 +8,9 @@ import (
 func main() {
 	//testPrimitives()
 	//testScanner()
-	testPParser()
-	testParser()
+	//testPParser()
+	//testParser()
+	testCompiler()
 }
 
 func testPrimitives() {
@@ -92,4 +93,17 @@ func testParser() {
 		fmt.Printf("parser:%v", err)
 	}
 	fmt.Printf("%s\n", p.prog)
+}
+
+func testCompiler() {
+	s := "23 45 + {(x-23)+|x} 23 43 + fun[2;3];"
+	sr := strings.NewReader(s)
+	p := &Parser{}
+	p.Init(&Scanner{reader: sr})
+	fmt.Println(s)
+	err := p.Parse()
+	if err != nil {
+		fmt.Printf("parser:%v", err)
+	}
+	fmt.Printf("%s\n", Compile(p.prog))
 }

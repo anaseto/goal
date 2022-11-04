@@ -221,7 +221,6 @@ func (p *Parser) ppLocal(tok ppToken) {
 func (p *Parser) ppVerb(tok ppToken) error {
 	ppe := p.it.Peek()
 	argc := p.argc
-	fmt.Printf("argc: %d\ttok: %v\n", argc, tok)
 	if ppe != nil && argc == 1 {
 		switch ppe := ppe.(type) {
 		case ppToken:

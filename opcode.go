@@ -9,10 +9,12 @@ const (
 	opLocal
 	opAssignGlobal
 	opAssignLocal
-	opValue
-	opJumpTrue
-	opJumpFalse
+	opMonad
+	opDyad
+	opAdverb
+	opVariadic
+	opLambda
 	opApply
 	opApplyN
-	opReturn
+	opDrop
 )
