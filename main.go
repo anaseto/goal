@@ -10,7 +10,8 @@ func main() {
 	//testScanner()
 	//testPParser()
 	//testParser()
-	testCompiler()
+	//testCompiler()
+	testVM()
 }
 
 func testPrimitives() {
@@ -106,4 +107,22 @@ func testCompiler() {
 		fmt.Printf("parser:%v", err)
 	}
 	fmt.Printf("%s\n", Compile(p.prog))
+}
+
+func testVM() {
+	s := "| 23 45 + 1 2;"
+	sr := strings.NewReader(s)
+	p := &Parser{}
+	p.Init(&Scanner{reader: sr})
+	fmt.Println(s)
+	err := p.Parse()
+	if err != nil {
+		fmt.Printf("parser:%v", err)
+	}
+	fmt.Printf("%s\n", p.prog)
+	prog := Compile(p.prog)
+	fmt.Printf("%s\n", prog)
+	ctx := NewContext(prog)
+	ctx.execute(ctx.prog.Body)
+	fmt.Printf("Result: %v\n", ctx.top())
 }

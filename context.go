@@ -12,3 +12,16 @@ type Context struct {
 	// from prog for direct access
 	constants []V
 }
+
+func NewContext(prog *Program) *Context {
+	ctx := &Context{prog: prog}
+	max := 0
+	for i := range prog.Globals {
+		if i > max {
+			max = i
+		}
+	}
+	ctx.globals = make([]V, max+1)
+	ctx.constants = prog.Constants
+	return ctx
+}
