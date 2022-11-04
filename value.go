@@ -164,6 +164,7 @@ type Function interface {
 
 func (u Monad) Len() int       { return 1 }
 func (v Dyad) Len() int        { return 1 }
+func (vv Variadic) Len() int   { return 1 }
 func (w Adverb) Len() int      { return 1 }
 func (r DerivedVerb) Len() int { return 1 }
 func (p Projection) Len() int  { return 1 }
@@ -172,6 +173,7 @@ func (l Lambda) Len() int      { return 1 }
 
 func (u Monad) Type() string       { return "u" }
 func (v Dyad) Type() string        { return "v" }
+func (vv Variadic) Type() string   { return "V" }
 func (w Adverb) Type() string      { return "w" }
 func (r DerivedVerb) Type() string { return "r" }
 func (p Projection) Type() string  { return "p" }
