@@ -61,6 +61,9 @@ func (ctx *Context) execute(ops []opcode) error {
 
 func (ctx *Context) apply() error {
 	v := ctx.pop()
+	if id, ok := v.(Lambda); ok {
+		return ctx.applyLambda(id, 1)
+	}
 	x := ctx.pop()
 	res := Apply(v, x)
 	err, ok := res.(error)
@@ -73,6 +76,9 @@ func (ctx *Context) apply() error {
 
 func (ctx *Context) apply2() error {
 	v := ctx.pop()
+	if id, ok := v.(Lambda); ok {
+		return ctx.applyLambda(id, 2)
+	}
 	w, x := ctx.pop2()
 	res := Apply2(v, w, x)
 	err, ok := res.(error)
@@ -84,9 +90,45 @@ func (ctx *Context) apply2() error {
 }
 
 func (ctx *Context) applyN(n int) error {
-	//v := ctx.pop()
-	//vals := ctx.popN(n)
-	// TODO
+	v := ctx.pop()
+	if id, ok := v.(Lambda); ok {
+		return ctx.applyLambda(id, n)
+	}
+	return nil
+}
+
+const maxCallDepth = 100000
+
+func (ctx *Context) applyLambda(id Lambda, n int) error {
+	if ctx.callDepth > maxCallDepth {
+		return errs("exceeded maximum call depth")
+	}
+	lc := ctx.prog.Lambdas[int(id)]
+	if lc.Arity < n {
+		return errf("too many arguments: got %d, expected %d", n, lc.Arity)
+	} else if lc.Arity > n {
+		argn := ctx.popN(n)
+		args := make(AV, n)
+		copy(args, argn)
+		ctx.push(Projection{Fun: id, Args: args})
+		return nil
+	}
+	osp := ctx.sp
+	oframe := ctx.frame
+	ctx.frame = ctx.stack[ctx.sp-n:]
+
+	ctx.callDepth++
+	err := ctx.execute(lc.Body)
+	ctx.callDepth--
+
+	ctx.frame = oframe
+
+	if err != nil {
+		return err
+	}
+	if ctx.sp == osp {
+		ctx.push(nil)
+	}
 	return nil
 }
 

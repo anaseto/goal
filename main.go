@@ -17,6 +17,8 @@ func main() {
 	testVM(`a:=%"patata" "lolo" "patata" "patato";`)
 	testVM(`a:=%"patata" "lolo" "patata" "patato"`)
 	testVM(``)
+	testVM(`a:1;b:{x+1} a`)
+	testVM(`a:1;b:{x+y+2}[a;4]`)
 }
 
 func testPrimitives() {
