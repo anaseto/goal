@@ -18,15 +18,15 @@ func Apply(v V, x V) (res V) {
 			res = First(x)
 		case VClassify:
 			res = Classify(x)
-		case VEnum:
+		case VRange:
 			res = Range(x)
 		case VWhere:
 			res = Indices(x)
 		case VReverse:
 			res = Reverse(x)
-		case VAscend:
+		case VGradeUp:
 			res = GradeUp(x)
-		case VDescend:
+		case VGradeDown:
 			res = GradeDown(x)
 		case VGroup:
 			res = Group(x)
@@ -92,7 +92,7 @@ func Apply2(v, w, x V) (res V) {
 			res = Equal(w, x)
 		case VMatch:
 			res = Match(w, x)
-		case VConcat:
+		case VJoin:
 			res = JoinTo(w, x)
 		case VCut:
 			res = errNYI("Apply2 VCut") // TODO

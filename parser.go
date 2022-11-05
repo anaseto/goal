@@ -347,7 +347,7 @@ func parseDyad(s string) (verb Dyad) {
 	case "~":
 		verb = VMatch
 	case ",":
-		verb = VConcat
+		verb = VJoin
 	case "^":
 		verb = VCut
 	case "#":
@@ -379,15 +379,15 @@ func parseMonad(s string) (verb Monad) {
 	case "%":
 		verb = VClassify
 	case "!":
-		verb = VEnum
+		verb = VRange
 	case "&":
 		verb = VWhere
 	case "|":
 		verb = VReverse
 	case "<":
-		verb = VAscend
+		verb = VGradeUp
 	case ">":
-		verb = VDescend
+		verb = VGradeDown
 	case "=":
 		verb = VGroup
 	case "~":
