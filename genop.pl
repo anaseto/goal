@@ -369,6 +369,7 @@ func ${name}A${t}V(w A$t, x V) V {
 	switch x := x.(type) {
 EOS
     for my $tt (sort keys %types) {
+        next if $tt eq "B";
         my $expr = $cases->{"${t}_$tt"}->[0];
         my $type = $cases->{"${t}_$tt"}->[1];
         my $iexpr = subst($expr, $t, $tt, "w[i]", "x");
@@ -399,6 +400,11 @@ EOS
 		return r
 EOS
     }
+    my $tt = $t;
+    if ($t eq "B") {
+        $t = "I";
+        $tt = "B2I";
+    }
     print $out <<EOS if $t !~ /^A/;
 	case AV:
                 if len(w) != len(x) {
@@ -406,7 +412,7 @@ EOS
                 }
 		r := make(AV, len(x))
 		for i := range r {
-			v := ${name}${t}V($t(w[i]), x[i])
+			v := ${name}${t}V($tt(w[i]), x[i])
 			e, ok := v.(E)
 			if ok {
 				return e

@@ -8,8 +8,6 @@ import (
 // Negate returns -x.
 func Negate(x V) V {
 	switch x := x.(type) {
-	case B:
-		return -B2I(x)
 	case F:
 		return -x
 	case I:
@@ -17,7 +15,7 @@ func Negate(x V) V {
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
-			r[i] = int(-B2I(B(x[i])))
+			r[i] = int(-B2I(x[i]))
 		}
 		return r
 	case AF:
@@ -70,8 +68,6 @@ func signI(x I) I {
 // Sign returns ×x.
 func Sign(x V) V {
 	switch x := x.(type) {
-	case B:
-		return x
 	case F:
 		return signF(x)
 	case I:
@@ -106,8 +102,6 @@ func Sign(x V) V {
 // Floor returns _x.
 func Floor(x V) V {
 	switch x := x.(type) {
-	case B:
-		return x
 	case F:
 		return F(math.Floor(float64(x)))
 	case I:
@@ -146,8 +140,6 @@ func Floor(x V) V {
 // Ceil returns ⌈x.
 func Ceil(x V) V {
 	switch x := x.(type) {
-	case B:
-		return x
 	case F:
 		return F(math.Ceil(float64(x)))
 	case I:
@@ -186,8 +178,6 @@ func Ceil(x V) V {
 // Not returns ~x.
 func Not(x V) V {
 	switch x := x.(type) {
-	case B:
-		return !x
 	case F:
 		return 1 - x
 	case I:
@@ -233,8 +223,6 @@ func absI(x I) I {
 // Abs returns |x.
 func Abs(x V) V {
 	switch x := x.(type) {
-	case B:
-		return x
 	case F:
 		return F(math.Abs(float64(x)))
 	case I:

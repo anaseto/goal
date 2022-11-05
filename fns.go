@@ -3,8 +3,6 @@ package main
 // Range returns ↕x.
 func Range(x V) V {
 	switch x := x.(type) {
-	case B:
-		return rangeI(B2I(x))
 	case F:
 		if !isI(x) {
 			return errs("non-integer range")
@@ -36,8 +34,6 @@ func rangeArray(x Array) V {
 	for i := range y {
 		v := x.At(i)
 		switch v := v.(type) {
-		case B:
-			y[i] = int(B2I(v))
 		case I:
 			y[i] = int(v)
 		case F:
@@ -78,11 +74,6 @@ func rangeArray(x Array) V {
 // Indices returns &x.
 func Indices(x V) V {
 	switch x := x.(type) {
-	case B:
-		if x {
-			return AI{0}
-		}
-		return AI{}
 	case I:
 		switch {
 		case x < 0:
@@ -110,7 +101,7 @@ func Indices(x V) V {
 	case AB:
 		n := 0
 		for _, v := range x {
-			n += int(B2I(B(v)))
+			n += int(B2I(v))
 		}
 		r := make(AI, 0, n)
 		for i, v := range x {
@@ -158,8 +149,6 @@ func Indices(x V) V {
 			n := 0
 			for _, v := range x {
 				switch v := v.(type) {
-				case B:
-					n += int(B2I(v))
 				case F:
 					if !isI(v) {
 						return errs("not an integer")
@@ -179,8 +168,6 @@ func Indices(x V) V {
 			for i, v := range x {
 				var max I
 				switch v := v.(type) {
-				case B:
-					max = B2I(v)
 				case I:
 					max = v
 				case F:
@@ -205,8 +192,6 @@ func Replicate(w, x V) V {
 		return errf("length mismatch: %d vs %d", Length(w), Length(x))
 	}
 	switch w := w.(type) {
-	case B:
-		return repeat(x, int(B2I(w)))
 	case I:
 		switch {
 		case w < 0:
@@ -240,12 +225,6 @@ func Replicate(w, x V) V {
 
 func repeat(x V, n int) V {
 	switch x := x.(type) {
-	case B:
-		r := make(AB, n)
-		for i := range r {
-			r[i] = bool(x)
-		}
-		return r
 	case F:
 		r := make(AF, n)
 		for i := range r {
@@ -253,6 +232,13 @@ func repeat(x V, n int) V {
 		}
 		return r
 	case I:
+		if isBI(x) {
+			r := make(AB, n)
+			for i := range r {
+				r[i] = x == 1
+			}
+			return r
+		}
 		r := make(AI, n)
 		for i := range r {
 			r[i] = int(x)
@@ -276,7 +262,7 @@ func repeat(x V, n int) V {
 func repeatAB(w AB, x V) V {
 	n := 0
 	for _, v := range w {
-		n += int(B2I(B(v)))
+		n += int(B2I(v))
 	}
 	switch x := x.(type) {
 	case AB:
@@ -441,8 +427,6 @@ func repeatAO(w AV, x V) V {
 		n := 0
 		for _, v := range w {
 			switch v := v.(type) {
-			case B:
-				n += int(B2I(v))
 			case F:
 				if !isI(v) {
 					return errsw("non-integer")

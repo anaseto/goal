@@ -278,7 +278,7 @@ func mergeTypes(t, s eltype) eltype {
 
 // eType returns the eltype of x.
 func eType(x V) eltype {
-	switch x.(type) {
+	switch x := x.(type) {
 	case F:
 		return tF
 	case I:
@@ -395,7 +395,7 @@ func minMax(x AI) (min, max int) {
 
 func minMaxB(x AB) (I, I) {
 	if len(x) == 0 {
-		return
+		return 0, 0
 	}
 	min := true
 	max := false

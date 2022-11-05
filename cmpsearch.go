@@ -8,26 +8,13 @@ type Matcher interface {
 
 // Match returns w≡x.
 func Match(w, x V) V {
-	return B(match(w, x))
+	return B2I(match(w, x))
 }
 
 func match(w, x V) bool {
 	switch w := w.(type) {
-	case B:
-		switch x := x.(type) {
-		case B:
-			return w == x
-		case I:
-			return B2I(w) == x
-		case F:
-			return B2F(w) == x
-		default:
-			return false
-		}
 	case F:
 		switch x := x.(type) {
-		case B:
-			return w == B2F(x)
 		case I:
 			return w == F(x)
 		case F:
@@ -37,8 +24,6 @@ func match(w, x V) bool {
 		}
 	case I:
 		switch x := x.(type) {
-		case B:
-			return w == B2I(x)
 		case I:
 			return w == x
 		case F:
@@ -126,7 +111,7 @@ func matchAB(w, x AB) bool {
 
 func matchABAI(w AB, x AI) bool {
 	for i, v := range x {
-		if v != int(B2I(B(w[i]))) {
+		if v != int(B2I(w[i])) {
 			return false
 		}
 	}
@@ -135,7 +120,7 @@ func matchABAI(w AB, x AI) bool {
 
 func matchABAF(w AB, x AF) bool {
 	for i, v := range x {
-		if F(v) != B2F(B(w[i])) {
+		if F(v) != B2F(w[i]) {
 			return false
 		}
 	}
@@ -176,7 +161,7 @@ func Classify(x V) V {
 	}
 	x = canonical(x)
 	switch x := x.(type) {
-	case B, F, I, S:
+	case F, I, S:
 		return errs("not an array")
 	case AB:
 		v := x[0]
@@ -259,7 +244,7 @@ func MarkFirsts(x V) V {
 	}
 	x = canonical(x)
 	switch x := x.(type) {
-	case B, F, I, S:
+	case F, I, S:
 		return errs("not an array")
 	case AB:
 		r := make(AB, len(x))
@@ -338,7 +323,7 @@ func MemberOf(w, x V) V {
 				r := make(AB, Length(w))
 				return r
 			default:
-				return B(false)
+				return B2I(false)
 			}
 		default:
 			return errs("not an array")
@@ -378,9 +363,9 @@ func memberOfAB(w V, x AB) V {
 		return r
 	}
 	if t {
-		return Equal(w, B(true))
+		return Equal(w, B2I(true))
 	}
-	return Equal(w, B(false))
+	return Equal(w, B2I(false))
 }
 
 func memberOfAF(w V, x AF) V {
@@ -393,19 +378,16 @@ func memberOfAF(w V, x AF) V {
 		}
 	}
 	switch w := w.(type) {
-	case B:
-		_, ok := m[B2F(w)]
-		return B(ok)
 	case I:
 		_, ok := m[F(w)]
-		return B(ok)
+		return B2I(ok)
 	case F:
 		_, ok := m[w]
-		return B(ok)
+		return B2I(ok)
 	case AB:
 		r := make(AB, len(w))
 		for i, v := range w {
-			_, r[i] = m[B2F(B(v))]
+			_, r[i] = m[B2F(v)]
 		}
 		return r
 	case AI:
@@ -435,22 +417,19 @@ func memberOfAI(w V, x AI) V {
 		}
 	}
 	switch w := w.(type) {
-	case B:
-		_, ok := m[int(B2I(w))]
-		return B(ok)
 	case I:
 		_, ok := m[int(w)]
-		return B(ok)
+		return B2I(ok)
 	case F:
 		if !isI(w) {
-			return B(false)
+			return B2I(false)
 		}
 		_, ok := m[int(w)]
-		return B(ok)
+		return B2I(ok)
 	case AB:
 		r := make(AB, len(w))
 		for i, v := range w {
-			_, r[i] = m[int(B2I(B(v)))]
+			_, r[i] = m[int(B2I(v))]
 		}
 		return r
 	case AI:
@@ -485,7 +464,7 @@ func memberOfAS(w V, x AS) V {
 	switch w := w.(type) {
 	case S:
 		_, ok := m[string(w)]
-		return B(ok)
+		return B2I(ok)
 	case AS:
 		r := make(AB, len(w))
 		for i, v := range w {
@@ -514,10 +493,10 @@ func memberOfAO(w V, x AV) V {
 	default:
 		for _, v := range x {
 			if match(w, v) {
-				return B(true)
+				return B2I(true)
 			}
 		}
-		return B(false)
+		return B2I(false)
 	}
 }
 
@@ -528,7 +507,7 @@ func OccurrenceCount(x V) V {
 	}
 	x = canonical(x)
 	switch x := x.(type) {
-	case B, F, I, S:
+	case F, I, S:
 		return errs("not an array")
 	case AB:
 		r := make(AI, len(x))

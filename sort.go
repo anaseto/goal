@@ -32,8 +32,6 @@ func (bs AOUp) Swap(i, j int) {
 
 func less(w, x V) bool {
 	switch w := w.(type) {
-	case B:
-		return lessB(w, x)
 	case F:
 		return lessF(w, x)
 	case I:
@@ -70,43 +68,8 @@ func less(w, x V) bool {
 	}
 }
 
-func lessB(w B, x V) bool {
-	switch x := x.(type) {
-	case B:
-		return bool(!w && x)
-	case F:
-		return B2F(w) < x
-	case I:
-		return B2I(w) < x
-	case AB:
-		if len(x) == 0 {
-			return false
-		}
-		return bool(!w && B(x[0]) || w == B(x[0]) && len(x) > 1)
-	case AF:
-		if len(x) == 0 {
-			return false
-		}
-		return B2F(w) < F(x[0]) || B2F(w) == F(x[0]) && len(x) > 1
-	case AI:
-		if len(x) == 0 {
-			return false
-		}
-		return B2I(w) < I(x[0]) || B2I(w) == I(x[0]) && len(x) > 1
-	case AV:
-		if len(x) == 0 {
-			return false
-		}
-		return lessB(w, x[0]) || !less(x[0], w) && len(x) > 1
-	default:
-		return false
-	}
-}
-
 func lessF(w F, x V) bool {
 	switch x := x.(type) {
-	case B:
-		return w < B2F(x)
 	case F:
 		return w < x
 	case I:
@@ -115,7 +78,7 @@ func lessF(w F, x V) bool {
 		if len(x) == 0 {
 			return false
 		}
-		return w < B2F(B(x[0])) || w == B2F(B(x[0])) && len(x) > 1
+		return w < B2F(x[0]) || w == B2F(x[0]) && len(x) > 1
 	case AF:
 		if len(x) == 0 {
 			return false
@@ -138,8 +101,6 @@ func lessF(w F, x V) bool {
 
 func lessI(w I, x V) bool {
 	switch x := x.(type) {
-	case B:
-		return w < B2I(x)
 	case F:
 		return F(w) < x
 	case I:
@@ -148,7 +109,7 @@ func lessI(w I, x V) bool {
 		if len(x) == 0 {
 			return false
 		}
-		return w < B2I(B(x[0])) || w == B2I(B(x[0])) && len(x) > 1
+		return w < B2I(x[0]) || w == B2I(x[0]) && len(x) > 1
 	case AF:
 		if len(x) == 0 {
 			return false
@@ -190,8 +151,6 @@ func lessS(w S, x V) bool {
 
 func lessAB(w AB, x V) bool {
 	switch x := x.(type) {
-	case B:
-		return !lessB(x, w)
 	case F:
 		return !lessF(x, w)
 	case I:
@@ -205,21 +164,21 @@ func lessAB(w AB, x V) bool {
 		return len(w) < len(x)
 	case AF:
 		for i := 0; i < len(w) && i < len(x); i++ {
-			if B2F(B(w[i])) > F(x[i]) {
+			if B2F(w[i]) > F(x[i]) {
 				return false
 			}
 		}
 		return len(w) < len(x)
 	case AI:
 		for i := 0; i < len(w) && i < len(x); i++ {
-			if B2I(B(w[i])) > I(x[i]) {
+			if B2I(w[i]) > I(x[i]) {
 				return false
 			}
 		}
 		return len(w) < len(x)
 	case AV:
 		for i := 0; i < len(w) && i < len(x); i++ {
-			if less(x[i], B(w[i])) {
+			if less(x[i], B2I(w[i])) {
 				return false
 			}
 		}
@@ -231,15 +190,13 @@ func lessAB(w AB, x V) bool {
 
 func lessAI(w AI, x V) bool {
 	switch x := x.(type) {
-	case B:
-		return !lessB(x, w)
 	case F:
 		return !lessF(x, w)
 	case I:
 		return !lessI(x, w)
 	case AB:
 		for i := 0; i < len(w) && i < len(x); i++ {
-			if I(w[i]) > B2I(B(x[i])) {
+			if I(w[i]) > B2I(x[i]) {
 				return false
 			}
 		}
@@ -272,15 +229,13 @@ func lessAI(w AI, x V) bool {
 
 func lessAF(w AF, x V) bool {
 	switch x := x.(type) {
-	case B:
-		return !lessB(x, w)
 	case F:
 		return !lessF(x, w)
 	case I:
 		return !lessI(x, w)
 	case AB:
 		for i := 0; i < len(w) && i < len(x); i++ {
-			if F(w[i]) > B2F(B(x[i])) {
+			if F(w[i]) > B2F(x[i]) {
 				return false
 			}
 		}
@@ -336,15 +291,13 @@ func lessAS(w AS, x V) bool {
 
 func lessAO(w AV, x V) bool {
 	switch x := x.(type) {
-	case B:
-		return less(w[0], x)
 	case F:
 		return less(w[0], x)
 	case I:
 		return less(w[0], x)
 	case AB:
 		for i := 0; i < len(w) && i < len(x); i++ {
-			if less(B(x[i]), w[i]) {
+			if less(B2I(x[i]), w[i]) {
 				return false
 			}
 		}
