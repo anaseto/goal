@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 func (ctx *Context) execute(ops []opcode) error {
 	for ip := 0; ip < len(ops); {
 		op := ops[ip]
@@ -39,10 +37,20 @@ func (ctx *Context) execute(ops []opcode) error {
 			ctx.push(Lambda(ops[ip]))
 			ip++
 		case opApply:
-			ctx.apply()
+			err := ctx.apply()
+			if err != nil {
+				return err
+			}
 		case opApply2:
-			ctx.apply2()
+			err := ctx.apply2()
+			if err != nil {
+				return err
+			}
 		case opApplyN:
+			err := ctx.applyN(int(ops[ip+1]))
+			if err != nil {
+				return err
+			}
 			ip++
 		case opDrop:
 			ctx.sp--
@@ -51,110 +59,35 @@ func (ctx *Context) execute(ops []opcode) error {
 	return nil
 }
 
-func (ctx *Context) apply() {
+func (ctx *Context) apply() error {
 	v := ctx.pop()
 	x := ctx.pop()
-	switch v := v.(type) {
-	case Monad:
-		switch v {
-		case VReturn:
-			// TODO: VReturn
-			ctx.push(x)
-		case VFlip:
-			ctx.push(Flip(x))
-		case VNegate:
-			ctx.push(Negate(x))
-		case VFirst:
-			ctx.push(First(x))
-		case VClassify:
-			ctx.push(Classify(x))
-		case VEnum:
-			ctx.push(Range(x))
-		case VWhere:
-			ctx.push(Indices(x))
-		case VReverse:
-			ctx.push(Reverse(x))
-		case VAscend:
-			ctx.push(GradeUp(x))
-		case VDescend:
-			ctx.push(GradeDown(x))
-		case VGroup:
-			ctx.push(Group(x))
-		case VNot:
-			ctx.push(Not(x))
-		case VEnlist:
-			ctx.push(Enlist(x))
-		case VSort:
-			ctx.push(SortUp(x))
-		case VLen:
-			ctx.push(Length(x))
-		case VFloor:
-			ctx.push(Floor(x))
-		case VString:
-			// TODO: VString
-			ctx.push(S(fmt.Sprint(x)))
-		case VNub:
-			panic("Apply VNub") // TODO
-		case VType:
-			panic("Apply VType") // TODO
-		case VEval:
-			panic("Apply VEval") // TODO
-		}
-	default:
-		panic("Apply other") // TODO
+	res := Apply(v, x)
+	err, ok := res.(error)
+	if ok {
+		return err
 	}
+	ctx.push(res)
+	return nil
 }
 
-func (ctx *Context) apply2() {
+func (ctx *Context) apply2() error {
 	v := ctx.pop()
 	w, x := ctx.pop2()
-	switch v := v.(type) {
-	case Dyad:
-		switch v {
-		case VRight:
-			ctx.push(x)
-		case VAdd:
-			ctx.push(Add(w, x))
-		case VSubtract:
-			ctx.push(Subtract(w, x))
-		case VMultiply:
-			ctx.push(Multiply(w, x))
-		case VDivide:
-			ctx.push(Divide(w, x))
-		case VMod:
-			ctx.push(Modulus(w, x))
-		case VMin:
-			ctx.push(Minimum(w, x))
-		case VMax:
-			ctx.push(Maximum(w, x))
-		case VLess:
-			ctx.push(Lesser(w, x))
-		case VMore:
-			ctx.push(Greater(w, x))
-		case VEqual:
-			ctx.push(Equal(w, x))
-		case VMatch:
-			ctx.push(Match(w, x))
-		case VConcat:
-			ctx.push(JoinTo(w, x))
-		case VCut:
-			panic("Apply2 VCut") // TODO
-		case VTake:
-			ctx.push(Take(w, x))
-		case VDrop:
-			ctx.push(Drop(w, x))
-		case VCast:
-			panic("Apply2 VCast") // TODO
-		case VFind:
-			panic("Apply2 VFind") // TODO
-		case VApply:
-			ctx.apply()
-		case VApplyN:
-			panic("Apply2 VApplyN") // TODO
-		}
-	default:
-		panic("Apply2 other") // TODO
+	res := Apply2(v, w, x)
+	err, ok := res.(error)
+	if ok {
+		return err
 	}
+	ctx.push(res)
+	return nil
+}
+
+func (ctx *Context) applyN(n int) error {
+	//v := ctx.pop()
+	//vals := ctx.popN(n)
+	// TODO
+	return nil
 }
 
 func (ctx *Context) push(v V) {

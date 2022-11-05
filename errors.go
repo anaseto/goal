@@ -2,6 +2,10 @@ package main
 
 import "fmt"
 
+func errNYI(s string) E {
+	return E("NYI: " + s)
+}
+
 func errType(x V) E {
 	return E("bad type: `" + x.Type())
 }
