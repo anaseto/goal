@@ -8,18 +8,15 @@ type V interface {
 	Type() string
 }
 
-type B bool    // B represents booleans (0 and 1 but less memory)
 type F float64 // F represents real numbers.
 type I int     // I represents integers.
 type S string  // S represents (immutable) strings of bytes.
 type E string  // E represents errors
 
-func (b B) Len() int      { return 1 }
 func (f F) Len() int      { return 1 }
 func (i I) Len() int      { return 1 }
 func (s S) Len() int      { return 1 }
 func (e E) Len() int      { return 1 }
-func (b B) Type() string  { return "b" }
 func (f F) Type() string  { return "f" }
 func (i I) Type() string  { return "i" }
 func (s S) Type() string  { return "s" }
@@ -53,7 +50,7 @@ func (x AF) Type() string { return "F" }
 func (x AS) Type() string { return "S" }
 
 func (x AV) At(i int) V { return x[i] }
-func (x AB) At(i int) V { return B(x[i]) }
+func (x AB) At(i int) V { return B2I(x[i]) }
 func (x AI) At(i int) V { return I(x[i]) }
 func (x AF) At(i int) V { return F(x[i]) }
 func (x AS) At(i int) V { return S(x[i]) }

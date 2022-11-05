@@ -4,14 +4,14 @@ import (
 	"math"
 )
 
-func B2I(b B) (i I) {
+func B2I(b bool) (i I) {
 	if b {
 		i = 1
 	}
 	return
 }
 
-func B2F(b B) (f F) {
+func B2F(b bool) (f F) {
 	if b {
 		f = 1
 	}
@@ -20,8 +20,6 @@ func B2F(b B) (f F) {
 
 func num2I(x V) (n I) {
 	switch x := x.(type) {
-	case B:
-		n = B2I(x)
 	case I:
 		n = x
 	case F:
@@ -33,7 +31,7 @@ func num2I(x V) (n I) {
 
 func isNum(x V) bool {
 	switch x.(type) {
-	case B, I, F:
+	case I, F:
 		return true
 	default:
 		return false
@@ -109,8 +107,6 @@ func maxS(w, x S) S {
 
 func clone(x V) V {
 	switch x := x.(type) {
-	case B:
-		return x
 	case F:
 		return x
 	case I:
@@ -175,11 +171,12 @@ func cloneShallow(x V) V {
 
 func toArray(x V) V {
 	switch x := x.(type) {
-	case B:
-		return AB{bool(x)}
 	case F:
 		return AF{float64(x)}
 	case I:
+		if x == 0 || x == 1 {
+			return AB{x == 1}
+		}
 		return AI{int(x)}
 	case S:
 		return AS{string(x)}
@@ -231,8 +228,6 @@ func growArray(x V, n int) V {
 
 func isFalse(x V) bool {
 	switch x := x.(type) {
-	case B:
-		return bool(x)
 	case F:
 		return x == 0
 	case I:
@@ -284,11 +279,12 @@ func mergeTypes(t, s eltype) eltype {
 // eType returns the eltype of x.
 func eType(x V) eltype {
 	switch x.(type) {
-	case B:
-		return tB
 	case F:
 		return tF
 	case I:
+		if x == 0 || x == 1 {
+			return tB
+		}
 		return tI
 	case S:
 		return tS
@@ -310,8 +306,6 @@ func eType(x V) eltype {
 // cType returns the canonical eltype of x. XXX: unused.
 func cType(x V) eltype {
 	switch x := x.(type) {
-	case B:
-		return tB
 	case AB:
 		return tAB
 	case F:
@@ -319,6 +313,9 @@ func cType(x V) eltype {
 	case AF:
 		return tAF
 	case I:
+		if x == 0 || x == 1 {
+			return tB
+		}
 		return tI
 	case AI:
 		return tAI
@@ -371,6 +368,14 @@ func isI(x F) bool {
 	return math.Floor(float64(x)) == float64(x)
 }
 
+func isBI(x I) bool {
+	return x == 0 || x == 1
+}
+
+func isBF(x F) bool {
+	return x == 0 || x == 1
+}
+
 func minMax(x AI) (min, max int) {
 	if len(x) == 0 {
 		return
@@ -388,19 +393,19 @@ func minMax(x AI) (min, max int) {
 	return
 }
 
-func minMaxB(x AB) (min, max B) {
+func minMaxB(x AB) (I, I) {
 	if len(x) == 0 {
 		return
 	}
-	min = true
-	max = false
+	min := true
+	max := false
 	for _, v := range x {
-		max, min = max || B(v), min && !B(v)
+		max, min = max || v, min && !v
 		if max && !min {
 			break
 		}
 	}
-	return
+	return B2I(min), B2I(max)
 }
 
 func canonical(x V) V {
@@ -411,7 +416,7 @@ func canonical(x V) V {
 		case tB:
 			r := make(AB, len(y))
 			for i, v := range y {
-				r[i] = bool(v.(B))
+				r[i] = v.(I) == 1
 			}
 			return r
 		case tI:
