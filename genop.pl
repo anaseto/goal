@@ -247,6 +247,7 @@ func ${name}(w, x V) V {
 	switch w := w.(type) {
 EOS
     for my $t (sort keys %types) {
+        next if $t eq "B";
         print $out <<EOS;
 	case $t:
 		return ${name}${t}V(w, x)
@@ -295,6 +296,7 @@ EOS
 EOS
     print $s;
     for my $t (sort keys %types) {
+        next if $t eq "B";
         genLeftExpanded($name, $cases, $t);
     }
     for my $t (sort keys %types) {
@@ -312,8 +314,10 @@ func ${name}${t}V(w $t, x V) V {
 	switch x := x.(type) {
 EOS
     for my $tt (sort keys %types) {
+        next if $tt eq "B";
         my $expr = $cases->{"${t}_$tt"}->[0];
         my $type = $cases->{"${t}_$tt"}->[1];
+        $type = "B2I" if $type eq "B";
         print $out <<EOS;
 	case $tt:
 		return $type($expr)
@@ -422,8 +426,8 @@ EOS
 
 sub subst {
     my ($expr, $t, $tt, $w, $x) = @_;
-    $expr =~ s/(!w|\bB2[IF]\(w\)|\bw)\b/$t($1)/g;
-    $expr =~ s/(!x|\bB2[IF]\(x\)|\bx)\b/$tt($1)/g;
+    $expr =~ s/(!w|\bB2[IF]\(w\)|\bw)\b/$t($1)/g unless $t eq "B";
+    $expr =~ s/(!x|\bB2[IF]\(x\)|\bx)\b/$tt($1)/g unless $tt eq "B";
     $expr =~ s/\bw\b/$w/g;
     $expr =~ s/\bx\b/$x/g;
     return $expr
