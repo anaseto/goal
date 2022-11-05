@@ -11,7 +11,12 @@ func main() {
 	//testPParser()
 	//testParser()
 	//testCompiler()
-	testVM()
+	testVM("a:23 13;b:a+5;|b;")
+	testVM("a:!10;b:a+5;|b;")
+	testVM(`a:%0 2 0 3 4 5 2 2 2;a;`)
+	testVM(`a:=%"patata" "lolo" "patata" "patato";`)
+	testVM(`a:=%"patata" "lolo" "patata" "patato"`)
+	testVM(``)
 }
 
 func testPrimitives() {
@@ -109,11 +114,11 @@ func testCompiler() {
 	fmt.Printf("%s\n", Compile(p.prog))
 }
 
-func testVM() {
-	s := "a:23 13;b:a+5;|b;"
+func testVM(s string) {
 	sr := strings.NewReader(s)
 	p := &Parser{}
 	p.Init(&Scanner{reader: sr})
+	fmt.Println("-------- Goal code ----------")
 	fmt.Println(s)
 	err := p.Parse()
 	if err != nil {
@@ -124,5 +129,10 @@ func testVM() {
 	fmt.Printf("%s\n", prog)
 	ctx := NewContext(prog)
 	ctx.execute(ctx.prog.Body)
-	fmt.Printf("Result: %v\n", ctx.top())
+	fmt.Println("---------- Result -----------")
+	if len(ctx.stack) > 0 {
+		fmt.Printf("%v\n", ctx.top())
+	} else {
+		fmt.Println("No result")
+	}
 }

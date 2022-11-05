@@ -17,7 +17,7 @@ type AstProgram struct {
 
 func (prog *AstProgram) String() string {
 	sb := &strings.Builder{}
-	fmt.Fprintln(sb, "---- Program -----\n")
+	fmt.Fprintln(sb, "---- AST -----")
 	fmt.Fprintln(sb, "Instructions:")
 	for _, expr := range prog.Body {
 		fmt.Fprintf(sb, "\t%#v\n", expr)

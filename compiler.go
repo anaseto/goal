@@ -22,7 +22,7 @@ type LambdaCode struct {
 
 func (prog *Program) String() string {
 	sb := &strings.Builder{}
-	fmt.Fprintln(sb, "---- Program -----\n")
+	fmt.Fprintln(sb, "---- Compiled program -----")
 	fmt.Fprintln(sb, "Instructions:")
 	fmt.Fprint(sb, prog.opcodesString(prog.Body, nil))
 	fmt.Fprintln(sb, "Globals:")

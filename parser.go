@@ -82,12 +82,12 @@ func (p *Parser) Parse() error {
 		if err != nil {
 			return err
 		}
-		if eof {
-			return nil
-		}
 		err = p.ppExprs(pps)
 		if err != nil {
 			return err
+		}
+		if eof {
+			return nil
 		}
 	}
 }
@@ -424,7 +424,7 @@ func (p *Parser) ppStrand(pps ppStrand) error {
 		case ppNUMBER:
 			v, err := parseNumber(tok.Text)
 			if err != nil {
-				return p.errorf("string syntax: %v", err)
+				return p.errorf("number syntax: %v", err)
 			}
 			a = append(a, v)
 		case ppSTRING:

@@ -197,8 +197,10 @@ func scanAny(s *Scanner) stateFn {
 		s.buf.WriteRune(r)
 		return s.emit(VERB)
 	case '"':
+		s.buf.WriteRune(r)
 		return scanString
 	case '`':
+		s.buf.WriteRune('\'')
 		return scanSymbolString
 	}
 	switch {
@@ -285,7 +287,15 @@ func scanString(s *Scanner) stateFn {
 		switch r {
 		case eof:
 			return s.emit(ERROR)
+		case '\\':
+			s.buf.WriteRune(r)
+			nr := s.peek()
+			if nr == '"' {
+				s.buf.WriteRune(nr)
+				s.next()
+			}
 		case '"':
+			s.buf.WriteRune(r)
 			return s.emit(STRING)
 		default:
 			s.buf.WriteRune(r)
@@ -300,6 +310,7 @@ func scanSymbolString(s *Scanner) stateFn {
 		case r == eof:
 			return s.emit(ERROR)
 		case !isAlpha(r) && (s.buf.Len() == 0) || !isAlphaNum(r):
+			s.buf.WriteRune('\'')
 			return s.emit(STRING)
 		default:
 			s.next()
