@@ -94,6 +94,13 @@ func (ctx *Context) applyN(n int) error {
 	if id, ok := v.(Lambda); ok {
 		return ctx.applyLambda(id, n)
 	}
+	argn := ctx.popN(n) // XXX: avoid allocation?
+	res := ctx.ApplyN(v, argn)
+	err, ok := res.(error)
+	if ok {
+		return err
+	}
+	ctx.push(res)
 	return nil
 }
 
