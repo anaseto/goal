@@ -216,7 +216,17 @@ func (ctx *Context) applyDyad(v Dyad, w, x V) (res V) {
 	case VApply:
 		res = ctx.Apply(w, x)
 	case VApplyN:
-		res = errNYI("Apply2 VApplyN") // TODO
+		switch x := x.(type) {
+		case Array:
+			for i := x.Len() - 1; i >= 0; i-- {
+				ctx.push(x.At(i))
+			}
+			ctx.push(v)
+			ctx.applyN(x.Len())
+			res = ctx.pop()
+		default:
+			res = errs("not an array")
+		}
 	}
 	return res
 }
