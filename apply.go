@@ -4,12 +4,12 @@ import (
 	"fmt"
 )
 
-func Apply(v V, x V) (res V) {
+func (ctx *Context) Apply(v V, x V) (res V) {
 	switch v := v.(type) {
 	case Monad:
 		switch v {
 		case VReturn:
-			res = x // TODO: VReturn
+			res = x // TODO: VReturn: probably syntax instead of value
 		case VFlip:
 			res = Flip(x)
 		case VNegate:
@@ -62,7 +62,7 @@ func Apply(v V, x V) (res V) {
 	return res
 }
 
-func Apply2(v, w, x V) (res V) {
+func (ctx *Context) Apply2(v, w, x V) (res V) {
 	switch v := v.(type) {
 	case Monad:
 		res = errf("monad %v got too many arguments", v)
@@ -105,7 +105,7 @@ func Apply2(v, w, x V) (res V) {
 		case VFind:
 			res = errNYI("Apply2 VFind") // TODO
 		case VApply:
-			res = Apply(w, x)
+			res = ctx.Apply(w, x)
 		case VApplyN:
 			res = errNYI("Apply2 VApplyN") // TODO
 		}

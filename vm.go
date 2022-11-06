@@ -65,7 +65,7 @@ func (ctx *Context) apply() error {
 		return ctx.applyLambda(id, 1)
 	}
 	x := ctx.pop()
-	res := Apply(v, x)
+	res := ctx.Apply(v, x)
 	err, ok := res.(error)
 	if ok {
 		return err
@@ -80,7 +80,7 @@ func (ctx *Context) apply2() error {
 		return ctx.applyLambda(id, 2)
 	}
 	w, x := ctx.pop2()
-	res := Apply2(v, w, x)
+	res := ctx.Apply2(v, w, x)
 	err, ok := res.(error)
 	if ok {
 		return err
