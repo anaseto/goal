@@ -22,6 +22,7 @@ func main() {
 	testVM(`a:1 3 5;b:3;a+b`)
 	testVM(`a:1 3 5;f:{x+3};f[a]`)
 	testVM(`a:1 3 5;;;|a`)
+	testVM(`a:1 3 5;a[2 0 1 0]`)
 }
 
 func testPrimitives() {
