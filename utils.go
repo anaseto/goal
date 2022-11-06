@@ -169,6 +169,27 @@ func cloneShallow(x V) V {
 	}
 }
 
+func toIndices(x V) (res AI) {
+	switch x := x.(type) {
+	case AB:
+		res = make(AI, len(x))
+		for i := range res {
+			res[i] = int(B2I(x[i]))
+		}
+	case AF:
+		res = make(AI, len(x))
+		for i := range res {
+			if !isI(F(x[i])) {
+				return nil
+			}
+			res[i] = int(x[i])
+		}
+	case AI:
+		res = x
+	}
+	return res
+}
+
 func toArray(x V) V {
 	switch x := x.(type) {
 	case F:
