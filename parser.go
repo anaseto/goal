@@ -77,8 +77,15 @@ func (p *Parser) scope() *AstLambdaCode {
 }
 
 func (p *Parser) Parse() error {
+	n := 0
+	var pps ppExprs
+	var eof bool
+	var err error
 	for {
-		pps, eof, err := p.pp.Next()
+		if n > 0 && len(pps) != 0 {
+			p.pushExpr(AstDrop{})
+		}
+		pps, eof, err = p.pp.Next()
 		if err != nil {
 			return err
 		}
@@ -89,6 +96,7 @@ func (p *Parser) Parse() error {
 		if eof {
 			return nil
 		}
+		n++
 	}
 }
 

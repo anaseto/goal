@@ -50,7 +50,9 @@ func (ctx *Context) execute(ops []opcode) error {
 			}
 			ip++
 		case opDrop:
-			ctx.sp--
+			if ctx.sp > 1 {
+				ctx.sp--
+			}
 		}
 	}
 	return nil
