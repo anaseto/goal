@@ -470,3 +470,34 @@ func canonical(x V) V {
 		return x
 	}
 }
+
+func hasNil(x []V) bool {
+	for _, v := range x {
+		if v == nil {
+			return true
+		}
+	}
+	return false
+}
+
+func countNils(x []V) int {
+	n := 0
+	for _, v := range x {
+		if v == nil {
+			n++
+		}
+	}
+	return n
+}
+
+func reverseAV(x []V) {
+	for i := 0; i < len(x)/2; i++ {
+		x[i], x[len(x)-i-1] = x[len(x)-i-1], x[i]
+	}
+}
+
+func cloneAV(x []V) []V {
+	args := make([]V, len(x))
+	copy(args, x)
+	return args
+}

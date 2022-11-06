@@ -1,6 +1,6 @@
 package main
 
-//go:generate stringer -type=Monad,Dyad,Adverb,TokenType,ppTokenType,ppBlockType,opcode -output stringer.go
+//go:generate stringer -type=Variadic,Adverb,TokenType,ppTokenType,ppBlockType,opcode -output stringer.go
 
 // V represents any kind of value.
 type V interface {
@@ -62,57 +62,65 @@ func (x AI) Slice(i, j int) Array { return x[i:j] }
 func (x AF) Slice(i, j int) Array { return x[i:j] }
 func (x AS) Slice(i, j int) Array { return x[i:j] }
 
-// Monad represents built-in 1-symbol unary operators.
-type Monad int32
+// Variadic represents a built-in function.
+type Variadic int32
 
-const (
-	VReturn   Monad = iota // :
-	VFlip                  // +
-	VNegate                // -
-	VFirst                 // *
-	VClassify              // %
-	VRange                 // !
-	VWhere                 // &
-	VReverse               // |
-	VAscend                // <
-	VDescend               // >
-	VGroup                 // =
-	VNot                   // ~
-	VEnlist                // ,
-	VSort                  // ^
-	VLen                   // #
-	VFloor                 // _
-	VString                // $
-	VUniq                  // ?
-	VType                  // @
-	VEval                  // .
-)
+type VariadicFun struct {
+	Name string
+	Func func(*Context, []V) V
+}
 
-// Dyad represents built-in 1-symbol binary operators.
-type Dyad int32
+//// Monad represents built-in 1-symbol unary operators.
+//type Monad int32
 
-const (
-	VRight    Dyad = iota // :
-	VAdd                  // +
-	VSubtract             // -
-	VMultiply             // *
-	VDivide               // %
-	VMod                  // !
-	VMin                  // &
-	VMax                  // |
-	VLess                 // <
-	VMore                 // >
-	VEqual                // =
-	VMatch                // ~
-	VJoin                 // ,
-	VCut                  // ^
-	VTake                 // #
-	VDrop                 // _
-	VCast                 // $
-	VFind                 // ?
-	VApply                // @
-	VApplyN               // .
-)
+//const (
+//VReturn   Monad = iota // :
+//VFlip                  // +
+//VNegate                // -
+//VFirst                 // *
+//VClassify              // %
+//VRange                 // !
+//VWhere                 // &
+//VReverse               // |
+//VAscend                // <
+//VDescend               // >
+//VGroup                 // =
+//VNot                   // ~
+//VEnlist                // ,
+//VSort                  // ^
+//VLen                   // #
+//VFloor                 // _
+//VString                // $
+//VUniq                  // ?
+//VType                  // @
+//VEval                  // .
+//)
+
+//// Dyad represents built-in 1-symbol binary operators.
+//type Dyad int32
+
+//const (
+//VRight    Dyad = iota // :
+//VAdd                  // +
+//VSubtract             // -
+//VMultiply             // *
+//VDivide               // %
+//VMod                  // !
+//VMin                  // &
+//VMax                  // |
+//VLess                 // <
+//VMore                 // >
+//VEqual                // =
+//VMatch                // ~
+//VJoin                 // ,
+//VCut                  // ^
+//VTake                 // #
+//VDrop                 // _
+//VCast                 // $
+//VFind                 // ?
+//VApply                // @
+//VApplyN               // .
+//)
 
 // Adverb represents verb modifiers.
 type Adverb int32
@@ -123,13 +131,13 @@ const (
 	AScan               // \
 )
 
-// Variadic represents verbs with variable arity > 2.
-type Variadic int32
+//// Variadic represents verbs with variable arity > 2.
+//type Variadic int32
 
-const (
-	VList Variadic = iota
-	VAmend
-)
+//const (
+//VList Variadic = iota
+//VAmend
+//)
 
 // DerivedVerb represents a value modified by an adverb.
 type DerivedVerb struct {
@@ -160,8 +168,8 @@ type Function interface {
 	Project(AV) Projection
 }
 
-func (u Monad) Len() int       { return 1 }
-func (v Dyad) Len() int        { return 1 }
+// func (u Monad) Len() int       { return 1 }
+// func (v Dyad) Len() int        { return 1 }
 func (vv Variadic) Len() int   { return 1 }
 func (w Adverb) Len() int      { return 1 }
 func (r DerivedVerb) Len() int { return 1 }
@@ -169,8 +177,8 @@ func (p Projection) Len() int  { return 1 }
 func (c Composition) Len() int { return 1 }
 func (l Lambda) Len() int      { return 1 }
 
-func (u Monad) Type() string       { return "u" }
-func (v Dyad) Type() string        { return "v" }
+// func (u Monad) Type() string       { return "u" }
+// func (v Dyad) Type() string        { return "v" }
 func (vv Variadic) Type() string   { return "V" }
 func (w Adverb) Type() string      { return "w" }
 func (r DerivedVerb) Type() string { return "r" }
@@ -178,8 +186,9 @@ func (p Projection) Type() string  { return "p" }
 func (c Composition) Type() string { return "c" }
 func (l Lambda) Type() string      { return "l" }
 
-func (u Monad) Project(vs AV) Projection       { return Projection{Fun: u, Args: vs} }
-func (v Dyad) Project(vs AV) Projection        { return Projection{Fun: v, Args: vs} }
+// func (u Monad) Project(vs AV) Projection       { return Projection{Fun: u, Args: vs} }
+// func (v Dyad) Project(vs AV) Projection        { return Projection{Fun: v, Args: vs} }
+func (v Variadic) Project(vs AV) Projection    { return Projection{Fun: v, Args: vs} }
 func (w Adverb) Project(vs AV) Projection      { return Projection{Fun: w, Args: vs} }
 func (r DerivedVerb) Project(vs AV) Projection { return Projection{Fun: r, Args: vs} }
 func (p Projection) Project(vs AV) Projection  { return Projection{Fun: p, Args: vs} }

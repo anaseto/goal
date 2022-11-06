@@ -74,17 +74,11 @@ func (prog *Program) opcodesString(ops []opcode, lc *LambdaCode) string {
 		case opAssignLocal:
 			fmt.Fprintf(sb, "%d\t%s\t%d (%s)\n", i, op, ops[i+1], lc.Locals[ops[i+1]])
 			i++
-		case opMonad:
-			fmt.Fprintf(sb, "%d\t%s\t\t%s\n", i, op, Monad(ops[i+1]))
-			i++
-		case opDyad:
-			fmt.Fprintf(sb, "%d\t%s\t\t%s\n", i, op, Dyad(ops[i+1]))
-			i++
 		case opAdverb:
 			fmt.Fprintf(sb, "%d\t%s\t%s\n", i, op, Adverb(ops[i+1]))
 			i++
 		case opVariadic:
-			fmt.Fprintf(sb, "%d\t%s\t%s\n", i, op, Variadic(ops[i+1]))
+			fmt.Fprintf(sb, "%d\t%s\t%s\n", i, op, builtins[ops[i+1]].Name)
 			i++
 		case opLambda:
 			fmt.Fprintf(sb, "%d\t%s\t%d\n", i, op, ops[i+1])
@@ -130,10 +124,6 @@ func compileExpr(body []opcode, expr Expr) ([]opcode, bool) {
 		body = append(body, opGlobal, opcode(expr.ID))
 	case AstAssignGlobal:
 		body = append(body, opAssignGlobal, opcode(expr.ID))
-	case AstMonad:
-		body = append(body, opMonad, opcode(expr.Monad))
-	case AstDyad:
-		body = append(body, opDyad, opcode(expr.Dyad))
 	case AstVariadic:
 		body = append(body, opVariadic, opcode(expr.Variadic))
 	case AstAdverb:

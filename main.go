@@ -135,7 +135,12 @@ func testVM(s string) {
 	prog := Compile(p.prog)
 	fmt.Printf("%s\n", prog)
 	ctx := NewContext(prog)
-	ctx.execute(ctx.prog.Body)
+	err = ctx.execute(ctx.prog.Body)
+	if err != nil {
+		fmt.Println("---------- Error -----------")
+		fmt.Printf("%v\n", err)
+		return
+	}
 	fmt.Println("---------- Result -----------")
 	if len(ctx.stack) > 0 {
 		fmt.Printf("%v\n", ctx.top())

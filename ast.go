@@ -148,18 +148,6 @@ type AstAssignLocal struct {
 	Pos   int
 }
 
-// AstMonad represents a monadic verb.
-type AstMonad struct {
-	Monad Monad
-	Pos   int
-}
-
-// AstDyad represents a dyadic verb.
-type AstDyad struct {
-	Dyad Dyad
-	Pos  int
-}
-
 // AstVariadic represents verbs with variable arity > 2.
 type AstVariadic struct {
 	Variadic Variadic
@@ -200,8 +188,6 @@ func (n AstGlobal) node()       {}
 func (n AstLocal) node()        {}
 func (n AstAssignGlobal) node() {}
 func (n AstAssignLocal) node()  {}
-func (n AstMonad) node()        {}
-func (n AstDyad) node()         {}
 func (n AstAdverb) node()       {}
 func (n AstVariadic) node()     {}
 func (n AstLambda) node()       {}

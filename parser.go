@@ -269,22 +269,12 @@ func (p *Parser) ppVerb(tok ppToken) error {
 			p.argc += argc
 		}
 	}
-	switch p.argc {
-	case 1:
-		monad := parseMonad(tok.Text)
-		p.pushExpr(AstMonad{
-			Monad: monad,
-			Pos:   tok.Pos,
-		})
-		p.apply()
-	default:
-		dyad := parseDyad(tok.Text)
-		p.pushExpr(AstDyad{
-			Dyad: dyad,
-			Pos:  tok.Pos,
-		})
-		p.apply()
-	}
+	v := parseBuiltin(tok.Text)
+	p.pushExpr(AstVariadic{
+		Variadic: v,
+		Pos:      tok.Pos,
+	})
+	p.apply()
 	return nil
 }
 
@@ -320,94 +310,48 @@ func (p *Parser) ppAssign(verbTok, identTok ppToken) bool {
 	return true
 }
 
-func parseDyad(s string) (verb Dyad) {
+func parseBuiltin(s string) (verb Variadic) {
 	switch s {
 	case ":":
-		verb = VRight
+		verb = vRight
 	case "+":
-		verb = VAdd
+		verb = vAdd
 	case "-":
-		verb = VSubtract
+		verb = vSubtract
 	case "*":
-		verb = VMultiply
+		verb = vMultiply
 	case "%":
-		verb = VDivide
+		verb = vDivide
 	case "!":
-		verb = VMod
+		verb = vMod
 	case "&":
-		verb = VMin
+		verb = vMin
 	case "|":
-		verb = VMax
+		verb = vMax
 	case "<":
-		verb = VLess
+		verb = vLess
 	case ">":
-		verb = VMore
+		verb = vMore
 	case "=":
-		verb = VEqual
+		verb = vEqual
 	case "~":
-		verb = VMatch
+		verb = vMatch
 	case ",":
-		verb = VJoin
+		verb = vJoin
 	case "^":
-		verb = VCut
+		verb = vCut
 	case "#":
-		verb = VTake
+		verb = vTake
 	case "_":
-		verb = VDrop
+		verb = vDrop
 	case "$":
-		verb = VCast
+		verb = vCast
 	case "?":
-		verb = VFind
+		verb = vFind
 	case "@":
-		verb = VApply
+		verb = vApply
 	case ".":
-		verb = VApplyN
-	}
-	return verb
-}
-
-func parseMonad(s string) (verb Monad) {
-	switch s {
-	case ":":
-		verb = VReturn
-	case "+":
-		verb = VFlip
-	case "-":
-		verb = VNegate
-	case "*":
-		verb = VFirst
-	case "%":
-		verb = VClassify
-	case "!":
-		verb = VRange
-	case "&":
-		verb = VWhere
-	case "|":
-		verb = VReverse
-	case "<":
-		verb = VAscend
-	case ">":
-		verb = VDescend
-	case "=":
-		verb = VGroup
-	case "~":
-		verb = VNot
-	case ",":
-		verb = VEnlist
-	case "^":
-		verb = VSort
-	case "#":
-		verb = VLen
-	case "_":
-		verb = VFloor
-	case "$":
-		verb = VString
-	case "?":
-		verb = VUniq
-	case "@":
-		verb = VType
-	case ".":
-		verb = VEval
+		verb = vApplyN
 	}
 	return verb
 }
@@ -564,7 +508,7 @@ func (p *Parser) ppList(body []ppExprs) error {
 			return err
 		}
 	}
-	p.pushExpr(AstVariadic{Variadic: VList})
+	p.pushExpr(AstVariadic{Variadic: vList})
 	p.pushExpr(AstApplyN{N: len(body)})
 	p.argc = argc
 	return nil

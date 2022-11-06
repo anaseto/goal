@@ -9,8 +9,6 @@ const (
 	opLocal
 	opAssignGlobal
 	opAssignLocal
-	opMonad
-	opDyad
 	opAdverb
 	opVariadic
 	opLambda

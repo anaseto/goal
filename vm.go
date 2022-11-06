@@ -1,8 +1,11 @@
 package main
 
+//import "fmt"
+
 func (ctx *Context) execute(ops []opcode) error {
 	for ip := 0; ip < len(ops); {
 		op := ops[ip]
+		//fmt.Printf("%s %d\n", op, ctx.sp)
 		ip++
 		switch op {
 		case opNop:
@@ -21,12 +24,6 @@ func (ctx *Context) execute(ops []opcode) error {
 		case opAssignLocal:
 			ctx.frame[ops[ip]] = ctx.top()
 			ip++
-		case opMonad:
-			ctx.push(Monad(ops[ip]))
-			ip++
-		case opDyad:
-			ctx.push(Dyad(ops[ip]))
-			ip++
 		case opAdverb:
 			ctx.push(Adverb(ops[ip]))
 			ip++
@@ -37,12 +34,12 @@ func (ctx *Context) execute(ops []opcode) error {
 			ctx.push(Lambda(ops[ip]))
 			ip++
 		case opApply:
-			err := ctx.apply()
+			err := ctx.applyN(1)
 			if err != nil {
 				return err
 			}
 		case opApply2:
-			err := ctx.apply2()
+			err := ctx.applyN(2)
 			if err != nil {
 				return err
 			}
@@ -59,45 +56,17 @@ func (ctx *Context) execute(ops []opcode) error {
 	return nil
 }
 
-func (ctx *Context) apply() error {
-	v := ctx.pop()
-	if id, ok := v.(Lambda); ok {
-		return ctx.applyLambda(id, 1)
-	}
-	x := ctx.pop()
-	res := ctx.Apply(v, x)
-	err, ok := res.(error)
-	if ok {
-		return err
-	}
-	ctx.push(res)
-	return nil
-}
-
-func (ctx *Context) apply2() error {
-	v := ctx.pop()
-	if id, ok := v.(Lambda); ok {
-		return ctx.applyLambda(id, 2)
-	}
-	w, x := ctx.pop2()
-	res := ctx.Apply2(v, w, x)
-	err, ok := res.(error)
-	if ok {
-		return err
-	}
-	ctx.push(res)
-	return nil
-}
-
 func (ctx *Context) applyN(n int) error {
 	v := ctx.pop()
 	if id, ok := v.(Lambda); ok {
 		return ctx.applyLambda(id, n)
 	}
-	argn := ctx.popN(n) // XXX: avoid allocation?
-	res := ctx.ApplyN(v, argn)
+	args := ctx.popN(n)
+	//fmt.Printf("args %d: %v\n", n, args)
+	res := ctx.ApplyN(v, args)
 	err, ok := res.(error)
 	if ok {
+		//fmt.Printf("applyN %d stack length %d, sp %d\n", n, len(ctx.stack), ctx.sp)
 		return err
 	}
 	ctx.push(res)
@@ -114,10 +83,8 @@ func (ctx *Context) applyLambda(id Lambda, n int) error {
 	if lc.Arity < n {
 		return errf("too many arguments: got %d, expected %d", n, lc.Arity)
 	} else if lc.Arity > n {
-		argn := ctx.popN(n)
-		args := make(AV, n)
-		copy(args, argn)
-		ctx.push(Projection{Fun: id, Args: args})
+		args := ctx.popN(n)
+		ctx.push(Projection{Fun: id, Args: cloneAV(args)})
 		return nil
 	}
 	osp := ctx.sp
@@ -162,10 +129,8 @@ func (ctx *Context) pop2() (V, V) {
 }
 
 func (ctx *Context) popN(n int) []V {
+	values := make([]V, n)
+	copy(values, ctx.stack[ctx.sp-n:])
 	ctx.sp -= n
-	values := make([]V, 0, n)
-	for i := 0; i < n; i++ {
-		values[i] = ctx.stack[ctx.sp+i]
-	}
 	return values
 }
