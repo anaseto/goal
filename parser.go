@@ -385,9 +385,9 @@ func parseMonad(s string) (verb Monad) {
 	case "|":
 		verb = VReverse
 	case "<":
-		verb = VGradeUp
+		verb = VAscend
 	case ">":
-		verb = VGradeDown
+		verb = VDescend
 	case "=":
 		verb = VGroup
 	case "~":
@@ -403,7 +403,7 @@ func parseMonad(s string) (verb Monad) {
 	case "$":
 		verb = VString
 	case "?":
-		verb = VNub
+		verb = VUniq
 	case "@":
 		verb = VType
 	case ".":

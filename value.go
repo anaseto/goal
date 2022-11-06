@@ -65,26 +65,26 @@ func (x AS) Slice(i, j int) Array { return x[i:j] }
 type Monad int32
 
 const (
-	VReturn    Monad = iota // :
-	VFlip                   // +
-	VNegate                 // -
-	VFirst                  // *
-	VClassify               // %
-	VRange                  // !
-	VWhere                  // &
-	VReverse                // |
-	VGradeUp                // <
-	VGradeDown              // >
-	VGroup                  // =
-	VNot                    // ~
-	VEnlist                 // ,
-	VSort                   // ^
-	VLen                    // #
-	VFloor                  // _
-	VString                 // $
-	VNub                    // ?
-	VType                   // @
-	VEval                   // .
+	VReturn   Monad = iota // :
+	VFlip                  // +
+	VNegate                // -
+	VFirst                 // *
+	VClassify              // %
+	VRange                 // !
+	VWhere                 // &
+	VReverse               // |
+	VAscend                // <
+	VDescend               // >
+	VGroup                 // =
+	VNot                   // ~
+	VEnlist                // ,
+	VSort                  // ^
+	VLen                   // #
+	VFloor                 // _
+	VString                // $
+	VUniq                  // ?
+	VType                  // @
+	VEval                  // .
 )
 
 // Dyad represents built-in 1-symbol binary operators.

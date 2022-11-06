@@ -1243,7 +1243,7 @@ func Windows(w, x V) V {
 	}
 }
 
-// Group returns ⊔x.
+// Group returns ⊔x. XXX Classify by default?
 func Group(x V) V {
 	if Length(x) == 0 {
 		return AV{}

@@ -21,13 +21,13 @@ func (ctx *Context) Apply(v V, x V) (res V) {
 		case VRange:
 			res = Range(x)
 		case VWhere:
-			res = Indices(x)
+			res = Where(x)
 		case VReverse:
 			res = Reverse(x)
-		case VGradeUp:
-			res = GradeUp(x)
-		case VGradeDown:
-			res = GradeDown(x)
+		case VAscend:
+			res = Ascend(x)
+		case VDescend:
+			res = Descend(x)
 		case VGroup:
 			res = Group(x)
 		case VNot:
@@ -43,10 +43,10 @@ func (ctx *Context) Apply(v V, x V) (res V) {
 		case VString:
 			// TODO: VString
 			res = S(fmt.Sprint(x))
-		case VNub:
-			res = errNYI("Apply VNub") // TODO
+		case VUniq:
+			res = Uniq(x) // TODO
 		case VType:
-			res = errNYI("Apply VType") // TODO
+			res = S(x.Type()) // TODO
 		case VEval:
 			res = errNYI("Apply VEval") // TODO
 		}

@@ -458,8 +458,8 @@ func permRange(n int) AI {
 	return r
 }
 
-// GradeUp returns <x.
-func GradeUp(x V) V {
+// Ascend returns <x.
+func Ascend(x V) V {
 	switch x := x.(type) {
 	case AB:
 		p := &PermutationAB{Perm: permRange(len(x)), X: ABUp(x)}
@@ -486,9 +486,9 @@ func GradeUp(x V) V {
 	}
 }
 
-// GradeDown returns >x.
-func GradeDown(x V) V {
-	p := GradeUp(x)
+// Descend returns >x.
+func Descend(x V) V {
+	p := Ascend(x)
 	switch p.(type) {
 	case E:
 		return p

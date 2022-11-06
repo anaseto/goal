@@ -244,11 +244,9 @@ func isFalse(x V) bool {
 		return len(x) == 0
 	case AV:
 		return len(x) == 0
-	case E:
-		return true
 	default:
 		// TODO: Interface for other objects?
-		return false
+		return x == nil
 	}
 }
 
@@ -365,6 +363,8 @@ func aType(x AV) eltype {
 }
 
 func isI(x F) bool {
+	// NOTE: We assume no NaN or Inf: handling those special cases is left
+	// to the program.
 	return math.Floor(float64(x)) == float64(x)
 }
 

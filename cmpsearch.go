@@ -154,7 +154,7 @@ func matchAF(w, x AF) bool {
 	return true
 }
 
-// Classify returns ⊐x.
+// Classify returns %x.
 func Classify(x V) V {
 	if Length(x) == 0 {
 		return AB{}
@@ -237,7 +237,83 @@ func Classify(x V) V {
 	}
 }
 
-// Mark Firsts returns ∊x.
+// Uniq returns ?x.
+func Uniq(x V) V {
+	if Length(x) == 0 {
+		return x
+	}
+	x = canonical(x)
+	switch x := x.(type) {
+	case F, I, S:
+		// NOTE: ?atom could be used for something.
+		return errs("not an array")
+	case AB:
+		if len(x) == 0 {
+			return x
+		}
+		b := x[0]
+		for i := 1; i < len(x); i++ {
+			if x[i] != b {
+				return AB{b, x[i]}
+			}
+		}
+		return AB{b}
+	case AF:
+		r := AF{}
+		m := map[float64]struct{}{}
+		for _, v := range x {
+			_, ok := m[v]
+			if !ok {
+				r = append(r, v)
+				m[v] = struct{}{}
+			}
+		}
+		return r
+	case AI:
+		r := AI{}
+		m := map[int]struct{}{}
+		for _, v := range x {
+			_, ok := m[v]
+			if !ok {
+				r = append(r, v)
+				m[v] = struct{}{}
+				continue
+			}
+		}
+		return r
+	case AS:
+		r := AS{}
+		m := map[string]struct{}{}
+		for _, v := range x {
+			_, ok := m[v]
+			if !ok {
+				r = append(r, v)
+				m[v] = struct{}{}
+				continue
+			}
+		}
+		return r
+	case AV:
+		// NOTE: quadratic algorithm, worst case complexity could be
+		// improved by sorting or string hashing, but that would be
+		// quite bad for short lengths.
+		r := make(AV, len(x))
+	loop:
+		for i, v := range x {
+			for j := range x[:i] {
+				if match(v, x[j]) {
+					continue loop
+				}
+			}
+			r = append(r, v)
+		}
+		return r
+	default:
+		return errs("not an array")
+	}
+}
+
+// Mark Firsts returns ∊x. XXX unused for now
 func MarkFirsts(x V) V {
 	if Length(x) == 0 {
 		return AB{}
@@ -313,7 +389,7 @@ func MarkFirsts(x V) V {
 	}
 }
 
-// MemberOf returns w∊x.
+// MemberOf returns w∊x. XXX unused for now
 func MemberOf(w, x V) V {
 	if Length(x) == 0 || Length(w) == 0 {
 		switch x.(type) {
@@ -500,7 +576,7 @@ func memberOfAO(w V, x AV) V {
 	}
 }
 
-// OccurrenceCount returns ⊒x.
+// OccurrenceCount returns ⊒x. XXX unused for now
 func OccurrenceCount(x V) V {
 	if Length(x) == 0 {
 		return AB{}

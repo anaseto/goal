@@ -1,6 +1,6 @@
 package main
 
-// Range returns ↕x.
+// Range returns !x.
 func Range(x V) V {
 	switch x := x.(type) {
 	case F:
@@ -30,19 +30,22 @@ func rangeI(n I) V {
 }
 
 func rangeArray(x Array) V {
-	y := make(AI, x.Len())
-	for i := range y {
-		v := x.At(i)
-		switch v := v.(type) {
-		case I:
-			y[i] = int(v)
-		case F:
-			if !isI(v) {
-				return errs("non-integer range")
+	y, ok := x.(AI)
+	if !ok {
+		y = make(AI, x.Len())
+		for i := range y {
+			v := x.At(i)
+			switch v := v.(type) {
+			case I:
+				y[i] = int(v)
+			case F:
+				if !isI(v) {
+					return errs("non-integer range")
+				}
+				y[i] = int(v)
+			default:
+				return errs("non-numeric")
 			}
-			y[i] = int(v)
-		default:
-			return errs("non-numeric")
 		}
 	}
 	cols := 1
@@ -71,8 +74,8 @@ func rangeArray(x Array) V {
 	return r
 }
 
-// Indices returns &x.
-func Indices(x V) V {
+// Where returns &x.
+func Where(x V) V {
 	switch x := x.(type) {
 	case I:
 		switch {

@@ -111,9 +111,11 @@ func Floor(x V) V {
 	case AB:
 		return x
 	case AF:
-		r := make(AF, len(x))
+		r := make(AI, len(x))
 		for i := range r {
-			r[i] = math.Floor(x[i])
+			// NOTE: we assume conversion is possible, leaving
+			// handling NaN, INF or big floats to the program.
+			r[i] = int(x[i])
 		}
 		return r
 	case AI:
@@ -179,9 +181,11 @@ func Ceil(x V) V {
 func Not(x V) V {
 	switch x := x.(type) {
 	case F:
-		return 1 - x
+		return B2I(x != 0)
 	case I:
-		return 1 - x
+		return B2I(x != 0)
+	case S:
+		return B2I(x != "")
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -189,15 +193,15 @@ func Not(x V) V {
 		}
 		return r
 	case AF:
-		r := make(AF, len(x))
+		r := make(AB, len(x))
 		for i := range r {
-			r[i] = 1 - x[i]
+			r[i] = x[i] != 0
 		}
 		return r
 	case AI:
-		r := make(AI, len(x))
+		r := make(AB, len(x))
 		for i := range r {
-			r[i] = 1 - x[i]
+			r[i] = x[i] != 0
 		}
 		return r
 	case AV:
@@ -213,14 +217,7 @@ func Not(x V) V {
 	}
 }
 
-func absI(x I) I {
-	if x < 0 {
-		return -x
-	}
-	return x
-}
-
-// Abs returns |x.
+// Abs returns abs[x]. XXX unused now
 func Abs(x V) V {
 	switch x := x.(type) {
 	case F:
@@ -252,4 +249,11 @@ func Abs(x V) V {
 	default:
 		return errType(x)
 	}
+}
+
+func absI(x I) I {
+	if x < 0 {
+		return -x
+	}
+	return x
 }
