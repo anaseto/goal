@@ -22,5 +22,6 @@ func NewContext(prog *Program) *Context {
 	}
 	ctx.globals = make([]V, max+1)
 	ctx.constants = prog.Constants
+	ctx.stack = make([]V, 64)
 	return ctx
 }

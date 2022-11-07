@@ -107,9 +107,6 @@ func (ctx *Context) applyLambda(id Lambda, n int) error {
 	default:
 		return errf("bad sp %d vs osp %d", len(ctx.stack), olen)
 	}
-	for i := range ctx.stack[olen-n : olen] {
-		ctx.stack[i] = nil
-	}
 	ctx.dropN(n)
 	ctx.frameIdx = oframeIdx
 	ctx.push(res)
@@ -137,5 +134,8 @@ func (ctx *Context) popN(n int) []V {
 }
 
 func (ctx *Context) dropN(n int) {
+	for i := range ctx.stack[len(ctx.stack)-n:] {
+		ctx.stack[i] = nil
+	}
 	ctx.stack = ctx.stack[:len(ctx.stack)-n]
 }
