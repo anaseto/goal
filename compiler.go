@@ -61,6 +61,8 @@ func (prog *Program) opcodesString(ops []opcode, lc *LambdaCode) string {
 		case opConst:
 			fmt.Fprintf(sb, "%d\t%s\t\t%d\n", i, op, ops[i+1])
 			i++
+		case opNil:
+			fmt.Fprintf(sb, "%d\t%s\n", i, op)
 		case opGlobal:
 			fmt.Fprintf(sb, "%d\t%s\t%d (%s)\n", i, op, ops[i+1], prog.Globals[int(ops[i+1])])
 			i++
@@ -120,6 +122,8 @@ func compileExpr(body []opcode, expr Expr) ([]opcode, bool) {
 	switch expr := expr.(type) {
 	case AstConst:
 		body = append(body, opConst, opcode(expr.ID))
+	case AstNil:
+		body = append(body, opNil)
 	case AstGlobal:
 		body = append(body, opGlobal, opcode(expr.ID))
 	case AstAssignGlobal:

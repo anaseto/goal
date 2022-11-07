@@ -234,7 +234,8 @@ func (p *Parser) ppLocal(tok ppToken) {
 func (p *Parser) ppVerb(tok ppToken) error {
 	ppe := p.it.Peek()
 	argc := p.argc
-	if ppe != nil && argc == 1 {
+	if ppe != nil && argc <= 1 {
+		left := false
 		switch ppe := ppe.(type) {
 		case ppToken:
 			switch ppe.Type {
@@ -251,7 +252,7 @@ func (p *Parser) ppVerb(tok ppToken) error {
 				if err != nil {
 					return err
 				}
-				p.argc += argc
+				left = true
 			}
 		case ppStrand:
 			p.it.Next()
@@ -260,19 +261,25 @@ func (p *Parser) ppVerb(tok ppToken) error {
 			if err != nil {
 				return err
 			}
-			p.argc += argc
+			left = true
 		case ppParenExpr:
 			p.it.Next()
 			err := p.ppParenExpr(ppe)
 			if err != nil {
 				return err
 			}
-			p.argc += argc
+			left = true
 		case ppBlock:
 			p.it.Next()
 			err := p.ppBlock(ppe)
 			if err != nil {
 				return err
+			}
+			left = true
+		}
+		if left {
+			if argc == 0 {
+				p.pushExpr(AstNil{Pos: tok.Pos})
 			}
 			p.argc += argc
 		}

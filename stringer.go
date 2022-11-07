@@ -141,22 +141,23 @@ func _() {
 	var x [1]struct{}
 	_ = x[opNop-0]
 	_ = x[opConst-1]
-	_ = x[opGlobal-2]
-	_ = x[opLocal-3]
-	_ = x[opAssignGlobal-4]
-	_ = x[opAssignLocal-5]
-	_ = x[opAdverb-6]
-	_ = x[opVariadic-7]
-	_ = x[opLambda-8]
-	_ = x[opApply-9]
-	_ = x[opApply2-10]
-	_ = x[opApplyN-11]
-	_ = x[opDrop-12]
+	_ = x[opNil-2]
+	_ = x[opGlobal-3]
+	_ = x[opLocal-4]
+	_ = x[opAssignGlobal-5]
+	_ = x[opAssignLocal-6]
+	_ = x[opAdverb-7]
+	_ = x[opVariadic-8]
+	_ = x[opLambda-9]
+	_ = x[opApply-10]
+	_ = x[opApply2-11]
+	_ = x[opApplyN-12]
+	_ = x[opDrop-13]
 }
 
-const _opcode_name = "opNopopConstopGlobalopLocalopAssignGlobalopAssignLocalopAdverbopVariadicopLambdaopApplyopApply2opApplyNopDrop"
+const _opcode_name = "opNopopConstopNilopGlobalopLocalopAssignGlobalopAssignLocalopAdverbopVariadicopLambdaopApplyopApply2opApplyNopDrop"
 
-var _opcode_index = [...]uint8{0, 5, 12, 20, 27, 41, 54, 62, 72, 80, 87, 95, 103, 109}
+var _opcode_index = [...]uint8{0, 5, 12, 17, 25, 32, 46, 59, 67, 77, 85, 92, 100, 108, 114}
 
 func (i opcode) String() string {
 	if i < 0 || i >= opcode(len(_opcode_index)-1) {

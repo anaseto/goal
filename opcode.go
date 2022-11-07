@@ -5,6 +5,7 @@ type opcode int32
 const (
 	opNop opcode = iota
 	opConst
+	opNil
 	opGlobal
 	opLocal
 	opAssignGlobal

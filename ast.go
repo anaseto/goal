@@ -120,6 +120,11 @@ type AstConst struct {
 	Pos int // position information
 }
 
+// AstNil represents a constant.
+type AstNil struct {
+	Pos int // position information
+}
+
 // AstGlobal represents a global variable read.
 type AstGlobal struct {
 	Name string
@@ -184,6 +189,7 @@ type AstApplyN struct {
 type AstDrop struct{}
 
 func (n AstConst) node()        {}
+func (n AstNil) node()          {}
 func (n AstGlobal) node()       {}
 func (n AstLocal) node()        {}
 func (n AstAssignGlobal) node() {}
