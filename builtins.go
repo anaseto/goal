@@ -281,6 +281,6 @@ func fApplyN(ctx *Context, args []V) V {
 
 func fList(ctx *Context, args []V) V {
 	res := cloneArgs(args)
-	reverseAV(res)
+	reverseArgs(res)
 	return AV(res)
 }

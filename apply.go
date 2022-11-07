@@ -18,6 +18,10 @@ func (ctx *Context) ApplyN(v V, n int) V {
 		args := ctx.peekN(n)
 		switch n {
 		case 1:
+			if args[0] == nil {
+				ctx.drop()
+				return v
+			}
 			indices := toIndices(args[0])
 			if indices == nil {
 				return errs("not an integer array")

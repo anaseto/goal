@@ -490,7 +490,7 @@ func countNils(x []V) int {
 	return n
 }
 
-func reverseAV(x []V) {
+func reverseArgs(x []V) {
 	for i := 0; i < len(x)/2; i++ {
 		x[i], x[len(x)-i-1] = x[len(x)-i-1], x[i]
 	}
