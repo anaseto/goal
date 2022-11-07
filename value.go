@@ -2,6 +2,11 @@ package main
 
 //go:generate stringer -type=Variadic,Adverb,TokenType,ppTokenType,ppBlockType,opcode -output stringer.go
 
+import (
+	"fmt"
+	"strings"
+)
+
 // V represents any kind of value.
 type V interface {
 	Len() int
@@ -61,6 +66,63 @@ func (x AB) Slice(i, j int) Array { return x[i:j] }
 func (x AI) Slice(i, j int) Array { return x[i:j] }
 func (x AF) Slice(i, j int) Array { return x[i:j] }
 func (x AS) Slice(i, j int) Array { return x[i:j] }
+
+func (x AV) String() string {
+	sb := &strings.Builder{}
+	sb.WriteRune('(')
+	for i, v := range x {
+		if v != nil {
+			fmt.Fprintf(sb, "%v", v)
+		}
+		if i < len(x)-1 {
+			sb.WriteRune(';')
+		}
+	}
+	sb.WriteRune(')')
+	return sb.String()
+}
+func (x AB) String() string {
+	sb := &strings.Builder{}
+	for i, v := range x {
+		fmt.Fprintf(sb, "%d", B2I(v))
+		if i < len(x)-1 {
+			sb.WriteRune(' ')
+		}
+	}
+	return sb.String()
+}
+func (x AI) String() string {
+	sb := &strings.Builder{}
+	for i, v := range x {
+		fmt.Fprintf(sb, "%d", v)
+		if i < len(x)-1 {
+			sb.WriteRune(' ')
+		}
+	}
+	return sb.String()
+}
+
+func (x AF) String() string {
+	sb := &strings.Builder{}
+	for i, v := range x {
+		fmt.Fprintf(sb, "%g", v)
+		if i < len(x)-1 {
+			sb.WriteRune(' ')
+		}
+	}
+	return sb.String()
+}
+
+func (x AS) String() string {
+	sb := &strings.Builder{}
+	for i, v := range x {
+		fmt.Fprintf(sb, "%q", v)
+		if i < len(x)-1 {
+			sb.WriteRune(' ')
+		}
+	}
+	return sb.String()
+}
 
 // Variadic represents a built-in function.
 type Variadic int32

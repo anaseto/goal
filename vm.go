@@ -44,7 +44,7 @@ func (ctx *Context) execute(ops []opcode) error {
 				return err
 			}
 		case opApplyN:
-			err := ctx.applyN(int(ops[ip+1]))
+			err := ctx.applyN(int(ops[ip]))
 			if err != nil {
 				return err
 			}
