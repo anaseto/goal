@@ -50,9 +50,7 @@ func (ctx *Context) execute(ops []opcode) error {
 			}
 			ip++
 		case opDrop:
-			if len(ctx.stack) > 0 {
-				ctx.stack = ctx.stack[:len(ctx.stack)-1]
-			}
+			ctx.stack = ctx.stack[:len(ctx.stack)-1]
 		}
 	}
 	return nil
