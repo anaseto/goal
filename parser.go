@@ -10,6 +10,7 @@ type Parser struct {
 	pp         *parser
 	prog       *AstProgram
 	argc       int // stack length for current sub-expression
+	arglist    bool
 	scopeStack []*AstLambdaCode
 	pos        int
 	it         ppIter
@@ -231,59 +232,7 @@ func (p *Parser) ppLocal(tok ppToken) {
 	p.ppGlobal(tok)
 }
 
-func (p *Parser) ppVerb(tok ppToken) error {
-	ppe := p.it.Peek()
-	argc := p.argc
-	if ppe != nil && argc <= 1 {
-		left := false
-		switch ppe := ppe.(type) {
-		case ppToken:
-			switch ppe.Type {
-			case ppIDENT:
-				if p.ppAssign(tok, ppe) {
-					p.it.Next()
-					return nil
-				}
-				fallthrough
-			case ppNUMBER, ppSTRING:
-				p.it.Next()
-				p.argc = 0
-				err := p.ppToken(ppe)
-				if err != nil {
-					return err
-				}
-				left = true
-			}
-		case ppStrand:
-			p.it.Next()
-			p.argc = 0
-			err := p.ppStrand(ppe)
-			if err != nil {
-				return err
-			}
-			left = true
-		case ppParenExpr:
-			p.it.Next()
-			err := p.ppParenExpr(ppe)
-			if err != nil {
-				return err
-			}
-			left = true
-		case ppBlock:
-			p.it.Next()
-			err := p.ppBlock(ppe)
-			if err != nil {
-				return err
-			}
-			left = true
-		}
-		if left {
-			if argc == 0 {
-				p.pushExpr(AstNil{Pos: tok.Pos})
-			}
-			p.argc += argc
-		}
-	}
+func (p *Parser) ppVariadic(tok ppToken) error {
 	v := parseBuiltin(tok.Text)
 	p.pushExpr(AstVariadic{
 		Variadic: v,
@@ -291,6 +240,37 @@ func (p *Parser) ppVerb(tok ppToken) error {
 	})
 	p.apply()
 	return nil
+}
+
+func (p *Parser) ppVerb(tok ppToken) error {
+	ppe := p.it.Peek()
+	argc := p.argc
+	if ppe == nil || p.arglist {
+		return p.ppVariadic(tok)
+	}
+	t, ok := ppe.(ppToken)
+	if ok {
+		switch t.Type {
+		case ppIDENT:
+			if p.ppAssign(tok, t) {
+				p.it.Next()
+				return nil
+			}
+		case ppADVERB, ppVERB:
+			return p.ppVariadic(tok)
+		}
+	}
+	p.it.Next()
+	p.argc = 0
+	err := p.ppExpr(ppe)
+	if err != nil {
+		return err
+	}
+	if argc == 0 {
+		p.pushExpr(AstNil{Pos: tok.Pos})
+	}
+	p.argc += argc
+	return p.ppVariadic(tok)
 }
 
 func (p *Parser) ppAssign(verbTok, identTok ppToken) bool {
@@ -367,13 +347,52 @@ func parseBuiltin(s string) (verb Variadic) {
 		verb = vApply
 	case ".":
 		verb = vApplyN
+	case "'":
+		verb = vEach
+	case "/":
+		verb = vFold
+	case "\\":
+		verb = vScan
 	}
 	return verb
 }
 
 func (p *Parser) ppAdVerb(tok ppToken) error {
-	// TODO: parse adverbs
-	return nil
+	ppe := p.it.Peek()
+	argc := p.argc
+	if ppe == nil {
+		p.pushExpr(AstNil{Pos: tok.Pos})
+		return p.ppVariadic(tok)
+	}
+	p.it.Next()
+	nppe := p.it.Peek()
+	if nppe == nil || p.arglist {
+		p.argc = 0
+		err := p.ppExpr(ppe)
+		if err != nil {
+			return err
+		}
+		if argc == 0 {
+			p.pushExpr(AstNil{Pos: tok.Pos})
+		}
+		p.argc += argc
+		return p.ppVariadic(tok)
+	}
+	p.argc = 0
+	err := p.ppExpr(nppe)
+	if err != nil {
+		return err
+	}
+	if argc == 0 {
+		p.pushExpr(AstNil{Pos: tok.Pos})
+	}
+	p.argc = 0
+	err = p.ppExpr(ppe)
+	if err != nil {
+		return err
+	}
+	p.argc = 3
+	return p.ppVariadic(tok)
 }
 
 func (p *Parser) ppStrand(pps ppStrand) error {
@@ -469,8 +488,8 @@ func (p *Parser) ppArgs(body []ppExprs) error {
 		}
 	}
 	argc := p.argc
-	bodyRev(body)
-	for _, exprs := range body {
+	for i := len(body) - 1; i >= 0; i-- {
+		exprs := body[i]
 		err := p.ppExprs(exprs)
 		if err != nil {
 			return err
@@ -482,7 +501,9 @@ func (p *Parser) ppArgs(body []ppExprs) error {
 	}
 	ppe := p.it.Expr()
 	p.argc = len(body)
+	p.arglist = true
 	err := p.ppExpr(ppe)
+	p.arglist = false
 	if err != nil {
 		return err
 	}

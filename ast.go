@@ -226,6 +226,14 @@ func (it *ppIter) Expr() ppExpr {
 	return it.pps[it.i]
 }
 
+func (it *ppIter) Index() int {
+	return it.i
+}
+
+func (it *ppIter) Set(i int) {
+	it.i = i
+}
+
 func (it *ppIter) Peek() ppExpr {
 	if it.i+1 >= len(it.pps) {
 		return nil
