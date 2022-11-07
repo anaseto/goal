@@ -13,31 +13,7 @@ func (ctx *Context) ApplyN(v V, n int) V {
 		ctx.dropN(n)
 		return res
 	case Projection:
-		args := ctx.peekN(n)
-		if len(args) > countNils(v.Args) {
-			return errs("too many arguments")
-		}
-		vargs := cloneArgs(v.Args)
-		n := 1
-		for i := len(vargs) - 1; i >= 0; i-- {
-			if vargs[i] == nil {
-				if n > len(args) {
-					break
-				}
-				vargs[i] = args[len(args)-n]
-				n++
-			}
-		}
-		ctx.dropN(n)
-		for _, arg := range vargs {
-			if arg == nil {
-				return v
-			}
-		}
-		ctx.pushArgs(vargs)
-		res := ctx.ApplyN(v.Fun, len(vargs))
-		ctx.dropN(len(vargs))
-		return res
+		return ctx.applyProjection(v, n)
 	case Array:
 		args := ctx.peekN(n)
 		switch n {
@@ -55,6 +31,44 @@ func (ctx *Context) ApplyN(v V, n int) V {
 		}
 	default:
 		return errf("type %s cannot be applied", v.Type())
+	}
+}
+
+func (ctx *Context) applyProjection(v Projection, n int) V {
+	args := ctx.peekN(n)
+	nNils := countNils(v.Args)
+	switch {
+	case len(args) > nNils:
+		return errs("too many arguments")
+	case len(args) == nNils:
+		n := 0
+		for _, v := range v.Args {
+			switch {
+			case v != nil:
+				ctx.push(v)
+			default:
+				ctx.push(args[n])
+				n++
+			}
+		}
+		res := ctx.ApplyN(v.Fun, len(v.Args))
+		ctx.dropN(len(v.Args))
+		ctx.dropN(n)
+		return res
+	default:
+		vargs := cloneArgs(v.Args)
+		n := 1
+		for i := len(vargs) - 1; i >= 0; i-- {
+			if vargs[i] == nil {
+				if n > len(args) {
+					break
+				}
+				vargs[i] = args[len(args)-n]
+				n++
+			}
+		}
+		ctx.dropN(n)
+		return Projection{Fun: v, Args: vargs}
 	}
 }
 
