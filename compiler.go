@@ -76,9 +76,6 @@ func (prog *Program) opcodesString(ops []opcode, lc *LambdaCode) string {
 		case opAssignLocal:
 			fmt.Fprintf(sb, "%d\t%s\t%d (%s)\n", i, op, ops[i+1], lc.Locals[ops[i+1]])
 			i++
-		case opAdverb:
-			fmt.Fprintf(sb, "%d\t%s\t%s\n", i, op, Adverb(ops[i+1]))
-			i++
 		case opVariadic:
 			fmt.Fprintf(sb, "%d\t%s\t%s\n", i, op, builtins[ops[i+1]].Name)
 			i++
@@ -130,8 +127,6 @@ func compileExpr(body []opcode, expr Expr) ([]opcode, bool) {
 		body = append(body, opAssignGlobal, opcode(expr.ID))
 	case AstVariadic:
 		body = append(body, opVariadic, opcode(expr.Variadic))
-	case AstAdverb:
-		body = append(body, opAdverb, opcode(expr.Adverb))
 	case AstLambda:
 		body = append(body, opLambda, opcode(expr.Lambda))
 	case AstApply:

@@ -1,6 +1,6 @@
 package main
 
-//go:generate stringer -type=Variadic,Adverb,TokenType,ppTokenType,ppBlockType,opcode -output stringer.go
+//go:generate stringer -type=Variadic,TokenType,ppTokenType,ppBlockType,opcode -output stringer.go
 
 import (
 	"fmt"
@@ -59,21 +59,16 @@ const (
 	vApply                    // @
 	vApplyN                   // .
 	vList                     // (...;...;...)
+	vEach                     // ' (adverb)
+	vFold                     // / (adverb)
+	vScan                     // \ (adverb)
 )
 
-// Adverb represents verb modifiers.
-type Adverb int32
-
-const (
-	AEach Adverb = iota // '
-	AFold               // /
-	AScan               // \
-)
-
-// DerivedVerb represents a value modified by an adverb.
+// DerivedVerb represents is a special case of projection with one argument.
+// It is, in particular, used for adverbs.
 type DerivedVerb struct {
-	Adverb Adverb
-	Value  V
+	Fun Variadic
+	Arg V
 }
 
 // Projection represents a partial application of a function. Because variadic
@@ -94,14 +89,12 @@ type Composition struct {
 type Lambda int32
 
 func (v Variadic) Len() int    { return 1 }
-func (w Adverb) Len() int      { return 1 }
 func (r DerivedVerb) Len() int { return 1 }
 func (p Projection) Len() int  { return 1 }
 func (c Composition) Len() int { return 1 }
 func (l Lambda) Len() int      { return 1 }
 
 func (v Variadic) Type() string    { return "v" }
-func (w Adverb) Type() string      { return "w" }
 func (p Projection) Type() string  { return "p" }
 func (c Composition) Type() string { return "q" }
 func (r DerivedVerb) Type() string { return "r" }

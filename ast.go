@@ -159,12 +159,6 @@ type AstVariadic struct {
 	Pos      int
 }
 
-// AstAdverb represents an adverb.
-type AstAdverb struct {
-	Adverb Adverb
-	Pos    int
-}
-
 // AstLambda represents an user Lambda.
 type AstLambda struct {
 	Lambda Lambda
@@ -194,7 +188,6 @@ func (n AstGlobal) node()       {}
 func (n AstLocal) node()        {}
 func (n AstAssignGlobal) node() {}
 func (n AstAssignLocal) node()  {}
-func (n AstAdverb) node()       {}
 func (n AstVariadic) node()     {}
 func (n AstLambda) node()       {}
 func (n AstApply) node()        {}

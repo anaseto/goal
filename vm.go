@@ -26,9 +26,6 @@ func (ctx *Context) execute(ops []opcode) error {
 		case opAssignLocal:
 			ctx.stack[ctx.frameIdx+int32(ops[ip])] = ctx.top()
 			ip++
-		case opAdverb:
-			ctx.push(Adverb(ops[ip]))
-			ip++
 		case opVariadic:
 			ctx.push(Variadic(ops[ip]))
 			ip++
