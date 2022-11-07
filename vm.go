@@ -50,7 +50,7 @@ func (ctx *Context) execute(ops []opcode) error {
 			}
 			ip++
 		case opDrop:
-			ctx.stack = ctx.stack[:len(ctx.stack)-1]
+			ctx.drop()
 		}
 	}
 	return nil
@@ -58,15 +58,9 @@ func (ctx *Context) execute(ops []opcode) error {
 
 func (ctx *Context) applyN(n int) error {
 	v := ctx.pop()
-	if id, ok := v.(Lambda); ok {
-		return ctx.applyLambda(id, n)
-	}
-	args := ctx.popN(n)
-	//fmt.Printf("args %d: %v\n", n, args)
-	res := ctx.ApplyN(v, args)
+	res := ctx.ApplyN(v, n)
 	err, ok := res.(error)
 	if ok {
-		//fmt.Printf("applyN %d stack length %d, sp %d\n", n, len(ctx.stack), ctx.sp)
 		return err
 	}
 	ctx.push(res)
@@ -75,50 +69,17 @@ func (ctx *Context) applyN(n int) error {
 
 const maxCallDepth = 10000
 
-func (ctx *Context) applyLambda(id Lambda, n int) error {
-	if ctx.callDepth > maxCallDepth {
-		return errs("exceeded maximum call depth")
-	}
-	lc := ctx.prog.Lambdas[int(id)]
-	if lc.Arity < n {
-		return errf("too many arguments: got %d, expected %d", n, lc.Arity)
-	} else if lc.Arity > n {
-		args := ctx.popN(n)
-		ctx.push(Projection{Fun: id, Args: cloneAV(args)})
-		return nil
-	}
-	olen := len(ctx.stack)
-	oframeIdx := ctx.frameIdx
-	ctx.frameIdx = int32(olen - n)
-
-	ctx.callDepth++
-	err := ctx.execute(lc.Body)
-	ctx.callDepth--
-
-	if err != nil {
-		return err
-	}
-	var res V
-	switch len(ctx.stack) {
-	case olen:
-		res = nil
-	case olen + 1:
-		res = ctx.stack[len(ctx.stack)-1]
-	default:
-		return errf("bad sp %d vs osp %d", len(ctx.stack), olen)
-	}
-	ctx.dropN(n)
-	ctx.frameIdx = oframeIdx
-	ctx.push(res)
-	return nil
-}
-
 func (ctx *Context) push(v V) {
 	ctx.stack = append(ctx.stack, v)
 }
 
+func (ctx *Context) pushArgs(args []V) {
+	ctx.stack = append(ctx.stack, args...)
+}
+
 func (ctx *Context) pop() V {
 	arg := ctx.stack[len(ctx.stack)-1]
+	ctx.stack[len(ctx.stack)-1] = nil
 	ctx.stack = ctx.stack[:len(ctx.stack)-1]
 	return arg
 }
@@ -128,9 +89,21 @@ func (ctx *Context) top() V {
 }
 
 func (ctx *Context) popN(n int) []V {
-	args := ctx.stack[len(ctx.stack)-n:]
+	args := cloneArgs(ctx.stack[len(ctx.stack)-n:])
+	for i := range ctx.stack[len(ctx.stack)-n:] {
+		ctx.stack[i] = nil
+	}
 	ctx.stack = ctx.stack[:len(ctx.stack)-n]
 	return args
+}
+
+func (ctx *Context) peekN(n int) []V {
+	return ctx.stack[len(ctx.stack)-n:]
+}
+
+func (ctx *Context) drop() {
+	ctx.stack[len(ctx.stack)-1] = nil
+	ctx.stack = ctx.stack[:len(ctx.stack)-1]
 }
 
 func (ctx *Context) dropN(n int) {

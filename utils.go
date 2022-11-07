@@ -496,7 +496,7 @@ func reverseAV(x []V) {
 	}
 }
 
-func cloneAV(x []V) []V {
+func cloneArgs(x []V) []V {
 	args := make([]V, len(x))
 	copy(args, x)
 	return args

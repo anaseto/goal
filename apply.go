@@ -1,17 +1,23 @@
 package main
 
-func (ctx *Context) ApplyN(v V, args []V) V {
+func (ctx *Context) ApplyN(v V, n int) V {
 	switch v := v.(type) {
+	case Lambda:
+		return ctx.applyLambda(v, n)
 	case Variadic:
+		args := ctx.peekN(n)
 		if hasNil(args) {
-			return Projection{Fun: v, Args: cloneAV(args)}
+			return Projection{Fun: v, Args: ctx.popN(n)}
 		}
-		return builtins[v].Func(ctx, args)
+		res := builtins[v].Func(ctx, args)
+		ctx.dropN(n)
+		return res
 	case Projection:
+		args := ctx.peekN(n)
 		if len(args) > countNils(v.Args) {
 			return errs("too many arguments")
 		}
-		vargs := cloneAV(v.Args)
+		vargs := cloneArgs(v.Args)
 		n := 1
 		for i := len(vargs) - 1; i >= 0; i-- {
 			if vargs[i] == nil {
@@ -22,33 +28,68 @@ func (ctx *Context) ApplyN(v V, args []V) V {
 				n++
 			}
 		}
+		ctx.dropN(n)
 		for _, arg := range vargs {
 			if arg == nil {
 				return v
 			}
 		}
-		return ctx.ApplyN(v.Fun, vargs)
+		ctx.pushArgs(vargs)
+		res := ctx.ApplyN(v.Fun, len(vargs))
+		ctx.dropN(len(vargs))
+		return res
 	case Array:
-		switch len(args) {
+		args := ctx.peekN(n)
+		switch n {
 		case 1:
 			indices := toIndices(args[0])
 			if indices == nil {
 				return errs("not an integer array")
 			}
-			return v.Apply(indices)
+			res := v.Apply(indices)
+			ctx.drop()
+			return res
 		default:
-			return errf("NYI: deep index %d", len(args))
+			ctx.dropN(n)
+			return errf("NYI: deep index %d", n)
 		}
-	case Lambda:
-		ctx.stack = append(ctx.stack, args...)
-		err := ctx.applyLambda(v, len(args))
-		if err != nil {
-			return errs(err.Error())
-		}
-		return ctx.pop()
 	default:
 		return errf("type %s cannot be applied", v.Type())
 	}
+}
+
+func (ctx *Context) applyLambda(id Lambda, n int) V {
+	if ctx.callDepth > maxCallDepth {
+		return errs("exceeded maximum call depth")
+	}
+	lc := ctx.prog.Lambdas[int(id)]
+	if lc.Arity < n {
+		return errf("too many arguments: got %d, expected %d", n, lc.Arity)
+	} else if lc.Arity > n {
+		return Projection{Fun: id, Args: ctx.popN(n)}
+	}
+	olen := len(ctx.stack)
+	oframeIdx := ctx.frameIdx
+	ctx.frameIdx = int32(olen - n)
+
+	ctx.callDepth++
+	err := ctx.execute(lc.Body)
+	ctx.callDepth--
+
+	if err != nil {
+		return errf("lambda execute: %v", err)
+	}
+	var res V
+	switch len(ctx.stack) {
+	case olen:
+	case olen + 1:
+		res = ctx.stack[len(ctx.stack)-1]
+	default:
+		return errf("bad sp %d vs osp %d", len(ctx.stack), olen)
+	}
+	ctx.dropN(n)
+	ctx.frameIdx = oframeIdx
+	return res
 }
 
 func (x AV) Apply(y AI) V {

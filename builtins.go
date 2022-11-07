@@ -258,7 +258,9 @@ func fApply(ctx *Context, args []V) V {
 	case 1:
 		return S(args[0].Type())
 	case 2:
-		return ctx.ApplyN(args[1], args[0:])
+		v := args[1]
+		ctx.push(args[0])
+		return ctx.ApplyN(v, 1)
 	default:
 		return errs("too many arguments")
 	}
@@ -269,14 +271,16 @@ func fApplyN(ctx *Context, args []V) V {
 	case 1:
 		return errNYI("monadic .")
 	case 2:
-		return ctx.ApplyN(args[len(args)-1], args[:len(args)-1])
+		v := args[len(args)-1]
+		ctx.pushArgs(args[:len(args)-1])
+		return ctx.ApplyN(v, len(args)-1)
 	default:
 		return errs("too many arguments")
 	}
 }
 
 func fList(ctx *Context, args []V) V {
-	res := cloneAV(args)
+	res := cloneArgs(args)
 	reverseAV(res)
 	return AV(res)
 }
