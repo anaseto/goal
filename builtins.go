@@ -2,29 +2,10 @@ package main
 
 import "fmt"
 
-const (
-	vRight    Variadic = iota // :
-	vAdd                      // +
-	vSubtract                 // -
-	vMultiply                 // *
-	vDivide                   // %
-	vMod                      // !
-	vMin                      // &
-	vMax                      // |
-	vLess                     // <
-	vMore                     // >
-	vEqual                    // =
-	vMatch                    // ~
-	vJoin                     // ,
-	vCut                      // ^
-	vTake                     // #
-	vDrop                     // _
-	vCast                     // $
-	vFind                     // ?
-	vApply                    // @
-	vApplyN                   // .
-	vList                     // (...;...;...)
-)
+type VariadicFun struct {
+	Name string
+	Func func(*Context, []V) V
+}
 
 var builtins []VariadicFun
 

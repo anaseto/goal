@@ -34,6 +34,79 @@ type AF []float64 // real array
 type AI []int     // integer array (TODO: optimization: add Range type?)
 type AS []string  // string array
 
+// Variadic represents a built-in function.
+type Variadic int32
+
+const (
+	vRight    Variadic = iota // :
+	vAdd                      // +
+	vSubtract                 // -
+	vMultiply                 // *
+	vDivide                   // %
+	vMod                      // !
+	vMin                      // &
+	vMax                      // |
+	vLess                     // <
+	vMore                     // >
+	vEqual                    // =
+	vMatch                    // ~
+	vJoin                     // ,
+	vCut                      // ^
+	vTake                     // #
+	vDrop                     // _
+	vCast                     // $
+	vFind                     // ?
+	vApply                    // @
+	vApplyN                   // .
+	vList                     // (...;...;...)
+)
+
+// Adverb represents verb modifiers.
+type Adverb int32
+
+const (
+	AEach Adverb = iota // '
+	AFold               // /
+	AScan               // \
+)
+
+// DerivedVerb represents a value modified by an adverb.
+type DerivedVerb struct {
+	Adverb Adverb
+	Value  V
+}
+
+// Projection represents a partial application of a function. Because variadic
+// verbs do not have a fixed arity, it is possible to produce a projection of
+// any arity.
+type Projection struct {
+	Fun  V
+	Args AV
+}
+
+// Composition represents a composition of several functions. All except the
+// last will be called monadically. XXX: not used for now.
+type Composition struct {
+	Funs []V
+}
+
+// Lambda represents an user defined function by ID.
+type Lambda int32
+
+func (v Variadic) Len() int    { return 1 }
+func (w Adverb) Len() int      { return 1 }
+func (r DerivedVerb) Len() int { return 1 }
+func (p Projection) Len() int  { return 1 }
+func (c Composition) Len() int { return 1 }
+func (l Lambda) Len() int      { return 1 }
+
+func (v Variadic) Type() string    { return "v" }
+func (w Adverb) Type() string      { return "w" }
+func (p Projection) Type() string  { return "p" }
+func (c Composition) Type() string { return "q" }
+func (r DerivedVerb) Type() string { return "r" }
+func (l Lambda) Type() string      { return "l" }
+
 // Array interface is satisfied by the different kind of supported arrays.
 // Typical implementation is given in comments.
 type Array interface {
@@ -123,127 +196,3 @@ func (x AS) String() string {
 	}
 	return sb.String()
 }
-
-// Variadic represents a built-in function.
-type Variadic int32
-
-type VariadicFun struct {
-	Name string
-	Func func(*Context, []V) V
-}
-
-//// Monad represents built-in 1-symbol unary operators.
-//type Monad int32
-
-//const (
-//VReturn   Monad = iota // :
-//VFlip                  // +
-//VNegate                // -
-//VFirst                 // *
-//VClassify              // %
-//VRange                 // !
-//VWhere                 // &
-//VReverse               // |
-//VAscend                // <
-//VDescend               // >
-//VGroup                 // =
-//VNot                   // ~
-//VEnlist                // ,
-//VSort                  // ^
-//VLen                   // #
-//VFloor                 // _
-//VString                // $
-//VUniq                  // ?
-//VType                  // @
-//VEval                  // .
-//)
-
-//// Dyad represents built-in 1-symbol binary operators.
-//type Dyad int32
-
-//const (
-//VRight    Dyad = iota // :
-//VAdd                  // +
-//VSubtract             // -
-//VMultiply             // *
-//VDivide               // %
-//VMod                  // !
-//VMin                  // &
-//VMax                  // |
-//VLess                 // <
-//VMore                 // >
-//VEqual                // =
-//VMatch                // ~
-//VJoin                 // ,
-//VCut                  // ^
-//VTake                 // #
-//VDrop                 // _
-//VCast                 // $
-//VFind                 // ?
-//VApply                // @
-//VApplyN               // .
-//)
-
-// Adverb represents verb modifiers.
-type Adverb int32
-
-const (
-	AEach Adverb = iota // '
-	AFold               // /
-	AScan               // \
-)
-
-//// Variadic represents verbs with variable arity > 2.
-//type Variadic int32
-
-//const (
-//VList Variadic = iota
-//VAmend
-//)
-
-// DerivedVerb represents a value modified by an adverb.
-type DerivedVerb struct {
-	Adverb Adverb
-	Value  V
-}
-
-// Projection represents a partial application of a function. Because many
-// functions do not have a fixed arity, the number of provided arguments can be
-// arbitrary.
-type Projection struct {
-	Fun  V
-	Args AV
-}
-
-// Composition represents a composition of several functions. All except the
-// last will be called monadically. XXX: not really any Function.
-type Composition struct {
-	Funs []V
-}
-
-// Lambda represents an user defined function by ID.
-type Lambda int32
-
-// func (u Monad) Len() int       { return 1 }
-// func (v Dyad) Len() int        { return 1 }
-func (vv Variadic) Len() int   { return 1 }
-func (w Adverb) Len() int      { return 1 }
-func (r DerivedVerb) Len() int { return 1 }
-func (p Projection) Len() int  { return 1 }
-func (c Composition) Len() int { return 1 }
-func (l Lambda) Len() int      { return 1 }
-
-// func (u Monad) Type() string       { return "u" }
-// func (v Dyad) Type() string        { return "v" }
-func (vv Variadic) Type() string   { return "V" }
-func (w Adverb) Type() string      { return "w" }
-func (r DerivedVerb) Type() string { return "r" }
-func (p Projection) Type() string  { return "p" }
-func (c Composition) Type() string { return "c" }
-func (l Lambda) Type() string      { return "l" }
-
-// vReturn represents a return.
-type vReturn struct{}
-
-func (rv vReturn) Len() int     { return 1 }
-func (rv vReturn) Type() string { return "return" }
