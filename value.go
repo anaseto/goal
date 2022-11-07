@@ -149,24 +149,18 @@ type DerivedVerb struct {
 // functions do not have a fixed arity, the number of provided arguments can be
 // arbitrary.
 type Projection struct {
-	Fun  Function
+	Fun  V
 	Args AV
 }
 
 // Composition represents a composition of several functions. All except the
 // last will be called monadically. XXX: not really any Function.
 type Composition struct {
-	Funs []Function
+	Funs []V
 }
 
 // Lambda represents an user defined function by ID.
 type Lambda int32
-
-// Function represents any kind of callable value that can be projected.
-type Function interface {
-	V
-	Project(AV) Projection
-}
 
 // func (u Monad) Len() int       { return 1 }
 // func (v Dyad) Len() int        { return 1 }
@@ -185,15 +179,6 @@ func (r DerivedVerb) Type() string { return "r" }
 func (p Projection) Type() string  { return "p" }
 func (c Composition) Type() string { return "c" }
 func (l Lambda) Type() string      { return "l" }
-
-// func (u Monad) Project(vs AV) Projection       { return Projection{Fun: u, Args: vs} }
-// func (v Dyad) Project(vs AV) Projection        { return Projection{Fun: v, Args: vs} }
-func (v Variadic) Project(vs AV) Projection    { return Projection{Fun: v, Args: vs} }
-func (w Adverb) Project(vs AV) Projection      { return Projection{Fun: w, Args: vs} }
-func (r DerivedVerb) Project(vs AV) Projection { return Projection{Fun: r, Args: vs} }
-func (p Projection) Project(vs AV) Projection  { return Projection{Fun: p, Args: vs} }
-func (c Composition) Project(vs AV) Projection { return Projection{Fun: c, Args: vs} }
-func (l Lambda) Project(vs AV) Projection      { return Projection{Fun: l, Args: vs} }
 
 // vReturn represents a return.
 type vReturn struct{}

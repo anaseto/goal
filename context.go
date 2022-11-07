@@ -4,10 +4,9 @@ package main
 type Context struct {
 	prog      *Program
 	stack     []V
-	sp        int
 	globals   []V
-	frame     []V
-	callDepth int
+	frameIdx  int32
+	callDepth int32
 
 	// from prog for direct access
 	constants []V

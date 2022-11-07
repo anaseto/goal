@@ -4,13 +4,10 @@ func (ctx *Context) ApplyN(v V, args []V) V {
 	switch v := v.(type) {
 	case Variadic:
 		if hasNil(args) {
-			return Projection{Fun: v, Args: args}
+			return Projection{Fun: v, Args: cloneAV(args)}
 		}
 		return builtins[v].Func(ctx, args)
 	case Projection:
-		if len(args) == 0 {
-			return v
-		}
 		if len(args) > countNils(v.Args) {
 			return errs("too many arguments")
 		}
@@ -18,6 +15,9 @@ func (ctx *Context) ApplyN(v V, args []V) V {
 		n := 1
 		for i := len(vargs) - 1; i >= 0; i-- {
 			if vargs[i] == nil {
+				if n > len(args) {
+					break
+				}
 				vargs[i] = args[len(args)-n]
 				n++
 			}
@@ -27,7 +27,7 @@ func (ctx *Context) ApplyN(v V, args []V) V {
 				return v
 			}
 		}
-		return ctx.ApplyN(v.Fun, args)
+		return ctx.ApplyN(v.Fun, vargs)
 	case Array:
 		switch len(args) {
 		case 1:
@@ -40,9 +40,7 @@ func (ctx *Context) ApplyN(v V, args []V) V {
 			return errf("NYI: deep index %d", len(args))
 		}
 	case Lambda:
-		for _, arg := range args {
-			ctx.push(arg)
-		}
+		ctx.stack = append(ctx.stack, args...)
 		err := ctx.applyLambda(v, len(args))
 		if err != nil {
 			return errs(err.Error())

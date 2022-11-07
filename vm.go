@@ -16,13 +16,13 @@ func (ctx *Context) execute(ops []opcode) error {
 			ctx.push(ctx.globals[ops[ip]])
 			ip++
 		case opLocal:
-			ctx.push(ctx.frame[ops[ip]])
+			ctx.push(ctx.stack[ctx.frameIdx+int32(ops[ip])])
 			ip++
 		case opAssignGlobal:
 			ctx.globals[ops[ip]] = ctx.top()
 			ip++
 		case opAssignLocal:
-			ctx.frame[ops[ip]] = ctx.top()
+			ctx.stack[ctx.frameIdx+int32(ops[ip])] = ctx.top()
 			ip++
 		case opAdverb:
 			ctx.push(Adverb(ops[ip]))
@@ -50,8 +50,8 @@ func (ctx *Context) execute(ops []opcode) error {
 			}
 			ip++
 		case opDrop:
-			if ctx.sp > 1 {
-				ctx.sp--
+			if len(ctx.stack) > 0 {
+				ctx.stack = ctx.stack[:len(ctx.stack)-1]
 			}
 		}
 	}
@@ -75,7 +75,7 @@ func (ctx *Context) applyN(n int) error {
 	return nil
 }
 
-const maxCallDepth = 100000
+const maxCallDepth = 10000
 
 func (ctx *Context) applyLambda(id Lambda, n int) error {
 	if ctx.callDepth > maxCallDepth {
@@ -89,50 +89,55 @@ func (ctx *Context) applyLambda(id Lambda, n int) error {
 		ctx.push(Projection{Fun: id, Args: cloneAV(args)})
 		return nil
 	}
-	osp := ctx.sp
-	oframe := ctx.frame
-	ctx.frame = ctx.stack[ctx.sp-n:]
+	olen := len(ctx.stack)
+	oframeIdx := ctx.frameIdx
+	ctx.frameIdx = int32(olen - n)
 
 	ctx.callDepth++
 	err := ctx.execute(lc.Body)
 	ctx.callDepth--
 
-	ctx.frame = oframe
-
 	if err != nil {
 		return err
 	}
-	if ctx.sp == osp {
-		ctx.push(nil)
+	var res V
+	switch len(ctx.stack) {
+	case olen:
+		res = nil
+	case olen + 1:
+		res = ctx.stack[len(ctx.stack)-1]
+	default:
+		return errf("bad sp %d vs osp %d", len(ctx.stack), olen)
 	}
+	for i := range ctx.stack[olen-n : olen] {
+		ctx.stack[i] = nil
+	}
+	ctx.dropN(n)
+	ctx.frameIdx = oframeIdx
+	ctx.push(res)
 	return nil
 }
 
 func (ctx *Context) push(v V) {
-	if ctx.sp >= len(ctx.stack) {
-		ctx.stack = append(ctx.stack, nil)
-	}
-	ctx.stack[ctx.sp] = v
-	ctx.sp++
+	ctx.stack = append(ctx.stack, v)
 }
 
 func (ctx *Context) pop() V {
-	ctx.sp--
-	return ctx.stack[ctx.sp]
+	arg := ctx.stack[len(ctx.stack)-1]
+	ctx.stack = ctx.stack[:len(ctx.stack)-1]
+	return arg
 }
 
 func (ctx *Context) top() V {
-	return ctx.stack[ctx.sp-1]
-}
-
-func (ctx *Context) pop2() (V, V) {
-	ctx.sp -= 2
-	return ctx.stack[ctx.sp], ctx.stack[ctx.sp+1]
+	return ctx.stack[len(ctx.stack)-1]
 }
 
 func (ctx *Context) popN(n int) []V {
-	values := make([]V, n)
-	copy(values, ctx.stack[ctx.sp-n:])
-	ctx.sp -= n
-	return values
+	args := ctx.stack[len(ctx.stack)-n:]
+	ctx.stack = ctx.stack[:len(ctx.stack)-n]
+	return args
+}
+
+func (ctx *Context) dropN(n int) {
+	ctx.stack = ctx.stack[:len(ctx.stack)-n]
 }
