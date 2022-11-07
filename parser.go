@@ -131,17 +131,18 @@ func (p *Parser) ppExpr(ppe ppExpr) error {
 			return err
 		}
 	case ppParenExpr:
+		oarglist := p.arglist
+		p.arglist = false
 		err := p.ppParenExpr(ppe)
+		p.arglist = oarglist
 		if err != nil {
 			return err
 		}
 	case ppBlock:
+		oarglist := p.arglist
+		p.arglist = false
 		err := p.ppBlock(ppe)
-		if err != nil {
-			return err
-		}
-	case ppLambdaArgs:
-		err := p.ppLambdaArgs(ppe)
+		p.arglist = oarglist
 		if err != nil {
 			return err
 		}
@@ -427,7 +428,7 @@ func (p *Parser) ppParenExpr(ppp ppParenExpr) error {
 func (p *Parser) ppBlock(ppb ppBlock) error {
 	switch ppb.Type {
 	case ppLAMBDA:
-		return p.ppLambda(ppb.Body)
+		return p.ppLambda(ppb.Body, ppb.Args)
 	case ppARGS:
 		return p.ppArgs(ppb.Body)
 	case ppSEQ:
@@ -439,13 +440,19 @@ func (p *Parser) ppBlock(ppb ppBlock) error {
 	}
 }
 
-func (p *Parser) ppLambda(body []ppExprs) error {
+func (p *Parser) ppLambda(body []ppExprs, args []string) error {
 	argc := p.argc
 	p.argc = 0
 	lc := &AstLambdaCode{
 		Locals: map[string]Local{},
 	}
 	p.scopeStack = append(p.scopeStack, lc)
+	if len(args) != 0 {
+		err := p.ppLambdaArgs(args)
+		if err != nil {
+			return err
+		}
+	}
 	for _, exprs := range body {
 		err := p.ppExprs(exprs)
 		if err != nil {
@@ -461,13 +468,13 @@ func (p *Parser) ppLambda(body []ppExprs) error {
 	return nil
 }
 
-func (p *Parser) ppLambdaArgs(args ppLambdaArgs) error {
+func (p *Parser) ppLambdaArgs(args []string) error {
 	lc := p.scope()
 	lc.NamedArgs = true
 	for i, arg := range args {
 		_, ok := lc.Locals[arg]
 		if ok {
-			return p.errorf("name %s appears twice in signature", arg)
+			return p.errorf("name %s appears twice in argument list", arg)
 		}
 		lc.Locals[arg] = Local{
 			Type: LocalArg,
@@ -674,15 +681,27 @@ func (p *parser) ppExpr() (ppExpr, error) {
 
 func (p *parser) ppExprBlock() (ppExpr, error) {
 	var bt ppBlockType
+	p.depth = append(p.depth, p.token)
+	ppb := ppBlock{}
 	switch p.token.Type {
 	case LEFTBRACE:
 		bt = ppLAMBDA
+		ntok := p.peek()
+		if ntok.Type == LEFTBRACKET {
+			p.next()
+			args, err := p.ppLambdaArgs()
+			if err != nil {
+				return ppb, err
+			}
+			if len(args) == 0 {
+				return ppb, p.errorf("empty argument list")
+			}
+			ppb.Args = args
+		}
 	case LEFTBRACKET:
 		switch p.oToken.Type {
 		case NEWLINE, SEMICOLON, LEFTBRACKET, LEFTPAREN:
 			bt = ppSEQ
-		case LEFTBRACE:
-			return p.ppLambdaArgs()
 		default:
 			// arguments being applied to something
 			bt = ppARGS
@@ -690,8 +709,6 @@ func (p *parser) ppExprBlock() (ppExpr, error) {
 	case LEFTPAREN:
 		bt = ppLIST
 	}
-	p.depth = append(p.depth, p.token)
-	ppb := ppBlock{}
 	ppb.Type = bt
 	ppb.Body = []ppExprs{}
 	ppb.Body = append(ppb.Body, ppExprs{})
@@ -728,9 +745,9 @@ func (p *parser) ppExprBlock() (ppExpr, error) {
 	}
 }
 
-func (p *parser) ppLambdaArgs() (ppExpr, error) {
+func (p *parser) ppLambdaArgs() ([]string, error) {
 	// p.token.Type is LEFTBRACKET
-	args := ppLambdaArgs{}
+	args := []string{}
 	for {
 		p.next()
 		switch p.token.Type {
@@ -739,7 +756,7 @@ func (p *parser) ppLambdaArgs() (ppExpr, error) {
 		case RIGHTBRACKET:
 			return args, nil
 		default:
-			return args, p.errorf("expected identifier or ] but got %s", p.token)
+			return args, p.errorf("expected identifier or ] in argument list, but got %s", p.token)
 		}
 		p.next()
 		switch p.token.Type {
@@ -747,7 +764,7 @@ func (p *parser) ppLambdaArgs() (ppExpr, error) {
 			return args, nil
 		case SEMICOLON:
 		default:
-			return args, p.errorf("expected ; or ] but got %s", p.token)
+			return args, p.errorf("expected ; or ] in argument list but got %s", p.token)
 		}
 	}
 }

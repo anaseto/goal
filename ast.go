@@ -283,12 +283,14 @@ type ppParenExpr ppExprs // for parenthesized sub-expressions
 type ppBlock struct {
 	Type ppBlockType
 	Body []ppExprs
+	Args []string
 }
 
 func (ppb ppBlock) String() (s string) {
 	switch ppb.Type {
 	case ppLAMBDA:
-		s = fmt.Sprintf("{%v %v}", ppb.Type, ppb.Body)
+		args := "[" + strings.Join([]string(ppb.Args), ";") + "]"
+		s = fmt.Sprintf("{%s %v %v}", args, ppb.Type, ppb.Body)
 	case ppARGS:
 		s = fmt.Sprintf("[%v %v]", ppb.Type, ppb.Body)
 	case ppLIST:
@@ -310,14 +312,7 @@ const (
 	ppLIST
 )
 
-type ppLambdaArgs []string
-
-func (ppa ppLambdaArgs) String() (s string) {
-	return "[ARGS: " + strings.Join([]string(ppa), ";") + "]"
-}
-
-func (tok ppToken) ppNode()      {}
-func (pps ppStrand) ppNode()     {}
-func (ppp ppParenExpr) ppNode()  {}
-func (ppb ppBlock) ppNode()      {}
-func (ppa ppLambdaArgs) ppNode() {}
+func (tok ppToken) ppNode()     {}
+func (pps ppStrand) ppNode()    {}
+func (ppp ppParenExpr) ppNode() {}
+func (ppb ppBlock) ppNode()     {}
