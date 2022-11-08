@@ -199,6 +199,12 @@ func fTake(ctx *Context, args []V) V {
 	case 1:
 		return Length(args[0])
 	case 2:
+		v, ok := args[1].(Function)
+		if ok {
+			ctx.push(args[0])
+			res := ctx.applyN(v, 1)
+			return Replicate(res, args[0])
+		}
 		return Take(args[1], args[0])
 	default:
 		return errs("too many arguments")
@@ -271,6 +277,53 @@ func fList(ctx *Context, args []V) V {
 }
 
 func fEach(ctx *Context, args []V) V {
+	switch len(args) {
+	case 2:
+		v, ok := args[1].(Function)
+		if !ok {
+			// TODO: binary search
+			return errsw("not a function")
+		}
+		x := args[0]
+		switch x := x.(type) {
+		case Array:
+			res := make(AV, 0, x.Len())
+			for i := 0; i < x.Len(); i++ {
+				ctx.push(x.At(i))
+				res = append(res, ctx.applyN(v, 1))
+			}
+			return canonical(res)
+		default:
+			return errs("not an array")
+		}
+	case 3:
+		v, ok := args[2].(Function)
+		if !ok {
+			// TODO: binary search
+			return errsw("not a function")
+		}
+		x, ok := args[1].(Array)
+		if !ok {
+			return errsw("not an array")
+		}
+		y, ok := args[0].(Array)
+		if !ok {
+			return errs("not an array")
+		}
+		xlen := x.Len()
+		if xlen != y.Len() {
+			return errf("length mismatch: %d vs %d", x.Len(), y.Len())
+		}
+		res := make(AV, 0, xlen)
+		for i := 0; i < xlen; i++ {
+			ctx.push(y.At(i))
+			ctx.push(x.At(i))
+			res = append(res, ctx.applyN(v, 2))
+		}
+		return canonical(res)
+	default:
+		return errs("too many arguments")
+	}
 	return nil
 }
 

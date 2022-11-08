@@ -208,45 +208,6 @@ func toArray(x V) V {
 	}
 }
 
-func growArray(x V, n int) V {
-	l := int(Length(x))
-	if l >= n && n >= -l {
-		return x
-	}
-	i := 0
-	if n < 0 {
-		i = l + n
-		n = -n
-		if i < 0 {
-			i = 0
-		}
-	}
-	switch x := x.(type) {
-	case AB:
-		r := make(AB, n)
-		copy(r[i:], x)
-		return r
-	case AF:
-		r := make(AF, n)
-		copy(r[i:], x)
-		return r
-	case AI:
-		r := make(AI, n)
-		copy(r[i:], x)
-		return r
-	case AS:
-		r := make(AS, n)
-		copy(r[i:], x)
-		return r
-	case AV:
-		r := make(AV, n)
-		copy(r[i:], x)
-		return r
-	default:
-		return x
-	}
-}
-
 func isFalse(x V) bool {
 	switch x := x.(type) {
 	case F:

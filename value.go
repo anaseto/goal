@@ -116,7 +116,7 @@ type ProjectionOne struct {
 }
 
 // Composition represents a composition of two functions. The left one is
-// always called monadically. XXX: not used for now.
+// always called monadically.
 type Composition struct {
 	Left  Function
 	Right Function
@@ -180,6 +180,7 @@ type Array interface {
 	At(i int) V           // x[i]
 	Slice(i, j int) Array // x[i:j]
 	Select(y AI) V        // x[y] (goal code)
+	Zero() V
 }
 
 func (x AV) Len() int { return len(x) }
@@ -205,6 +206,12 @@ func (x AB) Slice(i, j int) Array { return x[i:j] }
 func (x AI) Slice(i, j int) Array { return x[i:j] }
 func (x AF) Slice(i, j int) Array { return x[i:j] }
 func (x AS) Slice(i, j int) Array { return x[i:j] }
+
+func (x AV) Zero() V { return I(0) }
+func (x AB) Zero() V { return I(0) }
+func (x AI) Zero() V { return I(0) }
+func (x AF) Zero() V { return F(0) }
+func (x AS) Zero() V { return S("") }
 
 func (x AV) String() string {
 	sb := &strings.Builder{}

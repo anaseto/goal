@@ -1,5 +1,7 @@
 package main
 
+// applyN applies v with the top n arguments in the stack. It consumes the
+// arguments, but does not push the result, returing it instead.
 func (ctx *Context) applyN(v V, n int) V {
 	switch v := v.(type) {
 	case Lambda:
@@ -97,8 +99,9 @@ func (ctx *Context) applyNVariadic(v Variadic, n int) V {
 		}
 		return Projection{Fun: v, Args: ctx.popN(n)}
 	}
-	if n == 2 {
+	if n == 2 && !builtins[v].Adverb {
 		switch arg := args[1].(type) {
+		case Lambda:
 		case Function:
 			res := Composition{
 				Left:  ProjectionOne{Fun: v, Arg: args[0]},

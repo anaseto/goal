@@ -158,6 +158,10 @@ func (prog *Program) compileLambda(lc *AstLambdaCode) *LambdaCode {
 			nargs++
 		}
 	}
+	if nargs == 0 {
+		// All lambdas have at least one argument, even if not used.
+		nargs = 1
+	}
 	clc := &LambdaCode{}
 	clc.Rank = nargs
 	locals := make([]string, nlocals)

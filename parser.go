@@ -11,6 +11,7 @@ type Parser struct {
 	prog       *AstProgram
 	argc       int // stack length for current sub-expression
 	arglist    bool
+	adverb     bool
 	scopeStack []*AstLambdaCode
 	pos        int
 	it         ppIter
@@ -249,7 +250,7 @@ func (p *Parser) ppVariadic(tok ppToken) error {
 func (p *Parser) ppVerb(tok ppToken) error {
 	ppe := p.it.Peek()
 	argc := p.argc
-	if ppe == nil || p.arglist {
+	if ppe == nil || p.arglist || p.adverb {
 		return p.ppVariadic(tok)
 	}
 	switch ppe := ppe.(type) {
@@ -380,7 +381,10 @@ func (p *Parser) ppAdverbs(adverbs ppAdverbs) error {
 	nppe := p.it.Peek()
 	if nppe == nil || p.arglist {
 		p.argc = 0
+		oadverb := p.adverb
+		p.adverb = true
 		err := p.ppExpr(ppe)
+		p.adverb = oadverb
 		if err != nil {
 			return err
 		}
@@ -390,16 +394,25 @@ func (p *Parser) ppAdverbs(adverbs ppAdverbs) error {
 		p.argc += argc
 		return p.ppVariadic(tok)
 	}
+	it := p.it
+	p.it.Next()
 	p.argc = 0
+	oadverb := p.adverb
+	p.adverb = true
 	err := p.ppExpr(nppe)
+	p.adverb = oadverb
 	if err != nil {
 		return err
 	}
 	if argc == 0 {
 		p.pushExpr(AstNil{Pos: tok.Pos})
 	}
+	p.it = it
 	p.argc = 0
+	p.adverb = true
 	err = p.ppExpr(ppe)
+	p.adverb = false
+	p.it.Next()
 	if err != nil {
 		return err
 	}
@@ -562,16 +575,18 @@ func (p *Parser) ppSeq(body []ppExprs) error {
 
 func (p *Parser) ppList(body []ppExprs) error {
 	argc := p.argc
-	bodyRev(body)
-	for _, exprs := range body {
+	for i := len(body) - 1; i >= 0; i-- {
+		exprs := body[i]
+		p.argc = 0
 		err := p.ppExprs(exprs)
 		if err != nil {
 			return err
 		}
 	}
 	p.pushExpr(AstVariadic{Variadic: vList})
-	p.pushExpr(AstApplyN{N: len(body)})
 	p.argc = argc
+	p.pushExpr(AstApplyN{N: len(body)})
+	p.argc = 1
 	return nil
 }
 

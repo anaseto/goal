@@ -206,15 +206,88 @@ func Take(w, x V) V {
 		switch {
 		case i >= 0:
 			if i > x.Len() {
-				return growArray(x, i)
+				return takeCyclic(x, i)
 			}
 			return x.Slice(0, i)
 		default:
 			if i < -x.Len() {
-				return growArray(x, i)
+				return takeCyclic(x, i)
 			}
 			return x.Slice(x.Len()+i, x.Len())
 		}
+	default:
+		return x
+	}
+}
+
+func takeCyclic(x V, n int) V {
+	neg := n < 0
+	if neg {
+		n = -n
+	}
+	i := 0
+	step := x.Len()
+	switch x := x.(type) {
+	case AB:
+		r := make(AB, n)
+		for i+step < n {
+			copy(r[i:i+step], x)
+			i += step
+		}
+		if neg {
+			copy(r[i:n], x[len(x)-n+i:])
+		} else {
+			copy(r[i:n], x[:n-i])
+		}
+		return r
+	case AF:
+		r := make(AF, n)
+		for i+step < n {
+			copy(r[i:i+step], x)
+			i += step
+		}
+		if neg {
+			copy(r[i:n], x[len(x)-n+i:])
+		} else {
+			copy(r[i:n], x[:n-i])
+		}
+		return r
+	case AI:
+		r := make(AI, n)
+		for i+step < n {
+			copy(r[i:i+step], x)
+			i += step
+		}
+		if neg {
+			copy(r[i:n], x[len(x)-n+i:])
+		} else {
+			copy(r[i:n], x[:n-i])
+		}
+		return r
+	case AS:
+		r := make(AS, n)
+		for i+step < n {
+			copy(r[i:i+step], x)
+			i += step
+		}
+		if neg {
+			copy(r[i:n], x[len(x)-n+i:])
+		} else {
+			copy(r[i:n], x[:n-i])
+		}
+		return r
+	case AV:
+		r := make(AV, n)
+		for i+step < n {
+			copy(r[i:i+step], x)
+			i += step
+		}
+		if neg {
+			copy(r[i:n], x[len(x)-n+i:])
+		} else {
+			copy(r[i:n], x[:n-i])
+		}
+		return r
 	default:
 		return x
 	}
