@@ -5,15 +5,40 @@ func (ctx *Context) ApplyN(v V, n int) V {
 	case Lambda:
 		return ctx.applyLambda(v, n)
 	case Variadic:
-		args := ctx.peekN(n)
-		if hasNil(args) {
-			return Projection{Fun: v, Args: ctx.popN(n)}
+		if n == 1 {
+			return ctx.applyVariadic(v)
 		}
-		res := builtins[v].Func(ctx, args)
-		ctx.dropN(n)
+		return ctx.applyNVariadic(v, n)
+	case DerivedVerb:
+		ctx.push(v.Arg)
+		args := ctx.peekN(n + 1)
+		if hasNil(args) {
+			return Projection{Fun: v, Args: ctx.popN(n + 1)}
+		}
+		res := builtins[v.Fun].Func(ctx, args)
+		ctx.dropN(n + 1)
 		return res
+	case ProjectionOne:
+		if n > 1 {
+			return errf("too many arguments: got %d, expected 1", n)
+		}
+		arg := ctx.top()
+		if arg == nil {
+			ctx.drop()
+			return v
+		}
+		ctx.push(v.Arg)
+		return ctx.ApplyN(v.Fun, 2)
 	case Projection:
 		return ctx.applyProjection(v, n)
+	case Composition:
+		res := ctx.ApplyN(v.Right, n)
+		_, ok := res.(error)
+		if ok {
+			return res
+		}
+		ctx.push(res)
+		return ctx.ApplyN(v.Left, 1)
 	case Array:
 		args := ctx.peekN(n)
 		switch n {
@@ -36,6 +61,56 @@ func (ctx *Context) ApplyN(v V, n int) V {
 	default:
 		return errf("type %s cannot be applied", v.Type())
 	}
+}
+
+func (ctx *Context) applyVariadic(v Variadic) V {
+	args := ctx.peek()
+	vv := args[0]
+	if builtins[v].Adverb {
+		ctx.drop()
+		return DerivedVerb{Fun: v, Arg: vv}
+	}
+	if vv == nil {
+		ctx.drop()
+		return Projection{Fun: v, Args: []V{vv}}
+	}
+	switch vv := vv.(type) {
+	case Variadic:
+		return Composition{Left: v, Right: vv}
+	default:
+		if vv == nil {
+			return Projection{Fun: v, Args: []V{vv}}
+		}
+		res := builtins[v].Func(ctx, args)
+		ctx.drop()
+		return res
+	}
+}
+
+func (ctx *Context) applyNVariadic(v Variadic, n int) V {
+	args := ctx.peekN(n)
+	if hasNil(args) {
+		if n == 2 && args[1] != nil {
+			arg := args[1]
+			ctx.dropN(n)
+			return ProjectionOne{Fun: v, Arg: arg}
+		}
+		return Projection{Fun: v, Args: ctx.popN(n)}
+	}
+	if n == 2 {
+		switch args[1].(type) {
+		case Composition, Variadic, Projection, ProjectionOne:
+			res := Composition{
+				Left:  ProjectionOne{Fun: v, Arg: args[0]},
+				Right: args[1],
+			}
+			ctx.dropN(2)
+			return res
+		}
+	}
+	res := builtins[v].Func(ctx, args)
+	ctx.dropN(n)
+	return res
 }
 
 func (ctx *Context) applyProjection(v Projection, n int) V {

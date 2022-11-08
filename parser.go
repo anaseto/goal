@@ -125,6 +125,11 @@ func (p *Parser) ppExpr(ppe ppExpr) error {
 		if err != nil {
 			return err
 		}
+	case ppAdverbs:
+		err := p.ppAdverbs(ppe)
+		if err != nil {
+			return err
+		}
 	case ppStrand:
 		err := p.ppStrand(ppe)
 		if err != nil {
@@ -189,8 +194,6 @@ func (p *Parser) ppToken(tok ppToken) error {
 		return nil
 	case ppVERB:
 		return p.ppVerb(tok)
-	case ppADVERB:
-		return p.ppAdVerb(tok)
 	default:
 		// should not happen
 		return p.errorf("unexpected token type: %v", tok.Type)
@@ -249,26 +252,29 @@ func (p *Parser) ppVerb(tok ppToken) error {
 	if ppe == nil || p.arglist {
 		return p.ppVariadic(tok)
 	}
-	t, ok := ppe.(ppToken)
-	if ok {
-		switch t.Type {
+	switch ppe := ppe.(type) {
+	case ppToken:
+		switch ppe.Type {
 		case ppIDENT:
-			if p.ppAssign(tok, t) {
+			if p.ppAssign(tok, ppe) {
 				p.it.Next()
 				return nil
 			}
-		case ppADVERB, ppVERB:
+		case ppVERB:
 			return p.ppVariadic(tok)
 		}
+	case ppAdverbs:
+		return p.ppVariadic(tok)
+	}
+	if argc == 0 {
+		p.pushExpr(AstNil{Pos: tok.Pos})
+		argc++
 	}
 	p.it.Next()
 	p.argc = 0
 	err := p.ppExpr(ppe)
 	if err != nil {
 		return err
-	}
-	if argc == 0 {
-		p.pushExpr(AstNil{Pos: tok.Pos})
 	}
 	p.argc += argc
 	return p.ppVariadic(tok)
@@ -358,10 +364,15 @@ func parseBuiltin(s string) (verb Variadic) {
 	return verb
 }
 
-func (p *Parser) ppAdVerb(tok ppToken) error {
+func (p *Parser) ppAdverbs(adverbs ppAdverbs) error {
+	tok := adverbs[len(adverbs)-1]
+	adverbs = adverbs[:len(adverbs)-1]
 	ppe := p.it.Peek()
 	argc := p.argc
 	if ppe == nil {
+		if len(adverbs) > 0 {
+			return errf("adverb train should modify a value")
+		}
 		p.pushExpr(AstNil{Pos: tok.Pos})
 		return p.ppVariadic(tok)
 	}
@@ -391,6 +402,13 @@ func (p *Parser) ppAdVerb(tok ppToken) error {
 	err = p.ppExpr(ppe)
 	if err != nil {
 		return err
+	}
+	for _, atok := range adverbs {
+		p.argc = 1
+		err := p.ppVariadic(atok)
+		if err != nil {
+			return err
+		}
 	}
 	p.argc = 3
 	return p.ppVariadic(tok)
@@ -640,7 +658,8 @@ func (p *parser) ppExpr() (ppExpr, error) {
 	case ERROR:
 		return nil, p.errorf("error token: %s", tok)
 	case ADVERB:
-		return nil, p.errorf("adverb %s at start of expression", tok)
+		return p.ppAdverbs()
+		//return nil, p.errorf("adverb %s at start of expression", tok)
 	case IDENT:
 		return ppToken{Type: ppIDENT, Pos: tok.Pos, Text: tok.Text}, nil
 	case LEFTBRACE, LEFTBRACKET, LEFTPAREN:
@@ -765,6 +784,24 @@ func (p *parser) ppLambdaArgs() ([]string, error) {
 		case SEMICOLON:
 		default:
 			return args, p.errorf("expected ; or ] in argument list but got %s", p.token)
+		}
+	}
+}
+
+func (p *parser) ppAdverbs() (ppExpr, error) {
+	// p.token.Type is NUMBER or STRING for current and peek
+	ppb := ppAdverbs{}
+	for {
+		switch p.token.Type {
+		case ADVERB:
+			ppb = append(ppb, ppToken{Type: ppADVERB, Pos: p.token.Pos, Text: p.token.Text})
+		}
+		ntok := p.peek()
+		switch ntok.Type {
+		case ADVERB:
+			p.next()
+		default:
+			return ppb, nil
 		}
 	}
 }

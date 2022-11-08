@@ -278,6 +278,8 @@ const (
 
 type ppStrand []ppToken // for stranding, like 1 23 456
 
+type ppAdverbs []ppToken // for an adverb sequence
+
 type ppParenExpr ppExprs // for parenthesized sub-expressions
 
 type ppBlock struct {
@@ -314,5 +316,6 @@ const (
 
 func (tok ppToken) ppNode()     {}
 func (pps ppStrand) ppNode()    {}
+func (ppa ppAdverbs) ppNode()   {}
 func (ppp ppParenExpr) ppNode() {}
 func (ppb ppBlock) ppNode()     {}

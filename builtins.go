@@ -3,8 +3,9 @@ package main
 import "fmt"
 
 type VariadicFun struct {
-	Name string
-	Func func(*Context, []V) V
+	Name   string
+	Adverb bool
+	Func   func(*Context, []V) V
 }
 
 var builtins []VariadicFun
@@ -264,4 +265,16 @@ func fList(ctx *Context, args []V) V {
 	res := cloneArgs(args)
 	reverseArgs(res)
 	return AV(res)
+}
+
+func fEach(ctx *Context, args []V) V {
+	return nil
+}
+
+func fFold(ctx *Context, args []V) V {
+	return nil
+}
+
+func fScan(ctx *Context, args []V) V {
+	return nil
 }

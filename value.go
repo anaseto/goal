@@ -1,6 +1,6 @@
 package main
 
-//go:generate stringer -type=Variadic,TokenType,ppTokenType,ppBlockType,opcode -output stringer.go
+//go:generate stringer -type=TokenType,ppTokenType,ppBlockType,opcode -output stringer.go
 
 import (
 	"fmt"
@@ -64,6 +64,37 @@ const (
 	vScan                     // \ (adverb)
 )
 
+var vStrings = [...]string{
+	vRight:    ":",
+	vAdd:      "+",
+	vSubtract: "-",
+	vMultiply: "*",
+	vDivide:   "%",
+	vMod:      "!",
+	vMin:      "&",
+	vMax:      "|",
+	vLess:     "<",
+	vMore:     ">",
+	vEqual:    "=",
+	vMatch:    "~",
+	vJoin:     ",",
+	vCut:      "^",
+	vTake:     "#",
+	vDrop:     "_",
+	vCast:     "$",
+	vFind:     "?",
+	vApply:    "@",
+	vApplyN:   ".",
+	vList:     "List",
+	vEach:     "'",
+	vFold:     "/",
+	vScan:     "\\",
+}
+
+func (v Variadic) String() string {
+	return vStrings[v]
+}
+
 // DerivedVerb represents is a special case of projection with one argument.
 // It is, in particular, used for adverbs.
 type DerivedVerb struct {
@@ -79,26 +110,69 @@ type Projection struct {
 	Args AV
 }
 
-// Composition represents a composition of several functions. All except the
-// last will be called monadically. XXX: not used for now.
+// ProjectionOne represents a projection with one argument.
+type ProjectionOne struct {
+	Fun V
+	Arg V
+}
+
+// Composition represents a composition of two functions. The left one is
+// always called monadically. XXX: not used for now.
 type Composition struct {
-	Funs []V
+	Left  V
+	Right V
 }
 
 // Lambda represents an user defined function by ID.
 type Lambda int32
 
-func (v Variadic) Len() int    { return 1 }
-func (r DerivedVerb) Len() int { return 1 }
-func (p Projection) Len() int  { return 1 }
-func (c Composition) Len() int { return 1 }
-func (l Lambda) Len() int      { return 1 }
+func (v Variadic) Len() int      { return 1 }
+func (r DerivedVerb) Len() int   { return 1 }
+func (p Projection) Len() int    { return 1 }
+func (p ProjectionOne) Len() int { return 1 }
+func (c Composition) Len() int   { return 1 }
+func (l Lambda) Len() int        { return 1 }
 
-func (v Variadic) Type() string    { return "v" }
-func (p Projection) Type() string  { return "p" }
-func (c Composition) Type() string { return "q" }
-func (r DerivedVerb) Type() string { return "r" }
-func (l Lambda) Type() string      { return "l" }
+func (v Variadic) Type() string      { return "v" }
+func (p Projection) Type() string    { return "p" }
+func (p ProjectionOne) Type() string { return "p" }
+func (c Composition) Type() string   { return "q" }
+func (r DerivedVerb) Type() string   { return "r" }
+func (l Lambda) Type() string        { return "l" }
+
+func (p Projection) String() string {
+	sb := &strings.Builder{}
+	fmt.Fprintf(sb, "%v", p.Fun)
+	sb.WriteRune('[')
+	for i := len(p.Args) - 1; i >= 0; i-- {
+		arg := p.Args[i]
+		if arg != nil {
+			fmt.Fprintf(sb, "%v", arg)
+		}
+		if i > 0 {
+			sb.WriteRune(';')
+		}
+	}
+	sb.WriteRune(']')
+	return sb.String()
+}
+
+func (p ProjectionOne) String() string {
+	return fmt.Sprintf("%v[%v;]", p.Fun, p.Arg)
+}
+
+func (c Composition) String() string { return fmt.Sprintf("%v %v", c.Left, c.Right) }
+
+func (r DerivedVerb) String() string {
+	switch arg := r.Arg.(type) {
+	case Composition:
+		return fmt.Sprintf("(%v)%v", arg, r.Fun)
+	default:
+		return fmt.Sprintf("%v%v", arg, r.Fun)
+	}
+}
+
+func (l Lambda) String() string { return fmt.Sprintf("{Lambda %d}", l) }
 
 // Array interface is satisfied by the different kind of supported arrays.
 // Typical implementation is given in comments.

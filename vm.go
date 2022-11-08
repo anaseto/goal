@@ -5,7 +5,7 @@ package main
 func (ctx *Context) execute(ops []opcode) error {
 	for ip := 0; ip < len(ops); {
 		op := ops[ip]
-		//fmt.Printf("%s %d\n", op, ctx.sp)
+		//fmt.Printf("op: %s\n", op)
 		ip++
 		switch op {
 		case opNop:
@@ -51,6 +51,7 @@ func (ctx *Context) execute(ops []opcode) error {
 		case opDrop:
 			ctx.drop()
 		}
+		//fmt.Printf("stack: %v\n", ctx.stack)
 	}
 	return nil
 }
@@ -96,6 +97,10 @@ func (ctx *Context) popN(n int) []V {
 	return args
 }
 
+func (ctx *Context) peek() []V {
+	return ctx.stack[len(ctx.stack)-1:]
+}
+
 func (ctx *Context) peekN(n int) []V {
 	return ctx.stack[len(ctx.stack)-n:]
 }
@@ -106,8 +111,8 @@ func (ctx *Context) drop() {
 }
 
 func (ctx *Context) dropN(n int) {
-	for i := range ctx.stack[len(ctx.stack)-n:] {
-		ctx.stack[i] = nil
+	for i := 1; i <= n; i++ {
+		ctx.stack[len(ctx.stack)-i] = nil
 	}
 	ctx.stack = ctx.stack[:len(ctx.stack)-n]
 }

@@ -471,18 +471,18 @@ func canonical(x V) V {
 	}
 }
 
-func hasNil(x []V) bool {
-	for _, v := range x {
-		if v == nil {
+func hasNil(a []V) bool {
+	for _, x := range a {
+		if x == nil {
 			return true
 		}
 	}
 	return false
 }
 
-func countNils(x []V) int {
+func countNils(a []V) int {
 	n := 0
-	for _, v := range x {
+	for _, v := range a {
 		if v == nil {
 			n++
 		}
@@ -490,14 +490,14 @@ func countNils(x []V) int {
 	return n
 }
 
-func reverseArgs(x []V) {
-	for i := 0; i < len(x)/2; i++ {
-		x[i], x[len(x)-i-1] = x[len(x)-i-1], x[i]
+func reverseArgs(a []V) {
+	for i := 0; i < len(a)/2; i++ {
+		a[i], a[len(a)-i-1] = a[len(a)-i-1], a[i]
 	}
 }
 
-func cloneArgs(x []V) []V {
-	args := make([]V, len(x))
-	copy(args, x)
+func cloneArgs(a []V) []V {
+	args := make([]V, len(a))
+	copy(args, a)
 	return args
 }
