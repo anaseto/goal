@@ -245,7 +245,7 @@ func fApply(ctx *Context, args []V) V {
 	case 2:
 		v := args[1]
 		ctx.push(args[0])
-		return ctx.ApplyN(v, 1)
+		return ctx.applyN(v, 1)
 	default:
 		return errs("too many arguments")
 	}
@@ -258,7 +258,7 @@ func fApplyN(ctx *Context, args []V) V {
 	case 2:
 		v := args[len(args)-1]
 		ctx.pushArgs(args[:len(args)-1])
-		return ctx.ApplyN(v, len(args)-1)
+		return ctx.applyN(v, len(args)-1)
 	default:
 		return errs("too many arguments")
 	}

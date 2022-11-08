@@ -1,6 +1,6 @@
 package main
 
-func (ctx *Context) ApplyN(v V, n int) V {
+func (ctx *Context) applyN(v V, n int) V {
 	switch v := v.(type) {
 	case Lambda:
 		return ctx.applyLambda(v, n)
@@ -28,17 +28,17 @@ func (ctx *Context) ApplyN(v V, n int) V {
 			return v
 		}
 		ctx.push(v.Arg)
-		return ctx.ApplyN(v.Fun, 2)
+		return ctx.applyN(v.Fun, 2)
 	case Projection:
 		return ctx.applyProjection(v, n)
 	case Composition:
-		res := ctx.ApplyN(v.Right, n)
+		res := ctx.applyN(v.Right, n)
 		_, ok := res.(error)
 		if ok {
 			return res
 		}
 		ctx.push(res)
-		return ctx.ApplyN(v.Left, 1)
+		return ctx.applyN(v.Left, 1)
 	case Array:
 		args := ctx.peekN(n)
 		switch n {
@@ -51,7 +51,7 @@ func (ctx *Context) ApplyN(v V, n int) V {
 			if indices == nil {
 				return errs("not an integer array")
 			}
-			res := v.Apply(indices)
+			res := v.Select(indices)
 			ctx.drop()
 			return res
 		default:
@@ -130,7 +130,7 @@ func (ctx *Context) applyProjection(v Projection, n int) V {
 				n++
 			}
 		}
-		res := ctx.ApplyN(v.Fun, len(v.Args))
+		res := ctx.applyN(v.Fun, len(v.Args))
 		ctx.dropN(len(v.Args))
 		ctx.dropN(n)
 		return res
@@ -185,7 +185,7 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 	return res
 }
 
-func (x AV) Apply(y AI) V {
+func (x AV) Select(y AI) V {
 	res := make(AV, len(y))
 	for i := range res {
 		idx := y[i]
@@ -197,7 +197,7 @@ func (x AV) Apply(y AI) V {
 	return res
 }
 
-func (x AB) Apply(y AI) V {
+func (x AB) Select(y AI) V {
 	res := make(AB, len(y))
 	for i := range res {
 		idx := y[i]
@@ -209,7 +209,7 @@ func (x AB) Apply(y AI) V {
 	return res
 }
 
-func (x AI) Apply(y AI) V {
+func (x AI) Select(y AI) V {
 	res := make(AI, len(y))
 	for i := range res {
 		idx := y[i]
@@ -221,7 +221,7 @@ func (x AI) Apply(y AI) V {
 	return res
 }
 
-func (x AF) Apply(y AI) V {
+func (x AF) Select(y AI) V {
 	res := make(AF, len(y))
 	for i := range res {
 		idx := y[i]
@@ -233,7 +233,7 @@ func (x AF) Apply(y AI) V {
 	return res
 }
 
-func (x AS) Apply(y AI) V {
+func (x AS) Select(y AI) V {
 	res := make(AS, len(y))
 	for i := range res {
 		idx := y[i]

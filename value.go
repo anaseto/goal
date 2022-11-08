@@ -179,7 +179,7 @@ type Array interface {
 	V
 	At(i int) V           // x[i]
 	Slice(i, j int) Array // x[i:j]
-	Apply(y AI) V         // x[y] (goal code)
+	Select(y AI) V        // x[y] (goal code)
 }
 
 func (x AV) Len() int { return len(x) }

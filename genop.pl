@@ -241,6 +241,7 @@ sub genOp {
     my %types = map { $_=~/(\w)_/; $1 => 1 } keys $cases->%*;
     my $s = "";
     open my $out, '>', \$s;
+    my $namelc = lc($name);
     print $out <<EOS;
 // ${name} returns w${op}x.
 func ${name}(w, x V) V {
@@ -250,13 +251,13 @@ EOS
         next if $t eq "B";
         print $out <<EOS;
 	case $t:
-		return ${name}${t}V(w, x)
+		return ${namelc}${t}V(w, x)
 EOS
     }
     for my $t (sort keys %types) {
         print $out <<EOS;
 	case A$t:
-		return ${name}A${t}V(w, x)
+		return ${namelc}A${t}V(w, x)
 EOS
     }
     print $out <<EOS;
@@ -297,10 +298,10 @@ EOS
     print $s;
     for my $t (sort keys %types) {
         next if $t eq "B";
-        genLeftExpanded($name, $cases, $t);
+        genLeftExpanded($namelc, $cases, $t);
     }
     for my $t (sort keys %types) {
-        genLeftArrayExpanded($name, $cases, $t);
+        genLeftArrayExpanded($namelc, $cases, $t);
     }
 }
 

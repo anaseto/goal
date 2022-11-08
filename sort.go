@@ -2,31 +2,31 @@ package main
 
 import "sort"
 
-type ABUp []bool
+type sortAB []bool
 
-func (bs ABUp) Len() int {
+func (bs sortAB) Len() int {
 	return len(bs)
 }
 
-func (bs ABUp) Less(i, j int) bool {
+func (bs sortAB) Less(i, j int) bool {
 	return bs[j] && !bs[i]
 }
 
-func (bs ABUp) Swap(i, j int) {
+func (bs sortAB) Swap(i, j int) {
 	bs[i], bs[j] = bs[j], bs[i]
 }
 
-type AOUp []V
+type sortAO []V
 
-func (bs AOUp) Len() int {
+func (bs sortAO) Len() int {
 	return len(bs)
 }
 
-func (bs AOUp) Less(i, j int) bool {
+func (bs sortAO) Less(i, j int) bool {
 	return less(bs[i], bs[j])
 }
 
-func (bs AOUp) Swap(i, j int) {
+func (bs sortAO) Swap(i, j int) {
 	bs[i], bs[j] = bs[j], bs[i]
 }
 
@@ -335,7 +335,7 @@ func SortUp(x V) V {
 	x = cloneShallow(x)
 	switch x := x.(type) {
 	case AB:
-		sort.Stable(ABUp(x))
+		sort.Stable(sortAB(x))
 		return x
 	case AF:
 		sort.Stable(sort.Float64Slice(x))
@@ -347,7 +347,7 @@ func SortUp(x V) V {
 		sort.Stable(sort.StringSlice(x))
 		return x
 	case AV:
-		sort.Stable(AOUp(x))
+		sort.Stable(sortAO(x))
 		return x
 	default:
 		return errs("not an array")
@@ -365,88 +365,88 @@ func SortDown(x V) V {
 	return x
 }
 
-type PermutationAO struct {
+type permutationAO struct {
 	Perm AI
-	X    AOUp
+	X    sortAO
 }
 
-func (p *PermutationAO) Len() int {
+func (p *permutationAO) Len() int {
 	return p.X.Len()
 }
 
-func (p *PermutationAO) Swap(i, j int) {
+func (p *permutationAO) Swap(i, j int) {
 	p.Perm[i], p.Perm[j] = p.Perm[j], p.Perm[i]
 }
 
-func (p *PermutationAO) Less(i, j int) bool {
+func (p *permutationAO) Less(i, j int) bool {
 	return p.X.Less(p.Perm[i], p.Perm[j])
 }
 
-type PermutationAB struct {
+type permutationAB struct {
 	Perm AI
-	X    ABUp
+	X    sortAB
 }
 
-func (p *PermutationAB) Len() int {
+func (p *permutationAB) Len() int {
 	return p.X.Len()
 }
 
-func (p *PermutationAB) Swap(i, j int) {
+func (p *permutationAB) Swap(i, j int) {
 	p.Perm[i], p.Perm[j] = p.Perm[j], p.Perm[i]
 }
 
-func (p *PermutationAB) Less(i, j int) bool {
+func (p *permutationAB) Less(i, j int) bool {
 	return p.X.Less(p.Perm[i], p.Perm[j])
 }
 
-type PermutationAI struct {
+type permutationAI struct {
 	Perm AI
 	X    sort.IntSlice
 }
 
-func (p *PermutationAI) Len() int {
+func (p *permutationAI) Len() int {
 	return p.X.Len()
 }
 
-func (p *PermutationAI) Swap(i, j int) {
+func (p *permutationAI) Swap(i, j int) {
 	p.Perm[i], p.Perm[j] = p.Perm[j], p.Perm[i]
 }
 
-func (p *PermutationAI) Less(i, j int) bool {
+func (p *permutationAI) Less(i, j int) bool {
 	return p.X.Less(p.Perm[i], p.Perm[j])
 }
 
-type PermutationAF struct {
+type permutationAF struct {
 	Perm AI
 	X    sort.Float64Slice
 }
 
-func (p *PermutationAF) Len() int {
+func (p *permutationAF) Len() int {
 	return p.X.Len()
 }
 
-func (p *PermutationAF) Swap(i, j int) {
+func (p *permutationAF) Swap(i, j int) {
 	p.Perm[i], p.Perm[j] = p.Perm[j], p.Perm[i]
 }
 
-func (p *PermutationAF) Less(i, j int) bool {
+func (p *permutationAF) Less(i, j int) bool {
 	return p.X.Less(p.Perm[i], p.Perm[j])
 }
 
-type PermutationAS struct {
+type permutationAS struct {
 	Perm AI
 	X    sort.StringSlice
 }
 
-func (p *PermutationAS) Len() int {
+func (p *permutationAS) Len() int {
 	return p.X.Len()
 }
 
-func (p *PermutationAS) Swap(i, j int) {
+func (p *permutationAS) Swap(i, j int) {
 	p.Perm[i], p.Perm[j] = p.Perm[j], p.Perm[i]
 }
 
-func (p *PermutationAS) Less(i, j int) bool {
+func (p *permutationAS) Less(i, j int) bool {
 	return p.X.Less(p.Perm[i], p.Perm[j])
 }
 
@@ -462,23 +462,23 @@ func permRange(n int) AI {
 func Ascend(x V) V {
 	switch x := x.(type) {
 	case AB:
-		p := &PermutationAB{Perm: permRange(len(x)), X: ABUp(x)}
+		p := &permutationAB{Perm: permRange(len(x)), X: sortAB(x)}
 		sort.Stable(p)
 		return p.Perm
 	case AF:
-		p := &PermutationAF{Perm: permRange(len(x)), X: sort.Float64Slice(x)}
+		p := &permutationAF{Perm: permRange(len(x)), X: sort.Float64Slice(x)}
 		sort.Stable(p)
 		return p.Perm
 	case AI:
-		p := &PermutationAI{Perm: permRange(len(x)), X: sort.IntSlice(x)}
+		p := &permutationAI{Perm: permRange(len(x)), X: sort.IntSlice(x)}
 		sort.Stable(p)
 		return p.Perm
 	case AS:
-		p := &PermutationAS{Perm: permRange(len(x)), X: sort.StringSlice(x)}
+		p := &permutationAS{Perm: permRange(len(x)), X: sort.StringSlice(x)}
 		sort.Stable(p)
 		return p.Perm
 	case AV:
-		p := &PermutationAO{Perm: permRange(len(x)), X: AOUp(x)}
+		p := &permutationAO{Perm: permRange(len(x)), X: sortAO(x)}
 		sort.Stable(p)
 		return p.Perm
 	default:

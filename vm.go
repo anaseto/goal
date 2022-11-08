@@ -33,17 +33,17 @@ func (ctx *Context) execute(ops []opcode) error {
 			ctx.push(Lambda(ops[ip]))
 			ip++
 		case opApply:
-			err := ctx.applyN(1)
+			err := ctx.popApplyN(1)
 			if err != nil {
 				return err
 			}
 		case opApply2:
-			err := ctx.applyN(2)
+			err := ctx.popApplyN(2)
 			if err != nil {
 				return err
 			}
 		case opApplyN:
-			err := ctx.applyN(int(ops[ip]))
+			err := ctx.popApplyN(int(ops[ip]))
 			if err != nil {
 				return err
 			}
@@ -56,9 +56,9 @@ func (ctx *Context) execute(ops []opcode) error {
 	return nil
 }
 
-func (ctx *Context) applyN(n int) error {
+func (ctx *Context) popApplyN(n int) error {
 	v := ctx.pop()
-	res := ctx.ApplyN(v, n)
+	res := ctx.applyN(v, n)
 	err, ok := res.(error)
 	if ok {
 		return err
