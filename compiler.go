@@ -17,7 +17,7 @@ type Program struct {
 type LambdaCode struct {
 	Body   []opcode
 	Locals []string
-	Arity  int
+	Rank   int
 }
 
 func (prog *Program) String() string {
@@ -34,7 +34,7 @@ func (prog *Program) String() string {
 		fmt.Fprintf(sb, "\t%d\t%v\n", id, v)
 	}
 	for id, lc := range prog.Lambdas {
-		fmt.Fprintf(sb, "---- Lambda %d (Arity: %d) -----\n", id, lc.Arity)
+		fmt.Fprintf(sb, "---- Lambda %d (Rank: %d) -----\n", id, lc.Rank)
 		fmt.Fprintf(sb, "%s", prog.lambdaString(lc))
 	}
 	return sb.String()
@@ -159,7 +159,7 @@ func (prog *Program) compileLambda(lc *AstLambdaCode) *LambdaCode {
 		}
 	}
 	clc := &LambdaCode{}
-	clc.Arity = nargs
+	clc.Rank = nargs
 	locals := make([]string, nlocals)
 	getID := func(local Local) int {
 		switch local.Type {

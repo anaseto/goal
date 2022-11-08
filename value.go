@@ -95,8 +95,7 @@ func (v Variadic) String() string {
 	return vStrings[v]
 }
 
-// DerivedVerb represents is a special case of projection with one argument.
-// It is, in particular, used for adverbs.
+// DerivedVerb represents values modified by an adverb.
 type DerivedVerb struct {
 	Fun Variadic
 	Arg V
@@ -104,23 +103,23 @@ type DerivedVerb struct {
 
 // Projection represents a partial application of a function. Because variadic
 // verbs do not have a fixed arity, it is possible to produce a projection of
-// any arity.
+// arbitrary arity.
 type Projection struct {
-	Fun  V
+	Fun  Function
 	Args AV
 }
 
 // ProjectionOne represents a projection with one argument.
 type ProjectionOne struct {
-	Fun V
+	Fun Function
 	Arg V
 }
 
 // Composition represents a composition of two functions. The left one is
 // always called monadically. XXX: not used for now.
 type Composition struct {
-	Left  V
-	Right V
+	Left  Function
+	Right Function
 }
 
 // Lambda represents an user defined function by ID.
@@ -180,7 +179,7 @@ type Array interface {
 	V
 	At(i int) V           // x[i]
 	Slice(i, j int) Array // x[i:j]
-	Apply(y AI) V
+	Apply(y AI) V         // x[y] (goal code)
 }
 
 func (x AV) Len() int { return len(x) }
@@ -263,3 +262,18 @@ func (x AS) String() string {
 	}
 	return sb.String()
 }
+
+// Function interface is satisfied by the different kind of functions. A
+// function is a value thas has a default rank. Note that arrays do have a
+// “rank” but do not implement this interface.
+type Function interface {
+	V
+	Rank(ctx *Context) int
+}
+
+func (v Variadic) Rank(ctx *Context) int      { return 2 }
+func (r DerivedVerb) Rank(ctx *Context) int   { return 2 }
+func (p Projection) Rank(ctx *Context) int    { return countNils(p.Args) }
+func (p ProjectionOne) Rank(ctx *Context) int { return 1 }
+func (c Composition) Rank(ctx *Context) int   { return c.Right.Rank(ctx) }
+func (l Lambda) Rank(ctx *Context) int        { return ctx.prog.Lambdas[l].Rank }

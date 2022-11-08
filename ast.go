@@ -153,7 +153,7 @@ type AstAssignLocal struct {
 	Pos   int
 }
 
-// AstVariadic represents verbs with variable arity > 2.
+// AstVariadic represents built-in verbs with variable arity.
 type AstVariadic struct {
 	Variadic Variadic
 	Pos      int

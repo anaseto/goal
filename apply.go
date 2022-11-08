@@ -98,11 +98,11 @@ func (ctx *Context) applyNVariadic(v Variadic, n int) V {
 		return Projection{Fun: v, Args: ctx.popN(n)}
 	}
 	if n == 2 {
-		switch args[1].(type) {
-		case Composition, Variadic, Projection, ProjectionOne:
+		switch arg := args[1].(type) {
+		case Function:
 			res := Composition{
 				Left:  ProjectionOne{Fun: v, Arg: args[0]},
-				Right: args[1],
+				Right: arg,
 			}
 			ctx.dropN(2)
 			return res
@@ -156,9 +156,9 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 		return errs("exceeded maximum call depth")
 	}
 	lc := ctx.prog.Lambdas[int(id)]
-	if lc.Arity < n {
-		return errf("too many arguments: got %d, expected %d", n, lc.Arity)
-	} else if lc.Arity > n {
+	if lc.Rank < n {
+		return errf("too many arguments: got %d, expected %d", n, lc.Rank)
+	} else if lc.Rank > n {
 		return Projection{Fun: id, Args: ctx.popN(n)}
 	}
 	olen := len(ctx.stack)

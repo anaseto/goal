@@ -33,6 +33,9 @@ func init() {
 		vApply:    {Name: "@", Func: fApply},
 		vApplyN:   {Name: ".", Func: fApplyN},
 		vList:     {Name: "List", Func: fList},
+		vEach:     {Name: "'", Func: fEach, Adverb: true},
+		vFold:     {Name: "/", Func: fFold, Adverb: true},
+		vScan:     {Name: "\\", Func: fScan, Adverb: true},
 	}
 }
 
