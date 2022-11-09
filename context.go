@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -28,6 +29,7 @@ type Context struct {
 	scanner *Scanner
 }
 
+// NewContext returns a new context for compiling and interpreting code.
 func NewContext() *Context {
 	ctx := &Context{}
 	ctx.ast = &AstProgram{}
@@ -38,10 +40,11 @@ func NewContext() *Context {
 	return ctx
 }
 
+// RunString compiles the code in string s, then executes it.
 func (ctx *Context) RunString(s string) (V, error) {
 	sr := strings.NewReader(s)
 	ctx.scanner.Init(sr)
-	p := &Parser{ctx: ctx}
+	p := &parser{ctx: ctx}
 	p.Init()
 	err := p.Parse()
 	if err != nil {
@@ -52,11 +55,11 @@ func (ctx *Context) RunString(s string) (V, error) {
 	if err != nil {
 		return nil, fmt.Errorf("parser:%v", err)
 	}
-	if len(ctx.stack) > 0 {
-		return ctx.top(), nil
-	} else {
-		return nil, nil
+	if len(ctx.stack) == 0 {
+		// should not happen
+		return nil, errors.New("no result: empty stack")
 	}
+	return ctx.top(), nil
 }
 
 // Show prints internal information about the context.

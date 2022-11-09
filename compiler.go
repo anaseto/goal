@@ -18,6 +18,8 @@ type LambdaCode struct {
 	Rank   int
 }
 
+// ProgramString returns a string representation of the compiled program and
+// relevant data.
 func (ctx *Context) ProgramString() string {
 	sb := &strings.Builder{}
 	fmt.Fprintln(sb, "---- Compiled program -----")

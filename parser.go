@@ -5,10 +5,10 @@ import (
 	"strconv"
 )
 
-// Parser builds an Expr AST from a ppExpr.
-type Parser struct {
+// parser builds an Expr AST from a ppExpr.
+type parser struct {
 	ctx        *Context
-	pp         *parser
+	pp         *pparser
 	argc       int // stack length for current sub-expression
 	arglist    bool
 	adverb     bool
@@ -17,14 +17,40 @@ type Parser struct {
 	it         ppIter
 }
 
-func (p *Parser) Init() {
-	pp := &parser{}
+// Init initializes the parser.
+func (p *parser) Init() {
+	pp := &pparser{}
 	pp.Init(p.ctx.scanner)
 	p.pp = pp
 	p.argc = 0
 }
 
-func (p *Parser) pushExpr(e Expr) {
+// Parse builds on the context AST using input from the current scanner.
+func (p *parser) Parse() error {
+	n := 0
+	var pps ppExprs
+	var eof bool
+	var err error
+	for {
+		if n > 0 && len(pps) != 0 {
+			p.pushExpr(AstDrop{})
+		}
+		pps, eof, err = p.pp.Next()
+		if err != nil {
+			return err
+		}
+		err = p.ppExprs(pps)
+		if err != nil {
+			return err
+		}
+		if eof {
+			return nil
+		}
+		n++
+	}
+}
+
+func (p *parser) pushExpr(e Expr) {
 	lc := p.scope()
 	if lc != nil {
 		lc.Body = append(lc.Body, e)
@@ -51,7 +77,7 @@ func (p *Parser) pushExpr(e Expr) {
 	}
 }
 
-func (p *Parser) apply() {
+func (p *parser) apply() {
 	switch {
 	case p.argc == 2:
 		p.pushExpr(AstApply{})
@@ -62,44 +88,20 @@ func (p *Parser) apply() {
 	}
 }
 
-func (p *Parser) errorf(format string, a ...interface{}) error {
+func (p *parser) errorf(format string, a ...interface{}) error {
 	// TODO: in case of error, read the file again to get from pos the line
 	// and print the line that produced the error with some column marker.
 	return fmt.Errorf("error:%d:"+format, append([]interface{}{p.pos}, a...))
 }
 
-func (p *Parser) scope() *AstLambdaCode {
+func (p *parser) scope() *AstLambdaCode {
 	if len(p.scopeStack) == 0 {
 		return nil
 	}
 	return p.scopeStack[len(p.scopeStack)-1]
 }
 
-func (p *Parser) Parse() error {
-	n := 0
-	var pps ppExprs
-	var eof bool
-	var err error
-	for {
-		if n > 0 && len(pps) != 0 {
-			p.pushExpr(AstDrop{})
-		}
-		pps, eof, err = p.pp.Next()
-		if err != nil {
-			return err
-		}
-		err = p.ppExprs(pps)
-		if err != nil {
-			return err
-		}
-		if eof {
-			return nil
-		}
-		n++
-	}
-}
-
-func (p *Parser) ppExprs(pps ppExprs) error {
+func (p *parser) ppExprs(pps ppExprs) error {
 	argc := p.argc
 	p.argc = 0
 	it := p.it
@@ -116,7 +118,7 @@ func (p *Parser) ppExprs(pps ppExprs) error {
 	return nil
 }
 
-func (p *Parser) ppExpr(ppe ppExpr) error {
+func (p *parser) ppExpr(ppe ppExpr) error {
 	switch ppe := ppe.(type) {
 	case ppToken:
 		err := p.ppToken(ppe)
@@ -155,7 +157,7 @@ func (p *Parser) ppExpr(ppe ppExpr) error {
 	return nil
 }
 
-func (p *Parser) ppToken(tok ppToken) error {
+func (p *parser) ppToken(tok ppToken) error {
 	p.pos = tok.Pos
 	switch tok.Type {
 	case ppNUMBER:
@@ -210,7 +212,7 @@ func parseNumber(s string) (V, error) {
 	return nil, errF
 }
 
-func (p *Parser) ppGlobal(tok ppToken) {
+func (p *parser) ppGlobal(tok ppToken) {
 	id := p.ctx.global(tok.Text)
 	p.pushExpr(AstGlobal{
 		Name: tok.Text,
@@ -220,7 +222,7 @@ func (p *Parser) ppGlobal(tok ppToken) {
 	p.apply()
 }
 
-func (p *Parser) ppLocal(tok ppToken) {
+func (p *parser) ppLocal(tok ppToken) {
 	local, ok := p.scope().local(tok.Text)
 	if ok {
 		p.pushExpr(AstLocal{
@@ -234,7 +236,7 @@ func (p *Parser) ppLocal(tok ppToken) {
 	p.ppGlobal(tok)
 }
 
-func (p *Parser) ppVariadic(tok ppToken) error {
+func (p *parser) ppVariadic(tok ppToken) error {
 	v := parseBuiltin(tok.Rune)
 	p.pushExpr(AstVariadic{
 		Variadic: v,
@@ -244,7 +246,7 @@ func (p *Parser) ppVariadic(tok ppToken) error {
 	return nil
 }
 
-func (p *Parser) ppVerb(tok ppToken) error {
+func (p *parser) ppVerb(tok ppToken) error {
 	ppe := p.it.Peek()
 	argc := p.argc
 	if ppe == nil || p.arglist || p.adverb {
@@ -278,7 +280,7 @@ func (p *Parser) ppVerb(tok ppToken) error {
 	return p.ppVariadic(tok)
 }
 
-func (p *Parser) ppAssign(verbTok, identTok ppToken) bool {
+func (p *parser) ppAssign(verbTok, identTok ppToken) bool {
 	if verbTok.Rune != ':' || p.argc != 1 {
 		return false
 	}
@@ -362,7 +364,7 @@ func parseBuiltin(r rune) (verb Variadic) {
 	return verb
 }
 
-func (p *Parser) ppAdverbs(adverbs ppAdverbs) error {
+func (p *parser) ppAdverbs(adverbs ppAdverbs) error {
 	tok := adverbs[len(adverbs)-1]
 	adverbs = adverbs[:len(adverbs)-1]
 	ppe := p.it.Peek()
@@ -424,7 +426,7 @@ func (p *Parser) ppAdverbs(adverbs ppAdverbs) error {
 	return p.ppVariadic(tok)
 }
 
-func (p *Parser) ppStrand(pps ppStrand) error {
+func (p *parser) ppStrand(pps ppStrand) error {
 	a := make(AV, 0, len(pps))
 	for _, tok := range pps {
 		switch tok.Type {
@@ -448,12 +450,12 @@ func (p *Parser) ppStrand(pps ppStrand) error {
 	return nil
 }
 
-func (p *Parser) ppParenExpr(ppp ppParenExpr) error {
+func (p *parser) ppParenExpr(ppp ppParenExpr) error {
 	err := p.ppExprs(ppExprs(ppp))
 	return err
 }
 
-func (p *Parser) ppBlock(ppb ppBlock) error {
+func (p *parser) ppBlock(ppb ppBlock) error {
 	switch ppb.Type {
 	case ppLAMBDA:
 		return p.ppLambda(ppb.Body, ppb.Args)
@@ -468,7 +470,7 @@ func (p *Parser) ppBlock(ppb ppBlock) error {
 	}
 }
 
-func (p *Parser) ppLambda(body []ppExprs, args []string) error {
+func (p *parser) ppLambda(body []ppExprs, args []string) error {
 	argc := p.argc
 	p.argc = 0
 	lc := &AstLambdaCode{
@@ -496,7 +498,7 @@ func (p *Parser) ppLambda(body []ppExprs, args []string) error {
 	return nil
 }
 
-func (p *Parser) ppLambdaArgs(args []string) error {
+func (p *parser) ppLambdaArgs(args []string) error {
 	lc := p.scope()
 	lc.NamedArgs = true
 	for i, arg := range args {
@@ -512,7 +514,7 @@ func (p *Parser) ppLambdaArgs(args []string) error {
 	return nil
 }
 
-func (p *Parser) ppArgs(body []ppExprs) error {
+func (p *parser) ppArgs(body []ppExprs) error {
 	if len(body) >= 3 {
 		expr := p.it.Peek()
 		switch expr := expr.(type) {
@@ -549,13 +551,13 @@ func (p *Parser) ppArgs(body []ppExprs) error {
 	return nil
 }
 
-func (p *Parser) parseCond(body []ppExprs) error {
+func (p *parser) parseCond(body []ppExprs) error {
 	panic("TODO: parseCond")
 	// TODO
 	return nil
 }
 
-func (p *Parser) ppSeq(body []ppExprs) error {
+func (p *parser) ppSeq(body []ppExprs) error {
 	argc := p.argc
 	for i, exprs := range body {
 		err := p.ppExprs(exprs)
@@ -570,7 +572,7 @@ func (p *Parser) ppSeq(body []ppExprs) error {
 	return nil
 }
 
-func (p *Parser) ppList(body []ppExprs) error {
+func (p *parser) ppList(body []ppExprs) error {
 	argc := p.argc
 	for i := len(body) - 1; i >= 0; i-- {
 		exprs := body[i]
@@ -587,8 +589,8 @@ func (p *Parser) ppList(body []ppExprs) error {
 	return nil
 }
 
-// parser builds a ppExpr pre-AST.
-type parser struct {
+// pparser builds a ppExpr pre-AST.
+type pparser struct {
 	s      *Scanner
 	token  Token // current token
 	pToken Token // peeked token
@@ -597,39 +599,13 @@ type parser struct {
 	peeked bool
 }
 
-func (p *parser) errorf(format string, a ...interface{}) error {
-	// TODO: in case of error, read the file again to get from pos the line
-	// and print the line that produced the error with some column marker.
-	return fmt.Errorf("error:%d:"+format, append([]interface{}{p.token.Pos}, a...))
-}
-
 // Init initializes the parser.
-func (p *parser) Init(s *Scanner) {
+func (p *pparser) Init(s *Scanner) {
 	p.s = s
 }
 
-func (p *parser) peek() Token {
-	if p.peeked {
-		return p.pToken
-	}
-	p.pToken = p.s.Next()
-	p.peeked = true
-	return p.pToken
-}
-
-func (p *parser) next() Token {
-	p.oToken = p.token
-	if p.peeked {
-		p.token = p.pToken
-		p.peeked = false
-		return p.token
-	}
-	p.token = p.s.Next()
-	return p.token
-}
-
 // Next returns a whole expression, in stack-based order.
-func (p *parser) Next() (ppExprs, bool, error) {
+func (p *pparser) Next() (ppExprs, bool, error) {
 	pps := ppExprs{}
 	for {
 		ppe, err := p.ppExpr()
@@ -646,6 +622,32 @@ func (p *parser) Next() (ppExprs, bool, error) {
 	}
 }
 
+func (p *pparser) errorf(format string, a ...interface{}) error {
+	// TODO: in case of error, read the file again to get from pos the line
+	// and print the line that produced the error with some column marker.
+	return fmt.Errorf("error:%d:"+format, append([]interface{}{p.token.Pos}, a...))
+}
+
+func (p *pparser) peek() Token {
+	if p.peeked {
+		return p.pToken
+	}
+	p.pToken = p.s.Next()
+	p.peeked = true
+	return p.pToken
+}
+
+func (p *pparser) next() Token {
+	p.oToken = p.token
+	if p.peeked {
+		p.token = p.pToken
+		p.peeked = false
+		return p.token
+	}
+	p.token = p.s.Next()
+	return p.token
+}
+
 func closeToken(opTok TokenType) TokenType {
 	switch opTok {
 	case LEFTBRACE:
@@ -659,7 +661,7 @@ func closeToken(opTok TokenType) TokenType {
 	}
 }
 
-func (p *parser) ppExpr() (ppExpr, error) {
+func (p *pparser) ppExpr() (ppExpr, error) {
 	switch tok := p.next(); tok.Type {
 	case EOF:
 		return ppToken{Type: ppEOF, Pos: tok.Pos}, nil
@@ -708,7 +710,7 @@ func (p *parser) ppExpr() (ppExpr, error) {
 	}
 }
 
-func (p *parser) ppExprBlock() (ppExpr, error) {
+func (p *pparser) ppExprBlock() (ppExpr, error) {
 	var bt ppBlockType
 	p.depth = append(p.depth, p.token)
 	ppb := ppBlock{}
@@ -774,7 +776,7 @@ func (p *parser) ppExprBlock() (ppExpr, error) {
 	}
 }
 
-func (p *parser) ppLambdaArgs() ([]string, error) {
+func (p *pparser) ppLambdaArgs() ([]string, error) {
 	// p.token.Type is LEFTBRACKET
 	args := []string{}
 	for {
@@ -798,7 +800,7 @@ func (p *parser) ppLambdaArgs() ([]string, error) {
 	}
 }
 
-func (p *parser) ppAdverbs() (ppExpr, error) {
+func (p *pparser) ppAdverbs() (ppExpr, error) {
 	// p.token.Type is NUMBER or STRING for current and peek
 	ppb := ppAdverbs{}
 	for {
@@ -816,7 +818,7 @@ func (p *parser) ppAdverbs() (ppExpr, error) {
 	}
 }
 
-func (p *parser) ppExprStrand() (ppExpr, error) {
+func (p *pparser) ppExprStrand() (ppExpr, error) {
 	// p.token.Type is NUMBER or STRING for current and peek
 	ppb := ppStrand{}
 	for {
