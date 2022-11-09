@@ -7,12 +7,11 @@ import (
 
 // AstProgram represents a program written in goal.
 type AstProgram struct {
-	Body      []Expr           // program body AST
-	Constants []V              // constants indexed by ID
-	Globals   map[string]int   // name: ID
-	Lambdas   []*AstLambdaCode // list of user defined lambdas
+	Body    []Expr           // program body AST
+	Lambdas []*AstLambdaCode // list of user defined lambdas
 
-	nglobals int // number of globals
+	cBody    int // index next of last compiled expression
+	cLambdas int // index next of last compiled lambda
 }
 
 func (prog *AstProgram) String() string {
@@ -22,34 +21,11 @@ func (prog *AstProgram) String() string {
 	for _, expr := range prog.Body {
 		fmt.Fprintf(sb, "\t%#v\n", expr)
 	}
-	fmt.Fprintln(sb, "Globals:")
-	for name, id := range prog.Globals {
-		fmt.Fprintf(sb, "\t%s\t%d\n", name, id)
-	}
-	fmt.Fprintln(sb, "Constants:")
-	for id, v := range prog.Constants {
-		fmt.Fprintf(sb, "\t%d\t%v\n", id, v)
-	}
 	for id, lc := range prog.Lambdas {
 		fmt.Fprintf(sb, "---- Lambda %d -----\n", id)
 		fmt.Fprintf(sb, "%s", lc)
 	}
 	return sb.String()
-}
-
-func (prog *AstProgram) storeConst(v V) int {
-	prog.Constants = append(prog.Constants, v)
-	return len(prog.Constants) - 1
-}
-
-func (prog *AstProgram) global(s string) int {
-	id, ok := prog.Globals[s]
-	if ok {
-		return id
-	}
-	prog.Globals[s] = prog.nglobals
-	prog.nglobals++
-	return prog.nglobals - 1
 }
 
 // AstLambdaCode represents an user defined lambda like {x+1}.

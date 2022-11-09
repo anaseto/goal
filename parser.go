@@ -7,8 +7,8 @@ import (
 
 // Parser builds an Expr AST from a ppExpr.
 type Parser struct {
+	ctx        *Context
 	pp         *parser
-	prog       *AstProgram
 	argc       int // stack length for current sub-expression
 	arglist    bool
 	adverb     bool
@@ -17,13 +17,10 @@ type Parser struct {
 	it         ppIter
 }
 
-func (p *Parser) Init(s *Scanner) {
+func (p *Parser) Init() {
 	pp := &parser{}
-	pp.Init(s)
+	pp.Init(p.ctx.scanner)
 	p.pp = pp
-	p.prog = &AstProgram{
-		Globals: map[string]int{},
-	}
 	p.argc = 0
 }
 
@@ -32,7 +29,7 @@ func (p *Parser) pushExpr(e Expr) {
 	if lc != nil {
 		lc.Body = append(lc.Body, e)
 	} else {
-		p.prog.Body = append(p.prog.Body, e)
+		p.ctx.ast.Body = append(p.ctx.ast.Body, e)
 	}
 	switch e := e.(type) {
 	case AstApply:
@@ -169,7 +166,7 @@ func (p *Parser) ppToken(tok ppToken) error {
 		if p.argc > 0 {
 			return p.errorf("number atoms cannot be applied")
 		}
-		id := p.prog.storeConst(v)
+		id := p.ctx.storeConst(v)
 		p.pushExpr(AstConst{ID: id, Pos: tok.Pos})
 		return nil
 	case ppSTRING:
@@ -180,7 +177,7 @@ func (p *Parser) ppToken(tok ppToken) error {
 		if p.argc > 0 {
 			return p.errorf("string atoms cannot be applied")
 		}
-		id := p.prog.storeConst(S(s))
+		id := p.ctx.storeConst(S(s))
 		p.pushExpr(AstConst{ID: id, Pos: tok.Pos})
 		return nil
 	case ppIDENT:
@@ -214,7 +211,7 @@ func parseNumber(s string) (V, error) {
 }
 
 func (p *Parser) ppGlobal(tok ppToken) {
-	id := p.prog.global(tok.Text)
+	id := p.ctx.global(tok.Text)
 	p.pushExpr(AstGlobal{
 		Name: tok.Text,
 		ID:   id,
@@ -287,7 +284,7 @@ func (p *Parser) ppAssign(verbTok, identTok ppToken) bool {
 	}
 	lc := p.scope()
 	if lc == nil {
-		id := p.prog.global(identTok.Text)
+		id := p.ctx.global(identTok.Text)
 		p.pushExpr(AstAssignGlobal{
 			Name: identTok.Text,
 			ID:   id,
@@ -445,7 +442,7 @@ func (p *Parser) ppStrand(pps ppStrand) error {
 			a = append(a, S(s))
 		}
 	}
-	id := p.prog.storeConst(canonical(a))
+	id := p.ctx.storeConst(canonical(a))
 	// len(pps) > 0
 	p.pushExpr(AstConst{ID: id, Pos: pps[0].Pos})
 	return nil
@@ -491,8 +488,8 @@ func (p *Parser) ppLambda(body []ppExprs, args []string) error {
 		}
 	}
 	p.scopeStack = p.scopeStack[:len(p.scopeStack)-1]
-	id := len(p.prog.Lambdas)
-	p.prog.Lambdas = append(p.prog.Lambdas, lc)
+	id := len(p.ctx.ast.Lambdas)
+	p.ctx.ast.Lambdas = append(p.ctx.ast.Lambdas, lc)
 	p.argc = argc
 	p.pushExpr(AstLambda{Lambda: Lambda(id)})
 	p.apply()

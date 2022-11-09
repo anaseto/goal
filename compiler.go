@@ -7,10 +7,8 @@ import (
 
 // Program represents a compiled program.
 type Program struct {
-	Body      []opcode
-	Constants []V
-	Globals   map[int]string
-	Lambdas   []*LambdaCode
+	Body    []opcode
+	Lambdas []*LambdaCode
 }
 
 // LambdaCode represents a compiled user defined function.
@@ -20,30 +18,30 @@ type LambdaCode struct {
 	Rank   int
 }
 
-func (prog *Program) String() string {
+func (ctx *Context) ProgramString() string {
 	sb := &strings.Builder{}
 	fmt.Fprintln(sb, "---- Compiled program -----")
 	fmt.Fprintln(sb, "Instructions:")
-	fmt.Fprint(sb, prog.opcodesString(prog.Body, nil))
+	fmt.Fprint(sb, ctx.opcodesString(ctx.prog.Body, nil))
 	fmt.Fprintln(sb, "Globals:")
-	for id, name := range prog.Globals {
+	for id, name := range ctx.gNames {
 		fmt.Fprintf(sb, "\t%s\t%d\n", name, id)
 	}
 	fmt.Fprintln(sb, "Constants:")
-	for id, v := range prog.Constants {
+	for id, v := range ctx.constants {
 		fmt.Fprintf(sb, "\t%d\t%v\n", id, v)
 	}
-	for id, lc := range prog.Lambdas {
+	for id, lc := range ctx.prog.Lambdas {
 		fmt.Fprintf(sb, "---- Lambda %d (Rank: %d) -----\n", id, lc.Rank)
-		fmt.Fprintf(sb, "%s", prog.lambdaString(lc))
+		fmt.Fprintf(sb, "%s", ctx.lambdaString(lc))
 	}
 	return sb.String()
 }
 
-func (prog *Program) lambdaString(lc *LambdaCode) string {
+func (ctx *Context) lambdaString(lc *LambdaCode) string {
 	sb := &strings.Builder{}
 	fmt.Fprintln(sb, "Instructions:")
-	fmt.Fprint(sb, prog.opcodesString(lc.Body, lc))
+	fmt.Fprint(sb, ctx.opcodesString(lc.Body, lc))
 	fmt.Fprintln(sb, "Locals:")
 	for i, name := range lc.Locals {
 		fmt.Fprintf(sb, "\t%s\t%d\n", name, i)
@@ -51,7 +49,7 @@ func (prog *Program) lambdaString(lc *LambdaCode) string {
 	return sb.String()
 }
 
-func (prog *Program) opcodesString(ops []opcode, lc *LambdaCode) string {
+func (ctx *Context) opcodesString(ops []opcode, lc *LambdaCode) string {
 	sb := &strings.Builder{}
 	for i := 0; i < len(ops); i++ {
 		op := ops[i]
@@ -64,14 +62,14 @@ func (prog *Program) opcodesString(ops []opcode, lc *LambdaCode) string {
 		case opNil:
 			fmt.Fprintf(sb, "%d\t%s\n", i, op)
 		case opGlobal:
-			fmt.Fprintf(sb, "%d\t%s\t%d (%s)\n", i, op, ops[i+1], prog.Globals[int(ops[i+1])])
+			fmt.Fprintf(sb, "%d\t%s\t%d (%s)\n", i, op, ops[i+1], ctx.gNames[int(ops[i+1])])
 			i++
 		case opLocal:
 			fmt.Fprintf(sb, "%d\t%s\t\t%d (%s)\n", i, op, ops[i+1], lc.Locals[int(ops[i+1])])
 			//fmt.Fprintf(sb, "%d\t%s\t%d\n", i, op, ops[i+1])
 			i++
 		case opAssignGlobal:
-			fmt.Fprintf(sb, "%d\t%s\t%d (%s)\n", i, op, ops[i+1], prog.Globals[int(ops[i+1])])
+			fmt.Fprintf(sb, "%d\t%s\t%d (%s)\n", i, op, ops[i+1], ctx.gNames[int(ops[i+1])])
 			i++
 		case opAssignLocal:
 			fmt.Fprintf(sb, "%d\t%s\t%d (%s)\n", i, op, ops[i+1], lc.Locals[ops[i+1]])
@@ -97,22 +95,16 @@ func (prog *Program) opcodesString(ops []opcode, lc *LambdaCode) string {
 }
 
 // Compile transforms an AstProgram into a Program.
-func Compile(aprog *AstProgram) *Program {
-	prog := &Program{}
-	prog.Constants = aprog.Constants
-	prog.Globals = map[int]string{}
-	for k, id := range aprog.Globals {
-		prog.Globals[id] = k
-	}
-	prog.compileBody(aprog.Body)
-	prog.compileLambdas(aprog.Lambdas)
-	return prog
+func (ctx *Context) compile() {
+	ctx.compileBody()
+	ctx.compileLambdas()
 }
 
-func (prog *Program) compileBody(body []Expr) {
-	for _, expr := range body {
-		prog.Body, _ = compileExpr(prog.Body, expr)
+func (ctx *Context) compileBody() {
+	for _, expr := range ctx.ast.Body[ctx.ast.cBody:] {
+		ctx.prog.Body, _ = compileExpr(ctx.prog.Body, expr)
 	}
+	ctx.ast.cBody = len(ctx.ast.Body)
 }
 
 func compileExpr(body []opcode, expr Expr) ([]opcode, bool) {
@@ -143,13 +135,14 @@ func compileExpr(body []opcode, expr Expr) ([]opcode, bool) {
 	return body, true
 }
 
-func (prog *Program) compileLambdas(lcs []*AstLambdaCode) {
-	for _, lc := range lcs {
-		prog.Lambdas = append(prog.Lambdas, prog.compileLambda(lc))
+func (ctx *Context) compileLambdas() {
+	for _, lc := range ctx.ast.Lambdas[ctx.ast.cLambdas:] {
+		ctx.prog.Lambdas = append(ctx.prog.Lambdas, ctx.compileLambda(lc))
 	}
+	ctx.ast.cLambdas = len(ctx.ast.Lambdas)
 }
 
-func (prog *Program) compileLambda(lc *AstLambdaCode) *LambdaCode {
+func (ctx *Context) compileLambda(lc *AstLambdaCode) *LambdaCode {
 	nargs := 0
 	nlocals := 0
 	for _, local := range lc.Locals {

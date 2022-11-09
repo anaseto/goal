@@ -2,15 +2,9 @@ package main
 
 import (
 	"fmt"
-	"strings"
 )
 
 func main() {
-	//testPrimitives()
-	//testScanner()
-	//testPParser()
-	//testParser()
-	//testCompiler()
 	testVM("a:23 13;b:a+5;|b")
 	testVM("a:!10;b:a+5;|b")
 	testVM(`a:%0 2 0 3 4 5 2 2 2;a`)
@@ -85,92 +79,17 @@ func testPrimitives() {
 	fmt.Printf("Group:%#v\n", Group(AB{false, true, false}))
 }
 
-func testScanner() {
-	sr := strings.NewReader("%!:+/\n&/: /comment\nident 23 \"string\"")
-	sc := &Scanner{}
-	sc.Init(sr)
-	for tk := sc.Next(); tk.Type != EOF; tk = sc.Next() {
-		fmt.Printf("%v", tk)
-		if tk.Type == NEWLINE {
-			fmt.Print("\n")
-		}
-	}
-	fmt.Print("\n")
-}
-
-func testPParser() {
-	s := "23 45 + {(x-23)+|x} 23 43 + fun[2;3];"
-	sr := strings.NewReader(s)
-	p := &parser{}
-	sc := &Scanner{}
-	sc.Init(sr)
-	p.Init(sc)
-	fmt.Println(s)
-	exprs, _, err := p.Next()
-	if err != nil {
-		fmt.Printf("parser:%v", err)
-	}
-	for _, expr := range exprs {
-		fmt.Printf("%v\n", expr)
-	}
-}
-
-func testParser() {
-	s := "23 45 + {(x-23)+|x} 23 43 + fun[2;3];"
-	sr := strings.NewReader(s)
-	p := &Parser{}
-	sc := &Scanner{}
-	sc.Init(sr)
-	p.Init(sc)
-	fmt.Println(s)
-	err := p.Parse()
-	if err != nil {
-		fmt.Printf("parser:%v", err)
-	}
-	fmt.Printf("%s\n", p.prog)
-}
-
-func testCompiler() {
-	s := "23 45 + {(x-23)+|x} 23 43 + fun[2;3];"
-	sr := strings.NewReader(s)
-	p := &Parser{}
-	sc := &Scanner{}
-	sc.Init(sr)
-	p.Init(sc)
-	fmt.Println(s)
-	err := p.Parse()
-	if err != nil {
-		fmt.Printf("parser:%v", err)
-	}
-	fmt.Printf("%s\n", Compile(p.prog))
-}
-
 func testVM(s string) {
-	sr := strings.NewReader(s)
-	p := &Parser{}
-	sc := &Scanner{}
-	sc.Init(sr)
-	p.Init(sc)
 	fmt.Println("-------- Goal code ----------")
 	fmt.Println(s)
-	err := p.Parse()
-	if err != nil {
-		fmt.Printf("parser:%v", err)
-	}
-	fmt.Printf("%s\n", p.prog)
-	prog := Compile(p.prog)
-	fmt.Printf("%s\n", prog)
-	ctx := NewContext(prog)
-	err = ctx.execute(ctx.prog.Body)
+	ctx := NewContext()
+	v, err := ctx.RunString(s)
+	ctx.Show()
 	if err != nil {
 		fmt.Println("---------- Error -----------")
 		fmt.Printf("%v\n", err)
 		return
 	}
 	fmt.Println("---------- Result -----------")
-	if len(ctx.stack) > 0 {
-		fmt.Printf("%v\n", ctx.top())
-	} else {
-		fmt.Println("No result")
-	}
+	fmt.Printf("%v\n", v)
 }
