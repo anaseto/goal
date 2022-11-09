@@ -34,6 +34,7 @@ func main() {
 	testVM(`2 3#'1 2`)
 	testVM(`{0 1 0 1} 0`)
 	testVM(`{0 1 0 1}#1 2 3 4`)
+	testVM(`+/!1000000`)
 }
 
 func testPrimitives() {

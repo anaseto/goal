@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"strings"
 )
 
@@ -180,7 +181,6 @@ type Array interface {
 	At(i int) V           // x[i]
 	Slice(i, j int) Array // x[i:j]
 	Select(y AI) V        // x[y] (goal code)
-	Zero() V
 }
 
 func (x AV) Len() int { return len(x) }
@@ -206,12 +206,6 @@ func (x AB) Slice(i, j int) Array { return x[i:j] }
 func (x AI) Slice(i, j int) Array { return x[i:j] }
 func (x AF) Slice(i, j int) Array { return x[i:j] }
 func (x AS) Slice(i, j int) Array { return x[i:j] }
-
-func (x AV) Zero() V { return I(0) }
-func (x AB) Zero() V { return I(0) }
-func (x AI) Zero() V { return I(0) }
-func (x AF) Zero() V { return F(0) }
-func (x AS) Zero() V { return S("") }
 
 func (x AV) String() string {
 	sb := &strings.Builder{}
@@ -284,3 +278,22 @@ func (p Projection) Rank(ctx *Context) int    { return countNils(p.Args) }
 func (p ProjectionOne) Rank(ctx *Context) int { return 1 }
 func (c Composition) Rank(ctx *Context) int   { return c.Right.Rank(ctx) }
 func (l Lambda) Rank(ctx *Context) int        { return ctx.prog.Lambdas[l].Rank }
+
+type zeroFun interface {
+	Function
+	zero() V
+}
+
+func (v Variadic) zero() V {
+	switch v {
+	case vAdd, vSubtract:
+		return I(0)
+	case vMultiply:
+		return I(1)
+	case vMin:
+		return I(math.MinInt)
+	case vMax:
+		return I(math.MaxInt)
+	}
+	return nil
+}

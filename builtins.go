@@ -284,7 +284,7 @@ func fEach(ctx *Context, args []V) V {
 			// TODO: binary search
 			return errsw("not a function")
 		}
-		x := args[0]
+		x := toArray(args[0])
 		switch x := x.(type) {
 		case Array:
 			res := make(AV, 0, x.Len())
@@ -299,7 +299,6 @@ func fEach(ctx *Context, args []V) V {
 	case 3:
 		v, ok := args[2].(Function)
 		if !ok {
-			// TODO: binary search
 			return errsw("not a function")
 		}
 		x, ok := args[1].(Array)
@@ -328,9 +327,131 @@ func fEach(ctx *Context, args []V) V {
 }
 
 func fFold(ctx *Context, args []V) V {
+	switch len(args) {
+	case 2:
+		v, ok := args[1].(Function)
+		if !ok {
+			// TODO: join, split, encode, decode
+			return errsw("not a function")
+		}
+		if v.Rank(ctx) != 2 {
+			// TODO: converge
+			return errf("rank %d verb (expected 2)", v.Rank(ctx))
+		}
+		x := args[0]
+		switch x := x.(type) {
+		case Array:
+			if x.Len() == 0 {
+				v, ok := v.(zeroFun)
+				if ok {
+					return v.zero()
+				}
+				return I(0)
+			}
+			res := x.At(0)
+			for i := 1; i < x.Len(); i++ {
+				ctx.push(x.At(i))
+				ctx.push(res)
+				res = ctx.applyN(v, 2)
+			}
+			return canonical(res)
+		default:
+			return x
+		}
+	case 3:
+		v, ok := args[2].(Function)
+		if !ok {
+			return errs("3-rank form for adverb / expects function")
+		}
+		if v.Rank(ctx) != 2 {
+			// TODO: while
+			return errf("rank %d verb (expected 2)", v.Rank(ctx))
+		}
+		y := args[0]
+		switch y := y.(type) {
+		case Array:
+			res := args[1]
+			if y.Len() == 0 {
+				return res
+			}
+			for i := 0; i < y.Len(); i++ {
+				ctx.push(y.At(i))
+				ctx.push(res)
+				res = ctx.applyN(v, 2)
+			}
+			return canonical(res)
+		default:
+			ctx.push(y)
+			ctx.push(args[1])
+			return ctx.applyN(v, 2)
+		}
+	default:
+		return errs("too many arguments")
+	}
 	return nil
 }
 
 func fScan(ctx *Context, args []V) V {
+	switch len(args) {
+	case 2:
+		v, ok := args[1].(Function)
+		if !ok {
+			// TODO: join, split, encode, decode
+			return errsw("not a function")
+		}
+		if v.Rank(ctx) != 2 {
+			// TODO: converge
+			return errf("rank %d verb (expected 2)", v.Rank(ctx))
+		}
+		x := args[0]
+		switch x := x.(type) {
+		case Array:
+			if x.Len() == 0 {
+				v, ok := v.(zeroFun)
+				if ok {
+					return v.zero()
+				}
+				return I(0)
+			}
+			res := AV{x.At(0)}
+			for i := 1; i < x.Len(); i++ {
+				ctx.push(x.At(i))
+				ctx.push(res[len(res)-1])
+				res = append(res, ctx.applyN(v, 2))
+			}
+			return canonical(res)
+		default:
+			return x
+		}
+	case 3:
+		v, ok := args[2].(Function)
+		if !ok {
+			return errs("3-rank form for adverb / expects function")
+		}
+		if v.Rank(ctx) != 2 {
+			// TODO: while
+			return errf("rank %d verb (expected 2)", v.Rank(ctx))
+		}
+		y := args[0]
+		switch y := y.(type) {
+		case Array:
+			res := AV{args[1]}
+			if y.Len() == 0 {
+				return res
+			}
+			for i := 0; i < y.Len(); i++ {
+				ctx.push(y.At(i))
+				ctx.push(res[len(res)-1])
+				res = append(res, ctx.applyN(v, 2))
+			}
+			return canonical(res)
+		default:
+			ctx.push(y)
+			ctx.push(args[1])
+			return ctx.applyN(v, 2)
+		}
+	default:
+		return errs("too many arguments")
+	}
 	return nil
 }

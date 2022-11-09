@@ -237,7 +237,7 @@ func isFalse(x V) bool {
 type eltype int
 
 const (
-	tO  eltype = 0b00000
+	tV  eltype = 0b00000
 	tB  eltype = 0b00111
 	tF  eltype = 0b00001
 	tI  eltype = 0b00011
@@ -253,7 +253,7 @@ func mergeTypes(t, s eltype) eltype {
 	if t&tAO == s&tAO {
 		return t & s
 	}
-	return tO
+	return tV
 }
 
 // eType returns the eltype of x.
@@ -279,7 +279,7 @@ func eType(x V) eltype {
 	case AV:
 		return tAO
 	default:
-		return tO
+		return tV
 	}
 }
 
@@ -306,7 +306,7 @@ func cType(x V) eltype {
 	case AV:
 		return cTypeAO(x)
 	default:
-		return tO
+		return tV
 	}
 }
 
@@ -335,7 +335,7 @@ func cTypeAO(x AV) eltype {
 // aType returns the most specific eltype of the elements of a generic array.
 func aType(x AV) eltype {
 	if x.Len() == 0 {
-		return tO
+		return tV
 	}
 	t := eType(x[0])
 	for i := 1; i < len(x); i++ {
@@ -419,7 +419,7 @@ func canonical(x V) V {
 				r[i] = string(v.(S))
 			}
 			return r
-		case tO:
+		case tV:
 			for i, v := range y {
 				y[i] = canonical(v)
 			}
