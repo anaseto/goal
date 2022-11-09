@@ -251,6 +251,7 @@ func (it *ppIter) PeekN(n int) ppExpr {
 // ppToken represents a simplified token after processing into ppExpr.
 type ppToken struct {
 	Type ppTokenType
+	Rune rune
 	Pos  int
 	Text string
 }
@@ -260,7 +261,7 @@ func (ppt ppToken) String() string {
 }
 
 // ppTokenType represents tokens in a ppExpr.
-type ppTokenType int
+type ppTokenType int32
 
 // These constants represent the possible tokens in a ppExpr. The SEP,
 // EOF and CLOSE types are not emitted in the final result.

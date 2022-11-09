@@ -238,7 +238,7 @@ func (p *Parser) ppLocal(tok ppToken) {
 }
 
 func (p *Parser) ppVariadic(tok ppToken) error {
-	v := parseBuiltin(tok.Text)
+	v := parseBuiltin(tok.Rune)
 	p.pushExpr(AstVariadic{
 		Variadic: v,
 		Pos:      tok.Pos,
@@ -282,7 +282,7 @@ func (p *Parser) ppVerb(tok ppToken) error {
 }
 
 func (p *Parser) ppAssign(verbTok, identTok ppToken) bool {
-	if verbTok.Text != ":" || p.argc != 1 {
+	if verbTok.Rune != ':' || p.argc != 1 {
 		return false
 	}
 	lc := p.scope()
@@ -313,53 +313,53 @@ func (p *Parser) ppAssign(verbTok, identTok ppToken) bool {
 	return true
 }
 
-func parseBuiltin(s string) (verb Variadic) {
-	switch s {
-	case ":":
+func parseBuiltin(r rune) (verb Variadic) {
+	switch r {
+	case ':':
 		verb = vRight
-	case "+":
+	case '+':
 		verb = vAdd
-	case "-":
+	case '-':
 		verb = vSubtract
-	case "*":
+	case '*':
 		verb = vMultiply
-	case "%":
+	case '%':
 		verb = vDivide
-	case "!":
+	case '!':
 		verb = vMod
-	case "&":
+	case '&':
 		verb = vMin
-	case "|":
+	case '|':
 		verb = vMax
-	case "<":
+	case '<':
 		verb = vLess
-	case ">":
+	case '>':
 		verb = vMore
-	case "=":
+	case '=':
 		verb = vEqual
-	case "~":
+	case '~':
 		verb = vMatch
-	case ",":
+	case ',':
 		verb = vJoin
-	case "^":
+	case '^':
 		verb = vCut
-	case "#":
+	case '#':
 		verb = vTake
-	case "_":
+	case '_':
 		verb = vDrop
-	case "$":
+	case '$':
 		verb = vCast
-	case "?":
+	case '?':
 		verb = vFind
-	case "@":
+	case '@':
 		verb = vApply
-	case ".":
+	case '.':
 		verb = vApplyN
-	case "'":
+	case '\'':
 		verb = vEach
-	case "/":
+	case '/':
 		verb = vFold
-	case "\\":
+	case '\\':
 		verb = vScan
 	}
 	return verb
@@ -520,7 +520,7 @@ func (p *Parser) ppArgs(body []ppExprs) error {
 		expr := p.it.Peek()
 		switch expr := expr.(type) {
 		case ppToken:
-			if expr.Type == ppVERB && expr.Text == "$" {
+			if expr.Type == ppVERB && expr.Rune == '$' {
 				return p.parseCond(body)
 			}
 		}
@@ -704,10 +704,10 @@ func (p *parser) ppExpr() (ppExpr, error) {
 		p.depth = p.depth[:len(p.depth)-1]
 		return ppToken{Type: ppCLOSE, Pos: tok.Pos}, nil
 	case VERB:
-		return ppToken{Type: ppVERB, Pos: tok.Pos, Text: tok.Text}, nil
+		return ppToken{Type: ppVERB, Pos: tok.Pos, Rune: tok.Rune}, nil
 	default:
 		// should not happen
-		return nil, p.errorf("invalid token '%s' of type %d", tok.Text, tok.Type)
+		return nil, p.errorf("invalid token: %v", tok)
 	}
 }
 
@@ -807,7 +807,7 @@ func (p *parser) ppAdverbs() (ppExpr, error) {
 	for {
 		switch p.token.Type {
 		case ADVERB:
-			ppb = append(ppb, ppToken{Type: ppADVERB, Pos: p.token.Pos, Text: p.token.Text})
+			ppb = append(ppb, ppToken{Type: ppADVERB, Pos: p.token.Pos, Rune: p.token.Rune})
 		}
 		ntok := p.peek()
 		switch ntok.Type {
