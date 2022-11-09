@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"io"
-	"os"
 )
 
 // Token represents a token information.
@@ -63,7 +62,6 @@ const (
 
 // Scanner represents the state of the scanner.
 type Scanner struct {
-	wError    io.Writer     // writer for scanning errors
 	bReader   *bufio.Reader // buffered reader
 	buf       bytes.Buffer  // buffer
 	err       error         // scanning error (if any)
@@ -80,9 +78,6 @@ type stateFn func(*Scanner) stateFn
 
 func (s *Scanner) Init(r io.Reader) {
 	s.bReader = bufio.NewReader(r)
-	if s.wError == nil {
-		s.wError = os.Stderr
-	}
 	s.exprStart = true
 	s.start = true
 	s.err = nil
