@@ -290,7 +290,11 @@ func fEach(ctx *Context, args []V) V {
 			res := make(AV, 0, x.Len())
 			for i := 0; i < x.Len(); i++ {
 				ctx.push(x.At(i))
-				res = append(res, ctx.applyN(v, 1))
+				next := ctx.applyN(v, 1)
+				if err, ok := next.(E); ok {
+					return err
+				}
+				res = append(res)
 			}
 			return canonical(res)
 		default:
@@ -317,7 +321,11 @@ func fEach(ctx *Context, args []V) V {
 		for i := 0; i < xlen; i++ {
 			ctx.push(y.At(i))
 			ctx.push(x.At(i))
-			res = append(res, ctx.applyN(v, 2))
+			next := ctx.applyN(v, 2)
+			if err, ok := next.(E); ok {
+				return err
+			}
+			res = append(res, next)
 		}
 		return canonical(res)
 	default:
@@ -329,35 +337,7 @@ func fEach(ctx *Context, args []V) V {
 func fFold(ctx *Context, args []V) V {
 	switch len(args) {
 	case 2:
-		v, ok := args[1].(Function)
-		if !ok {
-			// TODO: join, split, encode, decode
-			return errsw("not a function")
-		}
-		if v.Rank(ctx) != 2 {
-			// TODO: converge
-			return errf("rank %d verb (expected 2)", v.Rank(ctx))
-		}
-		x := args[0]
-		switch x := x.(type) {
-		case Array:
-			if x.Len() == 0 {
-				v, ok := v.(zeroFun)
-				if ok {
-					return v.zero()
-				}
-				return I(0)
-			}
-			res := x.At(0)
-			for i := 1; i < x.Len(); i++ {
-				ctx.push(x.At(i))
-				ctx.push(res)
-				res = ctx.applyN(v, 2)
-			}
-			return canonical(res)
-		default:
-			return x
-		}
+		return fold2(ctx, args[1], args[0])
 	case 3:
 		v, ok := args[2].(Function)
 		if !ok {
@@ -378,6 +358,9 @@ func fFold(ctx *Context, args []V) V {
 				ctx.push(y.At(i))
 				ctx.push(res)
 				res = ctx.applyN(v, 2)
+				if err, ok := res.(E); ok {
+					return err
+				}
 			}
 			return canonical(res)
 		default:
@@ -417,7 +400,11 @@ func fScan(ctx *Context, args []V) V {
 			for i := 1; i < x.Len(); i++ {
 				ctx.push(x.At(i))
 				ctx.push(res[len(res)-1])
-				res = append(res, ctx.applyN(v, 2))
+				next := ctx.applyN(v, 2)
+				if err, ok := next.(E); ok {
+					return err
+				}
+				res = append(res, next)
 			}
 			return canonical(res)
 		default:
@@ -442,7 +429,11 @@ func fScan(ctx *Context, args []V) V {
 			for i := 0; i < y.Len(); i++ {
 				ctx.push(y.At(i))
 				ctx.push(res[len(res)-1])
-				res = append(res, ctx.applyN(v, 2))
+				next := ctx.applyN(v, 2)
+				if err, ok := next.(E); ok {
+					return err
+				}
+				res = append(res, next)
 			}
 			return canonical(res)
 		default:

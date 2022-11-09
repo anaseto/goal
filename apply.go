@@ -162,6 +162,9 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 	if lc.Rank < n {
 		return errf("too many arguments: got %d, expected %d", n, lc.Rank)
 	} else if lc.Rank > n {
+		if lc.Rank == 2 && n == 1 {
+			return ProjectionOne{Fun: id, Arg: ctx.pop()}
+		}
 		return Projection{Fun: id, Args: ctx.popN(n)}
 	}
 	olen := len(ctx.stack)
