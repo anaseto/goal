@@ -230,7 +230,7 @@ func scanAny(s *Scanner) stateFn {
 		s.buf.WriteRune(r)
 		return scanString
 	case '`':
-		s.buf.WriteRune('\'')
+		s.buf.WriteRune('`')
 		return scanSymbolString
 	}
 	switch {
@@ -349,7 +349,7 @@ func scanSymbolString(s *Scanner) stateFn {
 			s.buf.WriteString("non terminated string: unexpected EOF")
 			return s.emitString(ERROR)
 		case !isAlpha(r) && (s.buf.Len() == 0) || !isAlphaNum(r):
-			s.buf.WriteRune('\'')
+			s.buf.WriteRune('`')
 			return s.emitString(STRING)
 		default:
 			s.next()
