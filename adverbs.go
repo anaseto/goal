@@ -12,8 +12,12 @@ func fold2(ctx *Context, v, x V) V {
 	}
 	vv, ok := v.(Function)
 	if !ok {
+		switch v := v.(type) {
+		case S:
+			return fold2Join(v, x)
+		}
 		// TODO: join, split, encode, decode
-		return errsw("not a function")
+		return errf("not a function left: %s", v.Type())
 	}
 	if vv.Rank(ctx) != 2 {
 		// TODO: converge
@@ -87,5 +91,20 @@ func fold2vAdd(x V) V {
 		return canonical(res)
 	default:
 		return x
+	}
+}
+
+func fold2Join(sep S, x V) V {
+	switch x := x.(type) {
+	case AS:
+		return S(strings.Join([]string(x), string(sep)))
+	case AV:
+		xx := canonical(x)
+		if xx, ok := xx.(AS); ok {
+			return S(strings.Join([]string(xx), string(sep)))
+		}
+		return errs("not a string array")
+	default:
+		return errs("not a string array")
 	}
 }

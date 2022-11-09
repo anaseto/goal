@@ -38,7 +38,8 @@ func main() {
 	testVM(`#0#1`)
 	testVM(`+/0#1`)
 	testVM(`+\!10`)
-	testVM(`+/!1000000`)
+	//testVM(`+/!10000000`)
+	testVM(`","/"a" "b" "c" "d"`)
 }
 
 func testPrimitives() {
