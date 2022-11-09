@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io"
 	"os"
 )
@@ -64,26 +63,29 @@ const (
 
 // Scanner represents the state of the scanner.
 type Scanner struct {
-	ctx     *Context      // unused (for now)
-	reader  io.Reader     // reader to scan from
-	wError  io.Writer     // writer for scanning errors
-	bReader *bufio.Reader // buffered reader
-	buf     bytes.Buffer  // buffer
-	peeked  bool          // peeked next
-	pos     int           // current position in the input
-	pr      rune          // peeked rune
-	psize   int           // size of last peeked rune
-	start   bool          // at line start
-	token   Token         // last token
+	wError    io.Writer     // writer for scanning errors
+	bReader   *bufio.Reader // buffered reader
+	buf       bytes.Buffer  // buffer
+	err       error         // scanning error (if any)
+	peeked    bool          // peeked next
+	pos       int           // current position in the input
+	pr        rune          // peeked rune
+	psize     int           // size of last peeked rune
+	start     bool          // at line start
+	exprStart bool          // at expression start
+	token     Token         // last token
 }
 
 type stateFn func(*Scanner) stateFn
 
-func (s *Scanner) Init() {
-	s.bReader = bufio.NewReader(s.reader)
+func (s *Scanner) Init(r io.Reader) {
+	s.bReader = bufio.NewReader(r)
 	if s.wError == nil {
 		s.wError = os.Stderr
 	}
+	s.exprStart = true
+	s.start = true
+	s.err = nil
 	s.token = Token{Type: EOF, Pos: s.pos}
 }
 
@@ -97,15 +99,6 @@ func (s *Scanner) Next() Token {
 	}
 }
 
-func (s *Scanner) error(msg string) {
-	if s.wError == nil {
-		return
-	}
-	// TODO: in case of error, read the file again to get from pos the line
-	// and print the line that produced the error with some column marker.
-	fmt.Fprintf(s.wError, "scan error:%d: %s\n", s.pos, msg)
-}
-
 const eof = -1
 
 func (s *Scanner) peek() rune {
@@ -115,7 +108,7 @@ func (s *Scanner) peek() rune {
 	r, size, err := s.bReader.ReadRune()
 	if err != nil {
 		if err != io.EOF {
-			s.error(err.Error())
+			s.err = err
 		}
 		r = eof
 	}
@@ -135,9 +128,8 @@ func (s *Scanner) next() rune {
 	r, sz, err := s.bReader.ReadRune()
 	s.pos += sz
 	if err != nil {
-		// end of file
 		if err != io.EOF {
-			s.error(err.Error())
+			s.err = err
 		}
 		return eof
 	}
@@ -156,15 +148,30 @@ func (s *Scanner) updateInfo(r rune) {
 
 func (s *Scanner) emit(t TokenType) stateFn {
 	s.token = Token{t, s.pos, s.buf.String()}
+	switch t {
+	case LEFTBRACE, LEFTBRACKET, LEFTPAREN, NEWLINE, RIGHTBRACE, RIGHTBRACKET, RIGHTPAREN, SEMICOLON:
+		s.exprStart = true
+	default:
+		s.exprStart = false
+	}
 	s.buf.Reset()
 	return nil
+}
+
+func (s *Scanner) emitEOF() stateFn {
+	if s.err != nil {
+		s.buf.Reset()
+		s.buf.WriteString(s.err.Error())
+		return s.emit(ERROR)
+	}
+	return s.emit(EOF)
 }
 
 func scanAny(s *Scanner) stateFn {
 	r := s.next()
 	switch r {
 	case eof:
-		return s.emit(EOF)
+		return s.emitEOF()
 	case '\n':
 		return s.emit(NEWLINE)
 	case ' ', '\t':
@@ -192,7 +199,13 @@ func scanAny(s *Scanner) stateFn {
 		return s.emit(RIGHTPAREN)
 	case ';':
 		return s.emit(SEMICOLON)
-	case ':', '+', '-', '*', '%', '!', '&', '|', '<', '>',
+	case '-':
+		s.buf.WriteRune(r)
+		if s.exprStart {
+			return scanMinus
+		}
+		return s.emit(VERB)
+	case ':', '+', '*', '%', '!', '&', '|', '<', '>',
 		'=', '~', ',', '^', '#', '_', '$', '?', '@', '.':
 		s.buf.WriteRune(r)
 		return s.emit(VERB)
@@ -232,14 +245,21 @@ func isAlphaNum(r rune) bool {
 func scanSpace(s *Scanner) stateFn {
 	for {
 		r := s.peek()
-		switch {
-		case r == eof:
+		switch r {
+		case eof:
 			return scanAny
-		case r == '/':
+		case '/':
 			s.next()
 			return scanComment
-		case r == ' ' || r == '\t':
+		case ' ', '\t':
 			s.next()
+		case '-':
+			r = s.peek()
+			if isDigit(r) {
+				s.buf.WriteRune(r)
+				return scanMinus
+			}
+			return scanAny
 		default:
 			return scanAny
 		}
@@ -251,7 +271,7 @@ func scanComment(s *Scanner) stateFn {
 		r := s.next()
 		switch r {
 		case eof:
-			return s.emit(EOF)
+			return s.emitEOF()
 		case '\n':
 			return s.emit(NEWLINE)
 		}
@@ -271,7 +291,7 @@ func scanMultiLineComment(s *Scanner) stateFn {
 		r := s.next()
 		switch {
 		case r == eof:
-			return s.emit(EOF)
+			return s.emitEOF()
 		case r == '\\' && s.start:
 			r := s.next()
 			if r == '\n' {
@@ -319,7 +339,39 @@ func scanSymbolString(s *Scanner) stateFn {
 	}
 }
 
+func scanMinus(s *Scanner) stateFn {
+	r := s.peek()
+	if isDigit(r) {
+		return scanNumber
+	}
+	return s.emit(VERB)
+}
+
 func scanNumber(s *Scanner) stateFn {
+	for {
+		r := s.peek()
+		switch {
+		case r == eof:
+			return s.emit(NUMBER)
+		case r == 'e':
+			s.buf.WriteRune(r)
+			s.next()
+			r = s.peek()
+			if r == '+' || r == '-' {
+				s.buf.WriteRune(r)
+				s.next()
+				return scanExponent
+			}
+		case !isAlphaNum(r):
+			return s.emit(NUMBER)
+		default:
+			s.buf.WriteRune(r)
+			s.next()
+		}
+	}
+}
+
+func scanExponent(s *Scanner) stateFn {
 	for {
 		r := s.peek()
 		switch {

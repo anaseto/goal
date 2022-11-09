@@ -592,7 +592,6 @@ func (p *Parser) ppList(body []ppExprs) error {
 
 // parser builds a ppExpr pre-AST.
 type parser struct {
-	ctx    *Context // unused (for now)
 	s      *Scanner
 	token  Token // current token
 	pToken Token // peeked token
@@ -609,7 +608,6 @@ func (p *parser) errorf(format string, a ...interface{}) error {
 
 // Init initializes the parser.
 func (p *parser) Init(s *Scanner) {
-	s.Init()
 	p.s = s
 }
 

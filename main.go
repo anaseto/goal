@@ -40,6 +40,8 @@ func main() {
 	testVM(`+\!10`)
 	//testVM(`+/!10000000`)
 	testVM(`","/"a" "b" "c" "d"`)
+	testVM(`-3 2`)
+	testVM(`- 3 2`)
 }
 
 func testPrimitives() {
@@ -85,8 +87,8 @@ func testPrimitives() {
 
 func testScanner() {
 	sr := strings.NewReader("%!:+/\n&/: /comment\nident 23 \"string\"")
-	sc := &Scanner{reader: sr}
-	sc.Init()
+	sc := &Scanner{}
+	sc.Init(sr)
 	for tk := sc.Next(); tk.Type != EOF; tk = sc.Next() {
 		fmt.Printf("%v", tk)
 		if tk.Type == NEWLINE {
@@ -100,7 +102,9 @@ func testPParser() {
 	s := "23 45 + {(x-23)+|x} 23 43 + fun[2;3];"
 	sr := strings.NewReader(s)
 	p := &parser{}
-	p.Init(&Scanner{reader: sr})
+	sc := &Scanner{}
+	sc.Init(sr)
+	p.Init(sc)
 	fmt.Println(s)
 	exprs, _, err := p.Next()
 	if err != nil {
@@ -115,7 +119,9 @@ func testParser() {
 	s := "23 45 + {(x-23)+|x} 23 43 + fun[2;3];"
 	sr := strings.NewReader(s)
 	p := &Parser{}
-	p.Init(&Scanner{reader: sr})
+	sc := &Scanner{}
+	sc.Init(sr)
+	p.Init(sc)
 	fmt.Println(s)
 	err := p.Parse()
 	if err != nil {
@@ -128,7 +134,9 @@ func testCompiler() {
 	s := "23 45 + {(x-23)+|x} 23 43 + fun[2;3];"
 	sr := strings.NewReader(s)
 	p := &Parser{}
-	p.Init(&Scanner{reader: sr})
+	sc := &Scanner{}
+	sc.Init(sr)
+	p.Init(sc)
 	fmt.Println(s)
 	err := p.Parse()
 	if err != nil {
@@ -140,7 +148,9 @@ func testCompiler() {
 func testVM(s string) {
 	sr := strings.NewReader(s)
 	p := &Parser{}
-	p.Init(&Scanner{reader: sr})
+	sc := &Scanner{}
+	sc.Init(sr)
+	p.Init(sc)
 	fmt.Println("-------- Goal code ----------")
 	fmt.Println(s)
 	err := p.Parse()
