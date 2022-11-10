@@ -18,6 +18,7 @@ type Context struct {
 	frameIdx  int32
 	callDepth int32
 	ipNext    int
+	advanced  bool
 
 	// values
 	globals   []V
@@ -65,6 +66,7 @@ func (ctx *Context) Run() (V, error) {
 	ctx.compile()
 	ip, err := ctx.execute(ctx.prog.Body[ctx.ipNext:])
 	ctx.ipNext += ip
+	ctx.advanced = ip > 0
 	if err != nil {
 		return nil, fmt.Errorf("parser:%v", err)
 	}
@@ -73,6 +75,40 @@ func (ctx *Context) Run() (V, error) {
 		return nil, errors.New("no result: empty stack")
 	}
 	return ctx.top(), nil
+}
+
+// RunExpr compiles a whole expression from current source, then executes it.
+// It returns ErrEOF if the end of input was reached without issues.
+func (ctx *Context) RunExpr() (V, error) {
+	if ctx.scanner.bReader == nil {
+		return nil, errors.New("no source specified")
+	}
+	var eof bool
+	err := ctx.parser.ParseNext()
+	if err != nil {
+		_, eof = err.(ErrEOF)
+		if !eof {
+			return nil, fmt.Errorf("parser:%v", err)
+		}
+	}
+	ctx.compile()
+	ip, err := ctx.execute(ctx.prog.Body[ctx.ipNext:])
+	ctx.ipNext += ip
+	ctx.advanced = ip > 0
+	if err != nil {
+		return nil, fmt.Errorf("parser:%v", err)
+	}
+	if len(ctx.stack) == 0 {
+		// should not happen
+		return nil, errors.New("no result: empty stack")
+	}
+	if eof {
+		err = ErrEOF{}
+	}
+	if ctx.advanced {
+		return ctx.top(), err
+	}
+	return nil, nil
 }
 
 // RunString calls Run with the given string as source.
