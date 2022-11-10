@@ -1,6 +1,6 @@
 // structural functions (Length, Reverse, Take, ...)
 
-package main
+package goal
 
 import (
 	"sort"

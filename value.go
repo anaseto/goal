@@ -1,4 +1,4 @@
-package main
+package goal
 
 //go:generate stringer -type=TokenType,ppTokenType,ppBlockType,opcode -output stringer.go
 

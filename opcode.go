@@ -1,4 +1,4 @@
-package main
+package goal
 
 type opcode int32
 

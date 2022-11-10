@@ -1,4 +1,4 @@
-package main
+package goal
 
 // Range returns !x.
 func Range(x V) V {

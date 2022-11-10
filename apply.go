@@ -1,4 +1,4 @@
-package main
+package goal
 
 // applyN applies v with the top n arguments in the stack. It consumes the
 // arguments, but does not push the result, returing it instead.

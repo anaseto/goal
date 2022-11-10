@@ -1,4 +1,4 @@
-package main
+package goal
 
 // Matcher is implemented by types that can be matched againts other objects
 // (typically a struct of the same type with fields that match).
