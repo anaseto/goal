@@ -97,9 +97,14 @@ func (ctx *Context) opcodesString(ops []opcode, lc *LambdaCode) string {
 }
 
 // Compile transforms an AstProgram into a Program.
-func (ctx *Context) compile() {
+func (ctx *Context) compile() bool {
+	if ctx.ast.cBody == len(ctx.ast.Body) && ctx.ast.cLambdas == len(ctx.ast.Lambdas) {
+		return false
+	}
 	ctx.compileBody()
 	ctx.compileLambdas()
+	return true
+
 }
 
 func (ctx *Context) compileBody() {

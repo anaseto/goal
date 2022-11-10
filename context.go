@@ -19,6 +19,7 @@ type Context struct {
 	callDepth int32
 	ipNext    int
 	advanced  bool
+	lambda    int
 
 	// values
 	globals   []V
@@ -41,7 +42,7 @@ func NewContext() *Context {
 	ctx.ast = &AstProgram{}
 	ctx.prog = &Program{}
 	ctx.gIDs = map[string]int{}
-	ctx.stack = make([]V, 1, 64)
+	ctx.stack = make([]V, 0, 64)
 	ctx.scanner = &Scanner{}
 	ctx.parser = newParser(ctx)
 	return ctx
@@ -61,18 +62,11 @@ func (ctx *Context) Run() (V, error) {
 	}
 	err := ctx.parser.Parse()
 	if err != nil {
-		return nil, fmt.Errorf("parser:%v", err)
+		return nil, fmt.Errorf("%v", err)
 	}
-	ctx.compile()
-	ip, err := ctx.execute(ctx.prog.Body[ctx.ipNext:])
-	ctx.ipNext += ip
-	ctx.advanced = ip > 0
-	if err != nil {
-		return nil, fmt.Errorf("parser:%v", err)
-	}
-	if len(ctx.stack) == 0 {
-		// should not happen
-		return nil, errors.New("no result: empty stack")
+	done, err := ctx.compileExec()
+	if !done || err != nil {
+		return nil, err
 	}
 	return ctx.top(), nil
 }
@@ -88,19 +82,12 @@ func (ctx *Context) RunExpr() (V, error) {
 	if err != nil {
 		_, eof = err.(ErrEOF)
 		if !eof {
-			return nil, fmt.Errorf("parser:%v", err)
+			return nil, fmt.Errorf("%v", err)
 		}
 	}
-	ctx.compile()
-	ip, err := ctx.execute(ctx.prog.Body[ctx.ipNext:])
-	ctx.ipNext += ip
-	ctx.advanced = ip > 0
-	if err != nil {
-		return nil, fmt.Errorf("parser:%v", err)
-	}
-	if len(ctx.stack) == 0 {
-		// should not happen
-		return nil, errors.New("no result: empty stack")
+	done, err := ctx.compileExec()
+	if !done || err != nil {
+		return nil, err
 	}
 	if eof {
 		err = ErrEOF{}
@@ -108,13 +95,34 @@ func (ctx *Context) RunExpr() (V, error) {
 	if ctx.advanced {
 		return ctx.top(), err
 	}
-	return nil, nil
+	return nil, err
 }
 
 // RunString calls Run with the given string as source.
 func (ctx *Context) RunString(s string) (V, error) {
 	ctx.SetSource("", strings.NewReader(s))
 	return ctx.Run()
+}
+
+func (ctx *Context) compileExec() (bool, error) {
+	done := ctx.compile()
+	if !done {
+		return false, nil
+	}
+	ip, err := ctx.execute(ctx.prog.Body[ctx.ipNext:])
+	if err != nil {
+		ctx.ipNext = len(ctx.prog.Body)
+		ctx.stack = ctx.stack[0:]
+		ctx.push(nil)
+		return false, fmt.Errorf("%v", err)
+	}
+	ctx.ipNext += ip
+	ctx.advanced = ip > 0
+	if len(ctx.stack) == 0 {
+		// should not happen
+		return false, errors.New("no result: empty stack")
+	}
+	return true, nil
 }
 
 // Show prints internal information about the context.

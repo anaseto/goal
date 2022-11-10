@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"goal"
-	"log"
+	//"log"
 	"os"
 )
 
@@ -19,7 +19,7 @@ func main() {
 				echo(v)
 				return
 			}
-			log.Fatal(err)
+			fmt.Println(err)
 		}
 		echo(v)
 	}

@@ -1,9 +1,9 @@
 package goal
 
-//import "fmt"
+import "fmt"
 
 func (ctx *Context) execute(ops []opcode) (int, error) {
-	//fmt.PrIntf("ops: %v\n", ops)
+	//fmt.Printf("%s", ctx.ProgramString())
 	for ip := 0; ip < len(ops); {
 		op := ops[ip]
 		//fmt.Printf("op: %s\n", op)
@@ -16,10 +16,20 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 		case opNil:
 			ctx.push(nil)
 		case opGlobal:
-			ctx.push(ctx.globals[ops[ip]])
+			v := ctx.globals[ops[ip]]
+			if v == nil {
+				return ip, fmt.Errorf("undefined global: %s",
+					ctx.gNames[ops[ip]])
+			}
+			ctx.push(v)
 			ip++
 		case opLocal:
-			ctx.push(ctx.stack[ctx.frameIdx+int32(ops[ip])])
+			v := ctx.stack[ctx.frameIdx+int32(ops[ip])]
+			if v == nil {
+				return ip, fmt.Errorf("undefined local: %s",
+					ctx.prog.Lambdas[ctx.lambda].Locals[int32(ops[ip])])
+			}
+			ctx.push(v)
 			ip++
 		case opAssignGlobal:
 			ctx.globals[ops[ip]] = ctx.top()

@@ -10,11 +10,12 @@ type parser struct {
 	ctx        *Context         // main execution and compilation context
 	pp         *pparser         // pre-parsing into text-based non-resolved AST
 	argc       int              // stack length for current sub-expression
+	slen       int              // virtual stack length
 	arglist    bool             // whether current expression has an argument list
 	scopeStack []*AstLambdaCode // scope information
 	pos        int              // last token position
 	it         ppIter           // ppExprs iterator
-	nExprs     int              // length of last ppExprs
+	drop       bool             // whether to add a drop at the end
 }
 
 func newParser(ctx *Context) *parser {
@@ -43,7 +44,8 @@ func (p *parser) Parse() error {
 // Parse builds on the context AST using input from the current scanner until
 // the end of a whole expression is found. It returns ErrEOF on EOF.
 func (p *parser) ParseNext() error {
-	if p.nExprs > 0 {
+	ctx := p.ctx
+	if p.drop {
 		p.pushExpr(AstDrop{})
 	}
 	var eof bool
@@ -51,12 +53,17 @@ func (p *parser) ParseNext() error {
 	if err != nil {
 		_, eof = err.(ErrEOF)
 		if !eof {
+			ctx.parser.pp = newPParser(ctx.scanner)
 			return err
 		}
 	}
-	p.nExprs = len(pps)
+	blen, llen := len(ctx.ast.Body), len(ctx.ast.Lambdas)
+	slen := p.slen
 	err = p.ppExprs(pps)
+	p.drop = p.slen > slen
 	if err != nil {
+		ctx.ast.Body = ctx.ast.Body[:blen]
+		ctx.ast.Lambdas = ctx.ast.Lambdas[:llen]
 		return err
 	}
 	if eof {
@@ -75,19 +82,24 @@ func (p *parser) pushExpr(e Expr) {
 	switch e := e.(type) {
 	case AstApply:
 		// v v -> v
+		p.slen--
 		p.argc--
 	case AstApply2:
 		// v v v -> v
+		p.slen -= 2
 		p.argc -= 2
 	case AstApplyN:
 		// v ... v v -> v
+		p.slen -= e.N
 		p.argc -= e.N
 	case AstDrop:
 		// v ->
+		p.slen--
 		p.argc--
 	case AstAssignLocal, AstAssignGlobal:
 	default:
 		// -> v
+		p.slen++
 		p.argc++
 	}
 }
@@ -118,6 +130,7 @@ func (p *parser) scope() *AstLambdaCode {
 
 func (p *parser) ppExprs(pps ppExprs) error {
 	argc := p.argc
+	slen := p.slen
 	p.argc = 0
 	it := p.it
 	p.it = newppIter(pps)
@@ -130,6 +143,9 @@ func (p *parser) ppExprs(pps ppExprs) error {
 	}
 	p.it = it
 	p.argc = argc
+	if p.slen == slen {
+		p.pushExpr(AstNil{Pos: p.pos})
+	}
 	return nil
 }
 
@@ -494,6 +510,8 @@ func (p *parser) ppBlock(ppb ppBlock) error {
 
 func (p *parser) ppLambda(body []ppExprs, args []string) error {
 	argc := p.argc
+	slen := p.slen
+	p.slen = 0
 	p.argc = 0
 	lc := &AstLambdaCode{
 		Locals: map[string]Local{},
@@ -515,6 +533,7 @@ func (p *parser) ppLambda(body []ppExprs, args []string) error {
 	id := len(p.ctx.ast.Lambdas)
 	p.ctx.ast.Lambdas = append(p.ctx.ast.Lambdas, lc)
 	p.argc = argc
+	p.slen = slen
 	p.pushExpr(AstLambda{Lambda: Lambda(id)})
 	p.apply()
 	return nil
@@ -582,11 +601,12 @@ func (p *parser) parseCond(body []ppExprs) error {
 func (p *parser) ppSeq(body []ppExprs) error {
 	argc := p.argc
 	for i, exprs := range body {
+		slen := p.slen
 		err := p.ppExprs(exprs)
 		if err != nil {
 			return err
 		}
-		if i < len(body)-1 {
+		if i < len(body)-1 && p.slen > slen {
 			p.pushExpr(AstDrop{})
 		}
 	}
