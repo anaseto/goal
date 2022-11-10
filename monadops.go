@@ -181,11 +181,11 @@ func Ceil(x V) V {
 func Not(x V) V {
 	switch x := x.(type) {
 	case F:
-		return B2I(x != 0)
+		return B2I(x == 0)
 	case I:
-		return B2I(x != 0)
+		return B2I(x == 0)
 	case S:
-		return B2I(x != "")
+		return B2I(x == "")
 	case AB:
 		r := make(AB, len(x))
 		for i := range r {
@@ -195,13 +195,13 @@ func Not(x V) V {
 	case AF:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = x[i] != 0
+			r[i] = x[i] == 0
 		}
 		return r
 	case AI:
 		r := make(AB, len(x))
 		for i := range r {
-			r[i] = x[i] != 0
+			r[i] = x[i] == 0
 		}
 		return r
 	case AV:
