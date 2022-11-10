@@ -449,6 +449,7 @@ func (p *parser) ppAdverbs(adverbs ppAdverbs) error {
 		return p.ppVariadic(tok)
 	}
 	p.it.Next()
+	p.argc = 0
 	err = p.ppExpr(nppe)
 	if err != nil {
 		return err
