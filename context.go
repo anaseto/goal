@@ -60,8 +60,11 @@ func (ctx *Context) Run() (V, error) {
 	if ctx.scanner.bReader == nil {
 		return nil, errors.New("no source specified")
 	}
+	blen, llen := len(ctx.ast.Body), len(ctx.ast.Lambdas)
 	err := ctx.parser.Parse()
 	if err != nil {
+		ctx.ast.Body = ctx.ast.Body[:blen]
+		ctx.ast.Lambdas = ctx.ast.Lambdas[:llen]
 		return nil, fmt.Errorf("%v", err)
 	}
 	done, err := ctx.compileExec()
@@ -78,10 +81,13 @@ func (ctx *Context) RunExpr() (V, error) {
 		return nil, errors.New("no source specified")
 	}
 	var eof bool
+	blen, llen := len(ctx.ast.Body), len(ctx.ast.Lambdas)
 	err := ctx.parser.ParseNext()
 	if err != nil {
 		_, eof = err.(ErrEOF)
 		if !eof {
+			ctx.ast.Body = ctx.ast.Body[:blen]
+			ctx.ast.Lambdas = ctx.ast.Lambdas[:llen]
 			return nil, fmt.Errorf("%v", err)
 		}
 	}
@@ -109,6 +115,7 @@ func (ctx *Context) compileExec() (bool, error) {
 	if !done {
 		return false, nil
 	}
+	//fmt.Print(ctx.ProgramString())
 	ip, err := ctx.execute(ctx.prog.Body[ctx.ipNext:])
 	if err != nil {
 		ctx.ipNext = len(ctx.prog.Body)

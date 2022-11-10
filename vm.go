@@ -3,7 +3,6 @@ package goal
 import "fmt"
 
 func (ctx *Context) execute(ops []opcode) (int, error) {
-	//fmt.Printf("%s", ctx.ProgramString())
 	for ip := 0; ip < len(ops); {
 		op := ops[ip]
 		//fmt.Printf("op: %s\n", op)

@@ -53,17 +53,15 @@ func (p *parser) ParseNext() error {
 	if err != nil {
 		_, eof = err.(ErrEOF)
 		if !eof {
-			ctx.parser.pp = newPParser(ctx.scanner)
+			ctx.parser = newParser(ctx)
 			return err
 		}
 	}
-	blen, llen := len(ctx.ast.Body), len(ctx.ast.Lambdas)
 	slen := p.slen
 	err = p.ppExprs(pps)
 	p.drop = p.slen > slen
 	if err != nil {
-		ctx.ast.Body = ctx.ast.Body[:blen]
-		ctx.ast.Lambdas = ctx.ast.Lambdas[:llen]
+		ctx.parser = newParser(ctx)
 		return err
 	}
 	if eof {
@@ -129,7 +127,6 @@ func (p *parser) scope() *AstLambdaCode {
 }
 
 func (p *parser) ppExprs(pps ppExprs) error {
-	argc := p.argc
 	slen := p.slen
 	p.argc = 0
 	it := p.it
@@ -142,7 +139,6 @@ func (p *parser) ppExprs(pps ppExprs) error {
 		}
 	}
 	p.it = it
-	p.argc = argc
 	if p.slen == slen {
 		p.pushExpr(AstNil{Pos: p.pos})
 	}
