@@ -130,13 +130,13 @@ func (v Variadic) Len() int      { return 1 }
 func (r DerivedVerb) Len() int   { return 1 }
 func (p Projection) Len() int    { return 1 }
 func (p ProjectionOne) Len() int { return 1 }
-func (c Composition) Len() int   { return 1 }
+func (q Composition) Len() int   { return 1 }
 func (l Lambda) Len() int        { return 1 }
 
 func (v Variadic) Type() string      { return "v" }
 func (p Projection) Type() string    { return "p" }
 func (p ProjectionOne) Type() string { return "p" }
-func (c Composition) Type() string   { return "q" }
+func (q Composition) Type() string   { return "q" }
 func (r DerivedVerb) Type() string   { return "r" }
 func (l Lambda) Type() string        { return "l" }
 
@@ -161,7 +161,7 @@ func (p ProjectionOne) String() string {
 	return fmt.Sprintf("%v[%v;]", p.Fun, p.Arg)
 }
 
-func (c Composition) String() string { return fmt.Sprintf("%v %v", c.Left, c.Right) }
+func (q Composition) String() string { return fmt.Sprintf("%v %v", q.Left, q.Right) }
 
 func (r DerivedVerb) String() string {
 	switch arg := r.Arg.(type) {
@@ -276,7 +276,7 @@ func (v Variadic) Rank(ctx *Context) int      { return 2 }
 func (r DerivedVerb) Rank(ctx *Context) int   { return 2 }
 func (p Projection) Rank(ctx *Context) int    { return countNils(p.Args) }
 func (p ProjectionOne) Rank(ctx *Context) int { return 1 }
-func (c Composition) Rank(ctx *Context) int   { return c.Right.Rank(ctx) }
+func (q Composition) Rank(ctx *Context) int   { return q.Right.Rank(ctx) }
 func (l Lambda) Rank(ctx *Context) int        { return ctx.prog.Lambdas[l].Rank }
 
 type zeroFun interface {
@@ -296,4 +296,34 @@ func (v Variadic) zero() V {
 		return I(math.MaxInt)
 	}
 	return nil
+}
+
+func (v Variadic) Matches(x V) bool {
+	xv, ok := x.(Variadic)
+	return ok && v == xv
+}
+
+func (r DerivedVerb) Matches(x V) bool {
+	xr, ok := x.(DerivedVerb)
+	return ok && r.Fun == xr.Fun && match(r.Arg, xr.Arg)
+}
+
+func (p Projection) Matches(x V) bool {
+	xp, ok := x.(Projection)
+	return ok && match(p.Fun, xp.Fun) && match(p.Args, xp.Args)
+}
+
+func (p ProjectionOne) Matches(x V) bool {
+	xp, ok := x.(ProjectionOne)
+	return ok && match(p.Fun, xp.Fun) && match(p.Arg, xp.Arg)
+}
+
+func (q Composition) Matches(x V) bool {
+	xq, ok := x.(Composition)
+	return ok && match(q.Left, xq.Left) && match(q.Right, xq.Right)
+}
+
+func (l Lambda) Matches(x V) bool {
+	xl, ok := x.(Lambda)
+	return ok && l == xl
 }
