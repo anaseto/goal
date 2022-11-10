@@ -17,19 +17,19 @@ type parser struct {
 	nExprs     int              // length of last ppExprs
 }
 
-// Init initializes the parser.
-func (p *parser) Init() {
-	pp := &pparser{}
-	pp.Init(p.ctx.scanner)
-	p.pp = pp
-	p.argc = 0
+func newParser(ctx *Context) *parser {
+	p := &parser{
+		ctx: ctx,
+		pp:  newPParser(ctx.scanner),
+	}
+	return p
 }
 
 // Parse builds on the context AST using input from the current scanner until
 // EOF.
 func (p *parser) Parse() error {
 	for {
-		err := p.ParseExprs()
+		err := p.ParseNext()
 		if err != nil {
 			_, eof := err.(ErrEOF)
 			if !eof {
@@ -41,8 +41,8 @@ func (p *parser) Parse() error {
 }
 
 // Parse builds on the context AST using input from the current scanner until
-// the end of an expression is found. It returns ErrEOF on EOF.
-func (p *parser) ParseExprs() error {
+// the end of a whole expression is found. It returns ErrEOF on EOF.
+func (p *parser) ParseNext() error {
 	if p.nExprs > 0 {
 		p.pushExpr(AstDrop{})
 	}
@@ -607,9 +607,9 @@ type pparser struct {
 	peeked bool
 }
 
-// Init initializes the parser.
-func (p *pparser) Init(s *Scanner) {
-	p.s = s
+func newPParser(s *Scanner) *pparser {
+	pp := &pparser{s: s}
+	return pp
 }
 
 type ErrEOF struct{}

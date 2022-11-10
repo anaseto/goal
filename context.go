@@ -3,6 +3,7 @@ package goal
 import (
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 )
 
@@ -12,10 +13,11 @@ type Context struct {
 	ast  *AstProgram
 	prog *Program
 
-	// stack handling
+	// execution and stack handling
 	stack     []V
 	frameIdx  int32
 	callDepth int32
+	ipNext    int
 
 	// values
 	globals   []V
@@ -27,9 +29,12 @@ type Context struct {
 
 	// parsing, scanning
 	scanner *Scanner
+	parser  *parser
+	fname   string
 }
 
 // NewContext returns a new context for compiling and interpreting code.
+// SetSource should be called to set a source, and
 func NewContext() *Context {
 	ctx := &Context{}
 	ctx.ast = &AstProgram{}
@@ -37,21 +42,29 @@ func NewContext() *Context {
 	ctx.gIDs = map[string]int{}
 	ctx.stack = make([]V, 1, 64)
 	ctx.scanner = &Scanner{}
+	ctx.parser = newParser(ctx)
 	return ctx
 }
 
-// RunString compiles the code in string s, then executes it.
-func (ctx *Context) RunString(s string) (V, error) {
-	sr := strings.NewReader(s)
-	ctx.scanner.Init(sr)
-	p := &parser{ctx: ctx}
-	p.Init()
-	err := p.Parse()
+// SetSource sets the reader source for running code. The name is used for
+// error reporting.
+func (ctx *Context) SetSource(name string, r io.Reader) {
+	ctx.fname = name
+	ctx.scanner.Init(r)
+}
+
+// Run compiles the code from current source, then executes it.
+func (ctx *Context) Run() (V, error) {
+	if ctx.scanner.bReader == nil {
+		return nil, errors.New("no source specified")
+	}
+	err := ctx.parser.Parse()
 	if err != nil {
 		return nil, fmt.Errorf("parser:%v", err)
 	}
 	ctx.compile()
-	err = ctx.execute(ctx.prog.Body)
+	ip, err := ctx.execute(ctx.prog.Body[ctx.ipNext:])
+	ctx.ipNext += ip
 	if err != nil {
 		return nil, fmt.Errorf("parser:%v", err)
 	}
@@ -60,6 +73,12 @@ func (ctx *Context) RunString(s string) (V, error) {
 		return nil, errors.New("no result: empty stack")
 	}
 	return ctx.top(), nil
+}
+
+// RunString calls Run with the given string as source.
+func (ctx *Context) RunString(s string) (V, error) {
+	ctx.SetSource("", strings.NewReader(s))
+	return ctx.Run()
 }
 
 // Show prints internal information about the context.

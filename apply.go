@@ -172,7 +172,7 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 	ctx.frameIdx = int32(olen - n)
 
 	ctx.callDepth++
-	err := ctx.execute(lc.Body)
+	_, err := ctx.execute(lc.Body)
 	ctx.callDepth--
 
 	if err != nil {

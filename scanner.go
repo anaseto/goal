@@ -66,7 +66,7 @@ const (
 // Scanner represents the state of the scanner.
 type Scanner struct {
 	bReader   *bufio.Reader // buffered reader
-	buf       bytes.Buffer  // buffer
+	buf       *bytes.Buffer // buffer
 	err       error         // scanning error (if any)
 	peeked    bool          // peeked next
 	pos       int           // current position in the input
@@ -87,6 +87,8 @@ func (s *Scanner) Init(r io.Reader) {
 		*s = Scanner{}
 		s.buf = buf
 		s.buf.Reset()
+	} else {
+		s.buf = &bytes.Buffer{}
 	}
 	s.bReader = bufio.NewReader(r)
 	s.exprStart = true

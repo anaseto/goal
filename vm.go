@@ -2,7 +2,7 @@ package goal
 
 //import "fmt"
 
-func (ctx *Context) execute(ops []opcode) error {
+func (ctx *Context) execute(ops []opcode) (int, error) {
 	//fmt.PrIntf("ops: %v\n", ops)
 	for ip := 0; ip < len(ops); {
 		op := ops[ip]
@@ -36,17 +36,17 @@ func (ctx *Context) execute(ops []opcode) error {
 		case opApply:
 			err := ctx.popApplyN(1)
 			if err != nil {
-				return err
+				return ip, err
 			}
 		case opApply2:
 			err := ctx.popApplyN(2)
 			if err != nil {
-				return err
+				return ip, err
 			}
 		case opApplyN:
 			err := ctx.popApplyN(int(ops[ip]))
 			if err != nil {
-				return err
+				return ip, err
 			}
 			ip++
 		case opDrop:
@@ -54,7 +54,7 @@ func (ctx *Context) execute(ops []opcode) error {
 		}
 		//fmt.Printf("stack: %v\n", ctx.stack)
 	}
-	return nil
+	return len(ops), nil
 }
 
 func (ctx *Context) popApplyN(n int) error {
