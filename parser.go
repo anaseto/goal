@@ -406,12 +406,13 @@ func (p *parser) ppAdverbs(adverbs ppAdverbs) error {
 	if argc == 0 {
 		p.pushExpr(AstNil{Pos: tok.Pos})
 	}
+	nit := p.it
 	p.it = it
 	p.argc = 0
 	p.adverb = true
 	err = p.ppExpr(ppe)
 	p.adverb = false
-	p.it.Next()
+	p.it = nit
 	if err != nil {
 		return err
 	}
