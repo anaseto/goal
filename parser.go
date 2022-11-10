@@ -7,13 +7,14 @@ import (
 
 // parser builds an Expr AST from a ppExpr.
 type parser struct {
-	ctx        *Context
-	pp         *pparser
-	argc       int // stack length for current sub-expression
-	arglist    bool
-	scopeStack []*AstLambdaCode
-	pos        int
-	it         ppIter
+	ctx        *Context         // main execution and compilation context
+	pp         *pparser         // pre-parsing into text-based non-resolved AST
+	argc       int              // stack length for current sub-expression
+	arglist    bool             // whether current expression has an argument list
+	scopeStack []*AstLambdaCode // scope information
+	pos        int              // last token position
+	it         ppIter           // ppExprs iterator
+	nExprs     int              // length of last ppExprs
 }
 
 // Init initializes the parser.
@@ -24,29 +25,44 @@ func (p *parser) Init() {
 	p.argc = 0
 }
 
-// Parse builds on the context AST using input from the current scanner.
+// Parse builds on the context AST using input from the current scanner until
+// EOF.
 func (p *parser) Parse() error {
-	n := 0
-	var pps ppExprs
-	var eof bool
-	var err error
 	for {
-		if n > 0 && len(pps) != 0 {
-			p.pushExpr(AstDrop{})
-		}
-		pps, eof, err = p.pp.Next()
+		err := p.ParseExprs()
 		if err != nil {
-			return err
-		}
-		err = p.ppExprs(pps)
-		if err != nil {
-			return err
-		}
-		if eof {
+			_, eof := err.(ErrEOF)
+			if !eof {
+				return err
+			}
 			return nil
 		}
-		n++
 	}
+}
+
+// Parse builds on the context AST using input from the current scanner until
+// the end of an expression is found. It returns ErrEOF on EOF.
+func (p *parser) ParseExprs() error {
+	if p.nExprs > 0 {
+		p.pushExpr(AstDrop{})
+	}
+	var eof bool
+	pps, err := p.pp.Next()
+	if err != nil {
+		_, eof = err.(ErrEOF)
+		if !eof {
+			return err
+		}
+	}
+	p.nExprs = len(pps)
+	err = p.ppExprs(pps)
+	if err != nil {
+		return err
+	}
+	if eof {
+		return ErrEOF{}
+	}
+	return nil
 }
 
 func (p *parser) pushExpr(e Expr) {
@@ -596,19 +612,28 @@ func (p *pparser) Init(s *Scanner) {
 	p.s = s
 }
 
+type ErrEOF struct{}
+
+func (e ErrEOF) Error() string {
+	return "EOF"
+}
+
 // Next returns a whole expression, in stack-based order.
-func (p *pparser) Next() (ppExprs, bool, error) {
+func (p *pparser) Next() (ppExprs, error) {
 	pps := ppExprs{}
 	for {
 		ppe, err := p.ppExpr()
 		if err != nil {
 			ppRev([]ppExpr(pps))
-			return pps, false, err
+			return pps, err
 		}
 		tok, ok := ppe.(ppToken)
 		if ok && (tok.Type == ppSEP || tok.Type == ppEOF) {
 			ppRev([]ppExpr(pps))
-			return pps, tok.Type == ppEOF, nil
+			if tok.Type == ppEOF {
+				return pps, ErrEOF{}
+			}
+			return pps, nil
 		}
 		pps = append(pps, ppe)
 	}
