@@ -38,20 +38,26 @@ var matchTests = [...]matchTest{
 	{`","/"a" "b" "c" "d"`, `"a,b,c,d"`},
 	{`-3 2`, "-3 2"},
 	{`- 3 2`, "-3 -2"},
+	{`#-3 2`, "2"},
+	{`#3 -2`, "2"},
+	{`3-2`, "1"},
 }
 
 func TestRunString(t *testing.T) {
-	for _, mt := range matchTests {
+	for i, mt := range matchTests {
 		mt := mt
-		name := fmt.Sprintf("(%v) ~ (%v)", mt.Left, mt.Right)
+		name := fmt.Sprintf("String%d", i)
+		matchString := fmt.Sprintf("(%v) ~ (%v)", mt.Left, mt.Right)
 		t.Run(name, func(t *testing.T) {
 			ctxLeft := NewContext()
 			vLeft, errLeft := ctxLeft.RunString(mt.Left)
 			ctxRight := NewContext()
 			vRight, errRight := ctxRight.RunString(mt.Right)
 			if !match(vLeft, vRight) {
-				t.Errorf("return value mismatch: %v vs %v", vLeft, vRight)
+				t.Log(matchString)
+				t.Errorf("Results: %v vs %v", vLeft, vRight)
 			} else if errLeft != nil || errRight != nil {
+				t.Log(matchString)
 				t.Errorf("return error: `%v` vs `%v`", errLeft, errRight)
 			}
 		})

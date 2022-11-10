@@ -271,12 +271,8 @@ func scanSpace(s *Scanner) stateFn {
 		case ' ', '\t':
 			s.next()
 		case '-':
-			r = s.peek()
-			if isDigit(r) {
-				s.buf.WriteRune(r)
-				return scanMinus
-			}
-			return scanAny
+			s.next()
+			return scanMinus
 		default:
 			return scanAny
 		}
