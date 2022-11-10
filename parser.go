@@ -267,19 +267,14 @@ func (p *parser) ppVerb(tok ppToken) error {
 	if ppe == nil || p.arglist {
 		return p.ppVariadic(tok)
 	}
-	switch ppe := ppe.(type) {
-	case ppToken:
-		switch ppe.Type {
-		case ppIDENT:
-			if p.ppAssign(tok, ppe) {
-				p.it.Next()
-				return nil
-			}
-		case ppVERB:
-			return p.ppVariadic(tok)
-		}
-	case ppAdverbs:
+	if !isLeftArg(ppe) {
 		return p.ppVariadic(tok)
+	}
+	if identTok, ok := getIdent(ppe); ok {
+		if p.ppAssign(tok, identTok) {
+			p.it.Next()
+			return nil
+		}
 	}
 	if argc == 0 {
 		p.pushExpr(AstNil{Pos: tok.Pos})
@@ -292,6 +287,25 @@ func (p *parser) ppVerb(tok ppToken) error {
 	}
 	p.argc = 2
 	return p.ppVariadic(tok)
+}
+
+func getIdent(ppe ppExpr) (ppToken, bool) {
+	tok, ok := ppe.(ppToken)
+	return tok, ok && tok.Type == ppIDENT
+
+}
+
+func isLeftArg(ppe ppExpr) bool {
+	switch ppe := ppe.(type) {
+	case ppToken:
+		switch ppe.Type {
+		case ppVERB:
+			return false
+		}
+	case ppAdverbs:
+		return false
+	}
+	return true
 }
 
 func (p *parser) ppAssign(verbTok, identTok ppToken) bool {
@@ -415,7 +429,7 @@ func (p *parser) ppAdverbs(adverbs ppAdverbs) error {
 		}
 	}
 	nppe := p.it.Peek()
-	if nppe == nil || p.arglist {
+	if nppe == nil || p.arglist || !isLeftArg(nppe) {
 		if argc == 0 {
 			p.pushExpr(AstNil{Pos: tok.Pos})
 		}
