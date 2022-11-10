@@ -271,9 +271,10 @@ func fApplyN(ctx *Context, args []V) V {
 }
 
 func fList(ctx *Context, args []V) V {
+	// TODO: avoid redundant cloning if canonical clones already
 	res := cloneArgs(args)
 	reverseArgs(res)
-	return AV(res)
+	return canonical(AV(res))
 }
 
 func fEach(ctx *Context, args []V) V {
@@ -294,18 +295,18 @@ func fEach(ctx *Context, args []V) V {
 				if err, ok := next.(E); ok {
 					return err
 				}
-				res = append(res)
+				res = append(res, next)
 			}
 			return canonical(res)
 		default:
 			return errs("not an array")
 		}
 	case 3:
-		v, ok := args[2].(Function)
+		v, ok := args[1].(Function)
 		if !ok {
 			return errsw("not a function")
 		}
-		x, ok := args[1].(Array)
+		x, ok := args[2].(Array)
 		if !ok {
 			return errsw("not an array")
 		}
@@ -339,7 +340,7 @@ func fFold(ctx *Context, args []V) V {
 	case 2:
 		return fold2(ctx, args[1], args[0])
 	case 3:
-		v, ok := args[2].(Function)
+		v, ok := args[1].(Function)
 		if !ok {
 			return errs("3-rank form for adverb / expects function")
 		}
@@ -350,7 +351,7 @@ func fFold(ctx *Context, args []V) V {
 		y := args[0]
 		switch y := y.(type) {
 		case Array:
-			res := args[1]
+			res := args[2]
 			if y.Len() == 0 {
 				return res
 			}
@@ -365,7 +366,7 @@ func fFold(ctx *Context, args []V) V {
 			return canonical(res)
 		default:
 			ctx.push(y)
-			ctx.push(args[1])
+			ctx.push(args[2])
 			return ctx.applyN(v, 2)
 		}
 	default:
@@ -411,7 +412,7 @@ func fScan(ctx *Context, args []V) V {
 			return x
 		}
 	case 3:
-		v, ok := args[2].(Function)
+		v, ok := args[1].(Function)
 		if !ok {
 			return errs("3-rank form for adverb / expects function")
 		}
@@ -422,7 +423,7 @@ func fScan(ctx *Context, args []V) V {
 		y := args[0]
 		switch y := y.(type) {
 		case Array:
-			res := AV{args[1]}
+			res := AV{args[2]}
 			if y.Len() == 0 {
 				return res
 			}
@@ -438,7 +439,7 @@ func fScan(ctx *Context, args []V) V {
 			return canonical(res)
 		default:
 			ctx.push(y)
-			ctx.push(args[1])
+			ctx.push(args[2])
 			return ctx.applyN(v, 2)
 		}
 	default:

@@ -1,12 +1,12 @@
 package main
 
-import "fmt"
+//import "fmt"
 
 func (ctx *Context) execute(ops []opcode) error {
-	fmt.Printf("ops: %v\n", ops)
+	//fmt.PrIntf("ops: %v\n", ops)
 	for ip := 0; ip < len(ops); {
 		op := ops[ip]
-		fmt.Printf("op: %s\n", op)
+		//fmt.Printf("op: %s\n", op)
 		ip++
 		switch op {
 		case opNop:

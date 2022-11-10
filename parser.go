@@ -11,7 +11,6 @@ type parser struct {
 	pp         *pparser
 	argc       int // stack length for current sub-expression
 	arglist    bool
-	adverb     bool
 	scopeStack []*AstLambdaCode
 	pos        int
 	it         ppIter
@@ -249,7 +248,7 @@ func (p *parser) ppVariadic(tok ppToken) error {
 func (p *parser) ppVerb(tok ppToken) error {
 	ppe := p.it.Peek()
 	argc := p.argc
-	if ppe == nil || p.arglist || p.adverb {
+	if ppe == nil || p.arglist {
 		return p.ppVariadic(tok)
 	}
 	switch ppe := ppe.(type) {
@@ -268,7 +267,6 @@ func (p *parser) ppVerb(tok ppToken) error {
 	}
 	if argc == 0 {
 		p.pushExpr(AstNil{Pos: tok.Pos})
-		argc++
 	}
 	p.it.Next()
 	p.argc = 0
@@ -276,7 +274,7 @@ func (p *parser) ppVerb(tok ppToken) error {
 	if err != nil {
 		return err
 	}
-	p.argc += argc
+	p.argc = 2
 	return p.ppVariadic(tok)
 }
 
@@ -364,11 +362,16 @@ func parseBuiltin(r rune) (verb Variadic) {
 	return verb
 }
 
+func getVerb(ppe ppExpr) (ppToken, bool) {
+	tok, ok := ppe.(ppToken)
+	return tok, ok && tok.Type == ppVERB
+
+}
+
 func (p *parser) ppAdverbs(adverbs ppAdverbs) error {
 	tok := adverbs[len(adverbs)-1]
 	adverbs = adverbs[:len(adverbs)-1]
 	ppe := p.it.Peek()
-	argc := p.argc
 	if ppe == nil {
 		if len(adverbs) > 0 {
 			return errf("adverb train should modify a value")
@@ -376,43 +379,15 @@ func (p *parser) ppAdverbs(adverbs ppAdverbs) error {
 		p.pushExpr(AstNil{Pos: tok.Pos})
 		return p.ppVariadic(tok)
 	}
+	argc := p.argc
 	p.it.Next()
-	nppe := p.it.Peek()
-	if nppe == nil || p.arglist {
-		p.argc = 0
-		oadverb := p.adverb
-		p.adverb = true
-		err := p.ppExpr(ppe)
-		p.adverb = oadverb
-		if err != nil {
-			return err
-		}
-		if argc == 0 {
-			p.pushExpr(AstNil{Pos: tok.Pos})
-		}
-		p.argc += argc
-		return p.ppVariadic(tok)
-	}
-	it := p.it
-	p.it.Next()
+	var err error
 	p.argc = 0
-	oadverb := p.adverb
-	p.adverb = true
-	err := p.ppExpr(nppe)
-	p.adverb = oadverb
-	if err != nil {
-		return err
+	if vTok, ok := getVerb(ppe); ok {
+		err = p.ppVariadic(vTok)
+	} else {
+		err = p.ppExpr(ppe)
 	}
-	if argc == 0 {
-		p.pushExpr(AstNil{Pos: tok.Pos})
-	}
-	nit := p.it
-	p.it = it
-	p.argc = 0
-	p.adverb = true
-	err = p.ppExpr(ppe)
-	p.adverb = false
-	p.it = nit
 	if err != nil {
 		return err
 	}
@@ -422,6 +397,22 @@ func (p *parser) ppAdverbs(adverbs ppAdverbs) error {
 		if err != nil {
 			return err
 		}
+	}
+	nppe := p.it.Peek()
+	if nppe == nil || p.arglist {
+		if argc == 0 {
+			p.pushExpr(AstNil{Pos: tok.Pos})
+		}
+		p.argc = 2
+		return p.ppVariadic(tok)
+	}
+	p.it.Next()
+	err = p.ppExpr(nppe)
+	if err != nil {
+		return err
+	}
+	if argc == 0 {
+		p.pushExpr(AstNil{Pos: tok.Pos})
 	}
 	p.argc = 3
 	return p.ppVariadic(tok)
