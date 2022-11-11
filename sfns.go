@@ -16,7 +16,7 @@ func Length(x V) I {
 	}
 }
 
-func reverse(x V) {
+func reverseMut(x V) {
 	switch x := x.(type) {
 	case AB:
 		for i := 0; i < len(x)/2; i++ {
@@ -43,12 +43,12 @@ func reverse(x V) {
 	}
 }
 
-// Reverse returns |x.
-func Reverse(x V) V {
+// reverse returns |x.
+func reverse(x V) V {
 	switch x := x.(type) {
 	case Array:
 		r := cloneShallow(x)
-		reverse(r)
+		reverseMut(r)
 		return r
 	default:
 		return errType(x)
@@ -113,8 +113,8 @@ func Rotate(w, x V) V {
 	}
 }
 
-// First returns *x.
-func First(x V) V {
+// first returns *x.
+func first(x V) V {
 	switch x := x.(type) {
 	case Array:
 		if x.Len() == 0 {
@@ -594,8 +594,8 @@ func NudgeBack(x V) V {
 	}
 }
 
-// Flip returns +x.
-func Flip(x V) V {
+// flip returns +x.
+func flip(x V) V {
 	x = toArray(x)
 	x = canonical(x) // XXX really?
 	switch x := x.(type) {
@@ -1316,8 +1316,8 @@ func Windows(w, x V) V {
 	}
 }
 
-// Group returns ⊔x. XXX Classify by default?
-func Group(x V) V {
+// group returns ⊔x. XXX Classify by default?
+func group(x V) V {
 	if Length(x) == 0 {
 		return AV{}
 	}

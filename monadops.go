@@ -5,8 +5,8 @@ import (
 	"strings"
 )
 
-// Negate returns -x.
-func Negate(x V) V {
+// negate returns -x.
+func negate(x V) V {
 	switch x := x.(type) {
 	case F:
 		return -x
@@ -33,7 +33,7 @@ func Negate(x V) V {
 	case AV:
 		r := make(AV, len(x))
 		for i := range r {
-			r[i] = Negate(x[i])
+			r[i] = negate(x[i])
 		}
 		return r
 	case E:
@@ -65,8 +65,8 @@ func signI(x I) I {
 	}
 }
 
-// Sign returns ×x.
-func Sign(x V) V {
+// sign returns ×x.
+func sign(x V) V {
 	switch x := x.(type) {
 	case F:
 		return signF(x)
@@ -89,7 +89,7 @@ func Sign(x V) V {
 	case AV:
 		r := make(AV, len(x))
 		for i := range r {
-			r[i] = Sign(x[i])
+			r[i] = sign(x[i])
 		}
 		return r
 	case E:
@@ -99,8 +99,8 @@ func Sign(x V) V {
 	}
 }
 
-// Floor returns _x.
-func Floor(x V) V {
+// floor returns _x.
+func floor(x V) V {
 	switch x := x.(type) {
 	case F:
 		return F(math.Floor(float64(x)))
@@ -129,7 +129,7 @@ func Floor(x V) V {
 	case AV:
 		r := make(AV, len(x))
 		for i := range r {
-			r[i] = Floor(x[i])
+			r[i] = floor(x[i])
 		}
 		return r
 	case E:
@@ -139,8 +139,8 @@ func Floor(x V) V {
 	}
 }
 
-// Ceil returns ⌈x.
-func Ceil(x V) V {
+// ceil returns ⌈x.
+func ceil(x V) V {
 	switch x := x.(type) {
 	case F:
 		return F(math.Ceil(float64(x)))
@@ -167,7 +167,7 @@ func Ceil(x V) V {
 	case AV:
 		r := make(AV, len(x))
 		for i := range r {
-			r[i] = Ceil(x[i])
+			r[i] = ceil(x[i])
 		}
 		return r
 	case E:
@@ -177,8 +177,8 @@ func Ceil(x V) V {
 	}
 }
 
-// Not returns ~x.
-func Not(x V) V {
+// not returns ~x.
+func not(x V) V {
 	switch x := x.(type) {
 	case F:
 		return B2I(x == 0)
@@ -207,7 +207,7 @@ func Not(x V) V {
 	case AV:
 		r := make(AV, len(x))
 		for i := range r {
-			r[i] = Not(x[i])
+			r[i] = not(x[i])
 		}
 		return r
 	case E:
@@ -217,8 +217,8 @@ func Not(x V) V {
 	}
 }
 
-// Abs returns abs[x]. XXX unused now
-func Abs(x V) V {
+// abs returns abs[x]. XXX unused now
+func abs(x V) V {
 	switch x := x.(type) {
 	case F:
 		return F(math.Abs(float64(x)))
@@ -241,7 +241,7 @@ func Abs(x V) V {
 	case AV:
 		r := make(AV, len(x))
 		for i := range r {
-			r[i] = Abs(x[i])
+			r[i] = abs(x[i])
 		}
 		return r
 	case E:

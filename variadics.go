@@ -80,9 +80,9 @@ func fRight(ctx *Context, args []V) V {
 func fAdd(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return Flip(args[0])
+		return flip(args[0])
 	case 2:
-		return Add(args[1], args[0])
+		return add(args[1], args[0])
 	default:
 		return errs("too many arguments")
 	}
@@ -92,9 +92,9 @@ func fAdd(ctx *Context, args []V) V {
 func fSubtract(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return Negate(args[0])
+		return negate(args[0])
 	case 2:
-		return Subtract(args[1], args[0])
+		return subtract(args[1], args[0])
 	default:
 		return errs("too many arguments")
 	}
@@ -104,9 +104,9 @@ func fSubtract(ctx *Context, args []V) V {
 func fMultiply(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return First(args[0])
+		return first(args[0])
 	case 2:
-		return Multiply(args[1], args[0])
+		return multiply(args[1], args[0])
 	default:
 		return errs("too many arguments")
 	}
@@ -116,9 +116,9 @@ func fMultiply(ctx *Context, args []V) V {
 func fDivide(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return Classify(args[0])
+		return classify(args[0])
 	case 2:
-		return Divide(args[1], args[0])
+		return divide(args[1], args[0])
 	default:
 		return errs("too many arguments")
 	}
@@ -128,9 +128,9 @@ func fDivide(ctx *Context, args []V) V {
 func fMod(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return Range(args[0])
+		return enum(args[0])
 	case 2:
-		return Modulus(args[1], args[0])
+		return modulus(args[1], args[0])
 	default:
 		return errs("too many arguments")
 	}
@@ -140,9 +140,9 @@ func fMod(ctx *Context, args []V) V {
 func fMin(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return Where(args[0])
+		return where(args[0])
 	case 2:
-		return Minimum(args[1], args[0])
+		return minimum(args[1], args[0])
 	default:
 		return errs("too many arguments")
 	}
@@ -152,9 +152,9 @@ func fMin(ctx *Context, args []V) V {
 func fMax(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return Reverse(args[0])
+		return reverse(args[0])
 	case 2:
-		return Maximum(args[1], args[0])
+		return maximum(args[1], args[0])
 	default:
 		return errs("too many arguments")
 	}
@@ -164,9 +164,9 @@ func fMax(ctx *Context, args []V) V {
 func fLess(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return Ascend(args[0])
+		return ascend(args[0])
 	case 2:
-		return Lesser(args[1], args[0])
+		return lesser(args[1], args[0])
 	default:
 		return errs("too many arguments")
 	}
@@ -176,9 +176,9 @@ func fLess(ctx *Context, args []V) V {
 func fMore(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return Descend(args[0])
+		return descend(args[0])
 	case 2:
-		return Greater(args[1], args[0])
+		return greater(args[1], args[0])
 	default:
 		return errs("too many arguments")
 	}
@@ -188,9 +188,9 @@ func fMore(ctx *Context, args []V) V {
 func fEqual(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return Group(args[0])
+		return group(args[0])
 	case 2:
-		return Equal(args[1], args[0])
+		return equal(args[1], args[0])
 	default:
 		return errs("too many arguments")
 	}
@@ -200,7 +200,7 @@ func fEqual(ctx *Context, args []V) V {
 func fMatch(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return Not(args[0])
+		return not(args[0])
 	case 2:
 		return Match(args[1], args[0])
 	default:
@@ -255,7 +255,7 @@ func fTake(ctx *Context, args []V) V {
 func fDrop(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return Floor(args[0])
+		return floor(args[0])
 	case 2:
 		return Drop(args[1], args[0])
 	default:

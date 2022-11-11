@@ -361,7 +361,7 @@ func SortDown(x V) V {
 	case E:
 		return x
 	}
-	reverse(x)
+	reverseMut(x)
 	return x
 }
 
@@ -458,8 +458,8 @@ func permRange(n int) AI {
 	return r
 }
 
-// Ascend returns <x.
-func Ascend(x V) V {
+// ascend returns <x.
+func ascend(x V) V {
 	switch x := x.(type) {
 	case AB:
 		p := &permutationAB{Perm: permRange(len(x)), X: sortAB(x)}
@@ -486,13 +486,13 @@ func Ascend(x V) V {
 	}
 }
 
-// Descend returns >x.
-func Descend(x V) V {
-	p := Ascend(x)
+// descend returns >x.
+func descend(x V) V {
+	p := ascend(x)
 	switch p.(type) {
 	case E:
 		return p
 	}
-	reverse(p)
+	reverseMut(p)
 	return p
 }

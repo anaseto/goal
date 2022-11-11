@@ -47,18 +47,9 @@ func isArray(x V) bool {
 	}
 }
 
-func sign(x F) (sign int) {
-	if x > 0 {
-		sign = 1
-	} else if x < 0 {
-		sign = -1
-	}
-	return sign
-}
-
-func divide(w, x F) F {
+func divideF(w, x F) F {
 	if x == 0 {
-		return F(math.Inf(sign(w)))
+		return F(math.Inf(int(signF(w))))
 	}
 	return w / x
 }

@@ -86,7 +86,7 @@ func fold2vAdd(x V) V {
 		}
 		res := x[0]
 		for _, v := range x[1:] {
-			res = Add(res, v)
+			res = add(res, v)
 		}
 		return canonical(res)
 	default:

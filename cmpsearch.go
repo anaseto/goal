@@ -154,8 +154,8 @@ func matchAF(w, x AF) bool {
 	return true
 }
 
-// Classify returns %x.
-func Classify(x V) V {
+// classify returns %x.
+func classify(x V) V {
 	if Length(x) == 0 {
 		return AB{}
 	}
@@ -168,7 +168,7 @@ func Classify(x V) V {
 		if !v {
 			return x
 		}
-		return Not(x)
+		return not(x)
 	case AF:
 		r := make(AI, len(x))
 		m := map[float64]int{}
@@ -439,9 +439,9 @@ func memberOfAB(w V, x AB) V {
 		return r
 	}
 	if t {
-		return Equal(w, B2I(true))
+		return equal(w, B2I(true))
 	}
-	return Equal(w, B2I(false))
+	return equal(w, B2I(false))
 }
 
 func memberOfAF(w V, x AF) V {

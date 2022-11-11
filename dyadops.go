@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-// Equal returns w=x.
-func Equal(w, x V) V {
+// equal returns w=x.
+func equal(w, x V) V {
 	switch w := w.(type) {
 	case F:
 		return equalFV(w, x)
@@ -32,7 +32,7 @@ func Equal(w, x V) V {
 			}
 			r := make(AV, len(w))
 			for i := range r {
-				v := Equal(w[i], x.At(i))
+				v := equal(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -43,7 +43,7 @@ func Equal(w, x V) V {
 		}
 		r := make(AV, len(w))
 		for i := range r {
-			v := Equal(w[i], x)
+			v := equal(w[i], x)
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -394,8 +394,8 @@ func equalASV(w AS, x V) V {
 	}
 }
 
-// Lesser returns w<x.
-func Lesser(w, x V) V {
+// lesser returns w<x.
+func lesser(w, x V) V {
 	switch w := w.(type) {
 	case F:
 		return lesserFV(w, x)
@@ -419,7 +419,7 @@ func Lesser(w, x V) V {
 			}
 			r := make(AV, len(w))
 			for i := range r {
-				v := Lesser(w[i], x.At(i))
+				v := lesser(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -430,7 +430,7 @@ func Lesser(w, x V) V {
 		}
 		r := make(AV, len(w))
 		for i := range r {
-			v := Lesser(w[i], x)
+			v := lesser(w[i], x)
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -781,8 +781,8 @@ func lesserASV(w AS, x V) V {
 	}
 }
 
-// Greater returns w>x.
-func Greater(w, x V) V {
+// greater returns w>x.
+func greater(w, x V) V {
 	switch w := w.(type) {
 	case F:
 		return greaterFV(w, x)
@@ -806,7 +806,7 @@ func Greater(w, x V) V {
 			}
 			r := make(AV, len(w))
 			for i := range r {
-				v := Greater(w[i], x.At(i))
+				v := greater(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -817,7 +817,7 @@ func Greater(w, x V) V {
 		}
 		r := make(AV, len(w))
 		for i := range r {
-			v := Greater(w[i], x)
+			v := greater(w[i], x)
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -1168,8 +1168,8 @@ func greaterASV(w AS, x V) V {
 	}
 }
 
-// Add returns w+x.
-func Add(w, x V) V {
+// add returns w+x.
+func add(w, x V) V {
 	switch w := w.(type) {
 	case F:
 		return addFV(w, x)
@@ -1193,7 +1193,7 @@ func Add(w, x V) V {
 			}
 			r := make(AV, len(w))
 			for i := range r {
-				v := Add(w[i], x.At(i))
+				v := add(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -1204,7 +1204,7 @@ func Add(w, x V) V {
 		}
 		r := make(AV, len(w))
 		for i := range r {
-			v := Add(w[i], x)
+			v := add(w[i], x)
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -1555,8 +1555,8 @@ func addASV(w AS, x V) V {
 	}
 }
 
-// Subtract returns w-x.
-func Subtract(w, x V) V {
+// subtract returns w-x.
+func subtract(w, x V) V {
 	switch w := w.(type) {
 	case F:
 		return subtractFV(w, x)
@@ -1580,7 +1580,7 @@ func Subtract(w, x V) V {
 			}
 			r := make(AV, len(w))
 			for i := range r {
-				v := Subtract(w[i], x.At(i))
+				v := subtract(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -1591,7 +1591,7 @@ func Subtract(w, x V) V {
 		}
 		r := make(AV, len(w))
 		for i := range r {
-			v := Subtract(w[i], x)
+			v := subtract(w[i], x)
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -1942,8 +1942,8 @@ func subtractASV(w AS, x V) V {
 	}
 }
 
-// Multiply returns w*x.
-func Multiply(w, x V) V {
+// multiply returns w*x.
+func multiply(w, x V) V {
 	switch w := w.(type) {
 	case F:
 		return multiplyFV(w, x)
@@ -1967,7 +1967,7 @@ func Multiply(w, x V) V {
 			}
 			r := make(AV, len(w))
 			for i := range r {
-				v := Multiply(w[i], x.At(i))
+				v := multiply(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -1978,7 +1978,7 @@ func Multiply(w, x V) V {
 		}
 		r := make(AV, len(w))
 		for i := range r {
-			v := Multiply(w[i], x)
+			v := multiply(w[i], x)
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -2428,8 +2428,8 @@ func multiplyASV(w AS, x V) V {
 	}
 }
 
-// Divide returns w%x.
-func Divide(w, x V) V {
+// divide returns w%x.
+func divide(w, x V) V {
 	switch w := w.(type) {
 	case F:
 		return divideFV(w, x)
@@ -2449,7 +2449,7 @@ func Divide(w, x V) V {
 			}
 			r := make(AV, len(w))
 			for i := range r {
-				v := Divide(w[i], x.At(i))
+				v := divide(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -2460,7 +2460,7 @@ func Divide(w, x V) V {
 		}
 		r := make(AV, len(w))
 		for i := range r {
-			v := Divide(w[i], x)
+			v := divide(w[i], x)
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -2478,25 +2478,25 @@ func Divide(w, x V) V {
 func divideFV(w F, x V) V {
 	switch x := x.(type) {
 	case F:
-		return F(divide(w, x))
+		return F(divideF(w, x))
 	case I:
-		return F(divide(w, F(x)))
+		return F(divideF(w, F(x)))
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = float64(divide(F(w), B2F(x[i])))
+			r[i] = float64(divideF(F(w), B2F(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = float64(divide(F(w), F(x[i])))
+			r[i] = float64(divideF(F(w), F(x[i])))
 		}
 		return r
 	case AI:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = float64(divide(F(w), F(I(x[i]))))
+			r[i] = float64(divideF(F(w), F(I(x[i]))))
 		}
 		return r
 	case AV:
@@ -2520,25 +2520,25 @@ func divideFV(w F, x V) V {
 func divideIV(w I, x V) V {
 	switch x := x.(type) {
 	case F:
-		return F(divide(F(w), x))
+		return F(divideF(F(w), x))
 	case I:
-		return F(divide(F(w), F(x)))
+		return F(divideF(F(w), F(x)))
 	case AB:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = float64(divide(F(I(w)), B2F(x[i])))
+			r[i] = float64(divideF(F(I(w)), B2F(x[i])))
 		}
 		return r
 	case AF:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = float64(divide(F(I(w)), F(x[i])))
+			r[i] = float64(divideF(F(I(w)), F(x[i])))
 		}
 		return r
 	case AI:
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = float64(divide(F(I(w)), F(I(x[i]))))
+			r[i] = float64(divideF(F(I(w)), F(I(x[i]))))
 		}
 		return r
 	case AV:
@@ -2564,13 +2564,13 @@ func divideABV(w AB, x V) V {
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = float64(divide(B2F(w[i]), F(x)))
+			r[i] = float64(divideF(B2F(w[i]), F(x)))
 		}
 		return r
 	case I:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = float64(divide(B2F(w[i]), F(I(x))))
+			r[i] = float64(divideF(B2F(w[i]), F(I(x))))
 		}
 		return r
 	case AB:
@@ -2579,7 +2579,7 @@ func divideABV(w AB, x V) V {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = float64(divide(B2F(w[i]), B2F(x[i])))
+			r[i] = float64(divideF(B2F(w[i]), B2F(x[i])))
 		}
 		return r
 	case AF:
@@ -2588,7 +2588,7 @@ func divideABV(w AB, x V) V {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = float64(divide(B2F(w[i]), F(x[i])))
+			r[i] = float64(divideF(B2F(w[i]), F(x[i])))
 		}
 		return r
 	case AI:
@@ -2597,7 +2597,7 @@ func divideABV(w AB, x V) V {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = float64(divide(B2F(w[i]), F(I(x[i]))))
+			r[i] = float64(divideF(B2F(w[i]), F(I(x[i]))))
 		}
 		return r
 	case AV:
@@ -2626,13 +2626,13 @@ func divideAFV(w AF, x V) V {
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = float64(divide(F(w[i]), F(x)))
+			r[i] = float64(divideF(F(w[i]), F(x)))
 		}
 		return r
 	case I:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = float64(divide(F(w[i]), F(I(x))))
+			r[i] = float64(divideF(F(w[i]), F(I(x))))
 		}
 		return r
 	case AB:
@@ -2641,7 +2641,7 @@ func divideAFV(w AF, x V) V {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = float64(divide(F(w[i]), B2F(x[i])))
+			r[i] = float64(divideF(F(w[i]), B2F(x[i])))
 		}
 		return r
 	case AF:
@@ -2650,7 +2650,7 @@ func divideAFV(w AF, x V) V {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = float64(divide(F(w[i]), F(x[i])))
+			r[i] = float64(divideF(F(w[i]), F(x[i])))
 		}
 		return r
 	case AI:
@@ -2659,7 +2659,7 @@ func divideAFV(w AF, x V) V {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = float64(divide(F(w[i]), F(I(x[i]))))
+			r[i] = float64(divideF(F(w[i]), F(I(x[i]))))
 		}
 		return r
 	case AV:
@@ -2688,13 +2688,13 @@ func divideAIV(w AI, x V) V {
 	case F:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = float64(divide(F(I(w[i])), F(x)))
+			r[i] = float64(divideF(F(I(w[i])), F(x)))
 		}
 		return r
 	case I:
 		r := make(AF, len(w))
 		for i := range r {
-			r[i] = float64(divide(F(I(w[i])), F(I(x))))
+			r[i] = float64(divideF(F(I(w[i])), F(I(x))))
 		}
 		return r
 	case AB:
@@ -2703,7 +2703,7 @@ func divideAIV(w AI, x V) V {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = float64(divide(F(I(w[i])), B2F(x[i])))
+			r[i] = float64(divideF(F(I(w[i])), B2F(x[i])))
 		}
 		return r
 	case AF:
@@ -2712,7 +2712,7 @@ func divideAIV(w AI, x V) V {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = float64(divide(F(I(w[i])), F(x[i])))
+			r[i] = float64(divideF(F(I(w[i])), F(x[i])))
 		}
 		return r
 	case AI:
@@ -2721,7 +2721,7 @@ func divideAIV(w AI, x V) V {
 		}
 		r := make(AF, len(x))
 		for i := range r {
-			r[i] = float64(divide(F(I(w[i])), F(I(x[i]))))
+			r[i] = float64(divideF(F(I(w[i])), F(I(x[i]))))
 		}
 		return r
 	case AV:
@@ -2745,8 +2745,8 @@ func divideAIV(w AI, x V) V {
 	}
 }
 
-// Minimum returns w&x.
-func Minimum(w, x V) V {
+// minimum returns w&x.
+func minimum(w, x V) V {
 	switch w := w.(type) {
 	case F:
 		return minimumFV(w, x)
@@ -2770,7 +2770,7 @@ func Minimum(w, x V) V {
 			}
 			r := make(AV, len(w))
 			for i := range r {
-				v := Minimum(w[i], x.At(i))
+				v := minimum(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -2781,7 +2781,7 @@ func Minimum(w, x V) V {
 		}
 		r := make(AV, len(w))
 		for i := range r {
-			v := Minimum(w[i], x)
+			v := minimum(w[i], x)
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -3132,8 +3132,8 @@ func minimumASV(w AS, x V) V {
 	}
 }
 
-// Maximum returns w|x.
-func Maximum(w, x V) V {
+// maximum returns w|x.
+func maximum(w, x V) V {
 	switch w := w.(type) {
 	case F:
 		return maximumFV(w, x)
@@ -3157,7 +3157,7 @@ func Maximum(w, x V) V {
 			}
 			r := make(AV, len(w))
 			for i := range r {
-				v := Maximum(w[i], x.At(i))
+				v := maximum(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -3168,7 +3168,7 @@ func Maximum(w, x V) V {
 		}
 		r := make(AV, len(w))
 		for i := range r {
-			v := Maximum(w[i], x)
+			v := maximum(w[i], x)
 			e, ok := v.(E)
 			if ok {
 				return e
@@ -3519,8 +3519,8 @@ func maximumASV(w AS, x V) V {
 	}
 }
 
-// Modulus returns w mod x.
-func Modulus(w, x V) V {
+// modulus returns w mod x.
+func modulus(w, x V) V {
 	switch w := w.(type) {
 	case F:
 		return modulusFV(w, x)
@@ -3540,7 +3540,7 @@ func Modulus(w, x V) V {
 			}
 			r := make(AV, len(w))
 			for i := range r {
-				v := Modulus(w[i], x.At(i))
+				v := modulus(w[i], x.At(i))
 				e, ok := v.(E)
 				if ok {
 					return e
@@ -3551,7 +3551,7 @@ func Modulus(w, x V) V {
 		}
 		r := make(AV, len(w))
 		for i := range r {
-			v := Modulus(w[i], x)
+			v := modulus(w[i], x)
 			e, ok := v.(E)
 			if ok {
 				return e

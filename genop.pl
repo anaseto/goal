@@ -5,7 +5,7 @@ use warnings;
 use v5.28;
 
 my %dyads = (
-    Equal =>  {
+    equal =>  {
         B_B => ["w == x", "B"],
         B_I => ["B2I(w) == x", "B"],
         B_F => ["B2F(w) == x", "B"],
@@ -29,7 +29,7 @@ my %dyads = (
         #F_F => ["w != x", "B"],
         #S_S => ["w != x", "B"],
     #},
-    Lesser =>  {
+    lesser =>  {
         B_B => ["!w && x", "B"],
         B_I => ["B2I(w) < x", "B"],
         B_F => ["B2F(w) < x", "B"],
@@ -53,7 +53,7 @@ my %dyads = (
         #F_F => ["w <= x", "B"],
         #S_S => ["w <= x", "B"],
     #},
-    Greater =>  {
+    greater =>  {
         B_B => ["w && !x", "B"],
         B_I => ["B2I(w) > x", "B"],
         B_F => ["B2F(w) > x", "B"],
@@ -77,7 +77,7 @@ my %dyads = (
         #F_F => ["w >= x", "B"],
         #S_S => ["w >= x", "B"],
     #},
-    Add =>  {
+    add =>  {
         B_B => ["B2I(w) + B2I(x)", "I"],
         B_I => ["B2I(w) + x", "I"],
         B_F => ["B2F(w) + x", "F"],
@@ -89,7 +89,7 @@ my %dyads = (
         F_F => ["w + x", "F"],
         S_S => ["w + x", "S"],
     },
-    Subtract =>  {
+    subtract =>  {
         B_B => ["B2I(w) - B2I(x)", "I"],
         B_I => ["B2I(w) - x", "I"],
         B_F => ["B2F(w) - x", "F"],
@@ -112,7 +112,7 @@ my %dyads = (
         #F_I => ["1 + w - F(x)", "F"],
         #F_F => ["1 + w - x", "F"],
     #},
-    Multiply =>  {
+    multiply =>  {
         B_B => ["w && x", "B"],
         B_I => ["B2I(w) * x", "I"],
         B_F => ["B2F(w) * x", "F"],
@@ -129,18 +129,18 @@ my %dyads = (
         S_I => ["strings.Repeat(string(w), int(x))", "S"],
         S_F => ["strings.Repeat(string(w), int(float64(x)))", "S"],
     },
-    Divide =>  {
-        B_B => ["divide(B2F(w), B2F(x))", "F"],
-        B_I => ["divide(B2F(w), F(x))", "F"],
-        B_F => ["divide(B2F(w), x)", "F"],
-        I_B => ["divide(F(w), B2F(x))", "F"],
-        I_I => ["divide(F(w), F(x))", "F"],
-        I_F => ["divide(F(w), x)", "F"],
-        F_B => ["divide(w, B2F(x))", "F"],
-        F_I => ["divide(w, F(x))", "F"],
-        F_F => ["divide(w, x)", "F"],
+    divide =>  {
+        B_B => ["divideF(B2F(w), B2F(x))", "F"],
+        B_I => ["divideF(B2F(w), F(x))", "F"],
+        B_F => ["divideF(B2F(w), x)", "F"],
+        I_B => ["divideF(F(w), B2F(x))", "F"],
+        I_I => ["divideF(F(w), F(x))", "F"],
+        I_F => ["divideF(F(w), x)", "F"],
+        F_B => ["divideF(w, B2F(x))", "F"],
+        F_I => ["divideF(w, F(x))", "F"],
+        F_F => ["divideF(w, x)", "F"],
     },
-    Minimum =>  {
+    minimum =>  {
         B_B => ["w && x", "B"],
         B_I => ["minI(B2I(w), x)", "I"],
         B_F => ["F(math.Min(float64(B2F(w)), float64(x)))", "F"],
@@ -152,7 +152,7 @@ my %dyads = (
         F_F => ["F(math.Min(float64(w), float64(x)))", "F"],
         S_S => ["minS(w, x)", "S"],
     },
-    Maximum =>  {
+    maximum =>  {
         B_B => ["w || x", "B"],
         B_I => ["maxI(B2I(w), x)", "I"],
         B_F => ["F(math.Max(float64(B2F(w)), float64(x)))", "F"],
@@ -186,7 +186,7 @@ my %dyads = (
         #F_I => ["w * F(x)", "F"],
         #F_F => ["w * x", "F"],
     #},
-    Modulus =>  {
+    modulus =>  {
         B_B => ["modI(B2I(w), B2I(x))", "I"],
         B_I => ["modI(B2I(w), x)", "I"],
         B_F => ["modF(F(B2I(w)), x)", "I"],
@@ -218,22 +218,22 @@ import (
 
 EOS
 
-genOp("Equal", "=");
+genOp("equal", "=");
 #genOp("NotEqual", "≠");
-genOp("Lesser", "<");
+genOp("lesser", "<");
 #genOp("LesserEq", "≤");
-genOp("Greater", ">");
+genOp("greater", ">");
 #genOp("GreaterEq", "≥");
-genOp("Add", "+");
-genOp("Subtract", "-");
+genOp("add", "+");
+genOp("subtract", "-");
 #genOp("Span", "¬");
-genOp("Multiply", "*");
-genOp("Divide", "%");
-genOp("Minimum", "&");
-genOp("Maximum", "|");
+genOp("multiply", "*");
+genOp("divide", "%");
+genOp("minimum", "&");
+genOp("maximum", "|");
 #genOp("And", "∧"); # identical to Multiply
 #genOp("Or", "∨"); # Multiply under Not
-genOp("Modulus", " mod ");
+genOp("modulus", " mod ");
 
 sub genOp {
     my ($name, $op) = @_;

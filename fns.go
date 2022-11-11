@@ -1,7 +1,7 @@
 package goal
 
-// Range returns !x.
-func Range(x V) V {
+// enum returns !x.
+func enum(x V) V {
 	switch x := x.(type) {
 	case F:
 		if !isI(x) {
@@ -74,8 +74,8 @@ func rangeArray(x Array) V {
 	return r
 }
 
-// Where returns &x.
-func Where(x V) V {
+// where returns &x.
+func where(x V) V {
 	switch x := x.(type) {
 	case I:
 		switch {
