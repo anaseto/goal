@@ -12,3 +12,5 @@
 *.map
 *.html
 rewrite.sh
+goal.test
+cpuprofile.out
