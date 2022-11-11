@@ -1,5 +1,22 @@
 package goal
 
+// Apply calls a value with a single argument.
+func (ctx *Context) Apply(v, x V) V {
+	ctx.push(x)
+	return ctx.applyN(v, 1)
+}
+
+// ApplyN calls a value with one or more arguments. The arguments should be
+// provided in reverse order, given the stack-based right to left semantics
+// used by the language.
+func (ctx *Context) ApplyN(v V, args []V) V {
+	if len(args) == 0 {
+		panic("ApplyArgs: len(args) should be > 0")
+	}
+	ctx.pushArgs(args)
+	return ctx.applyN(v, len(args))
+}
+
 // applyN applies v with the top n arguments in the stack. It consumes the
 // arguments, but does not push the result, returing it instead.
 func (ctx *Context) applyN(v V, n int) V {
