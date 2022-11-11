@@ -10,7 +10,7 @@ import (
 // Context holds the state of the interpreter.
 type Context struct {
 	// program representations (AST and compiled)
-	ast  *AstProgram
+	ast  *astProgram
 	prog *Program
 
 	// execution and stack handling
@@ -41,7 +41,7 @@ type Context struct {
 // SetSource should be called to set a source, and
 func NewContext() *Context {
 	ctx := &Context{}
-	ctx.ast = &AstProgram{}
+	ctx.ast = &astProgram{}
 	ctx.prog = &Program{}
 	ctx.gIDs = map[string]int{}
 	ctx.stack = make([]V, 0, 64)

@@ -116,25 +116,25 @@ func (ctx *Context) compileBody() {
 
 func compileExpr(body []opcode, expr Expr) ([]opcode, bool) {
 	switch expr := expr.(type) {
-	case AstConst:
+	case astConst:
 		body = append(body, opConst, opcode(expr.ID))
-	case AstNil:
+	case astNil:
 		body = append(body, opNil)
-	case AstGlobal:
+	case astGlobal:
 		body = append(body, opGlobal, opcode(expr.ID))
-	case AstAssignGlobal:
+	case astAssignGlobal:
 		body = append(body, opAssignGlobal, opcode(expr.ID))
-	case AstVariadic:
+	case astVariadic:
 		body = append(body, opVariadic, opcode(expr.Variadic))
-	case AstLambda:
+	case astLambda:
 		body = append(body, opLambda, opcode(expr.Lambda))
-	case AstApply:
+	case astApply:
 		body = append(body, opApply)
-	case AstApply2:
+	case astApply2:
 		body = append(body, opApply2)
-	case AstApplyN:
+	case astApplyN:
 		body = append(body, opApplyN, opcode(expr.N))
-	case AstDrop:
+	case astDrop:
 		body = append(body, opDrop)
 	default:
 		return body, false
@@ -149,7 +149,7 @@ func (ctx *Context) compileLambdas() {
 	ctx.ast.cLambdas = len(ctx.ast.Lambdas)
 }
 
-func (ctx *Context) compileLambda(lc *AstLambdaCode) *LambdaCode {
+func (ctx *Context) compileLambda(lc *astLambdaCode) *LambdaCode {
 	nargs := 0
 	nlocals := 0
 	for _, local := range lc.Locals {
@@ -186,9 +186,9 @@ func (ctx *Context) compileLambda(lc *AstLambdaCode) *LambdaCode {
 		clc.Body, done = compileExpr(clc.Body, expr)
 		if !done {
 			switch expr := expr.(type) {
-			case AstLocal:
+			case astLocal:
 				clc.Body = append(clc.Body, opLocal, opcode(getID(expr.Local)))
-			case AstAssignLocal:
+			case astAssignLocal:
 				clc.Body = append(clc.Body, opAssignLocal, opcode(getID(expr.Local)))
 			}
 		}

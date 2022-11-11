@@ -6,15 +6,15 @@ import (
 )
 
 // AstProgram represents a program written in goal.
-type AstProgram struct {
+type astProgram struct {
 	Body    []Expr           // program body AST
-	Lambdas []*AstLambdaCode // list of user defined lambdas
+	Lambdas []*astLambdaCode // list of user defined lambdas
 
 	cBody    int // index next of last compiled expression
 	cLambdas int // index next of last compiled lambda
 }
 
-func (prog *AstProgram) String() string {
+func (prog *astProgram) String() string {
 	sb := &strings.Builder{}
 	fmt.Fprintln(sb, "---- AST -----")
 	fmt.Fprintln(sb, "Instructions:")
@@ -29,7 +29,7 @@ func (prog *AstProgram) String() string {
 }
 
 // AstLambdaCode represents an user defined lambda like {x+1}.
-type AstLambdaCode struct {
+type astLambdaCode struct {
 	Body      []Expr           // body AST
 	Locals    map[string]Local // arguments and variables
 	NamedArgs bool             // named arguments instead of x, y, z
@@ -38,7 +38,7 @@ type AstLambdaCode struct {
 	nVars int // number of non-argument local variables
 }
 
-func (lc *AstLambdaCode) String() string {
+func (lc *astLambdaCode) String() string {
 	sb := &strings.Builder{}
 	fmt.Fprintln(sb, "Instructions:")
 	for _, expr := range lc.Body {
@@ -67,7 +67,7 @@ const (
 	LocalVar
 )
 
-func (l *AstLambdaCode) local(s string) (Local, bool) {
+func (l *astLambdaCode) local(s string) (Local, bool) {
 	param, ok := l.Locals[s]
 	if ok {
 		return param, true
@@ -91,85 +91,85 @@ type Expr interface {
 }
 
 // AstConst represents a constant.
-type AstConst struct {
+type astConst struct {
 	ID  int // identifier
 	Pos int // position information
 }
 
 // AstNil represents a constant.
-type AstNil struct {
+type astNil struct {
 	Pos int // position information
 }
 
 // AstGlobal represents a global variable read.
-type AstGlobal struct {
+type astGlobal struct {
 	Name string
 	ID   int
 	Pos  int
 }
 
 // AstLocal represents a local variable read.
-type AstLocal struct {
+type astLocal struct {
 	Name  string
 	Local Local
 	Pos   int
 }
 
 // AstAssignGlobal represents a global variable assignment.
-type AstAssignGlobal struct {
+type astAssignGlobal struct {
 	Name string
 	ID   int
 	Pos  int
 }
 
 // AstAssignLocal represents a local variable assignment.
-type AstAssignLocal struct {
+type astAssignLocal struct {
 	Name  string
 	Local Local
 	Pos   int
 }
 
 // AstVariadic represents built-in verbs with variable arity.
-type AstVariadic struct {
+type astVariadic struct {
 	Variadic Variadic
 	Pos      int
 }
 
 // AstLambda represents an user Lambda.
-type AstLambda struct {
+type astLambda struct {
 	Lambda Lambda
 }
 
 // AstApply applies the top stack value at the previous, dropping those values
 // and pushing the result.
-type AstApply struct{}
+type astApply struct{}
 
 // AstApply2 applies the top stack value at the 2 previous ones, dropping those
 // values and pushing the result.
-type AstApply2 struct{}
+type astApply2 struct{}
 
 // AstApplyN applies the top stack value at the N previous ones, dropping
 // those values and pushing the result.
-type AstApplyN struct {
+type astApplyN struct {
 	N int
 }
 
 // AstDrop represents a separator, in practice discarding the final
 // value of the previous expression.
-type AstDrop struct{}
+type astDrop struct{}
 
-func (n AstConst) node()        {}
-func (n AstNil) node()          {}
-func (n AstGlobal) node()       {}
-func (n AstLocal) node()        {}
-func (n AstAssignGlobal) node() {}
-func (n AstAssignLocal) node()  {}
-func (n AstVariadic) node()     {}
-func (n AstLambda) node()       {}
-func (n AstApply) node()        {}
-func (n AstApply2) node()       {}
-func (n AstApplyN) node()       {}
-func (n AstDrop) node()         {}
+func (n astConst) node()        {}
+func (n astNil) node()          {}
+func (n astGlobal) node()       {}
+func (n astLocal) node()        {}
+func (n astAssignGlobal) node() {}
+func (n astAssignLocal) node()  {}
+func (n astVariadic) node()     {}
+func (n astLambda) node()       {}
+func (n astApply) node()        {}
+func (n astApply2) node()       {}
+func (n astApplyN) node()       {}
+func (n astDrop) node()         {}
 
 // ppExpr are built by the first left to right pass, resulting in a tree
 // of blocks producing a whole expression, with simplified token

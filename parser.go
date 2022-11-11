@@ -12,7 +12,7 @@ type parser struct {
 	argc       int              // stack length for current sub-expression
 	slen       int              // virtual stack length
 	arglist    bool             // whether current expression has an argument list
-	scopeStack []*AstLambdaCode // scope information
+	scopeStack []*astLambdaCode // scope information
 	pos        int              // last token position
 	it         ppIter           // ppExprs iterator
 	drop       bool             // whether to add a drop at the end
@@ -46,7 +46,7 @@ func (p *parser) Parse() error {
 func (p *parser) ParseNext() error {
 	ctx := p.ctx
 	if p.drop {
-		p.pushExpr(AstDrop{})
+		p.pushExpr(astDrop{})
 	}
 	var eof bool
 	pps, err := p.pp.Next()
@@ -78,23 +78,23 @@ func (p *parser) pushExpr(e Expr) {
 		p.ctx.ast.Body = append(p.ctx.ast.Body, e)
 	}
 	switch e := e.(type) {
-	case AstApply:
+	case astApply:
 		// v v -> v
 		p.slen--
 		p.argc--
-	case AstApply2:
+	case astApply2:
 		// v v v -> v
 		p.slen -= 2
 		p.argc -= 2
-	case AstApplyN:
+	case astApplyN:
 		// v ... v v -> v
 		p.slen -= e.N
 		p.argc -= e.N
-	case AstDrop:
+	case astDrop:
 		// v ->
 		p.slen--
 		p.argc--
-	case AstAssignLocal, AstAssignGlobal:
+	case astAssignLocal, astAssignGlobal:
 	default:
 		// -> v
 		p.slen++
@@ -105,11 +105,11 @@ func (p *parser) pushExpr(e Expr) {
 func (p *parser) apply() {
 	switch {
 	case p.argc == 2:
-		p.pushExpr(AstApply{})
+		p.pushExpr(astApply{})
 	case p.argc == 3:
-		p.pushExpr(AstApply2{})
+		p.pushExpr(astApply2{})
 	case p.argc > 3:
-		p.pushExpr(AstApplyN{N: p.argc - 1})
+		p.pushExpr(astApplyN{N: p.argc - 1})
 	}
 }
 
@@ -119,7 +119,7 @@ func (p *parser) errorf(format string, a ...interface{}) error {
 	return fmt.Errorf("error:%d:"+format, append([]interface{}{p.pos}, a...))
 }
 
-func (p *parser) scope() *AstLambdaCode {
+func (p *parser) scope() *astLambdaCode {
 	if len(p.scopeStack) == 0 {
 		return nil
 	}
@@ -140,7 +140,7 @@ func (p *parser) ppExprs(pps ppExprs) error {
 	}
 	p.it = it
 	if p.slen == slen {
-		p.pushExpr(AstNil{Pos: p.pos})
+		p.pushExpr(astNil{Pos: p.pos})
 	}
 	return nil
 }
@@ -196,7 +196,7 @@ func (p *parser) ppToken(tok ppToken) error {
 			return p.errorf("number atoms cannot be applied")
 		}
 		id := p.ctx.storeConst(v)
-		p.pushExpr(AstConst{ID: id, Pos: tok.Pos})
+		p.pushExpr(astConst{ID: id, Pos: tok.Pos})
 		return nil
 	case ppSTRING:
 		s, err := strconv.Unquote(tok.Text)
@@ -207,7 +207,7 @@ func (p *parser) ppToken(tok ppToken) error {
 			return p.errorf("string atoms cannot be applied")
 		}
 		id := p.ctx.storeConst(S(s))
-		p.pushExpr(AstConst{ID: id, Pos: tok.Pos})
+		p.pushExpr(astConst{ID: id, Pos: tok.Pos})
 		return nil
 	case ppIDENT:
 		// read or apply, not assign
@@ -241,7 +241,7 @@ func parseNumber(s string) (V, error) {
 
 func (p *parser) ppGlobal(tok ppToken) {
 	id := p.ctx.global(tok.Text)
-	p.pushExpr(AstGlobal{
+	p.pushExpr(astGlobal{
 		Name: tok.Text,
 		ID:   id,
 		Pos:  tok.Pos,
@@ -252,7 +252,7 @@ func (p *parser) ppGlobal(tok ppToken) {
 func (p *parser) ppLocal(tok ppToken) {
 	local, ok := p.scope().local(tok.Text)
 	if ok {
-		p.pushExpr(AstLocal{
+		p.pushExpr(astLocal{
 			Name:  tok.Text,
 			Local: local,
 			Pos:   tok.Pos,
@@ -265,7 +265,7 @@ func (p *parser) ppLocal(tok ppToken) {
 
 func (p *parser) ppVariadic(tok ppToken) error {
 	v := parseBuiltin(tok.Rune)
-	p.pushExpr(AstVariadic{
+	p.pushExpr(astVariadic{
 		Variadic: v,
 		Pos:      tok.Pos,
 	})
@@ -289,7 +289,7 @@ func (p *parser) ppVerb(tok ppToken) error {
 		}
 	}
 	if argc == 0 {
-		p.pushExpr(AstNil{Pos: tok.Pos})
+		p.pushExpr(astNil{Pos: tok.Pos})
 	}
 	p.it.Next()
 	p.argc = 0
@@ -327,7 +327,7 @@ func (p *parser) ppAssign(verbTok, identTok ppToken) bool {
 	lc := p.scope()
 	if lc == nil {
 		id := p.ctx.global(identTok.Text)
-		p.pushExpr(AstAssignGlobal{
+		p.pushExpr(astAssignGlobal{
 			Name: identTok.Text,
 			ID:   id,
 			Pos:  identTok.Pos,
@@ -336,7 +336,7 @@ func (p *parser) ppAssign(verbTok, identTok ppToken) bool {
 	}
 	local, ok := lc.local(identTok.Text)
 	if ok {
-		p.pushExpr(AstAssignLocal{
+		p.pushExpr(astAssignLocal{
 			Name:  identTok.Text,
 			Local: local,
 			Pos:   identTok.Pos,
@@ -344,7 +344,7 @@ func (p *parser) ppAssign(verbTok, identTok ppToken) bool {
 		return true
 	}
 	lc.Locals[identTok.Text] = Local{Type: LocalVar, ID: lc.nVars}
-	p.pushExpr(AstAssignLocal{
+	p.pushExpr(astAssignLocal{
 		Name:  identTok.Text,
 		Local: Local{Type: LocalVar, ID: lc.nVars},
 		Pos:   identTok.Pos,
@@ -419,7 +419,7 @@ func (p *parser) ppAdverbs(adverbs ppAdverbs) error {
 		if len(adverbs) > 0 {
 			return errf("adverb train should modify a value")
 		}
-		p.pushExpr(AstNil{Pos: tok.Pos})
+		p.pushExpr(astNil{Pos: tok.Pos})
 		return p.ppVariadic(tok)
 	}
 	argc := p.argc
@@ -444,7 +444,7 @@ func (p *parser) ppAdverbs(adverbs ppAdverbs) error {
 	nppe := p.it.Peek()
 	if nppe == nil || p.arglist || !isLeftArg(nppe) {
 		if argc == 0 {
-			p.pushExpr(AstNil{Pos: tok.Pos})
+			p.pushExpr(astNil{Pos: tok.Pos})
 		}
 		p.argc = 2
 		return p.ppVariadic(tok)
@@ -456,7 +456,7 @@ func (p *parser) ppAdverbs(adverbs ppAdverbs) error {
 		return err
 	}
 	if argc == 0 {
-		p.pushExpr(AstNil{Pos: tok.Pos})
+		p.pushExpr(astNil{Pos: tok.Pos})
 	}
 	p.argc = 3
 	return p.ppVariadic(tok)
@@ -482,7 +482,7 @@ func (p *parser) ppStrand(pps ppStrand) error {
 	}
 	id := p.ctx.storeConst(canonical(a))
 	// len(pps) > 0
-	p.pushExpr(AstConst{ID: id, Pos: pps[0].Pos})
+	p.pushExpr(astConst{ID: id, Pos: pps[0].Pos})
 	return nil
 }
 
@@ -511,7 +511,7 @@ func (p *parser) ppLambda(body []ppExprs, args []string) error {
 	slen := p.slen
 	p.slen = 0
 	p.argc = 0
-	lc := &AstLambdaCode{
+	lc := &astLambdaCode{
 		Locals: map[string]Local{},
 	}
 	p.scopeStack = append(p.scopeStack, lc)
@@ -528,7 +528,7 @@ func (p *parser) ppLambda(body []ppExprs, args []string) error {
 			return err
 		}
 		if i < len(body)-1 && p.slen > slen {
-			p.pushExpr(AstDrop{})
+			p.pushExpr(astDrop{})
 		}
 	}
 	p.scopeStack = p.scopeStack[:len(p.scopeStack)-1]
@@ -536,7 +536,7 @@ func (p *parser) ppLambda(body []ppExprs, args []string) error {
 	p.ctx.ast.Lambdas = append(p.ctx.ast.Lambdas, lc)
 	p.argc = argc
 	p.slen = slen
-	p.pushExpr(AstLambda{Lambda: Lambda(id)})
+	p.pushExpr(astLambda{Lambda: Lambda(id)})
 	p.apply()
 	return nil
 }
@@ -609,7 +609,7 @@ func (p *parser) ppSeq(body []ppExprs) error {
 			return err
 		}
 		if i < len(body)-1 && p.slen > slen {
-			p.pushExpr(AstDrop{})
+			p.pushExpr(astDrop{})
 		}
 	}
 	p.argc = argc
@@ -626,9 +626,9 @@ func (p *parser) ppList(body []ppExprs) error {
 			return err
 		}
 	}
-	p.pushExpr(AstVariadic{Variadic: vList})
+	p.pushExpr(astVariadic{Variadic: vList})
 	p.argc = argc
-	p.pushExpr(AstApplyN{N: len(body)})
+	p.pushExpr(astApplyN{N: len(body)})
 	p.argc = 1
 	return nil
 }

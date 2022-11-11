@@ -577,7 +577,7 @@ func memberOfAO(w V, x AV) V {
 }
 
 // OccurrenceCount returns ⊒x. XXX unused for now
-func OccurrenceCount(x V) V {
+func occurrenceCount(x V) V {
 	if length(x) == 0 {
 		return AB{}
 	}

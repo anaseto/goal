@@ -56,7 +56,7 @@ func reverse(x V) V {
 }
 
 // Rotate returns TODO
-func Rotate(w, x V) V {
+func rotate(w, x V) V {
 	i := 0
 	switch w := w.(type) {
 	case I:
@@ -138,7 +138,7 @@ func first(x V) V {
 }
 
 // Tail returns 1_x. XXX unused?
-func Tail(x V) V {
+func tail(x V) V {
 	x = toArray(x)
 	switch x := x.(type) {
 	case Array:
@@ -294,7 +294,7 @@ func takeCyclic(x V, n int) V {
 }
 
 // ShiftBefore returns w»x.
-func ShiftBefore(w, x V) V {
+func shiftBefore(w, x V) V {
 	w = toArray(w)
 	max := int(minI(length(w), length(x)))
 	if max == 0 {
@@ -443,7 +443,7 @@ func nudge(x V) V {
 }
 
 // ShiftAfter returns w«x.
-func ShiftAfter(w, x V) V {
+func shiftAfter(w, x V) V {
 	w = toArray(w)
 	max := int(minI(length(w), length(x)))
 	if max == 0 {
@@ -564,7 +564,7 @@ func ShiftAfter(w, x V) V {
 }
 
 // NudgeBack returns «x.
-func NudgeBack(x V) V {
+func nudgeBack(x V) V {
 	if length(x) == 0 {
 		return x
 	}
@@ -1288,7 +1288,7 @@ func enlist(x V) V {
 }
 
 // Windows returns w↕x.
-func Windows(w, x V) V {
+func windows(w, x V) V {
 	i := 0
 	switch w := w.(type) {
 	case I:

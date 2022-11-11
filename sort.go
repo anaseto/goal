@@ -355,7 +355,7 @@ func sortUp(x V) V {
 }
 
 // SortDown returns >x.
-func SortDown(x V) V {
+func sortDown(x V) V {
 	x = sortUp(x)
 	switch x.(type) {
 	case E:
