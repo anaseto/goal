@@ -98,3 +98,23 @@ func TestRunString(t *testing.T) {
 		})
 	}
 }
+
+func BenchmarkFoldMinus(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		ctx := NewContext()
+		ctx.RunString("-/!1000")
+	}
+}
+
+func BenchmarkFoldPlus(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		ctx := NewContext()
+		ctx.RunString("+/!1000")
+	}
+}
+
+func BenchmarkNewContext(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		NewContext()
+	}
+}

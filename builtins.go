@@ -3,39 +3,66 @@ package goal
 import "fmt"
 
 type VariadicFun struct {
-	Name   string
 	Adverb bool
 	Func   func(*Context, []V) V
 }
 
 var builtins []VariadicFun
+var builtinsNames []string
 
 func init() {
 	builtins = []VariadicFun{
-		vRight:    {Name: ":", Func: fRight},
-		vAdd:      {Name: "+", Func: fAdd},
-		vSubtract: {Name: "-", Func: fSubtract},
-		vMultiply: {Name: "*", Func: fMultiply},
-		vDivide:   {Name: "%", Func: fDivide},
-		vMod:      {Name: "!", Func: fMod},
-		vMin:      {Name: "&", Func: fMin},
-		vMax:      {Name: "|", Func: fMax},
-		vLess:     {Name: "<", Func: fLess},
-		vMore:     {Name: ">", Func: fMore},
-		vEqual:    {Name: "=", Func: fEqual},
-		vMatch:    {Name: "~", Func: fMatch},
-		vJoin:     {Name: ",", Func: fJoin},
-		vCut:      {Name: "^", Func: fCut},
-		vTake:     {Name: "#", Func: fTake},
-		vDrop:     {Name: "_", Func: fDrop},
-		vCast:     {Name: "$", Func: fCast},
-		vFind:     {Name: "?", Func: fFind},
-		vApply:    {Name: "@", Func: fApply},
-		vApplyN:   {Name: ".", Func: fApplyN},
-		vList:     {Name: "List", Func: fList},
-		vEach:     {Name: "'", Func: fEach, Adverb: true},
-		vFold:     {Name: "/", Func: fFold, Adverb: true},
-		vScan:     {Name: "\\", Func: fScan, Adverb: true},
+		vRight:    {Func: fRight},
+		vAdd:      {Func: fAdd},
+		vSubtract: {Func: fSubtract},
+		vMultiply: {Func: fMultiply},
+		vDivide:   {Func: fDivide},
+		vMod:      {Func: fMod},
+		vMin:      {Func: fMin},
+		vMax:      {Func: fMax},
+		vLess:     {Func: fLess},
+		vMore:     {Func: fMore},
+		vEqual:    {Func: fEqual},
+		vMatch:    {Func: fMatch},
+		vJoin:     {Func: fJoin},
+		vCut:      {Func: fCut},
+		vTake:     {Func: fTake},
+		vDrop:     {Func: fDrop},
+		vCast:     {Func: fCast},
+		vFind:     {Func: fFind},
+		vApply:    {Func: fApply},
+		vApplyN:   {Func: fApplyN},
+		vList:     {Func: fList},
+		vEach:     {Func: fEach, Adverb: true},
+		vFold:     {Func: fFold, Adverb: true},
+		vScan:     {Func: fScan, Adverb: true},
+	}
+
+	builtinsNames = []string{
+		vRight:    ":",
+		vAdd:      "+",
+		vSubtract: "-",
+		vMultiply: "*",
+		vDivide:   "%",
+		vMod:      "!",
+		vMin:      "&",
+		vMax:      "|",
+		vLess:     "<",
+		vMore:     ">",
+		vEqual:    "=",
+		vMatch:    "~",
+		vJoin:     ",",
+		vCut:      "^",
+		vTake:     "#",
+		vDrop:     "_",
+		vCast:     "$",
+		vFind:     "?",
+		vApply:    "@",
+		vApplyN:   ".",
+		vList:     "List",
+		vEach:     "'",
+		vFold:     "/",
+		vScan:     "\\",
 	}
 }
 

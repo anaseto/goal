@@ -121,8 +121,9 @@ func (ctx *Context) drop() {
 }
 
 func (ctx *Context) dropN(n int) {
-	for i := 1; i <= n; i++ {
-		ctx.stack[len(ctx.stack)-i] = nil
+	topN := ctx.stack[len(ctx.stack)-n:]
+	for i := range topN {
+		topN[i] = nil
 	}
 	ctx.stack = ctx.stack[:len(ctx.stack)-n]
 }
