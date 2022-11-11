@@ -405,39 +405,7 @@ func fFold(ctx *Context, args []V) V {
 func fScan(ctx *Context, args []V) V {
 	switch len(args) {
 	case 2:
-		v, ok := args[1].(Function)
-		if !ok {
-			// TODO: join, split, encode, decode
-			return errsw("not a function")
-		}
-		if v.Rank(ctx) != 2 {
-			// TODO: converge
-			return errf("rank %d verb (expected 2)", v.Rank(ctx))
-		}
-		x := args[0]
-		switch x := x.(type) {
-		case Array:
-			if x.Len() == 0 {
-				v, ok := v.(zeroFun)
-				if ok {
-					return v.zero()
-				}
-				return I(0)
-			}
-			res := AV{x.At(0)}
-			for i := 1; i < x.Len(); i++ {
-				ctx.push(x.At(i))
-				ctx.push(res[len(res)-1])
-				next := ctx.applyN(v, 2)
-				if err, ok := next.(E); ok {
-					return err
-				}
-				res = append(res, next)
-			}
-			return canonical(res)
-		default:
-			return x
-		}
+		return scan2(ctx, args[1], args[0])
 	case 3:
 		v, ok := args[1].(Function)
 		if !ok {

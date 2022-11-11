@@ -108,3 +108,67 @@ func fold2Join(sep S, x V) V {
 		return errs("not a string array")
 	}
 }
+
+func scan2(ctx *Context, v, x V) V {
+	vv, ok := v.(Function)
+	if !ok {
+		switch v := v.(type) {
+		case S:
+			return scan2Split(v, x)
+		}
+		// TODO: split, encode, decode
+		return errsw("not a function")
+	}
+	if vv.Rank(ctx) != 2 {
+		// TODO: converge
+		return errf("rank %d verb (expected 2)", vv.Rank(ctx))
+	}
+	switch x := x.(type) {
+	case Array:
+		if x.Len() == 0 {
+			vv, ok := v.(zeroFun)
+			if ok {
+				return vv.zero()
+			}
+			return I(0)
+		}
+		res := AV{x.At(0)}
+		for i := 1; i < x.Len(); i++ {
+			ctx.push(x.At(i))
+			ctx.push(res[len(res)-1])
+			next := ctx.applyN(v, 2)
+			if err, ok := next.(E); ok {
+				return err
+			}
+			res = append(res, next)
+		}
+		return canonical(res)
+	default:
+		return x
+	}
+}
+
+func scan2Split(sep S, x V) V {
+	switch x := x.(type) {
+	case S:
+		return AS(strings.Split(string(x), string(sep)))
+	case AS:
+		r := make(AV, len(x))
+		for i := range r {
+			r[i] = AS(strings.Split(x[i], string(sep)))
+		}
+		return r
+	case AV:
+		xx := canonical(x)
+		switch xx := xx.(type) {
+		case S:
+			return scan2Split(sep, xx)
+		case AS:
+			return scan2Split(sep, xx)
+		default:
+			return errs("not a string atom or array")
+		}
+	default:
+		return errs("not a string atom or array")
+	}
+}

@@ -67,6 +67,8 @@ var matchTests = [...]matchTest{
 	{`2 0 2=2`, `1 0 1`},
 	{`=/2 2 1`, `1`},
 	{`a:3;f:{a:3;a+x};(a;f 2)`, `(3;5)`},
+	{`","\"a,b,c"`, `"a" "b" "c"`},
+	{`","\("a,b,c";"d,e")`, `("a" "b" "c";"d" "e")`},
 }
 
 func TestRunString(t *testing.T) {
