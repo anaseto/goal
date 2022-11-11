@@ -169,7 +169,7 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 	}
 	olen := len(ctx.stack)
 	oframeIdx := ctx.frameIdx
-	ctx.frameIdx = int32(olen - n)
+	ctx.frameIdx = int32(olen - 1)
 
 	ctx.callDepth++
 	ctx.lambda = int(id)

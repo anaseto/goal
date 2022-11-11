@@ -49,6 +49,17 @@ var matchTests = [...]matchTest{
 	{`~1`, "0"},
 	{`~0`, "1"},
 	{`~0 1 2`, "1 0 0"},
+	{`"name"+".suffix"`, `"name.suffix"`},
+	{`"name.suffix"-".suffix"`, `"name"`},
+	{`2!!5`, `0 1 0 1 0`},
+	{`1%2`, `0.5`},
+	{`1 2%2`, `0.5 1`},
+	{`1 2*3`, `3 6`},
+	{`2*3 5`, `6 10`},
+	{`{x+y}/!5`, `+/!5`},
+	{`{x-y}\!5`, `-\!5`},
+	{`{x;y}[1;2]`, `2`},
+	{`{0;y;x}[1;2]`, `1`},
 }
 
 func TestRunString(t *testing.T) {
@@ -62,9 +73,11 @@ func TestRunString(t *testing.T) {
 			ctxRight := NewContext()
 			vRight, errRight := ctxRight.RunString(mt.Right)
 			if !match(vLeft, vRight) {
+				t.Log(ctxLeft.ProgramString())
 				t.Log(matchString)
 				t.Errorf("Results: %v vs %v", vLeft, vRight)
 			} else if errLeft != nil || errRight != nil {
+				t.Log(ctxLeft.ProgramString())
 				t.Log(matchString)
 				t.Errorf("return error: `%v` vs `%v`", errLeft, errRight)
 			}

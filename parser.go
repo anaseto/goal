@@ -520,10 +520,14 @@ func (p *parser) ppLambda(body []ppExprs, args []string) error {
 			return err
 		}
 	}
-	for _, exprs := range body {
+	for i, exprs := range body {
+		slen := p.slen
 		err := p.ppExprs(exprs)
 		if err != nil {
 			return err
+		}
+		if i < len(body)-1 && p.slen > slen {
+			p.pushExpr(AstDrop{})
 		}
 	}
 	p.scopeStack = p.scopeStack[:len(p.scopeStack)-1]

@@ -23,7 +23,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ctx.push(v)
 			ip++
 		case opLocal:
-			v := ctx.stack[ctx.frameIdx+int32(ops[ip])]
+			v := ctx.stack[ctx.frameIdx-int32(ops[ip])]
 			if v == nil {
 				return ip, fmt.Errorf("undefined local: %s",
 					ctx.prog.Lambdas[ctx.lambda].Locals[int32(ops[ip])])
@@ -34,7 +34,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ctx.globals[ops[ip]] = ctx.top()
 			ip++
 		case opAssignLocal:
-			ctx.stack[ctx.frameIdx+int32(ops[ip])] = ctx.top()
+			ctx.stack[ctx.frameIdx-int32(ops[ip])] = ctx.top()
 			ip++
 		case opVariadic:
 			ctx.push(Variadic(ops[ip]))

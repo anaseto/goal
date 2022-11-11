@@ -398,7 +398,7 @@ func canonical(x V) V {
 		case tB:
 			r := make(AB, len(y))
 			for i, v := range y {
-				r[i] = v.(I) == 1
+				r[i] = v.(I) != 0
 			}
 			return r
 		case tI:
@@ -410,7 +410,12 @@ func canonical(x V) V {
 		case tF:
 			r := make(AF, len(y))
 			for i, v := range y {
-				r[i] = float64(v.(F))
+				switch v := v.(type) {
+				case F:
+					r[i] = float64(v)
+				case I:
+					r[i] = float64(v)
+				}
 			}
 			return r
 		case tS:
