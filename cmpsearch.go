@@ -6,12 +6,12 @@ type Matcher interface {
 	Matches(x V) bool
 }
 
-// Match returns w≡x.
-func Match(w, x V) V {
-	return B2I(match(w, x))
+// match returns w≡x.
+func match(w, x V) V {
+	return B2I(matchB(w, x))
 }
 
-func match(w, x V) bool {
+func matchB(w, x V) bool {
 	switch w := w.(type) {
 	case F:
 		switch x := x.(type) {
@@ -88,7 +88,7 @@ func match(w, x V) bool {
 			return true
 		}
 		for i := 0; i < l; i++ {
-			if !match(w.At(i), x.At(i)) {
+			if !matchB(w.At(i), x.At(i)) {
 				return false
 			}
 		}
@@ -223,7 +223,7 @@ func classify(x V) V {
 	loop:
 		for i, v := range x {
 			for j := range x[:i] {
-				if match(v, x[j]) {
+				if matchB(v, x[j]) {
 					r[i] = r[j]
 					continue loop
 				}
@@ -301,7 +301,7 @@ func uniq(x V) V {
 	loop:
 		for i, v := range x {
 			for j := range x[:i] {
-				if match(v, x[j]) {
+				if matchB(v, x[j]) {
 					continue loop
 				}
 			}
@@ -377,7 +377,7 @@ func markFirsts(x V) V {
 	loop:
 		for i, v := range x {
 			for j := range x[:i] {
-				if match(v, x[j]) {
+				if matchB(v, x[j]) {
 					continue loop
 				}
 			}
@@ -559,7 +559,7 @@ func memberOfAO(w V, x AV) V {
 		r := make(AB, w.Len())
 		for i := 0; i < w.Len(); i++ {
 			for _, v := range x {
-				if match(w.At(i), v) {
+				if matchB(w.At(i), v) {
 					r[i] = true
 					break
 				}
@@ -568,7 +568,7 @@ func memberOfAO(w V, x AV) V {
 		return r
 	default:
 		for _, v := range x {
-			if match(w, v) {
+			if matchB(w, v) {
 				return B2I(true)
 			}
 		}
@@ -645,7 +645,7 @@ func occurrenceCount(x V) V {
 	loop:
 		for i, v := range x {
 			for j := i - 1; j >= 0; j-- {
-				if match(v, x[j]) {
+				if matchB(v, x[j]) {
 					r[i] = r[j] + 1
 					continue loop
 				}

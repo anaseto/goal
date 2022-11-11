@@ -202,7 +202,7 @@ func fMatch(ctx *Context, args []V) V {
 	case 1:
 		return not(args[0])
 	case 2:
-		return Match(args[1], args[0])
+		return match(args[1], args[0])
 	default:
 		return errs("too many arguments")
 	}
