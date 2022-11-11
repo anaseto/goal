@@ -414,8 +414,8 @@ func ShiftBefore(w, x V) V {
 	}
 }
 
-// Nudge returns »x.
-func Nudge(x V) V {
+// nudge returns »x.
+func nudge(x V) V {
 	switch x := x.(type) {
 	case AB:
 		r := make(AB, len(x))

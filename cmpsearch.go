@@ -314,7 +314,7 @@ func uniq(x V) V {
 }
 
 // Mark Firsts returns ∊x. XXX unused for now
-func MarkFirsts(x V) V {
+func markFirsts(x V) V {
 	if length(x) == 0 {
 		return AB{}
 	}
@@ -389,8 +389,8 @@ func MarkFirsts(x V) V {
 	}
 }
 
-// MemberOf returns w∊x. XXX unused for now
-func MemberOf(w, x V) V {
+// memberOf returns w∊x. XXX unused for now
+func memberOf(w, x V) V {
 	if length(x) == 0 || length(w) == 0 {
 		switch x.(type) {
 		case Array:
