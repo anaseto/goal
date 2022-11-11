@@ -156,7 +156,7 @@ func matchAF(w, x AF) bool {
 
 // classify returns %x.
 func classify(x V) V {
-	if Length(x) == 0 {
+	if length(x) == 0 {
 		return AB{}
 	}
 	x = canonical(x)
@@ -237,9 +237,9 @@ func classify(x V) V {
 	}
 }
 
-// Uniq returns ?x.
-func Uniq(x V) V {
-	if Length(x) == 0 {
+// uniq returns ?x.
+func uniq(x V) V {
+	if length(x) == 0 {
 		return x
 	}
 	x = canonical(x)
@@ -315,7 +315,7 @@ func Uniq(x V) V {
 
 // Mark Firsts returns ∊x. XXX unused for now
 func MarkFirsts(x V) V {
-	if Length(x) == 0 {
+	if length(x) == 0 {
 		return AB{}
 	}
 	x = canonical(x)
@@ -391,12 +391,12 @@ func MarkFirsts(x V) V {
 
 // MemberOf returns w∊x. XXX unused for now
 func MemberOf(w, x V) V {
-	if Length(x) == 0 || Length(w) == 0 {
+	if length(x) == 0 || length(w) == 0 {
 		switch x.(type) {
 		case Array:
 			switch w := w.(type) {
 			case Array:
-				r := make(AB, Length(w))
+				r := make(AB, length(w))
 				return r
 			default:
 				return B2I(false)
@@ -432,7 +432,7 @@ func memberOfAB(w V, x AB) V {
 		t, f = t || v, f || !v
 	}
 	if t && f {
-		r := make(AB, Length(w))
+		r := make(AB, length(w))
 		for i := range r {
 			r[i] = true
 		}
@@ -479,7 +479,7 @@ func memberOfAF(w V, x AF) V {
 		}
 		return r
 	default:
-		return make(AB, Length(w))
+		return make(AB, length(w))
 	}
 }
 
@@ -524,7 +524,7 @@ func memberOfAI(w V, x AI) V {
 		}
 		return r
 	default:
-		return make(AB, Length(w))
+		return make(AB, length(w))
 	}
 }
 
@@ -548,7 +548,7 @@ func memberOfAS(w V, x AS) V {
 		}
 		return r
 	default:
-		return make(AB, Length(w))
+		return make(AB, length(w))
 	}
 }
 
@@ -578,7 +578,7 @@ func memberOfAO(w V, x AV) V {
 
 // OccurrenceCount returns ⊒x. XXX unused for now
 func OccurrenceCount(x V) V {
-	if Length(x) == 0 {
+	if length(x) == 0 {
 		return AB{}
 	}
 	x = canonical(x)

@@ -40,27 +40,27 @@ func less(w, x V) bool {
 		return lessS(w, x)
 	case AB:
 		if len(w) == 0 {
-			return Length(x) > 0
+			return length(x) > 0
 		}
 		return lessAB(w, x)
 	case AF:
 		if len(w) == 0 {
-			return Length(x) > 0
+			return length(x) > 0
 		}
 		return lessAF(w, x)
 	case AI:
 		if len(w) == 0 {
-			return Length(x) > 0
+			return length(x) > 0
 		}
 		return lessAI(w, x)
 	case AS:
 		if len(w) == 0 {
-			return Length(x) > 0
+			return length(x) > 0
 		}
 		return lessAS(w, x)
 	case AV:
 		if len(w) == 0 {
-			return Length(x) > 0
+			return length(x) > 0
 		}
 		return lessAO(w, x)
 	default:
@@ -328,8 +328,8 @@ func lessAO(w AV, x V) bool {
 	}
 }
 
-// SortUp returns <x.
-func SortUp(x V) V {
+// sortUp returns <x.
+func sortUp(x V) V {
 	// XXX: error if atom?
 	x = canonical(x)
 	x = cloneShallow(x)
@@ -356,7 +356,7 @@ func SortUp(x V) V {
 
 // SortDown returns >x.
 func SortDown(x V) V {
-	x = SortUp(x)
+	x = sortUp(x)
 	switch x.(type) {
 	case E:
 		return x

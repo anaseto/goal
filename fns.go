@@ -189,10 +189,10 @@ func where(x V) V {
 	}
 }
 
-// Replicate returns {w}#x.
-func Replicate(w, x V) V {
-	if Length(w) != Length(x) {
-		return errf("length mismatch: %d vs %d", Length(w), Length(x))
+// replicate returns {w}#x.
+func replicate(w, x V) V {
+	if length(w) != length(x) {
+		return errf("length mismatch: %d vs %d", length(w), length(x))
 	}
 	switch w := w.(type) {
 	case I:

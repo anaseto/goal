@@ -212,9 +212,9 @@ func fMatch(ctx *Context, args []V) V {
 func fJoin(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return Enlist(args[0])
+		return enlist(args[0])
 	case 2:
-		return JoinTo(args[1], args[0])
+		return joinTo(args[1], args[0])
 	default:
 		return errs("too many arguments")
 	}
@@ -224,7 +224,7 @@ func fJoin(ctx *Context, args []V) V {
 func fCut(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return SortUp(args[0])
+		return sortUp(args[0])
 	case 2:
 		return errNYI("dyadic ^")
 		//return Cut(args[1], args[0])
@@ -237,15 +237,15 @@ func fCut(ctx *Context, args []V) V {
 func fTake(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return Length(args[0])
+		return length(args[0])
 	case 2:
 		v, ok := args[1].(Function)
 		if ok {
 			ctx.push(args[0])
 			res := ctx.applyN(v, 1)
-			return Replicate(res, args[0])
+			return replicate(res, args[0])
 		}
-		return Take(args[1], args[0])
+		return take(args[1], args[0])
 	default:
 		return errs("too many arguments")
 	}
@@ -257,7 +257,7 @@ func fDrop(ctx *Context, args []V) V {
 	case 1:
 		return floor(args[0])
 	case 2:
-		return Drop(args[1], args[0])
+		return drop(args[1], args[0])
 	default:
 		return errs("too many arguments")
 	}
@@ -279,7 +279,7 @@ func fCast(ctx *Context, args []V) V {
 func fFind(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return Uniq(args[0])
+		return uniq(args[0])
 	case 2:
 		return errNYI("dyadic ?")
 	default:

@@ -6,8 +6,8 @@ import (
 	"sort"
 )
 
-// Length returns #x.
-func Length(x V) I {
+// length returns #x.
+func length(x V) I {
 	switch x := x.(type) {
 	case nil:
 		return 0
@@ -69,7 +69,7 @@ func Rotate(w, x V) V {
 	default:
 		return errsw("not an integer")
 	}
-	lenx := int(Length(x))
+	lenx := int(length(x))
 	if lenx == 0 {
 		return x
 	}
@@ -151,8 +151,8 @@ func Tail(x V) V {
 	}
 }
 
-// Drop returns i_x.
-func Drop(w, x V) V {
+// drop returns i_x.
+func drop(w, x V) V {
 	i := 0
 	switch w := w.(type) {
 	case I:
@@ -186,8 +186,8 @@ func Drop(w, x V) V {
 	}
 }
 
-// Take returns i#x.
-func Take(w, x V) V {
+// take returns i#x.
+func take(w, x V) V {
 	i := 0
 	switch w := w.(type) {
 	case I:
@@ -296,7 +296,7 @@ func takeCyclic(x V, n int) V {
 // ShiftBefore returns w»x.
 func ShiftBefore(w, x V) V {
 	w = toArray(w)
-	max := int(minI(Length(w), Length(x)))
+	max := int(minI(length(w), length(x)))
 	if max == 0 {
 		return x
 	}
@@ -445,7 +445,7 @@ func Nudge(x V) V {
 // ShiftAfter returns w«x.
 func ShiftAfter(w, x V) V {
 	w = toArray(w)
-	max := int(minI(Length(w), Length(x)))
+	max := int(minI(length(w), length(x)))
 	if max == 0 {
 		return x
 	}
@@ -565,7 +565,7 @@ func ShiftAfter(w, x V) V {
 
 // NudgeBack returns «x.
 func NudgeBack(x V) V {
-	if Length(x) == 0 {
+	if length(x) == 0 {
 		return x
 	}
 	switch x := x.(type) {
@@ -607,7 +607,7 @@ func flip(x V) V {
 		}
 		lines := -1
 		for _, o := range x {
-			nl := int(Length(o))
+			nl := int(length(o))
 			if !isArray(o) {
 				continue
 			}
@@ -827,8 +827,8 @@ func flipAOAO(x AV, lines int) AV {
 	return r
 }
 
-// JoinTo returns w,x.
-func JoinTo(w, x V) V {
+// joinTo returns w,x.
+func joinTo(w, x V) V {
 	switch w := w.(type) {
 	case F:
 		return joinToF(w, x, true)
@@ -1270,8 +1270,8 @@ func joinAFAI(w AF, x AI) AF {
 	return r
 }
 
-// Enlist returns ,x.
-func Enlist(x V) V {
+// enlist returns ,x.
+func enlist(x V) V {
 	switch x := x.(type) {
 	case F:
 		return AF{float64(x)}
@@ -1318,7 +1318,7 @@ func Windows(w, x V) V {
 
 // group returns ⊔x. XXX Classify by default?
 func group(x V) V {
-	if Length(x) == 0 {
+	if length(x) == 0 {
 		return AV{}
 	}
 	// TODO: optimize allocations
