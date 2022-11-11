@@ -17,7 +17,7 @@ func (ctx *Context) applyN(v V, n int) V {
 		if hasNil(args) {
 			return Projection{Fun: v, Args: ctx.popN(n + 1)}
 		}
-		res := builtins[v.Fun].Func(ctx, args)
+		res := ctx.variadics[v.Fun].Func(ctx, args)
 		ctx.dropN(n + 1)
 		return res
 	case ProjectionOne:
@@ -68,7 +68,7 @@ func (ctx *Context) applyN(v V, n int) V {
 func (ctx *Context) applyVariadic(v Variadic) V {
 	args := ctx.peek()
 	vv := args[0]
-	if builtins[v].Adverb {
+	if ctx.variadics[v].Adverb {
 		ctx.drop()
 		return DerivedVerb{Fun: v, Arg: vv}
 	}
@@ -83,7 +83,7 @@ func (ctx *Context) applyVariadic(v Variadic) V {
 		if vv == nil {
 			return Projection{Fun: v, Args: []V{vv}}
 		}
-		res := builtins[v].Func(ctx, args)
+		res := ctx.variadics[v].Func(ctx, args)
 		ctx.drop()
 		return res
 	}
@@ -99,7 +99,7 @@ func (ctx *Context) applyNVariadic(v Variadic, n int) V {
 		}
 		return Projection{Fun: v, Args: ctx.popN(n)}
 	}
-	if n == 2 && !builtins[v].Adverb {
+	if n == 2 && !ctx.variadics[v].Adverb {
 		switch arg := args[1].(type) {
 		case Lambda:
 		case Function:
@@ -111,7 +111,7 @@ func (ctx *Context) applyNVariadic(v Variadic, n int) V {
 			return res
 		}
 	}
-	res := builtins[v].Func(ctx, args)
+	res := ctx.variadics[v].Func(ctx, args)
 	ctx.dropN(n)
 	return res
 }

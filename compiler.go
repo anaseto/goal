@@ -77,7 +77,7 @@ func (ctx *Context) opcodesString(ops []opcode, lc *LambdaCode) string {
 			fmt.Fprintf(sb, "%d\t%s\t%d (%s)\n", i, op, ops[i+1], lc.Locals[ops[i+1]])
 			i++
 		case opVariadic:
-			fmt.Fprintf(sb, "%d\t%s\t%s\n", i, op, builtinsNames[ops[i+1]])
+			fmt.Fprintf(sb, "%d\t%s\t%s\n", i, op, ctx.variadicsNames[ops[i+1]])
 			i++
 		case opLambda:
 			fmt.Fprintf(sb, "%d\t%s\t%d\n", i, op, ops[i+1])

@@ -7,11 +7,8 @@ type VariadicFun struct {
 	Func   func(*Context, []V) V
 }
 
-var builtins []VariadicFun
-var builtinsNames []string
-
-func init() {
-	builtins = []VariadicFun{
+func (ctx *Context) initVariadics() {
+	ctx.variadics = []VariadicFun{
 		vRight:    {Func: fRight},
 		vAdd:      {Func: fAdd},
 		vSubtract: {Func: fSubtract},
@@ -38,7 +35,7 @@ func init() {
 		vScan:     {Func: fScan, Adverb: true},
 	}
 
-	builtinsNames = []string{
+	ctx.variadicsNames = []string{
 		vRight:    ":",
 		vAdd:      "+",
 		vSubtract: "-",

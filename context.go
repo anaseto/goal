@@ -22,8 +22,10 @@ type Context struct {
 	lambda    int
 
 	// values
-	globals   []V
-	constants []V
+	globals        []V
+	constants      []V
+	variadics      []VariadicFun
+	variadicsNames []string
 
 	// symbol handling
 	gNames []string
@@ -45,7 +47,22 @@ func NewContext() *Context {
 	ctx.stack = make([]V, 0, 64)
 	ctx.scanner = &Scanner{}
 	ctx.parser = newParser(ctx)
+	ctx.initVariadics()
 	return ctx
+}
+
+// RegisterVariadic adds a variadic function to the context.
+func (ctx *Context) RegisterVariadic(name string, vf VariadicFun) Variadic {
+	id := len(ctx.variadics)
+	ctx.variadics = append(ctx.variadics, vf)
+	ctx.variadicsNames = append(ctx.variadicsNames, name)
+	return Variadic(id)
+}
+
+// AssignGlobal assigns a value to a global variable name.
+func (ctx *Context) AssignGlobal(name string, v V) {
+	id := ctx.global(name)
+	ctx.globals[id] = v
 }
 
 // SetSource sets the reader source for running code. The name is used for
