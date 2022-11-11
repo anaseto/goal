@@ -160,17 +160,19 @@ func (ctx *Context) compileLambda(lc *AstLambdaCode) *LambdaCode {
 	}
 	if nargs == 0 {
 		// All lambdas have at least one argument, even if not used.
+		nlocals++
 		nargs = 1
 	}
+	nvars := nlocals - nargs
 	clc := &LambdaCode{}
 	clc.Rank = nargs
 	locals := make([]string, nlocals)
 	getID := func(local Local) int {
 		switch local.Type {
 		case LocalArg:
-			return local.ID
+			return local.ID + nvars
 		case LocalVar:
-			return local.ID + nargs
+			return local.ID
 		default:
 			panic(fmt.Sprintf("unknown local type: %d", local.Type))
 		}

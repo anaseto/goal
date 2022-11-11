@@ -58,8 +58,15 @@ var matchTests = [...]matchTest{
 	{`2*3 5`, `6 10`},
 	{`{x+y}/!5`, `+/!5`},
 	{`{x-y}\!5`, `-\!5`},
+	{`{|x}[!5]`, `|!5`},
 	{`{x;y}[1;2]`, `2`},
 	{`{0;y;x}[1;2]`, `1`},
+	{`|/!5`, `4`},
+	{`&/!5`, `0`},
+	{`=/!5`, `0`},
+	{`2 0 2=2`, `1 0 1`},
+	{`=/2 2 1`, `1`},
+	{`a:3;f:{a:3;a+x};(a;f 2)`, `(3;5)`},
 }
 
 func TestRunString(t *testing.T) {
@@ -73,13 +80,20 @@ func TestRunString(t *testing.T) {
 			ctxRight := NewContext()
 			vRight, errRight := ctxRight.RunString(mt.Right)
 			if !match(vLeft, vRight) {
+				t.Log(ctxLeft.ast.String())
 				t.Log(ctxLeft.ProgramString())
 				t.Log(matchString)
-				t.Errorf("Results: %v vs %v", vLeft, vRight)
-			} else if errLeft != nil || errRight != nil {
-				t.Log(ctxLeft.ProgramString())
-				t.Log(matchString)
-				t.Errorf("return error: `%v` vs `%v`", errLeft, errRight)
+				t.Logf("results: %v vs %v", vLeft, vRight)
+				t.Fail()
+			}
+			if errLeft != nil || errRight != nil {
+				if !t.Failed() {
+					t.Log(ctxLeft.ast.String())
+					t.Log(ctxLeft.ProgramString())
+					t.Log(matchString)
+				}
+				t.Logf("return error: `%v` vs `%v`", errLeft, errRight)
+				t.Fail()
 			}
 		})
 	}

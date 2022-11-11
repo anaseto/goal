@@ -167,9 +167,13 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 		}
 		return Projection{Fun: id, Args: ctx.popN(n)}
 	}
+	nVars := len(lc.Locals) - lc.Rank
 	olen := len(ctx.stack)
+	for i := 0; i < nVars; i++ {
+		ctx.push(nil)
+	}
 	oframeIdx := ctx.frameIdx
-	ctx.frameIdx = int32(olen - 1)
+	ctx.frameIdx = int32(len(ctx.stack) - 1)
 
 	ctx.callDepth++
 	ctx.lambda = int(id)
@@ -181,11 +185,14 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 	}
 	var res V
 	switch len(ctx.stack) {
-	case olen:
-	case olen + 1:
+	case olen + nVars:
+	case olen + nVars + 1:
 		res = ctx.stack[len(ctx.stack)-1]
 	default:
 		return errf("bad sp %d vs osp %d", len(ctx.stack), olen)
+	}
+	if nVars > 0 {
+		ctx.dropN(nVars)
 	}
 	ctx.dropN(n)
 	ctx.frameIdx = oframeIdx

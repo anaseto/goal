@@ -343,6 +343,7 @@ func (p *parser) ppAssign(verbTok, identTok ppToken) bool {
 		})
 		return true
 	}
+	lc.Locals[identTok.Text] = Local{Type: LocalVar, ID: lc.nVars}
 	p.pushExpr(AstAssignLocal{
 		Name:  identTok.Text,
 		Local: Local{Type: LocalVar, ID: lc.nVars},
