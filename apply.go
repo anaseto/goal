@@ -93,17 +93,17 @@ func (ctx *Context) applyVariadic(v Variadic) V {
 		ctx.drop()
 		return Projection{Fun: v, Args: []V{vv}}
 	}
-	switch vv := vv.(type) {
-	case Variadic:
-		return Composition{Left: v, Right: vv}
-	default:
-		if vv == nil {
-			return Projection{Fun: v, Args: []V{vv}}
-		}
-		res := ctx.variadics[v].Func(ctx, args)
-		ctx.drop()
-		return res
+	//switch vv := vv.(type) {
+	//case Variadic:
+	//return Composition{Left: v, Right: vv}
+	//default:
+	if vv == nil {
+		return Projection{Fun: v, Args: []V{vv}}
 	}
+	res := ctx.variadics[v].Func(ctx, args)
+	ctx.drop()
+	return res
+	//}
 }
 
 func (ctx *Context) applyNVariadic(v Variadic, n int) V {
@@ -116,18 +116,18 @@ func (ctx *Context) applyNVariadic(v Variadic, n int) V {
 		}
 		return Projection{Fun: v, Args: ctx.popN(n)}
 	}
-	if n == 2 && !ctx.variadics[v].Adverb {
-		switch arg := args[1].(type) {
-		case Lambda:
-		case Function:
-			res := Composition{
-				Left:  ProjectionOne{Fun: v, Arg: args[0]},
-				Right: arg,
-			}
-			ctx.dropN(2)
-			return res
-		}
-	}
+	//if n == 2 && !ctx.variadics[v].Adverb {
+	//switch arg := args[1].(type) {
+	//case Lambda:
+	//case Function:
+	//res := Composition{
+	//Left:  ProjectionOne{Fun: v, Arg: args[0]},
+	//Right: arg,
+	//}
+	//ctx.dropN(2)
+	//return res
+	//}
+	//}
 	res := ctx.variadics[v].Func(ctx, args)
 	ctx.dropN(n)
 	return res

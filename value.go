@@ -5,6 +5,7 @@ package goal
 import (
 	"fmt"
 	"math"
+	"strconv"
 	"strings"
 )
 
@@ -19,14 +20,16 @@ type I int     // I represents integers.
 type S string  // S represents (immutable) strings of bytes.
 type E string  // E represents errors
 
-func (f F) Len() int      { return 1 }
-func (i I) Len() int      { return 1 }
-func (s S) Len() int      { return 1 }
-func (e E) Len() int      { return 1 }
-func (f F) Type() string  { return "f" }
-func (i I) Type() string  { return "i" }
-func (s S) Type() string  { return "s" }
-func (e E) Type() string  { return "e" }
+func (f F) Len() int       { return 1 }
+func (i I) Len() int       { return 1 }
+func (s S) Len() int       { return 1 }
+func (e E) Len() int       { return 1 }
+func (f F) Type() string   { return "f" }
+func (i I) Type() string   { return "i" }
+func (s S) Type() string   { return "s" }
+func (e E) Type() string   { return "e" }
+func (s S) String() string { return strconv.Quote(string(s)) }
+
 func (e E) Error() string { return string(e) }
 
 type AV []V       // generic array
@@ -117,7 +120,7 @@ type ProjectionOne struct {
 }
 
 // Composition represents a composition of two functions. The left one is
-// always called monadically.
+// always called monadically. NOTE: unused for now.
 type Composition struct {
 	Left  Function
 	Right Function

@@ -163,10 +163,14 @@ func (p *parser) ppExpr(ppe ppExpr) error {
 			return err
 		}
 	case ppParenExpr:
+		argc := p.argc
+		p.argc = 0
 		oarglist := p.arglist
 		p.arglist = false
 		err := p.ppParenExpr(ppe)
 		p.arglist = oarglist
+		p.argc = argc + 1
+		p.apply()
 		if err != nil {
 			return err
 		}
@@ -414,6 +418,7 @@ func getVerb(ppe ppExpr) (ppToken, bool) {
 func (p *parser) ppAdverbs(adverbs ppAdverbs) error {
 	tok := adverbs[len(adverbs)-1]
 	adverbs = adverbs[:len(adverbs)-1]
+	argc := p.argc
 	ppe := p.it.Peek()
 	if ppe == nil {
 		if len(adverbs) > 0 {
@@ -422,7 +427,9 @@ func (p *parser) ppAdverbs(adverbs ppAdverbs) error {
 		p.pushExpr(astNil{Pos: tok.Pos})
 		return p.ppVariadic(tok)
 	}
-	argc := p.argc
+	if argc == 0 {
+		p.pushExpr(astNil{Pos: tok.Pos})
+	}
 	p.it.Next()
 	var err error
 	p.argc = 0
@@ -443,9 +450,6 @@ func (p *parser) ppAdverbs(adverbs ppAdverbs) error {
 	}
 	nppe := p.it.Peek()
 	if nppe == nil || p.arglist || !isLeftArg(nppe) {
-		if argc == 0 {
-			p.pushExpr(astNil{Pos: tok.Pos})
-		}
 		p.argc = 2
 		return p.ppVariadic(tok)
 	}
@@ -454,9 +458,6 @@ func (p *parser) ppAdverbs(adverbs ppAdverbs) error {
 	err = p.ppExpr(nppe)
 	if err != nil {
 		return err
-	}
-	if argc == 0 {
-		p.pushExpr(astNil{Pos: tok.Pos})
 	}
 	p.argc = 3
 	return p.ppVariadic(tok)
@@ -587,10 +588,8 @@ func (p *parser) ppArgs(body []ppExprs) error {
 	if err != nil {
 		return err
 	}
-	if argc > 0 {
-		p.argc = argc + 1
-		p.apply()
-	}
+	p.argc = argc + 1
+	p.apply()
 	return nil
 }
 
@@ -612,7 +611,8 @@ func (p *parser) ppSeq(body []ppExprs) error {
 			p.pushExpr(astDrop{})
 		}
 	}
-	p.argc = argc
+	p.argc = argc + 1
+	p.apply()
 	return nil
 }
 
@@ -627,9 +627,9 @@ func (p *parser) ppList(body []ppExprs) error {
 		}
 	}
 	p.pushExpr(astVariadic{Variadic: vList})
-	p.argc = argc
 	p.pushExpr(astApplyN{N: len(body)})
-	p.argc = 1
+	p.argc = argc + 1
+	p.apply()
 	return nil
 }
 
