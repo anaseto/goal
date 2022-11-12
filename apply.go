@@ -1,5 +1,7 @@
 package goal
 
+//import "fmt"
+
 // Apply calls a value with a single argument.
 func (ctx *Context) Apply(v, x V) V {
 	ctx.push(x)
@@ -66,11 +68,22 @@ func (ctx *Context) applyN(v V, n int) V {
 				ctx.drop()
 				return v
 			}
-			indices := toIndices(args[0])
-			if indices == nil {
-				return errs("not an integer array")
+			var res V
+			switch x := args[0].(type) {
+			case F:
+				if !isI(x) {
+					return errs("[] : got non-integer as index")
+				}
+				res = v.At(int(x))
+			case I:
+				res = v.At(int(x))
+			case Array:
+				indices := toIndices(args[0])
+				if indices == nil {
+					return errs("[] : got non-integer array as indices")
+				}
+				res = v.Select(indices)
 			}
-			res := v.Select(indices)
 			ctx.drop()
 			return res
 		default:
@@ -193,20 +206,23 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 	ctx.frameIdx = int32(len(ctx.stack) - 1)
 
 	ctx.callDepth++
+	olambda := ctx.lambda
 	ctx.lambda = int(id)
 	_, err := ctx.execute(lc.Body)
 	ctx.callDepth--
+	ctx.lambda = olambda
 
 	if err != nil {
-		return errf("lambda execute: %v", err)
+		return errf("lambda %d (stack: %v): %v", id, ctx.stack, err)
 	}
 	var res V
 	switch len(ctx.stack) {
 	case olen + nVars:
 	case olen + nVars + 1:
 		res = ctx.stack[len(ctx.stack)-1]
+		ctx.drop()
 	default:
-		return errf("bad sp %d vs osp %d", len(ctx.stack), olen)
+		return errf("lambda %d: bad len %d vs old %d (depth: %d): %v", id, len(ctx.stack), olen, ctx.callDepth, ctx.stack)
 	}
 	if nVars > 0 {
 		ctx.dropN(nVars)

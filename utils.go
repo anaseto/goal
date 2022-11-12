@@ -218,8 +218,30 @@ func isFalse(x V) bool {
 	case AV:
 		return len(x) == 0
 	default:
-		// TODO: Interface for other objects?
 		return x == nil
+	}
+}
+
+func isTrue(x V) bool {
+	switch x := x.(type) {
+	case F:
+		return x != 0
+	case I:
+		return x != 0
+	case S:
+		return x != ""
+	case AB:
+		return len(x) > 0
+	case AF:
+		return len(x) > 0
+	case AI:
+		return len(x) > 0
+	case AS:
+		return len(x) > 0
+	case AV:
+		return len(x) > 0
+	default:
+		return x != nil
 	}
 }
 

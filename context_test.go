@@ -72,6 +72,17 @@ var matchTests = [...]matchTest{
 	{`f:+/;f[!10]`, `45`},
 	{`(+/)[!10]`, `45`},
 	{`(+/) @ !10`, `45`},
+	{`{x>0}{x-1}/2`, `0`},
+	{`{x>0}{x-1}/-2`, `-2`},
+	{`{x>0}{x-1}\2`, `2 1 0`},
+	{`3{x-1}/4`, `1`},
+	{`3{x-1}\4`, `4 3 2 1`},
+	{"dec:{({0};{dec x-1})[x>0]x};dec 3", "0"},
+	{"fib:{(({(fib x-1)+(fib x-2)};{1})[x=1];{0})[x=0]x}; fib 1", `1`},
+	{"fib:{(({(fib x-1)+(fib x-2)};{1})[x=1];{0})[x=0]x}; fib 0", `0`},
+	{"fib:{(({(fib x-1)+(fib x-2)};{1})[x=1];{0})[x=0]x}; fib 2", `1`},
+	{"fib:{(({(fib x-1)+(fib x-2)};{1})[x=1];{0})[x=0]x}; fib 3", `2`},
+	{"fib:{(({(fib x-1)+(fib x-2)};{1})[x=1];{0})[x=0]x}; fib 4", `3`},
 }
 
 func TestRunString(t *testing.T) {
@@ -117,6 +128,34 @@ func BenchmarkFoldPlus(b *testing.B) {
 		ctx.RunString("+/!1000")
 	}
 }
+
+func BenchmarkFoldLambdaPlus(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		ctx := NewContext()
+		ctx.RunString("{x+y}/!1000")
+	}
+}
+
+func BenchmarkFoldWhile(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		ctx := NewContext()
+		ctx.RunString("{x<1000}{x+1}/1")
+	}
+}
+
+func BenchmarkFoldDo(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		ctx := NewContext()
+		ctx.RunString("1000{x+1}/1")
+	}
+}
+
+//func BenchmarkFib(b *testing.B) {
+//for n := 0; n < b.N; n++ {
+//ctx := NewContext()
+//ctx.RunString("fib:{(({(fib x-1)+(fib x-2)};{1})[x=1];{0})[x=0]x}; fib 35")
+//}
+//}
 
 func BenchmarkNewContext(b *testing.B) {
 	for n := 0; n < b.N; n++ {

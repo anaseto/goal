@@ -17,7 +17,7 @@ func fold2(ctx *Context, args []V) V {
 		case S:
 			return fold2Join(v, args[0])
 		}
-		// TODO: join, split, encode, decode
+		// TODO: decode
 		return errf("not a function left: %s", v.Type())
 	}
 	if vv.Rank(ctx) != 2 {
@@ -116,8 +116,8 @@ func fold3(ctx *Context, args []V) V {
 		return errs("3-rank form for adverb / expects function")
 	}
 	if v.Rank(ctx) != 2 {
-		// TODO: while
-		return errf("rank %d verb (expected 2)", v.Rank(ctx))
+		return fold3While(ctx, args)
+		//return errf("rank %d verb (expected 2)", v.Rank(ctx))
 	}
 	y := args[0]
 	switch y := y.(type) {
@@ -142,6 +142,42 @@ func fold3(ctx *Context, args []V) V {
 	}
 }
 
+func fold3While(ctx *Context, args []V) V {
+	v := args[1]
+	switch x := args[2].(type) {
+	case I:
+		// TODO: F case
+		y := args[0]
+		for i := 0; i < int(x); i++ {
+			ctx.push(y)
+			y = ctx.applyN(v, 1)
+			if err, ok := y.(E); ok {
+				return err
+			}
+		}
+		return y
+	case Function:
+		y := args[0]
+		for {
+			ctx.push(y)
+			cond := ctx.applyN(x, 1)
+			if err, ok := cond.(E); ok {
+				return err
+			}
+			if !isTrue(cond) {
+				return y
+			}
+			ctx.push(y)
+			y = ctx.applyN(v, 1)
+			if err, ok := y.(E); ok {
+				return err
+			}
+		}
+	default:
+		return errf("x f/y : bad type `%v for x", x.Type())
+	}
+}
+
 func scan2(ctx *Context, v, x V) V {
 	vv, ok := v.(Function)
 	if !ok {
@@ -149,7 +185,7 @@ func scan2(ctx *Context, v, x V) V {
 		case S:
 			return scan2Split(v, x)
 		}
-		// TODO: split, encode, decode
+		// TODO: encode
 		return errsw("not a function")
 	}
 	if vv.Rank(ctx) != 2 {
@@ -212,8 +248,8 @@ func scan3(ctx *Context, args []V) V {
 		return errs("3-rank form for adverb / expects function")
 	}
 	if v.Rank(ctx) != 2 {
-		// TODO: while
-		return errf("rank %d verb (expected 2)", v.Rank(ctx))
+		return scan3While(ctx, args)
+		//return errf("rank %d verb (expected 2)", v.Rank(ctx))
 	}
 	y := args[0]
 	switch y := y.(type) {
@@ -236,6 +272,46 @@ func scan3(ctx *Context, args []V) V {
 		ctx.push(y)
 		ctx.push(args[2])
 		return ctx.applyN(v, 2)
+	}
+}
+
+func scan3While(ctx *Context, args []V) V {
+	v := args[1]
+	switch x := args[2].(type) {
+	case I:
+		// TODO: F case
+		y := args[0]
+		res := AV{y}
+		for i := 0; i < int(x); i++ {
+			ctx.push(y)
+			y = ctx.applyN(v, 1)
+			if err, ok := y.(E); ok {
+				return err
+			}
+			res = append(res, y)
+		}
+		return canonical(res)
+	case Function:
+		y := args[0]
+		res := AV{y}
+		for {
+			ctx.push(y)
+			cond := ctx.applyN(x, 1)
+			if err, ok := cond.(E); ok {
+				return err
+			}
+			if !isTrue(cond) {
+				return canonical(res)
+			}
+			ctx.push(y)
+			y = ctx.applyN(v, 1)
+			if err, ok := y.(E); ok {
+				return err
+			}
+			res = append(res, y)
+		}
+	default:
+		return errf("x f\\y : bad type `%v for x", x.Type())
 	}
 }
 
