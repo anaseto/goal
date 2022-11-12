@@ -2,19 +2,20 @@ package goal
 
 import "strings"
 
-func fold2(ctx *Context, v, x V) V {
+func fold2(ctx *Context, args []V) V {
+	v := args[1]
 	switch v := v.(type) {
 	case Variadic:
 		switch v {
 		case vAdd:
-			return fold2vAdd(x)
+			return fold2vAdd(args[0])
 		}
 	}
 	vv, ok := v.(Function)
 	if !ok {
 		switch v := v.(type) {
 		case S:
-			return fold2Join(v, x)
+			return fold2Join(v, args[0])
 		}
 		// TODO: join, split, encode, decode
 		return errf("not a function left: %s", v.Type())
@@ -23,7 +24,7 @@ func fold2(ctx *Context, v, x V) V {
 		// TODO: converge
 		return errf("rank %d verb (expected 2)", vv.Rank(ctx))
 	}
-	switch x := x.(type) {
+	switch x := args[0].(type) {
 	case Array:
 		if x.Len() == 0 {
 			vv, ok := vv.(zeroFun)
@@ -109,6 +110,38 @@ func fold2Join(sep S, x V) V {
 	}
 }
 
+func fold3(ctx *Context, args []V) V {
+	v, ok := args[1].(Function)
+	if !ok {
+		return errs("3-rank form for adverb / expects function")
+	}
+	if v.Rank(ctx) != 2 {
+		// TODO: while
+		return errf("rank %d verb (expected 2)", v.Rank(ctx))
+	}
+	y := args[0]
+	switch y := y.(type) {
+	case Array:
+		res := args[2]
+		if y.Len() == 0 {
+			return res
+		}
+		for i := 0; i < y.Len(); i++ {
+			ctx.push(y.At(i))
+			ctx.push(res)
+			res = ctx.applyN(v, 2)
+			if err, ok := res.(E); ok {
+				return err
+			}
+		}
+		return canonical(res)
+	default:
+		ctx.push(y)
+		ctx.push(args[2])
+		return ctx.applyN(v, 2)
+	}
+}
+
 func scan2(ctx *Context, v, x V) V {
 	vv, ok := v.(Function)
 	if !ok {
@@ -170,6 +203,39 @@ func scan2Split(sep S, x V) V {
 		}
 	default:
 		return errs("not a string atom or array")
+	}
+}
+
+func scan3(ctx *Context, args []V) V {
+	v, ok := args[1].(Function)
+	if !ok {
+		return errs("3-rank form for adverb / expects function")
+	}
+	if v.Rank(ctx) != 2 {
+		// TODO: while
+		return errf("rank %d verb (expected 2)", v.Rank(ctx))
+	}
+	y := args[0]
+	switch y := y.(type) {
+	case Array:
+		res := AV{args[2]}
+		if y.Len() == 0 {
+			return res
+		}
+		for i := 0; i < y.Len(); i++ {
+			ctx.push(y.At(i))
+			ctx.push(res[len(res)-1])
+			next := ctx.applyN(v, 2)
+			if err, ok := next.(E); ok {
+				return err
+			}
+			res = append(res, next)
+		}
+		return canonical(res)
+	default:
+		ctx.push(y)
+		ctx.push(args[2])
+		return ctx.applyN(v, 2)
 	}
 }
 

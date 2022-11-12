@@ -340,37 +340,9 @@ func fEach(ctx *Context, args []V) V {
 func fFold(ctx *Context, args []V) V {
 	switch len(args) {
 	case 2:
-		return fold2(ctx, args[1], args[0])
+		return fold2(ctx, args)
 	case 3:
-		v, ok := args[1].(Function)
-		if !ok {
-			return errs("3-rank form for adverb / expects function")
-		}
-		if v.Rank(ctx) != 2 {
-			// TODO: while
-			return errf("rank %d verb (expected 2)", v.Rank(ctx))
-		}
-		y := args[0]
-		switch y := y.(type) {
-		case Array:
-			res := args[2]
-			if y.Len() == 0 {
-				return res
-			}
-			for i := 0; i < y.Len(); i++ {
-				ctx.push(y.At(i))
-				ctx.push(res)
-				res = ctx.applyN(v, 2)
-				if err, ok := res.(E); ok {
-					return err
-				}
-			}
-			return canonical(res)
-		default:
-			ctx.push(y)
-			ctx.push(args[2])
-			return ctx.applyN(v, 2)
-		}
+		return fold3(ctx, args)
 	default:
 		return errs("too many arguments")
 	}
@@ -383,36 +355,7 @@ func fScan(ctx *Context, args []V) V {
 	case 2:
 		return scan2(ctx, args[1], args[0])
 	case 3:
-		v, ok := args[1].(Function)
-		if !ok {
-			return errs("3-rank form for adverb / expects function")
-		}
-		if v.Rank(ctx) != 2 {
-			// TODO: while
-			return errf("rank %d verb (expected 2)", v.Rank(ctx))
-		}
-		y := args[0]
-		switch y := y.(type) {
-		case Array:
-			res := AV{args[2]}
-			if y.Len() == 0 {
-				return res
-			}
-			for i := 0; i < y.Len(); i++ {
-				ctx.push(y.At(i))
-				ctx.push(res[len(res)-1])
-				next := ctx.applyN(v, 2)
-				if err, ok := next.(E); ok {
-					return err
-				}
-				res = append(res, next)
-			}
-			return canonical(res)
-		default:
-			ctx.push(y)
-			ctx.push(args[2])
-			return ctx.applyN(v, 2)
-		}
+		return scan3(ctx, args)
 	default:
 		return errs("too many arguments")
 	}
