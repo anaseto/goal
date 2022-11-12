@@ -327,55 +327,9 @@ func fList(ctx *Context, args []V) V {
 func fEach(ctx *Context, args []V) V {
 	switch len(args) {
 	case 2:
-		v, ok := args[1].(Function)
-		if !ok {
-			// TODO: binary search
-			return errsw("not a function")
-		}
-		x := toArray(args[0])
-		switch x := x.(type) {
-		case Array:
-			res := make(AV, 0, x.Len())
-			for i := 0; i < x.Len(); i++ {
-				ctx.push(x.At(i))
-				next := ctx.applyN(v, 1)
-				if err, ok := next.(E); ok {
-					return err
-				}
-				res = append(res, next)
-			}
-			return canonical(res)
-		default:
-			return errs("not an array")
-		}
+		return each2(ctx, args)
 	case 3:
-		v, ok := args[1].(Function)
-		if !ok {
-			return errsw("not a function")
-		}
-		x, ok := args[2].(Array)
-		if !ok {
-			return errsw("not an array")
-		}
-		y, ok := args[0].(Array)
-		if !ok {
-			return errs("not an array")
-		}
-		xlen := x.Len()
-		if xlen != y.Len() {
-			return errf("length mismatch: %d vs %d", x.Len(), y.Len())
-		}
-		res := make(AV, 0, xlen)
-		for i := 0; i < xlen; i++ {
-			ctx.push(y.At(i))
-			ctx.push(x.At(i))
-			next := ctx.applyN(v, 2)
-			if err, ok := next.(E); ok {
-				return err
-			}
-			res = append(res, next)
-		}
-		return canonical(res)
+		return each3(ctx, args)
 	default:
 		return errs("too many arguments")
 	}
