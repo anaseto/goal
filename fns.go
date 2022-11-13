@@ -30,26 +30,26 @@ func rangeI(n I) V {
 }
 
 func rangeArray(x Array) V {
-	y, ok := x.(AI)
+	z, ok := x.(AI)
 	if !ok {
-		y = make(AI, x.Len())
-		for i := range y {
+		z = make(AI, x.Len())
+		for i := range z {
 			v := x.At(i)
 			switch v := v.(type) {
 			case I:
-				y[i] = int(v)
+				z[i] = int(v)
 			case F:
 				if !isI(v) {
 					return errs("non-integer range")
 				}
-				y[i] = int(v)
+				z[i] = int(v)
 			default:
 				return errs("non-numeric")
 			}
 		}
 	}
 	cols := 1
-	for _, n := range y {
+	for _, n := range z {
 		if n == 0 {
 			return AV{}
 		}
@@ -59,11 +59,11 @@ func rangeArray(x Array) V {
 	reps := cols
 	for i := range r {
 		a := make(AI, cols)
-		reps /= y[i]
-		clen := reps * y[i]
+		reps /= z[i]
+		clen := reps * z[i]
 		for c := 0; c < cols/clen; c++ {
 			col := c * clen
-			for j := 0; j < y[i]; j++ {
+			for j := 0; j < z[i]; j++ {
 				for k := 0; k < reps; k++ {
 					a[col+j*reps+k] = j
 				}

@@ -658,12 +658,12 @@ func flip(x V) V {
 
 func flipAB(x AV) AB {
 	r := make(AB, len(x))
-	for i, y := range x {
-		switch y := y.(type) {
+	for i, z := range x {
+		switch z := z.(type) {
 		case I:
-			r[i] = y == 1
+			r[i] = z == 1
 		case AB:
-			r[i] = y[0]
+			r[i] = z[0]
 		}
 	}
 	return r
@@ -674,12 +674,12 @@ func flipAOAB(x AV, lines int) AV {
 	a := make(AB, lines*len(x))
 	for j := range r {
 		q := a[j*len(x) : (j+1)*len(x)]
-		for i, y := range x {
-			switch y := y.(type) {
+		for i, z := range x {
+			switch z := z.(type) {
 			case I:
-				q[i] = y == 1
+				q[i] = z == 1
 			case AB:
-				q[i] = y[j]
+				q[i] = z[j]
 			}
 		}
 		r[j] = q
@@ -689,18 +689,18 @@ func flipAOAB(x AV, lines int) AV {
 
 func flipAF(x AV) AF {
 	r := make(AF, len(x))
-	for i, y := range x {
-		switch y := y.(type) {
+	for i, z := range x {
+		switch z := z.(type) {
 		case AB:
-			r[i] = float64(B2F(y[0]))
+			r[i] = float64(B2F(z[0]))
 		case F:
-			r[i] = float64(y)
+			r[i] = float64(z)
 		case AF:
-			r[i] = y[0]
+			r[i] = z[0]
 		case I:
-			r[i] = float64(y)
+			r[i] = float64(z)
 		case AI:
-			r[i] = float64(y[0])
+			r[i] = float64(z[0])
 		}
 	}
 	return r
@@ -711,18 +711,18 @@ func flipAOAF(x AV, lines int) AV {
 	a := make(AF, lines*len(x))
 	for j := range r {
 		q := a[j*len(x) : (j+1)*len(x)]
-		for i, y := range x {
-			switch y := y.(type) {
+		for i, z := range x {
+			switch z := z.(type) {
 			case AB:
-				q[i] = float64(B2F(y[j]))
+				q[i] = float64(B2F(z[j]))
 			case F:
-				q[i] = float64(y)
+				q[i] = float64(z)
 			case AF:
-				q[i] = y[j]
+				q[i] = z[j]
 			case I:
-				q[i] = float64(y)
+				q[i] = float64(z)
 			case AI:
-				q[i] = float64(y[j])
+				q[i] = float64(z[j])
 			}
 		}
 		r[j] = q
@@ -732,14 +732,14 @@ func flipAOAF(x AV, lines int) AV {
 
 func flipAI(x AV) AI {
 	r := make(AI, len(x))
-	for i, y := range x {
-		switch y := y.(type) {
+	for i, z := range x {
+		switch z := z.(type) {
 		case AB:
-			r[i] = int(B2I(y[0]))
+			r[i] = int(B2I(z[0]))
 		case I:
-			r[i] = int(y)
+			r[i] = int(z)
 		case AI:
-			r[i] = y[0]
+			r[i] = z[0]
 		}
 	}
 	return r
@@ -750,14 +750,14 @@ func flipAOAI(x AV, lines int) AV {
 	a := make(AI, lines*len(x))
 	for j := range r {
 		q := a[j*len(x) : (j+1)*len(x)]
-		for i, y := range x {
-			switch y := y.(type) {
+		for i, z := range x {
+			switch z := z.(type) {
 			case AB:
-				q[i] = int(B2I(y[j]))
+				q[i] = int(B2I(z[j]))
 			case I:
-				q[i] = int(y)
+				q[i] = int(z)
 			case AI:
-				q[i] = y[j]
+				q[i] = z[j]
 			}
 		}
 		r[j] = q
@@ -767,12 +767,12 @@ func flipAOAI(x AV, lines int) AV {
 
 func flipAS(x AV) AS {
 	r := make(AS, len(x))
-	for i, y := range x {
-		switch y := y.(type) {
+	for i, z := range x {
+		switch z := z.(type) {
 		case S:
-			r[i] = string(y)
+			r[i] = string(z)
 		case AS:
-			r[i] = y[0]
+			r[i] = z[0]
 		}
 	}
 	return r
@@ -783,12 +783,12 @@ func flipAOAS(x AV, lines int) AV {
 	a := make(AS, lines*len(x))
 	for j := range r {
 		q := a[j*len(x) : (j+1)*len(x)]
-		for i, y := range x {
-			switch y := y.(type) {
+		for i, z := range x {
+			switch z := z.(type) {
 			case S:
-				q[i] = string(y)
+				q[i] = string(z)
 			case AS:
-				q[i] = y[j]
+				q[i] = z[j]
 			}
 		}
 		r[j] = q
@@ -798,12 +798,12 @@ func flipAOAS(x AV, lines int) AV {
 
 func flipAO(x AV) AV {
 	r := make(AV, len(x))
-	for i, y := range x {
-		switch y := y.(type) {
+	for i, z := range x {
+		switch z := z.(type) {
 		case Array:
-			r[i] = y.At(0)
+			r[i] = z.At(0)
 		default:
-			r[i] = y
+			r[i] = z
 		}
 	}
 	return r
@@ -814,12 +814,12 @@ func flipAOAO(x AV, lines int) AV {
 	a := make(AV, lines*len(x))
 	for j := range r {
 		q := a[j*len(x) : (j+1)*len(x)]
-		for i, y := range x {
-			switch y := y.(type) {
+		for i, z := range x {
+			switch z := z.(type) {
 			case Array:
-				q[i] = y.At(j)
+				q[i] = z.At(j)
 			default:
-				q[i] = y
+				q[i] = z
 			}
 		}
 		r[j] = q
