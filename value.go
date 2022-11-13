@@ -96,7 +96,10 @@ var vStrings = [...]string{
 }
 
 func (v Variadic) String() string {
-	return vStrings[v]
+	if v <= vScan {
+		return vStrings[v]
+	}
+	return "{Variadic}"
 }
 
 // DerivedVerb represents values modified by an adverb.
@@ -211,7 +214,15 @@ func (x AF) Slice(i, j int) Array { return x[i:j] }
 func (x AS) Slice(i, j int) Array { return x[i:j] }
 
 func (x AV) String() string {
+	if len(x) == 0 {
+		return `!0`
+	}
 	sb := &strings.Builder{}
+	if len(x) == 1 {
+		sb.WriteRune(',')
+		fmt.Fprintf(sb, "%v", x[0])
+		return sb.String()
+	}
 	sb.WriteRune('(')
 	for i, v := range x {
 		if v != nil {
@@ -225,7 +236,15 @@ func (x AV) String() string {
 	return sb.String()
 }
 func (x AB) String() string {
+	if len(x) == 0 {
+		return `!0`
+	}
 	sb := &strings.Builder{}
+	if len(x) == 1 {
+		sb.WriteRune(',')
+		fmt.Fprintf(sb, "%d", B2I(x[0]))
+		return sb.String()
+	}
 	for i, v := range x {
 		fmt.Fprintf(sb, "%d", B2I(v))
 		if i < len(x)-1 {
@@ -235,7 +254,15 @@ func (x AB) String() string {
 	return sb.String()
 }
 func (x AI) String() string {
+	if len(x) == 0 {
+		return `!0`
+	}
 	sb := &strings.Builder{}
+	if len(x) == 1 {
+		sb.WriteRune(',')
+		fmt.Fprintf(sb, "%d", x[0])
+		return sb.String()
+	}
 	for i, v := range x {
 		fmt.Fprintf(sb, "%d", v)
 		if i < len(x)-1 {
@@ -246,7 +273,15 @@ func (x AI) String() string {
 }
 
 func (x AF) String() string {
+	if len(x) == 0 {
+		return `!0`
+	}
 	sb := &strings.Builder{}
+	if len(x) == 1 {
+		sb.WriteRune(',')
+		fmt.Fprintf(sb, "%g", x[0])
+		return sb.String()
+	}
 	for i, v := range x {
 		fmt.Fprintf(sb, "%g", v)
 		if i < len(x)-1 {
@@ -257,7 +292,15 @@ func (x AF) String() string {
 }
 
 func (x AS) String() string {
+	if len(x) == 0 {
+		return `0#""`
+	}
 	sb := &strings.Builder{}
+	if len(x) == 1 {
+		sb.WriteRune(',')
+		fmt.Fprintf(sb, "%q", x[0])
+		return sb.String()
+	}
 	for i, v := range x {
 		fmt.Fprintf(sb, "%q", v)
 		if i < len(x)-1 {

@@ -243,6 +243,9 @@ func VTake(ctx *Context, args []V) V {
 		if ok {
 			ctx.push(args[0])
 			res := ctx.applyN(v, 1)
+			if err, ok := res.(E); ok {
+				return err
+			}
 			return replicate(res, args[0])
 		}
 		return take(args[1], args[0])
@@ -307,9 +310,12 @@ func VApplyN(ctx *Context, args []V) V {
 	case 1:
 		return errNYI("monadic .")
 	case 2:
-		v := args[len(args)-1]
-		ctx.pushArgs(args[:len(args)-1])
-		return ctx.applyN(v, len(args)-1)
+		v := args[1]
+		av := toArray(args[0]).(Array)
+		for i := av.Len() - 1; i >= 0; i-- {
+			ctx.push(av.At(i))
+		}
+		return ctx.applyN(v, av.Len())
 	default:
 		return errs("too many arguments")
 	}

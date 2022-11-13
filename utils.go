@@ -194,8 +194,10 @@ func toArray(x V) V {
 		return AS{string(x)}
 	case E:
 		return AV{x}
-	default:
+	case Array:
 		return x
+	default:
+		return AV{x}
 	}
 }
 

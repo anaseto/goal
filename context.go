@@ -127,6 +127,20 @@ func (ctx *Context) RunString(s string) (V, error) {
 	return ctx.Run()
 }
 
+// LastIsAssign returns true if the last parsed expression was an assignment.
+// This can be used by a repl to avoid printing results when assigning.
+func (ctx *Context) LastIsAssign() bool {
+	if len(ctx.ast.Body) == 0 {
+		return false
+	}
+	switch ctx.ast.Body[len(ctx.ast.Body)-1].(type) {
+	case astAssignLocal, astAssignGlobal:
+		return true
+	default:
+		return false
+	}
+}
+
 func (ctx *Context) compileExec() (bool, error) {
 	done := ctx.compile()
 	if !done {
