@@ -31,9 +31,9 @@ type Context struct {
 	gIDs   map[string]int
 
 	// parsing, scanning
-	scanner *Scanner
-	parser  *parser
-	fname   string
+	scanner  *Scanner
+	compiler *compiler
+	fname    string
 }
 
 // NewContext returns a new context for compiling and interpreting code.
@@ -44,7 +44,7 @@ func NewContext() *Context {
 	ctx.gIDs = map[string]int{}
 	ctx.stack = make([]V, 0, 64)
 	ctx.scanner = &Scanner{}
-	ctx.parser = newParser(ctx)
+	ctx.compiler = newCompiler(ctx)
 	ctx.initVariadics()
 	return ctx
 }
@@ -76,7 +76,7 @@ func (ctx *Context) Run() (V, error) {
 		return nil, errors.New("no source specified")
 	}
 	blen, llen, last := len(ctx.prog.Body), len(ctx.prog.Lambdas), ctx.prog.last
-	err := ctx.parser.Parse()
+	err := ctx.compiler.ParseCompile()
 	if err != nil {
 		ctx.prog.Body = ctx.prog.Body[:blen]
 		ctx.prog.Lambdas = ctx.prog.Lambdas[:llen]
@@ -98,7 +98,7 @@ func (ctx *Context) RunExpr() (V, error) {
 	}
 	var eof bool
 	blen, llen, last := len(ctx.prog.Body), len(ctx.prog.Lambdas), ctx.prog.last
-	err := ctx.parser.ParseNext()
+	err := ctx.compiler.ParseCompileNext()
 	if err != nil {
 		_, eof = err.(ErrEOF)
 		if !eof {

@@ -40,22 +40,22 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[ppSEP-0]
-	_ = x[ppEOF-1]
-	_ = x[ppCLOSE-2]
-	_ = x[ppNUMBER-3]
-	_ = x[ppSTRING-4]
-	_ = x[ppIDENT-5]
-	_ = x[ppVERB-6]
-	_ = x[ppADVERB-7]
+	_ = x[pSEP-0]
+	_ = x[pEOF-1]
+	_ = x[pCLOSE-2]
+	_ = x[pNUMBER-3]
+	_ = x[pSTRING-4]
+	_ = x[pIDENT-5]
+	_ = x[pVERB-6]
+	_ = x[pADVERB-7]
 }
 
 const _ppTokenType_name = "ppSEPppEOFppCLOSEppNUMBERppSTRINGppIDENTppVERBppADVERB"
 
 var _ppTokenType_index = [...]uint8{0, 5, 10, 17, 25, 33, 40, 46, 54}
 
-func (i ppTokenType) String() string {
-	if i < 0 || i >= ppTokenType(len(_ppTokenType_index)-1) {
+func (i pTokenType) String() string {
+	if i < 0 || i >= pTokenType(len(_ppTokenType_index)-1) {
 		return "ppTokenType(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
 	return _ppTokenType_name[_ppTokenType_index[i]:_ppTokenType_index[i+1]]
@@ -64,18 +64,18 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[ppLAMBDA-0]
-	_ = x[ppARGS-1]
-	_ = x[ppSEQ-2]
-	_ = x[ppLIST-3]
+	_ = x[pLAMBDA-0]
+	_ = x[pARGS-1]
+	_ = x[pSEQ-2]
+	_ = x[pLIST-3]
 }
 
 const _ppBlockType_name = "ppLAMBDAppARGSppSEQppLIST"
 
 var _ppBlockType_index = [...]uint8{0, 8, 14, 19, 25}
 
-func (i ppBlockType) String() string {
-	if i < 0 || i >= ppBlockType(len(_ppBlockType_index)-1) {
+func (i pBlockType) String() string {
+	if i < 0 || i >= pBlockType(len(_ppBlockType_index)-1) {
 		return "ppBlockType(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
 	return _ppBlockType_name[_ppBlockType_index[i]:_ppBlockType_index[i+1]]

@@ -5,128 +5,127 @@ import (
 	"strings"
 )
 
-// ppExpr are built by the first left to right pass, resulting in a tree
+// expr are built by the first left to right pass, resulting in a tree
 // of blocks producing a whole expression, with simplified token
-// information, and stack-like order. It is a pre-processing IR. The
-// representation of specific semantics of the language is left to a
-// second IR built around type Expr.
-type ppExpr interface {
+// information, and stack-like order. It is a non-resolved AST intermediary
+// representation.
+type expr interface {
 	ppNode()
 }
 
-// ppExprs is used to represent a whole expression. It is not a ppExpr.
-type ppExprs []ppExpr
+// exprs is used to represent a whole expression. It is not a ppExpr.
+type exprs []expr
 
-// ppIter is an iterator for ppExprs slices, with peek functionality.
-type ppIter struct {
-	pps ppExprs
+// pToken represents a simplified token after processing into expr.
+type pToken struct {
+	Type pTokenType
+	Rune rune
+	Pos  int
+	Text string
+}
+
+func (pt pToken) String() string {
+	return fmt.Sprintf("{%v %d %s}", pt.Type, pt.Pos, pt.Text)
+}
+
+// pTokenType represents tokens in a ppExpr.
+type pTokenType int32
+
+// These constants represent the possible tokens in a ppExpr. The SEP,
+// EOF and CLOSE types are not emitted in the final result.
+const (
+	pSEP pTokenType = iota
+	pEOF
+	pCLOSE
+
+	pNUMBER
+	pSTRING
+	pIDENT
+	pVERB
+	pADVERB
+)
+
+type pStrand []pToken // for stranding, like 1 23 456
+
+type pAdverbs []pToken // for an adverb sequence
+
+type pParenExpr exprs // for parenthesized sub-expressions
+
+type pBlock struct {
+	Type pBlockType
+	Body []exprs
+	Args []string
+}
+
+func (pb pBlock) String() (s string) {
+	switch pb.Type {
+	case pLAMBDA:
+		args := "[" + strings.Join([]string(pb.Args), ";") + "]"
+		s = fmt.Sprintf("{%s %v %v}", args, pb.Type, pb.Body)
+	case pARGS:
+		s = fmt.Sprintf("[%v %v]", pb.Type, pb.Body)
+	case pLIST:
+		s = fmt.Sprintf("(%v %v)", pb.Type, pb.Body)
+	}
+	return s
+}
+
+func (pb pBlock) push(pe expr) {
+	pb.Body[len(pb.Body)-1] = append(pb.Body[len(pb.Body)-1], pe)
+}
+
+type pBlockType int
+
+const (
+	pLAMBDA pBlockType = iota
+	pARGS
+	pSEQ
+	pLIST
+)
+
+func (pt pToken) ppNode()     {}
+func (ps pStrand) ppNode()    {}
+func (pa pAdverbs) ppNode()   {}
+func (pp pParenExpr) ppNode() {}
+func (pb pBlock) ppNode()     {}
+
+// pIter is an iterator for exprs slices, with peek functionality.
+type pIter struct {
+	pps exprs
 	i   int
 }
 
-func newppIter(pps ppExprs) ppIter {
-	return ppIter{pps: pps, i: -1}
+func newpIter(pps exprs) pIter {
+	return pIter{pps: pps, i: -1}
 }
 
-func (it *ppIter) Next() bool {
+func (it *pIter) Next() bool {
 	it.i++
 	return it.i < len(it.pps)
 }
 
-func (it *ppIter) Expr() ppExpr {
+func (it *pIter) Expr() expr {
 	return it.pps[it.i]
 }
 
-func (it *ppIter) Index() int {
+func (it *pIter) Index() int {
 	return it.i
 }
 
-func (it *ppIter) Set(i int) {
+func (it *pIter) Set(i int) {
 	it.i = i
 }
 
-func (it *ppIter) Peek() ppExpr {
+func (it *pIter) Peek() expr {
 	if it.i+1 >= len(it.pps) {
 		return nil
 	}
 	return it.pps[it.i+1]
 }
 
-func (it *ppIter) PeekN(n int) ppExpr {
+func (it *pIter) PeekN(n int) expr {
 	if it.i+n >= len(it.pps) {
 		return nil
 	}
 	return it.pps[it.i+n]
 }
-
-// ppToken represents a simplified token after processing into ppExpr.
-type ppToken struct {
-	Type ppTokenType
-	Rune rune
-	Pos  int
-	Text string
-}
-
-func (ppt ppToken) String() string {
-	return fmt.Sprintf("{%v %d %s}", ppt.Type, ppt.Pos, ppt.Text)
-}
-
-// ppTokenType represents tokens in a ppExpr.
-type ppTokenType int32
-
-// These constants represent the possible tokens in a ppExpr. The SEP,
-// EOF and CLOSE types are not emitted in the final result.
-const (
-	ppSEP ppTokenType = iota
-	ppEOF
-	ppCLOSE
-
-	ppNUMBER
-	ppSTRING
-	ppIDENT
-	ppVERB
-	ppADVERB
-)
-
-type ppStrand []ppToken // for stranding, like 1 23 456
-
-type ppAdverbs []ppToken // for an adverb sequence
-
-type ppParenExpr ppExprs // for parenthesized sub-expressions
-
-type ppBlock struct {
-	Type ppBlockType
-	Body []ppExprs
-	Args []string
-}
-
-func (ppb ppBlock) String() (s string) {
-	switch ppb.Type {
-	case ppLAMBDA:
-		args := "[" + strings.Join([]string(ppb.Args), ";") + "]"
-		s = fmt.Sprintf("{%s %v %v}", args, ppb.Type, ppb.Body)
-	case ppARGS:
-		s = fmt.Sprintf("[%v %v]", ppb.Type, ppb.Body)
-	case ppLIST:
-		s = fmt.Sprintf("(%v %v)", ppb.Type, ppb.Body)
-	}
-	return s
-}
-
-func (ppb ppBlock) push(ppe ppExpr) {
-	ppb.Body[len(ppb.Body)-1] = append(ppb.Body[len(ppb.Body)-1], ppe)
-}
-
-type ppBlockType int
-
-const (
-	ppLAMBDA ppBlockType = iota
-	ppARGS
-	ppSEQ
-	ppLIST
-)
-
-func (tok ppToken) ppNode()     {}
-func (pps ppStrand) ppNode()    {}
-func (ppa ppAdverbs) ppNode()   {}
-func (ppp ppParenExpr) ppNode() {}
-func (ppb ppBlock) ppNode()     {}
