@@ -116,7 +116,7 @@ func TestRunString(t *testing.T) {
 			vLeft, errLeft := ctxLeft.RunString(mt.Left)
 			ctxRight := NewContext()
 			vRight, errRight := ctxRight.RunString(mt.Right)
-			if !matchB(vLeft, vRight) {
+			if !match(vLeft, vRight) {
 				t.Log(ctxLeft.ast.String())
 				t.Log(ctxLeft.ProgramString())
 				t.Log(matchString)

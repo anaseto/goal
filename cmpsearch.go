@@ -6,148 +6,143 @@ type Matcher interface {
 	Matches(x V) bool
 }
 
-// match returns w≡x.
-func match(w, x V) V {
-	return B2I(matchB(w, x))
-}
-
-func matchB(w, x V) bool {
-	switch w := w.(type) {
+func match(x, y V) bool {
+	switch x := x.(type) {
 	case F:
-		switch x := x.(type) {
+		switch y := y.(type) {
 		case I:
-			return w == F(x)
+			return x == F(y)
 		case F:
-			return w == x
+			return x == y
 		default:
 			return false
 		}
 	case I:
-		switch x := x.(type) {
+		switch y := y.(type) {
 		case I:
-			return w == x
+			return x == y
 		case F:
-			return F(w) == x
+			return F(x) == y
 		default:
 			return false
 		}
 	case S:
-		switch x := x.(type) {
+		switch y := y.(type) {
 		case S:
-			return w == x
+			return x == y
 		default:
 			return false
 		}
 	case Array:
-		x, ok := x.(Array)
+		y, ok := y.(Array)
 		if !ok {
 			return false
 		}
-		l := w.Len()
-		if l != x.Len() {
+		l := x.Len()
+		if l != y.Len() {
 			return false
 		}
-		switch w := w.(type) {
+		switch x := x.(type) {
 		case AB:
-			switch x := x.(type) {
+			switch y := y.(type) {
 			case AB:
-				return matchAB(w, x)
+				return matchAB(x, y)
 			case AI:
-				return matchABAI(w, x)
+				return matchABAI(x, y)
 			case AF:
-				return matchABAF(w, x)
+				return matchABAF(x, y)
 			}
 		case AI:
-			switch x := x.(type) {
+			switch y := y.(type) {
 			case AB:
-				return matchABAI(x, w)
+				return matchABAI(y, x)
 			case AI:
-				return matchAI(w, x)
+				return matchAI(x, y)
 			case AF:
-				return matchAIAF(w, x)
+				return matchAIAF(x, y)
 			}
 		case AF:
-			switch x := x.(type) {
+			switch y := y.(type) {
 			case AB:
-				return matchABAF(x, w)
+				return matchABAF(y, x)
 			case AI:
-				return matchAIAF(x, w)
+				return matchAIAF(y, x)
 			case AF:
-				return matchAF(w, x)
+				return matchAF(x, y)
 			}
 		case AS:
-			x, ok := x.(AS)
+			y, ok := y.(AS)
 			if !ok {
 				break
 			}
-			for i, v := range x {
-				if v != w[i] {
+			for i, v := range y {
+				if v != x[i] {
 					return false
 				}
 			}
 			return true
 		}
 		for i := 0; i < l; i++ {
-			if !matchB(w.At(i), x.At(i)) {
+			if !match(x.At(i), y.At(i)) {
 				return false
 			}
 		}
 		return true
 	case Matcher:
-		return w.Matches(x)
+		return x.Matches(y)
 	default:
-		return w == x
+		return x == y
 	}
 }
 
-func matchAB(w, x AB) bool {
-	for i, v := range x {
-		if v != w[i] {
+func matchAB(x, y AB) bool {
+	for i, v := range y {
+		if v != x[i] {
 			return false
 		}
 	}
 	return true
 }
 
-func matchABAI(w AB, x AI) bool {
-	for i, v := range x {
-		if v != int(B2I(w[i])) {
+func matchABAI(x AB, y AI) bool {
+	for i, v := range y {
+		if v != int(B2I(x[i])) {
 			return false
 		}
 	}
 	return true
 }
 
-func matchABAF(w AB, x AF) bool {
-	for i, v := range x {
-		if F(v) != B2F(w[i]) {
+func matchABAF(x AB, y AF) bool {
+	for i, v := range y {
+		if F(v) != B2F(x[i]) {
 			return false
 		}
 	}
 	return true
 }
 
-func matchAI(w, x AI) bool {
-	for i, v := range x {
-		if v != w[i] {
+func matchAI(x, y AI) bool {
+	for i, v := range y {
+		if v != x[i] {
 			return false
 		}
 	}
 	return true
 }
 
-func matchAIAF(w AI, x AF) bool {
-	for i, v := range x {
-		if F(v) != F(w[i]) {
+func matchAIAF(x AI, y AF) bool {
+	for i, v := range y {
+		if F(v) != F(x[i]) {
 			return false
 		}
 	}
 	return true
 }
 
-func matchAF(w, x AF) bool {
-	for i, v := range x {
-		if v != w[i] {
+func matchAF(x, y AF) bool {
+	for i, v := range y {
+		if v != x[i] {
 			return false
 		}
 	}
@@ -162,7 +157,7 @@ func classify(x V) V {
 	x = canonical(x)
 	switch x := x.(type) {
 	case F, I, S:
-		return errs("not an array")
+		return errf("%%x : x not an array (%s)", x.Type())
 	case AB:
 		v := x[0]
 		if !v {
@@ -223,7 +218,7 @@ func classify(x V) V {
 	loop:
 		for i, v := range x {
 			for j := range x[:i] {
-				if matchB(v, x[j]) {
+				if match(v, x[j]) {
 					r[i] = r[j]
 					continue loop
 				}
@@ -233,7 +228,7 @@ func classify(x V) V {
 		}
 		return r
 	default:
-		return errs("not an array")
+		return errf("%%x : x not an array (%s)", x.Type())
 	}
 }
 
@@ -246,7 +241,7 @@ func uniq(x V) V {
 	switch x := x.(type) {
 	case F, I, S:
 		// NOTE: ?atom could be used for something.
-		return errs("not an array")
+		return errf("?x : x not an array (%s)", x.Type())
 	case AB:
 		if len(x) == 0 {
 			return x
@@ -301,7 +296,7 @@ func uniq(x V) V {
 	loop:
 		for i, v := range x {
 			for j := range x[:i] {
-				if matchB(v, x[j]) {
+				if match(v, x[j]) {
 					continue loop
 				}
 			}
@@ -309,7 +304,7 @@ func uniq(x V) V {
 		}
 		return r
 	default:
-		return errs("not an array")
+		return errf("?x : x not an array (%s)", x.Type())
 	}
 }
 
@@ -321,7 +316,7 @@ func markFirsts(x V) V {
 	x = canonical(x)
 	switch x := x.(type) {
 	case F, I, S:
-		return errs("not an array")
+		return errf("∊x : x not an array (%s)", x.Type())
 	case AB:
 		r := make(AB, len(x))
 		r[0] = true
@@ -377,7 +372,7 @@ func markFirsts(x V) V {
 	loop:
 		for i, v := range x {
 			for j := range x[:i] {
-				if matchB(v, x[j]) {
+				if match(v, x[j]) {
 					continue loop
 				}
 			}
@@ -385,138 +380,138 @@ func markFirsts(x V) V {
 		}
 		return r
 	default:
-		return errs("not an array")
+		return errf("∊x : x not an array (%s)", x.Type())
 	}
 }
 
-// memberOf returns w∊x. XXX unused for now
-func memberOf(w, x V) V {
-	if length(x) == 0 || length(w) == 0 {
-		switch x.(type) {
+// memberOf returns x∊y. XXX unused for now
+func memberOf(x, y V) V {
+	if length(y) == 0 || length(x) == 0 {
+		switch y.(type) {
 		case Array:
-			switch w := w.(type) {
+			switch x := x.(type) {
 			case Array:
-				r := make(AB, length(w))
+				r := make(AB, length(x))
 				return r
 			default:
 				return B2I(false)
 			}
 		default:
-			return errs("not an array")
+			return errf("x∊y : y not an array (%s)", y.Type())
 		}
 	}
+	y = canonical(y)
 	x = canonical(x)
-	w = canonical(w)
-	switch x := x.(type) {
+	switch y := y.(type) {
 	case AB:
-		return memberOfAB(w, x)
+		return memberOfAB(x, y)
 	case AF:
-		return memberOfAF(w, x)
+		return memberOfAF(x, y)
 	case AI:
-		return memberOfAI(w, x)
+		return memberOfAI(x, y)
 	case AS:
-		return memberOfAS(w, x)
+		return memberOfAS(x, y)
 	case AV:
-		return memberOfAO(w, x)
+		return memberOfAO(x, y)
 	default:
-		return errs("not an array")
+		return errf("x∊y : y not an array (%s)", y.Type())
 	}
 }
 
-func memberOfAB(w V, x AB) V {
+func memberOfAB(x V, y AB) V {
 	var t, f bool
-	for _, v := range x {
+	for _, v := range y {
 		if t && f {
 			break
 		}
 		t, f = t || v, f || !v
 	}
 	if t && f {
-		r := make(AB, length(w))
+		r := make(AB, length(x))
 		for i := range r {
 			r[i] = true
 		}
 		return r
 	}
 	if t {
-		return equal(w, B2I(true))
+		return equal(x, B2I(true))
 	}
-	return equal(w, B2I(false))
+	return equal(x, B2I(false))
 }
 
-func memberOfAF(w V, x AF) V {
+func memberOfAF(x V, y AF) V {
 	m := map[F]struct{}{}
-	for _, v := range x {
+	for _, v := range y {
 		_, ok := m[F(v)]
 		if !ok {
 			m[F(v)] = struct{}{}
 			continue
 		}
 	}
-	switch w := w.(type) {
+	switch x := x.(type) {
 	case I:
-		_, ok := m[F(w)]
+		_, ok := m[F(x)]
 		return B2I(ok)
 	case F:
-		_, ok := m[w]
+		_, ok := m[x]
 		return B2I(ok)
 	case AB:
-		r := make(AB, len(w))
-		for i, v := range w {
+		r := make(AB, len(x))
+		for i, v := range x {
 			_, r[i] = m[B2F(v)]
 		}
 		return r
 	case AI:
-		r := make(AB, len(w))
-		for i, v := range w {
+		r := make(AB, len(x))
+		for i, v := range x {
 			_, r[i] = m[F(v)]
 		}
 		return r
 	case AF:
-		r := make(AB, len(w))
-		for i, v := range w {
+		r := make(AB, len(x))
+		for i, v := range x {
 			_, r[i] = m[F(v)]
 		}
 		return r
 	default:
-		return make(AB, length(w))
+		return make(AB, length(x))
 	}
 }
 
-func memberOfAI(w V, x AI) V {
+func memberOfAI(x V, y AI) V {
 	m := map[int]struct{}{}
-	for _, v := range x {
+	for _, v := range y {
 		_, ok := m[v]
 		if !ok {
 			m[v] = struct{}{}
 			continue
 		}
 	}
-	switch w := w.(type) {
+	switch x := x.(type) {
 	case I:
-		_, ok := m[int(w)]
+		_, ok := m[int(x)]
 		return B2I(ok)
 	case F:
-		if !isI(w) {
+		if !isI(x) {
 			return B2I(false)
 		}
-		_, ok := m[int(w)]
+		_, ok := m[int(x)]
 		return B2I(ok)
 	case AB:
-		r := make(AB, len(w))
-		for i, v := range w {
+		r := make(AB, len(x))
+		for i, v := range x {
 			_, r[i] = m[int(B2I(v))]
 		}
 		return r
 	case AI:
-		r := make(AB, len(w))
-		for i, v := range w {
+		r := make(AB, len(x))
+		for i, v := range x {
 			_, r[i] = m[v]
 		}
 		return r
 	case AF:
-		r := make(AB, len(w))
-		for i, v := range w {
+		r := make(AB, len(x))
+		for i, v := range x {
 			if !isI(F(v)) {
 				continue
 			}
@@ -524,42 +519,42 @@ func memberOfAI(w V, x AI) V {
 		}
 		return r
 	default:
-		return make(AB, length(w))
+		return make(AB, length(x))
 	}
 }
 
-func memberOfAS(w V, x AS) V {
+func memberOfAS(x V, y AS) V {
 	m := map[string]struct{}{}
-	for _, v := range x {
+	for _, v := range y {
 		_, ok := m[v]
 		if !ok {
 			m[v] = struct{}{}
 			continue
 		}
 	}
-	switch w := w.(type) {
+	switch x := x.(type) {
 	case S:
-		_, ok := m[string(w)]
+		_, ok := m[string(x)]
 		return B2I(ok)
 	case AS:
-		r := make(AB, len(w))
-		for i, v := range w {
+		r := make(AB, len(x))
+		for i, v := range x {
 			_, r[i] = m[v]
 		}
 		return r
 	default:
-		return make(AB, length(w))
+		return make(AB, length(x))
 	}
 }
 
-func memberOfAO(w V, x AV) V {
-	switch w := w.(type) {
+func memberOfAO(x V, y AV) V {
+	switch x := x.(type) {
 	case Array:
 		// NOTE: quadratic algorithm
-		r := make(AB, w.Len())
-		for i := 0; i < w.Len(); i++ {
-			for _, v := range x {
-				if matchB(w.At(i), v) {
+		r := make(AB, x.Len())
+		for i := 0; i < x.Len(); i++ {
+			for _, v := range y {
+				if match(x.At(i), v) {
 					r[i] = true
 					break
 				}
@@ -567,8 +562,8 @@ func memberOfAO(w V, x AV) V {
 		}
 		return r
 	default:
-		for _, v := range x {
-			if matchB(w, v) {
+		for _, v := range y {
+			if match(x, v) {
 				return B2I(true)
 			}
 		}
@@ -584,7 +579,7 @@ func occurrenceCount(x V) V {
 	x = canonical(x)
 	switch x := x.(type) {
 	case F, I, S:
-		return errs("not an array")
+		return errf("⊒x : x not an array (%s)", x.Type())
 	case AB:
 		r := make(AI, len(x))
 		var f, t int
@@ -645,7 +640,7 @@ func occurrenceCount(x V) V {
 	loop:
 		for i, v := range x {
 			for j := i - 1; j >= 0; j-- {
-				if matchB(v, x[j]) {
+				if match(v, x[j]) {
 					r[i] = r[j] + 1
 					continue loop
 				}
@@ -653,6 +648,6 @@ func occurrenceCount(x V) V {
 		}
 		return r
 	default:
-		return errs("not an array")
+		return errf("⊒x : x not an array (%s)", x.Type())
 	}
 }
