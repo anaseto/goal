@@ -18,30 +18,14 @@ func main() {
 	}
 	flag.Parse()
 	args := flag.Args()
-	if *optE == "" && len(args) == 0 {
-		runStdin()
-		return
-	}
 	ctx := goal.NewContext()
-	say := ctx.RegisterVariadic("say", goal.VariadicFun{
-		Func: func(ctx *goal.Context, args []goal.V) goal.V {
-			switch len(args) {
-			case 1:
-				switch v := args[0].(type) {
-				case goal.S:
-					fmt.Println(v)
-					return nil
-				default:
-					fmt.Printf("%v\n", v)
-					return nil
-				}
-			default:
-				return goal.E("say: bad type")
-			}
-		}})
-	ctx.AssignGlobal("say", say)
+	registerVariadics(ctx)
 	if *optE != "" {
 		runCommand(ctx, *optE)
+	}
+	if *optE == "" && len(args) == 0 || len(args) == 1 && args[0] == "-" {
+		runStdin(ctx)
+		return
 	}
 	if len(args) == 0 {
 		return
@@ -65,8 +49,7 @@ func main() {
 	}
 }
 
-func runStdin() {
-	ctx := goal.NewContext()
+func runStdin(ctx *goal.Context) {
 	ctx.SetSource("-", os.Stdin)
 	for {
 		fmt.Print("  ")
@@ -97,7 +80,7 @@ func echo(v goal.V) {
 	}
 }
 
-func Error(usage bool, msgs ...interface{}) {
+func usageError(usage bool, msgs ...interface{}) {
 	s := "goal: "
 	s += fmt.Sprint(msgs...)
 	fmt.Fprintln(os.Stderr, s)
@@ -105,4 +88,41 @@ func Error(usage bool, msgs ...interface{}) {
 		flag.Usage()
 	}
 	os.Exit(1)
+}
+
+func registerVariadics(ctx *goal.Context) {
+	say := ctx.RegisterVariadic("say", goal.VariadicFun{
+		Func: func(ctx *goal.Context, args []goal.V) goal.V {
+			for _, v := range args {
+				switch v := v.(type) {
+				case goal.S:
+					fmt.Println(string(v))
+					return nil
+				default:
+					fmt.Printf("%v\n", v)
+					return nil
+				}
+			}
+			return nil
+		}})
+	ctx.AssignGlobal("say", say)
+	slurp := ctx.RegisterVariadic("slurp", goal.VariadicFun{
+		Func: func(ctx *goal.Context, args []goal.V) goal.V {
+			switch len(args) {
+			case 1:
+				switch v := args[0].(type) {
+				case goal.S:
+					bytes, err := os.ReadFile(string(v))
+					if err != nil {
+						return goal.E("slurp:" + err.Error())
+					}
+					return goal.S(bytes)
+				default:
+					return goal.E("slurp: non-string filename")
+				}
+			default:
+				return goal.E("slurp: too many arguments")
+			}
+		}})
+	ctx.AssignGlobal("slurp", slurp)
 }
