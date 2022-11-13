@@ -185,7 +185,7 @@ x@y apply	1 2 3@2 -> 3	1 2 3[2] -> 3
 x.y applyN	{x+y}.2 3 -> 5    {x+y}[2;3] -> 5
 
 ADVERBS
-f'x	each	#'((2;3);(1;2;3)) -> 2 3	
+f'x	each	#'(4 5;6 7 8) -> 2 3	
 x F'y   each	2 3#'1 2 -> (1 1;2 2 2)
 F/x	fold	+/!10 -> 45
 F\x	scan	+\!10 -> 0 1 3 6 10 15 21 28 36 45
@@ -197,4 +197,8 @@ f f/x   while	{x<100}{x*2}/4 -> 128
 f f/x   while	{x<100}{x*2}\4 -> 4 8 16 32 64 128
 s/x	join	","/"a" "b" "c" -> "a,b,c"
 s\x	split	","\"a,b,c" -> "a" "b" "c"
+
+IO
+slurp[s]	read file named s
+say[x;...]	print value(s) with newline
 `
