@@ -5,7 +5,7 @@ func enum(x V) V {
 	switch x := x.(type) {
 	case F:
 		if !isI(x) {
-			return errs("non-integer range")
+			return errs("!x : x non-integer")
 		}
 		// TODO: check whether range is too big?
 		return rangeI(I(x))
@@ -20,7 +20,7 @@ func enum(x V) V {
 
 func rangeI(n I) V {
 	if n < 0 {
-		return errs("negative integer")
+		return errs("!x : x negative")
 	}
 	r := make(AI, n)
 	for i := range r {
@@ -40,11 +40,11 @@ func rangeArray(x Array) V {
 				z[i] = int(v)
 			case F:
 				if !isI(v) {
-					return errs("non-integer range")
+					return errs("!x : x contains non-integer")
 				}
 				z[i] = int(v)
 			default:
-				return errs("non-numeric")
+				return errs("!x : x is not numeric")
 			}
 		}
 	}
@@ -80,7 +80,7 @@ func where(x V) V {
 	case I:
 		switch {
 		case x < 0:
-			return errs("negative integer")
+			return errs("&x : x negative")
 		case x == 0:
 			return AI{}
 		default:
@@ -89,12 +89,12 @@ func where(x V) V {
 		}
 	case F:
 		if !isI(x) {
-			return errs("not an integer")
+			return errs("&x : x non-integer")
 		}
 		n := I(x)
 		switch {
 		case n < 0:
-			return errs("negative integer")
+			return errs("&x : x negative")
 		case n == 0:
 			return AI{}
 		default:
@@ -117,7 +117,7 @@ func where(x V) V {
 		n := 0
 		for _, v := range x {
 			if v < 0 {
-				return errs("negative integer")
+				return errs("&x : x contains negative integer")
 			}
 			n += v
 		}
@@ -132,10 +132,10 @@ func where(x V) V {
 		n := 0
 		for _, v := range x {
 			if !isI(F(v)) {
-				return errs("not an integer")
+				return errs("&x : x contains non-integer")
 			}
 			if v < 0 {
-				return errs("negative integer")
+				return errs("&x : x contains negative")
 			}
 			n += int(v)
 		}
@@ -189,40 +189,40 @@ func where(x V) V {
 	}
 }
 
-// replicate returns {w}#x.
-func replicate(w, x V) V {
-	if length(w) != length(x) {
-		return errf("length mismatch: %d vs %d", length(w), length(x))
+// replicate returns {x}#y.
+func replicate(x, y V) V {
+	if length(x) != length(y) {
+		return errf("f#y : length mismatch: %d (f[y]) vs %d (y)", length(x), length(y))
 	}
-	switch w := w.(type) {
+	switch x := x.(type) {
 	case I:
 		switch {
-		case w < 0:
-			return errs("negative integer")
+		case x < 0:
+			return errs("f#y : f[y] negative integer")
 		default:
-			return repeat(x, int(w))
+			return repeat(y, int(x))
 		}
 	case F:
-		if !isI(w) {
-			return errs("not an integer")
+		if !isI(x) {
+			return errs("f#y : f[y] not an integer")
 		}
-		n := int(w)
+		n := int(x)
 		switch {
 		case n < 0:
-			return errs("negative integer")
+			return errs("f#y : f[y] negative")
 		default:
-			return repeat(x, n)
+			return repeat(y, n)
 		}
 	case AB:
-		return repeatAB(w, x)
+		return repeatAB(x, y)
 	case AI:
-		return repeatAI(w, x)
+		return repeatAI(x, y)
 	case AF:
-		return repeatAF(w, x)
+		return repeatAF(x, y)
 	case AV:
-		return repeatAO(w, x)
+		return repeatAO(x, y)
 	default:
-		return errsw("non-integer")
+		return errs("f#y : f[y] non-integer")
 	}
 }
 
@@ -262,49 +262,49 @@ func repeat(x V, n int) V {
 	}
 }
 
-func repeatAB(w AB, x V) V {
+func repeatAB(x AB, y V) V {
 	n := 0
-	for _, v := range w {
+	for _, v := range x {
 		n += int(B2I(v))
 	}
-	switch x := x.(type) {
+	switch y := y.(type) {
 	case AB:
 		r := make(AB, 0, n)
-		for i, v := range w {
+		for i, v := range x {
 			if v {
-				r = append(r, x[i])
+				r = append(r, y[i])
 			}
 		}
 		return r
 	case AF:
 		r := make(AF, 0, n)
-		for i, v := range w {
+		for i, v := range x {
 			if v {
-				r = append(r, x[i])
+				r = append(r, y[i])
 			}
 		}
 		return r
 	case AI:
 		r := make(AI, 0, n)
-		for i, v := range w {
+		for i, v := range x {
 			if v {
-				r = append(r, x[i])
+				r = append(r, y[i])
 			}
 		}
 		return r
 	case AS:
 		r := make(AS, 0, n)
-		for i, v := range w {
+		for i, v := range x {
 			if v {
-				r = append(r, x[i])
+				r = append(r, y[i])
 			}
 		}
 		return r
 	case AV:
 		r := make(AV, 0, n)
-		for i, v := range w {
+		for i, v := range x {
 			if v {
-				r = append(r, x.At(i))
+				r = append(r, y.At(i))
 			}
 		}
 		return r
@@ -313,52 +313,52 @@ func repeatAB(w AB, x V) V {
 	}
 }
 
-func repeatAI(w AI, x V) V {
+func repeatAI(x AI, y V) V {
 	n := 0
-	for _, v := range w {
+	for _, v := range x {
 		if v < 0 {
 			return errs("negative integer")
 		}
 		n += v
 	}
-	switch x := x.(type) {
+	switch y := y.(type) {
 	case AB:
 		r := make(AB, 0, n)
-		for i, v := range w {
+		for i, v := range x {
 			for j := 0; j < v; j++ {
-				r = append(r, x[i])
+				r = append(r, y[i])
 			}
 		}
 		return r
 	case AF:
 		r := make(AF, 0, n)
-		for i, v := range w {
+		for i, v := range x {
 			for j := 0; j < v; j++ {
-				r = append(r, x[i])
+				r = append(r, y[i])
 			}
 		}
 		return r
 	case AI:
 		r := make(AI, 0, n)
-		for i, v := range w {
+		for i, v := range x {
 			for j := 0; j < v; j++ {
-				r = append(r, x[i])
+				r = append(r, y[i])
 			}
 		}
 		return r
 	case AS:
 		r := make(AS, 0, n)
-		for i, v := range w {
+		for i, v := range x {
 			for j := 0; j < v; j++ {
-				r = append(r, x[i])
+				r = append(r, y[i])
 			}
 		}
 		return r
 	case AV:
 		r := make(AV, 0, n)
-		for i, v := range w {
+		for i, v := range x {
 			for j := 0; j < v; j++ {
-				r = append(r, x[i])
+				r = append(r, y[i])
 			}
 		}
 		return r
@@ -367,9 +367,9 @@ func repeatAI(w AI, x V) V {
 	}
 }
 
-func repeatAF(w AF, x V) V {
+func repeatAF(x AF, y V) V {
 	n := 0
-	for _, v := range w {
+	for _, v := range x {
 		if !isI(F(v)) {
 			return errs("not an integer")
 		}
@@ -378,44 +378,44 @@ func repeatAF(w AF, x V) V {
 		}
 		n += int(v)
 	}
-	switch x := x.(type) {
+	switch y := y.(type) {
 	case AB:
 		r := make(AB, 0, n)
-		for i, v := range w {
+		for i, v := range x {
 			for j := 0; j < int(v); j++ {
-				r = append(r, x[i])
+				r = append(r, y[i])
 			}
 		}
 		return r
 	case AF:
 		r := make(AF, 0, n)
-		for i, v := range w {
+		for i, v := range x {
 			for j := 0; j < int(v); j++ {
-				r = append(r, x[i])
+				r = append(r, y[i])
 			}
 		}
 		return r
 	case AI:
 		r := make(AI, 0, n)
-		for i, v := range w {
+		for i, v := range x {
 			for j := 0; j < int(v); j++ {
-				r = append(r, x[i])
+				r = append(r, y[i])
 			}
 		}
 		return r
 	case AS:
 		r := make(AS, 0, n)
-		for i, v := range w {
+		for i, v := range x {
 			for j := 0; j < int(v); j++ {
-				r = append(r, x[i])
+				r = append(r, y[i])
 			}
 		}
 		return r
 	case AV:
 		r := make(AV, 0, n)
-		for i, v := range w {
+		for i, v := range x {
 			for j := 0; j < int(v); j++ {
-				r = append(r, x[i])
+				r = append(r, y[i])
 			}
 		}
 		return r
@@ -424,11 +424,11 @@ func repeatAF(w AF, x V) V {
 	}
 }
 
-func repeatAO(w AV, x V) V {
-	switch aType(w) {
+func repeatAO(x AV, y V) V {
+	switch aType(x) {
 	case tB, tF, tI:
 		n := 0
-		for _, v := range w {
+		for _, v := range x {
 			switch v := v.(type) {
 			case F:
 				if !isI(v) {
@@ -445,49 +445,49 @@ func repeatAO(w AV, x V) V {
 				n += int(v)
 			}
 		}
-		switch x := x.(type) {
+		switch y := y.(type) {
 		case AB:
 			r := make(AB, 0, n)
-			for i, v := range w {
+			for i, v := range x {
 				max := num2I(v)
 				for j := 0; j < int(max); j++ {
-					r = append(r, x[i])
+					r = append(r, y[i])
 				}
 			}
 			return r
 		case AI:
 			r := make(AI, 0, n)
-			for i, v := range w {
+			for i, v := range x {
 				max := num2I(v)
 				for j := 0; j < int(max); j++ {
-					r = append(r, x[i])
+					r = append(r, y[i])
 				}
 			}
 			return r
 		case AF:
 			r := make(AF, 0, n)
-			for i, v := range w {
+			for i, v := range x {
 				max := num2I(v)
 				for j := 0; j < int(max); j++ {
-					r = append(r, x[i])
+					r = append(r, y[i])
 				}
 			}
 			return r
 		case AS:
 			r := make(AS, 0, n)
-			for i, v := range w {
+			for i, v := range x {
 				max := num2I(v)
 				for j := 0; j < int(max); j++ {
-					r = append(r, x[i])
+					r = append(r, y[i])
 				}
 			}
 			return r
 		case AV:
 			r := make(AV, 0, n)
-			for i, v := range w {
+			for i, v := range x {
 				max := num2I(v)
 				for j := 0; j < int(max); j++ {
-					r = append(r, x[i])
+					r = append(r, y[i])
 				}
 			}
 			return r
