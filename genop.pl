@@ -355,7 +355,7 @@ EOS
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x${errOp}y : bad type `%s for y", x.Type())
 	}
 }\n
 EOS

@@ -96,7 +96,7 @@ func equalFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x=y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -138,7 +138,7 @@ func equalIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x=y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -166,7 +166,7 @@ func equalSV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x=y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -483,7 +483,7 @@ func lesserFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x<y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -525,7 +525,7 @@ func lesserIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x<y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -553,7 +553,7 @@ func lesserSV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x<y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -870,7 +870,7 @@ func greaterFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x>y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -912,7 +912,7 @@ func greaterIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x>y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -940,7 +940,7 @@ func greaterSV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x>y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -1257,7 +1257,7 @@ func addFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x+y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -1299,7 +1299,7 @@ func addIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x+y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -1327,7 +1327,7 @@ func addSV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x+y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -1644,7 +1644,7 @@ func subtractFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x-y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -1686,7 +1686,7 @@ func subtractIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x-y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -1714,7 +1714,7 @@ func subtractSV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x-y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -2039,7 +2039,7 @@ func multiplyFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x*y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -2089,7 +2089,7 @@ func multiplyIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x*y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -2131,7 +2131,7 @@ func multiplySV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x*y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -2513,7 +2513,7 @@ func divideFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x%%y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -2555,7 +2555,7 @@ func divideIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x%%y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -2834,7 +2834,7 @@ func minimumFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x&y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -2876,7 +2876,7 @@ func minimumIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x&y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -2904,7 +2904,7 @@ func minimumSV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x&y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -3221,7 +3221,7 @@ func maximumFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x|y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -3263,7 +3263,7 @@ func maximumIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x|y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -3291,7 +3291,7 @@ func maximumSV(w S, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x|y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -3604,7 +3604,7 @@ func modulusFV(w F, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x mod y : bad type `%s for y", x.Type())
 	}
 }
 
@@ -3646,7 +3646,7 @@ func modulusIV(w I, x V) V {
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x mod y : bad type `%s for y", x.Type())
 	}
 }
 
