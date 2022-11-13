@@ -55,61 +55,61 @@ func reverse(x V) V {
 	}
 }
 
-// Rotate returns TODO
-func rotate(w, x V) V {
+// Rotate returns f|x. XXX: unused for now.
+func rotate(x, y V) V {
 	i := 0
-	switch w := w.(type) {
+	switch x := x.(type) {
 	case I:
-		i = int(w)
+		i = int(x)
 	case F:
-		if !isI(w) {
-			return errsw("not an integer")
+		if !isI(x) {
+			return errf("f|y : non-integer f[y] (%s)", x.Type())
 		}
-		i = int(w)
+		i = int(x)
 	default:
-		return errsw("not an integer")
+		return errf("f|y : non-integer f[y] (%s)", x.Type())
 	}
-	lenx := int(length(x))
+	lenx := int(length(y))
 	if lenx == 0 {
-		return x
+		return y
 	}
 	i %= lenx
 	if i < 0 {
 		i += lenx
 	}
-	switch x := x.(type) {
+	switch y := y.(type) {
 	case AB:
 		r := make(AB, lenx)
 		for j := 0; j < lenx; j++ {
-			r[j] = x[(j+i)%lenx]
+			r[j] = y[(j+i)%lenx]
 		}
 		return r
 	case AF:
 		r := make(AF, lenx)
 		for j := 0; j < lenx; j++ {
-			r[j] = x[(j+i)%lenx]
+			r[j] = y[(j+i)%lenx]
 		}
 		return r
 	case AI:
 		r := make(AI, lenx)
 		for j := 0; j < lenx; j++ {
-			r[j] = x[(j+i)%lenx]
+			r[j] = y[(j+i)%lenx]
 		}
 		return r
 	case AS:
 		r := make(AS, lenx)
 		for j := 0; j < lenx; j++ {
-			r[j] = x[(j+i)%lenx]
+			r[j] = y[(j+i)%lenx]
 		}
 		return r
 	case AV:
 		r := make(AV, lenx)
 		for j := 0; j < lenx; j++ {
-			r[j] = x[(j+i)%lenx]
+			r[j] = y[(j+i)%lenx]
 		}
 		return r
 	default:
-		return errType(x)
+		return errType(y)
 	}
 }
 
@@ -152,262 +152,262 @@ func tail(x V) V {
 }
 
 // drop returns i_x.
-func drop(w, x V) V {
+func drop(x, y V) V {
 	i := 0
-	switch w := w.(type) {
-	case I:
-		i = int(w)
-	case F:
-		if !isI(w) {
-			return errsw("not an integer")
-		}
-		i = int(w)
-	default:
-		return errsw("not an integer")
-	}
-	x = toArray(x)
 	switch x := x.(type) {
+	case I:
+		i = int(x)
+	case F:
+		if !isI(x) {
+			return errf("i_y : non-integer i (%s)", x.Type())
+		}
+		i = int(x)
+	default:
+		return errf("i_y : non-integer i (%s)", x.Type())
+	}
+	y = toArray(y)
+	switch y := y.(type) {
 	case Array:
 		switch {
 		case i >= 0:
-			if i > x.Len() {
-				i = x.Len()
+			if i > y.Len() {
+				i = y.Len()
 			}
-			return x.Slice(i, x.Len())
+			return y.Slice(i, y.Len())
 		default:
-			i = x.Len() + i
+			i = y.Len() + i
 			if i < 0 {
 				i = 0
 			}
-			return x.Slice(0, i)
+			return y.Slice(0, i)
 		}
 	default:
-		return x
+		return y
 	}
 }
 
 // take returns i#x.
-func take(w, x V) V {
+func take(x, y V) V {
 	i := 0
-	switch w := w.(type) {
-	case I:
-		i = int(w)
-	case F:
-		if !isI(w) {
-			return errsw("not an integer")
-		}
-		i = int(w)
-	default:
-		return errsw("not an integer")
-	}
-	x = toArray(x)
 	switch x := x.(type) {
+	case I:
+		i = int(x)
+	case F:
+		if !isI(x) {
+			return errf("i#y : non-integer i (%s)", x.Type())
+		}
+		i = int(x)
+	default:
+		return errf("i#y : non-integer i (%s)", x.Type())
+	}
+	y = toArray(y)
+	switch y := y.(type) {
 	case Array:
 		switch {
 		case i >= 0:
-			if i > x.Len() {
-				return takeCyclic(x, i)
+			if i > y.Len() {
+				return takeCyclic(y, i)
 			}
-			return x.Slice(0, i)
+			return y.Slice(0, i)
 		default:
-			if i < -x.Len() {
-				return takeCyclic(x, i)
+			if i < -y.Len() {
+				return takeCyclic(y, i)
 			}
-			return x.Slice(x.Len()+i, x.Len())
+			return y.Slice(y.Len()+i, y.Len())
 		}
 	default:
-		return x
+		return y
 	}
 }
 
-func takeCyclic(x V, n int) V {
+func takeCyclic(y V, n int) V {
 	neg := n < 0
 	if neg {
 		n = -n
 	}
 	i := 0
-	step := x.Len()
-	switch x := x.(type) {
+	step := y.Len()
+	switch y := y.(type) {
 	case AB:
 		r := make(AB, n)
 		for i+step < n {
-			copy(r[i:i+step], x)
+			copy(r[i:i+step], y)
 			i += step
 		}
 		if neg {
-			copy(r[i:n], x[len(x)-n+i:])
+			copy(r[i:n], y[len(y)-n+i:])
 		} else {
-			copy(r[i:n], x[:n-i])
+			copy(r[i:n], y[:n-i])
 		}
 		return r
 	case AF:
 		r := make(AF, n)
 		for i+step < n {
-			copy(r[i:i+step], x)
+			copy(r[i:i+step], y)
 			i += step
 		}
 		if neg {
-			copy(r[i:n], x[len(x)-n+i:])
+			copy(r[i:n], y[len(y)-n+i:])
 		} else {
-			copy(r[i:n], x[:n-i])
+			copy(r[i:n], y[:n-i])
 		}
 		return r
 	case AI:
 		r := make(AI, n)
 		for i+step < n {
-			copy(r[i:i+step], x)
+			copy(r[i:i+step], y)
 			i += step
 		}
 		if neg {
-			copy(r[i:n], x[len(x)-n+i:])
+			copy(r[i:n], y[len(y)-n+i:])
 		} else {
-			copy(r[i:n], x[:n-i])
+			copy(r[i:n], y[:n-i])
 		}
 		return r
 	case AS:
 		r := make(AS, n)
 		for i+step < n {
-			copy(r[i:i+step], x)
+			copy(r[i:i+step], y)
 			i += step
 		}
 		if neg {
-			copy(r[i:n], x[len(x)-n+i:])
+			copy(r[i:n], y[len(y)-n+i:])
 		} else {
-			copy(r[i:n], x[:n-i])
+			copy(r[i:n], y[:n-i])
 		}
 		return r
 	case AV:
 		r := make(AV, n)
 		for i+step < n {
-			copy(r[i:i+step], x)
+			copy(r[i:i+step], y)
 			i += step
 		}
 		if neg {
-			copy(r[i:n], x[len(x)-n+i:])
+			copy(r[i:n], y[len(y)-n+i:])
 		} else {
-			copy(r[i:n], x[:n-i])
+			copy(r[i:n], y[:n-i])
 		}
 		return r
 	default:
-		return x
+		return y
 	}
 }
 
-// ShiftBefore returns w»x.
-func shiftBefore(w, x V) V {
-	w = toArray(w)
-	max := int(minI(length(w), length(x)))
+// ShiftBefore returns x»y. XXX: unused for now.
+func shiftBefore(x, y V) V {
+	x = toArray(x)
+	max := int(minI(length(x), length(y)))
 	if max == 0 {
-		return x
+		return y
 	}
-	switch x := x.(type) {
+	switch y := y.(type) {
 	case AB:
-		switch w := w.(type) {
+		switch x := x.(type) {
 		case AB:
-			r := make(AB, len(x))
+			r := make(AB, len(y))
 			for i := 0; i < max; i++ {
-				r[i] = w[i]
+				r[i] = x[i]
 			}
-			copy(r[max:], x[:len(x)-max])
+			copy(r[max:], y[:len(y)-max])
 			return r
 		case AF:
-			r := make(AF, len(x))
+			r := make(AF, len(y))
 			for i := 0; i < max; i++ {
-				r[i] = w[i]
+				r[i] = x[i]
 			}
-			for i := max; i < len(x); i++ {
-				r[i] = float64(B2F(x[i-max]))
+			for i := max; i < len(y); i++ {
+				r[i] = float64(B2F(y[i-max]))
 			}
 			return r
 		case AI:
-			r := make(AI, len(x))
+			r := make(AI, len(y))
 			for i := 0; i < max; i++ {
-				r[i] = w[i]
+				r[i] = x[i]
 			}
-			for i := max; i < len(x); i++ {
-				r[i] = int(B2I(x[i-max]))
+			for i := max; i < len(y); i++ {
+				r[i] = int(B2I(y[i-max]))
 			}
 			return r
 		default:
-			return errType(x)
+			return errType(y)
 		}
 	case AF:
-		switch w := w.(type) {
+		switch x := x.(type) {
 		case AB:
-			r := make(AF, len(x))
+			r := make(AF, len(y))
 			for i := 0; i < max; i++ {
-				r[i] = float64(B2F(w[i]))
+				r[i] = float64(B2F(x[i]))
 			}
-			copy(r[max:], x[:len(x)-max])
+			copy(r[max:], y[:len(y)-max])
 			return r
 		case AF:
-			r := make(AF, len(x))
+			r := make(AF, len(y))
 			for i := 0; i < max; i++ {
-				r[i] = w[i]
+				r[i] = x[i]
 			}
-			copy(r[max:], x[:len(x)-max])
+			copy(r[max:], y[:len(y)-max])
 			return r
 		case AI:
-			r := make(AF, len(x))
+			r := make(AF, len(y))
 			for i := 0; i < max; i++ {
-				r[i] = float64(w[i])
+				r[i] = float64(x[i])
 			}
-			copy(r[max:], x[:len(x)-max])
+			copy(r[max:], y[:len(y)-max])
 			return r
 		default:
-			return errType(x)
+			return errType(y)
 		}
 	case AI:
-		switch w := w.(type) {
+		switch x := x.(type) {
 		case AB:
-			r := make(AI, len(x))
+			r := make(AI, len(y))
 			for i := 0; i < max; i++ {
-				r[i] = int(B2I(w[i]))
+				r[i] = int(B2I(x[i]))
 			}
-			copy(r[max:], x[:len(x)-max])
+			copy(r[max:], y[:len(y)-max])
 			return r
 		case AF:
-			r := make(AF, len(x))
+			r := make(AF, len(y))
 			for i := 0; i < max; i++ {
-				r[i] = w[i]
+				r[i] = x[i]
 			}
-			for i := max; i < len(x); i++ {
-				r[i] = float64(x[i-max])
+			for i := max; i < len(y); i++ {
+				r[i] = float64(y[i-max])
 			}
 			return r
 		case AI:
-			r := make(AI, len(x))
+			r := make(AI, len(y))
 			for i := 0; i < max; i++ {
-				r[i] = w[i]
+				r[i] = x[i]
 			}
-			copy(r[max:], x[:len(x)-max])
+			copy(r[max:], y[:len(y)-max])
 			return r
 		default:
-			return errType(x)
+			return errType(y)
 		}
 	case AS:
-		switch w := w.(type) {
+		switch x := x.(type) {
 		case AS:
-			r := make(AS, len(x))
+			r := make(AS, len(y))
 			for i := 0; i < max; i++ {
-				r[i] = w[i]
+				r[i] = x[i]
 			}
-			copy(r[max:], x[:len(x)-max])
+			copy(r[max:], y[:len(y)-max])
 			return r
 		default:
-			return errType(x)
+			return errType(y)
 		}
 	case AV:
-		switch w := w.(type) {
+		switch x := x.(type) {
 		case Array:
-			r := make(AV, len(x))
+			r := make(AV, len(y))
 			for i := 0; i < max; i++ {
-				r[i] = w.At(i)
+				r[i] = x.At(i)
 			}
-			copy(r[max:], x[:len(x)-max])
+			copy(r[max:], y[:len(y)-max])
 			return r
 		default:
-			return errType(x)
+			return errType(y)
 		}
 	default:
 		return errs("not an array")
@@ -442,121 +442,121 @@ func nudge(x V) V {
 	}
 }
 
-// ShiftAfter returns w«x.
-func shiftAfter(w, x V) V {
-	w = toArray(w)
-	max := int(minI(length(w), length(x)))
+// ShiftAfter returns x«y. XXX: unused for now.
+func shiftAfter(x, y V) V {
+	x = toArray(x)
+	max := int(minI(length(x), length(y)))
 	if max == 0 {
-		return x
+		return y
 	}
-	switch x := x.(type) {
+	switch y := y.(type) {
 	case AB:
-		switch w := w.(type) {
+		switch x := x.(type) {
 		case AB:
-			r := make(AB, len(x))
+			r := make(AB, len(y))
 			for i := 0; i < max; i++ {
-				r[len(x)-1-i] = w[i]
+				r[len(y)-1-i] = x[i]
 			}
-			copy(r[:len(x)-max], x[max:])
+			copy(r[:len(y)-max], y[max:])
 			return r
 		case AF:
-			r := make(AF, len(x))
+			r := make(AF, len(y))
 			for i := 0; i < max; i++ {
-				r[len(x)-1-i] = w[i]
+				r[len(y)-1-i] = x[i]
 			}
-			for i := max; i < len(x); i++ {
-				r[i-max] = float64(B2F(x[i]))
+			for i := max; i < len(y); i++ {
+				r[i-max] = float64(B2F(y[i]))
 			}
 			return r
 		case AI:
-			r := make(AI, len(x))
+			r := make(AI, len(y))
 			for i := 0; i < max; i++ {
-				r[len(x)-1-i] = w[i]
+				r[len(y)-1-i] = x[i]
 			}
-			for i := max; i < len(x); i++ {
-				r[i-max] = int(B2I(x[i]))
+			for i := max; i < len(y); i++ {
+				r[i-max] = int(B2I(y[i]))
 			}
 			return r
 		default:
-			return errType(x)
+			return errType(y)
 		}
 	case AF:
-		switch w := w.(type) {
+		switch x := x.(type) {
 		case AB:
-			r := make(AF, len(x))
+			r := make(AF, len(y))
 			for i := 0; i < max; i++ {
-				r[len(x)-1-i] = float64(B2F(w[i]))
+				r[len(y)-1-i] = float64(B2F(x[i]))
 			}
-			copy(r[:len(x)-max], x[max:])
+			copy(r[:len(y)-max], y[max:])
 			return r
 		case AF:
-			r := make(AF, len(x))
+			r := make(AF, len(y))
 			for i := 0; i < max; i++ {
-				r[len(x)-1-i] = w[i]
+				r[len(y)-1-i] = x[i]
 			}
-			copy(r[:len(x)-max], x[max:])
+			copy(r[:len(y)-max], y[max:])
 			return r
 		case AI:
-			r := make(AF, len(x))
+			r := make(AF, len(y))
 			for i := 0; i < max; i++ {
-				r[len(x)-1-i] = float64(w[i])
+				r[len(y)-1-i] = float64(x[i])
 			}
-			copy(r[:len(x)-max], x[max:])
+			copy(r[:len(y)-max], y[max:])
 			return r
 		default:
-			return errType(x)
+			return errType(y)
 		}
 	case AI:
-		switch w := w.(type) {
+		switch x := x.(type) {
 		case AB:
-			r := make(AI, len(x))
+			r := make(AI, len(y))
 			for i := 0; i < max; i++ {
-				r[len(x)-1-i] = int(B2I(w[i]))
+				r[len(y)-1-i] = int(B2I(x[i]))
 			}
-			copy(r[:len(x)-max], x[max:])
+			copy(r[:len(y)-max], y[max:])
 			return r
 		case AF:
-			r := make(AF, len(x))
+			r := make(AF, len(y))
 			for i := 0; i < max; i++ {
-				r[len(x)-1-i] = w[i]
+				r[len(y)-1-i] = x[i]
 			}
-			for i := max; i < len(x); i++ {
-				r[i-max] = float64(x[max])
+			for i := max; i < len(y); i++ {
+				r[i-max] = float64(y[max])
 			}
 			return r
 		case AI:
-			r := make(AI, len(x))
+			r := make(AI, len(y))
 			for i := 0; i < max; i++ {
-				r[len(x)-1-i] = w[i]
+				r[len(y)-1-i] = x[i]
 			}
-			copy(r[:len(x)-max], x[max:])
+			copy(r[:len(y)-max], y[max:])
 			return r
 		default:
-			return errType(x)
+			return errType(y)
 		}
 	case AS:
-		switch w := w.(type) {
+		switch x := x.(type) {
 		case AS:
-			r := make(AS, len(x))
+			r := make(AS, len(y))
 			for i := 0; i < max; i++ {
-				r[len(x)-1-i] = w[i]
+				r[len(y)-1-i] = x[i]
 			}
-			copy(r[:len(x)-max], x[max:])
+			copy(r[:len(y)-max], y[max:])
 			return r
 		default:
-			return errType(x)
+			return errType(y)
 		}
 	case AV:
-		switch w := w.(type) {
+		switch x := x.(type) {
 		case Array:
-			r := make(AV, len(x))
+			r := make(AV, len(y))
 			for i := 0; i < max; i++ {
-				r[len(x)-1-i] = w.At(i)
+				r[len(y)-1-i] = x.At(i)
 			}
-			copy(r[:len(x)-max], x[max:])
+			copy(r[:len(y)-max], y[max:])
 			return r
 		default:
-			return errType(x)
+			return errType(y)
 		}
 	default:
 		return errs("not an array")
@@ -827,445 +827,445 @@ func flipAOAO(x AV, lines int) AV {
 	return r
 }
 
-// joinTo returns w,x.
-func joinTo(w, x V) V {
-	switch w := w.(type) {
+// joinTo returns x,y.
+func joinTo(x, y V) V {
+	switch x := x.(type) {
 	case F:
-		return joinToF(w, x, true)
+		return joinToF(x, y, true)
 	case I:
-		return joinToI(w, x, true)
+		return joinToI(x, y, true)
 	case S:
-		return joinToS(w, x, true)
+		return joinToS(x, y, true)
 	case AB:
-		return joinToAB(x, w, false)
+		return joinToAB(y, x, false)
 	case AF:
-		return joinToAF(x, w, false)
+		return joinToAF(y, x, false)
 	case AI:
-		return joinToAI(x, w, false)
+		return joinToAI(y, x, false)
 	case AS:
-		return joinToAS(x, w, false)
+		return joinToAS(y, x, false)
 	case AV:
-		return joinToAO(x, w, false)
+		return joinToAO(y, x, false)
 	default:
-		switch x := x.(type) {
+		switch y := y.(type) {
 		case Array:
-			return joinAtomToArray(w, x, true)
+			return joinAtomToArray(x, y, true)
 		default:
-			return AV{w, x}
+			return AV{x, y}
 		}
 	}
 }
 
-func joinToI(w I, x V, left bool) V {
-	switch x := x.(type) {
+func joinToI(x I, y V, left bool) V {
+	switch y := y.(type) {
 	case F:
 		if left {
-			return AF{float64(w), float64(x)}
+			return AF{float64(x), float64(y)}
 		}
-		return AF{float64(x), float64(w)}
+		return AF{float64(y), float64(x)}
 	case I:
 		if left {
-			return AI{int(w), int(x)}
+			return AI{int(x), int(y)}
 		}
-		return AI{int(x), int(w)}
+		return AI{int(y), int(x)}
 	case S:
 		if left {
-			return AV{w, x}
+			return AV{x, y}
 		}
-		return AV{x, w}
+		return AV{y, x}
 	case AB:
-		return joinToAB(w, x, left)
+		return joinToAB(x, y, left)
 	case AF:
-		return joinToAF(w, x, left)
+		return joinToAF(x, y, left)
 	case AI:
-		return joinToAI(w, x, left)
+		return joinToAI(x, y, left)
 	case AS:
-		return joinToAS(w, x, left)
+		return joinToAS(x, y, left)
 	case AV:
-		return joinToAO(w, x, left)
+		return joinToAO(x, y, left)
 	default:
-		return AV{w, x}
+		return AV{x, y}
 	}
 }
 
-func joinToF(w F, x V, left bool) V {
-	switch x := x.(type) {
+func joinToF(x F, y V, left bool) V {
+	switch y := y.(type) {
 	case F:
 		if left {
-			return AF{float64(w), float64(x)}
+			return AF{float64(x), float64(y)}
 		}
-		return AF{float64(x), float64(w)}
+		return AF{float64(y), float64(x)}
 	case I:
 		if left {
-			return AF{float64(w), float64(x)}
+			return AF{float64(x), float64(y)}
 		}
-		return AF{float64(x), float64(w)}
+		return AF{float64(y), float64(x)}
 	case S:
 		if left {
-			return AV{w, x}
+			return AV{x, y}
 		}
-		return AV{x, w}
+		return AV{y, x}
 	case AB:
-		return joinToAB(w, x, left)
+		return joinToAB(x, y, left)
 	case AF:
-		return joinToAF(w, x, left)
+		return joinToAF(x, y, left)
 	case AI:
-		return joinToAI(w, x, left)
+		return joinToAI(x, y, left)
 	case AS:
-		return joinToAS(w, x, left)
+		return joinToAS(x, y, left)
 	case AV:
-		return joinToAO(w, x, left)
+		return joinToAO(x, y, left)
 	default:
-		return AV{w, x}
+		return AV{x, y}
 	}
 }
 
-func joinToS(w S, x V, left bool) V {
-	switch x := x.(type) {
+func joinToS(x S, y V, left bool) V {
+	switch y := y.(type) {
 	case F:
 		if left {
-			return AV{w, x}
+			return AV{x, y}
 		}
-		return AV{x, w}
+		return AV{y, x}
 	case I:
 		if left {
-			return AV{w, x}
+			return AV{x, y}
 		}
-		return AV{x, w}
+		return AV{y, x}
 	case S:
 		if left {
-			return AS{string(w), string(x)}
+			return AS{string(x), string(y)}
 		}
-		return AS{string(x), string(w)}
+		return AS{string(y), string(x)}
 	case AB:
-		return joinToAB(w, x, left)
+		return joinToAB(x, y, left)
 	case AF:
-		return joinToAF(w, x, left)
+		return joinToAF(x, y, left)
 	case AI:
-		return joinToAI(w, x, left)
+		return joinToAI(x, y, left)
 	case AS:
-		return joinToAS(w, x, left)
+		return joinToAS(x, y, left)
 	case AV:
-		return joinToAO(w, x, left)
+		return joinToAO(x, y, left)
 	default:
-		return AV{w, x}
+		return AV{x, y}
 	}
 }
 
-func joinToAO(w V, x AV, left bool) V {
-	switch w := w.(type) {
+func joinToAO(x V, y AV, left bool) V {
+	switch x := x.(type) {
 	case Array:
 		if left {
-			return joinArrays(w, x)
+			return joinArrays(x, y)
 		}
-		return joinArrays(x, w)
+		return joinArrays(y, x)
 	default:
-		r := make(AV, len(x)+1)
+		r := make(AV, len(y)+1)
 		if left {
-			r[0] = w
-			copy(r[1:], x)
+			r[0] = x
+			copy(r[1:], y)
 		} else {
-			r[len(r)-1] = w
-			copy(r[:len(r)-1], x)
+			r[len(r)-1] = x
+			copy(r[:len(r)-1], y)
 		}
 		return r
 	}
 }
 
-func joinArrays(w, x Array) AV {
-	r := make(AV, x.Len()+w.Len())
-	for i := 0; i < w.Len(); i++ {
-		r[i] = w.At(i)
+func joinArrays(x, y Array) AV {
+	r := make(AV, y.Len()+x.Len())
+	for i := 0; i < x.Len(); i++ {
+		r[i] = x.At(i)
 	}
-	for i := w.Len(); i < len(r); i++ {
-		r[i] = x.At(i - w.Len())
+	for i := x.Len(); i < len(r); i++ {
+		r[i] = y.At(i - x.Len())
 	}
 	return r
 }
 
-func joinAtomToArray(w V, x Array, left bool) AV {
-	r := make(AV, x.Len()+1)
+func joinAtomToArray(x V, y Array, left bool) AV {
+	r := make(AV, y.Len()+1)
 	if left {
-		r[0] = w
+		r[0] = x
 		for i := 1; i < len(r); i++ {
-			r[i] = x.At(i - 1)
+			r[i] = y.At(i - 1)
 		}
 	} else {
-		r[len(r)-1] = w
+		r[len(r)-1] = x
 		for i := 0; i < len(r)-1; i++ {
-			r[i] = x.At(i)
+			r[i] = y.At(i)
 		}
 	}
 	return r
 }
 
-func joinToAS(w V, x AS, left bool) V {
-	switch w := w.(type) {
+func joinToAS(x V, y AS, left bool) V {
+	switch x := x.(type) {
 	case S:
-		r := make(AS, len(x)+1)
+		r := make(AS, len(y)+1)
 		if left {
-			r[0] = string(w)
-			copy(r[1:], x)
+			r[0] = string(x)
+			copy(r[1:], y)
 		} else {
-			r[len(r)-1] = string(w)
-			copy(r[:len(r)-1], x)
+			r[len(r)-1] = string(x)
+			copy(r[:len(r)-1], y)
 		}
 		return r
 	case AS:
-		r := make(AS, len(x)+len(w))
+		r := make(AS, len(y)+len(x))
 		if left {
-			copy(r[:len(w)], w)
-			copy(r[len(w):], x)
-		} else {
 			copy(r[:len(x)], x)
-			copy(r[len(x):], w)
+			copy(r[len(x):], y)
+		} else {
+			copy(r[:len(y)], y)
+			copy(r[len(y):], x)
 		}
 		return r
 	case Array:
 		if left {
-			return joinArrays(w, x)
+			return joinArrays(x, y)
 		}
-		return joinArrays(x, w)
+		return joinArrays(y, x)
 	default:
-		return joinAtomToArray(w, x, left)
+		return joinAtomToArray(x, y, left)
 	}
 }
 
-func joinToAB(w V, x AB, left bool) V {
-	switch w := w.(type) {
+func joinToAB(x V, y AB, left bool) V {
+	switch x := x.(type) {
 	case F:
-		r := make(AF, len(x)+1)
+		r := make(AF, len(y)+1)
 		if left {
-			r[0] = float64(w)
+			r[0] = float64(x)
 			for i := 1; i < len(r); i++ {
-				r[i] = float64(B2F(x[i-1]))
+				r[i] = float64(B2F(y[i-1]))
 			}
 		} else {
-			r[len(r)-1] = float64(w)
+			r[len(r)-1] = float64(x)
 			for i := 0; i < len(r); i++ {
-				r[i] = float64(B2F(x[i]))
+				r[i] = float64(B2F(y[i]))
 			}
 		}
 		return r
 	case I:
-		if isBI(w) {
-			r := make(AB, len(x)+1)
+		if isBI(x) {
+			r := make(AB, len(y)+1)
 			if left {
-				r[0] = w == 1
-				copy(r[1:], x)
+				r[0] = x == 1
+				copy(r[1:], y)
 			} else {
-				r[len(r)-1] = w == 1
-				copy(r[:len(r)-1], x)
+				r[len(r)-1] = x == 1
+				copy(r[:len(r)-1], y)
 			}
 			return r
 		}
-		r := make(AI, len(x)+1)
+		r := make(AI, len(y)+1)
 		if left {
-			r[0] = int(w)
+			r[0] = int(x)
 			for i := 1; i < len(r); i++ {
-				r[i] = int(B2I(x[i-1]))
+				r[i] = int(B2I(y[i-1]))
 			}
 		} else {
-			r[len(r)-1] = int(w)
+			r[len(r)-1] = int(x)
 			for i := 0; i < len(r); i++ {
-				r[i] = int(B2I(x[i]))
+				r[i] = int(B2I(y[i]))
 			}
 		}
 		return r
 	case AB:
 		if left {
-			return joinABAB(w, x)
+			return joinABAB(x, y)
 		}
-		return joinABAB(x, w)
+		return joinABAB(y, x)
 	case AI:
 		if left {
-			return joinAIAB(w, x)
+			return joinAIAB(x, y)
 		}
-		return joinABAI(x, w)
+		return joinABAI(y, x)
 	case AF:
 		if left {
-			return joinAFAB(w, x)
+			return joinAFAB(x, y)
 		}
-		return joinABAF(x, w)
+		return joinABAF(y, x)
 	case Array:
 		if left {
-			return joinArrays(w, x)
+			return joinArrays(x, y)
 		}
-		return joinArrays(x, w)
+		return joinArrays(y, x)
 	default:
-		return joinAtomToArray(w, x, left)
+		return joinAtomToArray(x, y, left)
 	}
 }
 
-func joinToAI(w V, x AI, left bool) V {
-	switch w := w.(type) {
+func joinToAI(x V, y AI, left bool) V {
+	switch x := x.(type) {
 	case F:
-		r := make(AF, len(x)+1)
+		r := make(AF, len(y)+1)
 		if left {
-			r[0] = float64(w)
+			r[0] = float64(x)
 			for i := 1; i < len(r); i++ {
-				r[i] = float64(x[i-1])
+				r[i] = float64(y[i-1])
 			}
 		} else {
-			r[len(r)-1] = float64(w)
+			r[len(r)-1] = float64(x)
 			for i := 0; i < len(r)-1; i++ {
-				r[i] = float64(x[i])
+				r[i] = float64(y[i])
 			}
 		}
 		return r
 	case I:
-		r := make(AI, len(x)+1)
+		r := make(AI, len(y)+1)
 		if left {
-			r[0] = int(w)
-			copy(r[1:], x)
+			r[0] = int(x)
+			copy(r[1:], y)
 		} else {
-			r[len(r)-1] = int(w)
-			copy(r[:len(r)-1], x)
+			r[len(r)-1] = int(x)
+			copy(r[:len(r)-1], y)
 		}
 		return r
 	case AB:
 		if left {
-			return joinABAI(w, x)
+			return joinABAI(x, y)
 		}
-		return joinAIAB(x, w)
+		return joinAIAB(y, x)
 	case AI:
 		if left {
-			return joinAIAI(w, x)
+			return joinAIAI(x, y)
 		}
-		return joinAIAI(x, w)
+		return joinAIAI(y, x)
 	case AF:
 		if left {
-			return joinAFAI(w, x)
+			return joinAFAI(x, y)
 		}
-		return joinAIAF(x, w)
+		return joinAIAF(y, x)
 	case Array:
 		if left {
-			return joinArrays(w, x)
+			return joinArrays(x, y)
 		}
-		return joinArrays(x, w)
+		return joinArrays(y, x)
 	default:
-		return joinAtomToArray(w, x, left)
+		return joinAtomToArray(x, y, left)
 	}
 }
 
-func joinToAF(w V, x AF, left bool) V {
-	switch w := w.(type) {
+func joinToAF(x V, y AF, left bool) V {
+	switch x := x.(type) {
 	case F:
-		r := make(AF, len(x)+1)
+		r := make(AF, len(y)+1)
 		if left {
-			r[0] = float64(w)
-			copy(r[1:], x)
+			r[0] = float64(x)
+			copy(r[1:], y)
 		} else {
-			r[len(r)-1] = float64(w)
-			copy(r[:len(r)-1], x)
+			r[len(r)-1] = float64(x)
+			copy(r[:len(r)-1], y)
 		}
 		return r
 	case I:
-		r := make(AF, len(x)+1)
+		r := make(AF, len(y)+1)
 		if left {
-			r[0] = float64(w)
-			copy(r[1:], x)
+			r[0] = float64(x)
+			copy(r[1:], y)
 		} else {
-			r[len(r)-1] = float64(w)
-			copy(r[:len(r)-1], x)
+			r[len(r)-1] = float64(x)
+			copy(r[:len(r)-1], y)
 		}
 		return r
 	case AB:
 		if left {
-			return joinABAF(w, x)
+			return joinABAF(x, y)
 		}
-		return joinAFAB(x, w)
+		return joinAFAB(y, x)
 	case AI:
 		if left {
-			return joinAIAF(w, x)
+			return joinAIAF(x, y)
 		}
-		return joinAFAI(x, w)
+		return joinAFAI(y, x)
 	case AF:
 		if left {
-			return joinAFAF(w, x)
+			return joinAFAF(x, y)
 		}
-		return joinAFAF(x, w)
+		return joinAFAF(y, x)
 	case Array:
 		if left {
-			return joinArrays(w, x)
+			return joinArrays(x, y)
 		}
-		return joinArrays(x, w)
+		return joinArrays(y, x)
 	default:
-		return joinAtomToArray(w, x, left)
+		return joinAtomToArray(x, y, left)
 	}
 }
 
-func joinABAB(w AB, x AB) AB {
-	r := make(AB, len(x)+len(w))
-	copy(r[:len(w)], w)
-	copy(r[len(w):], x)
+func joinABAB(x AB, y AB) AB {
+	r := make(AB, len(y)+len(x))
+	copy(r[:len(x)], x)
+	copy(r[len(x):], y)
 	return r
 }
 
-func joinAIAI(w AI, x AI) AI {
-	r := make(AI, len(x)+len(w))
-	copy(r[:len(w)], w)
-	copy(r[len(w):], x)
+func joinAIAI(x AI, y AI) AI {
+	r := make(AI, len(y)+len(x))
+	copy(r[:len(x)], x)
+	copy(r[len(x):], y)
 	return r
 }
 
-func joinAFAF(w AF, x AF) AF {
-	r := make(AF, len(x)+len(w))
-	copy(r[:len(w)], w)
-	copy(r[len(w):], x)
+func joinAFAF(x AF, y AF) AF {
+	r := make(AF, len(y)+len(x))
+	copy(r[:len(x)], x)
+	copy(r[len(x):], y)
 	return r
 }
 
-func joinABAI(w AB, x AI) AI {
-	r := make(AI, len(w)+len(x))
-	for i := 0; i < len(w); i++ {
-		r[i] = int(B2I(w[i]))
+func joinABAI(x AB, y AI) AI {
+	r := make(AI, len(x)+len(y))
+	for i := 0; i < len(x); i++ {
+		r[i] = int(B2I(x[i]))
 	}
-	copy(r[len(w):], x)
+	copy(r[len(x):], y)
 	return r
 }
 
-func joinAIAB(w AI, x AB) AI {
-	r := make(AI, len(w)+len(x))
-	copy(r[:len(w)], w)
-	for i := len(w); i < len(r); i++ {
-		r[i] = int(B2I(x[i-len(w)]))
-	}
-	return r
-}
-
-func joinABAF(w AB, x AF) AF {
-	r := make(AF, len(w)+len(x))
-	for i := 0; i < len(w); i++ {
-		r[i] = float64(B2F(w[i]))
-	}
-	copy(r[len(w):], x)
-	return r
-}
-
-func joinAFAB(w AF, x AB) AF {
-	r := make(AF, len(w)+len(x))
-	copy(r[:len(w)], w)
-	for i := len(w); i < len(r); i++ {
-		r[i] = float64(B2F(x[i-len(w)]))
+func joinAIAB(x AI, y AB) AI {
+	r := make(AI, len(x)+len(y))
+	copy(r[:len(x)], x)
+	for i := len(x); i < len(r); i++ {
+		r[i] = int(B2I(y[i-len(x)]))
 	}
 	return r
 }
 
-func joinAIAF(w AI, x AF) AF {
-	r := make(AF, len(w)+len(x))
-	for i := 0; i < len(w); i++ {
-		r[i] = float64(w[i])
+func joinABAF(x AB, y AF) AF {
+	r := make(AF, len(x)+len(y))
+	for i := 0; i < len(x); i++ {
+		r[i] = float64(B2F(x[i]))
 	}
-	copy(r[len(w):], x)
+	copy(r[len(x):], y)
 	return r
 }
 
-func joinAFAI(w AF, x AI) AF {
-	r := make(AF, len(w)+len(x))
-	copy(r[:len(w)], w)
-	for i := len(w); i < len(r); i++ {
-		r[i] = float64(x[i-len(w)])
+func joinAFAB(x AF, y AB) AF {
+	r := make(AF, len(x)+len(y))
+	copy(r[:len(x)], x)
+	for i := len(x); i < len(r); i++ {
+		r[i] = float64(B2F(y[i-len(x)]))
+	}
+	return r
+}
+
+func joinAIAF(x AI, y AF) AF {
+	r := make(AF, len(x)+len(y))
+	for i := 0; i < len(x); i++ {
+		r[i] = float64(x[i])
+	}
+	copy(r[len(x):], y)
+	return r
+}
+
+func joinAFAI(x AF, y AI) AF {
+	r := make(AF, len(x)+len(y))
+	copy(r[:len(x)], x)
+	for i := len(x); i < len(r); i++ {
+		r[i] = float64(y[i-len(x)])
 	}
 	return r
 }
@@ -1287,21 +1287,21 @@ func enlist(x V) V {
 	}
 }
 
-// Windows returns w↕x.
-func windows(w, x V) V {
+// Windows returns x↕y. XXX: unused for now.
+func windows(x, y V) V {
 	i := 0
-	switch w := w.(type) {
+	switch x := x.(type) {
 	case I:
-		i = int(w)
+		i = int(x)
 	case F:
-		if !isI(w) {
+		if !isI(x) {
 			return errsw("not an integer")
 		}
-		i = int(w)
+		i = int(x)
 	default:
 		return errsw("not an integer")
 	}
-	switch x := x.(type) {
+	switch x := y.(type) {
 	case Array:
 		if i <= 0 || i >= x.Len()+1 {
 			return errsw("out of range [0, length]")
@@ -1338,7 +1338,7 @@ func group(x V) V {
 	case AI:
 		min, max := minMax(x)
 		if min < 0 {
-			return errs("negative integer")
+			return errs("=x : x contains negative integer(s)")
 		}
 		r := make(AV, max+1)
 		for i := range r {
@@ -1351,6 +1351,6 @@ func group(x V) V {
 		return r
 		// TODO: AF and AO
 	default:
-		return errs("non-integer array")
+		return errs("=x : x non-integer array")
 	}
 }
