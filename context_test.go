@@ -117,7 +117,6 @@ func TestRunString(t *testing.T) {
 			ctxRight := NewContext()
 			vRight, errRight := ctxRight.RunString(mt.Right)
 			if !match(vLeft, vRight) {
-				t.Log(ctxLeft.ast.String())
 				t.Log(ctxLeft.ProgramString())
 				t.Log(matchString)
 				t.Logf("results: %v vs %v", vLeft, vRight)
@@ -125,8 +124,8 @@ func TestRunString(t *testing.T) {
 			}
 			if errLeft != nil || errRight != nil {
 				if !t.Failed() {
-					t.Log(ctxLeft.ast.String())
 					t.Log(ctxLeft.ProgramString())
+					t.Log(ctxRight.ProgramString())
 					t.Log(matchString)
 				}
 				t.Logf("return error: `%v` vs `%v`", errLeft, errRight)

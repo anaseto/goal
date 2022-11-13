@@ -8,14 +8,58 @@ import (
 // Program represents a compiled program.
 type Program struct {
 	Body    []opcode
+	Pos     []int
 	Lambdas []*LambdaCode
+
+	cLambdas int // index next of last compiled lambda
+	cBody    int // number of already processed body ops
+	last     int // index of last non-argument opcode
 }
 
 // LambdaCode represents a compiled user defined function.
 type LambdaCode struct {
-	Body   []opcode
-	Locals []string
-	Rank   int
+	Body      []opcode
+	Pos       []int
+	Names     []string
+	Rank      int
+	NamedArgs bool
+	Locals    map[string]Local // arguments and variables
+
+	locals map[int]Local // opcode index -> local variable
+	nVars  int
+}
+
+// Local represents either an argument or a local variable. IDs are
+// unique for a given type only.
+type Local struct {
+	Type LocalType
+	ID   int
+}
+
+// LocalType represents different kinds of locals.
+type LocalType int
+
+// These constants describe the supported kinds of locals.
+const (
+	LocalArg LocalType = iota
+	LocalVar
+)
+
+func (l *LambdaCode) local(s string) (Local, bool) {
+	param, ok := l.Locals[s]
+	if ok {
+		return param, true
+	}
+	if !l.NamedArgs && len(s) == 1 {
+		switch r := rune(s[0]); r {
+		case 'x', 'y', 'z':
+			id := r - 'x'
+			arg := Local{Type: LocalArg, ID: int(id)}
+			l.Locals[s] = arg
+			return arg, true
+		}
+	}
+	return Local{}, false
 }
 
 // ProgramString returns a string representation of the compiled program and
@@ -45,7 +89,7 @@ func (ctx *Context) lambdaString(lc *LambdaCode) string {
 	fmt.Fprintln(sb, "Instructions:")
 	fmt.Fprint(sb, ctx.opcodesString(lc.Body, lc))
 	fmt.Fprintln(sb, "Locals:")
-	for i, name := range lc.Locals {
+	for i, name := range lc.Names {
 		fmt.Fprintf(sb, "\t%s\t%d\n", name, i)
 	}
 	return sb.String()
@@ -67,14 +111,14 @@ func (ctx *Context) opcodesString(ops []opcode, lc *LambdaCode) string {
 			fmt.Fprintf(sb, "%d\t%s\t%d (%s)\n", i, op, ops[i+1], ctx.gNames[int(ops[i+1])])
 			i++
 		case opLocal:
-			fmt.Fprintf(sb, "%d\t%s\t\t%d (%s)\n", i, op, ops[i+1], lc.Locals[int(ops[i+1])])
+			fmt.Fprintf(sb, "%d\t%s\t\t%d (%s)\n", i, op, ops[i+1], lc.Names[int(ops[i+1])])
 			//fmt.Fprintf(sb, "%d\t%s\t%d\n", i, op, ops[i+1])
 			i++
 		case opAssignGlobal:
 			fmt.Fprintf(sb, "%d\t%s\t%d (%s)\n", i, op, ops[i+1], ctx.gNames[int(ops[i+1])])
 			i++
 		case opAssignLocal:
-			fmt.Fprintf(sb, "%d\t%s\t%d (%s)\n", i, op, ops[i+1], lc.Locals[ops[i+1]])
+			fmt.Fprintf(sb, "%d\t%s\t%d (%s)\n", i, op, ops[i+1], lc.Names[ops[i+1]])
 			i++
 		case opVariadic:
 			fmt.Fprintf(sb, "%d\t%s\t%s\n", i, op, ctx.variadicsNames[ops[i+1]])
@@ -96,60 +140,27 @@ func (ctx *Context) opcodesString(ops []opcode, lc *LambdaCode) string {
 	return sb.String()
 }
 
-// Compile transforms an AstProgram into a Program.
-func (ctx *Context) compile() bool {
-	if ctx.ast.cBody == len(ctx.ast.Body) && ctx.ast.cLambdas == len(ctx.ast.Lambdas) {
+// resolve resolves names in lambdas and updates the object code. It returns
+// false if all code had already been processed.
+func (ctx *Context) resolve() bool {
+	if ctx.prog.cLambdas == len(ctx.prog.Lambdas) &&
+		ctx.prog.cBody == len(ctx.prog.Body) {
 		return false
 	}
-	ctx.compileBody()
-	ctx.compileLambdas()
+	ctx.resolveLambdas()
+	ctx.prog.cBody = len(ctx.prog.Body)
 	return true
 
 }
 
-func (ctx *Context) compileBody() {
-	for _, expr := range ctx.ast.Body[ctx.ast.cBody:] {
-		ctx.prog.Body, _ = compileExpr(ctx.prog.Body, expr)
+func (ctx *Context) resolveLambdas() {
+	for _, lc := range ctx.prog.Lambdas[ctx.prog.cLambdas:] {
+		ctx.resolveLambda(lc)
 	}
-	ctx.ast.cBody = len(ctx.ast.Body)
+	ctx.prog.cLambdas = len(ctx.prog.Lambdas)
 }
 
-func compileExpr(body []opcode, expr Expr) ([]opcode, bool) {
-	switch expr := expr.(type) {
-	case astConst:
-		body = append(body, opConst, opcode(expr.ID))
-	case astNil:
-		body = append(body, opNil)
-	case astGlobal:
-		body = append(body, opGlobal, opcode(expr.ID))
-	case astAssignGlobal:
-		body = append(body, opAssignGlobal, opcode(expr.ID))
-	case astVariadic:
-		body = append(body, opVariadic, opcode(expr.Variadic))
-	case astLambda:
-		body = append(body, opLambda, opcode(expr.Lambda))
-	case astApply:
-		body = append(body, opApply)
-	case astApply2:
-		body = append(body, opApply2)
-	case astApplyN:
-		body = append(body, opApplyN, opcode(expr.N))
-	case astDrop:
-		body = append(body, opDrop)
-	default:
-		return body, false
-	}
-	return body, true
-}
-
-func (ctx *Context) compileLambdas() {
-	for _, lc := range ctx.ast.Lambdas[ctx.ast.cLambdas:] {
-		ctx.prog.Lambdas = append(ctx.prog.Lambdas, ctx.compileLambda(lc))
-	}
-	ctx.ast.cLambdas = len(ctx.ast.Lambdas)
-}
-
-func (ctx *Context) compileLambda(lc *astLambdaCode) *LambdaCode {
+func (ctx *Context) resolveLambda(lc *LambdaCode) {
 	nargs := 0
 	nlocals := 0
 	for _, local := range lc.Locals {
@@ -164,9 +175,8 @@ func (ctx *Context) compileLambda(lc *astLambdaCode) *LambdaCode {
 		nargs = 1
 	}
 	nvars := nlocals - nargs
-	clc := &LambdaCode{}
-	clc.Rank = nargs
-	locals := make([]string, nlocals)
+	lc.Rank = nargs
+	names := make([]string, nlocals)
 	getID := func(local Local) int {
 		switch local.Type {
 		case LocalArg:
@@ -178,20 +188,20 @@ func (ctx *Context) compileLambda(lc *astLambdaCode) *LambdaCode {
 		}
 	}
 	for k, local := range lc.Locals {
-		locals[getID(local)] = k
+		names[getID(local)] = k
 	}
-	clc.Locals = locals
-	for _, expr := range lc.Body {
-		var done bool
-		clc.Body, done = compileExpr(clc.Body, expr)
-		if !done {
-			switch expr := expr.(type) {
-			case astLocal:
-				clc.Body = append(clc.Body, opLocal, opcode(getID(expr.Local)))
-			case astAssignLocal:
-				clc.Body = append(clc.Body, opAssignLocal, opcode(getID(expr.Local)))
-			}
+	lc.Names = names
+	for ip := 0; ip < len(lc.Body); {
+		op := lc.Body[ip]
+		ip++
+		switch op {
+		case opLocal:
+			lc.Body[ip] = opcode(getID(lc.locals[ip]))
+		case opAssignLocal:
+			lc.Body[ip] = opcode(getID(lc.locals[ip]))
+		}
+		if op.hasArg() {
+			ip++
 		}
 	}
-	return clc
 }

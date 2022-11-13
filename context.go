@@ -10,7 +10,6 @@ import (
 // Context holds the state of the interpreter.
 type Context struct {
 	// program representations (AST and compiled)
-	ast  *astProgram
 	prog *Program
 
 	// execution and stack handling
@@ -41,7 +40,6 @@ type Context struct {
 // SetSource should be called to set a source, and
 func NewContext() *Context {
 	ctx := &Context{}
-	ctx.ast = &astProgram{}
 	ctx.prog = &Program{}
 	ctx.gIDs = map[string]int{}
 	ctx.stack = make([]V, 0, 64)
@@ -77,11 +75,12 @@ func (ctx *Context) Run() (V, error) {
 	if ctx.scanner.bReader == nil {
 		return nil, errors.New("no source specified")
 	}
-	blen, llen := len(ctx.ast.Body), len(ctx.ast.Lambdas)
+	blen, llen, last := len(ctx.prog.Body), len(ctx.prog.Lambdas), ctx.prog.last
 	err := ctx.parser.Parse()
 	if err != nil {
-		ctx.ast.Body = ctx.ast.Body[:blen]
-		ctx.ast.Lambdas = ctx.ast.Lambdas[:llen]
+		ctx.prog.Body = ctx.prog.Body[:blen]
+		ctx.prog.Lambdas = ctx.prog.Lambdas[:llen]
+		ctx.prog.last = last
 		return nil, fmt.Errorf("%v", err)
 	}
 	done, err := ctx.compileExec()
@@ -98,13 +97,14 @@ func (ctx *Context) RunExpr() (V, error) {
 		return nil, errors.New("no source specified")
 	}
 	var eof bool
-	blen, llen := len(ctx.ast.Body), len(ctx.ast.Lambdas)
+	blen, llen, last := len(ctx.prog.Body), len(ctx.prog.Lambdas), ctx.prog.last
 	err := ctx.parser.ParseNext()
 	if err != nil {
 		_, eof = err.(ErrEOF)
 		if !eof {
-			ctx.ast.Body = ctx.ast.Body[:blen]
-			ctx.ast.Lambdas = ctx.ast.Lambdas[:llen]
+			ctx.prog.Body = ctx.prog.Body[:blen]
+			ctx.prog.Lambdas = ctx.prog.Lambdas[:llen]
+			ctx.prog.last = last
 			return nil, fmt.Errorf("%v", err)
 		}
 	}
@@ -130,11 +130,11 @@ func (ctx *Context) RunString(s string) (V, error) {
 // LastIsAssign returns true if the last parsed expression was an assignment.
 // This can be used by a repl to avoid printing results when assigning.
 func (ctx *Context) LastIsAssign() bool {
-	if len(ctx.ast.Body) == 0 {
+	if len(ctx.prog.Body) == 0 {
 		return false
 	}
-	switch ctx.ast.Body[len(ctx.ast.Body)-1].(type) {
-	case astAssignLocal, astAssignGlobal:
+	switch ctx.prog.Body[ctx.prog.last] {
+	case opAssignLocal, opAssignGlobal:
 		return true
 	default:
 		return false
@@ -142,7 +142,7 @@ func (ctx *Context) LastIsAssign() bool {
 }
 
 func (ctx *Context) compileExec() (bool, error) {
-	done := ctx.compile()
+	done := ctx.resolve()
 	if !done {
 		return false, nil
 	}
@@ -165,7 +165,6 @@ func (ctx *Context) compileExec() (bool, error) {
 
 // Show prints internal information about the context.
 func (ctx *Context) Show() {
-	fmt.Printf("%s\n", ctx.ast)
 	fmt.Printf("%s\n", ctx.ProgramString())
 }
 

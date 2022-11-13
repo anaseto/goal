@@ -197,7 +197,7 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 		}
 		return Projection{Fun: id, Args: ctx.popN(n)}
 	}
-	nVars := len(lc.Locals) - lc.Rank
+	nVars := len(lc.Names) - lc.Rank
 	olen := len(ctx.stack)
 	for i := 0; i < nVars; i++ {
 		ctx.push(nil)
