@@ -47,53 +47,53 @@ func isArray(x V) bool {
 	}
 }
 
-func divideF(w, x F) F {
-	if x == 0 {
-		return F(math.Inf(int(signF(w))))
+func divideF(x, y F) F {
+	if y == 0 {
+		return F(math.Inf(int(signF(x))))
 	}
-	return w / x
+	return x / y
 }
 
-func modI(w, x I) I {
-	if x == 0 {
+func modI(x, y I) I {
+	if y == 0 {
+		return y
+	}
+	return y % x
+}
+
+func modF(x, y F) F {
+	if y == 0 {
+		return y
+	}
+	return F(math.Mod(float64(y), float64(x)))
+}
+
+func minI(x, y I) I {
+	if x < y {
 		return x
 	}
-	return x % w
+	return y
 }
 
-func modF(w, x F) F {
-	if x == 0 {
-		return x
-	}
-	return F(math.Mod(float64(x), float64(w)))
-}
-
-func minI(w, x I) I {
-	if w < x {
-		return w
+func maxI(x, y I) I {
+	if x < y {
+		return y
 	}
 	return x
 }
 
-func maxI(w, x I) I {
-	if w < x {
+func minS(x, y S) S {
+	if x < y {
 		return x
 	}
-	return w
+	return y
 }
 
-func minS(w, x S) S {
-	if w < x {
-		return w
+func maxS(x, y S) S {
+	if x < y {
+		return y
 	}
 	return x
-}
-
-func maxS(w, x S) S {
-	if w < x {
-		return x
-	}
-	return w
 }
 
 func clone(x V) V {

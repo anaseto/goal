@@ -1,6 +1,9 @@
 package goal
 
-import "sort"
+import (
+	"sort"
+	"strings"
+)
 
 type sortAB []bool
 
@@ -30,305 +33,305 @@ func (bs sortAO) Swap(i, j int) {
 	bs[i], bs[j] = bs[j], bs[i]
 }
 
-func less(w, x V) bool {
-	switch w := w.(type) {
+func less(x, y V) bool {
+	switch x := x.(type) {
 	case F:
-		return lessF(w, x)
+		return lessF(x, y)
 	case I:
-		return lessI(w, x)
+		return lessI(x, y)
 	case S:
-		return lessS(w, x)
-	case AB:
-		if len(w) == 0 {
-			return length(x) > 0
-		}
-		return lessAB(w, x)
-	case AF:
-		if len(w) == 0 {
-			return length(x) > 0
-		}
-		return lessAF(w, x)
-	case AI:
-		if len(w) == 0 {
-			return length(x) > 0
-		}
-		return lessAI(w, x)
-	case AS:
-		if len(w) == 0 {
-			return length(x) > 0
-		}
-		return lessAS(w, x)
-	case AV:
-		if len(w) == 0 {
-			return length(x) > 0
-		}
-		return lessAO(w, x)
-	default:
-		return false
-	}
-}
-
-func lessF(w F, x V) bool {
-	switch x := x.(type) {
-	case F:
-		return w < x
-	case I:
-		return w < F(x)
+		return lessS(x, y)
 	case AB:
 		if len(x) == 0 {
-			return false
+			return length(y) > 0
 		}
-		return w < B2F(x[0]) || w == B2F(x[0]) && len(x) > 1
+		return lessAB(x, y)
 	case AF:
 		if len(x) == 0 {
-			return false
+			return length(y) > 0
 		}
-		return w < F(x[0]) || w == F(x[0]) && len(x) > 1
+		return lessAF(x, y)
 	case AI:
 		if len(x) == 0 {
-			return false
+			return length(y) > 0
 		}
-		return w < F(x[0]) || w == F(x[0]) && len(x) > 1
-	case AV:
-		if len(x) == 0 {
-			return false
-		}
-		return lessF(w, x[0]) || !less(x[0], w) && len(x) > 1
-	default:
-		return false
-	}
-}
-
-func lessI(w I, x V) bool {
-	switch x := x.(type) {
-	case F:
-		return F(w) < x
-	case I:
-		return w < x
-	case AB:
-		if len(x) == 0 {
-			return false
-		}
-		return w < B2I(x[0]) || w == B2I(x[0]) && len(x) > 1
-	case AF:
-		if len(x) == 0 {
-			return false
-		}
-		return float64(w) < x[0] || float64(w) == x[0] && len(x) > 1
-	case AI:
-		if len(x) == 0 {
-			return false
-		}
-		return w < I(x[0]) || w == I(x[0]) && len(x) > 1
-	case AV:
-		if len(x) == 0 {
-			return false
-		}
-		return lessI(w, x[0]) || !less(x[0], w) && len(x) > 1
-	default:
-		return false
-	}
-}
-
-func lessS(w S, x V) bool {
-	switch x := x.(type) {
-	case S:
-		return w < x
+		return lessAI(x, y)
 	case AS:
 		if len(x) == 0 {
-			return false
+			return length(y) > 0
 		}
-		return string(w) < x[0] || string(w) == x[0] && len(x) > 1
+		return lessAS(x, y)
 	case AV:
 		if len(x) == 0 {
+			return length(y) > 0
+		}
+		return lessAO(x, y)
+	default:
+		return false
+	}
+}
+
+func lessF(x F, y V) bool {
+	switch y := y.(type) {
+	case F:
+		return x < y
+	case I:
+		return x < F(y)
+	case AB:
+		if len(y) == 0 {
 			return false
 		}
-		return lessS(w, x[0]) || !less(x[0], w) && len(x) > 1
-	default:
-		return false
-	}
-}
-
-func lessAB(w AB, x V) bool {
-	switch x := x.(type) {
-	case F:
-		return !lessF(x, w)
-	case I:
-		return !lessI(x, w)
-	case AB:
-		for i := 0; i < len(w) && i < len(x); i++ {
-			if w[i] && !x[i] {
-				return false
-			}
-		}
-		return len(w) < len(x)
+		return x < B2F(y[0]) || x == B2F(y[0]) && len(y) > 1
 	case AF:
-		for i := 0; i < len(w) && i < len(x); i++ {
-			if B2F(w[i]) > F(x[i]) {
-				return false
-			}
+		if len(y) == 0 {
+			return false
 		}
-		return len(w) < len(x)
+		return x < F(y[0]) || x == F(y[0]) && len(y) > 1
 	case AI:
-		for i := 0; i < len(w) && i < len(x); i++ {
-			if B2I(w[i]) > I(x[i]) {
-				return false
-			}
+		if len(y) == 0 {
+			return false
 		}
-		return len(w) < len(x)
+		return x < F(y[0]) || x == F(y[0]) && len(y) > 1
 	case AV:
-		for i := 0; i < len(w) && i < len(x); i++ {
-			if less(x[i], B2I(w[i])) {
-				return false
-			}
+		if len(y) == 0 {
+			return false
 		}
-		return len(w) < len(x)
+		return lessF(x, y[0]) || !less(y[0], x) && len(y) > 1
 	default:
 		return false
 	}
 }
 
-func lessAI(w AI, x V) bool {
-	switch x := x.(type) {
+func lessI(x I, y V) bool {
+	switch y := y.(type) {
 	case F:
-		return !lessF(x, w)
+		return F(x) < y
 	case I:
-		return !lessI(x, w)
+		return x < y
 	case AB:
-		for i := 0; i < len(w) && i < len(x); i++ {
-			if I(w[i]) > B2I(x[i]) {
-				return false
-			}
+		if len(y) == 0 {
+			return false
 		}
-		return len(w) < len(x)
+		return x < B2I(y[0]) || x == B2I(y[0]) && len(y) > 1
 	case AF:
-		for i := 0; i < len(w) && i < len(x); i++ {
-			if F(w[i]) > F(x[i]) {
-				return false
-			}
+		if len(y) == 0 {
+			return false
 		}
-		return len(w) < len(x)
+		return float64(x) < y[0] || float64(x) == y[0] && len(y) > 1
 	case AI:
-		for i := 0; i < len(w) && i < len(x); i++ {
-			if w[i] > x[i] {
-				return false
-			}
+		if len(y) == 0 {
+			return false
 		}
-		return len(w) < len(x)
+		return x < I(y[0]) || x == I(y[0]) && len(y) > 1
 	case AV:
-		for i := 0; i < len(w) && i < len(x); i++ {
-			if less(x[i], I(w[i])) {
-				return false
-			}
+		if len(y) == 0 {
+			return false
 		}
-		return len(w) < len(x)
+		return lessI(x, y[0]) || !less(y[0], x) && len(y) > 1
 	default:
 		return false
 	}
 }
 
-func lessAF(w AF, x V) bool {
-	switch x := x.(type) {
-	case F:
-		return !lessF(x, w)
-	case I:
-		return !lessI(x, w)
-	case AB:
-		for i := 0; i < len(w) && i < len(x); i++ {
-			if F(w[i]) > B2F(x[i]) {
-				return false
-			}
-		}
-		return len(w) < len(x)
-	case AF:
-		for i := 0; i < len(w) && i < len(x); i++ {
-			if w[i] > x[i] {
-				return false
-			}
-		}
-		return len(w) < len(x)
-	case AI:
-		for i := 0; i < len(w) && i < len(x); i++ {
-			if w[i] > float64(x[i]) {
-				return false
-			}
-		}
-		return len(w) < len(x)
-	case AV:
-		for i := 0; i < len(w) && i < len(x); i++ {
-			if less(x[i], F(w[i])) {
-				return false
-			}
-		}
-		return len(w) < len(x)
-	default:
-		return false
-	}
-}
-
-func lessAS(w AS, x V) bool {
-	switch x := x.(type) {
+func lessS(x S, y V) bool {
+	switch y := y.(type) {
 	case S:
-		return !lessS(x, w)
+		return x < y
 	case AS:
-		for i := 0; i < len(w) && i < len(x); i++ {
-			if w[i] > x[i] {
-				return false
-			}
+		if len(y) == 0 {
+			return false
 		}
-		return len(w) < len(x)
+		return string(x) < y[0] || string(x) == y[0] && len(y) > 1
 	case AV:
-		for i := 0; i < len(w) && i < len(x); i++ {
-			if less(x[i], S(w[i])) {
-				return false
-			}
+		if len(y) == 0 {
+			return false
 		}
-		return len(w) < len(x)
+		return lessS(x, y[0]) || !less(y[0], x) && len(y) > 1
 	default:
 		return false
 	}
 }
 
-func lessAO(w AV, x V) bool {
-	switch x := x.(type) {
+func lessAB(x AB, y V) bool {
+	switch y := y.(type) {
 	case F:
-		return less(w[0], x)
+		return !lessF(y, x)
 	case I:
-		return less(w[0], x)
+		return !lessI(y, x)
 	case AB:
-		for i := 0; i < len(w) && i < len(x); i++ {
-			if less(B2I(x[i]), w[i]) {
+		for i := 0; i < len(x) && i < len(y); i++ {
+			if x[i] && !y[i] {
 				return false
 			}
 		}
-		return len(w) < len(x)
+		return len(x) < len(y)
 	case AF:
-		for i := 0; i < len(w) && i < len(x); i++ {
-			if less(F(x[i]), w[i]) {
+		for i := 0; i < len(x) && i < len(y); i++ {
+			if B2F(x[i]) > F(y[i]) {
 				return false
 			}
 		}
-		return len(w) < len(x)
+		return len(x) < len(y)
 	case AI:
-		for i := 0; i < len(w) && i < len(x); i++ {
-			if less(I(x[i]), w[i]) {
+		for i := 0; i < len(x) && i < len(y); i++ {
+			if B2I(x[i]) > I(y[i]) {
 				return false
 			}
 		}
-		return len(w) < len(x)
+		return len(x) < len(y)
 	case AV:
-		for i := 0; i < len(w) && i < len(x); i++ {
-			if less(x[i], w[i]) {
+		for i := 0; i < len(x) && i < len(y); i++ {
+			if less(y[i], B2I(x[i])) {
 				return false
 			}
 		}
-		return len(w) < len(x)
+		return len(x) < len(y)
 	default:
 		return false
 	}
 }
 
-// sortUp returns <x.
+func lessAI(x AI, y V) bool {
+	switch y := y.(type) {
+	case F:
+		return !lessF(y, x)
+	case I:
+		return !lessI(y, x)
+	case AB:
+		for i := 0; i < len(x) && i < len(y); i++ {
+			if I(x[i]) > B2I(y[i]) {
+				return false
+			}
+		}
+		return len(x) < len(y)
+	case AF:
+		for i := 0; i < len(x) && i < len(y); i++ {
+			if F(x[i]) > F(y[i]) {
+				return false
+			}
+		}
+		return len(x) < len(y)
+	case AI:
+		for i := 0; i < len(x) && i < len(y); i++ {
+			if x[i] > y[i] {
+				return false
+			}
+		}
+		return len(x) < len(y)
+	case AV:
+		for i := 0; i < len(x) && i < len(y); i++ {
+			if less(y[i], I(x[i])) {
+				return false
+			}
+		}
+		return len(x) < len(y)
+	default:
+		return false
+	}
+}
+
+func lessAF(x AF, y V) bool {
+	switch y := y.(type) {
+	case F:
+		return !lessF(y, x)
+	case I:
+		return !lessI(y, x)
+	case AB:
+		for i := 0; i < len(x) && i < len(y); i++ {
+			if F(x[i]) > B2F(y[i]) {
+				return false
+			}
+		}
+		return len(x) < len(y)
+	case AF:
+		for i := 0; i < len(x) && i < len(y); i++ {
+			if x[i] > y[i] {
+				return false
+			}
+		}
+		return len(x) < len(y)
+	case AI:
+		for i := 0; i < len(x) && i < len(y); i++ {
+			if x[i] > float64(y[i]) {
+				return false
+			}
+		}
+		return len(x) < len(y)
+	case AV:
+		for i := 0; i < len(x) && i < len(y); i++ {
+			if less(y[i], F(x[i])) {
+				return false
+			}
+		}
+		return len(x) < len(y)
+	default:
+		return false
+	}
+}
+
+func lessAS(x AS, y V) bool {
+	switch y := y.(type) {
+	case S:
+		return !lessS(y, x)
+	case AS:
+		for i := 0; i < len(x) && i < len(y); i++ {
+			if x[i] > y[i] {
+				return false
+			}
+		}
+		return len(x) < len(y)
+	case AV:
+		for i := 0; i < len(x) && i < len(y); i++ {
+			if less(y[i], S(x[i])) {
+				return false
+			}
+		}
+		return len(x) < len(y)
+	default:
+		return false
+	}
+}
+
+func lessAO(x AV, y V) bool {
+	switch y := y.(type) {
+	case F:
+		return less(x[0], y)
+	case I:
+		return less(x[0], y)
+	case AB:
+		for i := 0; i < len(x) && i < len(y); i++ {
+			if less(B2I(y[i]), x[i]) {
+				return false
+			}
+		}
+		return len(x) < len(y)
+	case AF:
+		for i := 0; i < len(x) && i < len(y); i++ {
+			if less(F(y[i]), x[i]) {
+				return false
+			}
+		}
+		return len(x) < len(y)
+	case AI:
+		for i := 0; i < len(x) && i < len(y); i++ {
+			if less(I(y[i]), x[i]) {
+				return false
+			}
+		}
+		return len(x) < len(y)
+	case AV:
+		for i := 0; i < len(x) && i < len(y); i++ {
+			if less(y[i], x[i]) {
+				return false
+			}
+		}
+		return len(x) < len(y)
+	default:
+		return false
+	}
+}
+
+// sortUp returns ^x.
 func sortUp(x V) V {
 	// XXX: error if atom?
 	x = canonical(x)
@@ -350,19 +353,8 @@ func sortUp(x V) V {
 		sort.Stable(sortAO(x))
 		return x
 	default:
-		return errs("not an array")
+		return errf("^x : x not an array (%s)", x.Type())
 	}
-}
-
-// SortDown returns >x.
-func sortDown(x V) V {
-	x = sortUp(x)
-	switch x.(type) {
-	case E:
-		return x
-	}
-	reverseMut(x)
-	return x
 }
 
 type permutationAO struct {
@@ -482,16 +474,16 @@ func ascend(x V) V {
 		sort.Stable(p)
 		return p.Perm
 	default:
-		return errs("not an array")
+		return errf("<x : x not an array (%s)", x.Type())
 	}
 }
 
 // descend returns >x.
 func descend(x V) V {
 	p := ascend(x)
-	switch p.(type) {
+	switch p := p.(type) {
 	case E:
-		return p
+		return errs(">" + strings.TrimPrefix(p.Error(), "<"))
 	}
 	reverseMut(p)
 	return p
