@@ -237,6 +237,8 @@ genOp("modulus", " mod ");
 
 sub genOp {
     my ($name, $op) = @_;
+    my $errOp = $op;
+    $errOp .= "%" if $op eq "%";
     my $cases = $dyads{$name};
     my %types = map { $_=~/(\w)_/; $1 => 1 } keys $cases->%*;
     my $s = "";
@@ -265,7 +267,7 @@ EOS
                 switch x := x.(type) {
                 case Array:
                         if x.Len() != len(w) {
-                                return errf("length mismatch: %d vs %d", len(w), x.Len())
+                                return errf("x${errOp}y : length mismatch: %d vs %d", len(w), x.Len())
                         }
                         r := make(AV, len(w))
                         for i := range r {
@@ -291,22 +293,22 @@ EOS
 	case E:
 		return w
 	default:
-		return errwType(w)
+		return errf("x${errOp}y : bad type `%s for x", w.Type())
 	}
 }\n
 EOS
     print $s;
     for my $t (sort keys %types) {
         next if $t eq "B";
-        genLeftExpanded($namelc, $cases, $t);
+        genLeftExpanded($namelc, $cases, $t, $errOp);
     }
     for my $t (sort keys %types) {
-        genLeftArrayExpanded($namelc, $cases, $t);
+        genLeftArrayExpanded($namelc, $cases, $t, $errOp);
     }
 }
 
 sub genLeftExpanded {
-    my ($name, $cases, $t) = @_;
+    my ($name, $cases, $t, $errOp) = @_;
     my %types = map { /_(\w)/; $1 => $cases->{"${t}_$1"}} grep { /${t}_(\w)/ } keys $cases->%*;
     my $s = "";
     open my $out, '>', \$s;
@@ -361,7 +363,7 @@ EOS
 }
 
 sub genLeftArrayExpanded {
-    my ($name, $cases, $t) = @_;
+    my ($name, $cases, $t, $errOp) = @_;
     my %types = map { /_(\w)/; $1 => $cases->{"${t}_$1"}} grep { /${t}_(\w)/ } keys $cases->%*;
     my $s = "";
     open my $out, '>', \$s;
@@ -392,7 +394,7 @@ EOS
         print $out <<EOS;
 	case A$tt:
                 if len(w) != len(x) {
-                        return errf("length mismatch: %d vs %d", len(w), len(x))
+                        return errf("x${errOp}y : length mismatch: %d vs %d", len(w), len(x))
                 }
 		r := make(A$type, len(x))
 		for i := range r {
@@ -409,7 +411,7 @@ EOS
     print $out <<EOS if $t !~ /^A/;
 	case AV:
                 if len(w) != len(x) {
-                        return errf("length mismatch: %d vs %d", len(w), len(x))
+                        return errf("x${errOp}y : length mismatch: %d vs %d", len(w), len(x))
                 }
 		r := make(AV, len(x))
 		for i := range r {
@@ -424,7 +426,7 @@ EOS
 	case E:
 		return w
 	default:
-		return errType(x)
+		return errf("x${errOp}y : bad type `%s for y", x.Type())
 	}
 }\n
 EOS
