@@ -172,7 +172,7 @@ x^y cut		TODO
 #x  length	#2 4 5 -> 3
 i#y take	2#4 1 5 -> 4 1	    4#3 1 5 -> 3 1 5 3 (cyclic)
 f#y replicate	{0 1 1 0}#4 1 5 3 -> 1 5    {x>0}#2 -3 1 -> 2 1
-_x  floor	_2.3 -> 2
+_N  floor	_2.3 -> 2
 _s  to lower	_"ABC" -> "abc"
 i_x drop	2_3 4 5 6 -> 5 6
 $x  string	$2 3 -> "2 3"
@@ -190,7 +190,7 @@ x F'y   each	2 3#'1 2 -> (1 1;2 2 2)
 F/x	fold	+/!10 -> 45
 F\x	scan	+\!10 -> 0 1 3 6 10 15 21 28 36 45
 x F/y	fold	1 2+/!10 -> 46 47
-x F\y   scan	5 6+\1 2 3 -> (5 6;6 7;8 9;11 12)
+x F\y   scan	5 6+\1 2 3 -> (6 7;8 9;11 12)
 n f/x	do	3{x*2}/4 -> 32
 n f\x	do	3{x*2}\4 -> 4 8 16 32
 f f/x   while	{x<100}{x*2}/4 -> 128
