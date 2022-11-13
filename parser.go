@@ -784,7 +784,7 @@ func (p *pparser) ppExprBlock() (ppExpr, error) {
 		}
 	case LEFTBRACKET:
 		switch p.oToken.Type {
-		case NEWLINE, SEMICOLON, LEFTBRACKET, LEFTPAREN:
+		case NEWLINE, SEMICOLON, LEFTBRACKET, LEFTPAREN, NONE:
 			bt = ppSEQ
 		default:
 			// arguments being applied to something

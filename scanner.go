@@ -46,7 +46,8 @@ type TokenType int32
 
 // These constants describe the possible kinds of tokens.
 const (
-	EOF TokenType = iota
+	NONE TokenType = iota
+	EOF
 	ERROR
 	ADVERB
 	IDENT
@@ -65,16 +66,16 @@ const (
 
 // Scanner represents the state of the scanner.
 type Scanner struct {
-	bReader   *bufio.Reader // buffered reader
-	buf       *bytes.Buffer // buffer
-	err       error         // scanning error (if any)
-	peeked    bool          // peeked next
-	pos       int           // current position in the input
-	pr        rune          // peeked rune
-	psize     int           // size of last peeked rune
-	start     bool          // at line start
-	exprStart bool          // at expression start
-	token     Token         // last token
+	bReader *bufio.Reader // buffered reader
+	buf     *bytes.Buffer // buffer
+	err     error         // scanning error (if any)
+	peeked  bool          // peeked next
+	pos     int           // current position in the input
+	pr      rune          // peeked rune
+	psize   int           // size of last peeked rune
+	start   bool          // at line start
+	exprEnd bool          // at expression start
+	token   Token         // last token
 }
 
 type stateFn func(*Scanner) stateFn
@@ -91,7 +92,7 @@ func (s *Scanner) Init(r io.Reader) {
 		s.buf = &bytes.Buffer{}
 	}
 	s.bReader = bufio.NewReader(r)
-	s.exprStart = true
+	s.exprEnd = false
 	s.start = true
 	s.token = Token{Type: EOF, Pos: s.pos}
 }
@@ -157,27 +158,26 @@ func (s *Scanner) updateInfo(r rune) {
 func (s *Scanner) emit(t TokenType) stateFn {
 	s.token = Token{Type: t, Pos: s.pos}
 	switch t {
-	case LEFTBRACE, LEFTBRACKET, LEFTPAREN, NEWLINE, RIGHTBRACE, RIGHTBRACKET, RIGHTPAREN, SEMICOLON:
+	case LEFTBRACE, LEFTBRACKET, LEFTPAREN, NEWLINE, SEMICOLON, EOF:
 		// all of these don't have additional content, so we don't do
 		// this test in the other emits.
-		s.exprStart = true
+		s.exprEnd = false
 	default:
-		s.exprStart = false
+		s.exprEnd = true
 	}
-	s.exprStart = false
 	return nil
 }
 
 func (s *Scanner) emitString(t TokenType) stateFn {
 	s.token = Token{Type: t, Pos: s.pos, Text: s.buf.String()}
-	s.exprStart = false
+	s.exprEnd = true
 	s.buf.Reset()
 	return nil
 }
 
-func (s *Scanner) emitRune(t TokenType, r rune) stateFn {
+func (s *Scanner) emitOp(t TokenType, r rune) stateFn {
 	s.token = Token{Type: t, Pos: s.pos, Rune: r}
-	s.exprStart = false
+	s.exprEnd = false
 	return nil
 }
 
@@ -203,9 +203,9 @@ func scanAny(s *Scanner) stateFn {
 		if s.start {
 			return scanCommentLine
 		}
-		return s.emitRune(ADVERB, r)
+		return s.emitOp(ADVERB, r)
 	case '\'', '\\':
-		return s.emitRune(ADVERB, r)
+		return s.emitOp(ADVERB, r)
 	case '{':
 		return s.emit(LEFTBRACE)
 	case '[':
@@ -221,13 +221,13 @@ func scanAny(s *Scanner) stateFn {
 	case ';':
 		return s.emit(SEMICOLON)
 	case '-':
-		if s.exprStart {
+		if !s.exprEnd {
 			return scanMinus
 		}
-		return s.emitRune(VERB, r)
+		return s.emitOp(VERB, r)
 	case ':', '+', '*', '%', '!', '&', '|', '<', '>',
 		'=', '~', ',', '^', '#', '_', '$', '?', '@', '.':
-		return s.emitRune(VERB, r)
+		return s.emitOp(VERB, r)
 	case '"':
 		s.buf.WriteRune(r)
 		return scanString
@@ -404,7 +404,7 @@ func scanMinus(s *Scanner) stateFn {
 		s.buf.WriteRune('-')
 		return scanNumber
 	}
-	return s.emitRune(VERB, '-')
+	return s.emitOp(VERB, '-')
 }
 
 func scanIdent(s *Scanner) stateFn {
