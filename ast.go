@@ -10,122 +10,124 @@ import (
 // information, and stack-like order. It is a non-resolved AST intermediary
 // representation.
 type expr interface {
-	ppNode()
+	node()
 }
 
 // exprs is used to represent a whole expression. It is not a ppExpr.
 type exprs []expr
 
-// pToken represents a simplified token after processing into expr.
-type pToken struct {
-	Type pTokenType
+// astToken represents a simplified token after processing into expr.
+type astToken struct {
+	Type astTokenType
 	Rune rune
 	Pos  int
 	Text string
 }
 
-func (pt pToken) String() string {
-	return fmt.Sprintf("{%v %d %s}", pt.Type, pt.Pos, pt.Text)
+func (t *astToken) String() string {
+	return fmt.Sprintf("{%v %d %s}", t.Type, t.Pos, t.Text)
 }
 
-// pTokenType represents tokens in a ppExpr.
-type pTokenType int32
+// astTokenType represents tokens in a ppExpr.
+type astTokenType int32
 
 // These constants represent the possible tokens in a ppExpr. The SEP,
 // EOF and CLOSE types are not emitted in the final result.
 const (
-	pSEP pTokenType = iota
-	pEOF
-	pCLOSE
+	astSEP astTokenType = iota
+	astEOF
+	astCLOSE
 
-	pNUMBER
-	pSTRING
-	pIDENT
-	pVERB
-	pADVERB
+	astNUMBER
+	astSTRING
+	astIDENT
+	astVERB
+	astADVERB
 )
 
-type pStrand []pToken // for stranding, like 1 23 456
+type astSpecial int
 
-type pAdverbs []pToken // for an adverb sequence
+type astStrand []*astToken // for stranding, like 1 23 456
 
-type pParenExpr exprs // for parenthesized sub-expressions
+type astAdverbs []*astToken // for an adverb sequence
 
-type pBlock struct {
-	Type pBlockType
+type astParenExpr exprs // for parenthesized sub-expressions
+
+type astBlock struct {
+	Type astBlockType
 	Body []exprs
 	Args []string
 }
 
-func (pb pBlock) String() (s string) {
-	switch pb.Type {
-	case pLAMBDA:
-		args := "[" + strings.Join([]string(pb.Args), ";") + "]"
-		s = fmt.Sprintf("{%s %v %v}", args, pb.Type, pb.Body)
-	case pARGS:
-		s = fmt.Sprintf("[%v %v]", pb.Type, pb.Body)
-	case pLIST:
-		s = fmt.Sprintf("(%v %v)", pb.Type, pb.Body)
+func (b *astBlock) String() (s string) {
+	switch b.Type {
+	case astLAMBDA:
+		args := "[" + strings.Join([]string(b.Args), ";") + "]"
+		s = fmt.Sprintf("{%s %v %v}", args, b.Type, b.Body)
+	case astARGS:
+		s = fmt.Sprintf("[%v %v]", b.Type, b.Body)
+	case astLIST:
+		s = fmt.Sprintf("(%v %v)", b.Type, b.Body)
 	}
 	return s
 }
 
-func (pb pBlock) push(pe expr) {
-	pb.Body[len(pb.Body)-1] = append(pb.Body[len(pb.Body)-1], pe)
+func (b *astBlock) push(e expr) {
+	b.Body[len(b.Body)-1] = append(b.Body[len(b.Body)-1], e)
 }
 
-type pBlockType int
+type astBlockType int
 
 const (
-	pLAMBDA pBlockType = iota
-	pARGS
-	pSEQ
-	pLIST
+	astLAMBDA astBlockType = iota
+	astARGS
+	astSEQ
+	astLIST
 )
 
-func (pt pToken) ppNode()     {}
-func (ps pStrand) ppNode()    {}
-func (pa pAdverbs) ppNode()   {}
-func (pp pParenExpr) ppNode() {}
-func (pb pBlock) ppNode()     {}
+func (t *astToken) node()    {}
+func (st astStrand) node()   {}
+func (ad astAdverbs) node()  {}
+func (p astParenExpr) node() {}
+func (b *astBlock) node()    {}
 
-// pIter is an iterator for exprs slices, with peek functionality.
-type pIter struct {
-	pps exprs
-	i   int
+// astIter is an iterator for exprs slices, with peek functionality.
+type astIter struct {
+	exprs exprs
+	i     int
 }
 
-func newpIter(pps exprs) pIter {
-	return pIter{pps: pps, i: -1}
+func newAstIter(es exprs) astIter {
+	return astIter{exprs: es, i: -1}
 }
 
-func (it *pIter) Next() bool {
+func (it *astIter) Next() bool {
 	it.i++
-	return it.i < len(it.pps)
+	return it.i < len(it.exprs)
 }
 
-func (it *pIter) Expr() expr {
-	return it.pps[it.i]
+func (it *astIter) Expr() expr {
+	return it.exprs[it.i]
 }
 
-func (it *pIter) Index() int {
+func (it *astIter) Index() int {
 	return it.i
 }
 
-func (it *pIter) Set(i int) {
+func (it *astIter) Set(i int) {
 	it.i = i
 }
 
-func (it *pIter) Peek() expr {
-	if it.i+1 >= len(it.pps) {
+func (it *astIter) Peek() expr {
+	if it.i+1 >= len(it.exprs) {
 		return nil
 	}
-	return it.pps[it.i+1]
+	return it.exprs[it.i+1]
 }
 
-func (it *pIter) PeekN(n int) expr {
-	if it.i+n >= len(it.pps) {
+func (it *astIter) PeekN(n int) expr {
+	if it.i+n >= len(it.exprs) {
 		return nil
 	}
-	return it.pps[it.i+n]
+	return it.exprs[it.i+n]
 }
