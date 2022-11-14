@@ -104,6 +104,7 @@ var matchTests = [...]matchTest{
 	{`1+/-3 -2`, `-4`},
 	{`(2)-3`, `-1`},
 	{`[(2)-3]`, `-1`},
+	{`{[a;b]a+b}[2;3]`, `5`},
 }
 
 func TestRunString(t *testing.T) {
