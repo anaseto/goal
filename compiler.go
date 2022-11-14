@@ -264,17 +264,17 @@ func (c *compiler) doExpr(e expr) error {
 		if err != nil {
 			return err
 		}
-	case astAdverbs:
+	case *astAdverbs:
 		err := c.doAdverbs(e)
 		if err != nil {
 			return err
 		}
-	case astStrand:
+	case *astStrand:
 		err := c.doStrand(e)
 		if err != nil {
 			return err
 		}
-	case astParenExpr:
+	case *astParenExpr:
 		argc := c.argc
 		c.argc = 0
 		oarglist := c.arglist
@@ -420,7 +420,7 @@ func isLeftArg(e expr) bool {
 		case astVERB:
 			return false
 		}
-	case astAdverbs:
+	case *astAdverbs:
 		return false
 	}
 	return true
@@ -508,13 +508,13 @@ func getVerb(e expr) (*astToken, bool) {
 
 }
 
-func (c *compiler) doAdverbs(adverbs astAdverbs) error {
-	tok := adverbs[len(adverbs)-1]
-	adverbs = adverbs[:len(adverbs)-1]
+func (c *compiler) doAdverbs(adverbs *astAdverbs) error {
+	tok := &adverbs.Train[len(adverbs.Train)-1]
+	ads := adverbs.Train[:len(adverbs.Train)-1]
 	argc := c.argc
 	e := c.it.Peek()
 	if e == nil {
-		if len(adverbs) > 0 {
+		if len(ads) > 0 {
 			return errf("adverb train should modify a value")
 		}
 		c.push(opNil)
@@ -534,7 +534,8 @@ func (c *compiler) doAdverbs(adverbs astAdverbs) error {
 	if err != nil {
 		return err
 	}
-	for _, atok := range adverbs {
+	for i := range ads {
+		atok := &ads[i]
 		c.argc = 1
 		err := c.doVariadic(atok)
 		if err != nil {
@@ -556,9 +557,9 @@ func (c *compiler) doAdverbs(adverbs astAdverbs) error {
 	return c.doVariadic(tok)
 }
 
-func (c *compiler) doStrand(st astStrand) error {
-	a := make(AV, 0, len(st))
-	for _, tok := range st {
+func (c *compiler) doStrand(st *astStrand) error {
+	a := make(AV, 0, len(st.Lits))
+	for _, tok := range st.Lits {
 		switch tok.Type {
 		case astNUMBER:
 			v, err := parseNumber(tok.Text)
@@ -579,8 +580,8 @@ func (c *compiler) doStrand(st astStrand) error {
 	return nil
 }
 
-func (c *compiler) doParenExpr(pa astParenExpr) error {
-	err := c.doExprs(exprs(pa))
+func (c *compiler) doParenExpr(pe *astParenExpr) error {
+	err := c.doExprs(pe.Exprs)
 	return err
 }
 

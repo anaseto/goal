@@ -124,7 +124,7 @@ func (p *parser) expr() (expr, error) {
 			return nil, p.errorf("unexpected %s without closing previous %s at %d", tok, opTok, opTok.Pos)
 		}
 		p.depth = p.depth[:len(p.depth)-1]
-		return nil, parseCLOSE{}
+		return nil, parseCLOSE{tok.Pos}
 	case VERB:
 		return &astToken{Type: astVERB, Pos: tok.Pos, Rune: tok.Rune}, nil
 	default:
@@ -136,7 +136,7 @@ func (p *parser) expr() (expr, error) {
 func (p *parser) pExprBlock() (expr, error) {
 	var bt astBlockType
 	p.depth = append(p.depth, p.token)
-	b := &astBlock{}
+	b := &astBlock{StartPos: p.token.Pos}
 	switch p.token.Type {
 	case LEFTBRACE:
 		bt = astLAMBDA
@@ -172,15 +172,20 @@ func (p *parser) pExprBlock() (expr, error) {
 			b.push(pe)
 			continue
 		}
-		switch err.(type) {
+		switch err := err.(type) {
 		case parseCLOSE:
 			pRev(b.Body[len(b.Body)-1])
 			if b.Type == astLIST && len(b.Body) == 1 &&
 				len(b.Body[0]) > 0 {
 				// not a list, but a parenthesized
 				// expression.
-				return astParenExpr(b.Body[0]), nil
+				return &astParenExpr{
+					Exprs:    b.Body[0],
+					StartPos: b.StartPos,
+					EndPos:   err.Pos,
+				}, nil
 			}
+			b.EndPos = err.Pos
 			return b, nil
 		case parseEOF:
 			pRev(b.Body[len(b.Body)-1])
@@ -196,7 +201,7 @@ func (p *parser) pExprBlock() (expr, error) {
 }
 
 func (p *parser) pLambdaArgs() ([]string, error) {
-	// c.token.Type is LEFTBRACKET
+	// p.token.Type is LEFTBRACKET
 	args := []string{}
 	for {
 		p.next()
@@ -220,32 +225,30 @@ func (p *parser) pLambdaArgs() ([]string, error) {
 }
 
 func (p *parser) pAdverbs() (expr, error) {
-	// c.token.Type is NUMBER or STRING for current and peek
-	ads := astAdverbs{}
+	// p.token.Type is ADVERB
+	ads := &astAdverbs{}
 	for {
-		switch p.token.Type {
-		case ADVERB:
-			ads = append(ads, &astToken{Type: astADVERB, Pos: p.token.Pos, Rune: p.token.Rune})
+		if p.token.Type == ADVERB {
+			ads.Train = append(ads.Train, astToken{Type: astADVERB, Pos: p.token.Pos, Rune: p.token.Rune})
 		}
 		ntok := p.peek()
-		switch ntok.Type {
-		case ADVERB:
+		if ntok.Type == ADVERB {
 			p.next()
-		default:
-			return ads, nil
+			continue
 		}
+		return ads, nil
 	}
 }
 
 func (p *parser) pExprStrand() (expr, error) {
 	// p.token.Type is NUMBER or STRING for current and peek
-	st := astStrand{}
+	st := &astStrand{}
 	for {
 		switch p.token.Type {
 		case NUMBER:
-			st = append(st, &astToken{Type: astNUMBER, Pos: p.token.Pos, Text: p.token.Text})
+			st.Lits = append(st.Lits, astToken{Type: astNUMBER, Pos: p.token.Pos, Text: p.token.Text})
 		case STRING:
-			st = append(st, &astToken{Type: astSTRING, Pos: p.token.Pos, Text: p.token.Text})
+			st.Lits = append(st.Lits, astToken{Type: astSTRING, Pos: p.token.Pos, Text: p.token.Text})
 		}
 		ntok := p.peek()
 		switch ntok.Type {

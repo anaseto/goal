@@ -40,16 +40,26 @@ const (
 	astADVERB
 )
 
-type astStrand []*astToken // for stranding, like 1 23 456
+type astStrand struct {
+	Lits []astToken // stranding of literals, like 1 23 456
+}
 
-type astAdverbs []*astToken // for an adverb sequence
+type astAdverbs struct {
+	Train []astToken // an adverb sequence
+}
 
-type astParenExpr exprs // for parenthesized sub-expressions
+type astParenExpr struct {
+	Exprs    exprs // parenthesized sub-expressions
+	StartPos int
+	EndPos   int
+}
 
 type astBlock struct {
-	Type astBlockType
-	Body []exprs
-	Args []string
+	Type     astBlockType
+	Body     []exprs
+	Args     []string
+	StartPos int
+	EndPos   int
 }
 
 func (b *astBlock) String() (s string) {
@@ -78,15 +88,17 @@ const (
 	astLIST
 )
 
-func (t *astToken) node()    {}
-func (st astStrand) node()   {}
-func (ads astAdverbs) node() {}
-func (p astParenExpr) node() {}
-func (b *astBlock) node()    {}
+func (t *astToken) node()      {}
+func (st *astStrand) node()    {}
+func (ads *astAdverbs) node()  {}
+func (pe *astParenExpr) node() {}
+func (b *astBlock) node()      {}
 
 type parseEOF struct{}
 type parseSEP struct{}
-type parseCLOSE struct{}
+type parseCLOSE struct {
+	Pos int
+}
 
 func (p parseEOF) Error() string   { return "EOF" }
 func (p parseSEP) Error() string   { return "SEP" }
