@@ -47,16 +47,41 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			if err != nil {
 				return ip, err
 			}
+		case opApplyVariadic:
+			v := Variadic(ops[ip])
+			res := ctx.applyVariadic(v)
+			if err, ok := res.(error); ok && err != nil {
+				return ip, err
+			}
+			ctx.push(res)
+			ip++
 		case opApply2:
 			err := ctx.popApplyN(2)
 			if err != nil {
 				return ip, err
 			}
+		case opApply2Variadic:
+			v := Variadic(ops[ip])
+			res := ctx.applyNVariadic(v, 2)
+			if err, ok := res.(error); ok && err != nil {
+				return ip, err
+			}
+			ctx.push(res)
+			ip++
 		case opApplyN:
 			err := ctx.popApplyN(int(ops[ip]))
 			if err != nil {
 				return ip, err
 			}
+			ip++
+		case opApplyNVariadic:
+			v := Variadic(ops[ip])
+			ip++
+			res := ctx.applyNVariadic(v, int(ops[ip]))
+			if err, ok := res.(error); ok && err != nil {
+				return ip, err
+			}
+			ctx.push(res)
 			ip++
 		case opDrop:
 			ctx.drop()
@@ -70,8 +95,7 @@ func (ctx *Context) popApplyN(n int) error {
 	//olen := len(ctx.stack)
 	v := ctx.pop()
 	res := ctx.applyN(v, n)
-	err, ok := res.(error)
-	if ok {
+	if err, ok := res.(error); ok {
 		return err
 	}
 	ctx.push(res)

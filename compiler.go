@@ -207,6 +207,32 @@ func (c *compiler) push2(op, arg opcode) {
 		// v ... v v -> v
 		c.slen -= int(arg)
 		c.argc -= int(arg)
+	case opApplyVariadic:
+	case opApply2Variadic:
+		c.slen--
+		c.argc--
+	default:
+		// -> v
+		c.slen++
+		c.argc++
+	}
+}
+
+func (c *compiler) push3(op, arg1, arg2 opcode) {
+	lc := c.scope()
+	if lc != nil {
+		lc.Body = append(lc.Body, op, arg1, arg2)
+		lc.Pos = append(lc.Pos, c.pos, 0, 0)
+	} else {
+		c.ctx.prog.Body = append(c.ctx.prog.Body, op, arg1, arg2)
+		c.ctx.prog.Pos = append(c.ctx.prog.Pos, c.pos, 0, 0)
+		c.ctx.prog.last = len(c.ctx.prog.Body) - 2
+	}
+	switch op {
+	case opApplyNVariadic:
+		// v ... v v -> v
+		c.slen -= int(arg2 - 1)
+		c.argc -= int(arg2 - 1)
 	default:
 		// -> v
 		c.slen++
@@ -374,9 +400,21 @@ func (c *compiler) doLocal(tok *astToken) {
 
 func (c *compiler) doVariadic(tok *astToken) error {
 	v := parseBuiltin(tok.Rune)
-	c.push2(opVariadic, opcode(v))
-	c.apply()
+	c.pushVariadic(v)
 	return nil
+}
+
+func (c *compiler) pushVariadic(v Variadic) {
+	switch c.argc {
+	case 0:
+		c.push2(opVariadic, opcode(v))
+	case 1:
+		c.push2(opApplyVariadic, opcode(v))
+	case 2:
+		c.push2(opApply2Variadic, opcode(v))
+	default:
+		c.push3(opApplyNVariadic, opcode(v), opcode(c.argc))
+	}
 }
 
 func (c *compiler) doVerb(tok *astToken) error {
@@ -693,9 +731,7 @@ func (ctx *Context) resolveLambda(lc *LambdaCode) {
 		case opAssignLocal:
 			lc.Body[ip] = opcode(getID(lc.locals[ip]))
 		}
-		if op.hasArg() {
-			ip++
-		}
+		ip += op.argc()
 	}
 }
 
