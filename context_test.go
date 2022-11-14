@@ -111,6 +111,7 @@ var matchTests = [...]matchTest{
 	{`fibrec:{?[x~0;y;x~1;z;fibrec[x-1;z;y+z]]};fib: fibrec[0;0;1]`, `0`},
 	{`fib:{*x{x[1],+/x}/0 1}; fib 4`, `3`},
 	{`a:!10;a[-1]`, `9`},
+	{`a:!10;a[-1 -3 0]`, `9 7 0`},
 }
 
 func TestRunString(t *testing.T) {
