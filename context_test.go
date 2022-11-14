@@ -83,11 +83,6 @@ var matchTests = [...]matchTest{
 	{`5 6+/1 2 3`, `11 12`},
 	{`5 6+\0#0`, `!0`},
 	{"dec:{({0};{dec x-1})[x>0]x};dec 3", "0"},
-	{"fib:{(({(fib x-1)+(fib x-2)};{1})[x=1];{0})[x=0]x}; fib 0", `0`},
-	{"fib:{(({(fib x-1)+(fib x-2)};{1})[x=1];{0})[x=0]x}; fib 1", `1`},
-	{"fib:{(({(fib x-1)+(fib x-2)};{1})[x=1];{0})[x=0]x}; fib 2", `1`},
-	{"fib:{(({(fib x-1)+(fib x-2)};{1})[x=1];{0})[x=0]x}; fib 3", `2`},
-	{"fib:{(({(fib x-1)+(fib x-2)};{1})[x=1];{0})[x=0]x}; fib 4", `3`},
 	{`{x+y}.2 3`, `5`},
 	{`$2 3`, `"2 3"`},
 	{`2_3 4 5 6`, `5 6`},
@@ -107,7 +102,14 @@ var matchTests = [...]matchTest{
 	{`{[a;b]a+b}[2;3]`, `5`},
 	{`?[1;2;3]`, `2`},
 	{`?[0;2;3]`, `3`},
+	{"fib:{(({(fib x-1)+(fib x-2)};{1})[x=1];{0})[x=0]x}; fib 2", `1`},
+	{"fib:{(({(fib x-1)+(fib x-2)};{1})[x=1];{0})[x=0]x}; fib 3", `2`},
+	{"fib:{(({(fib x-1)+(fib x-2)};{1})[x=1];{0})[x=0]x}; fib 4", `3`},
 	{`fib:{?[x~0;0;x~1;1;(fib x-1)+(fib x-2)]}; fib 4`, `3`},
+	{`fib:{?[x~0;0;x~1;1;(fib x-1)+(fib x-2)]}; fib 1`, `1`},
+	{`fibrec:{?[x~0;y;x~1;z;fibrec[x-1;z;y+z]]};fib: fibrec[4;0;1]`, `3`},
+	{`fibrec:{?[x~0;y;x~1;z;fibrec[x-1;z;y+z]]};fib: fibrec[0;0;1]`, `0`},
+	{`fib:{*x{x[1],+/x}/0 1}; fib 4`, `3`},
 }
 
 func TestRunString(t *testing.T) {
@@ -177,14 +179,21 @@ func BenchmarkFoldDo(b *testing.B) {
 //func BenchmarkFib(b *testing.B) {
 //for n := 0; n < b.N; n++ {
 //ctx := NewContext()
-//ctx.RunString("fib:{(({(fib x-1)+(fib x-2)};{1})[x=1];{0})[x=0]x}; fib 35")
+//ctx.RunString("fib:{?[x~0;0;x~1;1;(fib x-1)+(fib x-2)]}; fib 35")
 //}
 //}
 
-func BenchmarkFib(b *testing.B) {
+func BenchmarkFibTailRec(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		ctx := NewContext()
-		ctx.RunString("fib:{?[x~0;0;x~1;1;(fib x-1)+(fib x-2)]}; fib 35")
+		ctx.RunString("fibrec:{?[x~0;y;x~1;z;fibrec[x-1;z;y+z]]};fibrec[35;0;1]")
+	}
+}
+
+func BenchmarkFibDoWhile(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		ctx := NewContext()
+		ctx.RunString("*35{x[1],+/x}/0 1")
 	}
 }
 

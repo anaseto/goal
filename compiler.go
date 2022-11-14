@@ -399,6 +399,7 @@ func (c *compiler) doLocal(tok *astToken) {
 	if ok {
 		c.push2(opLocal, opArg)
 		lc.opIdxLocal[len(lc.Body)-1] = local
+		c.apply()
 		return
 	}
 	c.doGlobal(tok)
