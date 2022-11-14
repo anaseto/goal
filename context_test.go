@@ -83,8 +83,8 @@ var matchTests = [...]matchTest{
 	{`5 6+/1 2 3`, `11 12`},
 	{`5 6+\0#0`, `!0`},
 	{"dec:{({0};{dec x-1})[x>0]x};dec 3", "0"},
-	{"fib:{(({(fib x-1)+(fib x-2)};{1})[x=1];{0})[x=0]x}; fib 1", `1`},
 	{"fib:{(({(fib x-1)+(fib x-2)};{1})[x=1];{0})[x=0]x}; fib 0", `0`},
+	{"fib:{(({(fib x-1)+(fib x-2)};{1})[x=1];{0})[x=0]x}; fib 1", `1`},
 	{"fib:{(({(fib x-1)+(fib x-2)};{1})[x=1];{0})[x=0]x}; fib 2", `1`},
 	{"fib:{(({(fib x-1)+(fib x-2)};{1})[x=1];{0})[x=0]x}; fib 3", `2`},
 	{"fib:{(({(fib x-1)+(fib x-2)};{1})[x=1];{0})[x=0]x}; fib 4", `3`},
@@ -105,6 +105,9 @@ var matchTests = [...]matchTest{
 	{`(2)-3`, `-1`},
 	{`[(2)-3]`, `-1`},
 	{`{[a;b]a+b}[2;3]`, `5`},
+	{`?[1;2;3]`, `2`},
+	{`?[0;2;3]`, `3`},
+	{`fib:{?[x~0;0;x~1;1;(fib x-1)+(fib x-2)]}; fib 4`, `3`},
 }
 
 func TestRunString(t *testing.T) {
@@ -177,6 +180,13 @@ func BenchmarkFoldDo(b *testing.B) {
 //ctx.RunString("fib:{(({(fib x-1)+(fib x-2)};{1})[x=1];{0})[x=0]x}; fib 35")
 //}
 //}
+
+func BenchmarkFib(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		ctx := NewContext()
+		ctx.RunString("fib:{?[x~0;0;x~1;1;(fib x-1)+(fib x-2)]}; fib 35")
+	}
+}
 
 func BenchmarkNewContext(b *testing.B) {
 	for n := 0; n < b.N; n++ {

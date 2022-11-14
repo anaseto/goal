@@ -79,6 +79,10 @@ func (ctx *Context) opcodesString(ops []opcode, lc *LambdaCode) string {
 			fmt.Fprintf(sb, "%d\t%s\t%s\t%d\n", i, op, ctx.variadicsNames[ops[i+1]], ops[i+2])
 		case opDrop:
 			fmt.Fprintf(sb, "%d\t%s\n", i, op)
+		case opJump:
+			fmt.Fprintf(sb, "%d\t%s\t%d\n", i, op, ops[i+1])
+		case opJumpFalse:
+			fmt.Fprintf(sb, "%d\t%s\t%d\n", i, op, ops[i+1])
 		}
 		i += op.argc()
 	}

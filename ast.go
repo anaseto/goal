@@ -25,7 +25,7 @@ type astToken struct {
 }
 
 func (t *astToken) String() string {
-	return fmt.Sprintf("{%v %d %s}", t.Type, t.Pos, t.Text)
+	return fmt.Sprintf("{%v %c %d %s}", t.Type, t.Rune, t.Pos, t.Text)
 }
 
 // astTokenType represents tokens in a ppExpr.

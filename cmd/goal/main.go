@@ -5,13 +5,15 @@ import (
 	"flag"
 	"fmt"
 	"goal"
-	"strings"
-	//"log"
+	"log"
 	"os"
+	"runtime/debug"
+	"strings"
 )
 
 func main() {
-	optE := flag.String("e", "", "command")
+	optE := flag.String("e", "", "execute command")
+	optD := flag.Bool("d", false, "debug info")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [-e command] [path]\n", os.Args[0])
 		flag.PrintDefaults()
@@ -21,6 +23,9 @@ func main() {
 	args := flag.Args()
 	ctx := goal.NewContext()
 	registerVariadics(ctx)
+	if *optD {
+		defer runDebug(ctx)
+	}
 	if *optE != "" {
 		runCommand(ctx, *optE)
 	}
@@ -72,6 +77,20 @@ func runStdin(ctx *goal.Context) {
 			continue
 		}
 		echo(ctx, v)
+	}
+}
+
+func printProgram(ctx *goal.Context) {
+	fmt.Fprintf(os.Stderr, "goal: debug info below:\n%v", ctx.ProgramString())
+}
+
+func runDebug(ctx *goal.Context) {
+	if r := recover(); r != nil {
+		printProgram(ctx)
+		log.Printf("Caught panic: %v\nStack Trace:\n", r)
+		debug.PrintStack()
+	} else {
+		printProgram(ctx)
 	}
 }
 

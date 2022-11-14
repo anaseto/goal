@@ -748,7 +748,12 @@ func (c *compiler) doArgs(body []exprs) error {
 		switch expr := expr.(type) {
 		case *astToken:
 			if expr.Type == astVERB && expr.Rune == '?' {
-				return c.doCond(body)
+				err := c.doCond(body)
+				if err != nil {
+					return err
+				}
+				c.it.Next()
+				return nil
 			}
 		}
 	}
