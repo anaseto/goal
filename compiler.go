@@ -12,9 +12,7 @@ type Program struct {
 	Pos     []int
 	Lambdas []*LambdaCode
 
-	cLambdas int // index next of last compiled lambda
-	cBody    int // number of already processed body ops
-	last     int // index of last non-argument opcode
+	last int // index of last non-argument opcode
 }
 
 // LambdaCode represents a compiled user defined function.
@@ -26,8 +24,8 @@ type LambdaCode struct {
 	NamedArgs bool
 	Locals    map[string]Local // arguments and variables
 
-	locals map[int]Local // opcode index -> local variable
-	nVars  int
+	opIdxLocal map[int]Local // opcode index -> local variable
+	nVars      int
 }
 
 // Local represents either an argument or a local variable. IDs are
@@ -392,7 +390,7 @@ func (c *compiler) doLocal(tok *astToken) {
 	local, ok := lc.local(tok.Text)
 	if ok {
 		c.push2(opLocal, opArg)
-		lc.locals[len(lc.Body)-1] = local
+		lc.opIdxLocal[len(lc.Body)-1] = local
 		return
 	}
 	c.doGlobal(tok)
@@ -477,13 +475,13 @@ func (c *compiler) doAssign(verbTok, identTok *astToken) bool {
 	local, ok := lc.local(identTok.Text)
 	if ok {
 		c.push2(opAssignLocal, opArg)
-		lc.locals[len(lc.Body)-1] = local
+		lc.opIdxLocal[len(lc.Body)-1] = local
 		return true
 	}
 	local = Local{Type: LocalVar, ID: lc.nVars}
 	lc.Locals[identTok.Text] = local
 	c.push2(opAssignLocal, opArg)
-	lc.locals[len(lc.Body)-1] = local
+	lc.opIdxLocal[len(lc.Body)-1] = local
 	lc.nVars++
 	return true
 }
@@ -644,8 +642,8 @@ func (c *compiler) doLambda(body []exprs, args []string) error {
 	c.slen = 0
 	c.argc = 0
 	lc := &LambdaCode{
-		Locals: map[string]Local{},
-		locals: map[int]Local{},
+		Locals:     map[string]Local{},
+		opIdxLocal: map[int]Local{},
 	}
 	c.scopeStack = append(c.scopeStack, lc)
 	if len(args) != 0 {
@@ -727,12 +725,13 @@ func (ctx *Context) resolveLambda(lc *LambdaCode) {
 		ip++
 		switch op {
 		case opLocal:
-			lc.Body[ip] = opcode(getID(lc.locals[ip]))
+			lc.Body[ip] = opcode(getID(lc.opIdxLocal[ip]))
 		case opAssignLocal:
-			lc.Body[ip] = opcode(getID(lc.locals[ip]))
+			lc.Body[ip] = opcode(getID(lc.opIdxLocal[ip]))
 		}
 		ip += op.argc()
 	}
+	lc.opIdxLocal = nil
 }
 
 func (c *compiler) doArgs(body []exprs) error {
