@@ -17,7 +17,6 @@ type Context struct {
 	frameIdx  int32
 	callDepth int32
 	ipNext    int
-	advanced  bool
 	lambda    int
 
 	// values
@@ -83,11 +82,20 @@ func (ctx *Context) Run() (V, error) {
 		ctx.prog.last = last
 		return nil, fmt.Errorf("%v", err)
 	}
-	done, err := ctx.compileExec()
-	if !done || err != nil {
+	if !ctx.changed(blen, llen, last) {
+		return nil, nil
+	}
+	_, err = ctx.compileExec()
+	if err != nil {
 		return nil, err
 	}
 	return ctx.top(), nil
+}
+
+func (ctx *Context) changed(blen, llen, last int) bool {
+	return blen != len(ctx.prog.Body) ||
+		llen != len(ctx.prog.Lambdas) ||
+		last != ctx.prog.last
 }
 
 // RunExpr compiles a whole expression from current source, then executes it.
@@ -108,14 +116,17 @@ func (ctx *Context) RunExpr() (V, error) {
 			return nil, fmt.Errorf("%v", err)
 		}
 	}
-	done, err := ctx.compileExec()
-	if !done || err != nil {
+	if !ctx.changed(blen, llen, last) {
+		return nil, nil
+	}
+	advanced, err := ctx.compileExec()
+	if err != nil {
 		return nil, err
 	}
 	if eof {
 		err = ErrEOF{}
 	}
-	if ctx.advanced {
+	if advanced {
 		return ctx.top(), err
 	}
 	return nil, err
@@ -142,10 +153,6 @@ func (ctx *Context) LastIsAssign() bool {
 }
 
 func (ctx *Context) compileExec() (bool, error) {
-	done := ctx.resolve()
-	if !done {
-		return false, nil
-	}
 	//fmt.Print(ctx.ProgramString())
 	ip, err := ctx.execute(ctx.prog.Body[ctx.ipNext:])
 	if err != nil {
@@ -155,12 +162,11 @@ func (ctx *Context) compileExec() (bool, error) {
 		return false, fmt.Errorf("%v", err)
 	}
 	ctx.ipNext += ip
-	ctx.advanced = ip > 0
 	if len(ctx.stack) == 0 {
 		// should not happen
 		return false, errors.New("no result: empty stack")
 	}
-	return true, nil
+	return ip > 0, nil
 }
 
 // Show prints internal information about the context.
