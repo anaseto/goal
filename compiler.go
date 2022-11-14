@@ -205,8 +205,8 @@ func (c *compiler) push2(op, arg opcode) {
 		// v ... v v -> v
 		c.slen -= int(arg)
 		c.argc -= int(arg)
-	case opApplyVariadic:
-	case opApply2Variadic:
+	case opApplyVariadic, opJump:
+	case opApply2Variadic, opJumpFalse:
 		c.slen--
 		c.argc--
 	default:
@@ -260,6 +260,14 @@ func (c *compiler) scope() *LambdaCode {
 		return nil
 	}
 	return c.scopeStack[len(c.scopeStack)-1]
+}
+
+func (c *compiler) body() []opcode {
+	lc := c.scope()
+	if lc != nil {
+		return lc.Body
+	}
+	return c.ctx.prog.Body
 }
 
 func (c *compiler) doExprs(es exprs) error {
@@ -739,8 +747,8 @@ func (c *compiler) doArgs(body []exprs) error {
 		expr := c.it.Peek()
 		switch expr := expr.(type) {
 		case *astToken:
-			if expr.Type == astVERB && expr.Rune == '$' {
-				return c.parseCond(body)
+			if expr.Type == astVERB && expr.Rune == '?' {
+				return c.doCond(body)
 			}
 		}
 	}
@@ -769,9 +777,51 @@ func (c *compiler) doArgs(body []exprs) error {
 	return nil
 }
 
-func (c *compiler) parseCond(body []exprs) error {
-	panic("TODO: parseCond")
-	// TODO
+func (c *compiler) doCond(body []exprs) error {
+	if len(body)%2 != 1 {
+		return c.errorf("conditional ?[if;then;else] with even number of statements")
+	}
+	argc := c.argc
+	cond := body[0]
+	//slen := c.slen
+	err := c.doExprs(cond)
+	if err != nil {
+		return err
+	}
+	c.push2(opJumpFalse, opArg)
+	jmpCond := len(c.body()) - 1
+	jumpsEnd := []int{}
+	jumpsElse := []int{}
+	jumpsCond := []int{}
+	for i := 1; i < len(body); i += 2 {
+		then := body[i]
+		err := c.doExprs(then)
+		if err != nil {
+			return err
+		}
+		c.push2(opJump, opArg)
+		jumpsEnd = append(jumpsEnd, len(c.body())-1)
+		jumpsElse = append(jumpsElse, len(c.body()))
+		elseCond := body[i+1]
+		err = c.doExprs(elseCond)
+		if err != nil {
+			return err
+		}
+		if i+1 < len(body)-1 {
+			c.push2(opJumpFalse, opArg)
+			jumpsCond = append(jumpsCond, len(c.body())-1)
+		}
+	}
+	c.body()[jmpCond] = opcode(jumpsElse[0] - jmpCond)
+	for i, v := range jumpsCond {
+		c.body()[v] = opcode(jumpsElse[i+1] - v)
+	}
+	end := len(c.body())
+	for _, v := range jumpsEnd {
+		c.body()[v] = opcode(end - v)
+	}
+	c.argc = argc + 1
+	c.apply()
 	return nil
 }
 

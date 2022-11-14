@@ -209,18 +209,8 @@ func isFalse(x V) bool {
 		return x == 0
 	case S:
 		return x == ""
-	case AB:
-		return len(x) == 0
-	case AF:
-		return len(x) == 0
-	case AI:
-		return len(x) == 0
-	case AS:
-		return len(x) == 0
-	case AV:
-		return len(x) == 0
 	default:
-		return x == nil
+		return x == nil || x.Len() == 0
 	}
 }
 
@@ -232,18 +222,8 @@ func isTrue(x V) bool {
 		return x != 0
 	case S:
 		return x != ""
-	case AB:
-		return len(x) > 0
-	case AF:
-		return len(x) > 0
-	case AI:
-		return len(x) > 0
-	case AS:
-		return len(x) > 0
-	case AV:
-		return len(x) > 0
 	default:
-		return x != nil
+		return x != nil && x.Len() > 0
 	}
 }
 

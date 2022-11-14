@@ -25,6 +25,8 @@ const (
 	opApplyN
 	opApplyNVariadic
 	opDrop
+	opJumpFalse
+	opJump
 
 	opArg = -1 // argument to be computed later
 )

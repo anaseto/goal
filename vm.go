@@ -85,6 +85,14 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ip++
 		case opDrop:
 			ctx.drop()
+		case opJumpFalse:
+			if isFalse(ctx.pop()) {
+				ip += int(ops[ip])
+			} else {
+				ip++
+			}
+		case opJump:
+			ip += int(ops[ip])
 		}
 		//fmt.Printf("stack: %v\n", ctx.stack)
 	}
