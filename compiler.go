@@ -105,7 +105,7 @@ type compiler struct {
 	arglist    bool          // whether current expression has an argument list
 	scopeStack []*LambdaCode // scope information
 	pos        int           // last token position
-	it         astIter       // ppExprs iterator
+	it         astIter       // exprs iterator
 	drop       bool          // whether to add a drop at the end
 }
 
@@ -140,7 +140,7 @@ func (c *compiler) ParseCompileNext() error {
 		c.push(opDrop)
 	}
 	var eof bool
-	pps, err := c.p.Next()
+	exprs, err := c.p.Next()
 	if err != nil {
 		_, eof = err.(ErrEOF)
 		if !eof {
@@ -149,7 +149,7 @@ func (c *compiler) ParseCompileNext() error {
 		}
 	}
 	slen := c.slen
-	err = c.ppExprs(pps)
+	err = c.doExprs(exprs)
 	c.drop = c.slen > slen
 	if err != nil {
 		ctx.compiler = newCompiler(ctx)
@@ -238,14 +238,14 @@ func (c *compiler) scope() *LambdaCode {
 	return c.scopeStack[len(c.scopeStack)-1]
 }
 
-func (c *compiler) ppExprs(pps exprs) error {
+func (c *compiler) doExprs(es exprs) error {
 	slen := c.slen
 	c.argc = 0
 	it := c.it
-	c.it = newAstIter(pps)
+	c.it = newAstIter(es)
 	for c.it.Next() {
-		ppe := c.it.Expr()
-		err := c.ppExpr(ppe)
+		e := c.it.Expr()
+		err := c.doExpr(e)
 		if err != nil {
 			return err
 		}
@@ -257,20 +257,20 @@ func (c *compiler) ppExprs(pps exprs) error {
 	return nil
 }
 
-func (c *compiler) ppExpr(ppe expr) error {
-	switch ppe := ppe.(type) {
+func (c *compiler) doExpr(e expr) error {
+	switch e := e.(type) {
 	case *astToken:
-		err := c.ppToken(ppe)
+		err := c.doToken(e)
 		if err != nil {
 			return err
 		}
 	case astAdverbs:
-		err := c.ppAdverbs(ppe)
+		err := c.doAdverbs(e)
 		if err != nil {
 			return err
 		}
 	case astStrand:
-		err := c.ppStrand(ppe)
+		err := c.doStrand(e)
 		if err != nil {
 			return err
 		}
@@ -279,7 +279,7 @@ func (c *compiler) ppExpr(ppe expr) error {
 		c.argc = 0
 		oarglist := c.arglist
 		c.arglist = false
-		err := c.ppParenExpr(ppe)
+		err := c.doParenExpr(e)
 		c.arglist = oarglist
 		c.argc = argc + 1
 		c.apply()
@@ -289,18 +289,18 @@ func (c *compiler) ppExpr(ppe expr) error {
 	case *astBlock:
 		oarglist := c.arglist
 		c.arglist = false
-		err := c.ppBlock(ppe)
+		err := c.doBlock(e)
 		c.arglist = oarglist
 		if err != nil {
 			return err
 		}
 	default:
-		panic(c.errorf("unknown ppExpr type"))
+		panic(c.errorf("unknown expr type"))
 	}
 	return nil
 }
 
-func (c *compiler) ppToken(tok *astToken) error {
+func (c *compiler) doToken(tok *astToken) error {
 	c.pos = tok.Pos
 	switch tok.Type {
 	case astNUMBER:
@@ -329,14 +329,14 @@ func (c *compiler) ppToken(tok *astToken) error {
 		// read or apply, not assign
 		if c.scope() == nil {
 			// global scope: global variable
-			c.ppGlobal(tok)
+			c.doGlobal(tok)
 			return nil
 		}
 		// local scope: argument, local or global variable
-		c.ppLocal(tok)
+		c.doLocal(tok)
 		return nil
 	case astVERB:
-		return c.ppVerb(tok)
+		return c.doVerb(tok)
 	default:
 		// should not happen
 		return c.errorf("unexpected token type: %v", tok.Type)
@@ -355,13 +355,13 @@ func parseNumber(s string) (V, error) {
 	return nil, errF
 }
 
-func (c *compiler) ppGlobal(tok *astToken) {
+func (c *compiler) doGlobal(tok *astToken) {
 	id := c.ctx.global(tok.Text)
 	c.push2(opGlobal, opcode(id))
 	c.apply()
 }
 
-func (c *compiler) ppLocal(tok *astToken) {
+func (c *compiler) doLocal(tok *astToken) {
 	lc := c.scope()
 	local, ok := lc.local(tok.Text)
 	if ok {
@@ -369,27 +369,27 @@ func (c *compiler) ppLocal(tok *astToken) {
 		lc.locals[len(lc.Body)-1] = local
 		return
 	}
-	c.ppGlobal(tok)
+	c.doGlobal(tok)
 }
 
-func (c *compiler) ppVariadic(tok *astToken) error {
+func (c *compiler) doVariadic(tok *astToken) error {
 	v := parseBuiltin(tok.Rune)
 	c.push2(opVariadic, opcode(v))
 	c.apply()
 	return nil
 }
 
-func (c *compiler) ppVerb(tok *astToken) error {
-	ppe := c.it.Peek()
+func (c *compiler) doVerb(tok *astToken) error {
+	e := c.it.Peek()
 	argc := c.argc
-	if ppe == nil || c.arglist {
-		return c.ppVariadic(tok)
+	if e == nil || c.arglist {
+		return c.doVariadic(tok)
 	}
-	if !isLeftArg(ppe) {
-		return c.ppVariadic(tok)
+	if !isLeftArg(e) {
+		return c.doVariadic(tok)
 	}
-	if identTok, ok := getIdent(ppe); ok {
-		if c.ppAssign(tok, identTok) {
+	if identTok, ok := getIdent(e); ok {
+		if c.doAssign(tok, identTok) {
 			c.it.Next()
 			return nil
 		}
@@ -399,24 +399,24 @@ func (c *compiler) ppVerb(tok *astToken) error {
 	}
 	c.it.Next()
 	c.argc = 0
-	err := c.ppExpr(ppe)
+	err := c.doExpr(e)
 	if err != nil {
 		return err
 	}
 	c.argc = 2
-	return c.ppVariadic(tok)
+	return c.doVariadic(tok)
 }
 
-func getIdent(ppe expr) (*astToken, bool) {
-	tok, ok := ppe.(*astToken)
+func getIdent(e expr) (*astToken, bool) {
+	tok, ok := e.(*astToken)
 	return tok, ok && tok.Type == astIDENT
 
 }
 
-func isLeftArg(ppe expr) bool {
-	switch ppe := ppe.(type) {
+func isLeftArg(e expr) bool {
+	switch e := e.(type) {
 	case *astToken:
-		switch ppe.Type {
+		switch e.Type {
 		case astVERB:
 			return false
 		}
@@ -426,7 +426,7 @@ func isLeftArg(ppe expr) bool {
 	return true
 }
 
-func (c *compiler) ppAssign(verbTok, identTok *astToken) bool {
+func (c *compiler) doAssign(verbTok, identTok *astToken) bool {
 	if verbTok.Rune != ':' || c.argc != 1 {
 		return false
 	}
@@ -502,23 +502,23 @@ func parseBuiltin(r rune) (verb Variadic) {
 	return verb
 }
 
-func getVerb(ppe expr) (*astToken, bool) {
-	tok, ok := ppe.(*astToken)
+func getVerb(e expr) (*astToken, bool) {
+	tok, ok := e.(*astToken)
 	return tok, ok && tok.Type == astVERB
 
 }
 
-func (c *compiler) ppAdverbs(adverbs astAdverbs) error {
+func (c *compiler) doAdverbs(adverbs astAdverbs) error {
 	tok := adverbs[len(adverbs)-1]
 	adverbs = adverbs[:len(adverbs)-1]
 	argc := c.argc
-	ppe := c.it.Peek()
-	if ppe == nil {
+	e := c.it.Peek()
+	if e == nil {
 		if len(adverbs) > 0 {
 			return errf("adverb train should modify a value")
 		}
 		c.push(opNil)
-		return c.ppVariadic(tok)
+		return c.doVariadic(tok)
 	}
 	if argc == 0 {
 		c.push(opNil)
@@ -526,17 +526,17 @@ func (c *compiler) ppAdverbs(adverbs astAdverbs) error {
 	c.it.Next()
 	var err error
 	c.argc = 0
-	if vTok, ok := getVerb(ppe); ok {
-		err = c.ppVariadic(vTok)
+	if vTok, ok := getVerb(e); ok {
+		err = c.doVariadic(vTok)
 	} else {
-		err = c.ppExpr(ppe)
+		err = c.doExpr(e)
 	}
 	if err != nil {
 		return err
 	}
 	for _, atok := range adverbs {
 		c.argc = 1
-		err := c.ppVariadic(atok)
+		err := c.doVariadic(atok)
 		if err != nil {
 			return err
 		}
@@ -544,21 +544,21 @@ func (c *compiler) ppAdverbs(adverbs astAdverbs) error {
 	nppe := c.it.Peek()
 	if nppe == nil || c.arglist || !isLeftArg(nppe) {
 		c.argc = 2
-		return c.ppVariadic(tok)
+		return c.doVariadic(tok)
 	}
 	c.it.Next()
 	c.argc = 0
-	err = c.ppExpr(nppe)
+	err = c.doExpr(nppe)
 	if err != nil {
 		return err
 	}
 	c.argc = 3
-	return c.ppVariadic(tok)
+	return c.doVariadic(tok)
 }
 
-func (c *compiler) ppStrand(pps astStrand) error {
-	a := make(AV, 0, len(pps))
-	for _, tok := range pps {
+func (c *compiler) doStrand(st astStrand) error {
+	a := make(AV, 0, len(st))
+	for _, tok := range st {
 		switch tok.Type {
 		case astNUMBER:
 			v, err := parseNumber(tok.Text)
@@ -575,32 +575,31 @@ func (c *compiler) ppStrand(pps astStrand) error {
 		}
 	}
 	id := c.ctx.storeConst(canonical(a))
-	// len(pps) > 0
 	c.push2(opConst, opcode(id))
 	return nil
 }
 
-func (c *compiler) ppParenExpr(ppp astParenExpr) error {
-	err := c.ppExprs(exprs(ppp))
+func (c *compiler) doParenExpr(pa astParenExpr) error {
+	err := c.doExprs(exprs(pa))
 	return err
 }
 
-func (c *compiler) ppBlock(ppb *astBlock) error {
-	switch ppb.Type {
+func (c *compiler) doBlock(b *astBlock) error {
+	switch b.Type {
 	case astLAMBDA:
-		return c.pLambda(ppb.Body, ppb.Args)
+		return c.doLambda(b.Body, b.Args)
 	case astARGS:
-		return c.pArgs(ppb.Body)
+		return c.doArgs(b.Body)
 	case astSEQ:
-		return c.pSeq(ppb.Body)
+		return c.doSeq(b.Body)
 	case astLIST:
-		return c.pList(ppb.Body)
+		return c.doList(b.Body)
 	default:
-		panic(fmt.Sprintf("unknown block type: %d", ppb.Type))
+		panic(fmt.Sprintf("unknown block type: %d", b.Type))
 	}
 }
 
-func (c *compiler) pLambda(body []exprs, args []string) error {
+func (c *compiler) doLambda(body []exprs, args []string) error {
 	argc := c.argc
 	slen := c.slen
 	c.slen = 0
@@ -611,14 +610,14 @@ func (c *compiler) pLambda(body []exprs, args []string) error {
 	}
 	c.scopeStack = append(c.scopeStack, lc)
 	if len(args) != 0 {
-		err := c.ppLambdaArgs(args)
+		err := c.doLambdaArgs(args)
 		if err != nil {
 			return err
 		}
 	}
 	for i, exprs := range body {
 		slen := c.slen
-		err := c.ppExprs(exprs)
+		err := c.doExprs(exprs)
 		if err != nil {
 			return err
 		}
@@ -636,7 +635,7 @@ func (c *compiler) pLambda(body []exprs, args []string) error {
 	return nil
 }
 
-func (c *compiler) ppLambdaArgs(args []string) error {
+func (c *compiler) doLambdaArgs(args []string) error {
 	lc := c.scope()
 	lc.NamedArgs = true
 	for i, arg := range args {
@@ -652,7 +651,7 @@ func (c *compiler) ppLambdaArgs(args []string) error {
 	return nil
 }
 
-func (c *compiler) pArgs(body []exprs) error {
+func (c *compiler) doArgs(body []exprs) error {
 	if len(body) >= 3 {
 		expr := c.it.Peek()
 		switch expr := expr.(type) {
@@ -665,7 +664,7 @@ func (c *compiler) pArgs(body []exprs) error {
 	argc := c.argc
 	for i := len(body) - 1; i >= 0; i-- {
 		exprs := body[i]
-		err := c.ppExprs(exprs)
+		err := c.doExprs(exprs)
 		if err != nil {
 			return err
 		}
@@ -674,10 +673,10 @@ func (c *compiler) pArgs(body []exprs) error {
 		// should not happpen: it would be a sequence
 		panic(c.errorf("used as a sequence, but args").Error())
 	}
-	ppe := c.it.Expr()
+	e := c.it.Expr()
 	c.argc = len(body)
 	c.arglist = true
-	err := c.ppExpr(ppe)
+	err := c.doExpr(e)
 	c.arglist = false
 	if err != nil {
 		return err
@@ -693,11 +692,11 @@ func (c *compiler) parseCond(body []exprs) error {
 	return nil
 }
 
-func (c *compiler) pSeq(body []exprs) error {
+func (c *compiler) doSeq(body []exprs) error {
 	argc := c.argc
 	for i, exprs := range body {
 		slen := c.slen
-		err := c.ppExprs(exprs)
+		err := c.doExprs(exprs)
 		if err != nil {
 			return err
 		}
@@ -710,12 +709,12 @@ func (c *compiler) pSeq(body []exprs) error {
 	return nil
 }
 
-func (c *compiler) pList(body []exprs) error {
+func (c *compiler) doList(body []exprs) error {
 	argc := c.argc
 	for i := len(body) - 1; i >= 0; i-- {
 		exprs := body[i]
 		c.argc = 0
-		err := c.ppExprs(exprs)
+		err := c.doExprs(exprs)
 		if err != nil {
 			return err
 		}

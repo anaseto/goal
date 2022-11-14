@@ -19,6 +19,7 @@ func newParser(s *Scanner) *parser {
 	return p
 }
 
+// ErrEOF signals the end of the input file.
 type ErrEOF struct{}
 
 func (e ErrEOF) Error() string {
@@ -27,22 +28,20 @@ func (e ErrEOF) Error() string {
 
 // Next returns a whole expression, in stack-based order.
 func (p *parser) Next() (exprs, error) {
-	ps := exprs{}
+	es := exprs{}
 	for {
-		pe, err := p.expr()
+		e, err := p.expr()
 		if err != nil {
-			pRev([]expr(ps))
-			return ps, err
-		}
-		tok, ok := pe.(*astToken)
-		if ok && (tok.Type == astSEP || tok.Type == astEOF) {
-			pRev([]expr(ps))
-			if tok.Type == astEOF {
-				return ps, ErrEOF{}
+			pRev([]expr(es))
+			switch err.(type) {
+			case parseSEP:
+				return es, nil
+			case parseEOF:
+				return es, ErrEOF{}
 			}
-			return ps, nil
+			return es, err
 		}
-		ps = append(ps, pe)
+		es = append(es, e)
 	}
 }
 
@@ -88,9 +87,9 @@ func closeToken(opTok TokenType) TokenType {
 func (p *parser) expr() (expr, error) {
 	switch tok := p.next(); tok.Type {
 	case EOF:
-		return &astToken{Type: astEOF, Pos: tok.Pos}, nil
+		return nil, parseEOF{}
 	case NEWLINE, SEMICOLON:
-		return &astToken{Type: astSEP, Pos: tok.Pos}, nil
+		return nil, parseSEP{}
 	case ERROR:
 		return nil, p.errorf("error token: %s", tok)
 	case ADVERB:
@@ -125,7 +124,7 @@ func (p *parser) expr() (expr, error) {
 			return nil, p.errorf("unexpected %s without closing previous %s at %d", tok, opTok, opTok.Pos)
 		}
 		p.depth = p.depth[:len(p.depth)-1]
-		return &astToken{Type: astCLOSE, Pos: tok.Pos}, nil
+		return nil, parseCLOSE{}
 	case VERB:
 		return &astToken{Type: astVERB, Pos: tok.Pos, Rune: tok.Rune}, nil
 	default:
@@ -137,7 +136,7 @@ func (p *parser) expr() (expr, error) {
 func (p *parser) pExprBlock() (expr, error) {
 	var bt astBlockType
 	p.depth = append(p.depth, p.token)
-	pb := &astBlock{}
+	b := &astBlock{}
 	switch p.token.Type {
 	case LEFTBRACE:
 		bt = astLAMBDA
@@ -146,12 +145,12 @@ func (p *parser) pExprBlock() (expr, error) {
 			p.next()
 			args, err := p.pLambdaArgs()
 			if err != nil {
-				return pb, err
+				return b, err
 			}
 			if len(args) == 0 {
-				return pb, p.errorf("empty argument list")
+				return b, p.errorf("empty argument list")
 			}
-			pb.Args = args
+			b.Args = args
 		}
 	case LEFTBRACKET:
 		switch p.oToken.Type {
@@ -164,38 +163,34 @@ func (p *parser) pExprBlock() (expr, error) {
 	case LEFTPAREN:
 		bt = astLIST
 	}
-	pb.Type = bt
-	pb.Body = []exprs{}
-	pb.Body = append(pb.Body, exprs{})
+	b.Type = bt
+	b.Body = []exprs{}
+	b.Body = append(b.Body, exprs{})
 	for {
 		pe, err := p.expr()
-		if err != nil {
-			return pb, err
-		}
-		tok, ok := pe.(*astToken)
-		if !ok {
-			pb.push(pe)
+		if err == nil {
+			b.push(pe)
 			continue
 		}
-		switch tok.Type {
-		case astCLOSE:
-			pRev(pb.Body[len(pb.Body)-1])
-			if pb.Type == astLIST && len(pb.Body) == 1 &&
-				len(pb.Body[0]) > 0 {
+		switch err.(type) {
+		case parseCLOSE:
+			pRev(b.Body[len(b.Body)-1])
+			if b.Type == astLIST && len(b.Body) == 1 &&
+				len(b.Body[0]) > 0 {
 				// not a list, but a parenthesized
 				// expression.
-				return astParenExpr(pb.Body[0]), nil
+				return astParenExpr(b.Body[0]), nil
 			}
-			return pb, nil
-		case astEOF:
-			pRev(pb.Body[len(pb.Body)-1])
+			return b, nil
+		case parseEOF:
+			pRev(b.Body[len(b.Body)-1])
 			opTok := p.depth[len(p.depth)-1]
-			return pb, p.errorf("unexpected EOF without closing previous %s at %d", opTok, opTok.Pos)
-		case astSEP:
-			pRev(pb.Body[len(pb.Body)-1])
-			pb.Body = append(pb.Body, exprs{})
+			return b, p.errorf("unexpected EOF without closing previous %s at %d", opTok, opTok.Pos)
+		case parseSEP:
+			pRev(b.Body[len(b.Body)-1])
+			b.Body = append(b.Body, exprs{})
 		default:
-			pb.push(pe)
+			return b, err
 		}
 	}
 }
@@ -226,38 +221,38 @@ func (p *parser) pLambdaArgs() ([]string, error) {
 
 func (p *parser) pAdverbs() (expr, error) {
 	// c.token.Type is NUMBER or STRING for current and peek
-	pb := astAdverbs{}
+	ads := astAdverbs{}
 	for {
 		switch p.token.Type {
 		case ADVERB:
-			pb = append(pb, &astToken{Type: astADVERB, Pos: p.token.Pos, Rune: p.token.Rune})
+			ads = append(ads, &astToken{Type: astADVERB, Pos: p.token.Pos, Rune: p.token.Rune})
 		}
 		ntok := p.peek()
 		switch ntok.Type {
 		case ADVERB:
 			p.next()
 		default:
-			return pb, nil
+			return ads, nil
 		}
 	}
 }
 
 func (p *parser) pExprStrand() (expr, error) {
 	// p.token.Type is NUMBER or STRING for current and peek
-	pb := astStrand{}
+	st := astStrand{}
 	for {
 		switch p.token.Type {
 		case NUMBER:
-			pb = append(pb, &astToken{Type: astNUMBER, Pos: p.token.Pos, Text: p.token.Text})
+			st = append(st, &astToken{Type: astNUMBER, Pos: p.token.Pos, Text: p.token.Text})
 		case STRING:
-			pb = append(pb, &astToken{Type: astSTRING, Pos: p.token.Pos, Text: p.token.Text})
+			st = append(st, &astToken{Type: astSTRING, Pos: p.token.Pos, Text: p.token.Text})
 		}
 		ntok := p.peek()
 		switch ntok.Type {
 		case NUMBER, STRING:
 			p.next()
 		default:
-			return pb, nil
+			return st, nil
 		}
 	}
 }

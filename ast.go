@@ -31,21 +31,14 @@ func (t *astToken) String() string {
 // astTokenType represents tokens in a ppExpr.
 type astTokenType int32
 
-// These constants represent the possible tokens in a ppExpr. The SEP,
-// EOF and CLOSE types are not emitted in the final result.
+// These constants represent the possible tokens in a ppExpr.
 const (
-	astSEP astTokenType = iota
-	astEOF
-	astCLOSE
-
-	astNUMBER
+	astNUMBER astTokenType = iota
 	astSTRING
 	astIDENT
 	astVERB
 	astADVERB
 )
-
-type astSpecial int
 
 type astStrand []*astToken // for stranding, like 1 23 456
 
@@ -87,9 +80,17 @@ const (
 
 func (t *astToken) node()    {}
 func (st astStrand) node()   {}
-func (ad astAdverbs) node()  {}
+func (ads astAdverbs) node() {}
 func (p astParenExpr) node() {}
 func (b *astBlock) node()    {}
+
+type parseEOF struct{}
+type parseSEP struct{}
+type parseCLOSE struct{}
+
+func (p parseEOF) Error() string   { return "EOF" }
+func (p parseSEP) Error() string   { return "SEP" }
+func (p parseCLOSE) Error() string { return "CLOSE" }
 
 // astIter is an iterator for exprs slices, with peek functionality.
 type astIter struct {
