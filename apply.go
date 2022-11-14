@@ -64,28 +64,7 @@ func (ctx *Context) applyN(v V, n int) V {
 		args := ctx.peekN(n)
 		switch n {
 		case 1:
-			if args[0] == nil {
-				ctx.drop()
-				return v
-			}
-			var res V
-			switch x := args[0].(type) {
-			case F:
-				if !isI(x) {
-					return errs("[] : got non-integer as index")
-				}
-				res = v.At(int(x))
-			case I:
-				res = v.At(int(x))
-			case Array:
-				indices := toIndices(args[0])
-				if indices == nil {
-					return errs("[] : got non-integer array as indices")
-				}
-				res = v.Select(indices)
-			}
-			ctx.drop()
-			return res
+			return ctx.applyArray(v, args[0])
 		default:
 			ctx.dropN(n)
 			return errf("NYI: deep index %d", n)
@@ -93,6 +72,45 @@ func (ctx *Context) applyN(v V, n int) V {
 	default:
 		return errf("type %s cannot be applied", v.Type())
 	}
+}
+
+func (ctx *Context) applyArray(v Array, xv V) V {
+	if xv == nil {
+		ctx.drop()
+		return v
+	}
+	var res V
+	switch x := xv.(type) {
+	case F:
+		if !isI(x) {
+			return errf("x[y] : non-integer index: %g", x)
+		}
+		i := int(x)
+		if i < 0 {
+			i = v.Len() + i
+		}
+		if i < 0 || i >= v.Len() {
+			return errf("x[y] : out of bounds index: %d", i)
+		}
+		res = v.At(i)
+	case I:
+		i := int(x)
+		if i < 0 {
+			i = v.Len() + i
+		}
+		if i < 0 || i >= v.Len() {
+			return errf("x[y] : out of bounds index: %d", i)
+		}
+		res = v.At(i)
+	case Array:
+		indices, err := toIndices(xv, v.Len())
+		if err != nil {
+			return err.(E)
+		}
+		res = v.Select(indices)
+	}
+	ctx.drop()
+	return res
 }
 
 func (ctx *Context) applyVariadic(v Variadic) V {
