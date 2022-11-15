@@ -176,6 +176,10 @@ Type help TOPIC or h TOPIC where TOPIC is one of:
 "'"	adverbs ('/\)
 "io"	io functions (slurp, say)
 "syn"   syntax
+
+Notations:
+	s (string) f (1-arg fun) F (2-args fun)
+	i (integer) N (numeric) x,y (any)
 `
 const helpVERBS = `
 VERBS
@@ -234,9 +238,9 @@ F\x	scan	+\!10 -> 0 1 3 6 10 15 21 28 36 45
 x F/y	fold	1 2+/!10 -> 46 47
 x F\y   scan	5 6+\1 2 3 -> (6 7;8 9;11 12)
 n f/x	do	3{x*2}/4 -> 32
-n f\x	do	3{x*2}\4 -> 4 8 16 32
+n f\x	dos	3{x*2}\4 -> 4 8 16 32
 f f/x   while	{x<100}{x*2}/4 -> 128
-f f/x   while	{x<100}{x*2}\4 -> 4 8 16 32 64 128
+f f\x   whiles	{x<100}{x*2}\4 -> 4 8 16 32 64 128
 s/x	join	","/"a" "b" "c" -> "a,b,c"
 s\x	split	","\"a,b,c" -> "a" "b" "c"
 `
