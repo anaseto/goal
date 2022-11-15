@@ -160,35 +160,29 @@ func cloneShallow(x V) V {
 	}
 }
 
-func toIndices(x V, l int) (res AI, err error) {
+func toIndices(x V, l int) V {
+	x = canonical(x)
 	switch x := x.(type) {
 	case AB:
-		res = make(AI, len(x))
+		res := make(AI, len(x))
 		for i := range res {
 			res[i] = int(B2I(x[i]))
 		}
+		return res
 	case AF:
-		res = make(AI, len(x))
+		res := make(AI, len(x))
 		for i := range res {
 			if !isI(F(x[i])) {
-				return res, errs("x[y] : non-integer indices array")
+				return errs("x[y] : non-integer indices array")
 			}
 			res[i] = int(x[i])
 		}
+		return res
 	case AI:
-		res = x
+		return x
 	default:
-		return res, errs("x[y] : non-integer indices array")
+		return errs("x[y] : not an indices array")
 	}
-	for i, n := range res {
-		if n < 0 {
-			res[i] = l + n
-		}
-		if res[i] < 0 || res[i] >= l {
-			return res, errf("x[y] : out of bound index: %d", n)
-		}
-	}
-	return res, nil
 }
 
 func toArray(x V) V {

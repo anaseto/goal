@@ -103,11 +103,11 @@ func (ctx *Context) applyArray(v Array, xv V) V {
 		}
 		res = v.At(i)
 	case Array:
-		indices, err := toIndices(xv, v.Len())
-		if err != nil {
-			return err.(E)
+		indices := toIndices(xv, v.Len())
+		if err, ok := indices.(E); ok {
+			return err
 		}
-		res = v.Select(indices)
+		res = v.Select(indices.(AI))
 	}
 	ctx.drop()
 	return res
@@ -252,60 +252,80 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 
 func (x AV) Select(y AI) V {
 	res := make(AV, len(y))
+	xlen := x.Len()
 	for i := range res {
 		idx := y[i]
-		if idx < 0 || idx >= len(x) {
-			return errf("index out of bounds: %d (length %d)", idx, len(x))
+		if idx < 0 {
+			idx += xlen
 		}
-		res[i] = x[y[i]]
+		if idx < 0 || idx >= len(x) {
+			return errf("x[y] : index out of bounds: %d (length %d)", y[i], len(x))
+		}
+		res[i] = x[idx]
 	}
 	return res
 }
 
 func (x AB) Select(y AI) V {
 	res := make(AB, len(y))
+	xlen := x.Len()
 	for i := range res {
 		idx := y[i]
-		if idx < 0 || idx >= len(x) {
-			return errf("index out of bounds: %d (length %d)", idx, len(x))
+		if idx < 0 {
+			idx += xlen
 		}
-		res[i] = x[y[i]]
+		if idx < 0 || idx >= len(x) {
+			return errf("x[y] : index out of bounds: %d (length %d)", y[i], len(x))
+		}
+		res[i] = x[idx]
 	}
 	return res
 }
 
 func (x AI) Select(y AI) V {
 	res := make(AI, len(y))
+	xlen := x.Len()
 	for i := range res {
 		idx := y[i]
-		if idx < 0 || idx >= len(x) {
-			return errf("index out of bounds: %d (length %d)", idx, len(x))
+		if idx < 0 {
+			idx += xlen
 		}
-		res[i] = x[y[i]]
+		if idx < 0 || idx >= len(x) {
+			return errf("x[y] : index out of bounds: %d (length %d)", y[i], len(x))
+		}
+		res[i] = x[idx]
 	}
 	return res
 }
 
 func (x AF) Select(y AI) V {
 	res := make(AF, len(y))
+	xlen := x.Len()
 	for i := range res {
 		idx := y[i]
-		if idx < 0 || idx >= len(x) {
-			return errf("index out of bounds: %d (length %d)", idx, len(x))
+		if idx < 0 {
+			idx += xlen
 		}
-		res[i] = x[y[i]]
+		if idx < 0 || idx >= len(x) {
+			return errf("x[y] : index out of bounds: %d (length %d)", y[i], len(x))
+		}
+		res[i] = x[idx]
 	}
 	return res
 }
 
 func (x AS) Select(y AI) V {
 	res := make(AS, len(y))
+	xlen := x.Len()
 	for i := range res {
 		idx := y[i]
-		if idx < 0 || idx >= len(x) {
-			return errf("index out of bounds: %d (length %d)", idx, len(x))
+		if idx < 0 {
+			idx += xlen
 		}
-		res[i] = x[y[i]]
+		if idx < 0 || idx >= len(x) {
+			return errf("x[y] : index out of bounds: %d (length %d)", y[i], len(x))
+		}
+		res[i] = x[idx]
 	}
 	return res
 }
