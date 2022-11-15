@@ -182,6 +182,7 @@ func (ctx *Context) getError(err error) error {
 	e := &Error{
 		Msg:       err.Error(),
 		Positions: ctx.errPos,
+		Sources:   ctx.sources,
 	}
 	ctx.errPos = nil
 	return e

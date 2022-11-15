@@ -46,6 +46,7 @@ type astReturn struct {
 
 type astStrand struct {
 	Lits []astToken // stranding of literals, like 1 23 456
+	Pos  int
 }
 
 type astAdverbs struct {

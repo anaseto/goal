@@ -81,7 +81,7 @@ func runStdin(ctx *goal.Context) {
 	fmt.Printf("goal repl, type help\"\" for basic info.\n")
 	for {
 		fmt.Print("  ")
-		ctx.SetSource("-", lr.readLine())
+		ctx.SetSource("", lr.readLine())
 		v, err := ctx.RunExpr()
 		if err != nil {
 			_, eof := err.(goal.ErrEOF)
@@ -89,7 +89,7 @@ func runStdin(ctx *goal.Context) {
 				echo(ctx, v)
 				return
 			}
-			fmt.Println(err)
+			fmt.Println("'ERROR " + err.Error())
 			continue
 		}
 		echo(ctx, v)

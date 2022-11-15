@@ -58,7 +58,7 @@ func parseReturn(es exprs) exprs {
 func (p *parser) errorf(format string, a ...interface{}) error {
 	// TODO: in case of error, read the file again to get from pos the line
 	// and print the line that produced the error with some column marker.
-	return fmt.Errorf("error:%d:"+format, append([]interface{}{p.token.Pos}, a...))
+	return fmt.Errorf("parse error: "+format, a...)
 }
 
 func (p *parser) peek() Token {
@@ -252,7 +252,7 @@ func (p *parser) pAdverbs() (expr, error) {
 
 func (p *parser) pExprStrand() (expr, error) {
 	// p.token.Type is NUMBER or STRING for current and peek
-	st := &astStrand{}
+	st := &astStrand{Pos: p.token.Pos}
 	for {
 		switch p.token.Type {
 		case NUMBER:

@@ -194,10 +194,10 @@ func (c *compiler) push2(op, arg opcode) {
 	lc := c.scope()
 	if lc != nil {
 		lc.Body = append(lc.Body, op, arg)
-		lc.Pos = append(lc.Pos, c.pos, 0)
+		lc.Pos = append(lc.Pos, c.pos, c.pos)
 	} else {
 		c.ctx.prog.Body = append(c.ctx.prog.Body, op, arg)
-		c.ctx.prog.Pos = append(c.ctx.prog.Pos, c.pos, 0)
+		c.ctx.prog.Pos = append(c.ctx.prog.Pos, c.pos, c.pos)
 		c.ctx.prog.last = len(c.ctx.prog.Body) - 2
 	}
 	switch op {
@@ -220,10 +220,10 @@ func (c *compiler) push3(op, arg1, arg2 opcode) {
 	lc := c.scope()
 	if lc != nil {
 		lc.Body = append(lc.Body, op, arg1, arg2)
-		lc.Pos = append(lc.Pos, c.pos, 0, 0)
+		lc.Pos = append(lc.Pos, c.pos, c.pos, c.pos)
 	} else {
 		c.ctx.prog.Body = append(c.ctx.prog.Body, op, arg1, arg2)
-		c.ctx.prog.Pos = append(c.ctx.prog.Pos, c.pos, 0, 0)
+		c.ctx.prog.Pos = append(c.ctx.prog.Pos, c.pos, c.pos, c.pos)
 		c.ctx.prog.last = len(c.ctx.prog.Body) - 2
 	}
 	switch op {
@@ -252,7 +252,7 @@ func (c *compiler) apply() {
 func (c *compiler) errorf(format string, a ...interface{}) error {
 	// TODO: in case of error, read the file again to get from pos the line
 	// and print the line that produced the error with some column marker.
-	return fmt.Errorf("error:%d:"+format, append([]interface{}{c.pos}, a...))
+	return fmt.Errorf("compile error: "+format, a...)
 }
 
 func (c *compiler) scope() *LambdaCode {
@@ -297,6 +297,7 @@ func (c *compiler) doExpr(e expr) error {
 			return err
 		}
 	case *astReturn:
+		c.pos = e.Pos
 		c.push(opReturn)
 	case *astAdverbs:
 		err := c.doAdverbs(e)
@@ -304,6 +305,7 @@ func (c *compiler) doExpr(e expr) error {
 			return err
 		}
 	case *astStrand:
+		c.pos = e.Pos
 		err := c.doStrand(e)
 		if err != nil {
 			return err
