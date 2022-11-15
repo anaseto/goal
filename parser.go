@@ -146,7 +146,7 @@ func (p *parser) expr() (expr, error) {
 func (p *parser) pExprBlock() (expr, error) {
 	var bt astBlockType
 	p.depth = append(p.depth, p.token)
-	b := &astBlock{StartPos: p.token.Pos}
+	b := &astBlock{StartPos: p.token.Pos - 1}
 	switch p.token.Type {
 	case LEFTBRACE:
 		bt = astLAMBDA

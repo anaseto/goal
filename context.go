@@ -167,7 +167,7 @@ func (ctx *Context) compileExec() (bool, error) {
 		ctx.ipNext = len(ctx.prog.Body)
 		ctx.stack = ctx.stack[0:]
 		ctx.push(nil)
-		ctx.updateErrPos(ip)
+		ctx.updateErrPos(ip, -1)
 		return false, ctx.getError(err)
 	}
 	ctx.ipNext += ip
@@ -182,13 +182,13 @@ func (ctx *Context) getError(err error) error {
 	e := &Error{
 		Msg:       err.Error(),
 		Positions: ctx.errPos,
-		Sources:   ctx.sources,
+		ctx:       ctx,
 	}
 	ctx.errPos = nil
 	return e
 }
 
-func (ctx *Context) updateErrPos(ip int) {
+func (ctx *Context) updateErrPos(ip int, id Lambda) {
 	if len(ctx.prog.Body) == 0 {
 		// should not happen during execution
 		ctx.errPos = append(ctx.errPos, Position{Filename: ctx.fname})
@@ -198,7 +198,11 @@ func (ctx *Context) updateErrPos(ip int) {
 		ip = len(ctx.prog.Body) - 1
 	}
 	pos := ctx.prog.Pos[ip]
-	ctx.errPos = append(ctx.errPos, Position{Filename: ctx.fname, Pos: pos})
+	if id < 0 {
+		ctx.errPos = append(ctx.errPos, Position{Filename: ctx.fname, Pos: pos})
+	} else {
+		ctx.errPos = append(ctx.errPos, Position{Filename: ctx.fname, Pos: pos, Lambda: id})
+	}
 }
 
 // Show prints internal information about the context.

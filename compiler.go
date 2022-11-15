@@ -8,9 +8,10 @@ import (
 
 // Program represents a compiled program.
 type Program struct {
-	Body    []opcode
-	Pos     []int
-	Lambdas []*LambdaCode
+	Body          []opcode
+	Pos           []int
+	Lambdas       []*LambdaCode
+	LambdaStrings []string
 
 	last int // index of last non-argument opcode
 }
@@ -637,7 +638,7 @@ func (c *compiler) doParenExpr(pe *astParenExpr) error {
 func (c *compiler) doBlock(b *astBlock) error {
 	switch b.Type {
 	case astLAMBDA:
-		return c.doLambda(b.Body, b.Args)
+		return c.doLambda(b)
 	case astARGS:
 		return c.doArgs(b.Body)
 	case astSEQ:
@@ -649,7 +650,9 @@ func (c *compiler) doBlock(b *astBlock) error {
 	}
 }
 
-func (c *compiler) doLambda(body []exprs, args []string) error {
+func (c *compiler) doLambda(b *astBlock) error {
+	body := b.Body
+	args := b.Args
 	argc := c.argc
 	slen := c.slen
 	c.slen = 0
@@ -678,6 +681,8 @@ func (c *compiler) doLambda(body []exprs, args []string) error {
 	c.scopeStack = c.scopeStack[:len(c.scopeStack)-1]
 	id := len(c.ctx.prog.Lambdas)
 	c.ctx.prog.Lambdas = append(c.ctx.prog.Lambdas, lc)
+	s := c.ctx.sources[c.ctx.fname][b.StartPos:b.EndPos]
+	c.ctx.prog.LambdaStrings = append(c.ctx.prog.LambdaStrings, s)
 	c.ctx.resolveLambda(lc)
 	c.argc = argc
 	c.slen = slen

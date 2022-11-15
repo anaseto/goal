@@ -9,13 +9,15 @@ import (
 type Position struct {
 	Filename string // file name (as obtained from SetSource)
 	Pos      int    // byte offset
+	Lambda   Lambda
 }
 
 // Error represents an error returned by any Context method.
 type Error struct {
-	Msg       string            // error text content
-	Positions []Position        // error location stack
-	Sources   map[string]string // fname: content (shared with *Context)
+	Msg       string     // error text content
+	Positions []Position // error location stack
+
+	ctx *Context // context
 }
 
 // Error returns the default string representation. In practice, this is only
@@ -24,17 +26,19 @@ func (e *Error) Error() string {
 	if len(e.Positions) == 0 {
 		return e.Msg
 	}
+	sources := e.ctx.sources
 	sb := &strings.Builder{}
-	last := e.Positions[0]
-	s, lnum, offset := getPosLine(e.Sources[last.Filename], last.Pos)
+	last := e.Positions[len(e.Positions)-1]
+	s, lnum, offset := getPosLine(sources[last.Filename], last.Pos)
 	if last.Filename != "" {
 		fmt.Fprintf(sb, "%s:%d: %s\n", last.Filename, lnum, e.Msg)
 	} else {
 		fmt.Fprintf(sb, "%s\n", e.Msg)
 	}
 	writeLine(sb, s, offset)
-	for _, pos := range e.Positions[1:] {
-		s, lnum, offset := getPosLine(e.Sources[pos.Filename], pos.Pos)
+	for i := len(e.Positions) - 2; i >= 0; i-- {
+		pos := e.Positions[i]
+		s, lnum, offset := getPosLine(e.ctx.prog.LambdaStrings[int(pos.Lambda)], pos.Pos)
 		if pos.Filename != "" {
 			fmt.Fprintf(sb, "(called from) %s:%d\n", pos.Filename, lnum)
 		} else {
