@@ -6,7 +6,8 @@ type Matcher interface {
 	Matches(x V) bool
 }
 
-func match(x, y V) bool {
+// Match returns true if the two values match like in x~y.
+func Match(x, y V) bool {
 	switch x := x.(type) {
 	case F:
 		switch y := y.(type) {
@@ -83,7 +84,7 @@ func match(x, y V) bool {
 			return true
 		}
 		for i := 0; i < l; i++ {
-			if !match(x.At(i), y.At(i)) {
+			if !Match(x.At(i), y.At(i)) {
 				return false
 			}
 		}
@@ -218,7 +219,7 @@ func classify(x V) V {
 	loop:
 		for i, v := range x {
 			for j := range x[:i] {
-				if match(v, x[j]) {
+				if Match(v, x[j]) {
 					r[i] = r[j]
 					continue loop
 				}
@@ -296,7 +297,7 @@ func uniq(x V) V {
 	loop:
 		for i, v := range x {
 			for j := range x[:i] {
-				if match(v, x[j]) {
+				if Match(v, x[j]) {
 					continue loop
 				}
 			}
@@ -372,7 +373,7 @@ func markFirsts(x V) V {
 	loop:
 		for i, v := range x {
 			for j := range x[:i] {
-				if match(v, x[j]) {
+				if Match(v, x[j]) {
 					continue loop
 				}
 			}
@@ -554,7 +555,7 @@ func memberOfAO(x V, y AV) V {
 		r := make(AB, x.Len())
 		for i := 0; i < x.Len(); i++ {
 			for _, v := range y {
-				if match(x.At(i), v) {
+				if Match(x.At(i), v) {
 					r[i] = true
 					break
 				}
@@ -563,7 +564,7 @@ func memberOfAO(x V, y AV) V {
 		return r
 	default:
 		for _, v := range y {
-			if match(x, v) {
+			if Match(x, v) {
 				return B2I(true)
 			}
 		}
@@ -640,7 +641,7 @@ func occurrenceCount(x V) V {
 	loop:
 		for i, v := range x {
 			for j := i - 1; j >= 0; j-- {
-				if match(v, x[j]) {
+				if Match(v, x[j]) {
 					r[i] = r[j] + 1
 					continue loop
 				}

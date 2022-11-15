@@ -182,7 +182,7 @@ func (c *compiler) push(opc opcode) {
 		// v ->
 		c.slen--
 		c.argc--
-	case opAssignLocal, opAssignGlobal:
+	case opAssignLocal, opAssignGlobal, opReturn:
 	default:
 		// -> v
 		c.slen++
@@ -296,6 +296,8 @@ func (c *compiler) doExpr(e expr) error {
 		if err != nil {
 			return err
 		}
+	case *astReturn:
+		c.push(opReturn)
 	case *astAdverbs:
 		err := c.doAdverbs(e)
 		if err != nil {

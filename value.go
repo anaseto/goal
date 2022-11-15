@@ -351,22 +351,22 @@ func (v Variadic) Matches(x V) bool {
 
 func (r DerivedVerb) Matches(x V) bool {
 	xr, ok := x.(DerivedVerb)
-	return ok && r.Fun == xr.Fun && match(r.Arg, xr.Arg)
+	return ok && r.Fun == xr.Fun && Match(r.Arg, xr.Arg)
 }
 
 func (p Projection) Matches(x V) bool {
 	xp, ok := x.(Projection)
-	return ok && match(p.Fun, xp.Fun) && match(p.Args, xp.Args)
+	return ok && Match(p.Fun, xp.Fun) && Match(p.Args, xp.Args)
 }
 
 func (p ProjectionOne) Matches(x V) bool {
 	xp, ok := x.(ProjectionOne)
-	return ok && match(p.Fun, xp.Fun) && match(p.Arg, xp.Arg)
+	return ok && Match(p.Fun, xp.Fun) && Match(p.Arg, xp.Arg)
 }
 
 func (q Composition) Matches(x V) bool {
 	xq, ok := x.(Composition)
-	return ok && match(q.Left, xq.Left) && match(q.Right, xq.Right)
+	return ok && Match(q.Left, xq.Left) && Match(q.Right, xq.Right)
 }
 
 func (l Lambda) Matches(x V) bool {

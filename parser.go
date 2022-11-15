@@ -32,7 +32,7 @@ func (p *parser) Next() (exprs, error) {
 	for {
 		e, err := p.expr()
 		if err != nil {
-			pRev([]expr(es))
+			pExprsRev(es)
 			switch err.(type) {
 			case parseSEP:
 				return es, nil
@@ -43,6 +43,16 @@ func (p *parser) Next() (exprs, error) {
 		}
 		es = append(es, e)
 	}
+}
+
+func parseReturn(es exprs) exprs {
+	if len(es) == 0 {
+		return es
+	}
+	if e, ok := es[0].(*astToken); ok && e.Type == astVERB && e.Rune == ':' {
+		es[0] = &astReturn{Pos: e.Pos}
+	}
+	return es
 }
 
 func (p *parser) errorf(format string, a ...interface{}) error {
@@ -174,7 +184,7 @@ func (p *parser) pExprBlock() (expr, error) {
 		}
 		switch err := err.(type) {
 		case parseCLOSE:
-			pRev(b.Body[len(b.Body)-1])
+			pExprsRev(b.Body[len(b.Body)-1])
 			if b.Type == astLIST && len(b.Body) == 1 &&
 				len(b.Body[0]) > 0 {
 				// not a list, but a parenthesized
@@ -188,11 +198,11 @@ func (p *parser) pExprBlock() (expr, error) {
 			b.EndPos = err.Pos
 			return b, nil
 		case parseEOF:
-			pRev(b.Body[len(b.Body)-1])
+			pExprsRev(b.Body[len(b.Body)-1])
 			opTok := p.depth[len(p.depth)-1]
 			return b, p.errorf("unexpected EOF without closing previous %s at %d", opTok, opTok.Pos)
 		case parseSEP:
-			pRev(b.Body[len(b.Body)-1])
+			pExprsRev(b.Body[len(b.Body)-1])
 			b.Body = append(b.Body, exprs{})
 		default:
 			return b, err
@@ -260,7 +270,8 @@ func (p *parser) pExprStrand() (expr, error) {
 	}
 }
 
-func pRev(es []expr) {
+func pExprsRev(es exprs) {
+	es = parseReturn(es)
 	for i := 0; i < len(es)/2; i++ {
 		es[i], es[len(es)-i-1] = es[len(es)-i-1], es[i]
 	}

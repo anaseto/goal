@@ -93,6 +93,8 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			}
 		case opJump:
 			ip += int(ops[ip])
+		case opReturn:
+			return len(ops), nil
 		}
 		//fmt.Printf("stack: %v\n", ctx.stack)
 	}

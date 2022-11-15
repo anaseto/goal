@@ -27,13 +27,14 @@ const (
 	opDrop
 	opJumpFalse
 	opJump
+	opReturn
 
 	opArg = -1 // argument to be computed later
 )
 
 func (opc opcode) argc() int {
 	switch opc {
-	case opNop, opNil, opApply, opApply2, opDrop:
+	case opNop, opNil, opApply, opApply2, opDrop, opReturn:
 		return 0
 	case opApplyNVariadic:
 		return 2
@@ -83,6 +84,8 @@ func (ctx *Context) opcodesString(ops []opcode, lc *LambdaCode) string {
 			fmt.Fprintf(sb, "%d\t%s\t%d\n", i, op, ops[i+1])
 		case opJumpFalse:
 			fmt.Fprintf(sb, "%d\t%s\t%d\n", i, op, ops[i+1])
+		case opReturn:
+			fmt.Fprintf(sb, "%d\t%s\n", i, op)
 		}
 		i += op.argc()
 	}

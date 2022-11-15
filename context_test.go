@@ -118,6 +118,7 @@ var matchTests = [...]matchTest{
 	{`a:(!5;!5);a[0;]`, `!5`},
 	{`a:(1 "a";2 "b");a[0;]`, `1 "a"`},
 	{`a:(1 "a";2 "b");a[;1]`, `"a" "b"`},
+	{`[1;:2;3]`, `2`},
 }
 
 func TestRunString(t *testing.T) {
@@ -130,7 +131,7 @@ func TestRunString(t *testing.T) {
 			vLeft, errLeft := ctxLeft.RunString(mt.Left)
 			ctxRight := NewContext()
 			vRight, errRight := ctxRight.RunString(mt.Right)
-			if !match(vLeft, vRight) {
+			if !Match(vLeft, vRight) {
 				t.Log(ctxLeft.ProgramString())
 				t.Log(matchString)
 				t.Logf("results: %v vs %v", vLeft, vRight)

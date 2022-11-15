@@ -40,6 +40,10 @@ const (
 	astADVERB
 )
 
+type astReturn struct {
+	Pos int
+}
+
 type astStrand struct {
 	Lits []astToken // stranding of literals, like 1 23 456
 }
@@ -89,6 +93,7 @@ const (
 )
 
 func (t *astToken) node()      {}
+func (t *astReturn) node()     {}
 func (st *astStrand) node()    {}
 func (ads *astAdverbs) node()  {}
 func (pe *astParenExpr) node() {}

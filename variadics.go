@@ -202,7 +202,7 @@ func VMatch(ctx *Context, args []V) V {
 	case 1:
 		return not(args[0])
 	case 2:
-		return B2I(match(args[1], args[0]))
+		return B2I(Match(args[1], args[0]))
 	default:
 		return errs("too many arguments")
 	}

@@ -58,7 +58,21 @@ func main() {
 func runStdin(ctx *goal.Context) {
 	help := ctx.RegisterVariadic("help", goal.VariadicFun{
 		Func: func(ctx *goal.Context, args []goal.V) goal.V {
-			fmt.Println(strings.TrimSpace(helpTopics))
+			if len(args) >= 1 {
+				arg := args[0]
+				switch {
+				case goal.Match(arg, goal.S("+")):
+					fmt.Println(strings.TrimSpace(helpVERBS))
+				case goal.Match(arg, goal.S("'")):
+					fmt.Println(strings.TrimSpace(helpADVERBS))
+				case goal.Match(arg, goal.S("io")):
+					fmt.Println(strings.TrimSpace(helpIO))
+				case goal.Match(arg, goal.S("syn")):
+					fmt.Println(strings.TrimSpace(helpSyntax))
+				default:
+					fmt.Println(strings.TrimSpace(helpTopics))
+				}
+			}
 			return nil
 		}})
 	ctx.AssignGlobal("help", help)
@@ -156,6 +170,14 @@ func registerVariadics(ctx *goal.Context) {
 }
 
 const helpTopics = `
+Type help TOPIC or h TOPIC where TOPIC is one of:
+
+"+"	verbs (like +*-%,)
+"'"	adverbs ('/\)
+"io"	io functions (slurp, say)
+"syn"   syntax
+`
+const helpVERBS = `
 VERBS
 :x  return	:3 -> return 3 (TODO)
 x:y right	2:3 -> 3	name:3 -> assign 3 to name
@@ -202,7 +224,8 @@ x?y find	TODO
 x@y apply	1 2 3@2 -> 3	1 2 3[2] -> 3
 .   eval	TODO
 x.y applyN	{x+y}.2 3 -> 5    {x+y}[2;3] -> 5
-
+`
+const helpADVERBS = `
 ADVERBS
 f'x	each	#'(4 5;6 7 8) -> 2 3	
 x F'y   each	2 3#'1 2 -> (1 1;2 2 2)
@@ -216,8 +239,21 @@ f f/x   while	{x<100}{x*2}/4 -> 128
 f f/x   while	{x<100}{x*2}\4 -> 4 8 16 32 64 128
 s/x	join	","/"a" "b" "c" -> "a,b,c"
 s\x	split	","\"a,b,c" -> "a" "b" "c"
-
+`
+const helpIO = `
 IO
-slurp[s]	read file named s
-say[x;...]	print value(s) with newline
+slurp[s]	read file named s	lines:"\n"\slurp["/path/to/file"]
+say[x;...]	print value(s) with newline	say 2+3
+`
+
+const helpSyntax = `
+literals	1	1.5	"text"
+arrays		1 2 -3 4	1 "a" -2 "b"	(1 2;"a";(3;"b"))
+variables	a:2 (def)	a+3 (use)
+expressions	2*3+4 -> 14	1+|1 2 3 -> 4 3 2	+/1 2 3 -> 6
+index		1 2 3[1] -> 2
+lambdas		{x+y}[2;3] -> 5		{[a,b,c]a+b+c}[1;2;3] -> 6
+cond		?[1;2;3] -> 2	?[0;2;3] -> 3	?[0;2;"";3;4] -> 4
+sequence	[a:2;b:a+3;a] -> 2
+return		[1;:2;3] -> 2 (a : at start of expression)
 `
