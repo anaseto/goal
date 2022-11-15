@@ -252,7 +252,7 @@ arrays		1 2 -3 4	1 "a" -2 "b"	(1 2;"a";(3;"b"))
 variables	a:2 (def)	a+3 (use)
 expressions	2*3+4 -> 14	1+|1 2 3 -> 4 3 2	+/1 2 3 -> 6
 index		1 2 3[1] -> 2
-lambdas		{x+y}[2;3] -> 5		{[a,b,c]a+b+c}[1;2;3] -> 6
+lambdas		{x+y}[2;3] -> 5		{[a;b;c]a+b+c}[1;2;3] -> 6
 cond		?[1;2;3] -> 2	?[0;2;3] -> 3	?[0;2;"";3;4] -> 4
 sequence	[a:2;b:a+3;a+10] -> 12 (bracket block [] at start of expression)
 return		[1;:2;3] -> 2 (a : at start of expression)
