@@ -61,13 +61,14 @@ func (ctx *Context) applyN(v V, n int) V {
 		ctx.push(res)
 		return ctx.applyN(v.Left, 1)
 	case Array:
-		args := ctx.peekN(n)
 		switch n {
 		case 1:
-			return ctx.applyArray(v, args[0])
+			return canonical(ctx.applyArray(v, ctx.pop()))
 		default:
+			args := ctx.peekN(n)
+			res := ctx.applyArrayArgs(v, args)
 			ctx.dropN(n)
-			return errf("NYI: deep index %d", n)
+			return canonical(res)
 		}
 	default:
 		return errf("type %s cannot be applied", v.Type())
@@ -76,7 +77,6 @@ func (ctx *Context) applyN(v V, n int) V {
 
 func (ctx *Context) applyArray(v Array, xv V) V {
 	if xv == nil {
-		ctx.drop()
 		return v
 	}
 	var res V
@@ -109,8 +109,46 @@ func (ctx *Context) applyArray(v Array, xv V) V {
 		}
 		res = v.Select(indices.(AI))
 	}
-	ctx.drop()
 	return res
+}
+
+func (ctx *Context) applyArrayArgs(v Array, args []V) V {
+	if len(args) == 0 {
+		return v
+	}
+	arg := args[len(args)-1]
+	res := ctx.applyArray(v, arg)
+	if _, ok := res.(E); ok {
+		return res
+	}
+	args = args[:len(args)-1]
+	if len(args) == 0 {
+		return res
+	}
+	switch res := res.(type) {
+	case AV:
+		for i := range res {
+			switch z := res[i].(type) {
+			case Array:
+				res[i] = ctx.applyArrayArgs(z, args)
+				if _, ok := res[i].(E); ok {
+					return res
+				}
+			}
+		}
+		return res
+	case Array:
+		if len(args) > 1 {
+			return errs("x[y] : out of depth index")
+		}
+		vres := ctx.applyArray(res, args[len(args)-1])
+		if _, ok := vres.(E); ok {
+			return vres
+		}
+		return vres
+	default:
+		return errs("x[y] : out of depth index")
+	}
 }
 
 func (ctx *Context) applyVariadic(v Variadic) V {
