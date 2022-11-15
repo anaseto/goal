@@ -80,7 +80,7 @@ func where(x V) V {
 	case I:
 		switch {
 		case x < 0:
-			return errs("&x : x negative")
+			return errf("&x : x negative (%d)", x)
 		case x == 0:
 			return AI{}
 		default:
@@ -89,12 +89,12 @@ func where(x V) V {
 		}
 	case F:
 		if !isI(x) {
-			return errs("&x : x non-integer")
+			return errf("&x : x non-integer (%g)", x)
 		}
 		n := I(x)
 		switch {
 		case n < 0:
-			return errs("&x : x negative")
+			return errf("&x : x negative (%d)", n)
 		case n == 0:
 			return AI{}
 		default:
@@ -117,7 +117,7 @@ func where(x V) V {
 		n := 0
 		for _, v := range x {
 			if v < 0 {
-				return errs("&x : x contains negative integer")
+				return errf("&x : x contains negative integer (%d)", x)
 			}
 			n += v
 		}
@@ -132,10 +132,10 @@ func where(x V) V {
 		n := 0
 		for _, v := range x {
 			if !isI(F(v)) {
-				return errs("&x : x contains non-integer")
+				return errf("&x : x contains non-integer (%g)", v)
 			}
 			if v < 0 {
-				return errs("&x : x contains negative")
+				return errf("&x : x contains negative (%d)", int(v))
 			}
 			n += int(v)
 		}
@@ -154,15 +154,15 @@ func where(x V) V {
 				switch v := v.(type) {
 				case F:
 					if !isI(v) {
-						return errs("not an integer")
+						return errf("&x : not an integer (%g)", v)
 					}
 					if v < 0 {
-						return errs("negative integer")
+						return errf("&x : negative integer (%d)", int(v))
 					}
 					n += int(v)
 				case I:
 					if v < 0 {
-						return errs("negative integer")
+						return errf("&x : negative integer (%d)", v)
 					}
 					n += int(v)
 				}
@@ -182,10 +182,10 @@ func where(x V) V {
 			}
 			return r
 		default:
-			return errs("non-integer")
+			return errs("&x : x non-integer")
 		}
 	default:
-		return errs("non-integer")
+		return errs("&x : x non-integer")
 	}
 }
 
@@ -309,7 +309,7 @@ func repeatAB(x AB, y V) V {
 		}
 		return r
 	default:
-		return errs("not an array")
+		return errs("{x}#y : y not an array")
 	}
 }
 
@@ -317,7 +317,7 @@ func repeatAI(x AI, y V) V {
 	n := 0
 	for _, v := range x {
 		if v < 0 {
-			return errs("negative integer")
+			return errf("{x}#y : x contains negative integer (%d)", v)
 		}
 		n += v
 	}
@@ -363,7 +363,7 @@ func repeatAI(x AI, y V) V {
 		}
 		return r
 	default:
-		return errs("not an array")
+		return errs("{x}#y : y not an array")
 	}
 }
 
@@ -371,10 +371,10 @@ func repeatAF(x AF, y V) V {
 	n := 0
 	for _, v := range x {
 		if !isI(F(v)) {
-			return errs("not an integer")
+			return errf("{x}#y : x contains non-integer (%g)", v)
 		}
 		if v < 0 {
-			return errs("negative integer")
+			return errf("{x}#y : x contains negative integer (%d)", int(v))
 		}
 		n += int(v)
 	}
@@ -420,7 +420,7 @@ func repeatAF(x AF, y V) V {
 		}
 		return r
 	default:
-		return errs("not an array")
+		return errs("{x}#y : y not an array")
 	}
 }
 
@@ -432,15 +432,15 @@ func repeatAO(x AV, y V) V {
 			switch v := v.(type) {
 			case F:
 				if !isI(v) {
-					return errsw("non-integer")
+					return errf("{x}#y : x non-integer (%g)", v)
 				}
 				if v < 0 {
-					return errsw("negative integer")
+					return errf("{x}#y : x negative integer (%d)", int(v))
 				}
 				n += int(v)
 			case I:
 				if v < 0 {
-					return errsw("negative integer")
+					return errf("{x}#y : negative integer (%d)", v)
 				}
 				n += int(v)
 			}
@@ -492,9 +492,9 @@ func repeatAO(x AV, y V) V {
 			}
 			return r
 		default:
-			return errs("not an array")
+			return errs("{x}#y : y not an array")
 		}
 	default:
-		return errsw("non-integer")
+		return errs("{x}#y : x non-integer")
 	}
 }

@@ -242,11 +242,11 @@ func (ctx *Context) applyProjection(v Projection, n int) V {
 
 func (ctx *Context) applyLambda(id Lambda, n int) V {
 	if ctx.callDepth > maxCallDepth {
-		return errs("exceeded maximum call depth")
+		return errs("lambda: exceeded maximum call depth")
 	}
 	lc := ctx.prog.Lambdas[int(id)]
 	if lc.Rank < n {
-		return errf("too many arguments: got %d, expected %d", n, lc.Rank)
+		return errf("lambda: too many arguments: got %d, expected %d", n, lc.Rank)
 	} else if lc.Rank > n {
 		if lc.Rank == 2 && n == 1 {
 			return ProjectionOne{Fun: id, Arg: ctx.pop()}
@@ -264,12 +264,13 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 	ctx.callDepth++
 	olambda := ctx.lambda
 	ctx.lambda = int(id)
-	_, err := ctx.execute(lc.Body)
+	ip, err := ctx.execute(lc.Body)
 	ctx.callDepth--
 	ctx.lambda = olambda
 
 	if err != nil {
-		return errf("lambda %d (stack: %v): %v", id, ctx.stack, err)
+		ctx.updateErrPos(ip)
+		return E(err.Error())
 	}
 	var res V
 	switch len(ctx.stack) {
@@ -278,6 +279,8 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 		res = ctx.stack[len(ctx.stack)-1]
 		ctx.drop()
 	default:
+		ctx.updateErrPos(ip)
+		// should not happen
 		return errf("lambda %d: bad len %d vs old %d (depth: %d): %v", id, len(ctx.stack), olen, ctx.callDepth, ctx.stack)
 	}
 	if nVars > 0 {

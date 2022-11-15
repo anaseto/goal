@@ -1,7 +1,6 @@
 package goal
 
 import (
-	"bufio"
 	"bytes"
 	"io"
 )
@@ -66,7 +65,7 @@ const (
 
 // Scanner represents the state of the scanner.
 type Scanner struct {
-	bReader *bufio.Reader // buffered reader
+	reader  io.RuneReader // buffered reader
 	buf     *bytes.Buffer // buffer
 	err     error         // scanning error (if any)
 	peeked  bool          // peeked next
@@ -82,8 +81,8 @@ type stateFn func(*Scanner) stateFn
 
 // Init initializes the scanner with a given reader. It can be reused again
 // with a new reader, but position information will be reset.
-func (s *Scanner) Init(r io.Reader) {
-	if s.bReader != nil {
+func (s *Scanner) Init(r io.RuneReader) {
+	if s.reader != nil {
 		buf := s.buf
 		*s = Scanner{}
 		s.buf = buf
@@ -91,7 +90,7 @@ func (s *Scanner) Init(r io.Reader) {
 	} else {
 		s.buf = &bytes.Buffer{}
 	}
-	s.bReader = bufio.NewReader(r)
+	s.reader = r
 	s.exprEnd = false
 	s.start = true
 	s.token = Token{Type: EOF, Pos: s.pos}
@@ -114,7 +113,7 @@ func (s *Scanner) peek() rune {
 	if s.peeked {
 		return s.pr
 	}
-	r, size, err := s.bReader.ReadRune()
+	r, size, err := s.reader.ReadRune()
 	if err != nil {
 		if err != io.EOF {
 			s.err = err
@@ -134,7 +133,7 @@ func (s *Scanner) next() rune {
 		s.pos += s.psize
 		return s.pr
 	}
-	r, sz, err := s.bReader.ReadRune()
+	r, sz, err := s.reader.ReadRune()
 	s.pos += sz
 	if err != nil {
 		if err != io.EOF {

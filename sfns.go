@@ -137,20 +137,6 @@ func first(x V) V {
 	}
 }
 
-// Tail returns 1_x. XXX unused?
-func tail(x V) V {
-	x = toArray(x)
-	switch x := x.(type) {
-	case Array:
-		if x.Len() == 0 {
-			return errs("zero length")
-		}
-		return x.Slice(1, x.Len())
-	default:
-		return errType(x)
-	}
-}
-
 // drop returns i_x.
 func drop(x, y V) V {
 	i := 0
@@ -410,7 +396,7 @@ func shiftBefore(x, y V) V {
 			return errType(y)
 		}
 	default:
-		return errs("not an array")
+		return errs("x»y: y not an array")
 	}
 }
 
@@ -438,7 +424,7 @@ func nudge(x V) V {
 		copy(r[1:], x[0:len(x)-1])
 		return r
 	default:
-		return errs("not an array")
+		return errs("»x : not an array")
 	}
 }
 
@@ -559,7 +545,7 @@ func shiftAfter(x, y V) V {
 			return errType(y)
 		}
 	default:
-		return errs("not an array")
+		return errs("x«y: y not an array")
 	}
 }
 
@@ -590,7 +576,7 @@ func nudgeBack(x V) V {
 		copy(r[0:len(x)-1], x[1:])
 		return r
 	default:
-		return errs("not an array")
+		return errs("«x : x not an array")
 	}
 }
 
@@ -1295,16 +1281,16 @@ func windows(x, y V) V {
 		i = int(x)
 	case F:
 		if !isI(x) {
-			return errsw("not an integer")
+			return errs("x↕y : x not an integer")
 		}
 		i = int(x)
 	default:
-		return errsw("not an integer")
+		return errs("x↕y : x not an integer")
 	}
 	switch x := y.(type) {
 	case Array:
 		if i <= 0 || i >= x.Len()+1 {
-			return errsw("out of range [0, length]")
+			return errs("x↕y : x out of range [0, length]")
 		}
 		r := make(AV, 1+x.Len()-i)
 		for j := range r {
@@ -1312,7 +1298,7 @@ func windows(x, y V) V {
 		}
 		return r
 	default:
-		return errs("not an array")
+		return errs("x↕y : y not an array")
 	}
 }
 

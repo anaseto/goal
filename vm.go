@@ -102,20 +102,16 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 }
 
 func (ctx *Context) popApplyN(n int) error {
-	//olen := len(ctx.stack)
 	v := ctx.pop()
 	res := ctx.applyN(v, n)
 	if err, ok := res.(error); ok {
 		return err
 	}
 	ctx.push(res)
-	//if len(ctx.stack) != olen-n {
-	//return fmt.Errorf("call (%v with %d args): bad stack length: %d vs %d (stack: %v)", v, n, len(ctx.stack), olen-n, ctx.stack)
-	//}
 	return nil
 }
 
-const maxCallDepth = 10000
+const maxCallDepth = 100000
 
 func (ctx *Context) push(v V) {
 	ctx.stack = append(ctx.stack, v)

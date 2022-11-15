@@ -3,7 +3,6 @@ package goal
 import (
 	"errors"
 	"fmt"
-	"io"
 	"strings"
 )
 
@@ -33,6 +32,10 @@ type Context struct {
 	scanner  *Scanner
 	compiler *compiler
 	fname    string
+	sources  map[string]string
+
+	// error positions stack
+	errPos []Position
 }
 
 // NewContext returns a new context for compiling and interpreting code.
@@ -44,6 +47,7 @@ func NewContext() *Context {
 	ctx.stack = make([]V, 0, 64)
 	ctx.scanner = &Scanner{}
 	ctx.compiler = newCompiler(ctx)
+	ctx.sources = map[string]string{}
 	ctx.initVariadics()
 	return ctx
 }
@@ -62,17 +66,18 @@ func (ctx *Context) AssignGlobal(name string, v V) {
 	ctx.globals[id] = v
 }
 
-// SetSource sets the reader source for running code. The name is used for
-// error reporting.
-func (ctx *Context) SetSource(name string, r io.Reader) {
+// SetSource sets the reader string source for running code. The name is used
+// for error reporting.
+func (ctx *Context) SetSource(name string, s string) {
 	ctx.fname = name
-	ctx.scanner.Init(r)
+	ctx.sources[name] = s
+	ctx.scanner.Init(strings.NewReader(s))
 }
 
 // Run compiles the code from current source, then executes it.
 func (ctx *Context) Run() (V, error) {
-	if ctx.scanner.bReader == nil {
-		return nil, errors.New("no source specified")
+	if ctx.scanner.reader == nil {
+		panic("Run: no source specified with SetSource")
 	}
 	blen, llen, last := len(ctx.prog.Body), len(ctx.prog.Lambdas), ctx.prog.last
 	err := ctx.compiler.ParseCompile()
@@ -101,8 +106,8 @@ func (ctx *Context) changed(blen, llen, last int) bool {
 // RunExpr compiles a whole expression from current source, then executes it.
 // It returns ErrEOF if the end of input was reached without issues.
 func (ctx *Context) RunExpr() (V, error) {
-	if ctx.scanner.bReader == nil {
-		return nil, errors.New("no source specified")
+	if ctx.scanner.reader == nil {
+		panic("RunExpr: no source specified with SetSource")
 	}
 	var eof bool
 	blen, llen, last := len(ctx.prog.Body), len(ctx.prog.Lambdas), ctx.prog.last
@@ -113,7 +118,9 @@ func (ctx *Context) RunExpr() (V, error) {
 			ctx.prog.Body = ctx.prog.Body[:blen]
 			ctx.prog.Lambdas = ctx.prog.Lambdas[:llen]
 			ctx.prog.last = last
-			return nil, fmt.Errorf("%v", err)
+			ctx.errPos = append(ctx.errPos,
+				Position{Filename: ctx.fname, Pos: ctx.compiler.pos})
+			return nil, ctx.getError(err)
 		}
 	}
 	if !ctx.changed(blen, llen, last) {
@@ -134,7 +141,8 @@ func (ctx *Context) RunExpr() (V, error) {
 
 // RunString calls Run with the given string as source.
 func (ctx *Context) RunString(s string) (V, error) {
-	ctx.SetSource("", strings.NewReader(s))
+	ctx.fname = ""
+	ctx.SetSource("", s)
 	return ctx.Run()
 }
 
@@ -159,14 +167,37 @@ func (ctx *Context) compileExec() (bool, error) {
 		ctx.ipNext = len(ctx.prog.Body)
 		ctx.stack = ctx.stack[0:]
 		ctx.push(nil)
-		return false, fmt.Errorf("%v", err)
+		ctx.updateErrPos(ip)
+		return false, ctx.getError(err)
 	}
 	ctx.ipNext += ip
 	if len(ctx.stack) == 0 {
 		// should not happen
-		return false, errors.New("no result: empty stack")
+		return false, ctx.getError(errors.New("no result: empty stack"))
 	}
 	return ip > 0, nil
+}
+
+func (ctx *Context) getError(err error) error {
+	e := &Error{
+		Msg:       err.Error(),
+		Positions: ctx.errPos,
+	}
+	ctx.errPos = nil
+	return e
+}
+
+func (ctx *Context) updateErrPos(ip int) {
+	if len(ctx.prog.Body) == 0 {
+		// should not happen during execution
+		ctx.errPos = append(ctx.errPos, Position{Filename: ctx.fname})
+		return
+	}
+	if ip >= len(ctx.prog.Body) || ip < 0 {
+		ip = len(ctx.prog.Body) - 1
+	}
+	pos := ctx.prog.Pos[ip]
+	ctx.errPos = append(ctx.errPos, Position{Filename: ctx.fname, Pos: pos})
 }
 
 // Show prints internal information about the context.

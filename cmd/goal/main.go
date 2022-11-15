@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bytes"
+	"bufio"
 	"flag"
 	"fmt"
 	"goal"
@@ -47,7 +47,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "goal: %v", err)
 		os.Exit(1)
 	}
-	ctx.SetSource(fname, bytes.NewReader(bs))
+	ctx.SetSource(fname, string(bs))
 	_, err = ctx.Run()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "goal: %v", err)
@@ -76,10 +76,12 @@ func runStdin(ctx *goal.Context) {
 			return nil
 		}})
 	ctx.AssignGlobal("help", help)
-	ctx.SetSource("-", os.Stdin)
+	ctx.AssignGlobal("h", help)
+	lr := lineReader{r: bufio.NewReader(os.Stdin)}
 	fmt.Printf("goal repl, type help\"\" for basic info.\n")
 	for {
 		fmt.Print("  ")
+		ctx.SetSource("-", lr.readLine())
 		v, err := ctx.RunExpr()
 		if err != nil {
 			_, eof := err.(goal.ErrEOF)
@@ -91,6 +93,26 @@ func runStdin(ctx *goal.Context) {
 			continue
 		}
 		echo(ctx, v)
+	}
+}
+
+type lineReader struct {
+	r *bufio.Reader
+}
+
+func (lr lineReader) readLine() string {
+	sb := strings.Builder{}
+	for {
+		r, _, err := lr.r.ReadRune()
+		if err != nil {
+			return sb.String()
+		}
+		if r != '\r' {
+			sb.WriteRune(r)
+		}
+		if r == '\n' {
+			return sb.String()
+		}
 	}
 }
 
