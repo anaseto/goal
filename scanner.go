@@ -125,7 +125,6 @@ func (s *Scanner) peek() rune {
 
 func (s *Scanner) next() rune {
 	if s.peeked {
-		s.updateInfo(s.pr)
 		s.peeked = false
 		s.npos += s.psize
 		return s.pr
@@ -138,21 +137,13 @@ func (s *Scanner) next() rune {
 		}
 		return eof
 	}
-	s.updateInfo(r)
 	//fmt.Printf("[%c]", r)
 	return r
 }
 
-func (s *Scanner) updateInfo(r rune) {
-	if r == '\n' {
-		s.start = true
-	} else {
-		s.start = false
-	}
-}
-
 func (s *Scanner) emit(t TokenType) stateFn {
 	s.token = Token{Type: t, Pos: s.tpos}
+	s.start = t == NEWLINE
 	switch t {
 	case LEFTBRACE, LEFTBRACKET, LEFTPAREN, NEWLINE, SEMICOLON, EOF:
 		// all of these don't have additional content, so we don't do
@@ -170,12 +161,14 @@ func (s *Scanner) emitError(err string) stateFn {
 }
 
 func (s *Scanner) emitString(t TokenType) stateFn {
+	s.start = false
 	s.token = Token{Type: t, Pos: s.tpos, Text: s.source[s.tpos:s.npos]}
 	s.exprEnd = true
 	return nil
 }
 
 func (s *Scanner) emitOp(t TokenType, r rune) stateFn {
+	s.start = false
 	s.token = Token{Type: t, Pos: s.tpos, Rune: r}
 	s.exprEnd = false
 	return nil
