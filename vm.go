@@ -47,7 +47,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			if err != nil {
 				return ip - 1, err
 			}
-		case opApplyVariadic:
+		case opApplyV:
 			v := Variadic(ops[ip])
 			res := ctx.applyVariadic(v)
 			if err, ok := res.(error); ok && err != nil {
@@ -60,7 +60,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			if err != nil {
 				return ip - 1, err
 			}
-		case opApply2Variadic:
+		case opApply2V:
 			v := Variadic(ops[ip])
 			res := ctx.applyNVariadic(v, 2)
 			if err, ok := res.(error); ok && err != nil {
@@ -74,7 +74,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 				return ip - 1, err
 			}
 			ip++
-		case opApplyNVariadic:
+		case opApplyNV:
 			v := Variadic(ops[ip])
 			ip++
 			res := ctx.applyNVariadic(v, int(ops[ip]))

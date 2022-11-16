@@ -19,11 +19,11 @@ const (
 	opVariadic
 	opLambda
 	opApply
-	opApplyVariadic
+	opApplyV
 	opApply2
-	opApply2Variadic
+	opApply2V
 	opApplyN
-	opApplyNVariadic
+	opApplyNV
 	opDrop
 	opJumpFalse
 	opJump
@@ -36,7 +36,7 @@ func (opc opcode) argc() int {
 	switch opc {
 	case opNop, opNil, opApply, opApply2, opDrop, opReturn:
 		return 0
-	case opApplyNVariadic:
+	case opApplyNV:
 		return 2
 	default:
 		return 1
@@ -53,7 +53,7 @@ func (ctx *Context) opcodesString(ops []opcode, lc *LambdaCode) string {
 		} else {
 			pos = ctx.prog.Pos[i]
 		}
-		fmt.Fprintf(sb, "%3d %3d %s\t\t", i, pos, op)
+		fmt.Fprintf(sb, "%3d %3d %s\t", i, pos, op)
 		switch op {
 		case opConst:
 			fmt.Fprintf(sb, "%d", ops[i+1])
@@ -69,13 +69,13 @@ func (ctx *Context) opcodesString(ops []opcode, lc *LambdaCode) string {
 			fmt.Fprintf(sb, "%s", ctx.variadicsNames[ops[i+1]])
 		case opLambda:
 			fmt.Fprintf(sb, "%d", ops[i+1])
-		case opApplyVariadic:
+		case opApplyV:
 			fmt.Fprintf(sb, "%s", ctx.variadicsNames[ops[i+1]])
-		case opApply2Variadic:
+		case opApply2V:
 			fmt.Fprintf(sb, "%s", ctx.variadicsNames[ops[i+1]])
 		case opApplyN:
 			fmt.Fprintf(sb, "%d", ops[i+1])
-		case opApplyNVariadic:
+		case opApplyNV:
 			fmt.Fprintf(sb, "%s\t%d", ctx.variadicsNames[ops[i+1]], ops[i+2])
 		case opJump:
 			fmt.Fprintf(sb, "%d", ops[i+1])

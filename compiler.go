@@ -209,8 +209,8 @@ func (c *compiler) push2(op, arg opcode) {
 		// v ... v v -> v
 		c.slen -= int(arg)
 		c.argc -= int(arg)
-	case opApplyVariadic, opJump:
-	case opApply2Variadic, opJumpFalse:
+	case opApplyV, opJump:
+	case opApply2V, opJumpFalse:
 		c.slen--
 		c.argc--
 	default:
@@ -231,7 +231,7 @@ func (c *compiler) push3(op, arg1, arg2 opcode) {
 		c.ctx.prog.last = len(c.ctx.prog.Body) - 2
 	}
 	switch op {
-	case opApplyNVariadic:
+	case opApplyNV:
 		// v ... v v -> v
 		c.slen -= int(arg2 - 1)
 		c.argc -= int(arg2 - 1)
@@ -427,11 +427,11 @@ func (c *compiler) pushVariadic(v Variadic) {
 	case 0:
 		c.push2(opVariadic, opcode(v))
 	case 1:
-		c.push2(opApplyVariadic, opcode(v))
+		c.push2(opApplyV, opcode(v))
 	case 2:
-		c.push2(opApply2Variadic, opcode(v))
+		c.push2(opApply2V, opcode(v))
 	default:
-		c.push3(opApplyNVariadic, opcode(v), opcode(c.argc))
+		c.push3(opApplyNV, opcode(v), opcode(c.argc))
 	}
 }
 
