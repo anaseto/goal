@@ -146,7 +146,7 @@ func (p *parser) expr() (expr, error) {
 func (p *parser) pExprBlock() (expr, error) {
 	var bt astBlockType
 	p.depth = append(p.depth, p.token)
-	b := &astBlock{StartPos: p.token.Pos - 1}
+	b := &astBlock{StartPos: p.token.Pos}
 	switch p.token.Type {
 	case LEFTBRACE:
 		bt = astLAMBDA
@@ -192,10 +192,10 @@ func (p *parser) pExprBlock() (expr, error) {
 				return &astParenExpr{
 					Exprs:    b.Body[0],
 					StartPos: b.StartPos,
-					EndPos:   err.Pos,
+					EndPos:   err.Pos + 1,
 				}, nil
 			}
-			b.EndPos = err.Pos
+			b.EndPos = err.Pos + 1
 			return b, nil
 		case parseEOF:
 			pExprsRev(b.Body[len(b.Body)-1])

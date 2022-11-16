@@ -1,8 +1,9 @@
 package goal
 
 import (
-	"bytes"
+	"fmt"
 	"io"
+	"strings"
 )
 
 // Token represents a token information.
@@ -65,35 +66,31 @@ const (
 
 // Scanner represents the state of the scanner.
 type Scanner struct {
-	reader  io.RuneReader // buffered reader
-	buf     *bytes.Buffer // buffer
-	err     error         // scanning error (if any)
-	peeked  bool          // peeked next
-	pos     int           // current position in the input
-	pr      rune          // peeked rune
-	psize   int           // size of last peeked rune
-	start   bool          // at line start
-	exprEnd bool          // at expression start
-	token   Token         // last token
+	reader  *strings.Reader // rune reader
+	err     error           // scanning error (if any)
+	peeked  bool            // peeked next
+	npos    int             // position of next rune in the input
+	tpos    int             // current token start position
+	pr      rune            // peeked rune
+	psize   int             // size of last peeked rune
+	start   bool            // at line start
+	exprEnd bool            // at expression start
+	token   Token           // last token
+	source  string          // source string
 }
 
 type stateFn func(*Scanner) stateFn
 
 // Init initializes the scanner with a given reader. It can be reused again
 // with a new reader, but position information will be reset.
-func (s *Scanner) Init(r io.RuneReader) {
+func (s *Scanner) Init(source string) {
 	if s.reader != nil {
-		buf := s.buf
 		*s = Scanner{}
-		s.buf = buf
-		s.buf.Reset()
-	} else {
-		s.buf = &bytes.Buffer{}
 	}
-	s.reader = r
-	s.exprEnd = false
+	s.source = source
+	s.reader = strings.NewReader(source)
 	s.start = true
-	s.token = Token{Type: EOF, Pos: s.pos}
+	s.token = Token{Type: EOF, Pos: 0}
 }
 
 // Next produces the next token from the input reader.
@@ -130,11 +127,11 @@ func (s *Scanner) next() rune {
 	if s.peeked {
 		s.updateInfo(s.pr)
 		s.peeked = false
-		s.pos += s.psize
+		s.npos += s.psize
 		return s.pr
 	}
 	r, sz, err := s.reader.ReadRune()
-	s.pos += sz
+	s.npos += sz
 	if err != nil {
 		if err != io.EOF {
 			s.err = err
@@ -155,7 +152,7 @@ func (s *Scanner) updateInfo(r rune) {
 }
 
 func (s *Scanner) emit(t TokenType) stateFn {
-	s.token = Token{Type: t, Pos: s.pos}
+	s.token = Token{Type: t, Pos: s.tpos}
 	switch t {
 	case LEFTBRACE, LEFTBRACKET, LEFTPAREN, NEWLINE, SEMICOLON, EOF:
 		// all of these don't have additional content, so we don't do
@@ -167,29 +164,32 @@ func (s *Scanner) emit(t TokenType) stateFn {
 	return nil
 }
 
+func (s *Scanner) emitError(err string) stateFn {
+	s.token = Token{Type: ERROR, Pos: s.tpos, Text: err}
+	return nil
+}
+
 func (s *Scanner) emitString(t TokenType) stateFn {
-	s.token = Token{Type: t, Pos: s.pos, Text: s.buf.String()}
+	s.token = Token{Type: t, Pos: s.tpos, Text: s.source[s.tpos:s.npos]}
 	s.exprEnd = true
-	s.buf.Reset()
 	return nil
 }
 
 func (s *Scanner) emitOp(t TokenType, r rune) stateFn {
-	s.token = Token{Type: t, Pos: s.pos, Rune: r}
+	s.token = Token{Type: t, Pos: s.tpos, Rune: r}
 	s.exprEnd = false
 	return nil
 }
 
 func (s *Scanner) emitEOF() stateFn {
 	if s.err != nil {
-		s.buf.Reset()
-		s.buf.WriteString(s.err.Error())
-		return s.emitString(ERROR)
+		return s.emitError(s.err.Error())
 	}
 	return s.emit(EOF)
 }
 
 func scanAny(s *Scanner) stateFn {
+	s.tpos = s.npos
 	r := s.next()
 	switch r {
 	case eof:
@@ -228,22 +228,17 @@ func scanAny(s *Scanner) stateFn {
 		'=', '~', ',', '^', '#', '_', '$', '?', '@', '.':
 		return s.emitOp(VERB, r)
 	case '"':
-		s.buf.WriteRune(r)
 		return scanString
 	case '`':
-		s.buf.WriteRune('`')
 		return scanSymbolString
 	}
 	switch {
 	case isDigit(r):
-		s.buf.WriteRune(r)
 		return scanNumber
 	case isAlpha(r):
-		s.buf.WriteRune(r)
 		return scanIdent
 	default:
-		s.buf.WriteRune(r)
-		return s.emitString(ERROR)
+		return s.emitError(fmt.Sprintf("unexpected character: %c", r))
 	}
 	return nil
 }
@@ -272,6 +267,7 @@ func scanSpace(s *Scanner) stateFn {
 		case ' ', '\t':
 			s.next()
 		case '-':
+			s.tpos = s.npos
 			s.next()
 			return scanMinus
 		default:
@@ -317,40 +313,30 @@ func scanMultiLineComment(s *Scanner) stateFn {
 
 func scanString(s *Scanner) stateFn {
 	for {
+		// XXX: catch invalid newline here?
 		r := s.next()
 		switch r {
 		case eof:
-			s.buf.WriteString("non terminated string: unexpected EOF")
-			return s.emitString(ERROR)
+			return s.emitError("non terminated string: unexpected EOF")
 		case '\\':
-			s.buf.WriteRune(r)
 			nr := s.peek()
 			if nr == '"' {
-				s.buf.WriteRune(nr)
 				s.next()
 			}
 		case '"':
-			s.buf.WriteRune(r)
 			return s.emitString(STRING)
-		default:
-			s.buf.WriteRune(r)
 		}
 	}
 }
 
 func scanSymbolString(s *Scanner) stateFn {
 	for {
-		r := s.peek()
-		switch {
-		case r == eof:
-			s.buf.WriteString("non terminated string: unexpected EOF")
-			return s.emitString(ERROR)
-		case !isAlpha(r) && (s.buf.Len() == 0) || !isAlphaNum(r):
-			s.buf.WriteRune('`')
+		r := s.next()
+		switch r {
+		case eof:
+			return s.emitError("non terminated string: unexpected EOF")
+		case '`':
 			return s.emitString(STRING)
-		default:
-			s.next()
-			s.buf.WriteRune(r)
 		}
 	}
 }
@@ -362,21 +348,17 @@ func scanNumber(s *Scanner) stateFn {
 		case r == eof:
 			return s.emitString(NUMBER)
 		case r == '.':
-			s.buf.WriteRune(r)
 			s.next()
 		case r == 'e':
-			s.buf.WriteRune(r)
 			s.next()
 			r = s.peek()
 			if r == '+' || r == '-' {
-				s.buf.WriteRune(r)
 				s.next()
 				return scanExponent
 			}
 		case !isAlphaNum(r):
 			return s.emitString(NUMBER)
 		default:
-			s.buf.WriteRune(r)
 			s.next()
 		}
 	}
@@ -391,7 +373,6 @@ func scanExponent(s *Scanner) stateFn {
 		case !isDigit(r):
 			return s.emitString(NUMBER)
 		default:
-			s.buf.WriteRune(r)
 			s.next()
 		}
 	}
@@ -400,7 +381,6 @@ func scanExponent(s *Scanner) stateFn {
 func scanMinus(s *Scanner) stateFn {
 	r := s.peek()
 	if isDigit(r) {
-		s.buf.WriteRune('-')
 		return scanNumber
 	}
 	return s.emitOp(VERB, '-')
@@ -417,11 +397,8 @@ func scanIdent(s *Scanner) stateFn {
 			if !isAlpha(r) {
 				return s.emitString(IDENT)
 			}
-			s.buf.WriteRune('.')
-			s.buf.WriteRune(r)
 			s.next()
 		case isAlphaNum(r):
-			s.buf.WriteRune(r)
 			s.next()
 		default:
 			return s.emitString(IDENT)

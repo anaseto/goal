@@ -3,7 +3,6 @@ package goal
 import (
 	"errors"
 	"fmt"
-	"strings"
 )
 
 // Context holds the state of the interpreter.
@@ -71,7 +70,7 @@ func (ctx *Context) AssignGlobal(name string, v V) {
 func (ctx *Context) SetSource(name string, s string) {
 	ctx.fname = name
 	ctx.sources[name] = s
-	ctx.scanner.Init(strings.NewReader(s))
+	ctx.scanner.Init(s)
 }
 
 // Run compiles the code from current source, then executes it.
