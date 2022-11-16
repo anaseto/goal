@@ -53,46 +53,36 @@ func (ctx *Context) opcodesString(ops []opcode, lc *LambdaCode) string {
 		} else {
 			pos = ctx.prog.Pos[i]
 		}
+		fmt.Fprintf(sb, "%3d %3d %s\t\t", i, pos, op)
 		switch op {
-		case opNop:
-			fmt.Fprintf(sb, "%3d\t%s\n", i, op)
 		case opConst:
-			fmt.Fprintf(sb, "%3d %d\t%s\t\t%d\n", i, pos, op, ops[i+1])
-		case opNil:
-			fmt.Fprintf(sb, "%3d\t%s\n", i, op)
+			fmt.Fprintf(sb, "%d", ops[i+1])
 		case opGlobal:
-			fmt.Fprintf(sb, "%3d\t%s\t%d (%s)\n", i, op, ops[i+1], ctx.gNames[int(ops[i+1])])
+			fmt.Fprintf(sb, "%d (%s)", ops[i+1], ctx.gNames[int(ops[i+1])])
 		case opLocal:
-			fmt.Fprintf(sb, "%3d\t%s\t\t%d (%s)\n", i, op, ops[i+1], lc.Names[int(ops[i+1])])
+			fmt.Fprintf(sb, "%d (%s)", ops[i+1], lc.Names[int(ops[i+1])])
 		case opAssignGlobal:
-			fmt.Fprintf(sb, "%3d\t%s\t%d (%s)\n", i, op, ops[i+1], ctx.gNames[int(ops[i+1])])
+			fmt.Fprintf(sb, "%d (%s)", ops[i+1], ctx.gNames[int(ops[i+1])])
 		case opAssignLocal:
-			fmt.Fprintf(sb, "%3d\t%s\t%d (%s)\n", i, op, ops[i+1], lc.Names[ops[i+1]])
+			fmt.Fprintf(sb, "%d (%s)", ops[i+1], lc.Names[ops[i+1]])
 		case opVariadic:
-			fmt.Fprintf(sb, "%3d\t%s\t%s\n", i, op, ctx.variadicsNames[ops[i+1]])
+			fmt.Fprintf(sb, "%s", ctx.variadicsNames[ops[i+1]])
 		case opLambda:
-			fmt.Fprintf(sb, "%3d\t%s\t%d\n", i, op, ops[i+1])
-		case opApply:
-			fmt.Fprintf(sb, "%3d %d\t%s\n", i, pos, op)
+			fmt.Fprintf(sb, "%d", ops[i+1])
 		case opApplyVariadic:
-			fmt.Fprintf(sb, "%3d\t%s\t%s\n", i, op, ctx.variadicsNames[ops[i+1]])
-		case opApply2:
-			fmt.Fprintf(sb, "%3d\t%s\n", i, op)
+			fmt.Fprintf(sb, "%s", ctx.variadicsNames[ops[i+1]])
 		case opApply2Variadic:
-			fmt.Fprintf(sb, "%3d\t%s\t%s\n", i, op, ctx.variadicsNames[ops[i+1]])
+			fmt.Fprintf(sb, "%s", ctx.variadicsNames[ops[i+1]])
 		case opApplyN:
-			fmt.Fprintf(sb, "%3d\t%s\t%d\n", i, op, ops[i+1])
+			fmt.Fprintf(sb, "%d", ops[i+1])
 		case opApplyNVariadic:
-			fmt.Fprintf(sb, "%3d\t%s\t%s\t%d\n", i, op, ctx.variadicsNames[ops[i+1]], ops[i+2])
-		case opDrop:
-			fmt.Fprintf(sb, "%3d\t%s\n", i, op)
+			fmt.Fprintf(sb, "%s\t%d", ctx.variadicsNames[ops[i+1]], ops[i+2])
 		case opJump:
-			fmt.Fprintf(sb, "%3d\t%s\t%d\n", i, op, ops[i+1])
+			fmt.Fprintf(sb, "%d", ops[i+1])
 		case opJumpFalse:
-			fmt.Fprintf(sb, "%3d\t%s\t%d\n", i, op, ops[i+1])
-		case opReturn:
-			fmt.Fprintf(sb, "%3d\t%s\n", i, op)
+			fmt.Fprintf(sb, "%d", ops[i+1])
 		}
+		fmt.Fprint(sb, "\n")
 		i += op.argc()
 	}
 	return sb.String()
