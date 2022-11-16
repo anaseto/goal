@@ -84,10 +84,6 @@ func (ctx *Context) Run() (V, error) {
 		ctx.prog.Body = ctx.prog.Body[:blen]
 		ctx.prog.Lambdas = ctx.prog.Lambdas[:llen]
 		ctx.prog.last = last
-		if ctx.errPos == nil {
-			ctx.errPos = append(ctx.errPos,
-				Position{Filename: ctx.fname, Pos: ctx.compiler.p.token.Pos})
-		}
 		return nil, ctx.getError(err)
 	}
 	if !ctx.changed(blen, llen, last) {
@@ -121,10 +117,6 @@ func (ctx *Context) RunExpr() (V, error) {
 			ctx.prog.Body = ctx.prog.Body[:blen]
 			ctx.prog.Lambdas = ctx.prog.Lambdas[:llen]
 			ctx.prog.last = last
-			if ctx.errPos == nil {
-				ctx.errPos = append(ctx.errPos,
-					Position{Filename: ctx.fname, Pos: ctx.compiler.p.token.Pos})
-			}
 			return nil, ctx.getError(err)
 		}
 	}
