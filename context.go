@@ -169,10 +169,11 @@ func (ctx *Context) compileExec() (bool, error) {
 	//fmt.Print(ctx.ProgramString())
 	ip, err := ctx.execute(ctx.prog.Body[ctx.ipNext:])
 	if err != nil {
-		ctx.ipNext = len(ctx.prog.Body)
 		ctx.stack = ctx.stack[0:]
 		ctx.push(nil)
-		ctx.updateErrPos(ip, -1, ctx.fname)
+		fmt.Printf("ip: %d\n", ip+ctx.ipNext)
+		ctx.updateErrPos(ip+ctx.ipNext, nil)
+		ctx.ipNext = len(ctx.prog.Body)
 		return false, ctx.getError(err)
 	}
 	ctx.ipNext += ip
@@ -193,20 +194,28 @@ func (ctx *Context) getError(err error) error {
 	return e
 }
 
-func (ctx *Context) updateErrPos(ip int, id Lambda, fname string) {
+func (ctx *Context) updateErrPos(ip int, lc *LambdaCode) {
+	fname := ctx.fname
+	if lc != nil {
+		fname = lc.Filename
+	}
 	if len(ctx.prog.Body) == 0 {
 		// should not happen during execution
 		ctx.errPos = append(ctx.errPos, Position{Filename: fname})
 		return
 	}
-	if ip >= len(ctx.prog.Body) || ip < 0 {
-		ip = len(ctx.prog.Body) - 1
-	}
-	pos := ctx.prog.Pos[ip]
-	if id < 0 {
-		ctx.errPos = append(ctx.errPos, Position{Filename: fname, Pos: pos})
+	if lc != nil {
+		if ip >= len(lc.Body) || ip < 0 {
+			ip = len(lc.Body) - 1
+		}
+		pos := lc.Pos[ip]
+		ctx.errPos = append(ctx.errPos, Position{Filename: fname, Pos: pos, Lambda: lc})
 	} else {
-		ctx.errPos = append(ctx.errPos, Position{Filename: fname, Pos: pos, Lambda: id})
+		if ip >= len(ctx.prog.Body) || ip < 0 {
+			ip = len(ctx.prog.Body) - 1
+		}
+		pos := ctx.prog.Pos[ip]
+		ctx.errPos = append(ctx.errPos, Position{Filename: fname, Pos: pos})
 	}
 }
 

@@ -9,7 +9,7 @@ import (
 type Position struct {
 	Filename string // file name (as obtained from SetSource)
 	Pos      int    // byte offset
-	Lambda   Lambda
+	Lambda   *LambdaCode
 }
 
 // Error represents an error returned by any Context method.
@@ -26,24 +26,28 @@ func (e *Error) Error() string {
 	if len(e.Positions) == 0 {
 		return e.Msg
 	}
-	sources := e.ctx.sources
 	sb := &strings.Builder{}
-	first := e.Positions[0]
-	s, line, col := getPosLine(sources[first.Filename], first.Pos)
-	if first.Filename != "" {
-		fmt.Fprintf(sb, "%s:%d: %s\n", first.Filename, line, e.Msg)
-	} else {
-		fmt.Fprintf(sb, "%s\n", e.Msg)
-	}
-	writeLine(sb, s, col)
-	for _, pos := range e.Positions[1:] {
+	sources := e.ctx.sources
+	for i, pos := range e.Positions {
+		if i == 0 {
+			if pos.Filename != "" {
+				s, line, col := getPosLine(sources[pos.Filename], pos.Pos)
+				fmt.Fprintf(sb, "%s:%d:%d: %s\n",
+					pos.Filename, line, col, e.Msg)
+				writeLine(sb, s, col)
+				continue
+			}
+			fmt.Fprintf(sb, "%s\n", e.Msg)
+		}
 		if pos.Filename != "" {
 			s, line, col := getPosLine(sources[pos.Filename], pos.Pos)
 			fmt.Fprintf(sb, "  (called from) %s:%d:%d:%d\n", pos.Filename, line, col, pos.Pos)
 			writeLine(sb, s, col)
-		} else {
-			lc := e.ctx.prog.Lambdas[int(pos.Lambda)]
+		} else if lc := pos.Lambda; lc != nil {
 			s, _, col := getPosLine(lc.String, pos.Pos-lc.StartPos)
+			writeLine(sb, s, col)
+		} else {
+			s, _, col := getPosLine(sources[""], pos.Pos)
 			writeLine(sb, s, col)
 		}
 	}
