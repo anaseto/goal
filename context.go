@@ -163,7 +163,6 @@ func (ctx *Context) compileExec() (bool, error) {
 	if err != nil {
 		ctx.stack = ctx.stack[0:]
 		ctx.push(nil)
-		fmt.Printf("ip: %d\n", ip+ctx.ipNext)
 		ctx.updateErrPos(ip+ctx.ipNext, nil)
 		ctx.ipNext = len(ctx.prog.Body)
 		return false, ctx.getError(err)
