@@ -84,7 +84,11 @@ func (ctx *Context) Run() (V, error) {
 		ctx.prog.Body = ctx.prog.Body[:blen]
 		ctx.prog.Lambdas = ctx.prog.Lambdas[:llen]
 		ctx.prog.last = last
-		return nil, fmt.Errorf("%v", err)
+		if ctx.errPos == nil {
+			ctx.errPos = append(ctx.errPos,
+				Position{Filename: ctx.fname, Pos: ctx.compiler.p.token.Pos})
+		}
+		return nil, ctx.getError(err)
 	}
 	if !ctx.changed(blen, llen, last) {
 		return nil, nil
@@ -117,8 +121,10 @@ func (ctx *Context) RunExpr() (V, error) {
 			ctx.prog.Body = ctx.prog.Body[:blen]
 			ctx.prog.Lambdas = ctx.prog.Lambdas[:llen]
 			ctx.prog.last = last
-			ctx.errPos = append(ctx.errPos,
-				Position{Filename: ctx.fname, Pos: ctx.compiler.pos})
+			if ctx.errPos == nil {
+				ctx.errPos = append(ctx.errPos,
+					Position{Filename: ctx.fname, Pos: ctx.compiler.p.token.Pos})
+			}
 			return nil, ctx.getError(err)
 		}
 	}
@@ -166,7 +172,7 @@ func (ctx *Context) compileExec() (bool, error) {
 		ctx.ipNext = len(ctx.prog.Body)
 		ctx.stack = ctx.stack[0:]
 		ctx.push(nil)
-		ctx.updateErrPos(ip, -1)
+		ctx.updateErrPos(ip, -1, ctx.fname)
 		return false, ctx.getError(err)
 	}
 	ctx.ipNext += ip
@@ -187,10 +193,10 @@ func (ctx *Context) getError(err error) error {
 	return e
 }
 
-func (ctx *Context) updateErrPos(ip int, id Lambda) {
+func (ctx *Context) updateErrPos(ip int, id Lambda, fname string) {
 	if len(ctx.prog.Body) == 0 {
 		// should not happen during execution
-		ctx.errPos = append(ctx.errPos, Position{Filename: ctx.fname})
+		ctx.errPos = append(ctx.errPos, Position{Filename: fname})
 		return
 	}
 	if ip >= len(ctx.prog.Body) || ip < 0 {
@@ -198,9 +204,9 @@ func (ctx *Context) updateErrPos(ip int, id Lambda) {
 	}
 	pos := ctx.prog.Pos[ip]
 	if id < 0 {
-		ctx.errPos = append(ctx.errPos, Position{Filename: ctx.fname, Pos: pos})
+		ctx.errPos = append(ctx.errPos, Position{Filename: fname, Pos: pos})
 	} else {
-		ctx.errPos = append(ctx.errPos, Position{Filename: ctx.fname, Pos: pos, Lambda: id})
+		ctx.errPos = append(ctx.errPos, Position{Filename: fname, Pos: pos, Lambda: id})
 	}
 }
 

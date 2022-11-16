@@ -261,15 +261,18 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 	oframeIdx := ctx.frameIdx
 	ctx.frameIdx = int32(len(ctx.stack) - 1)
 
-	ctx.callDepth++
 	olambda := ctx.lambda
 	ctx.lambda = int(id)
+	ofname := ctx.fname
+	ctx.fname = lc.Filename
+	ctx.callDepth++
 	ip, err := ctx.execute(lc.Body)
 	ctx.callDepth--
+	ctx.fname = ofname
 	ctx.lambda = olambda
 
 	if err != nil {
-		ctx.updateErrPos(ip, id)
+		ctx.updateErrPos(ip, id, lc.Filename)
 		return E(err.Error())
 	}
 	var res V
@@ -279,7 +282,7 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 		res = ctx.stack[len(ctx.stack)-1]
 		ctx.drop()
 	default:
-		ctx.updateErrPos(ip, id)
+		ctx.updateErrPos(ip, id, lc.Filename)
 		// should not happen
 		return errf("lambda %d: bad len %d vs old %d (depth: %d): %v", id, len(ctx.stack), olen, ctx.callDepth, ctx.stack)
 	}

@@ -119,6 +119,7 @@ var matchTests = [...]matchTest{
 	{`a:(1 "a";2 "b");a[0;]`, `1 "a"`},
 	{`a:(1 "a";2 "b");a[;1]`, `"a" "b"`},
 	{`[1;:2;3]`, `2`},
+	{`i:2;1 2 3 4 i`, `3`},
 }
 
 func TestRunString(t *testing.T) {

@@ -28,35 +28,36 @@ func (e *Error) Error() string {
 	}
 	sources := e.ctx.sources
 	sb := &strings.Builder{}
-	last := e.Positions[len(e.Positions)-1]
-	s, lnum, offset := getPosLine(sources[last.Filename], last.Pos)
-	if last.Filename != "" {
-		fmt.Fprintf(sb, "%s:%d: %s\n", last.Filename, lnum, e.Msg)
+	first := e.Positions[0]
+	s, line, col := getPosLine(sources[first.Filename], first.Pos)
+	if first.Filename != "" {
+		fmt.Fprintf(sb, "%s:%d: %s\n", first.Filename, line, e.Msg)
 	} else {
 		fmt.Fprintf(sb, "%s\n", e.Msg)
 	}
-	writeLine(sb, s, offset)
-	for i := len(e.Positions) - 2; i >= 0; i-- {
-		pos := e.Positions[i]
-		s, lnum, offset := getPosLine(e.ctx.prog.LambdaStrings[int(pos.Lambda)], pos.Pos)
+	writeLine(sb, s, col)
+	for _, pos := range e.Positions[1:] {
 		if pos.Filename != "" {
-			fmt.Fprintf(sb, "(called from) %s:%d\n", pos.Filename, lnum)
+			s, line, col := getPosLine(sources[pos.Filename], pos.Pos)
+			fmt.Fprintf(sb, "  (called from) %s:%d:%d:%d\n", pos.Filename, line, col, pos.Pos)
+			writeLine(sb, s, col)
 		} else {
-			fmt.Fprint(sb, "(called from)\n")
+			lc := e.ctx.prog.Lambdas[int(pos.Lambda)]
+			s, _, col := getPosLine(lc.String, pos.Pos-lc.StartPos)
+			writeLine(sb, s, col)
 		}
-		writeLine(sb, s, offset)
 	}
 	return sb.String()
 }
 
-func writeLine(sb *strings.Builder, s string, offset int) {
+func writeLine(sb *strings.Builder, s string, col int) {
 	if s == "" {
 		return
 	}
 	sb.WriteString(s)
 	sb.WriteRune('\n')
-	if offset > 0 {
-		sb.WriteString(strings.Repeat(" ", offset-1))
+	if col > 0 {
+		sb.WriteString(strings.Repeat(" ", col))
 	}
 	sb.WriteRune('^')
 	sb.WriteRune('\n')

@@ -8,10 +8,9 @@ import (
 
 // Program represents a compiled program.
 type Program struct {
-	Body          []opcode
-	Pos           []int
-	Lambdas       []*LambdaCode
-	LambdaStrings []string
+	Body    []opcode
+	Pos     []int
+	Lambdas []*LambdaCode
 
 	last int // index of last non-argument opcode
 }
@@ -24,6 +23,10 @@ type LambdaCode struct {
 	Rank      int
 	NamedArgs bool
 	Locals    map[string]Local // arguments and variables
+	String    string
+	Filename  string
+	StartPos  int
+	EndPos    int
 
 	opIdxLocal map[int]Local // opcode index -> local variable
 	nVars      int
@@ -250,6 +253,13 @@ func (c *compiler) apply() {
 	}
 }
 
+func (c *compiler) applyAt(pos int) {
+	opos := c.pos
+	c.pos = pos
+	c.apply()
+	c.pos = opos
+}
+
 func (c *compiler) errorf(format string, a ...interface{}) error {
 	// TODO: in case of error, read the file again to get from pos the line
 	// and print the line that produced the error with some column marker.
@@ -312,14 +322,7 @@ func (c *compiler) doExpr(e expr) error {
 			return err
 		}
 	case *astParenExpr:
-		argc := c.argc
-		c.argc = 0
-		oarglist := c.arglist
-		c.arglist = false
 		err := c.doParenExpr(e)
-		c.arglist = oarglist
-		c.argc = argc + 1
-		c.apply()
 		if err != nil {
 			return err
 		}
@@ -412,7 +415,10 @@ func (c *compiler) doLocal(tok *astToken) {
 
 func (c *compiler) doVariadic(tok *astToken) error {
 	v := parseBuiltin(tok.Rune)
+	opos := c.pos
+	c.pos = tok.Pos
 	c.pushVariadic(v)
+	c.pos = opos
 	return nil
 }
 
@@ -614,24 +620,38 @@ func (c *compiler) doStrand(st *astStrand) error {
 		case astNUMBER:
 			v, err := parseNumber(tok.Text)
 			if err != nil {
+				c.pos = tok.Pos
 				return c.errorf("number syntax: %v", err)
 			}
 			a = append(a, v)
 		case astSTRING:
 			s, err := strconv.Unquote(tok.Text)
 			if err != nil {
+				c.pos = tok.Pos
 				return c.errorf("string syntax: %v", err)
 			}
 			a = append(a, S(s))
 		}
 	}
 	id := c.ctx.storeConst(canonical(a))
+	c.pos = st.Pos
 	c.push2(opConst, opcode(id))
+	c.apply()
 	return nil
 }
 
 func (c *compiler) doParenExpr(pe *astParenExpr) error {
+	argc := c.argc
+	c.argc = 0
+	oarglist := c.arglist
+	c.arglist = false
 	err := c.doExprs(pe.Exprs)
+	if err != nil {
+		return err
+	}
+	c.arglist = oarglist
+	c.argc = argc + 1
+	c.applyAt(pe.EndPos)
 	return err
 }
 
@@ -640,7 +660,7 @@ func (c *compiler) doBlock(b *astBlock) error {
 	case astLAMBDA:
 		return c.doLambda(b)
 	case astARGS:
-		return c.doArgs(b.Body)
+		return c.doArgs(b)
 	case astSEQ:
 		return c.doSeq(b.Body)
 	case astLIST:
@@ -681,13 +701,15 @@ func (c *compiler) doLambda(b *astBlock) error {
 	c.scopeStack = c.scopeStack[:len(c.scopeStack)-1]
 	id := len(c.ctx.prog.Lambdas)
 	c.ctx.prog.Lambdas = append(c.ctx.prog.Lambdas, lc)
-	s := c.ctx.sources[c.ctx.fname][b.StartPos:b.EndPos]
-	c.ctx.prog.LambdaStrings = append(c.ctx.prog.LambdaStrings, s)
+	lc.StartPos = b.StartPos
+	lc.EndPos = b.EndPos
+	lc.String = c.ctx.sources[c.ctx.fname][lc.StartPos:lc.EndPos]
+	lc.Filename = c.ctx.fname
 	c.ctx.resolveLambda(lc)
 	c.argc = argc
 	c.slen = slen
 	c.push2(opLambda, opcode(id))
-	c.apply()
+	c.applyAt(b.EndPos)
 	return nil
 }
 
@@ -752,13 +774,14 @@ func (ctx *Context) resolveLambda(lc *LambdaCode) {
 	lc.opIdxLocal = nil
 }
 
-func (c *compiler) doArgs(body []exprs) error {
+func (c *compiler) doArgs(b *astBlock) error {
+	body := b.Body
 	if len(body) >= 3 {
 		expr := c.it.Peek()
 		switch expr := expr.(type) {
 		case *astToken:
 			if expr.Type == astVERB && expr.Rune == '?' {
-				err := c.doCond(body)
+				err := c.doCond(b)
 				if err != nil {
 					return err
 				}
@@ -792,7 +815,8 @@ func (c *compiler) doArgs(body []exprs) error {
 	return nil
 }
 
-func (c *compiler) doCond(body []exprs) error {
+func (c *compiler) doCond(b *astBlock) error {
+	body := b.Body
 	if len(body)%2 != 1 {
 		return c.errorf("conditional ?[if;then;else] with even number of statements")
 	}

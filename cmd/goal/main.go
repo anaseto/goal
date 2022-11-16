@@ -51,6 +51,9 @@ func main() {
 	_, err = ctx.Run()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "goal: %v", err)
+		if *optD {
+			printProgram(ctx)
+		}
 		os.Exit(1)
 	}
 }
@@ -89,7 +92,7 @@ func runStdin(ctx *goal.Context) {
 				echo(ctx, v)
 				return
 			}
-			fmt.Println("'ERROR " + err.Error())
+			fmt.Println("'ERROR " + strings.TrimSuffix(err.Error(), "\n"))
 			continue
 		}
 		echo(ctx, v)
@@ -125,8 +128,6 @@ func runDebug(ctx *goal.Context) {
 		printProgram(ctx)
 		log.Printf("Caught panic: %v\nStack Trace:\n", r)
 		debug.PrintStack()
-	} else {
-		printProgram(ctx)
 	}
 }
 

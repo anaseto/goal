@@ -17,7 +17,7 @@ type Token struct {
 func (t Token) String() string {
 	switch t.Type {
 	case ERROR:
-		return "error:" + t.Text
+		return t.Text
 	case ADVERB, IDENT, VERB, NUMBER:
 		return t.Text
 	case LEFTBRACE:

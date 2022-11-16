@@ -17,7 +17,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 		case opGlobal:
 			v := ctx.globals[ops[ip]]
 			if v == nil {
-				return ip, fmt.Errorf("undefined global: %s",
+				return ip - 1, fmt.Errorf("undefined global: %s",
 					ctx.gNames[ops[ip]])
 			}
 			ctx.push(v)
@@ -25,7 +25,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 		case opLocal:
 			v := ctx.stack[ctx.frameIdx-int32(ops[ip])]
 			if v == nil {
-				return ip, fmt.Errorf("undefined local: %s",
+				return ip - 1, fmt.Errorf("undefined local: %s",
 					ctx.prog.Lambdas[ctx.lambda].Names[int32(ops[ip])])
 			}
 			ctx.push(v)
@@ -45,33 +45,33 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 		case opApply:
 			err := ctx.popApplyN(1)
 			if err != nil {
-				return ip, err
+				return ip - 1, err
 			}
 		case opApplyVariadic:
 			v := Variadic(ops[ip])
 			res := ctx.applyVariadic(v)
 			if err, ok := res.(error); ok && err != nil {
-				return ip, err
+				return ip - 1, err
 			}
 			ctx.push(res)
 			ip++
 		case opApply2:
 			err := ctx.popApplyN(2)
 			if err != nil {
-				return ip, err
+				return ip - 1, err
 			}
 		case opApply2Variadic:
 			v := Variadic(ops[ip])
 			res := ctx.applyNVariadic(v, 2)
 			if err, ok := res.(error); ok && err != nil {
-				return ip, err
+				return ip - 1, err
 			}
 			ctx.push(res)
 			ip++
 		case opApplyN:
 			err := ctx.popApplyN(int(ops[ip]))
 			if err != nil {
-				return ip, err
+				return ip - 1, err
 			}
 			ip++
 		case opApplyNVariadic:
@@ -79,7 +79,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ip++
 			res := ctx.applyNVariadic(v, int(ops[ip]))
 			if err, ok := res.(error); ok && err != nil {
-				return ip, err
+				return ip - 2, err
 			}
 			ctx.push(res)
 			ip++
