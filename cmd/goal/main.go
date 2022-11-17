@@ -206,7 +206,7 @@ Notations:
 `
 const helpVERBS = `
 VERBS
-:x  return	:3 -> return 3 (TODO)
+:x  return	:3 -> return 3 prematurely
 x:y right	2:3 -> 3	name:3 -> assign 3 to name
 +x  flip	+(1 2;3 4) -> (1 3;2 4)
 x+y add		2+3 -> 5
@@ -276,7 +276,7 @@ say[x;...]	print value(s) with newline	say 2+3
 const helpSyntax = `
 literals	1	1.5	"text"
 arrays		1 2 -3 4	1 "a" -2 "b"	(1 2;"a";(3;"b"))
-variables	a:2 (def)	a+3 (use)
+variables	a:2 (assign)	a+3 (use)	a::2 (assign global)
 expressions	2*3+4 -> 14	1+|1 2 3 -> 4 3 2	+/1 2 3 -> 6
 index		1 2 3[1] -> 2
 lambdas		{x+y}[2;3] -> 5		{[a;b;c]a+b+c}[1;2;3] -> 6

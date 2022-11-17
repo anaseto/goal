@@ -485,11 +485,11 @@ func isLeftArg(e expr) bool {
 }
 
 func (c *compiler) doAssign(verbTok, identTok *astToken) bool {
-	if verbTok.Text != ":" || c.argc != 1 {
+	if verbTok.Text != ":" && verbTok.Text != "::" || c.argc != 1 {
 		return false
 	}
 	lc := c.scope()
-	if lc == nil {
+	if lc == nil || verbTok.Text == "::" {
 		id := c.ctx.global(identTok.Text)
 		c.push2(opAssignGlobal, opcode(id))
 		return true
@@ -510,7 +510,7 @@ func (c *compiler) doAssign(verbTok, identTok *astToken) bool {
 
 func parseBuiltin(s string) (verb Variadic) {
 	switch s {
-	case ":":
+	case ":", "::":
 		verb = vRight
 	case "+":
 		verb = vAdd

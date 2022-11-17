@@ -216,7 +216,13 @@ func scanAny(s *Scanner) stateFn {
 			return scanMinus
 		}
 		return s.emitOp(VERB)
-	case ':', '+', '*', '%', '!', '&', '|', '<', '>',
+	case ':':
+		r := s.peek()
+		if r == ':' {
+			s.next()
+		}
+		return s.emitOp(VERB)
+	case '+', '*', '%', '!', '&', '|', '<', '>',
 		'=', '~', ',', '^', '#', '_', '$', '?', '@', '.':
 		return s.emitOp(VERB)
 	case '"':
