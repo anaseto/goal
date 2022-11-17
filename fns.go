@@ -1,5 +1,9 @@
 package goal
 
+import (
+	"strings"
+)
+
 // enum returns !x.
 func enum(x V) V {
 	switch x := x.(type) {
@@ -511,5 +515,134 @@ func weedOutAI(x AI, y V) V {
 		return r
 	default:
 		return errs("f#y : y not an array")
+	}
+}
+
+// cast implements x$y.
+func cast(x, y V) V {
+	s, ok := x.(S)
+	if !ok {
+		return errf("x$y : x not a string (%s)", x.Type())
+	}
+	switch s {
+	case "i":
+		return casti(y)
+	case "n":
+		return castn(y)
+	case "s":
+		return casts(y)
+	default:
+		return errf("s$y : unsupported \"%s\" value for s", s)
+	}
+}
+
+func casti(y V) V {
+	switch z := y.(type) {
+	case I:
+		return y
+	case F:
+		return I(z)
+	case S:
+		runes := []rune(z)
+		res := make(AI, len(runes))
+		for i, r := range runes {
+			res[i] = int(r)
+		}
+		return res
+	case AB:
+		return y
+	case AI:
+		return y
+	case AS:
+		res := make(AV, z.Len())
+		for i, s := range z {
+			res[i] = casti(S(s))
+		}
+		return res
+	case AF:
+		return toAI(z)
+	case AV:
+		res := make(AV, z.Len())
+		for i := range res {
+			res[i] = casti(z[i])
+			if err, ok := res[i].(E); ok {
+				return err
+			}
+		}
+		return res
+	default:
+		return errs("\"i\"$y : non-numeric y")
+	}
+}
+
+func castn(y V) V {
+	switch z := y.(type) {
+	case I:
+		return y
+	case F:
+		return y
+	case S:
+		v, err := parseNumber(string(z))
+		if err != nil {
+			return errf("\"i\"$y : non-numeric y (%s) : %v", z, err)
+		}
+		return v
+	case AB:
+		return y
+	case AI:
+		return y
+	case AS:
+		res := make(AV, z.Len())
+		for i, s := range z {
+			n, err := parseNumber(s)
+			if err != nil {
+				return errf("\"i\"$y : y contains non-numeric (%s) : %v", s, err)
+			}
+			res[i] = n
+		}
+		return canonical(res)
+	case AF:
+		return y
+	case AV:
+		res := make(AV, z.Len())
+		for i := range res {
+			res[i] = castn(z[i])
+			if err, ok := res[i].(E); ok {
+				return err
+			}
+		}
+		return res
+	default:
+		return errs("\"i\"$y : non-numeric y")
+	}
+}
+
+func casts(y V) V {
+	switch z := y.(type) {
+	case I:
+		return S(rune(z))
+	case F:
+		return casts(I(z))
+	case AB:
+		return casts(fromABtoAI(z))
+	case AI:
+		sb := &strings.Builder{}
+		for _, i := range z {
+			sb.WriteRune(rune(i))
+		}
+		return S(sb.String())
+	case AF:
+		return casts(toAI(z))
+	case AV:
+		res := make(AV, z.Len())
+		for i := range res {
+			res[i] = casts(z[i])
+			if err, ok := res[i].(E); ok {
+				return err
+			}
+		}
+		return res
+	default:
+		return errs("\"i\"$y : non-numeric y")
 	}
 }

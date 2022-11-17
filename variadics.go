@@ -290,7 +290,7 @@ func VCast(ctx *Context, args []V) V {
 	case 1:
 		return S(fmt.Sprint(args[0]))
 	case 2:
-		return errNYI("dyadic $")
+		return cast(args[1], args[0])
 	default:
 		return errs("too many arguments")
 	}

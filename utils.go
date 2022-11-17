@@ -220,6 +220,16 @@ func toAI(x AF) V {
 	return r
 }
 
+// fromABtoAI converts AB into AI (for simplifying code, used only for
+// unfrequent code).
+func fromABtoAI(x AB) V {
+	r := make(AI, len(x))
+	for i := range r {
+		r[i] = int(B2I(x[i]))
+	}
+	return r
+}
+
 func isFalse(x V) bool {
 	switch x := x.(type) {
 	case F:

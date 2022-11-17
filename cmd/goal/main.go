@@ -246,7 +246,8 @@ _s  to lower	_"ABC" -> "abc"
 i_x drop	2_3 4 5 6 -> 5 6
 f_x weed out	{0 1 1 0}_4 1 5 3 -> 4 3    {x>0}_2 -3 1 -> ,-3
 $x  string	$2 3 -> "2 3"
-x$y cast	TODO
+s$y cast	"i"$2.3 -> 2    "i"$"ab" -> 97 98   "s"$97 98 -> "ab"
+s$y parse num	"n"$"1.5" -> 1.5
 ?x  uniq	?2 2 3 4 3 3 -> 2 3 4
 x?y find	TODO
 @x  type	@2 -> "i"    @"ab" -> "s"    @2 3 -> "I"
