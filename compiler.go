@@ -444,6 +444,10 @@ func (c *compiler) doVerb(tok *astToken) error {
 		return c.doVariadic(tok)
 	}
 	if !isLeftArg(e) {
+		if argc == 0 {
+			c.push(opNil)
+			c.push(opNil)
+		}
 		return c.doVariadic(tok)
 	}
 	if identTok, ok := getIdent(e); ok {

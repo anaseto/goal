@@ -160,19 +160,22 @@ func (ctx *Context) applyVariadic(v Variadic) V {
 	}
 	if vv == nil {
 		ctx.drop()
-		return Projection{Fun: v, Args: []V{vv}}
+		return Projection{Fun: v, Args: []V{nil}}
 	}
-	//switch vv := vv.(type) {
-	//case Variadic:
-	//return Composition{Left: v, Right: vv}
-	//default:
-	if vv == nil {
-		return Projection{Fun: v, Args: []V{vv}}
+	switch vv := vv.(type) {
+	case Composition:
+		ctx.drop()
+		return Composition{Left: v, Right: vv}
+	case Projection:
+		ctx.drop()
+		return Composition{Left: v, Right: vv}
+	case ProjectionOne:
+		ctx.drop()
+		return Composition{Left: v, Right: vv}
 	}
 	res := ctx.variadics[v].Func(ctx, args)
 	ctx.drop()
 	return res
-	//}
 }
 
 func (ctx *Context) applyNVariadic(v Variadic, n int) V {
@@ -185,18 +188,22 @@ func (ctx *Context) applyNVariadic(v Variadic, n int) V {
 		}
 		return Projection{Fun: v, Args: ctx.popN(n)}
 	}
-	//if n == 2 && !ctx.variadics[v].Adverb {
-	//switch arg := args[1].(type) {
-	//case Lambda:
-	//case Function:
-	//res := Composition{
-	//Left:  ProjectionOne{Fun: v, Arg: args[0]},
-	//Right: arg,
-	//}
-	//ctx.dropN(2)
-	//return res
-	//}
-	//}
+	if n == 2 && !ctx.variadics[v].Adverb {
+		switch arg := args[0].(type) {
+		case Composition:
+			left := ProjectionOne{Fun: v, Arg: args[1]}
+			ctx.dropN(2)
+			return Composition{Left: left, Right: arg}
+		case Projection:
+			left := ProjectionOne{Fun: v, Arg: args[1]}
+			ctx.dropN(2)
+			return Composition{Left: left, Right: arg}
+		case ProjectionOne:
+			left := ProjectionOne{Fun: v, Arg: args[1]}
+			ctx.dropN(2)
+			return Composition{Left: left, Right: arg}
+		}
+	}
 	res := ctx.variadics[v].Func(ctx, args)
 	ctx.dropN(n)
 	return res
@@ -221,7 +228,6 @@ func (ctx *Context) applyProjection(v Projection, n int) V {
 		}
 		res := ctx.applyN(v.Fun, len(v.Args))
 		ctx.dropN(len(v.Args))
-		ctx.dropN(n)
 		return res
 	default:
 		vargs := cloneArgs(v.Args)
