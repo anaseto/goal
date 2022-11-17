@@ -80,16 +80,14 @@ type Scanner struct {
 
 type stateFn func(*Scanner) stateFn
 
-// Init initializes the scanner with a given reader. It can be reused again
-// with a new reader, but position information will be reset.
-func (s *Scanner) Init(source string) {
-	if s.reader != nil {
-		*s = Scanner{}
-	}
+// NewScanner returns a scanner for the given source string.
+func NewScanner(source string) *Scanner {
+	s := &Scanner{}
 	s.source = source
 	s.reader = strings.NewReader(source)
 	s.start = true
 	s.token = Token{Type: EOF, Pos: 0}
+	return s
 }
 
 // Next produces the next token from the input reader.

@@ -6,7 +6,7 @@ import (
 
 // parser builds an expr non-resolved AST.
 type parser struct {
-	s      *Scanner
+	ctx    *Context
 	token  Token // current token
 	pToken Token // peeked token
 	oToken Token // old (previous) token
@@ -14,8 +14,8 @@ type parser struct {
 	peeked bool
 }
 
-func newParser(s *Scanner) *parser {
-	p := &parser{s: s}
+func newParser(ctx *Context) *parser {
+	p := &parser{ctx: ctx}
 	return p
 }
 
@@ -65,7 +65,7 @@ func (p *parser) peek() Token {
 	if p.peeked {
 		return p.pToken
 	}
-	p.pToken = p.s.Next()
+	p.pToken = p.ctx.scanner.Next()
 	p.peeked = true
 	return p.pToken
 }
@@ -77,7 +77,7 @@ func (p *parser) next() Token {
 		p.peeked = false
 		return p.token
 	}
-	p.token = p.s.Next()
+	p.token = p.ctx.scanner.Next()
 	return p.token
 }
 

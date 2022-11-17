@@ -646,3 +646,25 @@ func casts(y V) V {
 		return errs("\"i\"$y : non-numeric y")
 	}
 }
+
+// eval implements .s.
+func eval(ctx *Context, x V) V {
+	x = canonical(x)
+	nctx := NewContext()
+	nctx.globals = ctx.globals
+	nctx.variadics = ctx.variadics
+	nctx.variadicsNames = ctx.variadicsNames
+	nctx.gNames = ctx.gNames
+
+	switch x := x.(type) {
+	case S:
+		v, err := nctx.Eval(string(x))
+		if err != nil {
+			return errf(".s : %v", err)
+		}
+		ctx.gNames = nctx.gNames
+		return v
+	default:
+		return errf(".x : bad type for x (%s)", x.Type())
+	}
+}

@@ -138,18 +138,21 @@ var matchTests = [...]matchTest{
 	{`"n"$"1.5" "2"`, `1.5 2`},
 	{`"s"$97`, `"a"`},
 	{`"s"$97 98`, `"ab"`},
+	{`."2+3"`, `5`},
+	{`a:."2+3";a`, `5`},
+	{`.'"2+3" "2"`, `5 2`},
 }
 
-func TestRunString(t *testing.T) {
+func TestEval(t *testing.T) {
 	for i, mt := range matchTests {
 		mt := mt
 		name := fmt.Sprintf("String%d", i)
 		matchString := fmt.Sprintf("(%v) ~ (%v)", mt.Left, mt.Right)
 		t.Run(name, func(t *testing.T) {
 			ctxLeft := NewContext()
-			vLeft, errLeft := ctxLeft.RunString(mt.Left)
+			vLeft, errLeft := ctxLeft.Eval(mt.Left)
 			ctxRight := NewContext()
-			vRight, errRight := ctxRight.RunString(mt.Right)
+			vRight, errRight := ctxRight.Eval(mt.Right)
 			if !Match(vLeft, vRight) {
 				t.Log(ctxLeft.ProgramString())
 				t.Log(matchString)
@@ -172,56 +175,56 @@ func TestRunString(t *testing.T) {
 func BenchmarkFoldMinus(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		ctx := NewContext()
-		ctx.RunString("-/!1000")
+		ctx.Eval("-/!1000")
 	}
 }
 
 func BenchmarkFoldPlus(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		ctx := NewContext()
-		ctx.RunString("+/!1000")
+		ctx.Eval("+/!1000")
 	}
 }
 
 func BenchmarkFoldLambdaPlus(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		ctx := NewContext()
-		ctx.RunString("{x+y}/!1000")
+		ctx.Eval("{x+y}/!1000")
 	}
 }
 
 func BenchmarkFoldWhile(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		ctx := NewContext()
-		ctx.RunString("{x<1000}{x+1}/1")
+		ctx.Eval("{x<1000}{x+1}/1")
 	}
 }
 
 func BenchmarkFoldDo(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		ctx := NewContext()
-		ctx.RunString("1000{x+1}/1")
+		ctx.Eval("1000{x+1}/1")
 	}
 }
 
 //func BenchmarkFib(b *testing.B) {
 //for n := 0; n < b.N; n++ {
 //ctx := NewContext()
-//ctx.RunString("fib:{?[x~0;0;x~1;1;(fib x-1)+(fib x-2)]}; fib 35")
+//ctx.Eval("fib:{?[x~0;0;x~1;1;(fib x-1)+(fib x-2)]}; fib 35")
 //}
 //}
 
 func BenchmarkFibTailRec(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		ctx := NewContext()
-		ctx.RunString("fibrec:{?[x~0;y;x~1;z;fibrec[x-1;z;y+z]]};fibrec[35;0;1]")
+		ctx.Eval("fibrec:{?[x~0;y;x~1;z;fibrec[x-1;z;y+z]]};fibrec[35;0;1]")
 	}
 }
 
 func BenchmarkFibDoWhile(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		ctx := NewContext()
-		ctx.RunString("*35{x[1],+/x}/0 1")
+		ctx.Eval("*35{x[1],+/x}/0 1")
 	}
 }
 

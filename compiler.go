@@ -114,7 +114,7 @@ type compiler struct {
 func newCompiler(ctx *Context) *compiler {
 	c := &compiler{
 		ctx: ctx,
-		p:   newParser(ctx.scanner),
+		p:   newParser(ctx),
 	}
 	return c
 }

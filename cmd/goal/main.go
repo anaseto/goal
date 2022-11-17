@@ -132,7 +132,7 @@ func runDebug(ctx *goal.Context) {
 }
 
 func runCommand(ctx *goal.Context, cmd string) {
-	_, err := ctx.RunString(cmd)
+	_, err := ctx.Eval(cmd)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "goal: %v", err)
 		os.Exit(1)
@@ -252,7 +252,7 @@ s$y parse num	"n"$"1.5" -> 1.5
 x?y find	TODO
 @x  type	@2 -> "i"    @"ab" -> "s"    @2 3 -> "I"
 x@y apply	1 2 3@2 -> 3	1 2 3[2] -> 3
-.   eval	TODO
+.s  eval	."2+3" -> 5
 x.y applyN	{x+y}.2 3 -> 5    {x+y}[2;3] -> 5
 `
 const helpADVERBS = `

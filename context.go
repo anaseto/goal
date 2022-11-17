@@ -43,8 +43,7 @@ func NewContext() *Context {
 	ctx := &Context{}
 	ctx.prog = &Program{}
 	ctx.gIDs = map[string]int{}
-	ctx.stack = make([]V, 0, 64)
-	ctx.scanner = &Scanner{}
+	ctx.stack = make([]V, 0, 32)
 	ctx.compiler = newCompiler(ctx)
 	ctx.sources = map[string]string{}
 	ctx.initVariadics()
@@ -70,12 +69,12 @@ func (ctx *Context) AssignGlobal(name string, v V) {
 func (ctx *Context) SetSource(name string, s string) {
 	ctx.fname = name
 	ctx.sources[name] = s
-	ctx.scanner.Init(s)
+	ctx.scanner = NewScanner(s)
 }
 
 // Run compiles the code from current source, then executes it.
 func (ctx *Context) Run() (V, error) {
-	if ctx.scanner.reader == nil {
+	if ctx.scanner == nil {
 		panic("Run: no source specified with SetSource")
 	}
 	blen, llen, last := len(ctx.prog.Body), len(ctx.prog.Lambdas), ctx.prog.last
@@ -105,7 +104,7 @@ func (ctx *Context) changed(blen, llen, last int) bool {
 // RunExpr compiles a whole expression from current source, then executes it.
 // It returns ErrEOF if the end of input was reached without issues.
 func (ctx *Context) RunExpr() (V, error) {
-	if ctx.scanner.reader == nil {
+	if ctx.scanner == nil {
 		panic("RunExpr: no source specified with SetSource")
 	}
 	var eof bool
@@ -136,9 +135,8 @@ func (ctx *Context) RunExpr() (V, error) {
 	return nil, err
 }
 
-// RunString calls Run with the given string as source.
-func (ctx *Context) RunString(s string) (V, error) {
-	ctx.fname = ""
+// Eval calls Run with the given string as unnamed source.
+func (ctx *Context) Eval(s string) (V, error) {
 	ctx.SetSource("", s)
 	return ctx.Run()
 }
