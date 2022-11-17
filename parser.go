@@ -49,7 +49,7 @@ func parseReturn(es exprs) exprs {
 	if len(es) == 0 {
 		return es
 	}
-	if e, ok := es[0].(*astToken); ok && e.Type == astVERB && e.Rune == ':' {
+	if e, ok := es[0].(*astToken); ok && e.Type == astVERB && e.Text == ":" {
 		es[0] = &astReturn{Pos: e.Pos}
 	}
 	return es
@@ -136,7 +136,7 @@ func (p *parser) expr() (expr, error) {
 		p.depth = p.depth[:len(p.depth)-1]
 		return nil, parseCLOSE{tok.Pos}
 	case VERB:
-		return &astToken{Type: astVERB, Pos: tok.Pos, Rune: tok.Rune}, nil
+		return &astToken{Type: astVERB, Pos: tok.Pos, Text: tok.Text}, nil
 	default:
 		// should not happen
 		return nil, p.errorf("invalid token: %v", tok)
@@ -239,7 +239,7 @@ func (p *parser) pAdverbs() (expr, error) {
 	ads := &astAdverbs{}
 	for {
 		if p.token.Type == ADVERB {
-			ads.Train = append(ads.Train, astToken{Type: astADVERB, Pos: p.token.Pos, Rune: p.token.Rune})
+			ads.Train = append(ads.Train, astToken{Type: astADVERB, Pos: p.token.Pos, Text: p.token.Text})
 		}
 		ntok := p.peek()
 		if ntok.Type == ADVERB {

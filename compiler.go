@@ -416,7 +416,7 @@ func (c *compiler) doLocal(tok *astToken) {
 }
 
 func (c *compiler) doVariadic(tok *astToken) error {
-	v := parseBuiltin(tok.Rune)
+	v := parseBuiltin(tok.Text)
 	opos := c.pos
 	c.pos = tok.Pos
 	c.pushVariadic(v)
@@ -485,7 +485,7 @@ func isLeftArg(e expr) bool {
 }
 
 func (c *compiler) doAssign(verbTok, identTok *astToken) bool {
-	if verbTok.Rune != ':' || c.argc != 1 {
+	if verbTok.Text != ":" || c.argc != 1 {
 		return false
 	}
 	lc := c.scope()
@@ -508,54 +508,56 @@ func (c *compiler) doAssign(verbTok, identTok *astToken) bool {
 	return true
 }
 
-func parseBuiltin(r rune) (verb Variadic) {
-	switch r {
-	case ':':
+func parseBuiltin(s string) (verb Variadic) {
+	switch s {
+	case ":":
 		verb = vRight
-	case '+':
+	case "+":
 		verb = vAdd
-	case '-':
+	case "-":
 		verb = vSubtract
-	case '*':
+	case "*":
 		verb = vMultiply
-	case '%':
+	case "%":
 		verb = vDivide
-	case '!':
+	case "!":
 		verb = vMod
-	case '&':
+	case "&":
 		verb = vMin
-	case '|':
+	case "|":
 		verb = vMax
-	case '<':
+	case "<":
 		verb = vLess
-	case '>':
+	case ">":
 		verb = vMore
-	case '=':
+	case "=":
 		verb = vEqual
-	case '~':
+	case "~":
 		verb = vMatch
-	case ',':
+	case ",":
 		verb = vJoin
-	case '^':
+	case "^":
 		verb = vCut
-	case '#':
+	case "#":
 		verb = vTake
-	case '_':
+	case "_":
 		verb = vDrop
-	case '$':
+	case "$":
 		verb = vCast
-	case '?':
+	case "?":
 		verb = vFind
-	case '@':
+	case "@":
 		verb = vApply
-	case '.':
+	case ".":
 		verb = vApplyN
-	case '\'':
+	case "'":
 		verb = vEach
-	case '/':
+	case "/":
 		verb = vFold
-	case '\\':
+	case "\\":
 		verb = vScan
+	default:
+		panic("unknown variadic op: " + s)
 	}
 	return verb
 }
@@ -782,7 +784,7 @@ func (c *compiler) doArgs(b *astBlock) error {
 		expr := c.it.Peek()
 		switch expr := expr.(type) {
 		case *astToken:
-			if expr.Type == astVERB && expr.Rune == '?' {
+			if expr.Type == astVERB && expr.Text == "?" {
 				err := c.doCond(b)
 				if err != nil {
 					return err

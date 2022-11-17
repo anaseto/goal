@@ -19,17 +19,16 @@ type exprs []expr
 // astToken represents a simplified token after processing into expr.
 type astToken struct {
 	Type astTokenType
-	Rune rune
 	Pos  int
 	Text string
 }
 
 func (t *astToken) String() string {
-	return fmt.Sprintf("{%v %c %d %s}", t.Type, t.Rune, t.Pos, t.Text)
+	return fmt.Sprintf("{%v %d %s}", t.Type, t.Pos, t.Text)
 }
 
 // astTokenType represents tokens in a ppExpr.
-type astTokenType int32
+type astTokenType int
 
 // These constants represent the possible tokens in a ppExpr.
 const (

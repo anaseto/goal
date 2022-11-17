@@ -9,7 +9,6 @@ import (
 // Token represents a token information.
 type Token struct {
 	Type TokenType // token type
-	Rune rune      // context text when only one rune is enough
 	Pos  int       // token's offset in the source
 	Text string    // content text (identifier, string, number)
 }
@@ -42,7 +41,7 @@ func (t Token) String() string {
 }
 
 // TokenType represents the different kinds of tokens.
-type TokenType int32
+type TokenType int
 
 // These constants describe the possible kinds of tokens.
 const (
@@ -167,9 +166,9 @@ func (s *Scanner) emitString(t TokenType) stateFn {
 	return nil
 }
 
-func (s *Scanner) emitOp(t TokenType, r rune) stateFn {
+func (s *Scanner) emitOp(t TokenType) stateFn {
 	s.start = false
-	s.token = Token{Type: t, Pos: s.tpos, Rune: r}
+	s.token = Token{Type: t, Pos: s.tpos, Text: s.source[s.tpos:s.npos]}
 	s.exprEnd = false
 	return nil
 }
@@ -195,9 +194,9 @@ func scanAny(s *Scanner) stateFn {
 		if s.start {
 			return scanCommentLine
 		}
-		return s.emitOp(ADVERB, r)
+		return s.emitOp(ADVERB)
 	case '\'', '\\':
-		return s.emitOp(ADVERB, r)
+		return s.emitOp(ADVERB)
 	case '{':
 		return s.emit(LEFTBRACE)
 	case '[':
@@ -216,10 +215,10 @@ func scanAny(s *Scanner) stateFn {
 		if !s.exprEnd {
 			return scanMinus
 		}
-		return s.emitOp(VERB, r)
+		return s.emitOp(VERB)
 	case ':', '+', '*', '%', '!', '&', '|', '<', '>',
 		'=', '~', ',', '^', '#', '_', '$', '?', '@', '.':
-		return s.emitOp(VERB, r)
+		return s.emitOp(VERB)
 	case '"':
 		return scanString
 	case '`':
@@ -376,7 +375,7 @@ func scanMinus(s *Scanner) stateFn {
 	if isDigit(r) {
 		return scanNumber
 	}
-	return s.emitOp(VERB, '-')
+	return s.emitOp(VERB)
 }
 
 func scanIdent(s *Scanner) stateFn {
