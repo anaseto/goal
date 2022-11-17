@@ -55,7 +55,7 @@ func reverse(x V) V {
 	}
 }
 
-// Rotate returns f|x. XXX: unused for now.
+// Rotate returns f|y.
 func rotate(x, y V) V {
 	i := 0
 	switch x := x.(type) {

@@ -125,6 +125,7 @@ var matchTests = [...]matchTest{
 	{"/\n23\n\\\n", ``},
 	{`a:3;f:{a:a+x};f 2;a`, `3`},
 	{`a:3;f:{a::a+x};f 2;a`, `5`},
+	{`{2}|1 2 3 4`, `3 4 1 2`},
 }
 
 func TestRunString(t *testing.T) {

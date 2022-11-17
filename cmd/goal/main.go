@@ -225,6 +225,7 @@ x!y mod		3!5 4 3 -> 2 1 0
 x&y min		2&3 -> 2	4&3 -> 3
 |x  reverse	|!5 -> 4 3 2 1 0
 x|y max		2|3 -> 3	4|3 -> 4
+f|y rotate	{2}|1 2 3 4 -> 3 4 1 2
 <x  ascend	<2 4 3 -> 0 2 1
 x<y less	2<3 -> 1
 >x  descend	>2 4 3 -> 1 2 0
