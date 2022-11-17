@@ -244,6 +244,7 @@ f#y replicate	{0 1 1 0}#4 1 5 3 -> 1 5    {x>0}#2 -3 1 -> 2 1
 _N  floor	_2.3 -> 2
 _s  to lower	_"ABC" -> "abc"
 i_x drop	2_3 4 5 6 -> 5 6
+f_x weed out	{0 1 1 0}_4 1 5 3 -> 4 3    {x>0}_2 -3 1 -> ,-3
 $x  string	$2 3 -> "2 3"
 x$y cast	TODO
 ?x  uniq	?2 2 3 4 3 3 -> 2 3 4

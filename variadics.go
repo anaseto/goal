@@ -269,6 +269,15 @@ func VDrop(ctx *Context, args []V) V {
 	case 1:
 		return floor(args[0])
 	case 2:
+		v, ok := args[1].(Function)
+		if ok {
+			ctx.push(args[0])
+			res := ctx.applyN(v, 1)
+			if err, ok := res.(E); ok {
+				return err
+			}
+			return weedOut(res, args[0])
+		}
 		return drop(args[1], args[0])
 	default:
 		return errs("too many arguments")

@@ -185,6 +185,7 @@ func toIndices(x V, l int) V {
 	}
 }
 
+// toArray converts atoms into 1-length arrays. It returns arrays as-is.
 func toArray(x V) V {
 	switch x := x.(type) {
 	case F:
@@ -203,6 +204,20 @@ func toArray(x V) V {
 	default:
 		return AV{x}
 	}
+}
+
+// toAI converts AF into AI if possible.
+func toAI(x AF) V {
+	for _, v := range x {
+		if !isI(F(v)) {
+			return errf("contains non-integer (%g)", v)
+		}
+	}
+	r := make(AI, len(x))
+	for i := range r {
+		r[i] = int(x[i])
+	}
+	return r
 }
 
 func isFalse(x V) bool {

@@ -191,36 +191,47 @@ func where(x V) V {
 
 // replicate returns {x}#y.
 func replicate(x, y V) V {
-	if length(x) != length(y) {
-		return errf("f#y : length mismatch: %d (f[y]) vs %d (y)", length(x), length(y))
-	}
 	switch x := x.(type) {
 	case I:
 		switch {
 		case x < 0:
-			return errs("f#y : f[y] negative integer")
+			return errf("f#y : f[y] negative integer (%d)", x)
 		default:
 			return repeat(y, int(x))
 		}
 	case F:
 		if !isI(x) {
-			return errs("f#y : f[y] not an integer")
+			return errf("f#y : f[y] not an integer (%g)", x)
 		}
 		n := int(x)
 		switch {
 		case n < 0:
-			return errs("f#y : f[y] negative")
+			return errf("f#y : f[y] negative (%d)", n)
 		default:
 			return repeat(y, n)
 		}
 	case AB:
+		if x.Len() != int(length(y)) {
+			return errf("f#y : length mismatch: %d (f[y]) vs %d (y)", x.Len(), length(y))
+		}
 		return repeatAB(x, y)
 	case AI:
+		if x.Len() != int(length(y)) {
+			return errf("f#y : length mismatch: %d (f[y]) vs %d (y)", x.Len(), length(y))
+		}
 		return repeatAI(x, y)
 	case AF:
-		return repeatAF(x, y)
+		z := toAI(x)
+		if err, ok := z.(E); ok {
+			return errf("f#y : x %v", err)
+		}
+		return replicate(z, y)
 	case AV:
-		return repeatAO(x, y)
+		z := canonical(x)
+		if _, ok := z.(AV); ok {
+			return errs("f#y : f[y] non-integer")
+		}
+		return replicate(z, y)
 	default:
 		return errs("f#y : f[y] non-integer")
 	}
@@ -309,7 +320,7 @@ func repeatAB(x AB, y V) V {
 		}
 		return r
 	default:
-		return errs("{x}#y : y not an array")
+		return errs("f#y : y not an array")
 	}
 }
 
@@ -317,7 +328,7 @@ func repeatAI(x AI, y V) V {
 	n := 0
 	for _, v := range x {
 		if v < 0 {
-			return errf("{x}#y : x contains negative integer (%d)", v)
+			return errf("f#y : f[y] contains negative integer (%d)", v)
 		}
 		n += v
 	}
@@ -363,26 +374,54 @@ func repeatAI(x AI, y V) V {
 		}
 		return r
 	default:
-		return errs("{x}#y : y not an array")
+		return errs("f#y : y not an array")
 	}
 }
 
-func repeatAF(x AF, y V) V {
+// weedOut implements {x}_y
+func weedOut(x, y V) V {
+	switch x := x.(type) {
+	case I:
+		if x != 0 {
+			return AV{}
+		}
+		return y
+	case F:
+		if x != 0 {
+			return AV{}
+		}
+		return y
+	case AB:
+		return weedOutAB(x, y)
+	case AI:
+		return weedOutAI(x, y)
+	case AF:
+		z := toAI(x)
+		if err, ok := z.(E); ok {
+			return errf("f#y : x %v", err)
+		}
+		return weedOut(z, y)
+	case AV:
+		z := canonical(x)
+		if _, ok := z.(AV); ok {
+			return errs("f#y : f[y] non-integer")
+		}
+		return weedOut(z, y)
+	default:
+		return errs("f_y : f[y] non-integer")
+	}
+}
+
+func weedOutAB(x AB, y V) V {
 	n := 0
 	for _, v := range x {
-		if !isI(F(v)) {
-			return errf("{x}#y : x contains non-integer (%g)", v)
-		}
-		if v < 0 {
-			return errf("{x}#y : x contains negative integer (%d)", int(v))
-		}
-		n += int(v)
+		n += 1 - int(B2I(v))
 	}
 	switch y := y.(type) {
 	case AB:
 		r := make(AB, 0, n)
 		for i, v := range x {
-			for j := 0; j < int(v); j++ {
+			if !v {
 				r = append(r, y[i])
 			}
 		}
@@ -390,7 +429,7 @@ func repeatAF(x AF, y V) V {
 	case AF:
 		r := make(AF, 0, n)
 		for i, v := range x {
-			for j := 0; j < int(v); j++ {
+			if !v {
 				r = append(r, y[i])
 			}
 		}
@@ -398,7 +437,7 @@ func repeatAF(x AF, y V) V {
 	case AI:
 		r := make(AI, 0, n)
 		for i, v := range x {
-			for j := 0; j < int(v); j++ {
+			if !v {
 				r = append(r, y[i])
 			}
 		}
@@ -406,7 +445,7 @@ func repeatAF(x AF, y V) V {
 	case AS:
 		r := make(AS, 0, n)
 		for i, v := range x {
-			for j := 0; j < int(v); j++ {
+			if !v {
 				r = append(r, y[i])
 			}
 		}
@@ -414,87 +453,63 @@ func repeatAF(x AF, y V) V {
 	case AV:
 		r := make(AV, 0, n)
 		for i, v := range x {
-			for j := 0; j < int(v); j++ {
+			if !v {
+				r = append(r, y.At(i))
+			}
+		}
+		return r
+	default:
+		return errs("f_y : y not an array")
+	}
+}
+
+func weedOutAI(x AI, y V) V {
+	n := 0
+	for _, v := range x {
+		n += int(B2I(v == 0))
+	}
+	switch y := y.(type) {
+	case AB:
+		r := make(AB, 0, n)
+		for i, v := range x {
+			if v == 0 {
+				r = append(r, y[i])
+			}
+		}
+		return r
+	case AF:
+		r := make(AF, 0, n)
+		for i, v := range x {
+			if v == 0 {
+				r = append(r, y[i])
+			}
+		}
+		return r
+	case AI:
+		r := make(AI, 0, n)
+		for i, v := range x {
+			if v == 0 {
+				r = append(r, y[i])
+			}
+		}
+		return r
+	case AS:
+		r := make(AS, 0, n)
+		for i, v := range x {
+			if v == 0 {
+				r = append(r, y[i])
+			}
+		}
+		return r
+	case AV:
+		r := make(AV, 0, n)
+		for i, v := range x {
+			if v == 0 {
 				r = append(r, y[i])
 			}
 		}
 		return r
 	default:
-		return errs("{x}#y : y not an array")
-	}
-}
-
-func repeatAO(x AV, y V) V {
-	switch aType(x) {
-	case tB, tF, tI:
-		n := 0
-		for _, v := range x {
-			switch v := v.(type) {
-			case F:
-				if !isI(v) {
-					return errf("{x}#y : x non-integer (%g)", v)
-				}
-				if v < 0 {
-					return errf("{x}#y : x negative integer (%d)", int(v))
-				}
-				n += int(v)
-			case I:
-				if v < 0 {
-					return errf("{x}#y : negative integer (%d)", v)
-				}
-				n += int(v)
-			}
-		}
-		switch y := y.(type) {
-		case AB:
-			r := make(AB, 0, n)
-			for i, v := range x {
-				max := num2I(v)
-				for j := 0; j < int(max); j++ {
-					r = append(r, y[i])
-				}
-			}
-			return r
-		case AI:
-			r := make(AI, 0, n)
-			for i, v := range x {
-				max := num2I(v)
-				for j := 0; j < int(max); j++ {
-					r = append(r, y[i])
-				}
-			}
-			return r
-		case AF:
-			r := make(AF, 0, n)
-			for i, v := range x {
-				max := num2I(v)
-				for j := 0; j < int(max); j++ {
-					r = append(r, y[i])
-				}
-			}
-			return r
-		case AS:
-			r := make(AS, 0, n)
-			for i, v := range x {
-				max := num2I(v)
-				for j := 0; j < int(max); j++ {
-					r = append(r, y[i])
-				}
-			}
-			return r
-		case AV:
-			r := make(AV, 0, n)
-			for i, v := range x {
-				max := num2I(v)
-				for j := 0; j < int(max); j++ {
-					r = append(r, y[i])
-				}
-			}
-			return r
-		default:
-			return errs("{x}#y : y not an array")
-		}
-	default:
-		return errs("{x}#y : x non-integer")
+		return errs("f#y : y not an array")
 	}
 }
