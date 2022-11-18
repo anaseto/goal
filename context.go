@@ -239,10 +239,13 @@ func (ctx *Context) global(s string) int {
 
 // derive returns a context derived from ctx, suitable for eval.
 func (ctx *Context) derive() *Context {
-	nctx := NewContext()
+	nctx := &Context{}
+	nctx.gCode = &GlobalCode{}
+	nctx.stack = make([]V, 0, 32)
+	nctx.compiler = newCompiler(nctx)
+
 	nctx.variadics = ctx.variadics
 	nctx.variadicsNames = ctx.variadicsNames
-
 	nctx.lambdas = ctx.lambdas
 	nctx.globals = ctx.globals
 	nctx.gNames = ctx.gNames
@@ -253,12 +256,11 @@ func (ctx *Context) derive() *Context {
 }
 
 // merge integrates changes from a context created with derive.
-func (ctx *Context) merge(nctx *Context) *Context {
+func (ctx *Context) merge(nctx *Context) {
 	ctx.lambdas = nctx.lambdas
 	ctx.globals = nctx.globals
 	ctx.gNames = nctx.gNames
 	ctx.gIDs = nctx.gIDs
 	ctx.sources = nctx.sources
 	ctx.errPos = nctx.errPos
-	return nctx
 }
