@@ -235,8 +235,7 @@ func VCut(ctx *Context, args []V) V {
 	case 1:
 		return sortUp(args[0])
 	case 2:
-		return errNYI("dyadic ^")
-		//return Cut(args[1], args[0])
+		return cut(args[1], args[0])
 	default:
 		return errs("^ got too many arguments")
 	}

@@ -1273,32 +1273,20 @@ func enlist(x V) V {
 	}
 }
 
-// Windows returns x↕y. XXX: unused for now.
-func windows(x, y V) V {
-	i := 0
-	switch x := x.(type) {
-	case I:
-		i = int(x)
-	case F:
-		if !isI(x) {
-			return errs("x↕y : x not an integer")
-		}
-		i = int(x)
-	default:
-		return errs("x↕y : x not an integer")
-	}
-	switch x := y.(type) {
+// windows returns i^y.
+func windows(i int, y V) V {
+	switch y := y.(type) {
 	case Array:
-		if i <= 0 || i >= x.Len()+1 {
-			return errs("x↕y : x out of range [0, length]")
+		if i <= 0 || i >= y.Len()+1 {
+			return errf("i^y : i out of range !%d (%d)", y.Len()+1, i)
 		}
-		r := make(AV, 1+x.Len()-i)
+		r := make(AV, 1+y.Len()-i)
 		for j := range r {
-			r[j] = x.Slice(j, j+i)
+			r[j] = y.Slice(j, j+i)
 		}
 		return r
 	default:
-		return errs("x↕y : y not an array")
+		return errs("i^y : y not an array")
 	}
 }
 
@@ -1338,5 +1326,106 @@ func group(x V) V {
 		// TODO: AF and AO
 	default:
 		return errs("=x : x non-integer array")
+	}
+}
+
+// cut returns x^y.
+func cut(x, y V) V {
+	switch x := x.(type) {
+	case I:
+		return windows(int(x), y)
+	case F:
+		if !isI(x) {
+			return errf("i^y : i non-integer (%g)", x)
+		}
+		return windows(int(x), y)
+	case AB:
+		return cut(fromABtoAI(x), y)
+	case AI:
+		return cutAI(x, y)
+	case AF:
+		return cut(toAI(x), y)
+	case AV:
+		z := canonical(x)
+		if _, ok := z.(AV); ok {
+			return errs("x^y : x non-integer")
+		}
+		return cut(z, y)
+	default:
+		return errs("x^y : x non-integer")
+	}
+}
+
+func cutAI(x AI, y V) V {
+	if !sort.IsSorted(sort.IntSlice(x)) {
+		return errs("x^y : x is not ascending")
+	}
+	ylen := y.Len()
+	for _, i := range x {
+		if i < 0 || i > ylen {
+			return errf("x^y : x contains out of bound index (%d)", i)
+		}
+	}
+	if len(x) == 0 {
+		return AV{}
+	}
+	switch y := y.(type) {
+	case AB:
+		res := make(AV, len(x))
+		from := x[0]
+		for i, to := range x[1:] {
+			a := AB{}
+			for _, n := range y[from:to] {
+				a = append(a, n)
+			}
+			res[i] = a
+		}
+		return res
+	case AI:
+		res := make(AV, len(x))
+		from := x[0]
+		for i, to := range x[1:] {
+			a := AI{}
+			for _, n := range y[from:to] {
+				a = append(a, n)
+			}
+			res[i] = a
+		}
+		return res
+	case AF:
+		res := make(AV, len(x))
+		from := x[0]
+		for i, to := range x[1:] {
+			a := AF{}
+			for _, n := range y[from:to] {
+				a = append(a, n)
+			}
+			res[i] = a
+		}
+		return res
+	case AS:
+		res := make(AV, len(x))
+		from := x[0]
+		for i, to := range x[1:] {
+			a := AS{}
+			for _, n := range y[from:to] {
+				a = append(a, n)
+			}
+			res[i] = a
+		}
+		return res
+	case AV:
+		res := make(AV, len(x))
+		from := x[0]
+		for i, to := range x[1:] {
+			a := AV{}
+			for _, n := range y[from:to] {
+				a = append(a, n)
+			}
+			res[i] = a
+		}
+		return canonical(res)
+	default:
+		return errs("x^y : y not an array")
 	}
 }
