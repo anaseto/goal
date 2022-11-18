@@ -8,15 +8,14 @@ import (
 // Context holds the state of the interpreter.
 type Context struct {
 	// program representations (AST and compiled)
-	prog    *Program
+	prog    *GlobalCode
 	lambdas []*LambdaCode
 
 	// execution and stack handling
 	stack     []V
 	frameIdx  int32
 	callDepth int32
-	ipNext    int
-	lambda    int
+	lambda    int // currently executed lambda (if any)
 
 	// values
 	globals        []V
@@ -42,7 +41,7 @@ type Context struct {
 // SetSource should be called to set a source, and
 func NewContext() *Context {
 	ctx := &Context{}
-	ctx.prog = &Program{}
+	ctx.prog = &GlobalCode{}
 	ctx.gIDs = map[string]int{}
 	ctx.stack = make([]V, 0, 32)
 	ctx.compiler = newCompiler(ctx)
@@ -89,7 +88,7 @@ func (ctx *Context) Run() (V, error) {
 	if !ctx.changed(blen, llen, last) {
 		return nil, nil
 	}
-	_, err = ctx.compileExec()
+	_, err = ctx.exec()
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +122,7 @@ func (ctx *Context) RunExpr() (V, error) {
 	if !ctx.changed(blen, llen, last) {
 		return nil, nil
 	}
-	advanced, err := ctx.compileExec()
+	advanced, err := ctx.exec()
 	if err != nil {
 		return nil, err
 	}
@@ -156,17 +155,17 @@ func (ctx *Context) LastIsAssign() bool {
 	}
 }
 
-func (ctx *Context) compileExec() (bool, error) {
+func (ctx *Context) exec() (bool, error) {
 	//fmt.Print(ctx.ProgramString())
-	ip, err := ctx.execute(ctx.prog.Body[ctx.ipNext:])
+	ip, err := ctx.execute(ctx.prog.Body)
 	if err != nil {
 		ctx.stack = ctx.stack[0:]
 		ctx.push(nil)
-		ctx.updateErrPos(ip+ctx.ipNext, nil)
-		ctx.ipNext = len(ctx.prog.Body)
+		ctx.updateErrPos(ip, nil)
+		ctx.prog.Body = ctx.prog.Body[:0]
 		return false, ctx.getError(err)
 	}
-	ctx.ipNext += ip
+	ctx.prog.Body = ctx.prog.Body[:0]
 	if len(ctx.stack) == 0 {
 		// should not happen
 		return false, ctx.getError(errors.New("no result: empty stack"))

@@ -6,8 +6,9 @@ import (
 	"strings"
 )
 
-// Program represents a compiled program.
-type Program struct {
+// GlobalCode represents the last code compiled in global context, outside any
+// lambda.
+type GlobalCode struct {
 	Body []opcode
 	Pos  []int
 
