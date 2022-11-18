@@ -1372,59 +1372,54 @@ func cutAI(x AI, y V) V {
 	switch y := y.(type) {
 	case AB:
 		res := make(AV, len(x))
-		from := x[0]
-		for i, to := range x[1:] {
-			a := AB{}
-			for _, n := range y[from:to] {
-				a = append(a, n)
+		for i, from := range x {
+			to := len(y)
+			if i+1 < len(x) {
+				to = x[i+1]
 			}
-			res[i] = a
+			res[i] = y[from:to]
 		}
 		return res
 	case AI:
 		res := make(AV, len(x))
-		from := x[0]
-		for i, to := range x[1:] {
-			a := AI{}
-			for _, n := range y[from:to] {
-				a = append(a, n)
+		for i, from := range x {
+			to := len(y)
+			if i+1 < len(x) {
+				to = x[i+1]
 			}
-			res[i] = a
+			res[i] = y[from:to]
 		}
 		return res
 	case AF:
 		res := make(AV, len(x))
-		from := x[0]
-		for i, to := range x[1:] {
-			a := AF{}
-			for _, n := range y[from:to] {
-				a = append(a, n)
+		for i, from := range x {
+			to := len(y)
+			if i+1 < len(x) {
+				to = x[i+1]
 			}
-			res[i] = a
+			res[i] = y[from:to]
 		}
 		return res
 	case AS:
 		res := make(AV, len(x))
-		from := x[0]
-		for i, to := range x[1:] {
-			a := AS{}
-			for _, n := range y[from:to] {
-				a = append(a, n)
+		for i, from := range x {
+			to := len(y)
+			if i+1 < len(x) {
+				to = x[i+1]
 			}
-			res[i] = a
+			res[i] = y[from:to]
 		}
 		return res
 	case AV:
 		res := make(AV, len(x))
-		from := x[0]
-		for i, to := range x[1:] {
-			a := AV{}
-			for _, n := range y[from:to] {
-				a = append(a, n)
+		for i, from := range x {
+			to := len(y)
+			if i+1 < len(x) {
+				to = x[i+1]
 			}
-			res[i] = a
+			res[i] = y[from:to]
 		}
-		return canonical(res)
+		return res
 	default:
 		return errs("x^y : y not an array")
 	}
