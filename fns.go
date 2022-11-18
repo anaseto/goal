@@ -650,19 +650,14 @@ func casts(y V) V {
 // eval implements .s.
 func eval(ctx *Context, x V) V {
 	x = canonical(x)
-	nctx := NewContext()
-	nctx.globals = ctx.globals
-	nctx.variadics = ctx.variadics
-	nctx.variadicsNames = ctx.variadicsNames
-	nctx.gNames = ctx.gNames
-
+	nctx := ctx.derive()
 	switch x := x.(type) {
 	case S:
 		v, err := nctx.Eval(string(x))
 		if err != nil {
 			return errf(".s : %v", err)
 		}
-		ctx.gNames = nctx.gNames
+		ctx.merge(nctx)
 		return v
 	default:
 		return errf(".x : bad type for x (%s)", x.Type())

@@ -236,3 +236,29 @@ func (ctx *Context) global(s string) int {
 	ctx.gNames = append(ctx.gNames, s)
 	return len(ctx.gNames) - 1
 }
+
+// derive returns a context derived from ctx, suitable for eval.
+func (ctx *Context) derive() *Context {
+	nctx := NewContext()
+	nctx.variadics = ctx.variadics
+	nctx.variadicsNames = ctx.variadicsNames
+
+	nctx.lambdas = ctx.lambdas
+	nctx.globals = ctx.globals
+	nctx.gNames = ctx.gNames
+	nctx.gIDs = ctx.gIDs
+	nctx.sources = ctx.sources
+	nctx.errPos = ctx.errPos
+	return nctx
+}
+
+// merge integrates changes from a context created with derive.
+func (ctx *Context) merge(nctx *Context) *Context {
+	ctx.lambdas = nctx.lambdas
+	ctx.globals = nctx.globals
+	ctx.gNames = nctx.gNames
+	ctx.gIDs = nctx.gIDs
+	ctx.sources = nctx.sources
+	ctx.errPos = nctx.errPos
+	return nctx
+}
