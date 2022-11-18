@@ -246,7 +246,8 @@ x~y match	3~3 -> 1	2 3~3 2 -> 0
 ,   enlist	,1 -> ,1 (list with one element)
 x,y join	1,2 -> 1 2
 ^   sort	^3 5 0 -> 0 3 5
-x^y cut		TODO
+i^y windows	2^!4 -> (1 2;2 3;3 4)
+x^y cut		2 5^!10 -> (2 3 4;5 6 7 8 9)
 #x  length	#2 4 5 -> 3
 i#y take	2#4 1 5 -> 4 1	    4#3 1 5 -> 3 1 5 3 (cyclic)
 f#y replicate	{0 1 1 0}#4 1 5 3 -> 1 5    {x>0}#2 -3 1 -> 2 1
