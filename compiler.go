@@ -8,9 +8,8 @@ import (
 
 // Program represents a compiled program.
 type Program struct {
-	Body    []opcode
-	Pos     []int
-	Lambdas []*LambdaCode
+	Body []opcode
+	Pos  []int
 
 	last int // index of last non-argument opcode
 }
@@ -80,7 +79,7 @@ func (ctx *Context) ProgramString() string {
 	for id, v := range ctx.constants {
 		fmt.Fprintf(sb, "\t%d\t%v\n", id, v)
 	}
-	for id, lc := range ctx.prog.Lambdas {
+	for id, lc := range ctx.lambdas {
 		fmt.Fprintf(sb, "---- Lambda %d (Rank: %d) -----\n", id, lc.Rank)
 		fmt.Fprintf(sb, "%s", ctx.lambdaString(lc))
 	}
@@ -707,8 +706,8 @@ func (c *compiler) doLambda(b *astBlock) error {
 		}
 	}
 	c.scopeStack = c.scopeStack[:len(c.scopeStack)-1]
-	id := len(c.ctx.prog.Lambdas)
-	c.ctx.prog.Lambdas = append(c.ctx.prog.Lambdas, lc)
+	id := len(c.ctx.lambdas)
+	c.ctx.lambdas = append(c.ctx.lambdas, lc)
 	lc.StartPos = b.StartPos
 	lc.EndPos = b.EndPos
 	lc.String = c.ctx.sources[c.ctx.fname][lc.StartPos:lc.EndPos]

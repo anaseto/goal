@@ -8,7 +8,8 @@ import (
 // Context holds the state of the interpreter.
 type Context struct {
 	// program representations (AST and compiled)
-	prog *Program
+	prog    *Program
+	lambdas []*LambdaCode
 
 	// execution and stack handling
 	stack     []V
@@ -77,11 +78,11 @@ func (ctx *Context) Run() (V, error) {
 	if ctx.scanner == nil {
 		panic("Run: no source specified with SetSource")
 	}
-	blen, llen, last := len(ctx.prog.Body), len(ctx.prog.Lambdas), ctx.prog.last
+	blen, llen, last := len(ctx.prog.Body), len(ctx.lambdas), ctx.prog.last
 	err := ctx.compiler.ParseCompile()
 	if err != nil {
 		ctx.prog.Body = ctx.prog.Body[:blen]
-		ctx.prog.Lambdas = ctx.prog.Lambdas[:llen]
+		ctx.lambdas = ctx.lambdas[:llen]
 		ctx.prog.last = last
 		return nil, ctx.getError(err)
 	}
@@ -97,7 +98,7 @@ func (ctx *Context) Run() (V, error) {
 
 func (ctx *Context) changed(blen, llen, last int) bool {
 	return blen != len(ctx.prog.Body) ||
-		llen != len(ctx.prog.Lambdas) ||
+		llen != len(ctx.lambdas) ||
 		last != ctx.prog.last
 }
 
@@ -108,13 +109,13 @@ func (ctx *Context) RunExpr() (V, error) {
 		panic("RunExpr: no source specified with SetSource")
 	}
 	var eof bool
-	blen, llen, last := len(ctx.prog.Body), len(ctx.prog.Lambdas), ctx.prog.last
+	blen, llen, last := len(ctx.prog.Body), len(ctx.lambdas), ctx.prog.last
 	err := ctx.compiler.ParseCompileNext()
 	if err != nil {
 		_, eof = err.(ErrEOF)
 		if !eof {
 			ctx.prog.Body = ctx.prog.Body[:blen]
-			ctx.prog.Lambdas = ctx.prog.Lambdas[:llen]
+			ctx.lambdas = ctx.lambdas[:llen]
 			ctx.prog.last = last
 			return nil, ctx.getError(err)
 		}

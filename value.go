@@ -323,7 +323,7 @@ func (r DerivedVerb) Rank(ctx *Context) int   { return 2 }
 func (p Projection) Rank(ctx *Context) int    { return countNils(p.Args) }
 func (p ProjectionOne) Rank(ctx *Context) int { return 1 }
 func (q Composition) Rank(ctx *Context) int   { return q.Right.Rank(ctx) }
-func (l Lambda) Rank(ctx *Context) int        { return ctx.prog.Lambdas[l].Rank }
+func (l Lambda) Rank(ctx *Context) int        { return ctx.lambdas[l].Rank }
 
 type zeroFun interface {
 	Function

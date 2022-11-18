@@ -250,7 +250,7 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 	if ctx.callDepth > maxCallDepth {
 		return errs("lambda: exceeded maximum call depth")
 	}
-	lc := ctx.prog.Lambdas[int(id)]
+	lc := ctx.lambdas[int(id)]
 	if lc.Rank < n {
 		return errf("lambda: too many arguments: got %d, expected %d", n, lc.Rank)
 	} else if lc.Rank > n {

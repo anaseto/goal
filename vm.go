@@ -26,7 +26,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			v := ctx.stack[ctx.frameIdx-int32(ops[ip])]
 			if v == nil {
 				return ip - 1, fmt.Errorf("undefined local: %s",
-					ctx.prog.Lambdas[ctx.lambda].Names[int32(ops[ip])])
+					ctx.lambdas[ctx.lambda].Names[int32(ops[ip])])
 			}
 			ctx.push(v)
 			ip++
