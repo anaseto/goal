@@ -86,7 +86,6 @@ func NewScanner(source string) *Scanner {
 	s.source = source
 	s.reader = strings.NewReader(source)
 	s.start = true
-	s.token = Token{Type: EOF, Pos: 0}
 	return s
 }
 
