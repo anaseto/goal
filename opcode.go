@@ -51,7 +51,7 @@ func (ctx *Context) opcodesString(ops []opcode, lc *LambdaCode) string {
 		if lc != nil {
 			pos = lc.Pos[i]
 		} else {
-			pos = ctx.prog.Pos[i]
+			pos = ctx.gCode.Pos[i]
 		}
 		fmt.Fprintf(sb, "%3d %3d %s\t", i, pos, op)
 		switch op {

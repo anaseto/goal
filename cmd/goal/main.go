@@ -85,17 +85,21 @@ func runStdin(ctx *goal.Context) {
 	for {
 		fmt.Print("  ")
 		ctx.SetSource("", lr.readLine())
-		v, err := ctx.RunExpr()
+		v, assigned, err := ctx.RunExpr()
 		if err != nil {
 			_, eof := err.(goal.ErrEOF)
 			if eof {
-				echo(ctx, v)
+				if !assigned {
+					echo(ctx, v)
+				}
 				return
 			}
 			fmt.Println("'ERROR " + strings.TrimSuffix(err.Error(), "\n"))
 			continue
 		}
-		echo(ctx, v)
+		if !assigned {
+			echo(ctx, v)
+		}
 	}
 }
 
@@ -140,7 +144,7 @@ func runCommand(ctx *goal.Context, cmd string) {
 }
 
 func echo(ctx *goal.Context, v goal.V) {
-	if v != nil && !ctx.LastIsAssign() {
+	if v != nil {
 		fmt.Printf("%v\n", v)
 	}
 }

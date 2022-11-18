@@ -9,8 +9,8 @@ import (
 // GlobalCode represents the last code compiled in global context, outside any
 // lambda.
 type GlobalCode struct {
-	Body []opcode
-	Pos  []int
+	Body []opcode // compiled code
+	Pos  []int    // positions in the source
 
 	last int // index of last non-argument opcode
 }
@@ -71,7 +71,7 @@ func (ctx *Context) ProgramString() string {
 	sb := &strings.Builder{}
 	fmt.Fprintln(sb, "---- Compiled program -----")
 	fmt.Fprintln(sb, "Instructions:")
-	fmt.Fprint(sb, ctx.opcodesString(ctx.prog.Body, nil))
+	fmt.Fprint(sb, ctx.opcodesString(ctx.gCode.Body, nil))
 	fmt.Fprintln(sb, "Globals:")
 	for id, name := range ctx.gNames {
 		fmt.Fprintf(sb, "\t%s\t%d\n", name, id)
@@ -171,9 +171,9 @@ func (c *compiler) push(opc opcode) {
 		lc.Body = append(lc.Body, opc)
 		lc.Pos = append(lc.Pos, c.pos)
 	} else {
-		c.ctx.prog.Body = append(c.ctx.prog.Body, opc)
-		c.ctx.prog.Pos = append(c.ctx.prog.Pos, c.pos)
-		c.ctx.prog.last = len(c.ctx.prog.Body) - 1
+		c.ctx.gCode.Body = append(c.ctx.gCode.Body, opc)
+		c.ctx.gCode.Pos = append(c.ctx.gCode.Pos, c.pos)
+		c.ctx.gCode.last = len(c.ctx.gCode.Body) - 1
 	}
 	switch opc {
 	case opApply:
@@ -202,9 +202,9 @@ func (c *compiler) push2(op, arg opcode) {
 		lc.Body = append(lc.Body, op, arg)
 		lc.Pos = append(lc.Pos, c.pos, c.pos)
 	} else {
-		c.ctx.prog.Body = append(c.ctx.prog.Body, op, arg)
-		c.ctx.prog.Pos = append(c.ctx.prog.Pos, c.pos, c.pos)
-		c.ctx.prog.last = len(c.ctx.prog.Body) - 2
+		c.ctx.gCode.Body = append(c.ctx.gCode.Body, op, arg)
+		c.ctx.gCode.Pos = append(c.ctx.gCode.Pos, c.pos, c.pos)
+		c.ctx.gCode.last = len(c.ctx.gCode.Body) - 2
 	}
 	switch op {
 	case opApplyN:
@@ -228,9 +228,9 @@ func (c *compiler) push3(op, arg1, arg2 opcode) {
 		lc.Body = append(lc.Body, op, arg1, arg2)
 		lc.Pos = append(lc.Pos, c.pos, c.pos, c.pos)
 	} else {
-		c.ctx.prog.Body = append(c.ctx.prog.Body, op, arg1, arg2)
-		c.ctx.prog.Pos = append(c.ctx.prog.Pos, c.pos, c.pos, c.pos)
-		c.ctx.prog.last = len(c.ctx.prog.Body) - 2
+		c.ctx.gCode.Body = append(c.ctx.gCode.Body, op, arg1, arg2)
+		c.ctx.gCode.Pos = append(c.ctx.gCode.Pos, c.pos, c.pos, c.pos)
+		c.ctx.gCode.last = len(c.ctx.gCode.Body) - 2
 	}
 	switch op {
 	case opApplyNV:
@@ -280,7 +280,7 @@ func (c *compiler) body() []opcode {
 	if lc != nil {
 		return lc.Body
 	}
-	return c.ctx.prog.Body
+	return c.ctx.gCode.Body
 }
 
 func (c *compiler) doExprs(es exprs) error {

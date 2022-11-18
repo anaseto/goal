@@ -8,7 +8,7 @@ import (
 // Context holds the state of the interpreter.
 type Context struct {
 	// program representations (AST and compiled)
-	prog    *GlobalCode
+	gCode   *GlobalCode
 	lambdas []*LambdaCode
 
 	// execution and stack handling
@@ -41,7 +41,7 @@ type Context struct {
 // SetSource should be called to set a source, and
 func NewContext() *Context {
 	ctx := &Context{}
-	ctx.prog = &GlobalCode{}
+	ctx.gCode = &GlobalCode{}
 	ctx.gIDs = map[string]int{}
 	ctx.stack = make([]V, 0, 32)
 	ctx.compiler = newCompiler(ctx)
@@ -77,12 +77,13 @@ func (ctx *Context) Run() (V, error) {
 	if ctx.scanner == nil {
 		panic("Run: no source specified with SetSource")
 	}
-	blen, llen, last := len(ctx.prog.Body), len(ctx.lambdas), ctx.prog.last
+	blen, llen, last := len(ctx.gCode.Body), len(ctx.lambdas), ctx.gCode.last
 	err := ctx.compiler.ParseCompile()
 	if err != nil {
-		ctx.prog.Body = ctx.prog.Body[:blen]
+		ctx.gCode.Body = ctx.gCode.Body[:blen]
+		ctx.gCode.Pos = ctx.gCode.Pos[:blen]
+		ctx.gCode.last = last
 		ctx.lambdas = ctx.lambdas[:llen]
-		ctx.prog.last = last
 		return nil, ctx.getError(err)
 	}
 	if !ctx.changed(blen, llen, last) {
@@ -96,43 +97,47 @@ func (ctx *Context) Run() (V, error) {
 }
 
 func (ctx *Context) changed(blen, llen, last int) bool {
-	return blen != len(ctx.prog.Body) ||
+	return blen != len(ctx.gCode.Body) ||
 		llen != len(ctx.lambdas) ||
-		last != ctx.prog.last
+		last != ctx.gCode.last
 }
 
 // RunExpr compiles a whole expression from current source, then executes it.
 // It returns ErrEOF if the end of input was reached without issues.
-func (ctx *Context) RunExpr() (V, error) {
+// It returns true if the last compiled instruction was an assignment.  This
+// can be used by a repl to avoid printing results when assigning.
+func (ctx *Context) RunExpr() (V, bool, error) {
 	if ctx.scanner == nil {
 		panic("RunExpr: no source specified with SetSource")
 	}
 	var eof bool
-	blen, llen, last := len(ctx.prog.Body), len(ctx.lambdas), ctx.prog.last
+	blen, llen, last := len(ctx.gCode.Body), len(ctx.lambdas), ctx.gCode.last
 	err := ctx.compiler.ParseCompileNext()
 	if err != nil {
 		_, eof = err.(ErrEOF)
 		if !eof {
-			ctx.prog.Body = ctx.prog.Body[:blen]
+			ctx.gCode.Body = ctx.gCode.Body[:blen]
+			ctx.gCode.Pos = ctx.gCode.Pos[:blen]
+			ctx.gCode.last = last
 			ctx.lambdas = ctx.lambdas[:llen]
-			ctx.prog.last = last
-			return nil, ctx.getError(err)
+			return nil, ctx.lastIsAssign(), ctx.getError(err)
 		}
 	}
+	assigned := ctx.lastIsAssign()
 	if !ctx.changed(blen, llen, last) {
-		return nil, nil
+		return nil, assigned, nil
 	}
 	advanced, err := ctx.exec()
 	if err != nil {
-		return nil, err
+		return nil, assigned, err
 	}
 	if eof {
 		err = ErrEOF{}
 	}
 	if advanced {
-		return ctx.top(), err
+		return ctx.top(), assigned, err
 	}
-	return nil, err
+	return nil, assigned, err
 }
 
 // Eval calls Run with the given string as unnamed source.
@@ -141,13 +146,12 @@ func (ctx *Context) Eval(s string) (V, error) {
 	return ctx.Run()
 }
 
-// LastIsAssign returns true if the last parsed expression was an assignment.
-// This can be used by a repl to avoid printing results when assigning.
-func (ctx *Context) LastIsAssign() bool {
-	if len(ctx.prog.Body) == 0 {
+// lastIsAssign returns true if the last parsed expression was an assignment.
+func (ctx *Context) lastIsAssign() bool {
+	if len(ctx.gCode.Body) == 0 {
 		return false
 	}
-	switch ctx.prog.Body[ctx.prog.last] {
+	switch ctx.gCode.Body[ctx.gCode.last] {
 	case opAssignLocal, opAssignGlobal:
 		return true
 	default:
@@ -157,15 +161,19 @@ func (ctx *Context) LastIsAssign() bool {
 
 func (ctx *Context) exec() (bool, error) {
 	//fmt.Print(ctx.ProgramString())
-	ip, err := ctx.execute(ctx.prog.Body)
+	ip, err := ctx.execute(ctx.gCode.Body)
 	if err != nil {
 		ctx.stack = ctx.stack[0:]
 		ctx.push(nil)
 		ctx.updateErrPos(ip, nil)
-		ctx.prog.Body = ctx.prog.Body[:0]
+		ctx.gCode.Body = ctx.gCode.Body[:0]
+		ctx.gCode.Pos = ctx.gCode.Pos[:0]
+		ctx.gCode.last = 0
 		return false, ctx.getError(err)
 	}
-	ctx.prog.Body = ctx.prog.Body[:0]
+	ctx.gCode.Body = ctx.gCode.Body[:0]
+	ctx.gCode.Pos = ctx.gCode.Pos[:0]
+	ctx.gCode.last = 0
 	if len(ctx.stack) == 0 {
 		// should not happen
 		return false, ctx.getError(errors.New("no result: empty stack"))
@@ -188,7 +196,7 @@ func (ctx *Context) updateErrPos(ip int, lc *LambdaCode) {
 	if lc != nil {
 		fname = lc.Filename
 	}
-	if len(ctx.prog.Body) == 0 {
+	if len(ctx.gCode.Body) == 0 {
 		// should not happen during execution
 		ctx.errPos = append(ctx.errPos, Position{Filename: fname})
 		return
@@ -200,10 +208,10 @@ func (ctx *Context) updateErrPos(ip int, lc *LambdaCode) {
 		pos := lc.Pos[ip]
 		ctx.errPos = append(ctx.errPos, Position{Filename: fname, Pos: pos, Lambda: lc})
 	} else {
-		if ip >= len(ctx.prog.Body) || ip < 0 {
-			ip = len(ctx.prog.Body) - 1
+		if ip >= len(ctx.gCode.Body) || ip < 0 {
+			ip = len(ctx.gCode.Body) - 1
 		}
-		pos := ctx.prog.Pos[ip]
+		pos := ctx.gCode.Pos[ip]
 		ctx.errPos = append(ctx.errPos, Position{Filename: fname, Pos: pos})
 	}
 }
