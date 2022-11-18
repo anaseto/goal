@@ -43,7 +43,7 @@ func (opc opcode) argc() int {
 	}
 }
 
-func (ctx *Context) opcodesString(ops []opcode, lc *LambdaCode) string {
+func (ctx *Context) opcodesString(ops []opcode, lc *lambdaCode) string {
 	sb := &strings.Builder{}
 	for i := 0; i < len(ops); i++ {
 		op := ops[i]

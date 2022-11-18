@@ -8,8 +8,8 @@ import (
 // Context holds the state of the interpreter.
 type Context struct {
 	// program representations (AST and compiled)
-	gCode   *GlobalCode
-	lambdas []*LambdaCode
+	gCode   *globalCode
+	lambdas []*lambdaCode
 
 	// execution and stack handling
 	stack     []V
@@ -41,7 +41,7 @@ type Context struct {
 // SetSource should be called to set a source, and
 func NewContext() *Context {
 	ctx := &Context{}
-	ctx.gCode = &GlobalCode{}
+	ctx.gCode = &globalCode{}
 	ctx.gIDs = map[string]int{}
 	ctx.stack = make([]V, 0, 32)
 	ctx.compiler = newCompiler(ctx)
@@ -201,7 +201,7 @@ func (ctx *Context) getError(err error) error {
 	return e
 }
 
-func (ctx *Context) updateErrPos(ip int, lc *LambdaCode) {
+func (ctx *Context) updateErrPos(ip int, lc *lambdaCode) {
 	fname := ctx.fname
 	if lc != nil {
 		fname = lc.Filename
@@ -250,7 +250,7 @@ func (ctx *Context) global(s string) int {
 // derive returns a context derived from ctx, suitable for eval.
 func (ctx *Context) derive() *Context {
 	nctx := &Context{}
-	nctx.gCode = &GlobalCode{}
+	nctx.gCode = &globalCode{}
 	nctx.stack = make([]V, 0, 32)
 	nctx.compiler = newCompiler(nctx)
 

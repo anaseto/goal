@@ -9,7 +9,7 @@ import (
 type Position struct {
 	Filename string // file name (as obtained from SetSource)
 	Pos      int    // byte offset
-	Lambda   *LambdaCode
+	Lambda   *lambdaCode
 }
 
 // Error represents an error returned by any Context method.

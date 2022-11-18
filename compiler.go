@@ -6,17 +6,17 @@ import (
 	"strings"
 )
 
-// GlobalCode represents the last code compiled in global context, outside any
+// globalCode represents the last code compiled in global context, outside any
 // lambda.
-type GlobalCode struct {
+type globalCode struct {
 	Body []opcode // compiled code
 	Pos  []int    // positions in the source
 
 	last int // index of last non-argument opcode
 }
 
-// LambdaCode represents a compiled user defined function.
-type LambdaCode struct {
+// lambdaCode represents a compiled user defined function.
+type lambdaCode struct {
 	Body      []opcode
 	Pos       []int
 	Names     []string
@@ -48,7 +48,7 @@ const (
 	LocalVar
 )
 
-func (l *LambdaCode) local(s string) (Local, bool) {
+func (l *lambdaCode) local(s string) (Local, bool) {
 	param, ok := l.Locals[s]
 	if ok {
 		return param, true
@@ -87,7 +87,7 @@ func (ctx *Context) ProgramString() string {
 	return sb.String()
 }
 
-func (ctx *Context) lambdaString(lc *LambdaCode) string {
+func (ctx *Context) lambdaString(lc *lambdaCode) string {
 	sb := &strings.Builder{}
 	fmt.Fprintln(sb, "Instructions:")
 	fmt.Fprint(sb, ctx.opcodesString(lc.Body, lc))
@@ -105,7 +105,7 @@ type compiler struct {
 	argc       int           // stack length for current sub-expression
 	slen       int           // virtual stack length
 	arglist    bool          // whether current expression has an argument list
-	scopeStack []*LambdaCode // scope information
+	scopeStack []*lambdaCode // scope information
 	pos        int           // last token position
 	it         astIter       // exprs iterator
 	drop       bool          // whether to add a drop at the end
@@ -268,7 +268,7 @@ func (c *compiler) errorf(format string, a ...interface{}) error {
 	return fmt.Errorf("compile error: "+format, a...)
 }
 
-func (c *compiler) scope() *LambdaCode {
+func (c *compiler) scope() *lambdaCode {
 	if len(c.scopeStack) == 0 {
 		return nil
 	}
@@ -685,7 +685,7 @@ func (c *compiler) doLambda(b *astBlock) error {
 	slen := c.slen
 	c.slen = 0
 	c.argc = 0
-	lc := &LambdaCode{
+	lc := &lambdaCode{
 		Locals:     map[string]Local{},
 		opIdxLocal: map[int]Local{},
 	}
@@ -737,7 +737,7 @@ func (c *compiler) doLambdaArgs(args []string) error {
 	return nil
 }
 
-func (ctx *Context) resolveLambda(lc *LambdaCode) {
+func (ctx *Context) resolveLambda(lc *lambdaCode) {
 	nargs := 0
 	nlocals := 0
 	for _, local := range lc.Locals {
