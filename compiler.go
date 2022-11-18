@@ -22,33 +22,33 @@ type lambdaCode struct {
 	Names     []string
 	Rank      int
 	NamedArgs bool
-	Locals    map[string]Local // arguments and variables
+	Locals    map[string]lambdaLocal // arguments and variables
 	String    string
 	Filename  string
 	StartPos  int
 	EndPos    int
 
-	opIdxLocal map[int]Local // opcode index -> local variable
+	opIdxLocal map[int]lambdaLocal // opcode index -> local variable
 	nVars      int
 }
 
-// Local represents either an argument or a local variable. IDs are
+// lambdaLocal represents either an argument or a local variable. IDs are
 // unique for a given type only.
-type Local struct {
-	Type LocalType
+type lambdaLocal struct {
+	Type localType
 	ID   int
 }
 
-// LocalType represents different kinds of locals.
-type LocalType int
+// localType represents different kinds of locals.
+type localType int
 
 // These constants describe the supported kinds of locals.
 const (
-	LocalArg LocalType = iota
-	LocalVar
+	localArg localType = iota
+	localVar
 )
 
-func (l *lambdaCode) local(s string) (Local, bool) {
+func (l *lambdaCode) local(s string) (lambdaLocal, bool) {
 	param, ok := l.Locals[s]
 	if ok {
 		return param, true
@@ -57,12 +57,12 @@ func (l *lambdaCode) local(s string) (Local, bool) {
 		switch r := rune(s[0]); r {
 		case 'x', 'y', 'z':
 			id := r - 'x'
-			arg := Local{Type: LocalArg, ID: int(id)}
+			arg := lambdaLocal{Type: localArg, ID: int(id)}
 			l.Locals[s] = arg
 			return arg, true
 		}
 	}
-	return Local{}, false
+	return lambdaLocal{}, false
 }
 
 // ProgramString returns a string representation of the compiled program and
@@ -504,7 +504,7 @@ func (c *compiler) doAssign(verbTok, identTok *astToken) bool {
 		lc.opIdxLocal[len(lc.Body)-1] = local
 		return true
 	}
-	local = Local{Type: LocalVar, ID: lc.nVars}
+	local = lambdaLocal{Type: localVar, ID: lc.nVars}
 	lc.Locals[identTok.Text] = local
 	c.push2(opAssignLocal, opArg)
 	lc.opIdxLocal[len(lc.Body)-1] = local
@@ -686,8 +686,8 @@ func (c *compiler) doLambda(b *astBlock) error {
 	c.slen = 0
 	c.argc = 0
 	lc := &lambdaCode{
-		Locals:     map[string]Local{},
-		opIdxLocal: map[int]Local{},
+		Locals:     map[string]lambdaLocal{},
+		opIdxLocal: map[int]lambdaLocal{},
 	}
 	c.scopeStack = append(c.scopeStack, lc)
 	if len(args) != 0 {
@@ -729,8 +729,8 @@ func (c *compiler) doLambdaArgs(args []string) error {
 		if ok {
 			return c.errorf("name %s appears twice in argument list", arg)
 		}
-		lc.Locals[arg] = Local{
-			Type: LocalArg,
+		lc.Locals[arg] = lambdaLocal{
+			Type: localArg,
 			ID:   i,
 		}
 	}
@@ -742,7 +742,7 @@ func (ctx *Context) resolveLambda(lc *lambdaCode) {
 	nlocals := 0
 	for _, local := range lc.Locals {
 		nlocals++
-		if local.Type == LocalArg {
+		if local.Type == localArg {
 			nargs++
 		}
 	}
@@ -754,11 +754,11 @@ func (ctx *Context) resolveLambda(lc *lambdaCode) {
 	nvars := nlocals - nargs
 	lc.Rank = nargs
 	names := make([]string, nlocals)
-	getID := func(local Local) int {
+	getID := func(local lambdaLocal) int {
 		switch local.Type {
-		case LocalArg:
+		case localArg:
 			return local.ID + nvars
-		case LocalVar:
+		case localVar:
 			return local.ID
 		default:
 			panic(fmt.Sprintf("unknown local type: %d", local.Type))
