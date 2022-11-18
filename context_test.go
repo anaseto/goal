@@ -141,6 +141,8 @@ var matchTests = [...]matchTest{
 	{`."2+3"`, `5`},
 	{`a:."2+3";a`, `5`},
 	{`.'"2+3" "2"`, `5 2`},
+	{`."a:3";a`, `3`},
+	{`."f:{x}";f 3`, `3`},
 }
 
 func TestEval(t *testing.T) {
