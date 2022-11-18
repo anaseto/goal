@@ -193,7 +193,8 @@ func (ctx *Context) updateErrPos(ip int, lc *lambdaCode) {
 	}
 }
 
-// Show prints internal information about the context.
+// Show returns a string representation with debug information about the
+// context.
 func (ctx *Context) Show() string {
 	return ctx.programString()
 }
