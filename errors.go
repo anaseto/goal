@@ -5,30 +5,30 @@ import (
 	"strings"
 )
 
-// Position represents a source location, usually where an error occured.
-type Position struct {
+// position represents a source location, usually where an error occured.
+type position struct {
 	Filename string // file name (as obtained from SetSource)
 	Pos      int    // byte offset
-	Lambda   *lambdaCode
+	lambda   *lambdaCode
 }
 
 // Error represents an error returned by any Context method.
 type Error struct {
-	Msg       string     // error text content
-	Positions []Position // error location stack
+	Msg string // error message (without location)
 
-	ctx *Context // context
+	positions []position        // error location stack
+	sources   map[string]string // filename: source
 }
 
-// Error returns the default string representation. In practice, this is only
-// used for debugging, because it uses raw byte offsets to report positions.
+// Error returns the default string representation. It makes uses of position
+// information obtained from its running context.
 func (e *Error) Error() string {
-	if len(e.Positions) == 0 {
+	if len(e.positions) == 0 {
 		return e.Msg
 	}
 	sb := &strings.Builder{}
-	sources := e.ctx.sources
-	for i, pos := range e.Positions {
+	sources := e.sources
+	for i, pos := range e.positions {
 		if i == 0 {
 			if pos.Filename != "" {
 				s, line, col := getPosLine(sources[pos.Filename], pos.Pos)
@@ -43,7 +43,7 @@ func (e *Error) Error() string {
 			s, line, col := getPosLine(sources[pos.Filename], pos.Pos)
 			fmt.Fprintf(sb, "  (called from) %s:%d:%d:%d\n", pos.Filename, line, col, pos.Pos)
 			writeLine(sb, s, col)
-		} else if lc := pos.Lambda; lc != nil {
+		} else if lc := pos.lambda; lc != nil {
 			s, _, col := getPosLine(lc.String, pos.Pos-lc.StartPos)
 			writeLine(sb, s, col)
 		} else {

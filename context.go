@@ -34,7 +34,7 @@ type Context struct {
 	assigned bool              // last instruction was opAssignGlobal
 
 	// error positions stack
-	errPos []Position
+	errPos []position
 }
 
 // NewContext returns a new context for compiling and interpreting code.
@@ -161,8 +161,8 @@ func (ctx *Context) exec() error {
 func (ctx *Context) getError(err error) error {
 	e := &Error{
 		Msg:       err.Error(),
-		Positions: ctx.errPos,
-		ctx:       ctx,
+		positions: ctx.errPos,
+		sources:   ctx.sources,
 	}
 	ctx.errPos = nil
 	return e
@@ -175,7 +175,7 @@ func (ctx *Context) updateErrPos(ip int, lc *lambdaCode) {
 	}
 	if len(ctx.gCode.Body) == 0 {
 		// should not happen during execution
-		ctx.errPos = append(ctx.errPos, Position{Filename: fname})
+		ctx.errPos = append(ctx.errPos, position{Filename: fname})
 		return
 	}
 	if lc != nil {
@@ -183,13 +183,13 @@ func (ctx *Context) updateErrPos(ip int, lc *lambdaCode) {
 			ip = len(lc.Body) - 1
 		}
 		pos := lc.Pos[ip]
-		ctx.errPos = append(ctx.errPos, Position{Filename: fname, Pos: pos, Lambda: lc})
+		ctx.errPos = append(ctx.errPos, position{Filename: fname, Pos: pos, lambda: lc})
 	} else {
 		if ip >= len(ctx.gCode.Body) || ip < 0 {
 			ip = len(ctx.gCode.Body) - 1
 		}
 		pos := ctx.gCode.Pos[ip]
-		ctx.errPos = append(ctx.errPos, Position{Filename: fname, Pos: pos})
+		ctx.errPos = append(ctx.errPos, position{Filename: fname, Pos: pos})
 	}
 }
 

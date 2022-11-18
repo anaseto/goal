@@ -19,10 +19,10 @@ func newParser(ctx *Context) *parser {
 	return p
 }
 
-// ErrEOF signals the end of the input file.
-type ErrEOF struct{}
+// errEOF signals the end of the input file.
+type errEOF struct{}
 
-func (e ErrEOF) Error() string {
+func (e errEOF) Error() string {
 	return "EOF"
 }
 
@@ -37,7 +37,7 @@ func (p *parser) Next() (exprs, error) {
 			case parseSEP:
 				return es, nil
 			case parseEOF:
-				return es, ErrEOF{}
+				return es, errEOF{}
 			}
 			return es, err
 		}

@@ -125,7 +125,7 @@ func (c *compiler) ParseCompile() error {
 	for {
 		err := c.ParseCompileNext()
 		if err != nil {
-			if _, ok := err.(ErrEOF); ok {
+			if _, ok := err.(errEOF); ok {
 				//c = nil
 				return nil
 			}
@@ -144,10 +144,10 @@ func (c *compiler) ParseCompileNext() error {
 	var eof bool
 	exprs, err := c.p.Next()
 	if err != nil {
-		_, eof = err.(ErrEOF)
+		_, eof = err.(errEOF)
 		if !eof {
 			c.ctx.errPos = append(c.ctx.errPos,
-				Position{Filename: c.ctx.fname, Pos: c.p.token.Pos})
+				position{Filename: c.ctx.fname, Pos: c.p.token.Pos})
 			ctx.compiler = newCompiler(ctx)
 			return err
 		}
@@ -160,7 +160,7 @@ func (c *compiler) ParseCompileNext() error {
 		return err
 	}
 	if eof {
-		return ErrEOF{}
+		return errEOF{}
 	}
 	return nil
 }
