@@ -65,9 +65,9 @@ func (l *lambdaCode) local(s string) (lambdaLocal, bool) {
 	return lambdaLocal{}, false
 }
 
-// ProgramString returns a string representation of the compiled program and
+// programString returns a string representation of the compiled program and
 // relevant data.
-func (ctx *Context) ProgramString() string {
+func (ctx *Context) programString() string {
 	sb := &strings.Builder{}
 	fmt.Fprintln(sb, "---- Compiled program -----")
 	fmt.Fprintln(sb, "Instructions:")
@@ -125,11 +125,11 @@ func (c *compiler) ParseCompile() error {
 	for {
 		err := c.ParseCompileNext()
 		if err != nil {
-			_, eof := err.(ErrEOF)
-			if !eof {
-				return err
+			if _, ok := err.(ErrEOF); ok {
+				//c = nil
+				return nil
 			}
-			return nil
+			return err
 		}
 	}
 }

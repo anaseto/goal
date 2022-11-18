@@ -156,15 +156,15 @@ func TestEval(t *testing.T) {
 			ctxRight := NewContext()
 			vRight, errRight := ctxRight.Eval(mt.Right)
 			if !Match(vLeft, vRight) {
-				t.Log(ctxLeft.ProgramString())
+				t.Log(ctxLeft.programString())
 				t.Log(matchString)
 				t.Logf("results: %v vs %v", vLeft, vRight)
 				t.Fail()
 			}
 			if errLeft != nil || errRight != nil {
 				if !t.Failed() {
-					t.Log(ctxLeft.ProgramString())
-					t.Log(ctxRight.ProgramString())
+					t.Log(ctxLeft.programString())
+					t.Log(ctxRight.programString())
 					t.Log(matchString)
 				}
 				t.Logf("return error: `%v` vs `%v`", errLeft, errRight)

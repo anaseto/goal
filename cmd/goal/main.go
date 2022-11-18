@@ -47,13 +47,21 @@ func main() {
 		fmt.Fprintf(os.Stderr, "goal: %v", err)
 		os.Exit(1)
 	}
-	ctx.SetSource(fname, string(bs))
-	_, err = ctx.Run()
+	err = ctx.Compile(fname, string(bs))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "goal: %v", err)
 		if *optD {
 			printProgram(ctx)
 		}
+		os.Exit(1)
+	}
+	if *optD {
+		printProgram(ctx)
+		os.Exit(0)
+	}
+	_, err = ctx.Run()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "goal: %v", err)
 		os.Exit(1)
 	}
 }
@@ -84,19 +92,16 @@ func runStdin(ctx *goal.Context) {
 	fmt.Printf("goal repl, type help\"\" for basic info.\n")
 	for {
 		fmt.Print("  ")
-		ctx.SetSource("", lr.readLine())
-		v, assigned, err := ctx.RunExpr()
+		s, err := lr.readLine()
+		if err != nil && s == "" {
+			return
+		}
+		v, err := ctx.Eval(s)
 		if err != nil {
-			_, eof := err.(goal.ErrEOF)
-			if eof {
-				if !assigned {
-					echo(ctx, v)
-				}
-				return
-			}
 			fmt.Println("'ERROR " + strings.TrimSuffix(err.Error(), "\n"))
 			continue
 		}
+		assigned := ctx.AssignedLast()
 		if !assigned {
 			echo(ctx, v)
 		}
@@ -107,24 +112,24 @@ type lineReader struct {
 	r *bufio.Reader
 }
 
-func (lr lineReader) readLine() string {
+func (lr lineReader) readLine() (string, error) {
 	sb := strings.Builder{}
 	for {
 		r, _, err := lr.r.ReadRune()
 		if err != nil {
-			return sb.String()
+			return sb.String(), err
+		}
+		if r == '\n' {
+			return sb.String(), nil
 		}
 		if r != '\r' {
 			sb.WriteRune(r)
-		}
-		if r == '\n' {
-			return sb.String()
 		}
 	}
 }
 
 func printProgram(ctx *goal.Context) {
-	fmt.Fprintf(os.Stderr, "goal: debug info below:\n%v", ctx.ProgramString())
+	fmt.Fprintf(os.Stderr, "goal: debug info below:\n%v", ctx.Show())
 }
 
 func runDebug(ctx *goal.Context) {

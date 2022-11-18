@@ -2,7 +2,6 @@ package goal
 
 import (
 	"errors"
-	"fmt"
 )
 
 // Context holds the state of the interpreter.
@@ -30,8 +29,9 @@ type Context struct {
 	// parsing, scanning
 	scanner  *Scanner
 	compiler *compiler
-	fname    string
-	sources  map[string]string
+	fname    string            // filename
+	sources  map[string]string // filename: source
+	assigned bool              // last instruction was opAssignGlobal
 
 	// error positions stack
 	errPos []Position
@@ -44,7 +44,6 @@ func NewContext() *Context {
 	ctx.gCode = &globalCode{}
 	ctx.gIDs = map[string]int{}
 	ctx.stack = make([]V, 0, 32)
-	ctx.compiler = newCompiler(ctx)
 	ctx.sources = map[string]string{}
 	ctx.initVariadics()
 	return ctx
@@ -74,103 +73,71 @@ func (ctx *Context) GetGlobal(name string) (V, bool) {
 	return ctx.globals[id], true
 }
 
-// SetSource sets the reader string source for running code. The name is used
-// for error reporting.
-func (ctx *Context) SetSource(name string, s string) {
+// Compile parses and compiles code from the given source string. The name
+// argument is used for error reporting and represents, usually, the filename.
+func (ctx *Context) Compile(name string, s string) error {
+	if len(ctx.gCode.Body) > 0 {
+		ctx.gCode.Body = ctx.gCode.Body[:0]
+		ctx.gCode.Pos = ctx.gCode.Pos[:0]
+		ctx.gCode.last = 0
+	}
 	ctx.fname = name
 	ctx.sources[name] = s
 	ctx.scanner = NewScanner(s)
-}
-
-// Run compiles the code from current source, then executes it.
-func (ctx *Context) Run() (V, error) {
-	if ctx.scanner == nil {
-		panic("Run: no source specified with SetSource")
-	}
-	blen, llen, last := len(ctx.gCode.Body), len(ctx.lambdas), ctx.gCode.last
+	ctx.compiler = newCompiler(ctx)
+	llen := len(ctx.lambdas)
 	err := ctx.compiler.ParseCompile()
 	if err != nil {
-		ctx.gCode.Body = ctx.gCode.Body[:blen]
-		ctx.gCode.Pos = ctx.gCode.Pos[:blen]
-		ctx.gCode.last = last
+		ctx.gCode.Body = ctx.gCode.Body[:0]
+		ctx.gCode.Pos = ctx.gCode.Pos[:0]
+		ctx.gCode.last = 0
 		ctx.lambdas = ctx.lambdas[:llen]
-		return nil, ctx.getError(err)
+		ctx.assigned = false
+		return ctx.getError(err)
 	}
-	if !ctx.changed(blen, llen, last) {
+	ctx.checkAssign()
+	return nil
+}
+
+// Run runs compiled code, if not already done, and returns the result value.
+func (ctx *Context) Run() (V, error) {
+	if len(ctx.gCode.Body) == 0 {
 		return nil, nil
 	}
-	_, err = ctx.exec()
+	err := ctx.exec()
 	if err != nil {
 		return nil, err
 	}
-	return ctx.top(), nil
+	return ctx.pop(), nil
 }
 
-func (ctx *Context) changed(blen, llen, last int) bool {
-	return blen != len(ctx.gCode.Body) ||
-		llen != len(ctx.lambdas) ||
-		last != ctx.gCode.last
-}
-
-// Eval calls Run with the given string as unnamed source.
+// Eval calls Compile with the given string as unnamed source, and then Run.
 func (ctx *Context) Eval(s string) (V, error) {
-	ctx.SetSource("", s)
+	err := ctx.Compile("", s)
+	if err != nil {
+		return nil, err
+	}
 	return ctx.Run()
 }
 
-// RunExpr compiles a whole expression from current source, then executes it.
-// It returns ErrEOF if the end of input was reached without issues.
-// It returns true if the last compiled instruction was an assignment.  This
-// can be used by a repl to avoid printing results when assigning.
-func (ctx *Context) RunExpr() (V, bool, error) {
-	if ctx.scanner == nil {
-		panic("RunExpr: no source specified with SetSource")
-	}
-	var eof bool
-	blen, llen, last := len(ctx.gCode.Body), len(ctx.lambdas), ctx.gCode.last
-	err := ctx.compiler.ParseCompileNext()
-	if err != nil {
-		_, eof = err.(ErrEOF)
-		if !eof {
-			ctx.gCode.Body = ctx.gCode.Body[:blen]
-			ctx.gCode.Pos = ctx.gCode.Pos[:blen]
-			ctx.gCode.last = last
-			ctx.lambdas = ctx.lambdas[:llen]
-			return nil, ctx.lastIsAssign(), ctx.getError(err)
-		}
-	}
-	assigned := ctx.lastIsAssign()
-	if !ctx.changed(blen, llen, last) {
-		return nil, assigned, nil
-	}
-	advanced, err := ctx.exec()
-	if err != nil {
-		return nil, assigned, err
-	}
-	if eof {
-		err = ErrEOF{}
-	}
-	if advanced {
-		return ctx.top(), assigned, err
-	}
-	return nil, assigned, err
+// AssignedLast returns true if the last compiled expression was an assignment.
+func (ctx *Context) AssignedLast() bool {
+	return ctx.assigned
 }
 
-// lastIsAssign returns true if the last parsed expression was an assignment.
-func (ctx *Context) lastIsAssign() bool {
+func (ctx *Context) checkAssign() {
 	if len(ctx.gCode.Body) == 0 {
-		return false
+		ctx.assigned = false
 	}
 	switch ctx.gCode.Body[ctx.gCode.last] {
-	case opAssignLocal, opAssignGlobal:
-		return true
+	case opAssignGlobal:
+		ctx.assigned = true
 	default:
-		return false
+		ctx.assigned = false
 	}
 }
 
-func (ctx *Context) exec() (bool, error) {
-	//fmt.Print(ctx.ProgramString())
+func (ctx *Context) exec() error {
 	ip, err := ctx.execute(ctx.gCode.Body)
 	if err != nil {
 		ctx.stack = ctx.stack[0:]
@@ -179,16 +146,16 @@ func (ctx *Context) exec() (bool, error) {
 		ctx.gCode.Body = ctx.gCode.Body[:0]
 		ctx.gCode.Pos = ctx.gCode.Pos[:0]
 		ctx.gCode.last = 0
-		return false, ctx.getError(err)
+		return ctx.getError(err)
 	}
 	ctx.gCode.Body = ctx.gCode.Body[:0]
 	ctx.gCode.Pos = ctx.gCode.Pos[:0]
 	ctx.gCode.last = 0
 	if len(ctx.stack) == 0 {
 		// should not happen
-		return false, ctx.getError(errors.New("no result: empty stack"))
+		return ctx.getError(errors.New("no result: empty stack"))
 	}
-	return ip > 0, nil
+	return nil
 }
 
 func (ctx *Context) getError(err error) error {
@@ -227,8 +194,8 @@ func (ctx *Context) updateErrPos(ip int, lc *lambdaCode) {
 }
 
 // Show prints internal information about the context.
-func (ctx *Context) Show() {
-	fmt.Printf("%s\n", ctx.ProgramString())
+func (ctx *Context) Show() string {
+	return ctx.programString()
 }
 
 func (ctx *Context) storeConst(v V) int {
