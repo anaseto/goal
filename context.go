@@ -64,6 +64,16 @@ func (ctx *Context) AssignGlobal(name string, v V) {
 	ctx.globals[id] = v
 }
 
+// GetGlobal returns the value attached to a global variable with the given
+// name.
+func (ctx *Context) GetGlobal(name string) (V, bool) {
+	id, ok := ctx.gIDs[name]
+	if !ok {
+		return nil, false
+	}
+	return ctx.globals[id], true
+}
+
 // SetSource sets the reader string source for running code. The name is used
 // for error reporting.
 func (ctx *Context) SetSource(name string, s string) {
@@ -102,6 +112,12 @@ func (ctx *Context) changed(blen, llen, last int) bool {
 		last != ctx.gCode.last
 }
 
+// Eval calls Run with the given string as unnamed source.
+func (ctx *Context) Eval(s string) (V, error) {
+	ctx.SetSource("", s)
+	return ctx.Run()
+}
+
 // RunExpr compiles a whole expression from current source, then executes it.
 // It returns ErrEOF if the end of input was reached without issues.
 // It returns true if the last compiled instruction was an assignment.  This
@@ -138,12 +154,6 @@ func (ctx *Context) RunExpr() (V, bool, error) {
 		return ctx.top(), assigned, err
 	}
 	return nil, assigned, err
-}
-
-// Eval calls Run with the given string as unnamed source.
-func (ctx *Context) Eval(s string) (V, error) {
-	ctx.SetSource("", s)
-	return ctx.Run()
 }
 
 // lastIsAssign returns true if the last parsed expression was an assignment.
