@@ -1,5 +1,7 @@
 package goal
 
+import "strings"
+
 // Matcher is implemented by types that can be matched againts other objects
 // (typically a struct of the same type with fields that match).
 type Matcher interface {
@@ -650,5 +652,32 @@ func occurrenceCount(x V) V {
 		return r
 	default:
 		return errf("⊒x : x not an array (%s)", x.Type())
+	}
+}
+
+// without returns x^y.
+func without(x, y V) V {
+	switch z := x.(type) {
+	case I:
+		return windows(int(z), y)
+	case F:
+		if !isI(z) {
+			return errf("i^y : i non-integer (%g)", z)
+		}
+		return windows(int(z), y)
+	case Array:
+		// TODO: without: properly fix error messages in a better way.
+		// Maybe optimize.
+		y = toArray(y)
+		v := replicate(not(memberOf(x, y)), x)
+		if err, ok := v.(E); ok {
+			idx := strings.IndexRune(string(err), ':')
+			if idx >= 0 {
+				return E("x^y " + string(err[idx:]))
+			}
+		}
+		return v
+	default:
+		return errf("x^y : bad type for x (%s)", x.Type())
 	}
 }

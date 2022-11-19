@@ -1411,19 +1411,3 @@ func group(x V) V {
 		return errs("=x : x non-integer array")
 	}
 }
-
-// without returns x^y.
-func without(x, y V) V {
-	switch x := x.(type) {
-	case I:
-		return windows(int(x), y)
-	case F:
-		if !isI(x) {
-			return errf("i^y : i non-integer (%g)", x)
-		}
-		return windows(int(x), y)
-	default:
-		// TODO: without
-		return errs("x^y : unsupported x")
-	}
-}

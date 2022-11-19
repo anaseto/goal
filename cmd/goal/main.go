@@ -247,7 +247,7 @@ x~y match	3~3 -> 1	2 3~3 2 -> 0
 x,y join	1,2 -> 1 2
 ^   sort	^3 5 0 -> 0 3 5
 i^y windows	2^!4 -> (1 2;2 3;3 4)
-x^y without	TODO
+x^y without	1 2 3 4^2 3 -> 1 4
 #x  length	#2 4 5 -> 3
 i#y take	2#4 1 5 -> 4 1	    4#3 1 5 -> 3 1 5 3 (cyclic)
 f#y replicate	{0 1 1 0}#4 1 5 3 -> 1 5    {x>0}#2 -3 1 -> 2 1
