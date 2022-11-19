@@ -230,7 +230,20 @@ func (x AI) Slice(i, j int) Array { return x[i:j] }
 func (x AF) Slice(i, j int) Array { return x[i:j] }
 func (x AS) Slice(i, j int) Array { return x[i:j] }
 
+// sprintV returns a string for a V deep in an AV.
+func sprintV(ctx *Context, v V) string {
+	av, ok := v.(AV)
+	if ok {
+		return av.sprint(ctx, true)
+	}
+	return v.Sprint(ctx)
+}
+
 func (x AV) Sprint(ctx *Context) string {
+	return x.sprint(ctx, false)
+}
+
+func (x AV) sprint(ctx *Context, deep bool) string {
 	if len(x) == 0 {
 		return `!0`
 	}
@@ -241,7 +254,12 @@ func (x AV) Sprint(ctx *Context) string {
 		return sb.String()
 	}
 	sb.WriteRune('(')
-	sep := "\n "
+	var sep string
+	if deep {
+		sep = ";"
+	} else {
+		sep = "\n "
+	}
 	t := aType(x)
 	switch t {
 	case tB, tI, tF, tS:
@@ -251,7 +269,7 @@ func (x AV) Sprint(ctx *Context) string {
 	}
 	for i, v := range x {
 		if v != nil {
-			fmt.Fprintf(sb, "%s", v.Sprint(ctx))
+			fmt.Fprintf(sb, "%s", sprintV(ctx, v))
 		}
 		if i < len(x)-1 {
 			sb.WriteString(sep)

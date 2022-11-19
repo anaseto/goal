@@ -1,6 +1,6 @@
 package goal
 
-import "fmt"
+//import "fmt"
 
 // VariadicFun represents a variadic function, either a verb or an adverb.
 type VariadicFun struct {
@@ -288,7 +288,7 @@ func VDrop(ctx *Context, args []V) V {
 func VCast(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return S(fmt.Sprint(args[0]))
+		return S(args[0].Sprint(ctx))
 	case 2:
 		return cast(args[1], args[0])
 	default:

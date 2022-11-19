@@ -681,3 +681,143 @@ func without(x, y V) V {
 		return errf("x^y : bad type for x (%s)", x.Type())
 	}
 }
+
+// find returns x?y.
+func find(x, y V) V {
+	y = canonical(y)
+	x = canonical(x)
+	switch x := x.(type) {
+	case AB:
+		return findAB(x, y)
+	case AF:
+		return findAF(x, y)
+	case AI:
+		return findAI(x, y)
+	case AS:
+		return findAS(x, y)
+	case AV:
+		return findAV(x, y)
+	default:
+		return errf("x?y : x not an array (%s)", x.Type())
+	}
+}
+
+func imapAB(x AB) (m [2]int) {
+	m[0] = len(x)
+	m[1] = len(x)
+	if len(x) == 0 {
+		return m
+	}
+	m[int(B2I(x[0]))] = 0
+	for i, v := range x[1:] {
+		if v != x[0] {
+			m[int(B2I(v))] = i + 1
+			break
+		}
+	}
+	return m
+}
+
+func imapAI(x AI) map[int]int {
+	m := map[int]int{}
+	for i, v := range x {
+		_, ok := m[v]
+		if !ok {
+			m[v] = i
+			continue
+		}
+	}
+	return m
+}
+
+func imapAF(x AF) map[float64]int {
+	m := map[float64]int{}
+	for i, v := range x {
+		_, ok := m[v]
+		if !ok {
+			m[v] = i
+			continue
+		}
+	}
+	return m
+}
+
+func imapAS(x AS) map[string]int {
+	m := map[string]int{}
+	for i, v := range x {
+		_, ok := m[v]
+		if !ok {
+			m[v] = i
+			continue
+		}
+	}
+	return m
+}
+
+func findAB(x AB, y V) V {
+	switch y := y.(type) {
+	case I:
+		for i, v := range x {
+			if B2I(v) == y {
+				return I(i)
+			}
+		}
+		return I(x.Len())
+	case F:
+		if !isI(y) {
+			return I(x.Len())
+		}
+		return findAB(x, I(y))
+	case AB:
+		m := imapAB(x)
+		res := make(AI, y.Len())
+		for i, v := range y {
+			res[i] = m[B2I(v)]
+		}
+		return res
+	case AI:
+		m := imapAB(x)
+		res := make(AI, y.Len())
+		for i, v := range y {
+			if v != 0 && v != 1 {
+				res[i] = x.Len()
+			} else {
+				res[i] = m[v]
+			}
+		}
+		return res
+	case AF:
+		m := imapAB(x)
+		res := make(AI, y.Len())
+		for i, v := range y {
+			if v != 0 && v != 1 {
+				res[i] = x.Len()
+			} else {
+				res[i] = m[int(v)]
+			}
+		}
+		return res
+	default:
+		res := make(AI, y.Len())
+		for i := range res {
+			res[i] = x.Len()
+		}
+		return res
+	}
+}
+
+func findAF(x AF, y V) V {
+	return nil
+}
+
+func findAI(x AI, y V) V {
+	return nil
+}
+
+func findAS(x AS, y V) V {
+	return nil
+}
+
+func findAV(x AV, y V) V {
+	return nil
+}
