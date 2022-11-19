@@ -228,7 +228,9 @@ func (x AV) String() string {
 	sep := "\n "
 	t := aType(x)
 	switch t {
-	case tB, tI, tF, tS, tV:
+	case tB, tI, tF, tS:
+		sep = " "
+	case tV:
 		sep = ";"
 	}
 	for i, v := range x {
