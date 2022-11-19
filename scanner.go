@@ -163,6 +163,15 @@ func (s *Scanner) emitString(t TokenType) stateFn {
 	return nil
 }
 
+func (s *Scanner) emitIDENT() stateFn {
+	switch s.source[s.tpos:s.npos] {
+	case "in":
+		return s.emitOp(VERB)
+	default:
+		return s.emitString(IDENT)
+	}
+}
+
 func (s *Scanner) emitOp(t TokenType) stateFn {
 	s.start = false
 	s.token = Token{Type: t, Pos: s.tpos, Text: s.source[s.tpos:s.npos]}
@@ -386,17 +395,17 @@ func scanIdent(s *Scanner) stateFn {
 		r := s.peek()
 		switch {
 		case r == eof:
-			return s.emitString(IDENT)
+			return s.emitIDENT()
 		case r == '.':
 			r = s.peek()
 			if !isAlpha(r) {
-				return s.emitString(IDENT)
+				return s.emitIDENT()
 			}
 			s.next()
 		case isAlphaNum(r):
 			s.next()
 		default:
-			return s.emitString(IDENT)
+			return s.emitIDENT()
 		}
 	}
 }

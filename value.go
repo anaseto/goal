@@ -62,6 +62,7 @@ const (
 	vFind                     // ?
 	vApply                    // @
 	vApplyN                   // .
+	vIn                       // in
 	vList                     // (...;...;...)
 	vEach                     // ' (adverb)
 	vFold                     // / (adverb)

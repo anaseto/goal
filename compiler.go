@@ -386,6 +386,12 @@ func (c *compiler) doToken(tok *astToken) error {
 }
 
 func parseNumber(s string) (V, error) {
+	switch s {
+	case "0w":
+		s = "Inf"
+	case "-0w":
+		s = "-Inf"
+	}
 	i, errI := strconv.ParseInt(s, 0, 0)
 	if errI == nil {
 		return I(i), nil
@@ -554,6 +560,8 @@ func parseBuiltin(s string) (verb Variadic) {
 		verb = vApply
 	case ".":
 		verb = vApplyN
+	case "in":
+		verb = vIn
 	case "'":
 		verb = vEach
 	case "/":

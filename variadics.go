@@ -30,6 +30,7 @@ func (ctx *Context) initVariadics() {
 		vFind:     {Func: VFind},
 		vApply:    {Func: VApply},
 		vApplyN:   {Func: VApplyN},
+		vIn:       {Func: VIn},
 		vList:     {Func: VList},
 		vEach:     {Func: VEach, Adverb: true},
 		vFold:     {Func: VFold, Adverb: true},
@@ -335,6 +336,18 @@ func VApplyN(ctx *Context, args []V) V {
 		return ctx.applyN(v, av.Len())
 	default:
 		return errs(". got too many arguments")
+	}
+}
+
+// VIn implements the "in" variadic verb.
+func VIn(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		return errs("in : got only one argument")
+	case 2:
+		return memberOf(args[1], args[0])
+	default:
+		return errs("in : got too many arguments")
 	}
 }
 

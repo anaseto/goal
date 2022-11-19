@@ -387,7 +387,7 @@ func markFirsts(x V) V {
 	}
 }
 
-// memberOf returns x∊y. XXX unused for now
+// memberOf returns x in y. XXX unused for now
 func memberOf(x, y V) V {
 	if length(y) == 0 || length(x) == 0 {
 		switch y.(type) {
@@ -400,7 +400,7 @@ func memberOf(x, y V) V {
 				return B2I(false)
 			}
 		default:
-			return errf("x∊y : y not an array (%s)", y.Type())
+			return errf("x in y : y not an array (%s)", y.Type())
 		}
 	}
 	y = canonical(y)
@@ -417,7 +417,7 @@ func memberOf(x, y V) V {
 	case AV:
 		return memberOfAO(x, y)
 	default:
-		return errf("x∊y : y not an array (%s)", y.Type())
+		return errf("x in y : y not an array (%s)", y.Type())
 	}
 }
 
