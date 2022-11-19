@@ -225,12 +225,18 @@ func (x AV) String() string {
 		return sb.String()
 	}
 	sb.WriteRune('(')
+	sep := "\n "
+	t := aType(x)
+	switch t {
+	case tB, tI, tF, tS, tV:
+		sep = ";"
+	}
 	for i, v := range x {
 		if v != nil {
 			fmt.Fprintf(sb, "%v", v)
 		}
 		if i < len(x)-1 {
-			sb.WriteRune(';')
+			sb.WriteString(sep)
 		}
 	}
 	sb.WriteRune(')')
