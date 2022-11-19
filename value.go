@@ -264,8 +264,6 @@ func (x AV) sprint(ctx *Context, deep bool) string {
 	switch t {
 	case tB, tI, tF, tS:
 		sep = " "
-	case tV:
-		sep = ";"
 	}
 	for i, v := range x {
 		if v != nil {
