@@ -150,7 +150,7 @@ func runCommand(ctx *goal.Context, cmd string) {
 
 func echo(ctx *goal.Context, v goal.V) {
 	if v != nil {
-		fmt.Printf("%v\n", v)
+		fmt.Printf("%s\n", v.Sprint(ctx))
 	}
 }
 

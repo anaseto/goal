@@ -44,7 +44,7 @@ func (e *Error) Error() string {
 			fmt.Fprintf(sb, "  (called from) %s:%d:%d:%d\n", pos.Filename, line, col, pos.Pos)
 			writeLine(sb, s, col)
 		} else if lc := pos.lambda; lc != nil {
-			s, _, col := getPosLine(lc.String, pos.Pos-lc.StartPos)
+			s, _, col := getPosLine(lc.Source, pos.Pos-lc.StartPos)
 			writeLine(sb, s, col)
 		} else {
 			s, _, col := getPosLine(sources[""], pos.Pos)

@@ -13,6 +13,7 @@ import (
 type V interface {
 	Len() int
 	Type() string
+	Sprint(*Context) string
 }
 
 type F float64 // F represents real numbers.
@@ -20,15 +21,18 @@ type I int     // I represents integers.
 type S string  // S represents (immutable) strings of bytes.
 type E string  // E represents errors
 
-func (f F) Len() int       { return 1 }
-func (i I) Len() int       { return 1 }
-func (s S) Len() int       { return 1 }
-func (e E) Len() int       { return 1 }
-func (f F) Type() string   { return "f" }
-func (i I) Type() string   { return "i" }
-func (s S) Type() string   { return "s" }
-func (e E) Type() string   { return "e" }
-func (s S) String() string { return strconv.Quote(string(s)) }
+func (f F) Len() int                   { return 1 }
+func (i I) Len() int                   { return 1 }
+func (s S) Len() int                   { return 1 }
+func (e E) Len() int                   { return 1 }
+func (f F) Type() string               { return "f" }
+func (i I) Type() string               { return "i" }
+func (s S) Type() string               { return "s" }
+func (e E) Type() string               { return "e" }
+func (f F) Sprint(ctx *Context) string { return fmt.Sprintf("%g", f) }
+func (i I) Sprint(ctx *Context) string { return fmt.Sprintf("%d", i) }
+func (s S) Sprint(ctx *Context) string { return strconv.Quote(string(s)) }
+func (e E) Sprint(ctx *Context) string { return fmt.Sprintf("'ERROR %s", e) }
 
 func (e E) Error() string { return string(e) }
 
@@ -90,7 +94,8 @@ var vStrings = [...]string{
 	vFind:     "?",
 	vApply:    "@",
 	vApplyN:   ".",
-	vList:     "List",
+	vIn:       "in",
+	vList:     "list",
 	vEach:     "'",
 	vFold:     "/",
 	vScan:     "\\",
@@ -100,7 +105,11 @@ func (v Variadic) String() string {
 	if v <= vScan {
 		return vStrings[v]
 	}
-	return "{Variadic}"
+	return fmt.Sprintf("{Variadic %d}", v)
+}
+
+func (v Variadic) Sprint(ctx *Context) string {
+	return v.String()
 }
 
 // DerivedVerb represents values modified by an adverb.
@@ -147,14 +156,14 @@ func (q Composition) Type() string   { return "q" }
 func (r DerivedVerb) Type() string   { return "r" }
 func (l Lambda) Type() string        { return "l" }
 
-func (p Projection) String() string {
+func (p Projection) Sprint(ctx *Context) string {
 	sb := &strings.Builder{}
-	fmt.Fprintf(sb, "%v", p.Fun)
+	fmt.Fprintf(sb, "%s", p.Fun.Sprint(ctx))
 	sb.WriteRune('[')
 	for i := len(p.Args) - 1; i >= 0; i-- {
 		arg := p.Args[i]
 		if arg != nil {
-			fmt.Fprintf(sb, "%v", arg)
+			fmt.Fprintf(sb, "%s", arg.Sprint(ctx))
 		}
 		if i > 0 {
 			sb.WriteRune(';')
@@ -164,22 +173,29 @@ func (p Projection) String() string {
 	return sb.String()
 }
 
-func (p ProjectionOne) String() string {
-	return fmt.Sprintf("%v[%v;]", p.Fun, p.Arg)
+func (p ProjectionOne) Sprint(ctx *Context) string {
+	return fmt.Sprintf("%s[%s;]", p.Fun.Sprint(ctx), p.Arg.Sprint(ctx))
 }
 
-func (q Composition) String() string { return fmt.Sprintf("%v %v", q.Left, q.Right) }
+func (q Composition) Sprint(ctx *Context) string {
+	return fmt.Sprintf("%s %s", q.Left.Sprint(ctx), q.Right.Sprint(ctx))
+}
 
-func (r DerivedVerb) String() string {
+func (r DerivedVerb) Sprint(ctx *Context) string {
 	switch arg := r.Arg.(type) {
 	case Composition:
-		return fmt.Sprintf("(%v)%v", arg, r.Fun)
+		return fmt.Sprintf("(%s)%s", arg.Sprint(ctx), r.Fun.Sprint(ctx))
 	default:
-		return fmt.Sprintf("%v%v", arg, r.Fun)
+		return fmt.Sprintf("%s%s", arg.Sprint(ctx), r.Fun.Sprint(ctx))
 	}
 }
 
-func (l Lambda) String() string { return fmt.Sprintf("{Lambda %d}", l) }
+func (l Lambda) Sprint(ctx *Context) string {
+	if l < 0 || int(l) >= len(ctx.lambdas) {
+		return fmt.Sprintf("{Lambda %d}", l)
+	}
+	return ctx.lambdas[l].Source
+}
 
 // Array interface is satisfied by the different kind of supported arrays.
 // Typical implementation is given in comments.
@@ -214,14 +230,14 @@ func (x AI) Slice(i, j int) Array { return x[i:j] }
 func (x AF) Slice(i, j int) Array { return x[i:j] }
 func (x AS) Slice(i, j int) Array { return x[i:j] }
 
-func (x AV) String() string {
+func (x AV) Sprint(ctx *Context) string {
 	if len(x) == 0 {
 		return `!0`
 	}
 	sb := &strings.Builder{}
 	if len(x) == 1 {
 		sb.WriteRune(',')
-		fmt.Fprintf(sb, "%v", x[0])
+		fmt.Fprintf(sb, "%s", x[0].Sprint(ctx))
 		return sb.String()
 	}
 	sb.WriteRune('(')
@@ -235,7 +251,7 @@ func (x AV) String() string {
 	}
 	for i, v := range x {
 		if v != nil {
-			fmt.Fprintf(sb, "%v", v)
+			fmt.Fprintf(sb, "%s", v.Sprint(ctx))
 		}
 		if i < len(x)-1 {
 			sb.WriteString(sep)
@@ -244,7 +260,7 @@ func (x AV) String() string {
 	sb.WriteRune(')')
 	return sb.String()
 }
-func (x AB) String() string {
+func (x AB) Sprint(ctx *Context) string {
 	if len(x) == 0 {
 		return `!0`
 	}
@@ -262,7 +278,7 @@ func (x AB) String() string {
 	}
 	return sb.String()
 }
-func (x AI) String() string {
+func (x AI) Sprint(ctx *Context) string {
 	if len(x) == 0 {
 		return `!0`
 	}
@@ -281,7 +297,7 @@ func (x AI) String() string {
 	return sb.String()
 }
 
-func (x AF) String() string {
+func (x AF) Sprint(ctx *Context) string {
 	if len(x) == 0 {
 		return `!0`
 	}
@@ -300,7 +316,7 @@ func (x AF) String() string {
 	return sb.String()
 }
 
-func (x AS) String() string {
+func (x AS) Sprint(ctx *Context) string {
 	if len(x) == 0 {
 		return `0#""`
 	}

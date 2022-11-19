@@ -167,7 +167,7 @@ func TestEval(t *testing.T) {
 			if !Match(vLeft, vRight) {
 				t.Log(ctxLeft.programString())
 				t.Log(matchString)
-				t.Logf("results: %v vs %v", vLeft, vRight)
+				t.Logf("results: %s vs %s", vLeft.Sprint(ctxLeft), vRight.Sprint(ctxRight))
 				t.Fail()
 			}
 			if errLeft != nil || errRight != nil {

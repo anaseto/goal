@@ -23,7 +23,7 @@ type lambdaCode struct {
 	Rank      int
 	NamedArgs bool
 	Locals    map[string]lambdaLocal // arguments and variables
-	String    string
+	Source    string
 	Filename  string
 	StartPos  int
 	EndPos    int
@@ -719,7 +719,7 @@ func (c *compiler) doLambda(b *astBlock) error {
 	c.ctx.lambdas = append(c.ctx.lambdas, lc)
 	lc.StartPos = b.StartPos
 	lc.EndPos = b.EndPos
-	lc.String = c.ctx.sources[c.ctx.fname][lc.StartPos:lc.EndPos]
+	lc.Source = c.ctx.sources[c.ctx.fname][lc.StartPos:lc.EndPos]
 	lc.Filename = c.ctx.fname
 	c.ctx.resolveLambda(lc)
 	c.argc = argc
