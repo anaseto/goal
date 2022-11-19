@@ -260,7 +260,7 @@ $x  string	$2 3 -> "2 3"
 s$y cast	"i"$2.3 -> 2    "i"$"ab" -> 97 98   "s"$97 98 -> "ab"
 s$y parse num	"n"$"1.5" -> 1.5
 ?x  uniq	?2 2 3 4 3 3 -> 2 3 4
-x?y find	TODO
+x?y find	3 2 1?2 -> 1	3 2 1?0	-> 3
 @x  type	@2 -> "i"    @"ab" -> "s"    @2 3 -> "I"
 x@y apply	1 2 3@2 -> 3	1 2 3[2] -> 3
 .s  eval	."2+3" -> 5
