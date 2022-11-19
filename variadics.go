@@ -23,7 +23,7 @@ func (ctx *Context) initVariadics() {
 		vEqual:    {Func: VEqual},
 		vMatch:    {Func: VMatch},
 		vJoin:     {Func: VJoin},
-		vCut:      {Func: VCut},
+		vWithout:  {Func: VWithout},
 		vTake:     {Func: VTake},
 		vDrop:     {Func: VDrop},
 		vCast:     {Func: VCast},
@@ -50,7 +50,7 @@ func (ctx *Context) initVariadics() {
 		vEqual:    "=",
 		vMatch:    "~",
 		vJoin:     ",",
-		vCut:      "^",
+		vWithout:  "^",
 		vTake:     "#",
 		vDrop:     "_",
 		vCast:     "$",
@@ -229,13 +229,13 @@ func VJoin(ctx *Context, args []V) V {
 	}
 }
 
-// VCut implements the ^ variadic verb.
-func VCut(ctx *Context, args []V) V {
+// VWithout implements the ^ variadic verb.
+func VWithout(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return sortUp(args[0])
 	case 2:
-		return cut(args[1], args[0])
+		return without(args[1], args[0])
 	default:
 		return errs("^ got too many arguments")
 	}

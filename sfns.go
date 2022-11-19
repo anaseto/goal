@@ -139,18 +139,32 @@ func first(x V) V {
 
 // drop returns i_x.
 func drop(x, y V) V {
-	i := 0
 	switch x := x.(type) {
 	case I:
-		i = int(x)
+		return dropi(int(x), y)
 	case F:
 		if !isI(x) {
 			return errf("i_y : non-integer i (%s)", x.Type())
 		}
-		i = int(x)
+		return dropi(int(x), y)
+	case AB:
+		return drop(fromABtoAI(x), y)
+	case AI:
+		return cutAI(x, y)
+	case AF:
+		return drop(toAI(x), y)
+	case AV:
+		z := canonical(x)
+		if _, ok := z.(AV); ok {
+			return errs("x_y : x non-integer")
+		}
+		return drop(z, y)
 	default:
 		return errf("i_y : non-integer i (%s)", x.Type())
 	}
+}
+
+func dropi(i int, y V) V {
 	y = toArray(y)
 	switch y := y.(type) {
 	case Array:
@@ -169,6 +183,75 @@ func drop(x, y V) V {
 		}
 	default:
 		return y
+	}
+}
+
+func cutAI(x AI, y V) V {
+	if !sort.IsSorted(sort.IntSlice(x)) {
+		return errs("x^y : x is not ascending")
+	}
+	ylen := y.Len()
+	for _, i := range x {
+		if i < 0 || i > ylen {
+			return errf("x^y : x contains out of bound index (%d)", i)
+		}
+	}
+	if len(x) == 0 {
+		return AV{}
+	}
+	switch y := y.(type) {
+	case AB:
+		res := make(AV, len(x))
+		for i, from := range x {
+			to := len(y)
+			if i+1 < len(x) {
+				to = x[i+1]
+			}
+			res[i] = y[from:to]
+		}
+		return res
+	case AI:
+		res := make(AV, len(x))
+		for i, from := range x {
+			to := len(y)
+			if i+1 < len(x) {
+				to = x[i+1]
+			}
+			res[i] = y[from:to]
+		}
+		return res
+	case AF:
+		res := make(AV, len(x))
+		for i, from := range x {
+			to := len(y)
+			if i+1 < len(x) {
+				to = x[i+1]
+			}
+			res[i] = y[from:to]
+		}
+		return res
+	case AS:
+		res := make(AV, len(x))
+		for i, from := range x {
+			to := len(y)
+			if i+1 < len(x) {
+				to = x[i+1]
+			}
+			res[i] = y[from:to]
+		}
+		return res
+	case AV:
+		res := make(AV, len(x))
+		for i, from := range x {
+			to := len(y)
+			if i+1 < len(x) {
+				to = x[i+1]
+			}
+			res[i] = y[from:to]
+		}
+		return res
+	default:
+		return errs("x^y : y not an array")
 	}
 }
 
@@ -1329,8 +1412,8 @@ func group(x V) V {
 	}
 }
 
-// cut returns x^y.
-func cut(x, y V) V {
+// without returns x^y.
+func without(x, y V) V {
 	switch x := x.(type) {
 	case I:
 		return windows(int(x), y)
@@ -1339,88 +1422,8 @@ func cut(x, y V) V {
 			return errf("i^y : i non-integer (%g)", x)
 		}
 		return windows(int(x), y)
-	case AB:
-		return cut(fromABtoAI(x), y)
-	case AI:
-		return cutAI(x, y)
-	case AF:
-		return cut(toAI(x), y)
-	case AV:
-		z := canonical(x)
-		if _, ok := z.(AV); ok {
-			return errs("x^y : x non-integer")
-		}
-		return cut(z, y)
 	default:
-		return errs("x^y : x non-integer")
-	}
-}
-
-func cutAI(x AI, y V) V {
-	if !sort.IsSorted(sort.IntSlice(x)) {
-		return errs("x^y : x is not ascending")
-	}
-	ylen := y.Len()
-	for _, i := range x {
-		if i < 0 || i > ylen {
-			return errf("x^y : x contains out of bound index (%d)", i)
-		}
-	}
-	if len(x) == 0 {
-		return AV{}
-	}
-	switch y := y.(type) {
-	case AB:
-		res := make(AV, len(x))
-		for i, from := range x {
-			to := len(y)
-			if i+1 < len(x) {
-				to = x[i+1]
-			}
-			res[i] = y[from:to]
-		}
-		return res
-	case AI:
-		res := make(AV, len(x))
-		for i, from := range x {
-			to := len(y)
-			if i+1 < len(x) {
-				to = x[i+1]
-			}
-			res[i] = y[from:to]
-		}
-		return res
-	case AF:
-		res := make(AV, len(x))
-		for i, from := range x {
-			to := len(y)
-			if i+1 < len(x) {
-				to = x[i+1]
-			}
-			res[i] = y[from:to]
-		}
-		return res
-	case AS:
-		res := make(AV, len(x))
-		for i, from := range x {
-			to := len(y)
-			if i+1 < len(x) {
-				to = x[i+1]
-			}
-			res[i] = y[from:to]
-		}
-		return res
-	case AV:
-		res := make(AV, len(x))
-		for i, from := range x {
-			to := len(y)
-			if i+1 < len(x) {
-				to = x[i+1]
-			}
-			res[i] = y[from:to]
-		}
-		return res
-	default:
-		return errs("x^y : y not an array")
+		// TODO: without
+		return errs("x^y : unsupported x")
 	}
 }

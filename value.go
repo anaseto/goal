@@ -55,7 +55,7 @@ const (
 	vEqual                    // =
 	vMatch                    // ~
 	vJoin                     // ,
-	vCut                      // ^
+	vWithout                  // ^
 	vTake                     // #
 	vDrop                     // _
 	vCast                     // $
@@ -82,7 +82,7 @@ var vStrings = [...]string{
 	vEqual:    "=",
 	vMatch:    "~",
 	vJoin:     ",",
-	vCut:      "^",
+	vWithout:  "^",
 	vTake:     "#",
 	vDrop:     "_",
 	vCast:     "$",

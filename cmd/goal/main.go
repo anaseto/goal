@@ -247,13 +247,14 @@ x~y match	3~3 -> 1	2 3~3 2 -> 0
 x,y join	1,2 -> 1 2
 ^   sort	^3 5 0 -> 0 3 5
 i^y windows	2^!4 -> (1 2;2 3;3 4)
-x^y cut		2 5^!10 -> (2 3 4;5 6 7 8 9)
+x^y without	TODO
 #x  length	#2 4 5 -> 3
 i#y take	2#4 1 5 -> 4 1	    4#3 1 5 -> 3 1 5 3 (cyclic)
 f#y replicate	{0 1 1 0}#4 1 5 3 -> 1 5    {x>0}#2 -3 1 -> 2 1
 _N  floor	_2.3 -> 2
 _s  to lower	_"ABC" -> "abc"
 i_x drop	2_3 4 5 6 -> 5 6
+x_y cut		2 5_!10 -> (2 3 4;5 6 7 8 9)
 f_x weed out	{0 1 1 0}_4 1 5 3 -> 4 3    {x>0}_2 -3 1 -> ,-3
 $x  string	$2 3 -> "2 3"
 s$y cast	"i"$2.3 -> 2    "i"$"ab" -> 97 98   "s"$97 98 -> "ab"

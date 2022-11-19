@@ -541,7 +541,7 @@ func parseBuiltin(s string) (verb Variadic) {
 	case ",":
 		verb = vJoin
 	case "^":
-		verb = vCut
+		verb = vWithout
 	case "#":
 		verb = vTake
 	case "_":
