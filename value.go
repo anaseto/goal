@@ -260,6 +260,7 @@ func (x AV) Sprint(ctx *Context) string {
 	sb.WriteRune(')')
 	return sb.String()
 }
+
 func (x AB) Sprint(ctx *Context) string {
 	if len(x) == 0 {
 		return `!0`
@@ -278,6 +279,7 @@ func (x AB) Sprint(ctx *Context) string {
 	}
 	return sb.String()
 }
+
 func (x AI) Sprint(ctx *Context) string {
 	if len(x) == 0 {
 		return `!0`
