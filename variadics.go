@@ -302,7 +302,7 @@ func VFind(ctx *Context, args []V) V {
 	case 1:
 		return uniq(args[0])
 	case 2:
-		return errNYI("dyadic ?")
+		return find(args[1], args[0])
 	default:
 		return errs("? got too many arguments")
 	}
