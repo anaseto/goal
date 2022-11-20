@@ -84,7 +84,7 @@ func Match(x, y V) bool {
 			return true
 		}
 		for i := 0; i < l; i++ {
-			if !Match(x.At(i), y.At(i)) {
+			if !Match(x.at(i), y.at(i)) {
 				return false
 			}
 		}
@@ -574,7 +574,7 @@ func memberOfArray(x, y array) V {
 	res := make(AB, x.Len())
 	for i := 0; i < x.Len(); i++ {
 		for j := 0; j < y.Len(); j++ {
-			if Match(y.At(i), x.At(j)) {
+			if Match(y.at(i), x.at(j)) {
 				res[i] = true
 				break
 			}
@@ -993,7 +993,7 @@ func findArray(x, y array) V {
 	}
 	for i := 0; i < y.Len(); i++ {
 		for j := 0; j < x.Len(); j++ {
-			if Match(y.At(i), x.At(j)) {
+			if Match(y.at(i), x.at(j)) {
 				res[i] = j
 				break
 			}

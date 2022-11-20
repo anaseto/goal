@@ -234,7 +234,7 @@ func (l Lambda) Sprint(ctx *Context) string {
 // Typical implementation is given in comments.
 type array interface {
 	V
-	At(i int) V           // x[i]
+	at(i int) V           // x[i]
 	Slice(i, j int) array // x[i:j]
 	Select(y AI) V        // x[y] (goal code)
 }
@@ -251,11 +251,11 @@ func (x AI) Type() string { return "I" }
 func (x AF) Type() string { return "F" }
 func (x AS) Type() string { return "S" }
 
-func (x AV) At(i int) V { return x[i] }
-func (x AB) At(i int) V { return B2I(x[i]) }
-func (x AI) At(i int) V { return I(x[i]) }
-func (x AF) At(i int) V { return F(x[i]) }
-func (x AS) At(i int) V { return S(x[i]) }
+func (x AV) at(i int) V { return x[i] }
+func (x AB) at(i int) V { return B2I(x[i]) }
+func (x AI) at(i int) V { return I(x[i]) }
+func (x AF) at(i int) V { return F(x[i]) }
+func (x AS) at(i int) V { return S(x[i]) }
 
 func (x AV) Slice(i, j int) array { return x[i:j] }
 func (x AB) Slice(i, j int) array { return x[i:j] }

@@ -336,7 +336,7 @@ func VApplyN(ctx *Context, args []V) V {
 		v := args[1]
 		av := toArray(args[0]).(array)
 		for i := av.Len() - 1; i >= 0; i-- {
-			ctx.push(av.At(i))
+			ctx.push(av.at(i))
 		}
 		return ctx.applyN(v, av.Len())
 	case 3:

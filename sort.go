@@ -571,7 +571,7 @@ func searchAI(x AI, y V) V {
 		res := make(AI, y.Len())
 		for i := 0; i < y.Len(); i++ {
 			res[i] = sort.Search(len(x),
-				func(i int) bool { return less(y.At(i), I(x[i])) })
+				func(i int) bool { return less(y.at(i), I(x[i])) })
 		}
 		return res
 	default:
@@ -607,7 +607,7 @@ func searchAF(x AF, y V) V {
 		res := make(AI, y.Len())
 		for i := 0; i < y.Len(); i++ {
 			res[i] = sort.Search(len(x),
-				func(i int) bool { return less(y.At(i), F(x[i])) })
+				func(i int) bool { return less(y.at(i), F(x[i])) })
 		}
 		return res
 	default:
@@ -629,7 +629,7 @@ func searchAS(x AS, y V) V {
 		res := make(AI, y.Len())
 		for i := 0; i < y.Len(); i++ {
 			res[i] = sort.Search(len(x),
-				func(i int) bool { return less(y.At(i), S(x[i])) })
+				func(i int) bool { return less(y.at(i), S(x[i])) })
 		}
 		return res
 	default:
@@ -643,7 +643,7 @@ func searchAV(x AV, y V) V {
 		res := make(AI, y.Len())
 		for i := 0; i < y.Len(); i++ {
 			res[i] = sort.Search(len(x),
-				func(i int) bool { return less(y.At(i), x[i]) })
+				func(i int) bool { return less(y.at(i), x[i]) })
 		}
 		return res
 	default:

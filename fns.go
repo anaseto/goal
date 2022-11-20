@@ -38,7 +38,7 @@ func rangeArray(x array) V {
 	if !ok {
 		z = make(AI, x.Len())
 		for i := range z {
-			v := x.At(i)
+			v := x.at(i)
 			switch v := v.(type) {
 			case I:
 				z[i] = int(v)
@@ -319,7 +319,7 @@ func repeatAB(x AB, y V) V {
 		r := make(AV, 0, n)
 		for i, v := range x {
 			if v {
-				r = append(r, y.At(i))
+				r = append(r, y.at(i))
 			}
 		}
 		return r
@@ -458,7 +458,7 @@ func weedOutAB(x AB, y V) V {
 		r := make(AV, 0, n)
 		for i, v := range x {
 			if !v {
-				r = append(r, y.At(i))
+				r = append(r, y.at(i))
 			}
 		}
 		return r
@@ -668,7 +668,7 @@ func eval(ctx *Context, x V) V {
 func try(ctx *Context, f1, x, f2 V) V {
 	av := toArray(x).(array)
 	for i := av.Len() - 1; i >= 0; i-- {
-		ctx.push(av.At(i))
+		ctx.push(av.at(i))
 	}
 	res := ctx.applyN(f1, av.Len())
 	if err, ok := res.(errV); ok {

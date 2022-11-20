@@ -92,7 +92,7 @@ func (ctx *Context) applyArray(v array, xv V) V {
 		if i < 0 || i >= v.Len() {
 			return errf("x[y] : out of bounds index: %d", i)
 		}
-		res = v.At(i)
+		res = v.at(i)
 	case I:
 		i := int(x)
 		if i < 0 {
@@ -101,7 +101,7 @@ func (ctx *Context) applyArray(v array, xv V) V {
 		if i < 0 || i >= v.Len() {
 			return errf("x[y] : out of bounds index: %d", i)
 		}
-		res = v.At(i)
+		res = v.at(i)
 	case array:
 		indices := toIndices(xv, v.Len())
 		if err, ok := indices.(errV); ok {

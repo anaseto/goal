@@ -33,9 +33,9 @@ func fold2(ctx *Context, args []V) V {
 			}
 			return I(0)
 		}
-		res := x.At(0)
+		res := x.at(0)
 		for i := 1; i < x.Len(); i++ {
-			ctx.push(x.At(i))
+			ctx.push(x.at(i))
 			ctx.push(res)
 			res = ctx.applyN(v, 2)
 		}
@@ -126,7 +126,7 @@ func fold3(ctx *Context, args []V) V {
 			return res
 		}
 		for i := 0; i < y.Len(); i++ {
-			ctx.push(y.At(i))
+			ctx.push(y.at(i))
 			ctx.push(res)
 			res = ctx.applyN(v, 2)
 			if err, ok := res.(errV); ok {
@@ -207,9 +207,9 @@ func scan2(ctx *Context, v, x V) V {
 			}
 			return I(0)
 		}
-		res := AV{x.At(0)}
+		res := AV{x.at(0)}
 		for i := 1; i < x.Len(); i++ {
-			ctx.push(x.At(i))
+			ctx.push(x.at(i))
 			ctx.push(res[len(res)-1])
 			next := ctx.applyN(v, 2)
 			if err, ok := next.(errV); ok {
@@ -263,7 +263,7 @@ func scan3(ctx *Context, args []V) V {
 		if y.Len() == 0 {
 			return AV{}
 		}
-		ctx.push(y.At(0))
+		ctx.push(y.at(0))
 		ctx.push(args[2])
 		first := ctx.applyN(v, 2)
 		if err, ok := first.(errV); ok {
@@ -271,7 +271,7 @@ func scan3(ctx *Context, args []V) V {
 		}
 		res := AV{first}
 		for i := 1; i < y.Len(); i++ {
-			ctx.push(y.At(i))
+			ctx.push(y.at(i))
 			ctx.push(res[len(res)-1])
 			next := ctx.applyN(v, 2)
 			if err, ok := next.(errV); ok {
@@ -345,7 +345,7 @@ func each2(ctx *Context, args []V) V {
 	case array:
 		res := make(AV, 0, x.Len())
 		for i := 0; i < x.Len(); i++ {
-			ctx.push(x.At(i))
+			ctx.push(x.at(i))
 			next := ctx.applyN(v, 1)
 			if err, ok := next.(errV); ok {
 				return err
@@ -378,8 +378,8 @@ func each3(ctx *Context, args []V) V {
 	}
 	res := make(AV, 0, xlen)
 	for i := 0; i < xlen; i++ {
-		ctx.push(y.At(i))
-		ctx.push(x.At(i))
+		ctx.push(y.at(i))
+		ctx.push(x.at(i))
 		next := ctx.applyN(v, 2)
 		if err, ok := next.(errV); ok {
 			return err

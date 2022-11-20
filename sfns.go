@@ -126,7 +126,7 @@ func first(x V) V {
 				return V(nil)
 			}
 		}
-		return x.At(0)
+		return x.at(0)
 	default:
 		return x
 	}
@@ -466,7 +466,7 @@ func shiftBefore(x, y V) V {
 		case array:
 			r := make(AV, len(y))
 			for i := 0; i < max; i++ {
-				r[i] = x.At(i)
+				r[i] = x.at(i)
 			}
 			copy(r[max:], y[:len(y)-max])
 			return r
@@ -615,7 +615,7 @@ func shiftAfter(x, y V) V {
 		case array:
 			r := make(AV, len(y))
 			for i := 0; i < max; i++ {
-				r[len(y)-1-i] = x.At(i)
+				r[len(y)-1-i] = x.at(i)
 			}
 			copy(r[:len(y)-max], y[max:])
 			return r
@@ -865,7 +865,7 @@ func flipAO(x AV) AV {
 	for i, z := range x {
 		switch z := z.(type) {
 		case array:
-			r[i] = z.At(0)
+			r[i] = z.at(0)
 		default:
 			r[i] = z
 		}
@@ -881,7 +881,7 @@ func flipAOAO(x AV, lines int) AV {
 		for i, z := range x {
 			switch z := z.(type) {
 			case array:
-				q[i] = z.At(j)
+				q[i] = z.at(j)
 			default:
 				q[i] = z
 			}
@@ -1039,10 +1039,10 @@ func joinToAO(x V, y AV, left bool) V {
 func joinArrays(x, y array) AV {
 	r := make(AV, y.Len()+x.Len())
 	for i := 0; i < x.Len(); i++ {
-		r[i] = x.At(i)
+		r[i] = x.at(i)
 	}
 	for i := x.Len(); i < len(r); i++ {
-		r[i] = y.At(i - x.Len())
+		r[i] = y.at(i - x.Len())
 	}
 	return r
 }
@@ -1052,12 +1052,12 @@ func joinAtomToArray(x V, y array, left bool) AV {
 	if left {
 		r[0] = x
 		for i := 1; i < len(r); i++ {
-			r[i] = y.At(i - 1)
+			r[i] = y.at(i - 1)
 		}
 	} else {
 		r[len(r)-1] = x
 		for i := 0; i < len(r)-1; i++ {
-			r[i] = y.At(i)
+			r[i] = y.at(i)
 		}
 	}
 	return r

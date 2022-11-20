@@ -32,7 +32,7 @@ func equal(x, y V) V {
 			}
 			r := make(AV, len(x))
 			for i := range r {
-				v := equal(x[i], y.At(i))
+				v := equal(x[i], y.at(i))
 				e, ok := v.(errV)
 				if ok {
 					return e
@@ -403,7 +403,7 @@ func lesser(x, y V) V {
 			}
 			r := make(AV, len(x))
 			for i := range r {
-				v := lesser(x[i], y.At(i))
+				v := lesser(x[i], y.at(i))
 				e, ok := v.(errV)
 				if ok {
 					return e
@@ -774,7 +774,7 @@ func greater(x, y V) V {
 			}
 			r := make(AV, len(x))
 			for i := range r {
-				v := greater(x[i], y.At(i))
+				v := greater(x[i], y.at(i))
 				e, ok := v.(errV)
 				if ok {
 					return e
@@ -1145,7 +1145,7 @@ func add(x, y V) V {
 			}
 			r := make(AV, len(x))
 			for i := range r {
-				v := add(x[i], y.At(i))
+				v := add(x[i], y.at(i))
 				e, ok := v.(errV)
 				if ok {
 					return e
@@ -1516,7 +1516,7 @@ func subtract(x, y V) V {
 			}
 			r := make(AV, len(x))
 			for i := range r {
-				v := subtract(x[i], y.At(i))
+				v := subtract(x[i], y.at(i))
 				e, ok := v.(errV)
 				if ok {
 					return e
@@ -1887,7 +1887,7 @@ func multiply(x, y V) V {
 			}
 			r := make(AV, len(x))
 			for i := range r {
-				v := multiply(x[i], y.At(i))
+				v := multiply(x[i], y.at(i))
 				e, ok := v.(errV)
 				if ok {
 					return e
@@ -2353,7 +2353,7 @@ func divide(x, y V) V {
 			}
 			r := make(AV, len(x))
 			for i := range r {
-				v := divide(x[i], y.At(i))
+				v := divide(x[i], y.at(i))
 				e, ok := v.(errV)
 				if ok {
 					return e
@@ -2662,7 +2662,7 @@ func minimum(x, y V) V {
 			}
 			r := make(AV, len(x))
 			for i := range r {
-				v := minimum(x[i], y.At(i))
+				v := minimum(x[i], y.at(i))
 				e, ok := v.(errV)
 				if ok {
 					return e
@@ -3033,7 +3033,7 @@ func maximum(x, y V) V {
 			}
 			r := make(AV, len(x))
 			for i := range r {
-				v := maximum(x[i], y.At(i))
+				v := maximum(x[i], y.at(i))
 				e, ok := v.(errV)
 				if ok {
 					return e
@@ -3400,7 +3400,7 @@ func modulus(x, y V) V {
 			}
 			r := make(AV, len(x))
 			for i := range r {
-				v := modulus(x[i], y.At(i))
+				v := modulus(x[i], y.at(i))
 				e, ok := v.(errV)
 				if ok {
 					return e
