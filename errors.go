@@ -106,6 +106,6 @@ func errDomain(op, s string) E {
 	return E(op + " : " + s)
 }
 
-func errRank(op, s string) E {
-	return E(op + " : " + s)
+func errRank(op string) E {
+	return E(op + " got too many arguments")
 }

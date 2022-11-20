@@ -73,7 +73,7 @@ func VRight(ctx *Context, args []V) V {
 	case 2:
 		return args[0]
 	default:
-		return errs(": got too many arguments")
+		return errRank(":")
 	}
 }
 
@@ -85,7 +85,7 @@ func VAdd(ctx *Context, args []V) V {
 	case 2:
 		return add(args[1], args[0])
 	default:
-		return errs("+ got too many arguments")
+		return errRank("+")
 	}
 }
 
@@ -97,7 +97,7 @@ func VSubtract(ctx *Context, args []V) V {
 	case 2:
 		return subtract(args[1], args[0])
 	default:
-		return errs("- got too many arguments")
+		return errRank("-")
 	}
 }
 
@@ -109,7 +109,7 @@ func VMultiply(ctx *Context, args []V) V {
 	case 2:
 		return multiply(args[1], args[0])
 	default:
-		return errs("* got too many arguments")
+		return errRank("*")
 	}
 }
 
@@ -121,7 +121,7 @@ func VDivide(ctx *Context, args []V) V {
 	case 2:
 		return divide(args[1], args[0])
 	default:
-		return errs("%% got too many arguments")
+		return errRank("%")
 	}
 }
 
@@ -133,7 +133,7 @@ func VMod(ctx *Context, args []V) V {
 	case 2:
 		return modulus(args[1], args[0])
 	default:
-		return errs("! got too many arguments")
+		return errRank("!")
 	}
 }
 
@@ -145,7 +145,7 @@ func VMin(ctx *Context, args []V) V {
 	case 2:
 		return minimum(args[1], args[0])
 	default:
-		return errs("& got too many arguments")
+		return errRank("&")
 	}
 }
 
@@ -166,7 +166,7 @@ func VMax(ctx *Context, args []V) V {
 		}
 		return maximum(args[1], args[0])
 	default:
-		return errs("| got too many arguments")
+		return errRank("|")
 	}
 }
 
@@ -178,7 +178,7 @@ func VLess(ctx *Context, args []V) V {
 	case 2:
 		return lesser(args[1], args[0])
 	default:
-		return errs("< got too many arguments")
+		return errRank("<")
 	}
 }
 
@@ -190,7 +190,7 @@ func VMore(ctx *Context, args []V) V {
 	case 2:
 		return greater(args[1], args[0])
 	default:
-		return errs("> got too many arguments")
+		return errRank(">")
 	}
 }
 
@@ -202,7 +202,7 @@ func VEqual(ctx *Context, args []V) V {
 	case 2:
 		return equal(args[1], args[0])
 	default:
-		return errs("= got too many arguments")
+		return errRank("=")
 	}
 }
 
@@ -214,7 +214,7 @@ func VMatch(ctx *Context, args []V) V {
 	case 2:
 		return B2I(Match(args[1], args[0]))
 	default:
-		return errs("~ got too many arguments")
+		return errRank("~")
 	}
 }
 
@@ -226,7 +226,7 @@ func VJoin(ctx *Context, args []V) V {
 	case 2:
 		return joinTo(args[1], args[0])
 	default:
-		return errs(", got too many arguments")
+		return errRank(",")
 	}
 }
 
@@ -238,7 +238,7 @@ func VWithout(ctx *Context, args []V) V {
 	case 2:
 		return without(args[1], args[0])
 	default:
-		return errs("^ got too many arguments")
+		return errRank("^")
 	}
 }
 
@@ -259,7 +259,7 @@ func VTake(ctx *Context, args []V) V {
 		}
 		return take(args[1], args[0])
 	default:
-		return errs("# got too many arguments")
+		return errRank("#")
 	}
 }
 
@@ -280,7 +280,7 @@ func VDrop(ctx *Context, args []V) V {
 		}
 		return drop(args[1], args[0])
 	default:
-		return errs("_ got too many arguments")
+		return errRank("_")
 	}
 }
 
@@ -297,7 +297,7 @@ func VCast(ctx *Context, args []V) V {
 			return cast(args[1], args[0])
 		}
 	default:
-		return errs("$ got too many arguments")
+		return errRank("$")
 	}
 }
 
@@ -309,7 +309,7 @@ func VFind(ctx *Context, args []V) V {
 	case 2:
 		return find(args[1], args[0])
 	default:
-		return errs("? got too many arguments")
+		return errRank("?")
 	}
 }
 
@@ -323,7 +323,7 @@ func VApply(ctx *Context, args []V) V {
 		ctx.push(args[0])
 		return ctx.applyN(v, 1)
 	default:
-		return errs("@ got too many arguments")
+		return errRank("@")
 	}
 }
 
@@ -342,7 +342,7 @@ func VApplyN(ctx *Context, args []V) V {
 	case 3:
 		return try(ctx, args[2], args[1], args[0])
 	default:
-		return errs(". got too many arguments")
+		return errRank(".")
 	}
 }
 
@@ -354,7 +354,7 @@ func VIn(ctx *Context, args []V) V {
 	case 2:
 		return memberOf(args[1], args[0])
 	default:
-		return errs("in : got too many arguments")
+		return errRank("in")
 	}
 }
 
@@ -374,7 +374,7 @@ func VEach(ctx *Context, args []V) V {
 	case 3:
 		return each3(ctx, args)
 	default:
-		return errs("too many arguments")
+		return errRank("'")
 	}
 	return nil
 }
@@ -387,7 +387,7 @@ func VFold(ctx *Context, args []V) V {
 	case 3:
 		return fold3(ctx, args)
 	default:
-		return errs("too many arguments")
+		return errRank("/")
 	}
 	return nil
 }
@@ -400,7 +400,7 @@ func VScan(ctx *Context, args []V) V {
 	case 3:
 		return scan3(ctx, args)
 	default:
-		return errs("too many arguments")
+		return errRank("\\")
 	}
 	return nil
 }
