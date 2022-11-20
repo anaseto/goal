@@ -107,7 +107,7 @@ func (ctx *Context) applyArray(v array, xv V) V {
 		if err, ok := indices.(errV); ok {
 			return err
 		}
-		res = v.Select(indices.(AI))
+		res = v.atIndices(indices.(AI))
 	}
 	return res
 }
@@ -297,7 +297,7 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 	return res
 }
 
-func (x AV) Select(y AI) V {
+func (x AV) atIndices(y AI) V {
 	res := make(AV, len(y))
 	xlen := x.Len()
 	for i := range res {
@@ -313,7 +313,7 @@ func (x AV) Select(y AI) V {
 	return res
 }
 
-func (x AB) Select(y AI) V {
+func (x AB) atIndices(y AI) V {
 	res := make(AB, len(y))
 	xlen := x.Len()
 	for i := range res {
@@ -329,7 +329,7 @@ func (x AB) Select(y AI) V {
 	return res
 }
 
-func (x AI) Select(y AI) V {
+func (x AI) atIndices(y AI) V {
 	res := make(AI, len(y))
 	xlen := x.Len()
 	for i := range res {
@@ -345,7 +345,7 @@ func (x AI) Select(y AI) V {
 	return res
 }
 
-func (x AF) Select(y AI) V {
+func (x AF) atIndices(y AI) V {
 	res := make(AF, len(y))
 	xlen := x.Len()
 	for i := range res {
@@ -361,7 +361,7 @@ func (x AF) Select(y AI) V {
 	return res
 }
 
-func (x AS) Select(y AI) V {
+func (x AS) atIndices(y AI) V {
 	res := make(AS, len(y))
 	xlen := x.Len()
 	for i := range res {

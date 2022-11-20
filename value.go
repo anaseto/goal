@@ -235,8 +235,8 @@ func (l Lambda) Sprint(ctx *Context) string {
 type array interface {
 	V
 	at(i int) V           // x[i]
-	Slice(i, j int) array // x[i:j]
-	Select(y AI) V        // x[y] (goal code)
+	slice(i, j int) array // x[i:j]
+	atIndices(y AI) V     // x[y] (goal code)
 }
 
 func (x AV) Len() int { return len(x) }
@@ -257,11 +257,11 @@ func (x AI) at(i int) V { return I(x[i]) }
 func (x AF) at(i int) V { return F(x[i]) }
 func (x AS) at(i int) V { return S(x[i]) }
 
-func (x AV) Slice(i, j int) array { return x[i:j] }
-func (x AB) Slice(i, j int) array { return x[i:j] }
-func (x AI) Slice(i, j int) array { return x[i:j] }
-func (x AF) Slice(i, j int) array { return x[i:j] }
-func (x AS) Slice(i, j int) array { return x[i:j] }
+func (x AV) slice(i, j int) array { return x[i:j] }
+func (x AB) slice(i, j int) array { return x[i:j] }
+func (x AI) slice(i, j int) array { return x[i:j] }
+func (x AF) slice(i, j int) array { return x[i:j] }
+func (x AS) slice(i, j int) array { return x[i:j] }
 
 // sprintV returns a string for a V deep in an AV.
 func sprintV(ctx *Context, v V) string {
@@ -387,19 +387,33 @@ func (x AS) Sprint(ctx *Context) string {
 }
 
 // Function interface is satisfied by the different kind of functions. A
-// function is a value thas has a default rank. Note that arrays do have a
-// “rank” but do not implement this interface.
+// function is a value thas has a default rank. The default rank is used in
+// situations where an adverb or function has different meanings depending on
+// the arity of the function that is passed to it.
+// Note that arrays do also have a “rank” but do not implement this interface.
 type Function interface {
 	V
 	Rank(ctx *Context) int
 }
 
-func (v Variadic) Rank(ctx *Context) int      { return 2 }
-func (r DerivedVerb) Rank(ctx *Context) int   { return 2 }
-func (p Projection) Rank(ctx *Context) int    { return countNils(p.Args) }
+// Rank returns 2 for variadics.
+func (v Variadic) Rank(ctx *Context) int { return 2 }
+
+// Rank returns 2 for derived verbs.
+func (r DerivedVerb) Rank(ctx *Context) int { return 2 }
+
+// Rank for a projection is the number of nil arguments.
+func (p Projection) Rank(ctx *Context) int { return countNils(p.Args) }
+
+// Rank for a 1-arg projection is 1.
 func (p ProjectionOne) Rank(ctx *Context) int { return 1 }
-func (q Composition) Rank(ctx *Context) int   { return q.Right.Rank(ctx) }
-func (l Lambda) Rank(ctx *Context) int        { return ctx.lambdas[l].Rank }
+
+// Rank for a composition is given by the function on the right.
+func (q Composition) Rank(ctx *Context) int { return q.Right.Rank(ctx) }
+
+// Rank for a lambda is the number of arguments, either determined by the
+// signature, or the use of x, y and z in the definition.
+func (l Lambda) Rank(ctx *Context) int { return ctx.lambdas[l].Rank }
 
 type zeroFun interface {
 	Function

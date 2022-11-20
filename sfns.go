@@ -168,13 +168,13 @@ func dropi(i int, y V) V {
 			if i > y.Len() {
 				i = y.Len()
 			}
-			return y.Slice(i, y.Len())
+			return y.slice(i, y.Len())
 		default:
 			i = y.Len() + i
 			if i < 0 {
 				i = 0
 			}
-			return y.Slice(0, i)
+			return y.slice(0, i)
 		}
 	default:
 		return y
@@ -272,12 +272,12 @@ func take(x, y V) V {
 			if i > y.Len() {
 				return takeCyclic(y, i)
 			}
-			return y.Slice(0, i)
+			return y.slice(0, i)
 		default:
 			if i < -y.Len() {
 				return takeCyclic(y, i)
 			}
-			return y.Slice(y.Len()+i, y.Len())
+			return y.slice(y.Len()+i, y.Len())
 		}
 	default:
 		return y
@@ -1360,7 +1360,7 @@ func windows(i int, y V) V {
 		}
 		r := make(AV, 1+y.Len()-i)
 		for j := range r {
-			r[j] = y.Slice(j, j+i)
+			r[j] = y.slice(j, j+i)
 		}
 		return r
 	default:
