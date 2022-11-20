@@ -13,10 +13,13 @@ import (
 type V interface {
 	// Len returns the length of the value. It is always 1 for atoms.
 	Len() int
-	// Type returns the name of the value's type.
-	Type() string
+	// Matches returns true if the value matches another (in the sense of
+	// the ~ operator).
+	Matches(x V) bool
 	// Sprint returns a prettified string representation of the value.
 	Sprint(*Context) string
+	// Type returns the name of the value's type.
+	Type() string
 }
 
 // F represents real numbers.
@@ -40,8 +43,36 @@ func (i I) Len() int { return 1 }
 // Len returns 1 for atoms.
 func (s S) Len() int { return 1 }
 
-// Len returns 1 for atoms.
-func (e errV) Len() int { return 1 }
+func (f F) Matches(y V) bool {
+	switch y := y.(type) {
+	case I:
+		return f == F(y)
+	case F:
+		return f == y
+	default:
+		return false
+	}
+}
+
+func (i I) Matches(y V) bool {
+	switch y := y.(type) {
+	case I:
+		return i == y
+	case F:
+		return F(i) == y
+	default:
+		return false
+	}
+}
+
+func (s S) Matches(y V) bool {
+	switch y := y.(type) {
+	case S:
+		return s == y
+	default:
+		return false
+	}
+}
 
 // Type retuns "n" for numeric atoms.
 func (f F) Type() string { return "n" }
@@ -52,13 +83,19 @@ func (i I) Type() string { return "n" }
 // Type retuns "s" for string atoms.
 func (s S) Type() string { return "s" }
 
-func (e errV) Type() string               { return "e" }
-func (f F) Sprint(ctx *Context) string    { return fmt.Sprintf("%g", f) }
-func (i I) Sprint(ctx *Context) string    { return fmt.Sprintf("%d", i) }
-func (s S) Sprint(ctx *Context) string    { return strconv.Quote(string(s)) }
-func (e errV) Sprint(ctx *Context) string { return fmt.Sprintf("'ERROR %s", e) }
+func (f F) Sprint(ctx *Context) string { return fmt.Sprintf("%g", f) }
+func (i I) Sprint(ctx *Context) string { return fmt.Sprintf("%d", i) }
+func (s S) Sprint(ctx *Context) string { return strconv.Quote(string(s)) }
 
-func (e errV) Error() string { return string(e) }
+func (e errV) Matches(v V) bool {
+	err, ok := v.(errV)
+	return ok && e == err
+}
+
+func (e errV) Len() int                   { return 1 }
+func (e errV) Type() string               { return "e" }
+func (e errV) Sprint(ctx *Context) string { return fmt.Sprintf("'ERROR %s", e) }
+func (e errV) Error() string              { return string(e) }
 
 // AV represents a generic array.
 type AV []V
@@ -238,6 +275,12 @@ type array interface {
 	slice(i, j int) array // x[i:j]
 	atIndices(y AI) V     // x[y] (goal code)
 }
+
+func (x AV) Matches(y V) bool { return matchArray(x, y) }
+func (x AB) Matches(y V) bool { return matchArray(x, y) }
+func (x AI) Matches(y V) bool { return matchArray(x, y) }
+func (x AF) Matches(y V) bool { return matchArray(x, y) }
+func (x AS) Matches(y V) bool { return matchArray(x, y) }
 
 func (x AV) Len() int { return len(x) }
 func (x AB) Len() int { return len(x) }

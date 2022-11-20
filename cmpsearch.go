@@ -8,92 +8,64 @@ type Matcher interface {
 
 // Match returns true if the two values match like in x~y.
 func Match(x, y V) bool {
+	return x != nil && x.Matches(y) || x == nil && y == nil
+}
+
+func matchArray(x array, y V) bool {
+	ya, ok := y.(array)
+	if !ok {
+		return false
+	}
+	l := x.Len()
+	if l != ya.Len() {
+		return false
+	}
 	switch x := x.(type) {
-	case F:
-		switch y := y.(type) {
-		case I:
-			return x == F(y)
-		case F:
-			return x == y
-		default:
-			return false
-		}
-	case I:
-		switch y := y.(type) {
-		case I:
-			return x == y
-		case F:
-			return F(x) == y
-		default:
-			return false
-		}
-	case S:
-		switch y := y.(type) {
-		case S:
-			return x == y
-		default:
-			return false
-		}
-	case array:
-		y, ok := y.(array)
-		if !ok {
-			return false
-		}
-		l := x.Len()
-		if l != y.Len() {
-			return false
-		}
-		switch x := x.(type) {
+	case AB:
+		switch ya := ya.(type) {
 		case AB:
-			switch y := y.(type) {
-			case AB:
-				return matchAB(x, y)
-			case AI:
-				return matchABAI(x, y)
-			case AF:
-				return matchABAF(x, y)
-			}
+			return matchAB(x, ya)
 		case AI:
-			switch y := y.(type) {
-			case AB:
-				return matchABAI(y, x)
-			case AI:
-				return matchAI(x, y)
-			case AF:
-				return matchAIAF(x, y)
-			}
+			return matchABAI(x, ya)
 		case AF:
-			switch y := y.(type) {
-			case AB:
-				return matchABAF(y, x)
-			case AI:
-				return matchAIAF(y, x)
-			case AF:
-				return matchAF(x, y)
-			}
-		case AS:
-			y, ok := y.(AS)
-			if !ok {
-				break
-			}
-			for i, v := range y {
-				if v != x[i] {
-					return false
-				}
-			}
-			return true
+			return matchABAF(x, ya)
 		}
-		for i := 0; i < l; i++ {
-			if !Match(x.at(i), y.at(i)) {
+	case AI:
+		switch ya := ya.(type) {
+		case AB:
+			return matchABAI(ya, x)
+		case AI:
+			return matchAI(x, ya)
+		case AF:
+			return matchAIAF(x, ya)
+		}
+	case AF:
+		switch ya := ya.(type) {
+		case AB:
+			return matchABAF(ya, x)
+		case AI:
+			return matchAIAF(ya, x)
+		case AF:
+			return matchAF(x, ya)
+		}
+	case AS:
+		ya, ok := ya.(AS)
+		if !ok {
+			break
+		}
+		for i, v := range ya {
+			if v != x[i] {
 				return false
 			}
 		}
 		return true
-	case Matcher:
-		return x.Matches(y)
-	default:
-		return x == y
 	}
+	for i := 0; i < l; i++ {
+		if !Match(x.at(i), ya.at(i)) {
+			return false
+		}
+	}
+	return true
 }
 
 func matchAB(x, y AB) bool {
