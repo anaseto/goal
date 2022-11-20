@@ -19,7 +19,7 @@ type V interface {
 type F float64   // F represents real numbers.
 type I int       // I represents integers.
 type S string    // S represents (immutable) strings of bytes.
-type errV string // E represents errors
+type errV string // errV represents errors
 
 func (f F) Len() int                      { return 1 }
 func (i I) Len() int                      { return 1 }
