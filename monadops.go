@@ -36,10 +36,8 @@ func negate(x V) V {
 			r[i] = negate(x[i])
 		}
 		return r
-	case E:
-		return x
 	default:
-		return errType(x)
+		return errType("-x", "x", x)
 	}
 }
 
@@ -92,10 +90,8 @@ func sign(x V) V {
 			r[i] = sign(x[i])
 		}
 		return r
-	case E:
-		return x
 	default:
-		return errType(x)
+		return errType("sign x", "x", x)
 	}
 }
 
@@ -132,10 +128,8 @@ func floor(x V) V {
 			r[i] = floor(x[i])
 		}
 		return r
-	case E:
-		return x
 	default:
-		return errType(x)
+		return errType("_N", "N", x)
 	}
 }
 
@@ -170,10 +164,8 @@ func ceil(x V) V {
 			r[i] = ceil(x[i])
 		}
 		return r
-	case E:
-		return x
 	default:
-		return errType(x)
+		return errType("ceil x", "x", x)
 	}
 }
 
@@ -215,7 +207,7 @@ func not(x V) V {
 	}
 }
 
-// abs returns abs[x]. XXX unused now
+// abs returns abs[x].
 func abs(x V) V {
 	switch x := x.(type) {
 	case F:
@@ -242,10 +234,8 @@ func abs(x V) V {
 			r[i] = abs(x[i])
 		}
 		return r
-	case E:
-		return x
 	default:
-		return errType(x)
+		return errType("abs x", "x", x)
 	}
 }
 

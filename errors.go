@@ -90,8 +90,8 @@ func errNYI(s string) E {
 	return E("NYI: " + s)
 }
 
-func errType(x V) E {
-	return E("bad type " + x.Type())
+func errType(op, sym string, x V) E {
+	return errf("%s : bad type for %s (%s)", op, sym, x.Type())
 }
 
 func errs(s string) E {

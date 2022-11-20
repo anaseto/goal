@@ -18,7 +18,7 @@ func enum(x V) V {
 	case Array:
 		return rangeArray(x)
 	default:
-		return errType(x)
+		return errType("!x", "x", x)
 	}
 }
 

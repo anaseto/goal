@@ -46,7 +46,7 @@ func reverse(x V) V {
 		reverseMut(r)
 		return r
 	default:
-		return errType(x)
+		return errType("|x", "x", x)
 	}
 }
 
@@ -104,7 +104,7 @@ func rotate(x, y V) V {
 		}
 		return r
 	default:
-		return errType(y)
+		return errType("f|y", "y", y)
 	}
 }
 
@@ -393,7 +393,7 @@ func shiftBefore(x, y V) V {
 			}
 			return r
 		default:
-			return errType(y)
+			return errType("x»y", "y", y)
 		}
 	case AF:
 		switch x := x.(type) {
@@ -419,7 +419,7 @@ func shiftBefore(x, y V) V {
 			copy(r[max:], y[:len(y)-max])
 			return r
 		default:
-			return errType(y)
+			return errType("x»y", "y", y)
 		}
 	case AI:
 		switch x := x.(type) {
@@ -447,7 +447,7 @@ func shiftBefore(x, y V) V {
 			copy(r[max:], y[:len(y)-max])
 			return r
 		default:
-			return errType(y)
+			return errType("x»y", "y", y)
 		}
 	case AS:
 		switch x := x.(type) {
@@ -459,7 +459,7 @@ func shiftBefore(x, y V) V {
 			copy(r[max:], y[:len(y)-max])
 			return r
 		default:
-			return errType(y)
+			return errType("x»y", "y", y)
 		}
 	case AV:
 		switch x := x.(type) {
@@ -471,7 +471,7 @@ func shiftBefore(x, y V) V {
 			copy(r[max:], y[:len(y)-max])
 			return r
 		default:
-			return errType(y)
+			return errType("x»y", "y", y)
 		}
 	default:
 		return errs("x»y: y not an array")
@@ -542,7 +542,7 @@ func shiftAfter(x, y V) V {
 			}
 			return r
 		default:
-			return errType(y)
+			return errType("x«y", "y", y)
 		}
 	case AF:
 		switch x := x.(type) {
@@ -568,7 +568,7 @@ func shiftAfter(x, y V) V {
 			copy(r[:len(y)-max], y[max:])
 			return r
 		default:
-			return errType(y)
+			return errType("x«y", "y", y)
 		}
 	case AI:
 		switch x := x.(type) {
@@ -596,7 +596,7 @@ func shiftAfter(x, y V) V {
 			copy(r[:len(y)-max], y[max:])
 			return r
 		default:
-			return errType(y)
+			return errType("x«y", "y", y)
 		}
 	case AS:
 		switch x := x.(type) {
@@ -608,7 +608,7 @@ func shiftAfter(x, y V) V {
 			copy(r[:len(y)-max], y[max:])
 			return r
 		default:
-			return errType(y)
+			return errType("x«y", "y", y)
 		}
 	case AV:
 		switch x := x.(type) {
@@ -620,7 +620,7 @@ func shiftAfter(x, y V) V {
 			copy(r[:len(y)-max], y[max:])
 			return r
 		default:
-			return errType(y)
+			return errType("x«y", "y", y)
 		}
 	default:
 		return errs("x«y: y not an array")
