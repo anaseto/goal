@@ -1010,10 +1010,11 @@ func findAV(x AV, y V) V {
 	case Array:
 		return findArray(x, y)
 	default:
-		res := make(AI, y.Len())
-		for i := range res {
-			res[i] = x.Len()
+		for i, v := range x {
+			if Match(v, y) {
+				return I(i)
+			}
 		}
-		return res
+		return I(x.Len())
 	}
 }

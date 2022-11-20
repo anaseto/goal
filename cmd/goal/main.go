@@ -228,7 +228,8 @@ x*y multiply	2*3 -> 6
 s*x repeat	"a"*3 2 1 0 -> "aaa" "aa" "a" ""
 %x  classify	%1 2 3 1 2 3 -> 0 1 2 0 1 2
 x%y divide	3%2 -> 1.5
-!x  enum	!5 -> 0 1 2 3 4
+!i  enum	!5 -> 0 1 2 3 4
+!x  odometer	!2 3 -> (0 0 0 1 1 1;0 1 2 0 1 2)
 x!y mod		3!5 4 3 -> 2 1 0	
 &x  where	&0 0 1 0 0 0 1 -> 2 6
 x&y min		2&3 -> 2	4&3 -> 3

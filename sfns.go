@@ -8,12 +8,7 @@ import (
 
 // length returns #x.
 func length(x V) I {
-	switch x := x.(type) {
-	case nil:
-		return 0
-	default:
-		return I(x.Len())
-	}
+	return I(x.Len())
 }
 
 func reverseMut(x V) {
