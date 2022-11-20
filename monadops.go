@@ -210,10 +210,8 @@ func not(x V) V {
 			r[i] = not(x[i])
 		}
 		return r
-	case E:
-		return x
 	default:
-		return errType(x)
+		return B2I(!isTrue(x))
 	}
 }
 

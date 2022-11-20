@@ -1,7 +1,5 @@
 package goal
 
-import "strings"
-
 // Matcher is implemented by types that can be matched againts other objects
 // (typically a struct of the same type with fields that match).
 type Matcher interface {
@@ -384,7 +382,7 @@ func markFirsts(x V) V {
 	}
 }
 
-// memberOf returns x in y. XXX unused for now
+// memberOf returns x in y.
 func memberOf(x, y V) V {
 	if length(y) == 0 || length(x) == 0 {
 		switch y.(type) {
@@ -473,6 +471,8 @@ func memberOfAF(x V, y AF) V {
 			_, r[i] = m[F(v)]
 		}
 		return r
+	case AV:
+		return memberOfArray(x, y)
 	default:
 		return make(AB, length(x))
 	}
@@ -518,6 +518,8 @@ func memberOfAI(x V, y AI) V {
 			_, r[i] = m[int(v)]
 		}
 		return r
+	case AV:
+		return memberOfArray(x, y)
 	default:
 		return make(AB, length(x))
 	}
@@ -542,6 +544,8 @@ func memberOfAS(x V, y AS) V {
 			_, r[i] = m[v]
 		}
 		return r
+	case AV:
+		return memberOfArray(x, y)
 	default:
 		return make(AB, length(x))
 	}
@@ -550,17 +554,7 @@ func memberOfAS(x V, y AS) V {
 func memberOfAO(x V, y AV) V {
 	switch x := x.(type) {
 	case Array:
-		// NOTE: quadratic algorithm
-		r := make(AB, x.Len())
-		for i := 0; i < x.Len(); i++ {
-			for _, v := range y {
-				if Match(x.At(i), v) {
-					r[i] = true
-					break
-				}
-			}
-		}
-		return r
+		return memberOfArray(x, y)
 	default:
 		for _, v := range y {
 			if Match(x, v) {
@@ -569,6 +563,21 @@ func memberOfAO(x V, y AV) V {
 		}
 		return B2I(false)
 	}
+}
+
+func memberOfArray(x, y Array) V {
+	// NOTE: quadratic algorithm, worst case complexity could be
+	// improved by sorting or string hashing.
+	res := make(AB, x.Len())
+	for i := 0; i < x.Len(); i++ {
+		for j := 0; j < y.Len(); j++ {
+			if Match(y.At(i), x.At(j)) {
+				res[i] = true
+				break
+			}
+		}
+	}
+	return res
 }
 
 // OccurrenceCount returns ⊒x. XXX unused for now
@@ -662,17 +671,15 @@ func without(x, y V) V {
 		}
 		return windows(int(z), y)
 	case Array:
-		// TODO: without: properly fix error messages in a better way.
-		// Maybe optimize.
 		y = toArray(y)
-		v := replicate(not(memberOf(x, y)), x)
-		if err, ok := v.(E); ok {
-			idx := strings.IndexRune(string(err), ':')
-			if idx >= 0 {
-				return E("x^y " + string(err[idx:]))
+		res := not(memberOf(x, y))
+		if av, ok := res.(Array); ok {
+			if av.Len() != x.Len() {
+				return errf("x^y : length mismatch: %d (x) vs %d (y)", x.Len(), y.Len())
 			}
 		}
-		return v
+		res = replicate(res, x)
+		return res
 	default:
 		return errf("x^y : bad type for x (%s)", x.Type())
 	}
