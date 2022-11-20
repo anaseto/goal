@@ -264,10 +264,19 @@ func (x AI) Matches(y V) bool { return matchArray(x, y) }
 func (x AF) Matches(y V) bool { return matchArray(x, y) }
 func (x AS) Matches(y V) bool { return matchArray(x, y) }
 
+// Len returns the length of the array.
 func (x AV) Len() int { return len(x) }
+
+// Len returns the length of the array.
 func (x AB) Len() int { return len(x) }
+
+// Len returns the length of the array.
 func (x AI) Len() int { return len(x) }
+
+// Len returns the length of the array.
 func (x AF) Len() int { return len(x) }
+
+// Len returns the length of the array.
 func (x AS) Len() int { return len(x) }
 
 func (x AV) Type() string { return "A" }
