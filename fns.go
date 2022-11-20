@@ -15,7 +15,7 @@ func enum(x V) V {
 		return rangeI(I(x))
 	case I:
 		return rangeI(x)
-	case Array:
+	case array:
 		return rangeArray(x)
 	default:
 		return errType("!x", "x", x)
@@ -33,7 +33,7 @@ func rangeI(n I) V {
 	return r
 }
 
-func rangeArray(x Array) V {
+func rangeArray(x array) V {
 	z, ok := x.(AI)
 	if !ok {
 		z = make(AI, x.Len())
@@ -226,7 +226,7 @@ func replicate(x, y V) V {
 		return repeatAI(x, y)
 	case AF:
 		z := toAI(x)
-		if err, ok := z.(E); ok {
+		if err, ok := z.(errV); ok {
 			return errf("f#y : x %v", err)
 		}
 		return replicate(z, y)
@@ -401,7 +401,7 @@ func weedOut(x, y V) V {
 		return weedOutAI(x, y)
 	case AF:
 		z := toAI(x)
-		if err, ok := z.(E); ok {
+		if err, ok := z.(errV); ok {
 			return errf("f#y : x %v", err)
 		}
 		return weedOut(z, y)
@@ -565,7 +565,7 @@ func casti(y V) V {
 		res := make(AV, z.Len())
 		for i := range res {
 			res[i] = casti(z[i])
-			if err, ok := res[i].(E); ok {
+			if err, ok := res[i].(errV); ok {
 				return err
 			}
 		}
@@ -607,7 +607,7 @@ func castn(y V) V {
 		res := make(AV, z.Len())
 		for i := range res {
 			res[i] = castn(z[i])
-			if err, ok := res[i].(E); ok {
+			if err, ok := res[i].(errV); ok {
 				return err
 			}
 		}
@@ -637,7 +637,7 @@ func casts(y V) V {
 		res := make(AV, z.Len())
 		for i := range res {
 			res[i] = casts(z[i])
-			if err, ok := res[i].(E); ok {
+			if err, ok := res[i].(errV); ok {
 				return err
 			}
 		}
@@ -666,12 +666,12 @@ func eval(ctx *Context, x V) V {
 
 // try implements .[f1;x;f2].
 func try(ctx *Context, f1, x, f2 V) V {
-	av := toArray(x).(Array)
+	av := toArray(x).(array)
 	for i := av.Len() - 1; i >= 0; i-- {
 		ctx.push(av.At(i))
 	}
 	res := ctx.applyN(f1, av.Len())
-	if err, ok := res.(E); ok {
+	if err, ok := res.(errV); ok {
 		ctx.push(S(err))
 		return ctx.applyN(f2, 1)
 	}

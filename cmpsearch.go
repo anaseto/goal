@@ -34,8 +34,8 @@ func Match(x, y V) bool {
 		default:
 			return false
 		}
-	case Array:
-		y, ok := y.(Array)
+	case array:
+		y, ok := y.(array)
 		if !ok {
 			return false
 		}
@@ -386,7 +386,7 @@ func markFirsts(x V) V {
 func memberOf(x, y V) V {
 	if length(y) == 0 {
 		switch x := x.(type) {
-		case Array:
+		case array:
 			r := make(AB, length(x))
 			return r
 		default:
@@ -424,7 +424,7 @@ func memberOfAB(x V, y AB) V {
 	}
 	if t && f {
 		switch x := x.(type) {
-		case Array:
+		case array:
 			r := make(AB, length(x))
 			for i := range r {
 				r[i] = true
@@ -474,7 +474,7 @@ func memberOfAF(x V, y AF) V {
 			_, r[i] = m[F(v)]
 		}
 		return r
-	case Array:
+	case array:
 		return memberOfArray(x, y)
 	default:
 		return make(AB, length(x))
@@ -521,7 +521,7 @@ func memberOfAI(x V, y AI) V {
 			_, r[i] = m[int(v)]
 		}
 		return r
-	case Array:
+	case array:
 		return memberOfArray(x, y)
 	default:
 		return make(AB, length(x))
@@ -547,7 +547,7 @@ func memberOfAS(x V, y AS) V {
 			_, r[i] = m[v]
 		}
 		return r
-	case Array:
+	case array:
 		return memberOfArray(x, y)
 	default:
 		return make(AB, length(x))
@@ -556,7 +556,7 @@ func memberOfAS(x V, y AS) V {
 
 func memberOfAV(x V, y AV) V {
 	switch x := x.(type) {
-	case Array:
+	case array:
 		return memberOfArray(x, y)
 	default:
 		for _, v := range y {
@@ -568,7 +568,7 @@ func memberOfAV(x V, y AV) V {
 	}
 }
 
-func memberOfArray(x, y Array) V {
+func memberOfArray(x, y array) V {
 	// NOTE: quadratic algorithm, worst case complexity could be
 	// improved by sorting or string hashing.
 	res := make(AB, x.Len())
@@ -673,7 +673,7 @@ func without(x, y V) V {
 			return errf("i^y : i non-integer (%g)", z)
 		}
 		return windows(int(z), y)
-	case Array:
+	case array:
 		y = toArray(y)
 		res := memberOf(x, y)
 		switch bres := res.(type) {
@@ -684,7 +684,7 @@ func without(x, y V) V {
 				bres[i] = !b
 			}
 		}
-		if av, ok := res.(Array); ok {
+		if av, ok := res.(array); ok {
 			if av.Len() != x.Len() {
 				return errf("x^y : length mismatch: %d (x) vs %d (y)", x.Len(), y.Len())
 			}
@@ -811,7 +811,7 @@ func findAB(x AB, y V) V {
 			}
 		}
 		return res
-	case Array:
+	case array:
 		return findArray(x, y)
 	default:
 		res := make(AI, y.Len())
@@ -874,7 +874,7 @@ func findAF(x AF, y V) V {
 			}
 		}
 		return res
-	case Array:
+	case array:
 		return findArray(x, y)
 	default:
 		res := make(AI, y.Len())
@@ -941,7 +941,7 @@ func findAI(x AI, y V) V {
 			}
 		}
 		return res
-	case Array:
+	case array:
 		return findArray(x, y)
 	default:
 		res := make(AI, y.Len())
@@ -973,7 +973,7 @@ func findAS(x AS, y V) V {
 			}
 		}
 		return res
-	case Array:
+	case array:
 		return findArray(x, y)
 	default:
 		res := make(AI, y.Len())
@@ -984,7 +984,7 @@ func findAS(x AS, y V) V {
 	}
 }
 
-func findArray(x, y Array) V {
+func findArray(x, y array) V {
 	// NOTE: quadratic algorithm, worst case complexity could be
 	// improved by sorting or string hashing.
 	res := make(AI, y.Len())
@@ -1025,7 +1025,7 @@ func findAV(x AV, y V) V {
 			}
 		}
 		return I(x.Len())
-	case Array:
+	case array:
 		return findArray(x, y)
 	default:
 		for i, v := range x {

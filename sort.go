@@ -482,7 +482,7 @@ func ascend(x V) V {
 func descend(x V) V {
 	p := ascend(x)
 	switch p := p.(type) {
-	case E:
+	case errV:
 		return errs(">" + strings.TrimPrefix(p.Error(), "<"))
 	}
 	reverseMut(p)
@@ -567,7 +567,7 @@ func searchAI(x AI, y V) V {
 			res[i] = searchAIF(x, F(v))
 		}
 		return res
-	case Array:
+	case array:
 		res := make(AI, y.Len())
 		for i := 0; i < y.Len(); i++ {
 			res[i] = sort.Search(len(x),
@@ -603,7 +603,7 @@ func searchAF(x AF, y V) V {
 			res[i] = searchAFF(x, F(v))
 		}
 		return res
-	case Array:
+	case array:
 		res := make(AI, y.Len())
 		for i := 0; i < y.Len(); i++ {
 			res[i] = sort.Search(len(x),
@@ -625,7 +625,7 @@ func searchAS(x AS, y V) V {
 			res[i] = searchASS(x, S(v))
 		}
 		return res
-	case Array:
+	case array:
 		res := make(AI, y.Len())
 		for i := 0; i < y.Len(); i++ {
 			res[i] = sort.Search(len(x),
@@ -639,7 +639,7 @@ func searchAS(x AS, y V) V {
 
 func searchAV(x AV, y V) V {
 	switch y := y.(type) {
-	case Array:
+	case array:
 		res := make(AI, y.Len())
 		for i := 0; i < y.Len(); i++ {
 			res[i] = sort.Search(len(x),

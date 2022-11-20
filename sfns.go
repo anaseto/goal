@@ -41,7 +41,7 @@ func reverseMut(x V) {
 // reverse returns |x.
 func reverse(x V) V {
 	switch x := x.(type) {
-	case Array:
+	case array:
 		r := cloneShallow(x)
 		reverseMut(r)
 		return r
@@ -111,7 +111,7 @@ func rotate(x, y V) V {
 // first returns *x.
 func first(x V) V {
 	switch x := x.(type) {
-	case Array:
+	case array:
 		if x.Len() == 0 {
 			switch x.(type) {
 			case AB:
@@ -162,7 +162,7 @@ func drop(x, y V) V {
 func dropi(i int, y V) V {
 	y = toArray(y)
 	switch y := y.(type) {
-	case Array:
+	case array:
 		switch {
 		case i >= 0:
 			if i > y.Len() {
@@ -266,7 +266,7 @@ func take(x, y V) V {
 	}
 	y = toArray(y)
 	switch y := y.(type) {
-	case Array:
+	case array:
 		switch {
 		case i >= 0:
 			if i > y.Len() {
@@ -463,7 +463,7 @@ func shiftBefore(x, y V) V {
 		}
 	case AV:
 		switch x := x.(type) {
-		case Array:
+		case array:
 			r := make(AV, len(y))
 			for i := 0; i < max; i++ {
 				r[i] = x.At(i)
@@ -612,7 +612,7 @@ func shiftAfter(x, y V) V {
 		}
 	case AV:
 		switch x := x.(type) {
-		case Array:
+		case array:
 			r := make(AV, len(y))
 			for i := 0; i < max; i++ {
 				r[len(y)-1-i] = x.At(i)
@@ -864,7 +864,7 @@ func flipAO(x AV) AV {
 	r := make(AV, len(x))
 	for i, z := range x {
 		switch z := z.(type) {
-		case Array:
+		case array:
 			r[i] = z.At(0)
 		default:
 			r[i] = z
@@ -880,7 +880,7 @@ func flipAOAO(x AV, lines int) AV {
 		q := a[j*len(x) : (j+1)*len(x)]
 		for i, z := range x {
 			switch z := z.(type) {
-			case Array:
+			case array:
 				q[i] = z.At(j)
 			default:
 				q[i] = z
@@ -912,7 +912,7 @@ func joinTo(x, y V) V {
 		return joinToAO(y, x, false)
 	default:
 		switch y := y.(type) {
-		case Array:
+		case array:
 			return joinAtomToArray(x, y, true)
 		default:
 			return AV{x, y}
@@ -1018,7 +1018,7 @@ func joinToS(x S, y V, left bool) V {
 
 func joinToAO(x V, y AV, left bool) V {
 	switch x := x.(type) {
-	case Array:
+	case array:
 		if left {
 			return joinArrays(x, y)
 		}
@@ -1036,7 +1036,7 @@ func joinToAO(x V, y AV, left bool) V {
 	}
 }
 
-func joinArrays(x, y Array) AV {
+func joinArrays(x, y array) AV {
 	r := make(AV, y.Len()+x.Len())
 	for i := 0; i < x.Len(); i++ {
 		r[i] = x.At(i)
@@ -1047,7 +1047,7 @@ func joinArrays(x, y Array) AV {
 	return r
 }
 
-func joinAtomToArray(x V, y Array, left bool) AV {
+func joinAtomToArray(x V, y array, left bool) AV {
 	r := make(AV, y.Len()+1)
 	if left {
 		r[0] = x
@@ -1085,7 +1085,7 @@ func joinToAS(x V, y AS, left bool) V {
 			copy(r[len(y):], x)
 		}
 		return r
-	case Array:
+	case array:
 		if left {
 			return joinArrays(x, y)
 		}
@@ -1151,7 +1151,7 @@ func joinToAB(x V, y AB, left bool) V {
 			return joinAFAB(x, y)
 		}
 		return joinABAF(y, x)
-	case Array:
+	case array:
 		if left {
 			return joinArrays(x, y)
 		}
@@ -1202,7 +1202,7 @@ func joinToAI(x V, y AI, left bool) V {
 			return joinAFAI(x, y)
 		}
 		return joinAIAF(y, x)
-	case Array:
+	case array:
 		if left {
 			return joinArrays(x, y)
 		}
@@ -1249,7 +1249,7 @@ func joinToAF(x V, y AF, left bool) V {
 			return joinAFAF(x, y)
 		}
 		return joinAFAF(y, x)
-	case Array:
+	case array:
 		if left {
 			return joinArrays(x, y)
 		}
@@ -1354,7 +1354,7 @@ func enlist(x V) V {
 // windows returns i^y.
 func windows(i int, y V) V {
 	switch y := y.(type) {
-	case Array:
+	case array:
 		if i <= 0 || i >= y.Len()+1 {
 			return errf("i^y : i out of range !%d (%d)", y.Len()+1, i)
 		}

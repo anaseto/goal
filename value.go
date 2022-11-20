@@ -16,25 +16,25 @@ type V interface {
 	Sprint(*Context) string
 }
 
-type F float64 // F represents real numbers.
-type I int     // I represents integers.
-type S string  // S represents (immutable) strings of bytes.
-type E string  // E represents errors
+type F float64   // F represents real numbers.
+type I int       // I represents integers.
+type S string    // S represents (immutable) strings of bytes.
+type errV string // E represents errors
 
-func (f F) Len() int                   { return 1 }
-func (i I) Len() int                   { return 1 }
-func (s S) Len() int                   { return 1 }
-func (e E) Len() int                   { return 1 }
-func (f F) Type() string               { return "f" }
-func (i I) Type() string               { return "i" }
-func (s S) Type() string               { return "s" }
-func (e E) Type() string               { return "e" }
-func (f F) Sprint(ctx *Context) string { return fmt.Sprintf("%g", f) }
-func (i I) Sprint(ctx *Context) string { return fmt.Sprintf("%d", i) }
-func (s S) Sprint(ctx *Context) string { return strconv.Quote(string(s)) }
-func (e E) Sprint(ctx *Context) string { return fmt.Sprintf("'ERROR %s", e) }
+func (f F) Len() int                      { return 1 }
+func (i I) Len() int                      { return 1 }
+func (s S) Len() int                      { return 1 }
+func (e errV) Len() int                   { return 1 }
+func (f F) Type() string                  { return "f" }
+func (i I) Type() string                  { return "i" }
+func (s S) Type() string                  { return "s" }
+func (e errV) Type() string               { return "e" }
+func (f F) Sprint(ctx *Context) string    { return fmt.Sprintf("%g", f) }
+func (i I) Sprint(ctx *Context) string    { return fmt.Sprintf("%d", i) }
+func (s S) Sprint(ctx *Context) string    { return strconv.Quote(string(s)) }
+func (e errV) Sprint(ctx *Context) string { return fmt.Sprintf("'ERROR %s", e) }
 
-func (e E) Error() string { return string(e) }
+func (e errV) Error() string { return string(e) }
 
 type AV []V       // generic array
 type AB []bool    // boolean array
@@ -197,12 +197,12 @@ func (l Lambda) Sprint(ctx *Context) string {
 	return ctx.lambdas[l].Source
 }
 
-// Array interface is satisfied by the different kind of supported arrays.
+// array interface is satisfied by the different kind of supported arrays.
 // Typical implementation is given in comments.
-type Array interface {
+type array interface {
 	V
 	At(i int) V           // x[i]
-	Slice(i, j int) Array // x[i:j]
+	Slice(i, j int) array // x[i:j]
 	Select(y AI) V        // x[y] (goal code)
 }
 
@@ -224,11 +224,11 @@ func (x AI) At(i int) V { return I(x[i]) }
 func (x AF) At(i int) V { return F(x[i]) }
 func (x AS) At(i int) V { return S(x[i]) }
 
-func (x AV) Slice(i, j int) Array { return x[i:j] }
-func (x AB) Slice(i, j int) Array { return x[i:j] }
-func (x AI) Slice(i, j int) Array { return x[i:j] }
-func (x AF) Slice(i, j int) Array { return x[i:j] }
-func (x AS) Slice(i, j int) Array { return x[i:j] }
+func (x AV) Slice(i, j int) array { return x[i:j] }
+func (x AB) Slice(i, j int) array { return x[i:j] }
+func (x AI) Slice(i, j int) array { return x[i:j] }
+func (x AF) Slice(i, j int) array { return x[i:j] }
+func (x AS) Slice(i, j int) array { return x[i:j] }
 
 // sprintV returns a string for a V deep in an AV.
 func sprintV(ctx *Context, v V) string {

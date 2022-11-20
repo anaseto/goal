@@ -159,7 +159,7 @@ func VMax(ctx *Context, args []V) V {
 		if ok {
 			ctx.push(args[0])
 			res := ctx.applyN(v, 1)
-			if err, ok := res.(E); ok {
+			if err, ok := res.(errV); ok {
 				return err
 			}
 			return rotate(res, args[0])
@@ -252,7 +252,7 @@ func VTake(ctx *Context, args []V) V {
 		if ok {
 			ctx.push(args[0])
 			res := ctx.applyN(v, 1)
-			if err, ok := res.(E); ok {
+			if err, ok := res.(errV); ok {
 				return err
 			}
 			return replicate(res, args[0])
@@ -273,7 +273,7 @@ func VDrop(ctx *Context, args []V) V {
 		if ok {
 			ctx.push(args[0])
 			res := ctx.applyN(v, 1)
-			if err, ok := res.(E); ok {
+			if err, ok := res.(errV); ok {
 				return err
 			}
 			return weedOut(res, args[0])
@@ -291,7 +291,7 @@ func VCast(ctx *Context, args []V) V {
 		return S(args[0].Sprint(ctx))
 	case 2:
 		switch args[1].(type) {
-		case Array:
+		case array:
 			return search(args[1], args[0])
 		default:
 			return cast(args[1], args[0])
@@ -334,7 +334,7 @@ func VApplyN(ctx *Context, args []V) V {
 		return eval(ctx, args[0])
 	case 2:
 		v := args[1]
-		av := toArray(args[0]).(Array)
+		av := toArray(args[0]).(array)
 		for i := av.Len() - 1; i >= 0; i-- {
 			ctx.push(av.At(i))
 		}

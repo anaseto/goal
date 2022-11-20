@@ -26,14 +26,14 @@ func equal(x, y V) V {
 		return equalASV(x, y)
 	case AV:
 		switch y := y.(type) {
-		case Array:
+		case array:
 			if y.Len() != len(x) {
 				return errf("x=y : length mismatch: %d vs %d", len(x), y.Len())
 			}
 			r := make(AV, len(x))
 			for i := range r {
 				v := equal(x[i], y.At(i))
-				e, ok := v.(E)
+				e, ok := v.(errV)
 				if ok {
 					return e
 				}
@@ -44,15 +44,13 @@ func equal(x, y V) V {
 		r := make(AV, len(x))
 		for i := range r {
 			v := equal(x[i], y)
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x=y", "x", x)
 	}
@@ -86,15 +84,13 @@ func equalFV(x F, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := equalFV(F(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x=y", "y", y)
 	}
@@ -128,15 +124,13 @@ func equalIV(x I, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := equalIV(I(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x=y", "y", y)
 	}
@@ -156,15 +150,13 @@ func equalSV(x S, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := equalSV(S(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x=y", "y", y)
 	}
@@ -218,15 +210,13 @@ func equalABV(x AB, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := equalIV(B2I(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x=y", "y", y)
 	}
@@ -280,15 +270,13 @@ func equalAFV(x AF, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := equalFV(F(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x=y", "y", y)
 	}
@@ -342,15 +330,13 @@ func equalAIV(x AI, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := equalIV(I(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x=y", "y", y)
 	}
@@ -380,15 +366,13 @@ func equalASV(x AS, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := equalSV(S(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x=y", "y", y)
 	}
@@ -413,14 +397,14 @@ func lesser(x, y V) V {
 		return lesserASV(x, y)
 	case AV:
 		switch y := y.(type) {
-		case Array:
+		case array:
 			if y.Len() != len(x) {
 				return errf("x<y : length mismatch: %d vs %d", len(x), y.Len())
 			}
 			r := make(AV, len(x))
 			for i := range r {
 				v := lesser(x[i], y.At(i))
-				e, ok := v.(E)
+				e, ok := v.(errV)
 				if ok {
 					return e
 				}
@@ -431,15 +415,13 @@ func lesser(x, y V) V {
 		r := make(AV, len(x))
 		for i := range r {
 			v := lesser(x[i], y)
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x<y", "x", x)
 	}
@@ -473,15 +455,13 @@ func lesserFV(x F, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := lesserFV(F(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x<y", "y", y)
 	}
@@ -515,15 +495,13 @@ func lesserIV(x I, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := lesserIV(I(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x<y", "y", y)
 	}
@@ -543,15 +521,13 @@ func lesserSV(x S, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := lesserSV(S(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x<y", "y", y)
 	}
@@ -605,15 +581,13 @@ func lesserABV(x AB, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := lesserIV(B2I(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x<y", "y", y)
 	}
@@ -667,15 +641,13 @@ func lesserAFV(x AF, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := lesserFV(F(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x<y", "y", y)
 	}
@@ -729,15 +701,13 @@ func lesserAIV(x AI, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := lesserIV(I(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x<y", "y", y)
 	}
@@ -767,15 +737,13 @@ func lesserASV(x AS, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := lesserSV(S(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x<y", "y", y)
 	}
@@ -800,14 +768,14 @@ func greater(x, y V) V {
 		return greaterASV(x, y)
 	case AV:
 		switch y := y.(type) {
-		case Array:
+		case array:
 			if y.Len() != len(x) {
 				return errf("x>y : length mismatch: %d vs %d", len(x), y.Len())
 			}
 			r := make(AV, len(x))
 			for i := range r {
 				v := greater(x[i], y.At(i))
-				e, ok := v.(E)
+				e, ok := v.(errV)
 				if ok {
 					return e
 				}
@@ -818,15 +786,13 @@ func greater(x, y V) V {
 		r := make(AV, len(x))
 		for i := range r {
 			v := greater(x[i], y)
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x>y", "x", x)
 	}
@@ -860,15 +826,13 @@ func greaterFV(x F, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := greaterFV(F(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x>y", "y", y)
 	}
@@ -902,15 +866,13 @@ func greaterIV(x I, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := greaterIV(I(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x>y", "y", y)
 	}
@@ -930,15 +892,13 @@ func greaterSV(x S, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := greaterSV(S(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x>y", "y", y)
 	}
@@ -992,15 +952,13 @@ func greaterABV(x AB, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := greaterIV(B2I(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x>y", "y", y)
 	}
@@ -1054,15 +1012,13 @@ func greaterAFV(x AF, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := greaterFV(F(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x>y", "y", y)
 	}
@@ -1116,15 +1072,13 @@ func greaterAIV(x AI, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := greaterIV(I(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x>y", "y", y)
 	}
@@ -1154,15 +1108,13 @@ func greaterASV(x AS, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := greaterSV(S(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x>y", "y", y)
 	}
@@ -1187,14 +1139,14 @@ func add(x, y V) V {
 		return addASV(x, y)
 	case AV:
 		switch y := y.(type) {
-		case Array:
+		case array:
 			if y.Len() != len(x) {
 				return errf("x+y : length mismatch: %d vs %d", len(x), y.Len())
 			}
 			r := make(AV, len(x))
 			for i := range r {
 				v := add(x[i], y.At(i))
-				e, ok := v.(E)
+				e, ok := v.(errV)
 				if ok {
 					return e
 				}
@@ -1205,15 +1157,13 @@ func add(x, y V) V {
 		r := make(AV, len(x))
 		for i := range r {
 			v := add(x[i], y)
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x+y", "x", x)
 	}
@@ -1247,15 +1197,13 @@ func addFV(x F, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := addFV(F(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x+y", "y", y)
 	}
@@ -1289,15 +1237,13 @@ func addIV(x I, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := addIV(I(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x+y", "y", y)
 	}
@@ -1317,15 +1263,13 @@ func addSV(x S, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := addSV(S(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x+y", "y", y)
 	}
@@ -1379,15 +1323,13 @@ func addABV(x AB, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := addIV(B2I(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x+y", "y", y)
 	}
@@ -1441,15 +1383,13 @@ func addAFV(x AF, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := addFV(F(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x+y", "y", y)
 	}
@@ -1503,15 +1443,13 @@ func addAIV(x AI, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := addIV(I(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x+y", "y", y)
 	}
@@ -1541,15 +1479,13 @@ func addASV(x AS, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := addSV(S(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x+y", "y", y)
 	}
@@ -1574,14 +1510,14 @@ func subtract(x, y V) V {
 		return subtractASV(x, y)
 	case AV:
 		switch y := y.(type) {
-		case Array:
+		case array:
 			if y.Len() != len(x) {
 				return errf("x-y : length mismatch: %d vs %d", len(x), y.Len())
 			}
 			r := make(AV, len(x))
 			for i := range r {
 				v := subtract(x[i], y.At(i))
-				e, ok := v.(E)
+				e, ok := v.(errV)
 				if ok {
 					return e
 				}
@@ -1592,15 +1528,13 @@ func subtract(x, y V) V {
 		r := make(AV, len(x))
 		for i := range r {
 			v := subtract(x[i], y)
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x-y", "x", x)
 	}
@@ -1634,15 +1568,13 @@ func subtractFV(x F, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := subtractFV(F(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x-y", "y", y)
 	}
@@ -1676,15 +1608,13 @@ func subtractIV(x I, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := subtractIV(I(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x-y", "y", y)
 	}
@@ -1704,15 +1634,13 @@ func subtractSV(x S, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := subtractSV(S(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x-y", "y", y)
 	}
@@ -1766,15 +1694,13 @@ func subtractABV(x AB, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := subtractIV(B2I(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x-y", "y", y)
 	}
@@ -1828,15 +1754,13 @@ func subtractAFV(x AF, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := subtractFV(F(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x-y", "y", y)
 	}
@@ -1890,15 +1814,13 @@ func subtractAIV(x AI, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := subtractIV(I(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x-y", "y", y)
 	}
@@ -1928,15 +1850,13 @@ func subtractASV(x AS, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := subtractSV(S(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x-y", "y", y)
 	}
@@ -1961,14 +1881,14 @@ func multiply(x, y V) V {
 		return multiplyASV(x, y)
 	case AV:
 		switch y := y.(type) {
-		case Array:
+		case array:
 			if y.Len() != len(x) {
 				return errf("x*y : length mismatch: %d vs %d", len(x), y.Len())
 			}
 			r := make(AV, len(x))
 			for i := range r {
 				v := multiply(x[i], y.At(i))
-				e, ok := v.(E)
+				e, ok := v.(errV)
 				if ok {
 					return e
 				}
@@ -1979,15 +1899,13 @@ func multiply(x, y V) V {
 		r := make(AV, len(x))
 		for i := range r {
 			v := multiply(x[i], y)
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x*y", "x", x)
 	}
@@ -2029,15 +1947,13 @@ func multiplyFV(x F, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := multiplyFV(F(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x*y", "y", y)
 	}
@@ -2079,15 +1995,13 @@ func multiplyIV(x I, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := multiplyIV(I(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x*y", "y", y)
 	}
@@ -2121,15 +2035,13 @@ func multiplySV(x S, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := multiplySV(S(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x*y", "y", y)
 	}
@@ -2198,15 +2110,13 @@ func multiplyABV(x AB, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := multiplyIV(B2I(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x*y", "y", y)
 	}
@@ -2275,15 +2185,13 @@ func multiplyAFV(x AF, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := multiplyFV(F(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x*y", "y", y)
 	}
@@ -2352,15 +2260,13 @@ func multiplyAIV(x AI, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := multiplyIV(I(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x*y", "y", y)
 	}
@@ -2414,15 +2320,13 @@ func multiplyASV(x AS, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := multiplySV(S(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x*y", "y", y)
 	}
@@ -2443,14 +2347,14 @@ func divide(x, y V) V {
 		return divideAIV(x, y)
 	case AV:
 		switch y := y.(type) {
-		case Array:
+		case array:
 			if y.Len() != len(x) {
 				return errf("x%%y : length mismatch: %d vs %d", len(x), y.Len())
 			}
 			r := make(AV, len(x))
 			for i := range r {
 				v := divide(x[i], y.At(i))
-				e, ok := v.(E)
+				e, ok := v.(errV)
 				if ok {
 					return e
 				}
@@ -2461,15 +2365,13 @@ func divide(x, y V) V {
 		r := make(AV, len(x))
 		for i := range r {
 			v := divide(x[i], y)
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x%%y", "x", x)
 	}
@@ -2503,15 +2405,13 @@ func divideFV(x F, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := divideFV(F(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x%%y", "y", y)
 	}
@@ -2545,15 +2445,13 @@ func divideIV(x I, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := divideIV(I(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x%%y", "y", y)
 	}
@@ -2607,15 +2505,13 @@ func divideABV(x AB, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := divideIV(B2I(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x%%y", "y", y)
 	}
@@ -2669,15 +2565,13 @@ func divideAFV(x AF, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := divideFV(F(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x%%y", "y", y)
 	}
@@ -2731,15 +2625,13 @@ func divideAIV(x AI, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := divideIV(I(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x%%y", "y", y)
 	}
@@ -2764,14 +2656,14 @@ func minimum(x, y V) V {
 		return minimumASV(x, y)
 	case AV:
 		switch y := y.(type) {
-		case Array:
+		case array:
 			if y.Len() != len(x) {
 				return errf("x&y : length mismatch: %d vs %d", len(x), y.Len())
 			}
 			r := make(AV, len(x))
 			for i := range r {
 				v := minimum(x[i], y.At(i))
-				e, ok := v.(E)
+				e, ok := v.(errV)
 				if ok {
 					return e
 				}
@@ -2782,15 +2674,13 @@ func minimum(x, y V) V {
 		r := make(AV, len(x))
 		for i := range r {
 			v := minimum(x[i], y)
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x&y", "x", x)
 	}
@@ -2824,15 +2714,13 @@ func minimumFV(x F, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := minimumFV(F(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x&y", "y", y)
 	}
@@ -2866,15 +2754,13 @@ func minimumIV(x I, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := minimumIV(I(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x&y", "y", y)
 	}
@@ -2894,15 +2780,13 @@ func minimumSV(x S, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := minimumSV(S(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x&y", "y", y)
 	}
@@ -2956,15 +2840,13 @@ func minimumABV(x AB, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := minimumIV(B2I(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x&y", "y", y)
 	}
@@ -3018,15 +2900,13 @@ func minimumAFV(x AF, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := minimumFV(F(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x&y", "y", y)
 	}
@@ -3080,15 +2960,13 @@ func minimumAIV(x AI, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := minimumIV(I(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x&y", "y", y)
 	}
@@ -3118,15 +2996,13 @@ func minimumASV(x AS, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := minimumSV(S(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x&y", "y", y)
 	}
@@ -3151,14 +3027,14 @@ func maximum(x, y V) V {
 		return maximumASV(x, y)
 	case AV:
 		switch y := y.(type) {
-		case Array:
+		case array:
 			if y.Len() != len(x) {
 				return errf("x|y : length mismatch: %d vs %d", len(x), y.Len())
 			}
 			r := make(AV, len(x))
 			for i := range r {
 				v := maximum(x[i], y.At(i))
-				e, ok := v.(E)
+				e, ok := v.(errV)
 				if ok {
 					return e
 				}
@@ -3169,15 +3045,13 @@ func maximum(x, y V) V {
 		r := make(AV, len(x))
 		for i := range r {
 			v := maximum(x[i], y)
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x|y", "x", x)
 	}
@@ -3211,15 +3085,13 @@ func maximumFV(x F, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := maximumFV(F(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x|y", "y", y)
 	}
@@ -3253,15 +3125,13 @@ func maximumIV(x I, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := maximumIV(I(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x|y", "y", y)
 	}
@@ -3281,15 +3151,13 @@ func maximumSV(x S, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := maximumSV(S(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x|y", "y", y)
 	}
@@ -3343,15 +3211,13 @@ func maximumABV(x AB, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := maximumIV(B2I(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x|y", "y", y)
 	}
@@ -3405,15 +3271,13 @@ func maximumAFV(x AF, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := maximumFV(F(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x|y", "y", y)
 	}
@@ -3467,15 +3331,13 @@ func maximumAIV(x AI, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := maximumIV(I(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x|y", "y", y)
 	}
@@ -3505,15 +3367,13 @@ func maximumASV(x AS, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := maximumSV(S(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x|y", "y", y)
 	}
@@ -3534,14 +3394,14 @@ func modulus(x, y V) V {
 		return modulusAIV(x, y)
 	case AV:
 		switch y := y.(type) {
-		case Array:
+		case array:
 			if y.Len() != len(x) {
 				return errf("x mod y : length mismatch: %d vs %d", len(x), y.Len())
 			}
 			r := make(AV, len(x))
 			for i := range r {
 				v := modulus(x[i], y.At(i))
-				e, ok := v.(E)
+				e, ok := v.(errV)
 				if ok {
 					return e
 				}
@@ -3552,15 +3412,13 @@ func modulus(x, y V) V {
 		r := make(AV, len(x))
 		for i := range r {
 			v := modulus(x[i], y)
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x mod y", "x", x)
 	}
@@ -3594,15 +3452,13 @@ func modulusFV(x F, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := modulusFV(F(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x mod y", "y", y)
 	}
@@ -3636,15 +3492,13 @@ func modulusIV(x I, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := modulusIV(I(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x mod y", "y", y)
 	}
@@ -3698,15 +3552,13 @@ func modulusABV(x AB, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := modulusIV(B2I(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x mod y", "y", y)
 	}
@@ -3760,15 +3612,13 @@ func modulusAFV(x AF, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := modulusFV(F(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x mod y", "y", y)
 	}
@@ -3822,15 +3672,13 @@ func modulusAIV(x AI, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			v := modulusIV(I(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x mod y", "y", y)
 	}

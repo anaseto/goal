@@ -265,14 +265,14 @@ EOS
     print $out <<EOS;
 	case AV:
                 switch y := y.(type) {
-                case Array:
+                case array:
                         if y.Len() != len(x) {
                                 return errf("x${errOp}y : length mismatch: %d vs %d", len(x), y.Len())
                         }
                         r := make(AV, len(x))
                         for i := range r {
                                 v := ${name}(x[i], y.At(i))
-                                e, ok := v.(E)
+                                e, ok := v.(errV)
                                 if ok {
                                         return e
                                 }
@@ -283,15 +283,13 @@ EOS
                 r := make(AV, len(x))
                 for i := range r {
                         v := ${name}(x[i], y)
-                        e, ok := v.(E)
+                        e, ok := v.(errV)
                         if ok {
                                 return e
                         }
                         r[i] = v
                 }
                 return r
-	case E:
-		return x
 	default:
 		return errType("x${errOp}y", "x", x)
 	}
@@ -345,15 +343,13 @@ EOS
 		r := make(AV, len(y))
 		for i := range r {
 			v := ${name}${t}V($t(x), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x${errOp}y", "y", y)
 	}
@@ -416,15 +412,13 @@ EOS
 		r := make(AV, len(y))
 		for i := range r {
 			v := ${name}${t}V($tt(x[i]), y[i])
-			e, ok := v.(E)
+			e, ok := v.(errV)
 			if ok {
 				return e
 			}
 			r[i] = v
 		}
 		return r
-	case E:
-		return x
 	default:
 		return errType("x${errOp}y", "y", y)
 	}

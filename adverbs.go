@@ -25,7 +25,7 @@ func fold2(ctx *Context, args []V) V {
 		return errf("F/x : F rank is %d (expected 2)", vv.Rank(ctx))
 	}
 	switch x := args[0].(type) {
-	case Array:
+	case array:
 		if x.Len() == 0 {
 			vv, ok := vv.(zeroFun)
 			if ok {
@@ -120,7 +120,7 @@ func fold3(ctx *Context, args []V) V {
 	}
 	y := args[0]
 	switch y := y.(type) {
-	case Array:
+	case array:
 		res := args[2]
 		if y.Len() == 0 {
 			return res
@@ -129,7 +129,7 @@ func fold3(ctx *Context, args []V) V {
 			ctx.push(y.At(i))
 			ctx.push(res)
 			res = ctx.applyN(v, 2)
-			if err, ok := res.(E); ok {
+			if err, ok := res.(errV); ok {
 				return err
 			}
 		}
@@ -156,7 +156,7 @@ func fold3While(ctx *Context, args []V) V {
 		for {
 			ctx.push(y)
 			cond := ctx.applyN(x, 1)
-			if err, ok := cond.(E); ok {
+			if err, ok := cond.(errV); ok {
 				return err
 			}
 			if !isTrue(cond) {
@@ -164,7 +164,7 @@ func fold3While(ctx *Context, args []V) V {
 			}
 			ctx.push(y)
 			y = ctx.applyN(v, 1)
-			if err, ok := y.(E); ok {
+			if err, ok := y.(errV); ok {
 				return err
 			}
 		}
@@ -177,7 +177,7 @@ func fold3doTimes(ctx *Context, n int, v, y V) V {
 	for i := 0; i < n; i++ {
 		ctx.push(y)
 		y = ctx.applyN(v, 1)
-		if err, ok := y.(E); ok {
+		if err, ok := y.(errV); ok {
 			return err
 		}
 	}
@@ -199,7 +199,7 @@ func scan2(ctx *Context, v, x V) V {
 		return errf("f\\x : f rank is %d (expected 2)", vv.Rank(ctx))
 	}
 	switch x := x.(type) {
-	case Array:
+	case array:
 		if x.Len() == 0 {
 			vv, ok := v.(zeroFun)
 			if ok {
@@ -212,7 +212,7 @@ func scan2(ctx *Context, v, x V) V {
 			ctx.push(x.At(i))
 			ctx.push(res[len(res)-1])
 			next := ctx.applyN(v, 2)
-			if err, ok := next.(E); ok {
+			if err, ok := next.(errV); ok {
 				return err
 			}
 			res = append(res, next)
@@ -259,14 +259,14 @@ func scan3(ctx *Context, args []V) V {
 	}
 	y := args[0]
 	switch y := y.(type) {
-	case Array:
+	case array:
 		if y.Len() == 0 {
 			return AV{}
 		}
 		ctx.push(y.At(0))
 		ctx.push(args[2])
 		first := ctx.applyN(v, 2)
-		if err, ok := first.(E); ok {
+		if err, ok := first.(errV); ok {
 			return err
 		}
 		res := AV{first}
@@ -274,7 +274,7 @@ func scan3(ctx *Context, args []V) V {
 			ctx.push(y.At(i))
 			ctx.push(res[len(res)-1])
 			next := ctx.applyN(v, 2)
-			if err, ok := next.(E); ok {
+			if err, ok := next.(errV); ok {
 				return err
 			}
 			res = append(res, next)
@@ -303,7 +303,7 @@ func scan3While(ctx *Context, args []V) V {
 		for {
 			ctx.push(y)
 			cond := ctx.applyN(x, 1)
-			if err, ok := cond.(E); ok {
+			if err, ok := cond.(errV); ok {
 				return err
 			}
 			if !isTrue(cond) {
@@ -311,7 +311,7 @@ func scan3While(ctx *Context, args []V) V {
 			}
 			ctx.push(y)
 			y = ctx.applyN(v, 1)
-			if err, ok := y.(E); ok {
+			if err, ok := y.(errV); ok {
 				return err
 			}
 			res = append(res, y)
@@ -326,7 +326,7 @@ func scan3doTimes(ctx *Context, n int, v, y V) V {
 	for i := 0; i < n; i++ {
 		ctx.push(y)
 		y = ctx.applyN(v, 1)
-		if err, ok := y.(E); ok {
+		if err, ok := y.(errV); ok {
 			return err
 		}
 		res = append(res, y)
@@ -342,12 +342,12 @@ func each2(ctx *Context, args []V) V {
 	}
 	x := toArray(args[0])
 	switch x := x.(type) {
-	case Array:
+	case array:
 		res := make(AV, 0, x.Len())
 		for i := 0; i < x.Len(); i++ {
 			ctx.push(x.At(i))
 			next := ctx.applyN(v, 1)
-			if err, ok := next.(E); ok {
+			if err, ok := next.(errV); ok {
 				return err
 			}
 			res = append(res, next)
@@ -364,11 +364,11 @@ func each3(ctx *Context, args []V) V {
 	if !ok {
 		return errf("x f'y : f not a function (%s)", v.Type())
 	}
-	x, ok := args[2].(Array)
+	x, ok := args[2].(array)
 	if !ok {
 		return errf("x f'y : x not an array (%s)", x.Type())
 	}
-	y, ok := args[0].(Array)
+	y, ok := args[0].(array)
 	if !ok {
 		return errf("x f'y : y not an array (%s)", y.Type())
 	}
@@ -381,7 +381,7 @@ func each3(ctx *Context, args []V) V {
 		ctx.push(y.At(i))
 		ctx.push(x.At(i))
 		next := ctx.applyN(v, 2)
-		if err, ok := next.(E); ok {
+		if err, ok := next.(errV); ok {
 			return err
 		}
 		res = append(res, next)

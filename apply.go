@@ -60,7 +60,7 @@ func (ctx *Context) applyN(v V, n int) V {
 		}
 		ctx.push(res)
 		return ctx.applyN(v.Left, 1)
-	case Array:
+	case array:
 		switch n {
 		case 1:
 			return canonical(ctx.applyArray(v, ctx.pop()))
@@ -75,7 +75,7 @@ func (ctx *Context) applyN(v V, n int) V {
 	}
 }
 
-func (ctx *Context) applyArray(v Array, xv V) V {
+func (ctx *Context) applyArray(v array, xv V) V {
 	if xv == nil {
 		return v
 	}
@@ -102,9 +102,9 @@ func (ctx *Context) applyArray(v Array, xv V) V {
 			return errf("x[y] : out of bounds index: %d", i)
 		}
 		res = v.At(i)
-	case Array:
+	case array:
 		indices := toIndices(xv, v.Len())
-		if err, ok := indices.(E); ok {
+		if err, ok := indices.(errV); ok {
 			return err
 		}
 		res = v.Select(indices.(AI))
@@ -112,13 +112,13 @@ func (ctx *Context) applyArray(v Array, xv V) V {
 	return res
 }
 
-func (ctx *Context) applyArrayArgs(v Array, args []V) V {
+func (ctx *Context) applyArrayArgs(v array, args []V) V {
 	if len(args) == 0 {
 		return v
 	}
 	arg := args[len(args)-1]
 	res := ctx.applyArray(v, arg)
-	if _, ok := res.(E); ok {
+	if _, ok := res.(errV); ok {
 		return res
 	}
 	args = args[:len(args)-1]
@@ -129,20 +129,20 @@ func (ctx *Context) applyArrayArgs(v Array, args []V) V {
 	case AV:
 		for i := range res {
 			switch z := res[i].(type) {
-			case Array:
+			case array:
 				res[i] = ctx.applyArrayArgs(z, args)
-				if _, ok := res[i].(E); ok {
+				if _, ok := res[i].(errV); ok {
 					return res
 				}
 			}
 		}
 		return res
-	case Array:
+	case array:
 		if len(args) > 1 {
 			return errs("x[y] : out of depth index")
 		}
 		vres := ctx.applyArray(res, args[len(args)-1])
-		if _, ok := vres.(E); ok {
+		if _, ok := vres.(errV); ok {
 			return vres
 		}
 		return vres
@@ -276,7 +276,7 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 
 	if err != nil {
 		ctx.updateErrPos(ip, lc)
-		return E(err.Error())
+		return errV(err.Error())
 	}
 	var res V
 	switch len(ctx.stack) {

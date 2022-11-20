@@ -40,7 +40,7 @@ func isNum(x V) bool {
 
 func isArray(x V) bool {
 	switch x.(type) {
-	case Array:
+	case array:
 		return true
 	default:
 		return false
@@ -126,7 +126,7 @@ func clone(x V) V {
 			r[i] = clone(x[i])
 		}
 		return r
-	case E:
+	case errV:
 		return x
 	default:
 		return x
@@ -197,9 +197,9 @@ func toArray(x V) V {
 		return AI{int(x)}
 	case S:
 		return AS{string(x)}
-	case E:
+	case errV:
 		return AV{x}
-	case Array:
+	case array:
 		return x
 	default:
 		return AV{x}
