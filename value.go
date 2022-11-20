@@ -11,23 +11,47 @@ import (
 
 // V represents any kind of value.
 type V interface {
+	// Len returns the length of the value. It is always 1 for atoms.
 	Len() int
+	// Type returns the name of the value's type.
 	Type() string
+	// Sprint returns a prettified string representation of the value.
 	Sprint(*Context) string
 }
 
-type F float64   // F represents real numbers.
-type I int       // I represents integers.
-type S string    // S represents (immutable) strings of bytes.
-type errV string // errV represents errors
+// F represents real numbers.
+type F float64
 
-func (f F) Len() int                      { return 1 }
-func (i I) Len() int                      { return 1 }
-func (s S) Len() int                      { return 1 }
-func (e errV) Len() int                   { return 1 }
-func (f F) Type() string                  { return "f" }
-func (i I) Type() string                  { return "i" }
-func (s S) Type() string                  { return "s" }
+// I represents integers.
+type I int
+
+// S represents (immutable) strings of bytes.
+type S string
+
+// errV represents errors
+type errV string
+
+// Len returns 1 for atoms.
+func (f F) Len() int { return 1 }
+
+// Len returns 1 for atoms.
+func (i I) Len() int { return 1 }
+
+// Len returns 1 for atoms.
+func (s S) Len() int { return 1 }
+
+// Len returns 1 for atoms.
+func (e errV) Len() int { return 1 }
+
+// Type retuns "n" for numeric atoms.
+func (f F) Type() string { return "n" }
+
+// Type retuns "n" for numeric atoms.
+func (i I) Type() string { return "n" }
+
+// Type retuns "s" for string atoms.
+func (s S) Type() string { return "s" }
+
 func (e errV) Type() string               { return "e" }
 func (f F) Sprint(ctx *Context) string    { return fmt.Sprintf("%g", f) }
 func (i I) Sprint(ctx *Context) string    { return fmt.Sprintf("%d", i) }
@@ -36,11 +60,20 @@ func (e errV) Sprint(ctx *Context) string { return fmt.Sprintf("'ERROR %s", e) }
 
 func (e errV) Error() string { return string(e) }
 
-type AV []V       // generic array
-type AB []bool    // boolean array
-type AF []float64 // real array
-type AI []int     // integer array (TODO: optimization: add Range type?)
-type AS []string  // string array
+// AV represents a generic array.
+type AV []V
+
+// AB represents an array of booleans.
+type AB []bool
+
+// AF represents an array of reals.
+type AF []float64
+
+// AI represents an array of integers.
+type AI []int
+
+// AS represents an array of strings.
+type AS []string // string array
 
 // Variadic represents a built-in function.
 type Variadic int32
