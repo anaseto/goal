@@ -33,10 +33,6 @@ func (bs sortAV) Swap(i, j int) {
 	bs[i], bs[j] = bs[j], bs[i]
 }
 
-func lessOrEq(x, y V) bool {
-	return less(x, y) || Match(x, y)
-}
-
 func less(x, y V) bool {
 	switch x := x.(type) {
 	case F:
@@ -500,7 +496,7 @@ func search(x V, y V) V {
 		if !sort.IsSorted(sortAB(x)) {
 			return errs("x$y : x is not ascending")
 		}
-		return searchAB(x, y)
+		return searchAI(fromABtoAI(x).(AI), y)
 	case AI:
 		if !sort.IsSorted(sort.IntSlice(x)) {
 			return errs("x$y : x is not ascending")
@@ -527,92 +523,55 @@ func search(x V, y V) V {
 	}
 }
 
-func searchAB(x AB, y V) V {
-	switch y := y.(type) {
-	case I:
-		if y != 0 && y != 1 {
-			return I(x.Len())
-		}
-		return I(sort.Search(len(x),
-			func(i int) bool { return B2I(x[i]) >= y }))
-	case F:
-		if !isI(y) {
-			return I(0)
-		}
-		return searchAB(x, I(y))
-	case AB:
-		res := make(AI, y.Len())
-		for i, v := range y {
-			res[i] = sort.Search(len(x),
-				func(i int) bool { return !v || x[i] })
-		}
-		return res
-	case AI:
-		res := make(AI, y.Len())
-		for i, v := range y {
-			res[i] = sort.Search(len(x),
-				func(i int) bool { return B2I(x[i]) >= I(v) })
-		}
-		return res
-	case AF:
-		res := make(AI, y.Len())
-		for i, v := range y {
-			j := y.Len()
-			if isI(F(v)) {
-				j = sort.Search(len(x),
-					func(i int) bool { return B2I(x[i]) >= I(v) })
-			}
-			res[i] = j
-		}
-		return res
-	case Array:
-		res := make(AI, y.Len())
-		for i := 0; i < y.Len(); i++ {
-			res[i] = sort.Search(len(x),
-				func(i int) bool { return lessOrEq(y.At(i), B2I(x[i])) })
-		}
-		return res
-	default:
-		return I(x.Len())
-	}
+func searchAII(x AI, y I) int {
+	return sort.Search(len(x), func(i int) bool { return I(x[i]) > y })
+}
+
+func searchAIF(x AI, y F) int {
+	return sort.Search(len(x), func(i int) bool { return F(x[i]) > y })
+}
+
+func searchAFI(x AF, y I) int {
+	return sort.Search(len(x), func(i int) bool { return x[i] > float64(y) })
+}
+
+func searchAFF(x AF, y F) int {
+	return sort.Search(len(x), func(i int) bool { return F(x[i]) > y })
+}
+
+func searchASS(x AS, y S) int {
+	return sort.Search(len(x), func(i int) bool { return S(x[i]) > y })
 }
 
 func searchAI(x AI, y V) V {
 	switch y := y.(type) {
 	case I:
-		return I(sort.SearchInts(x, int(y)))
+		return I(searchAII(x, y))
 	case F:
-		if !isI(y) {
-			return I(0)
-		}
-		return I(sort.SearchInts(x, int(y)))
+		return I(searchAIF(x, y))
 	case AB:
 		res := make(AI, y.Len())
 		for i, v := range y {
-			res[i] = sort.SearchInts(x, int(B2I(v)))
+			res[i] = searchAII(x, B2I(v))
 		}
 		return res
 	case AI:
 		res := make(AI, y.Len())
 		for i, v := range y {
-			res[i] = sort.SearchInts(x, v)
+			res[i] = searchAII(x, I(v))
 		}
 		return res
 	case AF:
 		res := make(AI, y.Len())
 		for i, v := range y {
-			j := y.Len()
-			if isI(F(v)) {
-				j = sort.SearchInts(x, int(v))
-			}
-			res[i] = j
+			res[i] = searchAIF(x, F(v))
 		}
 		return res
 	case Array:
 		res := make(AI, y.Len())
 		for i := 0; i < y.Len(); i++ {
 			res[i] = sort.Search(len(x),
-				func(i int) bool { return lessOrEq(y.At(i), I(x[i])) })
+				func(i int) bool { return less(y.At(i), I(x[i])) })
 		}
 		return res
 	default:
@@ -623,32 +582,32 @@ func searchAI(x AI, y V) V {
 func searchAF(x AF, y V) V {
 	switch y := y.(type) {
 	case I:
-		return I(sort.SearchFloat64s(x, float64(y)))
+		return I(searchAFI(x, y))
 	case F:
-		return I(sort.SearchFloat64s(x, float64(y)))
+		return I(searchAFF(x, y))
 	case AB:
 		res := make(AI, y.Len())
 		for i, v := range y {
-			res[i] = sort.SearchFloat64s(x, float64(B2I(v)))
+			res[i] = searchAFI(x, B2I(v))
 		}
 		return res
 	case AI:
 		res := make(AI, y.Len())
 		for i, v := range y {
-			res[i] = sort.SearchFloat64s(x, float64(v))
+			res[i] = searchAFI(x, I(v))
 		}
 		return res
 	case AF:
 		res := make(AI, y.Len())
 		for i, v := range y {
-			res[i] = sort.SearchFloat64s(x, v)
+			res[i] = searchAFF(x, F(v))
 		}
 		return res
 	case Array:
 		res := make(AI, y.Len())
 		for i := 0; i < y.Len(); i++ {
 			res[i] = sort.Search(len(x),
-				func(i int) bool { return lessOrEq(y.At(i), F(x[i])) })
+				func(i int) bool { return less(y.At(i), F(x[i])) })
 		}
 		return res
 	default:
@@ -658,17 +617,19 @@ func searchAF(x AF, y V) V {
 
 func searchAS(x AS, y V) V {
 	switch y := y.(type) {
+	case S:
+		return I(searchASS(x, y))
 	case AS:
 		res := make(AI, y.Len())
 		for i, v := range y {
-			res[i] = sort.SearchStrings(x, v)
+			res[i] = searchASS(x, S(v))
 		}
 		return res
 	case Array:
 		res := make(AI, y.Len())
 		for i := 0; i < y.Len(); i++ {
 			res[i] = sort.Search(len(x),
-				func(i int) bool { return lessOrEq(y.At(i), S(x[i])) })
+				func(i int) bool { return less(y.At(i), S(x[i])) })
 		}
 		return res
 	default:
@@ -682,11 +643,11 @@ func searchAV(x AV, y V) V {
 		res := make(AI, y.Len())
 		for i := 0; i < y.Len(); i++ {
 			res[i] = sort.Search(len(x),
-				func(i int) bool { return lessOrEq(y.At(i), x[i]) })
+				func(i int) bool { return less(y.At(i), x[i]) })
 		}
 		return res
 	default:
 		return I(sort.Search(len(x),
-			func(i int) bool { return lessOrEq(y, x[i]) }))
+			func(i int) bool { return less(y, x[i]) }))
 	}
 }
