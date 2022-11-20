@@ -19,18 +19,22 @@ func (bs sortAB) Swap(i, j int) {
 	bs[i], bs[j] = bs[j], bs[i]
 }
 
-type sortAO []V
+type sortAV []V
 
-func (bs sortAO) Len() int {
+func (bs sortAV) Len() int {
 	return len(bs)
 }
 
-func (bs sortAO) Less(i, j int) bool {
+func (bs sortAV) Less(i, j int) bool {
 	return less(bs[i], bs[j])
 }
 
-func (bs sortAO) Swap(i, j int) {
+func (bs sortAV) Swap(i, j int) {
 	bs[i], bs[j] = bs[j], bs[i]
+}
+
+func lessOrEq(x, y V) bool {
+	return less(x, y) || Match(x, y)
 }
 
 func less(x, y V) bool {
@@ -65,7 +69,7 @@ func less(x, y V) bool {
 		if len(x) == 0 {
 			return length(y) > 0
 		}
-		return lessAO(x, y)
+		return lessAV(x, y)
 	default:
 		return false
 	}
@@ -292,7 +296,7 @@ func lessAS(x AS, y V) bool {
 	}
 }
 
-func lessAO(x AV, y V) bool {
+func lessAV(x AV, y V) bool {
 	switch y := y.(type) {
 	case F:
 		return less(x[0], y)
@@ -350,27 +354,27 @@ func sortUp(x V) V {
 		sort.Stable(sort.StringSlice(x))
 		return x
 	case AV:
-		sort.Stable(sortAO(x))
+		sort.Stable(sortAV(x))
 		return x
 	default:
 		return errf("^x : x not an array (%s)", x.Type())
 	}
 }
 
-type permutationAO struct {
+type permutationAV struct {
 	Perm AI
-	X    sortAO
+	X    sortAV
 }
 
-func (p *permutationAO) Len() int {
+func (p *permutationAV) Len() int {
 	return p.X.Len()
 }
 
-func (p *permutationAO) Swap(i, j int) {
+func (p *permutationAV) Swap(i, j int) {
 	p.Perm[i], p.Perm[j] = p.Perm[j], p.Perm[i]
 }
 
-func (p *permutationAO) Less(i, j int) bool {
+func (p *permutationAV) Less(i, j int) bool {
 	return p.X.Less(p.Perm[i], p.Perm[j])
 }
 
@@ -470,7 +474,7 @@ func ascend(x V) V {
 		sort.Stable(p)
 		return p.Perm
 	case AV:
-		p := &permutationAO{Perm: permRange(len(x)), X: sortAO(x)}
+		p := &permutationAV{Perm: permRange(len(x)), X: sortAV(x)}
 		sort.Stable(p)
 		return p.Perm
 	default:
@@ -487,4 +491,202 @@ func descend(x V) V {
 	}
 	reverseMut(p)
 	return p
+}
+
+// search implements x$y.
+func search(x V, y V) V {
+	switch x := x.(type) {
+	case AB:
+		if !sort.IsSorted(sortAB(x)) {
+			return errs("x$y : x is not ascending")
+		}
+		return searchAB(x, y)
+	case AI:
+		if !sort.IsSorted(sort.IntSlice(x)) {
+			return errs("x$y : x is not ascending")
+		}
+		return searchAI(x, y)
+	case AF:
+		if !sort.IsSorted(sort.Float64Slice(x)) {
+			return errs("x$y : x is not ascending")
+		}
+		return searchAF(x, y)
+	case AS:
+		if !sort.IsSorted(sort.StringSlice(x)) {
+			return errs("x$y : x is not ascending")
+		}
+		return searchAS(x, y)
+	case AV:
+		if !sort.IsSorted(sortAV(x)) {
+			return errs("x$y : x is not ascending")
+		}
+		return searchAV(x, y)
+	default:
+		// should not happen
+		return errf("x$y : bad type for x (%s)", x.Type())
+	}
+}
+
+func searchAB(x AB, y V) V {
+	switch y := y.(type) {
+	case I:
+		if y != 0 && y != 1 {
+			return I(x.Len())
+		}
+		return I(sort.Search(len(x),
+			func(i int) bool { return B2I(x[i]) >= y }))
+	case F:
+		if !isI(y) {
+			return I(0)
+		}
+		return searchAB(x, I(y))
+	case AB:
+		res := make(AI, y.Len())
+		for i, v := range y {
+			res[i] = sort.Search(len(x),
+				func(i int) bool { return !v || x[i] })
+		}
+		return res
+	case AI:
+		res := make(AI, y.Len())
+		for i, v := range y {
+			res[i] = sort.Search(len(x),
+				func(i int) bool { return B2I(x[i]) >= I(v) })
+		}
+		return res
+	case AF:
+		res := make(AI, y.Len())
+		for i, v := range y {
+			j := y.Len()
+			if isI(F(v)) {
+				j = sort.Search(len(x),
+					func(i int) bool { return B2I(x[i]) >= I(v) })
+			}
+			res[i] = j
+		}
+		return res
+	case Array:
+		res := make(AI, y.Len())
+		for i := 0; i < y.Len(); i++ {
+			res[i] = sort.Search(len(x),
+				func(i int) bool { return lessOrEq(y.At(i), B2I(x[i])) })
+		}
+		return res
+	default:
+		return I(x.Len())
+	}
+}
+
+func searchAI(x AI, y V) V {
+	switch y := y.(type) {
+	case I:
+		return I(sort.SearchInts(x, int(y)))
+	case F:
+		if !isI(y) {
+			return I(0)
+		}
+		return I(sort.SearchInts(x, int(y)))
+	case AB:
+		res := make(AI, y.Len())
+		for i, v := range y {
+			res[i] = sort.SearchInts(x, int(B2I(v)))
+		}
+		return res
+	case AI:
+		res := make(AI, y.Len())
+		for i, v := range y {
+			res[i] = sort.SearchInts(x, v)
+		}
+		return res
+	case AF:
+		res := make(AI, y.Len())
+		for i, v := range y {
+			j := y.Len()
+			if isI(F(v)) {
+				j = sort.SearchInts(x, int(v))
+			}
+			res[i] = j
+		}
+		return res
+	case Array:
+		res := make(AI, y.Len())
+		for i := 0; i < y.Len(); i++ {
+			res[i] = sort.Search(len(x),
+				func(i int) bool { return lessOrEq(y.At(i), I(x[i])) })
+		}
+		return res
+	default:
+		return I(x.Len())
+	}
+}
+
+func searchAF(x AF, y V) V {
+	switch y := y.(type) {
+	case I:
+		return I(sort.SearchFloat64s(x, float64(y)))
+	case F:
+		return I(sort.SearchFloat64s(x, float64(y)))
+	case AB:
+		res := make(AI, y.Len())
+		for i, v := range y {
+			res[i] = sort.SearchFloat64s(x, float64(B2I(v)))
+		}
+		return res
+	case AI:
+		res := make(AI, y.Len())
+		for i, v := range y {
+			res[i] = sort.SearchFloat64s(x, float64(v))
+		}
+		return res
+	case AF:
+		res := make(AI, y.Len())
+		for i, v := range y {
+			res[i] = sort.SearchFloat64s(x, v)
+		}
+		return res
+	case Array:
+		res := make(AI, y.Len())
+		for i := 0; i < y.Len(); i++ {
+			res[i] = sort.Search(len(x),
+				func(i int) bool { return lessOrEq(y.At(i), F(x[i])) })
+		}
+		return res
+	default:
+		return I(x.Len())
+	}
+}
+
+func searchAS(x AS, y V) V {
+	switch y := y.(type) {
+	case AS:
+		res := make(AI, y.Len())
+		for i, v := range y {
+			res[i] = sort.SearchStrings(x, v)
+		}
+		return res
+	case Array:
+		res := make(AI, y.Len())
+		for i := 0; i < y.Len(); i++ {
+			res[i] = sort.Search(len(x),
+				func(i int) bool { return lessOrEq(y.At(i), S(x[i])) })
+		}
+		return res
+	default:
+		return I(x.Len())
+	}
+}
+
+func searchAV(x AV, y V) V {
+	switch y := y.(type) {
+	case Array:
+		res := make(AI, y.Len())
+		for i := 0; i < y.Len(); i++ {
+			res[i] = sort.Search(len(x),
+				func(i int) bool { return lessOrEq(y.At(i), x[i]) })
+		}
+		return res
+	default:
+		return I(sort.Search(len(x),
+			func(i int) bool { return lessOrEq(y, x[i]) }))
+	}
 }

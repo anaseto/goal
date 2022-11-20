@@ -408,7 +408,7 @@ func memberOf(x, y V) V {
 	case AS:
 		return memberOfAS(x, y)
 	case AV:
-		return memberOfAO(x, y)
+		return memberOfAV(x, y)
 	default:
 		return errf("x in y : y not an array (%s)", y.Type())
 	}
@@ -474,7 +474,7 @@ func memberOfAF(x V, y AF) V {
 			_, r[i] = m[F(v)]
 		}
 		return r
-	case AV:
+	case Array:
 		return memberOfArray(x, y)
 	default:
 		return make(AB, length(x))
@@ -521,7 +521,7 @@ func memberOfAI(x V, y AI) V {
 			_, r[i] = m[int(v)]
 		}
 		return r
-	case AV:
+	case Array:
 		return memberOfArray(x, y)
 	default:
 		return make(AB, length(x))
@@ -547,14 +547,14 @@ func memberOfAS(x V, y AS) V {
 			_, r[i] = m[v]
 		}
 		return r
-	case AV:
+	case Array:
 		return memberOfArray(x, y)
 	default:
 		return make(AB, length(x))
 	}
 }
 
-func memberOfAO(x V, y AV) V {
+func memberOfAV(x V, y AV) V {
 	switch x := x.(type) {
 	case Array:
 		return memberOfArray(x, y)
@@ -811,7 +811,7 @@ func findAB(x AB, y V) V {
 			}
 		}
 		return res
-	case AV:
+	case Array:
 		return findArray(x, y)
 	default:
 		res := make(AI, y.Len())
@@ -874,7 +874,7 @@ func findAF(x AF, y V) V {
 			}
 		}
 		return res
-	case AV:
+	case Array:
 		return findArray(x, y)
 	default:
 		res := make(AI, y.Len())
@@ -941,7 +941,7 @@ func findAI(x AI, y V) V {
 			}
 		}
 		return res
-	case AV:
+	case Array:
 		return findArray(x, y)
 	default:
 		res := make(AI, y.Len())
@@ -973,7 +973,7 @@ func findAS(x AS, y V) V {
 			}
 		}
 		return res
-	case AV:
+	case Array:
 		return findArray(x, y)
 	default:
 		res := make(AI, y.Len())

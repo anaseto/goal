@@ -290,7 +290,12 @@ func VCast(ctx *Context, args []V) V {
 	case 1:
 		return S(args[0].Sprint(ctx))
 	case 2:
-		return cast(args[1], args[0])
+		switch args[1].(type) {
+		case Array:
+			return search(args[1], args[0])
+		default:
+			return cast(args[1], args[0])
+		}
 	default:
 		return errs("$ got too many arguments")
 	}

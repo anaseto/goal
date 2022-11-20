@@ -522,7 +522,7 @@ func weedOutAI(x AI, y V) V {
 func cast(x, y V) V {
 	s, ok := x.(S)
 	if !ok {
-		return errf("x$y : x not a string (%s)", x.Type())
+		return errf("s$y : s not a string (%s)", x.Type())
 	}
 	switch s {
 	case "i":
