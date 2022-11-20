@@ -215,12 +215,12 @@ func replicate(x, y V) V {
 			return repeat(y, n)
 		}
 	case AB:
-		if x.Len() != int(Length(y)) {
+		if x.Len() != Length(y) {
 			return errf("f#y : length mismatch: %d (f[y]) vs %d (y)", x.Len(), Length(y))
 		}
 		return repeatAB(x, y)
 	case AI:
-		if x.Len() != int(Length(y)) {
+		if x.Len() != Length(y) {
 			return errf("f#y : length mismatch: %d (f[y]) vs %d (y)", x.Len(), Length(y))
 		}
 		return repeatAI(x, y)

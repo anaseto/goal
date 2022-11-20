@@ -7,10 +7,10 @@ import (
 )
 
 // Length returns the length of a value like in #x.
-func Length(x V) I {
+func Length(x V) int {
 	switch x := x.(type) {
 	case array:
-		return I(x.Len())
+		return x.Len()
 	default:
 		return 1
 	}
@@ -69,7 +69,7 @@ func rotate(x, y V) V {
 	default:
 		return errf("f|y : non-integer f[y] (%s)", x.Type())
 	}
-	lenx := int(Length(y))
+	lenx := Length(y)
 	if lenx == 0 {
 		return y
 	}
@@ -190,7 +190,7 @@ func cutAI(x AI, y V) V {
 	if !sort.IsSorted(sort.IntSlice(x)) {
 		return errs("x^y : x is not ascending")
 	}
-	ylen := int(Length(y))
+	ylen := Length(y)
 	for _, i := range x {
 		if i < 0 || i > ylen {
 			return errf("x^y : x contains out of bound index (%d)", i)
@@ -295,7 +295,7 @@ func takeCyclic(y V, n int) V {
 		n = -n
 	}
 	i := 0
-	step := int(Length(y))
+	step := Length(y)
 	switch y := y.(type) {
 	case AB:
 		r := make(AB, n)
@@ -365,7 +365,7 @@ func takeCyclic(y V, n int) V {
 // ShiftBefore returns x»y. XXX: unused for now.
 func shiftBefore(x, y V) V {
 	x = toArray(x)
-	max := int(minI(Length(x), Length(y)))
+	max := int(minI(I(Length(x)), I(Length(y))))
 	if max == 0 {
 		return y
 	}
@@ -514,7 +514,7 @@ func nudge(x V) V {
 // ShiftAfter returns x«y. XXX: unused for now.
 func shiftAfter(x, y V) V {
 	x = toArray(x)
-	max := int(minI(Length(x), Length(y)))
+	max := int(minI(I(Length(x)), I(Length(y))))
 	if max == 0 {
 		return y
 	}
@@ -676,7 +676,7 @@ func flip(x V) V {
 		}
 		lines := -1
 		for _, o := range x {
-			nl := int(Length(o))
+			nl := Length(o)
 			if !isArray(o) {
 				continue
 			}
