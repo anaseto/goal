@@ -169,7 +169,7 @@ func fold3While(ctx *Context, args []V) V {
 			}
 		}
 	default:
-		return errf("x f/y : bad type `%v for x", x.Type())
+		return errf("x f/y : bad type for x (%s)", x.Type())
 	}
 }
 
@@ -317,7 +317,7 @@ func scan3While(ctx *Context, args []V) V {
 			res = append(res, y)
 		}
 	default:
-		return errf("x f\\y : bad type `%v for x", x.Type())
+		return errf("x f\\y : bad type for x (%s)", x.Type())
 	}
 }
 

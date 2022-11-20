@@ -293,7 +293,7 @@ EOS
 	case E:
 		return x
 	default:
-		return errf("x${errOp}y : bad type `%s for x", x.Type())
+		return errf("x${errOp}y : bad type for x (%s)", x.Type())
 	}
 }\n
 EOS
@@ -355,7 +355,7 @@ EOS
 	case E:
 		return x
 	default:
-		return errf("x${errOp}y : bad type `%s for y", y.Type())
+		return errf("x${errOp}y : bad type for y (%s)", y.Type())
 	}
 }\n
 EOS
@@ -426,7 +426,7 @@ EOS
 	case E:
 		return x
 	default:
-		return errf("x${errOp}y : bad type `%s for y", y.Type())
+		return errf("x${errOp}y : bad type for y (%s)", y.Type())
 	}
 }\n
 EOS

@@ -91,7 +91,7 @@ func errNYI(s string) E {
 }
 
 func errType(x V) E {
-	return E("bad type: `" + x.Type())
+	return E("bad type " + x.Type())
 }
 
 func errs(s string) E {
