@@ -384,19 +384,17 @@ func markFirsts(x V) V {
 
 // memberOf returns x in y.
 func memberOf(x, y V) V {
-	if length(y) == 0 || length(x) == 0 {
-		switch y.(type) {
+	if length(y) == 0 {
+		switch x := x.(type) {
 		case Array:
-			switch x := x.(type) {
-			case Array:
-				r := make(AB, length(x))
-				return r
-			default:
-				return B2I(false)
-			}
+			r := make(AB, length(x))
+			return r
 		default:
-			return errf("x in y : y not an array (%s)", y.Type())
+			return B2I(false)
 		}
+	}
+	if length(x) == 0 {
+		return AB{}
 	}
 	y = canonical(y)
 	x = canonical(x)
@@ -425,11 +423,16 @@ func memberOfAB(x V, y AB) V {
 		t, f = t || v, f || !v
 	}
 	if t && f {
-		r := make(AB, length(x))
-		for i := range r {
-			r[i] = true
+		switch x := x.(type) {
+		case Array:
+			r := make(AB, length(x))
+			for i := range r {
+				r[i] = true
+			}
+			return r
+		default:
+			return B2I(true)
 		}
-		return r
 	}
 	if t {
 		return equal(x, B2I(true))
@@ -672,7 +675,15 @@ func without(x, y V) V {
 		return windows(int(z), y)
 	case Array:
 		y = toArray(y)
-		res := not(memberOf(x, y))
+		res := memberOf(x, y)
+		switch bres := res.(type) {
+		case I:
+			res = I(1 - bres)
+		case AB:
+			for i, b := range bres {
+				bres[i] = !b
+			}
+		}
 		if av, ok := res.(Array); ok {
 			if av.Len() != x.Len() {
 				return errf("x^y : length mismatch: %d (x) vs %d (y)", x.Len(), y.Len())
