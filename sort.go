@@ -43,27 +43,27 @@ func less(x, y V) bool {
 		return lessS(x, y)
 	case AB:
 		if len(x) == 0 {
-			return length(y) > 0
+			return Length(y) > 0
 		}
 		return lessAB(x, y)
 	case AF:
 		if len(x) == 0 {
-			return length(y) > 0
+			return Length(y) > 0
 		}
 		return lessAF(x, y)
 	case AI:
 		if len(x) == 0 {
-			return length(y) > 0
+			return Length(y) > 0
 		}
 		return lessAI(x, y)
 	case AS:
 		if len(x) == 0 {
-			return length(y) > 0
+			return Length(y) > 0
 		}
 		return lessAS(x, y)
 	case AV:
 		if len(x) == 0 {
-			return length(y) > 0
+			return Length(y) > 0
 		}
 		return lessAV(x, y)
 	default:

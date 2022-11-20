@@ -239,7 +239,7 @@ func isFalse(x V) bool {
 	case S:
 		return x == ""
 	default:
-		return x == nil || x.Len() == 0
+		return x == nil || Length(x) == 0
 	}
 }
 
@@ -252,7 +252,7 @@ func isTrue(x V) bool {
 	case S:
 		return x != ""
 	default:
-		return x != nil && x.Len() > 0
+		return x != nil && Length(x) > 0
 	}
 }
 

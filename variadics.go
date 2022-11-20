@@ -246,7 +246,7 @@ func VWithout(ctx *Context, args []V) V {
 func VTake(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return length(args[0])
+		return Length(args[0])
 	case 2:
 		v, ok := args[1].(Function)
 		if ok {

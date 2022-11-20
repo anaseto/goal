@@ -124,7 +124,7 @@ func matchAF(x, y AF) bool {
 
 // classify returns %x.
 func classify(x V) V {
-	if length(x) == 0 {
+	if Length(x) == 0 {
 		return AB{}
 	}
 	x = canonical(x)
@@ -206,7 +206,7 @@ func classify(x V) V {
 
 // uniq returns ?x.
 func uniq(x V) V {
-	if length(x) == 0 {
+	if Length(x) == 0 {
 		return x
 	}
 	x = canonical(x)
@@ -281,7 +281,7 @@ func uniq(x V) V {
 
 // Mark Firsts returns ∊x. XXX unused for now
 func markFirsts(x V) V {
-	if length(x) == 0 {
+	if Length(x) == 0 {
 		return AB{}
 	}
 	x = canonical(x)
@@ -356,16 +356,16 @@ func markFirsts(x V) V {
 
 // memberOf returns x in y.
 func memberOf(x, y V) V {
-	if length(y) == 0 {
+	if Length(y) == 0 {
 		switch x := x.(type) {
 		case array:
-			r := make(AB, length(x))
+			r := make(AB, x.Len())
 			return r
 		default:
 			return B2I(false)
 		}
 	}
-	if length(x) == 0 {
+	if Length(x) == 0 {
 		return AB{}
 	}
 	y = canonical(y)
@@ -397,7 +397,7 @@ func memberOfAB(x V, y AB) V {
 	if t && f {
 		switch x := x.(type) {
 		case array:
-			r := make(AB, length(x))
+			r := make(AB, x.Len())
 			for i := range r {
 				r[i] = true
 			}
@@ -449,7 +449,7 @@ func memberOfAF(x V, y AF) V {
 	case array:
 		return memberOfArray(x, y)
 	default:
-		return make(AB, length(x))
+		return make(AB, Length(x))
 	}
 }
 
@@ -496,7 +496,7 @@ func memberOfAI(x V, y AI) V {
 	case array:
 		return memberOfArray(x, y)
 	default:
-		return make(AB, length(x))
+		return make(AB, Length(x))
 	}
 }
 
@@ -522,7 +522,7 @@ func memberOfAS(x V, y AS) V {
 	case array:
 		return memberOfArray(x, y)
 	default:
-		return make(AB, length(x))
+		return make(AB, Length(x))
 	}
 }
 
@@ -557,7 +557,7 @@ func memberOfArray(x, y array) V {
 
 // OccurrenceCount returns ⊒x. XXX unused for now
 func occurrenceCount(x V) V {
-	if length(x) == 0 {
+	if Length(x) == 0 {
 		return AB{}
 	}
 	x = canonical(x)
@@ -654,11 +654,6 @@ func without(x, y V) V {
 		case AB:
 			for i, b := range bres {
 				bres[i] = !b
-			}
-		}
-		if av, ok := res.(array); ok {
-			if av.Len() != x.Len() {
-				return errf("x^y : length mismatch: %d (x) vs %d (y)", x.Len(), y.Len())
 			}
 		}
 		res = replicate(res, x)
@@ -786,11 +781,7 @@ func findAB(x AB, y V) V {
 	case array:
 		return findArray(x, y)
 	default:
-		res := make(AI, y.Len())
-		for i := range res {
-			res[i] = x.Len()
-		}
-		return res
+		return I(x.Len())
 	}
 }
 
@@ -849,11 +840,7 @@ func findAF(x AF, y V) V {
 	case array:
 		return findArray(x, y)
 	default:
-		res := make(AI, y.Len())
-		for i := range res {
-			res[i] = x.Len()
-		}
-		return res
+		return I(x.Len())
 	}
 }
 
@@ -916,11 +903,7 @@ func findAI(x AI, y V) V {
 	case array:
 		return findArray(x, y)
 	default:
-		res := make(AI, y.Len())
-		for i := range res {
-			res[i] = x.Len()
-		}
-		return res
+		return I(x.Len())
 	}
 }
 
@@ -948,11 +931,7 @@ func findAS(x AS, y V) V {
 	case array:
 		return findArray(x, y)
 	default:
-		res := make(AI, y.Len())
-		for i := range res {
-			res[i] = x.Len()
-		}
-		return res
+		return I(x.Len())
 	}
 }
 

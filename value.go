@@ -11,8 +11,6 @@ import (
 
 // V represents any kind of value.
 type V interface {
-	// Len returns the length of the value. It is always 1 for atoms.
-	Len() int
 	// Matches returns true if the value matches another (in the sense of
 	// the ~ operator).
 	Matches(x V) bool
@@ -33,15 +31,6 @@ type S string
 
 // errV represents errors
 type errV string
-
-// Len returns 1 for atoms.
-func (f F) Len() int { return 1 }
-
-// Len returns 1 for atoms.
-func (i I) Len() int { return 1 }
-
-// Len returns 1 for atoms.
-func (s S) Len() int { return 1 }
 
 func (f F) Matches(y V) bool {
 	switch y := y.(type) {
@@ -92,7 +81,6 @@ func (e errV) Matches(v V) bool {
 	return ok && e == err
 }
 
-func (e errV) Len() int                   { return 1 }
 func (e errV) Type() string               { return "e" }
 func (e errV) Sprint(ctx *Context) string { return fmt.Sprintf("'ERROR %s", e) }
 func (e errV) Error() string              { return string(e) }
@@ -212,13 +200,6 @@ type Composition struct {
 // Lambda represents an user defined function by ID.
 type Lambda int32
 
-func (v Variadic) Len() int      { return 1 }
-func (r DerivedVerb) Len() int   { return 1 }
-func (p Projection) Len() int    { return 1 }
-func (p ProjectionOne) Len() int { return 1 }
-func (q Composition) Len() int   { return 1 }
-func (l Lambda) Len() int        { return 1 }
-
 func (v Variadic) Type() string      { return "v" }
 func (p Projection) Type() string    { return "p" }
 func (p ProjectionOne) Type() string { return "p" }
@@ -271,6 +252,7 @@ func (l Lambda) Sprint(ctx *Context) string {
 // Typical implementation is given in comments.
 type array interface {
 	V
+	Len() int
 	at(i int) V           // x[i]
 	slice(i, j int) array // x[i:j]
 	atIndices(y AI) V     // x[y] (goal code)

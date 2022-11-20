@@ -6,9 +6,14 @@ import (
 	"sort"
 )
 
-// length returns #x.
-func length(x V) I {
-	return I(x.Len())
+// Length returns the length of a value like in #x.
+func Length(x V) I {
+	switch x := x.(type) {
+	case array:
+		return I(x.Len())
+	default:
+		return 1
+	}
 }
 
 func reverseMut(x V) {
@@ -64,7 +69,7 @@ func rotate(x, y V) V {
 	default:
 		return errf("f|y : non-integer f[y] (%s)", x.Type())
 	}
-	lenx := int(length(y))
+	lenx := int(Length(y))
 	if lenx == 0 {
 		return y
 	}
@@ -185,7 +190,7 @@ func cutAI(x AI, y V) V {
 	if !sort.IsSorted(sort.IntSlice(x)) {
 		return errs("x^y : x is not ascending")
 	}
-	ylen := y.Len()
+	ylen := int(Length(y))
 	for _, i := range x {
 		if i < 0 || i > ylen {
 			return errf("x^y : x contains out of bound index (%d)", i)
@@ -290,7 +295,7 @@ func takeCyclic(y V, n int) V {
 		n = -n
 	}
 	i := 0
-	step := y.Len()
+	step := int(Length(y))
 	switch y := y.(type) {
 	case AB:
 		r := make(AB, n)
@@ -360,7 +365,7 @@ func takeCyclic(y V, n int) V {
 // ShiftBefore returns x»y. XXX: unused for now.
 func shiftBefore(x, y V) V {
 	x = toArray(x)
-	max := int(minI(length(x), length(y)))
+	max := int(minI(Length(x), Length(y)))
 	if max == 0 {
 		return y
 	}
@@ -509,7 +514,7 @@ func nudge(x V) V {
 // ShiftAfter returns x«y. XXX: unused for now.
 func shiftAfter(x, y V) V {
 	x = toArray(x)
-	max := int(minI(length(x), length(y)))
+	max := int(minI(Length(x), Length(y)))
 	if max == 0 {
 		return y
 	}
@@ -629,7 +634,7 @@ func shiftAfter(x, y V) V {
 
 // NudgeBack returns «x.
 func nudgeBack(x V) V {
-	if length(x) == 0 {
+	if Length(x) == 0 {
 		return x
 	}
 	switch x := x.(type) {
@@ -671,7 +676,7 @@ func flip(x V) V {
 		}
 		lines := -1
 		for _, o := range x {
-			nl := int(length(o))
+			nl := int(Length(o))
 			if !isArray(o) {
 				continue
 			}
@@ -1370,7 +1375,7 @@ func windows(i int, y V) V {
 
 // group returns ⊔x. XXX Classify by default?
 func group(x V) V {
-	if length(x) == 0 {
+	if Length(x) == 0 {
 		return AV{}
 	}
 	// TODO: optimize allocations
