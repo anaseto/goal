@@ -339,6 +339,8 @@ func VApplyN(ctx *Context, args []V) V {
 			ctx.push(av.At(i))
 		}
 		return ctx.applyN(v, av.Len())
+	case 3:
+		return try(ctx, args[2], args[1], args[0])
 	default:
 		return errs(". got too many arguments")
 	}

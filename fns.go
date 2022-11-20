@@ -663,3 +663,17 @@ func eval(ctx *Context, x V) V {
 		return errf(".x : bad type for x (%s)", x.Type())
 	}
 }
+
+// try implements .[f1;x;f2].
+func try(ctx *Context, f1, x, f2 V) V {
+	av := toArray(x).(Array)
+	for i := av.Len() - 1; i >= 0; i-- {
+		ctx.push(av.At(i))
+	}
+	res := ctx.applyN(f1, av.Len())
+	if err, ok := res.(E); ok {
+		ctx.push(S(err))
+		return ctx.applyN(f2, 1)
+	}
+	return res
+}
