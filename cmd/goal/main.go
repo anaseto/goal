@@ -268,6 +268,8 @@ x@y apply	1 2 3@2 -> 3	1 2 3[2] -> 3
 .s  eval	."2+3" -> 5
 x.y applyN	{x+y}.2 3 -> 5    {x+y}[2;3] -> 5
 
+.[f;x;f]  try	.[+;2 3;{"msg"}] -> 5	.[+;2 "a";{-1}] -> "msg"
+
 NAMED VERBS
 x in y	member of	2 3 in 0 2 4 -> 1 0
 `
