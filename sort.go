@@ -494,32 +494,32 @@ func search(x V, y V) V {
 	switch x := x.(type) {
 	case AB:
 		if !sort.IsSorted(sortAB(x)) {
-			return errs("x$y : x is not ascending")
+			return errDomain("x$y", "x is not ascending")
 		}
 		return searchAI(fromABtoAI(x).(AI), y)
 	case AI:
 		if !sort.IsSorted(sort.IntSlice(x)) {
-			return errs("x$y : x is not ascending")
+			return errDomain("x$y", "x is not ascending")
 		}
 		return searchAI(x, y)
 	case AF:
 		if !sort.IsSorted(sort.Float64Slice(x)) {
-			return errs("x$y : x is not ascending")
+			return errDomain("x$y", "x is not ascending")
 		}
 		return searchAF(x, y)
 	case AS:
 		if !sort.IsSorted(sort.StringSlice(x)) {
-			return errs("x$y : x is not ascending")
+			return errDomain("x$y", "x is not ascending")
 		}
 		return searchAS(x, y)
 	case AV:
 		if !sort.IsSorted(sortAV(x)) {
-			return errs("x$y : x is not ascending")
+			return errDomain("x$y", "x is not ascending")
 		}
 		return searchAV(x, y)
 	default:
 		// should not happen
-		return errf("x$y : bad type for x (%s)", x.Type())
+		return errType("x$y", "x", x)
 	}
 }
 

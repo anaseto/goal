@@ -660,7 +660,7 @@ func eval(ctx *Context, x V) V {
 		ctx.merge(nctx)
 		return v
 	default:
-		return errf(".x : bad type for x (%s)", x.Type())
+		return errType(".x", "x", x)
 	}
 }
 

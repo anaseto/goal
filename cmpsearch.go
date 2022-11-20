@@ -692,7 +692,7 @@ func without(x, y V) V {
 		res = replicate(res, x)
 		return res
 	default:
-		return errf("x^y : bad type for x (%s)", x.Type())
+		return errType("x^y", "x", x)
 	}
 }
 

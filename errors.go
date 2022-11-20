@@ -90,14 +90,22 @@ func errNYI(s string) E {
 	return E("NYI: " + s)
 }
 
-func errType(op, sym string, x V) E {
-	return errf("%s : bad type for %s (%s)", op, sym, x.Type())
-}
-
 func errs(s string) E {
 	return E(s)
 }
 
 func errf(format string, a ...interface{}) E {
 	return E(fmt.Sprintf(format, a...))
+}
+
+func errType(op, sym string, x V) E {
+	return errf("%s : bad type for %s (%s)", op, sym, x.Type())
+}
+
+func errDomain(op, s string) E {
+	return E(op + " : " + s)
+}
+
+func errRank(op, s string) E {
+	return E(op + " : " + s)
 }
