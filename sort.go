@@ -333,7 +333,7 @@ func lessAV(x AV, y V) bool {
 
 // sortUp returns ^x.
 func sortUp(x V) V {
-	// XXX: error if atom?
+	// TODO: avoid cases of double clone
 	x = canonical(x)
 	x = cloneShallow(x)
 	switch x := x.(type) {

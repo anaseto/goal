@@ -546,7 +546,7 @@ func memberOfArray(x, y array) V {
 	res := make(AB, x.Len())
 	for i := 0; i < x.Len(); i++ {
 		for j := 0; j < y.Len(); j++ {
-			if Match(y.at(i), x.at(j)) {
+			if Match(x.at(i), y.at(j)) {
 				res[i] = true
 				break
 			}

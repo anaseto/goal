@@ -178,6 +178,7 @@ var matchTests = [...]matchTest{
 	{`"prefix-"_"prefix-name"`, `"name"`},
 	{`"prefix-"_"prefix-name" "prefix-name2"`, `"name" "name2"`},
 	{`" []"^"  [text]  "`, `"text"`},
+	{`(,!0)^(1;!0)`, `,1`},
 }
 
 func TestEval(t *testing.T) {
