@@ -127,7 +127,7 @@ func classify(x V) V {
 	if Length(x) == 0 {
 		return AB{}
 	}
-	x = canonical(x)
+	assertCanonical(x)
 	switch x := x.(type) {
 	case F, I, S:
 		return errf("%%x : x not an array (%s)", x.Type())
@@ -209,7 +209,7 @@ func uniq(x V) V {
 	if Length(x) == 0 {
 		return x
 	}
-	x = canonical(x)
+	assertCanonical(x)
 	switch x := x.(type) {
 	case F, I, S:
 		// NOTE: ?atom could be used for something.
@@ -284,7 +284,7 @@ func markFirsts(x V) V {
 	if Length(x) == 0 {
 		return AB{}
 	}
-	x = canonical(x)
+	assertCanonical(x)
 	switch x := x.(type) {
 	case F, I, S:
 		return errf("∊x : x not an array (%s)", x.Type())
@@ -368,8 +368,8 @@ func memberOf(x, y V) V {
 	if Length(x) == 0 {
 		return AB{}
 	}
-	y = canonical(y)
-	x = canonical(x)
+	assertCanonical(x)
+	assertCanonical(y)
 	switch y := y.(type) {
 	case AB:
 		return memberOfAB(x, y)
@@ -560,7 +560,7 @@ func occurrenceCount(x V) V {
 	if Length(x) == 0 {
 		return AB{}
 	}
-	x = canonical(x)
+	assertCanonical(x)
 	switch x := x.(type) {
 	case F, I, S:
 		return errf("⊒x : x not an array (%s)", x.Type())
@@ -667,8 +667,8 @@ func without(x, y V) V {
 
 // find returns x?y.
 func find(x, y V) V {
-	y = canonical(y)
-	x = canonical(x)
+	assertCanonical(y)
+	assertCanonical(x)
 	switch x := x.(type) {
 	case AB:
 		return findAB(x, y)

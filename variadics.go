@@ -369,10 +369,22 @@ func VIn(ctx *Context, args []V) V {
 
 // VList implements (...;y;x) array constructor variadic verb.
 func VList(ctx *Context, args []V) V {
-	// TODO: avoid redundant cloning if canonical clones already
-	res := cloneArgs(args)
-	reverseArgs(res)
-	return canonical(AV(res))
+	t, ok := isCanonical(AV(args))
+	if ok {
+		res := cloneArgs(args)
+		reverseArgs(res)
+		return AV(res)
+	}
+	switch t {
+	case tB, tI, tF, tS:
+		res := canonical(AV(args))
+		reverseMut(res)
+		return res
+	default:
+		res := cloneArgs(args)
+		reverseArgs(res)
+		return canonical(AV(res))
+	}
 }
 
 // VEach implements the ' variadic adverb.

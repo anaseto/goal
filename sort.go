@@ -334,7 +334,7 @@ func lessAV(x AV, y V) bool {
 // sortUp returns ^x.
 func sortUp(x V) V {
 	// TODO: avoid cases of double clone
-	x = canonical(x)
+	assertCanonical(x)
 	x = cloneShallow(x)
 	switch x := x.(type) {
 	case AB:

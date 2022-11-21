@@ -1,6 +1,7 @@
 package goal
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -197,8 +198,6 @@ func toArray(x V) V {
 		return AI{int(x)}
 	case S:
 		return AS{string(x)}
-	case errV:
-		return AV{x}
 	case array:
 		return x
 	default:
@@ -461,6 +460,13 @@ func isCanonical(x V) (eltype, bool) {
 	}
 }
 
+func assertCanonical(x V) {
+	_, ok := isCanonical(x)
+	if !ok {
+		panic(fmt.Sprintf("not canonical: %#v", x))
+	}
+}
+
 // normalize returns a canonical form of an AV array.
 func normalize(y AV, t eltype) V {
 	switch t {
@@ -499,6 +505,7 @@ func normalize(y AV, t eltype) V {
 		}
 		return y
 	default:
+		// should not happen
 		return y
 	}
 }

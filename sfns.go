@@ -161,11 +161,8 @@ func drop(x, y V) V {
 		}
 		return drop(z, y)
 	case AV:
-		z := canonical(x)
-		if _, ok := z.(AV); ok {
-			return errs("x_y : x non-integer")
-		}
-		return drop(z, y)
+		assertCanonical(x)
+		return errs("x_y : x non-integer")
 	default:
 		return errf("x_y : bad type i (%s)", x.Type())
 	}
@@ -194,12 +191,12 @@ func dropi(i int, y V) V {
 
 func cutAI(x AI, y V) V {
 	if !sort.IsSorted(sort.IntSlice(x)) {
-		return errs("x^y : x is not ascending")
+		return errs("x_y : x is not ascending")
 	}
 	ylen := Length(y)
 	for _, i := range x {
 		if i < 0 || i > ylen {
-			return errf("x^y : x contains out of bound index (%d)", i)
+			return errf("x_y : x contains out of bound index (%d)", i)
 		}
 	}
 	if len(x) == 0 {
@@ -257,7 +254,7 @@ func cutAI(x AI, y V) V {
 		}
 		return canonical(res)
 	default:
-		return errs("x^y : y not an array")
+		return errs("x_y : y not an array")
 	}
 }
 
@@ -720,8 +717,8 @@ func nudgeBack(x V) V {
 
 // flip returns +x.
 func flip(x V) V {
+	assertCanonical(x)
 	x = toArray(x)
-	x = canonical(x) // XXX really?
 	switch x := x.(type) {
 	case AV:
 		cols := len(x)
@@ -1513,11 +1510,8 @@ func group(x V) V {
 		}
 		return group(z)
 	case AV:
-		z := canonical(x)
-		if _, ok := z.(AV); ok {
-			return errs("=x : x non-integer array")
-		}
-		return group(z)
+		assertCanonical(x)
+		return errs("=x : x non-integer array")
 	default:
 		return errs("=x : x not an integer array")
 	}

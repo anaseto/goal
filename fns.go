@@ -231,11 +231,9 @@ func replicate(x, y V) V {
 		}
 		return replicate(z, y)
 	case AV:
-		z := canonical(x)
-		if _, ok := z.(AV); ok {
-			return errs("f#y : f[y] non-integer")
-		}
-		return replicate(z, y)
+		// should be canonical
+		assertCanonical(x)
+		return errs("f#y : f[y] non-integer")
 	default:
 		return errs("f#y : f[y] non-integer")
 	}
@@ -406,11 +404,8 @@ func weedOut(x, y V) V {
 		}
 		return weedOut(z, y)
 	case AV:
-		z := canonical(x)
-		if _, ok := z.(AV); ok {
-			return errs("f#y : f[y] non-integer")
-		}
-		return weedOut(z, y)
+		assertCanonical(x)
+		return errs("f#y : f[y] non-integer")
 	default:
 		return errs("f_y : f[y] non-integer")
 	}
@@ -514,7 +509,7 @@ func weedOutAI(x AI, y V) V {
 		}
 		return canonical(r)
 	default:
-		return errs("f#y : y not an array")
+		return errs("f_y : y not an array")
 	}
 }
 
@@ -649,7 +644,7 @@ func casts(y V) V {
 
 // eval implements .s.
 func eval(ctx *Context, x V) V {
-	x = canonical(x)
+	assertCanonical(x)
 	nctx := ctx.derive()
 	switch x := x.(type) {
 	case S:

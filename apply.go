@@ -63,12 +63,12 @@ func (ctx *Context) applyN(v V, n int) V {
 	case array:
 		switch n {
 		case 1:
-			return canonical(ctx.applyArray(v, ctx.pop()))
+			return ctx.applyArray(v, ctx.pop())
 		default:
 			args := ctx.peekN(n)
 			res := ctx.applyArrayArgs(v, args)
 			ctx.dropN(n)
-			return canonical(res)
+			return res
 		}
 	default:
 		return errf("type %s cannot be applied", v.Type())
@@ -136,7 +136,7 @@ func (ctx *Context) applyArrayArgs(v array, args []V) V {
 				}
 			}
 		}
-		return res
+		return canonical(res)
 	case array:
 		if len(args) > 1 {
 			return errs("x[y] : out of depth index")

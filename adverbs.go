@@ -100,10 +100,7 @@ func fold2Join(sep S, x V) V {
 	case AS:
 		return S(strings.Join([]string(x), string(sep)))
 	case AV:
-		xx := canonical(x)
-		if xx, ok := xx.(AS); ok {
-			return S(strings.Join([]string(xx), string(sep)))
-		}
+		assertCanonical(x)
 		return errf("s/x : x not a string array (%s)", x.Type())
 	default:
 		return errf("s/x : x not a string array (%s)", x.Type())
@@ -234,15 +231,8 @@ func scan2Split(sep S, x V) V {
 		}
 		return r
 	case AV:
-		xx := canonical(x)
-		switch xx := xx.(type) {
-		case S:
-			return scan2Split(sep, xx)
-		case AS:
-			return scan2Split(sep, xx)
-		default:
-			return errf("s/x : x not a string atom or array (%s)", x.Type())
-		}
+		assertCanonical(x)
+		return errf("s/x : x not a string atom or array (%s)", x.Type())
 	default:
 		return errf("s/x : x not a string atom or array (%s)", x.Type())
 	}
