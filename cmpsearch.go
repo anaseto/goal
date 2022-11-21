@@ -555,7 +555,7 @@ func memberOfArray(x, y array) V {
 	return res
 }
 
-// OccurrenceCount returns ⊒x. XXX unused for now
+// OccurrenceCount returns ⊒x.
 func occurrenceCount(x V) V {
 	if Length(x) == 0 {
 		return AB{}

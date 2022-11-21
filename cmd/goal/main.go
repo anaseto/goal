@@ -70,6 +70,8 @@ func runStdin(ctx *goal.Context) {
 				switch {
 				case goal.Match(arg, goal.S("+")):
 					fmt.Println(strings.TrimSpace(helpVERBS))
+				case goal.Match(arg, goal.S("nv")):
+					fmt.Println(strings.TrimSpace(helpNAMEDVERBS))
 				case goal.Match(arg, goal.S("'")):
 					fmt.Println(strings.TrimSpace(helpADVERBS))
 				case goal.Match(arg, goal.S("io")):
@@ -201,6 +203,7 @@ const helpTopics = `
 Type help TOPIC or h TOPIC where TOPIC is one of:
 
 "+"	verbs (like +*-%,)
+"nv"	named verbs (like in, sign)
 "'"	adverbs ('/\)
 "io"	io functions (slurp, say)
 "syn"   syntax
@@ -268,10 +271,15 @@ x@y apply	1 2 3@2 -> 3	1 2 3[2] -> 3
 x.y applyN	{x+y}.2 3 -> 5    {x+y}[2;3] -> 5
 
 .[f;x;f]  try	.[+;2 3;{"msg"}] -> 5	.[+;2 "a";{-1}] -> "msg"
-
-NAMED VERBS
-x in y	member of	2 3 in 0 2 4 -> 1 0
 `
+
+const helpNAMEDVERBS = `
+NAMED VERBS
+x in y    member of	2 3 in 0 2 4 -> 1 0
+ocount x  occur counts	ocount 3 2 5 3 2 2 7 -> 0 0 0 1 1 2 0
+sign x    sign		sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
+`
+
 const helpADVERBS = `
 ADVERBS
 f'x	each	#'(4 5;6 7 8) -> 2 3	

@@ -125,6 +125,8 @@ const (
 	vApply                    // @
 	vApplyN                   // .
 	vIn                       // in
+	vSign                     // sign
+	vOCount                   // ocount (occurrence count)
 	vList                     // (...;...;...)
 	vEach                     // ' (adverb)
 	vFold                     // / (adverb)
@@ -191,7 +193,7 @@ type ProjectionOne struct {
 }
 
 // Composition represents a composition of two functions. The left one is
-// always called monadically. NOTE: unused for now.
+// always called monadically.
 type Composition struct {
 	Left  Function
 	Right Function

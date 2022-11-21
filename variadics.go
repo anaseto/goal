@@ -31,6 +31,8 @@ func (ctx *Context) initVariadics() {
 		vApply:    {Func: VApply},
 		vApplyN:   {Func: VApplyN},
 		vIn:       {Func: VIn},
+		vSign:     {Func: VSign},
+		vOCount:   {Func: VOCount},
 		vList:     {Func: VList},
 		vEach:     {Func: VEach, Adverb: true},
 		vFold:     {Func: VFold, Adverb: true},
@@ -364,6 +366,26 @@ func VIn(ctx *Context, args []V) V {
 		return memberOf(args[1], args[0])
 	default:
 		return errRank("in")
+	}
+}
+
+// VSign implements the "sign" variadic verb.
+func VSign(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		return sign(args[0])
+	default:
+		return errRank("sign")
+	}
+}
+
+// VOCount implements the "ocount" variadic verb.
+func VOCount(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		return occurrenceCount(args[0])
+	default:
+		return errRank("ocount")
 	}
 }
 
