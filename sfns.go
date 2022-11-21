@@ -4,6 +4,7 @@ package goal
 
 import (
 	"sort"
+	"strings"
 )
 
 // Length returns the length of a value like in #x.
@@ -137,7 +138,7 @@ func first(x V) V {
 	}
 }
 
-// drop returns i_x.
+// drop returns i_x and s_x.
 func drop(x, y V) V {
 	switch x := x.(type) {
 	case I:
@@ -147,6 +148,8 @@ func drop(x, y V) V {
 			return errf("i_y : non-integer i (%s)", x.Type())
 		}
 		return dropi(int(x), y)
+	case S:
+		return drops(x, y)
 	case AB:
 		return drop(fromABtoAI(x), y)
 	case AI:
@@ -160,7 +163,7 @@ func drop(x, y V) V {
 		}
 		return drop(z, y)
 	default:
-		return errf("i_y : non-integer i (%s)", x.Type())
+		return errf("x_y : bad type i (%s)", x.Type())
 	}
 }
 
@@ -252,6 +255,55 @@ func cutAI(x AI, y V) V {
 		return res
 	default:
 		return errs("x^y : y not an array")
+	}
+}
+
+func drops(s S, y V) V {
+	switch y := y.(type) {
+	case S:
+		return S(strings.TrimPrefix(string(y), string(s)))
+	case AS:
+		res := make(AS, y.Len())
+		for i, z := range y {
+			res[i] = strings.TrimPrefix(string(z), string(s))
+		}
+		return res
+	case AV:
+		res := make(AV, y.Len())
+		for i, z := range y {
+			res[i] = drops(s, z)
+			if err, ok := res[i].(errV); ok {
+				return err
+			}
+		}
+		return res
+	default:
+		return errType("s_y", "y", y)
+	}
+}
+
+// trim returns s^y.
+func trim(s S, y V) V {
+	switch y := y.(type) {
+	case S:
+		return S(strings.Trim(string(y), string(s)))
+	case AS:
+		res := make(AS, y.Len())
+		for i, z := range y {
+			res[i] = strings.Trim(string(z), string(s))
+		}
+		return res
+	case AV:
+		res := make(AV, y.Len())
+		for i, z := range y {
+			res[i] = trim(s, z)
+			if err, ok := res[i].(errV); ok {
+				return err
+			}
+		}
+		return res
+	default:
+		return errType("s^y", "y", y)
 	}
 }
 

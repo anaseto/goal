@@ -244,17 +244,19 @@ x>y greater	2>3 -> 0
 x=y equal	2 3 4=3 -> 0 1 0
 ~x  not		~0 1 2 -> 1 0 0
 x~y match	3~3 -> 1	2 3~3 2 -> 0
-,   enlist	,1 -> ,1 (list with one element)
+,x  enlist	,1 -> ,1 (list with one element)
 x,y join	1,2 -> 1 2
-^   sort	^3 5 0 -> 0 3 5
+^x  sort	^3 5 0 -> 0 3 5
 i^y windows	2^!4 -> (1 2;2 3;3 4)
-x^y without	1 2 3 4^2 3 -> 1 4
+s^y trim	" []"^"  [text]  " -> "text"
+x^y without	2 3^1 2 3 4 -> 1 4
 #x  length	#2 4 5 -> 3
 i#y take	2#4 1 5 -> 4 1	    4#3 1 5 -> 3 1 5 3 (cyclic)
 f#y replicate	{0 1 1 0}#4 1 5 3 -> 1 5    {x>0}#2 -3 1 -> 2 1
 _N  floor	_2.3 -> 2     _1.5 3.7 -> 1 3
 _S  to lower	_"ABC" -> "abc"     _"AB" "CD" -> "ab" "cd"
 i_x drop	2_3 4 5 6 -> 5 6
+s_x trim prefix "pref-"_"pref-name" -> "name"
 x_y cut		2 5_!10 -> (2 3 4;5 6 7 8 9)
 f_x weed out	{0 1 1 0}_4 1 5 3 -> 4 3    {x>0}_2 -3 1 -> ,-3
 $x  string	$2 3 -> "2 3"

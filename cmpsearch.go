@@ -645,9 +645,11 @@ func without(x, y V) V {
 			return errf("i^y : i non-integer (%g)", z)
 		}
 		return windows(int(z), y)
+	case S:
+		return trim(z, y)
 	case array:
 		y = toArray(y)
-		res := memberOf(x, y)
+		res := memberOf(y, x)
 		switch bres := res.(type) {
 		case I:
 			res = I(1 - bres)
@@ -656,7 +658,7 @@ func without(x, y V) V {
 				bres[i] = !b
 			}
 		}
-		res = replicate(res, x)
+		res = replicate(res, y)
 		return res
 	default:
 		return errType("x^y", "x", x)
