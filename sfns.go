@@ -1428,37 +1428,82 @@ func windows(i int, y V) V {
 	}
 }
 
+func sumAB(x AB) int {
+	n := 0
+	for _, v := range x {
+		if v {
+			n++
+		}
+	}
+	return n
+}
+
 // group returns =x.
 func group(x V) V {
 	if Length(x) == 0 {
 		return AV{}
 	}
-	// TODO: group: optimize allocations
 	switch x := x.(type) {
 	case AB:
-		max := maxAB(x)
-		r := make(AV, int(B2I(max)+1))
-		for i := range r {
-			r[i] = AI{}
+		n := sumAB(x)
+		r := make(AV, int(B2I(n > 0)+1))
+		ai := make(AI, x.Len())
+		if n == 0 {
+			for i := range ai {
+				ai[i] = i
+			}
+			r[0] = ai
+			return r
 		}
+		aif := ai[:len(ai)-n]
+		ait := ai[len(ai)-n:]
+		iTrue, iFalse := 0, 0
 		for i, v := range x {
-			j := B2I(v)
-			rj := r[j].(AI)
-			r[j] = append(rj, i)
+			if v {
+				ait[iTrue] = i
+				iTrue++
+			} else {
+				aif[iFalse] = i
+				iFalse++
+			}
 		}
+		r[0] = aif
+		r[1] = ait
 		return r
 	case AI:
 		max := maxAI(x)
+		if max < 0 {
+			max = -1
+		}
 		r := make(AV, max+1)
+		counta := make(AI, 2*(max+1))
+		counts := counta[:max+1]
+		countn := 0
+		for _, j := range x {
+			if j < 0 {
+				countn++
+				continue
+			}
+			counts[j]++
+		}
+		scounts := counta[max+1:]
+		sn := 0
+		for i, n := range counts {
+			sn += n
+			scounts[i] = sn
+		}
+		pj := 0
+		ai := make(AI, x.Len()-countn)
 		for i := range r {
-			r[i] = AI{}
+			r[i] = ai[pj:scounts[i]]
+			pj = scounts[i]
 		}
 		for i, j := range x {
 			if j < 0 {
 				continue
 			}
-			rj := r[j].(AI)
-			r[j] = append(rj, i)
+			ai[scounts[j]-counts[j]] = i
+			counts[j]--
 		}
 		return r
 	case AF:
