@@ -155,7 +155,11 @@ func drop(x, y V) V {
 	case AI:
 		return cutAI(x, y)
 	case AF:
-		return drop(toAI(x), y)
+		z := toAI(x)
+		if err, ok := z.(errV); ok {
+			return err
+		}
+		return drop(z, y)
 	case AV:
 		z := canonical(x)
 		if _, ok := z.(AV); ok {
@@ -1424,7 +1428,7 @@ func windows(i int, y V) V {
 	}
 }
 
-// group returns ⊔x. XXX Classify by default?
+// group returns ⊔x.
 func group(x V) V {
 	if Length(x) == 0 {
 		return AV{}
@@ -1432,8 +1436,8 @@ func group(x V) V {
 	// TODO: optimize allocations
 	switch x := x.(type) {
 	case AB:
-		_, max := minMaxB(x)
-		r := make(AV, max+1)
+		max := maxAB(x)
+		r := make(AV, int(B2I(max)+1))
 		for i := range r {
 			r[i] = AI{}
 		}
@@ -1444,20 +1448,31 @@ func group(x V) V {
 		}
 		return r
 	case AI:
-		min, max := minMax(x)
-		if min < 0 {
-			return errs("=x : x contains negative integer(s)")
-		}
+		max := maxAI(x)
 		r := make(AV, max+1)
 		for i := range r {
 			r[i] = AI{}
 		}
 		for i, j := range x {
+			if j < 0 {
+				continue
+			}
 			rj := r[j].(AI)
 			r[j] = append(rj, i)
 		}
 		return r
-		// TODO: AF and AV
+	case AF:
+		z := toAI(x)
+		if err, ok := z.(errV); ok {
+			return err
+		}
+		return group(z)
+	case AV:
+		z := canonical(x)
+		if _, ok := z.(AV); ok {
+			return errs("=x : x non-integer array")
+		}
+		return group(z)
 	default:
 		return errs("=x : x non-integer array")
 	}

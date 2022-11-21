@@ -399,6 +399,19 @@ func minMax(x AI) (min, max int) {
 	return
 }
 
+func maxAI(x AI) int {
+	max := math.MinInt
+	if len(x) == 0 {
+		return max
+	}
+	for _, v := range x {
+		if v > max {
+			max = v
+		}
+	}
+	return max
+}
+
 func minMaxB(x AB) (I, I) {
 	if len(x) == 0 {
 		return 0, 0
@@ -412,6 +425,15 @@ func minMaxB(x AB) (I, I) {
 		}
 	}
 	return B2I(min), B2I(max)
+}
+
+func maxAB(x AB) bool {
+	for _, v := range x {
+		if v {
+			return true
+		}
+	}
+	return false
 }
 
 func canonical(x V) V {
