@@ -168,7 +168,6 @@ func drop(x, y V) V {
 }
 
 func dropi(i int, y V) V {
-	y = toArray(y)
 	switch y := y.(type) {
 	case array:
 		switch {
@@ -176,16 +175,16 @@ func dropi(i int, y V) V {
 			if i > y.Len() {
 				i = y.Len()
 			}
-			return y.slice(i, y.Len())
+			return canonical(y.slice(i, y.Len()))
 		default:
 			i = y.Len() + i
 			if i < 0 {
 				i = 0
 			}
-			return y.slice(0, i)
+			return canonical(y.slice(0, i))
 		}
 	default:
-		return y
+		return errs("i_y : y not an array")
 	}
 }
 
@@ -212,7 +211,7 @@ func cutAI(x AI, y V) V {
 			}
 			res[i] = y[from:to]
 		}
-		return res
+		return canonical(res)
 	case AI:
 		res := make(AV, len(x))
 		for i, from := range x {
@@ -222,7 +221,7 @@ func cutAI(x AI, y V) V {
 			}
 			res[i] = y[from:to]
 		}
-		return res
+		return canonical(res)
 	case AF:
 		res := make(AV, len(x))
 		for i, from := range x {
@@ -232,7 +231,7 @@ func cutAI(x AI, y V) V {
 			}
 			res[i] = y[from:to]
 		}
-		return res
+		return canonical(res)
 	case AS:
 		res := make(AV, len(x))
 		for i, from := range x {
@@ -252,7 +251,7 @@ func cutAI(x AI, y V) V {
 			}
 			res[i] = y[from:to]
 		}
-		return res
+		return canonical(res)
 	default:
 		return errs("x^y : y not an array")
 	}
@@ -526,7 +525,7 @@ func shiftBefore(x, y V) V {
 				r[i] = x.at(i)
 			}
 			copy(r[max:], y[:len(y)-max])
-			return r
+			return canonical(r)
 		default:
 			return errType("x»y", "y", y)
 		}
@@ -557,7 +556,7 @@ func nudge(x V) V {
 	case AV:
 		r := make(AV, len(x))
 		copy(r[1:], x[0:len(x)-1])
-		return r
+		return canonical(r)
 	default:
 		return errs("»x : not an array")
 	}
@@ -675,7 +674,7 @@ func shiftAfter(x, y V) V {
 				r[len(y)-1-i] = x.at(i)
 			}
 			copy(r[:len(y)-max], y[max:])
-			return r
+			return canonical(r)
 		default:
 			return errType("x«y", "y", y)
 		}
@@ -709,7 +708,7 @@ func nudgeBack(x V) V {
 	case AV:
 		r := make(AV, len(x))
 		copy(r[0:len(x)-1], x[1:])
-		return r
+		return canonical(r)
 	default:
 		return errs("«x : x not an array")
 	}
@@ -756,20 +755,20 @@ func flip(x V) V {
 			case tS, tAS:
 				return AV{flipAS(x)}
 			default:
-				return AV{flipAO(x)}
+				return AV{flipAV(x)}
 			}
 		default:
 			switch t {
 			case tB, tAB:
-				return flipAOAB(x, lines)
+				return flipAVAB(x, lines)
 			case tF, tAF:
-				return flipAOAF(x, lines)
+				return flipAVAF(x, lines)
 			case tI, tAI:
-				return flipAOAI(x, lines)
+				return flipAVAI(x, lines)
 			case tS, tAS:
-				return flipAOAS(x, lines)
+				return flipAVAS(x, lines)
 			default:
-				return flipAOAO(x, lines)
+				return flipAVAV(x, lines)
 			}
 		}
 	default:
@@ -790,7 +789,7 @@ func flipAB(x AV) AB {
 	return r
 }
 
-func flipAOAB(x AV, lines int) AV {
+func flipAVAB(x AV, lines int) AV {
 	r := make(AV, lines)
 	a := make(AB, lines*len(x))
 	for j := range r {
@@ -827,7 +826,7 @@ func flipAF(x AV) AF {
 	return r
 }
 
-func flipAOAF(x AV, lines int) AV {
+func flipAVAF(x AV, lines int) AV {
 	r := make(AV, lines)
 	a := make(AF, lines*len(x))
 	for j := range r {
@@ -866,7 +865,7 @@ func flipAI(x AV) AI {
 	return r
 }
 
-func flipAOAI(x AV, lines int) AV {
+func flipAVAI(x AV, lines int) AV {
 	r := make(AV, lines)
 	a := make(AI, lines*len(x))
 	for j := range r {
@@ -899,7 +898,7 @@ func flipAS(x AV) AS {
 	return r
 }
 
-func flipAOAS(x AV, lines int) AV {
+func flipAVAS(x AV, lines int) AV {
 	r := make(AV, lines)
 	a := make(AS, lines*len(x))
 	for j := range r {
@@ -917,7 +916,7 @@ func flipAOAS(x AV, lines int) AV {
 	return r
 }
 
-func flipAO(x AV) AV {
+func flipAV(x AV) AV {
 	r := make(AV, len(x))
 	for i, z := range x {
 		switch z := z.(type) {
@@ -930,7 +929,7 @@ func flipAO(x AV) AV {
 	return r
 }
 
-func flipAOAO(x AV, lines int) AV {
+func flipAVAV(x AV, lines int) AV {
 	r := make(AV, lines)
 	a := make(AV, lines*len(x))
 	for j := range r {
@@ -966,7 +965,7 @@ func joinTo(x, y V) V {
 	case AS:
 		return joinToAS(y, x, false)
 	case AV:
-		return joinToAO(y, x, false)
+		return joinToAV(y, x, false)
 	default:
 		switch y := y.(type) {
 		case array:
@@ -1003,7 +1002,7 @@ func joinToI(x I, y V, left bool) V {
 	case AS:
 		return joinToAS(x, y, left)
 	case AV:
-		return joinToAO(x, y, left)
+		return joinToAV(x, y, left)
 	default:
 		return AV{x, y}
 	}
@@ -1035,7 +1034,7 @@ func joinToF(x F, y V, left bool) V {
 	case AS:
 		return joinToAS(x, y, left)
 	case AV:
-		return joinToAO(x, y, left)
+		return joinToAV(x, y, left)
 	default:
 		return AV{x, y}
 	}
@@ -1067,13 +1066,13 @@ func joinToS(x S, y V, left bool) V {
 	case AS:
 		return joinToAS(x, y, left)
 	case AV:
-		return joinToAO(x, y, left)
+		return joinToAV(x, y, left)
 	default:
 		return AV{x, y}
 	}
 }
 
-func joinToAO(x V, y AV, left bool) V {
+func joinToAV(x V, y AV, left bool) V {
 	switch x := x.(type) {
 	case array:
 		if left {
@@ -1458,7 +1457,7 @@ func group(x V) V {
 			r[j] = append(rj, i)
 		}
 		return r
-		// TODO: AF and AO
+		// TODO: AF and AV
 	default:
 		return errs("=x : x non-integer array")
 	}

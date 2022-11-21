@@ -37,11 +37,7 @@ func main() {
 		return
 	}
 	fname := args[0]
-	v := make(goal.AV, len(args)-1)
-	for _, s := range args[1:] {
-		v = append(v, goal.S(s))
-	}
-	ctx.AssignGlobal("args", v)
+	ctx.AssignGlobal("ARGS", goal.AS(args[1:]))
 	bs, err := os.ReadFile(fname)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "goal: %v", err)
