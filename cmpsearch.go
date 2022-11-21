@@ -273,7 +273,7 @@ func uniq(x V) V {
 			}
 			r = append(r, v)
 		}
-		return r
+		return canonical(r)
 	default:
 		return errf("?x : x not an array (%s)", x.Type())
 	}

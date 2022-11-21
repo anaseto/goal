@@ -920,7 +920,7 @@ func flipAVAS(x AV, lines int) AV {
 	return r
 }
 
-func flipAV(x AV) AV {
+func flipAV(x AV) V {
 	r := make(AV, len(x))
 	for i, z := range x {
 		switch z := z.(type) {
@@ -930,7 +930,7 @@ func flipAV(x AV) AV {
 			r[i] = z
 		}
 	}
-	return r
+	return canonical(r)
 }
 
 func flipAVAV(x AV, lines int) AV {
@@ -1422,7 +1422,7 @@ func windows(i int, y V) V {
 		for j := range r {
 			r[j] = y.slice(j, j+i)
 		}
-		return r
+		return canonical(r)
 	default:
 		return errs("i^y : y not an array")
 	}

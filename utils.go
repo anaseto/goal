@@ -258,7 +258,7 @@ func isTrue(x V) bool {
 
 // eltype represents distinct kinds of elements for specialized
 // arrays.
-type eltype int
+type eltype int32
 
 const (
 	tV  eltype = 0b00000
@@ -436,53 +436,93 @@ func maxAB(x AB) bool {
 	return false
 }
 
-func canonical(x V) V {
+// isCanonical returns true if the value is in canonical form, that is, it uses
+// the most specialized representation. For example AV{I(2), I(3)} is not
+// canonical, but AI{2, 3} is.
+func isCanonical(x V) (eltype, bool) {
 	switch y := x.(type) {
 	case AV:
 		t := aType(y)
 		switch t {
-		case tB:
-			r := make(AB, len(y))
-			for i, v := range y {
-				r[i] = v.(I) != 0
-			}
-			return r
-		case tI:
-			r := make(AI, len(y))
-			for i, v := range y {
-				r[i] = int(v.(I))
-			}
-			return r
-		case tF:
-			r := make(AF, len(y))
-			for i, v := range y {
-				switch v := v.(type) {
-				case F:
-					r[i] = float64(v)
-				case I:
-					r[i] = float64(v)
+		case tB, tI, tF, tS:
+			return t, false
+		case tV:
+			for _, v := range y {
+				if _, ok := isCanonical(v); !ok {
+					return t, false
 				}
 			}
-			return r
-		case tS:
-			r := make(AS, len(y))
-			for i, v := range y {
-				r[i] = string(v.(S))
-			}
-			return r
-		case tV:
-			for i, v := range y {
-				y[i] = canonical(v)
-			}
-			return y
+			return t, true
 		default:
-			return x
+			return t, true
 		}
 	default:
-		return x
+		return tV, true
 	}
 }
 
+// normalize returns a canonical form of an AV array.
+func normalize(y AV, t eltype) V {
+	switch t {
+	case tB:
+		r := make(AB, len(y))
+		for i, v := range y {
+			r[i] = v.(I) != 0
+		}
+		return r
+	case tI:
+		r := make(AI, len(y))
+		for i, v := range y {
+			r[i] = int(v.(I))
+		}
+		return r
+	case tF:
+		r := make(AF, len(y))
+		for i, v := range y {
+			switch v := v.(type) {
+			case F:
+				r[i] = float64(v)
+			case I:
+				r[i] = float64(v)
+			}
+		}
+		return r
+	case tS:
+		r := make(AS, len(y))
+		for i, v := range y {
+			r[i] = string(v.(S))
+		}
+		return r
+	case tV:
+		for i, v := range y {
+			y[i] = canonical(v)
+		}
+		return y
+	default:
+		return y
+	}
+}
+
+// canonical returns the canonical form of a given value.
+func canonical(x V) V {
+	t, ok := isCanonical(x)
+	if ok {
+		return x
+	}
+	return normalize(x.(AV), t)
+}
+
+// toCanonical returns the canonical form of a given value, and false if it was
+// already canonical.
+func toCanonical(x V) (V, bool) {
+	t, ok := isCanonical(x)
+	if ok {
+		return x, false
+	}
+	return normalize(x.(AV), t), true
+}
+
+// hasNil returns true if there is a nil value in the given array.
 func hasNil(a []V) bool {
 	for _, x := range a {
 		if x == nil {
@@ -492,6 +532,7 @@ func hasNil(a []V) bool {
 	return false
 }
 
+// countNils returns the number of nil values in the given array.
 func countNils(a []V) int {
 	n := 0
 	for _, v := range a {

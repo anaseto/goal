@@ -63,7 +63,7 @@ func signI(x I) I {
 	}
 }
 
-// sign returns ×x.
+// sign returns sign x.
 func sign(x V) V {
 	switch x := x.(type) {
 	case F:
@@ -111,7 +111,7 @@ func floor(x V) V {
 		for i := range r {
 			// NOTE: we assume conversion is possible, leaving
 			// handling NaN, INF or big floats to the program.
-			r[i] = int(x[i])
+			r[i] = int(math.Floor(x[i]))
 		}
 		return r
 	case AI:
@@ -145,9 +145,9 @@ func ceil(x V) V {
 	case AB:
 		return x
 	case AF:
-		r := make(AF, len(x))
+		r := make(AI, len(x))
 		for i := range r {
-			r[i] = math.Ceil(x[i])
+			r[i] = int(math.Ceil(x[i]))
 		}
 		return r
 	case AI:

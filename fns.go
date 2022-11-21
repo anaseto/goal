@@ -322,7 +322,7 @@ func repeatAB(x AB, y V) V {
 				r = append(r, y.at(i))
 			}
 		}
-		return r
+		return canonical(r)
 	default:
 		return errs("f#y : y not an array")
 	}
@@ -376,7 +376,7 @@ func repeatAI(x AI, y V) V {
 				r = append(r, y[i])
 			}
 		}
-		return r
+		return canonical(r)
 	default:
 		return errs("f#y : y not an array")
 	}
@@ -461,7 +461,7 @@ func weedOutAB(x AB, y V) V {
 				r = append(r, y.at(i))
 			}
 		}
-		return r
+		return canonical(r)
 	default:
 		return errs("f_y : y not an array")
 	}
@@ -512,7 +512,7 @@ func weedOutAI(x AI, y V) V {
 				r = append(r, y[i])
 			}
 		}
-		return r
+		return canonical(r)
 	default:
 		return errs("f#y : y not an array")
 	}

@@ -310,7 +310,7 @@ func (x AV) atIndices(y AI) V {
 		}
 		res[i] = x[idx]
 	}
-	return res
+	return canonical(res)
 }
 
 func (x AB) atIndices(y AI) V {
