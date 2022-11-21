@@ -200,6 +200,15 @@ func VEqual(ctx *Context, args []V) V {
 	case 1:
 		return group(args[0])
 	case 2:
+		v, ok := args[1].(Function)
+		if ok {
+			ctx.push(args[0])
+			res := ctx.applyN(v, 1)
+			if err, ok := res.(errV); ok {
+				return err
+			}
+			return groupBy(res, args[0])
+		}
 		return equal(args[1], args[0])
 	default:
 		return errRank("=")

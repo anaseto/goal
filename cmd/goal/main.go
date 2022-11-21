@@ -236,7 +236,8 @@ f|y rotate	{2}|1 2 3 4 -> 3 4 1 2
 x<y less	2<3 -> 1
 >x  descend	>2 4 3 -> 1 2 0
 x>y greater	2>3 -> 0
-=x  group	=1 0 2 1 2 -> (1;0 3;2 4)
+=x  group	=1 0 2 1 2 -> (,1;0 3;2 4)
+f=x group by	{1=2!x}=!10 -> (0 2 4 6 8;1 3 5 7 9)
 x=y equal	2 3 4=3 -> 0 1 0
 ~x  not		~0 1 2 -> 1 0 0
 x~y match	3~3 -> 1	2 3~3 2 -> 0

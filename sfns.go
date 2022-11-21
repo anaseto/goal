@@ -1428,12 +1428,12 @@ func windows(i int, y V) V {
 	}
 }
 
-// group returns ⊔x.
+// group returns =x.
 func group(x V) V {
 	if Length(x) == 0 {
 		return AV{}
 	}
-	// TODO: optimize allocations
+	// TODO: group: optimize allocations
 	switch x := x.(type) {
 	case AB:
 		max := maxAB(x)
@@ -1474,6 +1474,29 @@ func group(x V) V {
 		}
 		return group(z)
 	default:
-		return errs("=x : x non-integer array")
+		return errs("=x : x not an integer array")
+	}
+}
+
+// groupBy by returns {x}=y.
+func groupBy(x, y V) V {
+	if Length(x) != Length(y) {
+		return errf("f=y : length mismatch for f[y] and y: %d vs %d ",
+			Length(x), Length(y))
+	}
+	x = group(x)
+	if _, ok := x.(errV); ok {
+		return errs("f=y : f[y] not an integer array")
+	}
+	ax := x.(AV) // group should always return AV or errV
+	switch y := y.(type) {
+	case array:
+		r := make(AV, ax.Len())
+		for i, v := range ax {
+			r[i] = y.atIndices(v.(AI))
+		}
+		return r
+	default:
+		return errs("f=y : y not array")
 	}
 }
