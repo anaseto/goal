@@ -1,7 +1,5 @@
 package goal
 
-//import "fmt"
-
 // Apply calls a value with a single argument.
 func (ctx *Context) Apply(v, x V) V {
 	ctx.push(x)
@@ -60,13 +58,20 @@ func (ctx *Context) applyN(v V, n int) V {
 		}
 		ctx.push(res)
 		return ctx.applyN(v.Left, 1)
+	case S:
+		switch n {
+		case 1:
+			return applyS(v, ctx.pop())
+		default:
+			return errf("too many arguments")
+		}
 	case array:
 		switch n {
 		case 1:
 			return ctx.applyArray(v, ctx.pop())
 		default:
 			args := ctx.peekN(n)
-			res := ctx.applyArrayArgs(v, args)
+			res := ctx.applyArrayArgs(v, args[len(args)-1], args[:len(args)-1])
 			ctx.dropN(n)
 			return res
 		}
@@ -75,79 +80,133 @@ func (ctx *Context) applyN(v V, n int) V {
 	}
 }
 
-func (ctx *Context) applyArray(v array, xv V) V {
-	if xv == nil {
-		return v
-	}
-	var res V
-	switch x := xv.(type) {
+func applyS(s S, x V) V {
+	switch x := x.(type) {
+	case I:
+		if x < 0 {
+			x += I(len(s))
+		}
+		if x < 0 || x > I(len(s)) {
+			return errf("s[i] : i out of bounds index (%d)", x)
+		}
+		return s[x:]
 	case F:
 		if !isI(x) {
-			return errf("x[y] : non-integer index: %g", x)
+			return errf("s[x] : x non-integer (%g)", x)
 		}
-		i := int(x)
-		if i < 0 {
-			i = v.Len() + i
+		return applyS(s, x)
+	case AB:
+		return applyS(s, fromABtoAI(x))
+	case AI:
+		res := make(AS, x.Len())
+		for i, n := range x {
+			if n < 0 {
+				n += len(s)
+			}
+			if n < 0 || n > len(s) {
+				return errf("s[i] : i out of bounds index (%d)", n)
+			}
+			res[i] = string(s[n:])
 		}
-		if i < 0 || i >= v.Len() {
-			return errf("x[y] : out of bounds index: %d", i)
-		}
-		res = v.at(i)
-	case I:
-		i := int(x)
-		if i < 0 {
-			i = v.Len() + i
-		}
-		if i < 0 || i >= v.Len() {
-			return errf("x[y] : out of bounds index: %d", i)
-		}
-		res = v.at(i)
-	case array:
-		indices := toIndices(xv, v.Len())
-		if err, ok := indices.(errV); ok {
+		return res
+	case AF:
+		z := toAI(x)
+		if err, ok := z.(errV); ok {
 			return err
 		}
-		res = v.atIndices(indices.(AI))
+		return applyS(s, z)
+	case AV:
+		res := make(AV, x.Len())
+		for i, v := range x {
+			res[i] = applyS(s, v)
+			if err, ok := res[i].(errV); ok {
+				return err
+			}
+		}
+		return canonical(res)
+	default:
+		return errf("s[x] : x non-integer (%s)", x.Type())
 	}
-	return res
 }
 
-func (ctx *Context) applyArrayArgs(v array, args []V) V {
-	if len(args) == 0 {
-		return v
+// applyArray applies an array to a value.
+func (ctx *Context) applyArray(a array, x V) V {
+	if x == nil {
+		return a
 	}
-	arg := args[len(args)-1]
-	res := ctx.applyArray(v, arg)
-	if _, ok := res.(errV); ok {
-		return res
-	}
-	args = args[:len(args)-1]
-	if len(args) == 0 {
-		return res
-	}
-	switch res := res.(type) {
+	switch z := x.(type) {
+	case F:
+		if !isI(z) {
+			return errf("x[y] : non-integer index: %g", z)
+		}
+		i := int(z)
+		if i < 0 {
+			i = a.Len() + i
+		}
+		if i < 0 || i >= a.Len() {
+			return errf("x[y] : out of bounds index: %d", i)
+		}
+		return a.at(i)
+	case I:
+		i := int(z)
+		if i < 0 {
+			i = a.Len() + i
+		}
+		if i < 0 || i >= a.Len() {
+			return errf("x[y] : out of bounds index: %d", i)
+		}
+		return a.at(i)
 	case AV:
-		for i := range res {
-			switch z := res[i].(type) {
-			case array:
-				res[i] = ctx.applyArrayArgs(z, args)
-				if _, ok := res[i].(errV); ok {
-					return res
-				}
+		res := make(AV, z.Len())
+		for i, v := range z {
+			res[i] = ctx.applyArray(a, v)
+			if err, ok := res[i].(errV); ok {
+				return err
 			}
 		}
 		return canonical(res)
 	case array:
-		if len(args) > 1 {
-			return errs("x[y] : out of depth index")
+		indices := toIndices(x, a.Len())
+		if err, ok := indices.(errV); ok {
+			return err
 		}
-		vres := ctx.applyArray(res, args[len(args)-1])
-		if _, ok := vres.(errV); ok {
-			return vres
-		}
-		return vres
+		res := a.atIndices(indices.(AI))
+		return res
 	default:
-		return errs("x[y] : out of depth index")
+		return errf("x[y] : y non-array non-integer")
+	}
+}
+
+func (ctx *Context) applyArrayArgs(v array, arg V, args []V) V {
+	if len(args) == 0 {
+		return ctx.applyArray(v, arg)
+	}
+	if arg == nil {
+		res := make(AV, v.Len())
+		for i := 0; i < len(res); i++ {
+			res[i] = ctx.ApplyN(v.at(i), args)
+			if err, ok := res[i].(errV); ok {
+				return err
+			}
+		}
+		return canonical(res)
+	}
+	switch arg := arg.(type) {
+	case array:
+		res := make(AV, arg.Len())
+		for i := 0; i < arg.Len(); i++ {
+			res[i] = ctx.applyArrayArgs(v, arg.at(i), args)
+			if err, ok := res[i].(errV); ok {
+				return err
+			}
+		}
+		return canonical(res)
+	default:
+		res := ctx.Apply(v, arg)
+		if _, ok := res.(errV); ok {
+			return res
+		}
+		return ctx.ApplyN(res, args)
 	}
 }
 

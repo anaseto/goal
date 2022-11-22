@@ -361,11 +361,9 @@ func (c *compiler) doToken(tok *astToken) error {
 		if err != nil {
 			return err
 		}
-		if c.argc > 0 {
-			return c.errorf("string atoms cannot be applied")
-		}
 		id := c.ctx.storeConst(S(s))
 		c.push2(opConst, opcode(id))
+		c.apply()
 		return nil
 	case astIDENT:
 		// read or apply, not assign
