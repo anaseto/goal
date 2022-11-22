@@ -33,6 +33,7 @@ func (ctx *Context) initVariadics() {
 		vIn:       {Func: VIn},
 		vSign:     {Func: VSign},
 		vOCount:   {Func: VOCount},
+		vICount:   {Func: VICount},
 		vList:     {Func: VList},
 		vEach:     {Func: VEach, Adverb: true},
 		vFold:     {Func: VFold, Adverb: true},
@@ -386,6 +387,16 @@ func VOCount(ctx *Context, args []V) V {
 		return occurrenceCount(args[0])
 	default:
 		return errRank("ocount")
+	}
+}
+
+// VICount implements the "icount" variadic verb.
+func VICount(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		return icount(args[0])
+	default:
+		return errRank("icount")
 	}
 }
 

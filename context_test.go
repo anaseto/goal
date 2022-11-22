@@ -190,6 +190,7 @@ var matchTests = [...]matchTest{
 	{`sign -3.5 -1 0 1 5.2`, `-1 -1 0 1 1`},
 	{`ocount 3 2 5 3 2 2 7`, `0 0 0 1 1 2 0`},
 	{`ocount "a" "b" "c" "b" "b" "a"`, `0 0 0 1 2 1`},
+	{`icount 0 0 1 -1 0 1 2 3 2`, `3 2 2 1`},
 }
 
 func TestEval(t *testing.T) {

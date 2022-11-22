@@ -127,6 +127,7 @@ const (
 	vIn                       // in
 	vSign                     // sign
 	vOCount                   // ocount (occurrence count)
+	vICount                   // icount (index count)
 	vList                     // (...;...;...)
 	vEach                     // ' (adverb)
 	vFold                     // / (adverb)

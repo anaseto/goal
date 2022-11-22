@@ -276,7 +276,8 @@ x.y applyN	{x+y}.2 3 -> 5    {x+y}[2;3] -> 5
 const helpNAMEDVERBS = `
 NAMED VERBS
 x in y    member of	2 3 in 0 2 4 -> 1 0
-ocount x  occur counts	ocount 3 2 5 3 2 2 7 -> 0 0 0 1 1 2 0
+ocount x  occur-count	ocount 3 2 5 3 2 2 7 -> 0 0 0 1 1 2 0
+icount x  index-count	icount 0 0 1 -1 0 1 2 3 2 -> 3 2 2 1 (same as #'=x)
 sign x    sign		sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
 `
 

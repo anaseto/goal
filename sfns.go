@@ -1517,6 +1517,41 @@ func group(x V) V {
 	}
 }
 
+// icount efficiently returns #'=x.
+func icount(x V) V {
+	if Length(x) == 0 {
+		return AI{}
+	}
+	switch x := x.(type) {
+	case AB:
+		n := sumAB(x)
+		return AI{x.Len() - n, n}
+	case AI:
+		max := maxAI(x)
+		if max < 0 {
+			max = -1
+		}
+		counts := make(AI, max+1)
+		for _, j := range x {
+			if j >= 0 {
+				counts[j]++
+			}
+		}
+		return counts
+	case AF:
+		z := toAI(x)
+		if err, ok := z.(errV); ok {
+			return err
+		}
+		return icount(z)
+	case AV:
+		assertCanonical(x)
+		return errs("icount x : x non-integer array")
+	default:
+		return errf("icount x : x not an integer array (%s)", x.Type())
+	}
+}
+
 // groupBy by returns {x}=y.
 func groupBy(x, y V) V {
 	if Length(x) != Length(y) {

@@ -566,6 +566,8 @@ func parseBuiltin(s string) (verb Variadic) {
 		verb = vSign
 	case "ocount":
 		verb = vOCount
+	case "icount":
+		verb = vICount
 	case "'":
 		verb = vEach
 	case "/":
