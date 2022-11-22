@@ -1,5 +1,7 @@
 package goal
 
+import "strings"
+
 // Matcher is implemented by types that can be matched againts other objects
 // (typically a struct of the same type with fields that match).
 type Matcher interface {
@@ -670,6 +672,8 @@ func find(x, y V) V {
 	assertCanonical(y)
 	assertCanonical(x)
 	switch x := x.(type) {
+	case S:
+		return findS(x, y)
 	case AB:
 		return findAB(x, y)
 	case AF:
@@ -682,6 +686,30 @@ func find(x, y V) V {
 		return findAV(x, y)
 	default:
 		return errf("x?y : x not an array (%s)", x.Type())
+	}
+}
+
+func findS(s S, y V) V {
+	switch y := y.(type) {
+	case S:
+		return I(strings.Index(string(s), string(y)))
+	case AS:
+		res := make(AI, y.Len())
+		for i, ss := range y {
+			res[i] = strings.Index(string(s), string(ss))
+		}
+		return res
+	case AV:
+		res := make(AV, y.Len())
+		for i, v := range y {
+			res[i] = findS(s, v)
+			if err, ok := res[i].(errV); ok {
+				return err
+			}
+		}
+		return res
+	default:
+		return errType("s?y", "y", y)
 	}
 }
 
