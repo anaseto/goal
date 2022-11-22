@@ -193,6 +193,11 @@ var matchTests = [...]matchTest{
 	{`icount 0 0 1 -1 0 1 2 3 2`, `3 2 2 1`},
 	{`"a = a + 1"?"="`, `2`},
 	{`"a = a + 1"?"=" "+"`, `2 6`},
+	{`a:!3;a[(0 1;1 2)]`, `(0 1;1 2)`},
+	{`a:!3;a[(0 1;1 2)][1]`, `1 2`},
+	{`a:(#;^);a[(0 1;1 0);3 2 1]`, `((3;1 2 3);(1 2 3;3))`},
+	{`"012345"[2]`, `"2345"`},
+	{`"012345"[(2 3;5)]`, `("2345" "345";"5")`},
 }
 
 func TestEval(t *testing.T) {
@@ -205,19 +210,18 @@ func TestEval(t *testing.T) {
 			vLeft, errLeft := ctxLeft.Eval(mt.Left)
 			ctxRight := NewContext()
 			vRight, errRight := ctxRight.Eval(mt.Right)
+			if errLeft != nil || errRight != nil {
+				t.Log(ctxLeft.programString())
+				t.Log(ctxRight.programString())
+				t.Log(matchString)
+				t.Logf("return error: `%v` vs `%v`", errLeft, errRight)
+				t.Fail()
+				return
+			}
 			if !Match(vLeft, vRight) {
 				t.Log(ctxLeft.programString())
 				t.Log(matchString)
 				t.Logf("results: %s vs %s", vLeft.Sprint(ctxLeft), vRight.Sprint(ctxRight))
-				t.Fail()
-			}
-			if errLeft != nil || errRight != nil {
-				if !t.Failed() {
-					t.Log(ctxLeft.programString())
-					t.Log(ctxRight.programString())
-					t.Log(matchString)
-				}
-				t.Logf("return error: `%v` vs `%v`", errLeft, errRight)
 				t.Fail()
 			}
 		})

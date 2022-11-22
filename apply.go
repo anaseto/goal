@@ -137,14 +137,14 @@ func (ctx *Context) applyArray(a array, x V) V {
 	switch z := x.(type) {
 	case F:
 		if !isI(z) {
-			return errf("x[y] : non-integer index: %g", z)
+			return errf("a[x] : non-integer index: %g", z)
 		}
 		i := int(z)
 		if i < 0 {
 			i = a.Len() + i
 		}
 		if i < 0 || i >= a.Len() {
-			return errf("x[y] : out of bounds index: %d", i)
+			return errf("a[x] : out of bounds index: %d", i)
 		}
 		return a.at(i)
 	case I:
@@ -153,7 +153,7 @@ func (ctx *Context) applyArray(a array, x V) V {
 			i = a.Len() + i
 		}
 		if i < 0 || i >= a.Len() {
-			return errf("x[y] : out of bounds index: %d", i)
+			return errf("a[x] : out of bounds index: %d", i)
 		}
 		return a.at(i)
 	case AV:
@@ -173,11 +173,12 @@ func (ctx *Context) applyArray(a array, x V) V {
 		res := a.atIndices(indices.(AI))
 		return res
 	default:
-		return errf("x[y] : y non-array non-integer")
+		return errf("a[x] : x non-array non-integer")
 	}
 }
 
 func (ctx *Context) applyArrayArgs(v array, arg V, args []V) V {
+	// TODO: annotate error with depth?
 	if len(args) == 0 {
 		return ctx.applyArray(v, arg)
 	}
@@ -202,7 +203,7 @@ func (ctx *Context) applyArrayArgs(v array, arg V, args []V) V {
 		}
 		return canonical(res)
 	default:
-		res := ctx.Apply(v, arg)
+		res := ctx.applyArray(v, arg)
 		if _, ok := res.(errV); ok {
 			return res
 		}

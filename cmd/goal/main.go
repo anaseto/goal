@@ -267,9 +267,11 @@ x$y binsearch	2 3 5 7$8 2 7 5 5.5 3 0 -> 4 1 4 3 3 2 0
 s?y index	"a = a + 1"?"=" "+" -> 2 6
 x?y find	3 2 1?2 -> 1	3 2 1?0	-> 3
 @x  type	@2 -> "i"    @"ab" -> "s"    @2 3 -> "I"
-x@y apply	1 2 3@2 -> 3	1 2 3[2] -> 3
+f@y apply	(|)@1 2 -> 2 1 (like |[1 2] -> 2 1 or |1 2)
+s@y index	"012345"[2] -> "2345"
+a@y index	1 2 3@2 -> 3	1 2 3[2] -> 3
 .s  eval	."2+3" -> 5
-x.y applyN	{x+y}.2 3 -> 5    {x+y}[2;3] -> 5
+x.y applyN	{x+y}.2 3 -> 5    {x+y}[2;3] -> 5    (1 2;3 4)[0;1] -> 2
 
 .[f;x;f]  try	.[+;2 3;{"msg"}] -> 5	.[+;2 "a";{"msg"}] -> "msg"
 `
@@ -308,7 +310,7 @@ literals	1	1.5	"text"
 arrays		1 2 -3 4	1 "a" -2 "b"	(1 2;"a";(3;"b"))
 variables	a:2 (assign)	a+3 (use)	a::2 (assign global)
 expressions	2*3+4 -> 14	1+|1 2 3 -> 4 3 2	+/1 2 3 -> 6
-index		1 2 3[1] -> 2
+index		1 2 3[1] -> 2 (same as x@1) (1 2;3 4)[0;1] -> 2 (same as x.(0;1))
 lambdas		{x+y}[2;3] -> 5		{[a;b;c]a+b+c}[1;2;3] -> 6
 cond		?[1;2;3] -> 2	?[0;2;3] -> 3	?[0;2;"";3;4] -> 4
 sequence	[a:2;b:a+3;a+10] -> 12 (bracket block [] at start of expression)
