@@ -165,7 +165,7 @@ func (s *Scanner) emitString(t TokenType) stateFn {
 
 func (s *Scanner) emitIDENT() stateFn {
 	switch s.source[s.tpos:s.npos] {
-	case "in", "sign", "ocount", "icount":
+	case "in", "sign", "ocount", "icount", "bytes":
 		return s.emitOp(VERB)
 	default:
 		return s.emitString(IDENT)

@@ -34,6 +34,7 @@ func (ctx *Context) initVariadics() {
 		vSign:     {Func: VSign},
 		vOCount:   {Func: VOCount},
 		vICount:   {Func: VICount},
+		vBytes:    {Func: VBytes},
 		vList:     {Func: VList},
 		vEach:     {Func: VEach, Adverb: true},
 		vFold:     {Func: VFold, Adverb: true},
@@ -395,6 +396,16 @@ func VICount(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return icount(args[0])
+	default:
+		return errRank("icount")
+	}
+}
+
+// VBytes implements the "bytes" variadic verb.
+func VBytes(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		return bytes(args[0])
 	default:
 		return errRank("icount")
 	}

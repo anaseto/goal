@@ -197,6 +197,8 @@ func registerVariadics(ctx *goal.Context) {
 			}
 		}})
 	ctx.AssignGlobal("slurp", slurp)
+	shell := ctx.RegisterVariadic("shell", goal.VariadicFun{Func: vShell})
+	ctx.AssignGlobal("shell", shell)
 }
 
 const helpTopics = `
@@ -282,7 +284,7 @@ x in y    member of	2 3 in 0 2 4 -> 1 0
 ocount x  occur-count	ocount 3 2 5 3 2 2 7 -> 0 0 0 1 1 2 0
 icount x  index-count	icount 0 0 1 -1 0 1 2 3 2 -> 3 2 2 1 (same as #'=x)
 sign x    sign		sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
-bytes x	  byte-count	bytes "abc" -> 3 (TODO)
+bytes x	  byte-count	bytes "abc" -> 3
 `
 
 const helpADVERBS = `
@@ -304,6 +306,7 @@ const helpIO = `
 IO
 slurp[s]	read file named s	lines:"\n"\slurp["/path/to/file"]
 say[x;...]	print value(s) with newline	say 2+3
+shell[cmd;opts]	run a command through the shell
 `
 
 const helpSyntax = `
