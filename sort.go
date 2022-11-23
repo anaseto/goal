@@ -551,20 +551,20 @@ func searchAI(x AI, y V) V {
 		return I(searchAIF(x, y))
 	case AB:
 		res := make(AI, y.Len())
-		for i, v := range y {
-			res[i] = searchAII(x, B2I(v))
+		for i, yi := range y {
+			res[i] = searchAII(x, B2I(yi))
 		}
 		return res
 	case AI:
 		res := make(AI, y.Len())
-		for i, v := range y {
-			res[i] = searchAII(x, I(v))
+		for i, yi := range y {
+			res[i] = searchAII(x, I(yi))
 		}
 		return res
 	case AF:
 		res := make(AI, y.Len())
-		for i, v := range y {
-			res[i] = searchAIF(x, F(v))
+		for i, yi := range y {
+			res[i] = searchAIF(x, F(yi))
 		}
 		return res
 	case array:
@@ -587,20 +587,20 @@ func searchAF(x AF, y V) V {
 		return I(searchAFF(x, y))
 	case AB:
 		res := make(AI, y.Len())
-		for i, v := range y {
-			res[i] = searchAFI(x, B2I(v))
+		for i, yi := range y {
+			res[i] = searchAFI(x, B2I(yi))
 		}
 		return res
 	case AI:
 		res := make(AI, y.Len())
-		for i, v := range y {
-			res[i] = searchAFI(x, I(v))
+		for i, yi := range y {
+			res[i] = searchAFI(x, I(yi))
 		}
 		return res
 	case AF:
 		res := make(AI, y.Len())
-		for i, v := range y {
-			res[i] = searchAFF(x, F(v))
+		for i, yi := range y {
+			res[i] = searchAFF(x, F(yi))
 		}
 		return res
 	case array:
@@ -621,8 +621,8 @@ func searchAS(x AS, y V) V {
 		return I(searchASS(x, y))
 	case AS:
 		res := make(AI, y.Len())
-		for i, v := range y {
-			res[i] = searchASS(x, S(v))
+		for i, yi := range y {
+			res[i] = searchASS(x, S(yi))
 		}
 		return res
 	case array:

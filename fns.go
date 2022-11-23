@@ -6,19 +6,17 @@ import (
 
 // enum returns !x.
 func enum(x V) V {
-	switch x := x.(type) {
-	case F:
-		if !isI(x) {
-			return errs("!x : x non-integer")
-		}
-		// TODO: check whether range is too big?
-		return rangeI(I(x))
+	x = toIndices(x)
+	if err, ok := x.(errV); ok {
+		return errV("!x : ") + err
+	}
+	switch xx := x.(type) {
 	case I:
-		return rangeI(x)
-	case array:
-		return rangeArray(x)
+		return rangeI(xx)
+	case AI:
+		return rangeArray(xx)
 	default:
-		return errType("!x", "x", x)
+		return errs("!x : x nested array")
 	}
 }
 
@@ -33,27 +31,9 @@ func rangeI(n I) V {
 	return r
 }
 
-func rangeArray(x array) V {
-	z, ok := x.(AI)
-	if !ok {
-		z = make(AI, x.Len())
-		for i := range z {
-			v := x.at(i)
-			switch v := v.(type) {
-			case I:
-				z[i] = int(v)
-			case F:
-				if !isI(v) {
-					return errs("!x : x contains non-integer")
-				}
-				z[i] = int(v)
-			default:
-				return errs("!x : x is not numeric")
-			}
-		}
-	}
+func rangeArray(x AI) V {
 	cols := 1
-	for _, n := range z {
+	for _, n := range x {
 		if n == 0 {
 			return AV{}
 		}
@@ -63,11 +43,11 @@ func rangeArray(x array) V {
 	reps := cols
 	for i := range r {
 		a := make(AI, cols)
-		reps /= z[i]
-		clen := reps * z[i]
+		reps /= x[i]
+		clen := reps * x[i]
 		for c := 0; c < cols/clen; c++ {
 			col := c * clen
-			for j := 0; j < z[i]; j++ {
+			for j := 0; j < x[i]; j++ {
 				for k := 0; k < reps; k++ {
 					a[col+j*reps+k] = j
 				}

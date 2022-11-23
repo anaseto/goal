@@ -1,47 +1,47 @@
 package goal
 
 // Apply calls a value with a single argument.
-func (ctx *Context) Apply(v, x V) V {
-	ctx.push(x)
-	return ctx.applyN(v, 1)
+func (ctx *Context) Apply(x, y V) V {
+	ctx.push(y)
+	return ctx.applyN(x, 1)
 }
 
 // Apply2 calls a value with a two arguments.
-func (ctx *Context) Apply2(v, x, y V) V {
+func (ctx *Context) Apply2(x, y, z V) V {
+	ctx.push(z)
 	ctx.push(y)
-	ctx.push(x)
-	return ctx.applyN(v, 2)
+	return ctx.applyN(x, 2)
 }
 
 // ApplyN calls a value with one or more arguments. The arguments should be
 // provided in reverse order, given the stack-based right to left semantics
 // used by the language.
-func (ctx *Context) ApplyN(v V, args []V) V {
+func (ctx *Context) ApplyN(x V, args []V) V {
 	if len(args) == 0 {
 		panic("ApplyArgs: len(args) should be > 0")
 	}
 	ctx.pushArgs(args)
-	return ctx.applyN(v, len(args))
+	return ctx.applyN(x, len(args))
 }
 
-// applyN applies v with the top n arguments in the stack. It consumes the
+// applyN applies x with the top n arguments in the stack. It consumes the
 // arguments, but does not push the result, returing it instead.
-func (ctx *Context) applyN(v V, n int) V {
-	switch v := v.(type) {
+func (ctx *Context) applyN(x V, n int) V {
+	switch x := x.(type) {
 	case Lambda:
-		return ctx.applyLambda(v, n)
+		return ctx.applyLambda(x, n)
 	case Variadic:
 		if n == 1 {
-			return ctx.applyVariadic(v)
+			return ctx.applyVariadic(x)
 		}
-		return ctx.applyNVariadic(v, n)
+		return ctx.applyNVariadic(x, n)
 	case DerivedVerb:
-		ctx.push(v.Arg)
+		ctx.push(x.Arg)
 		args := ctx.peekN(n + 1)
 		if hasNil(args) {
-			return Projection{Fun: v, Args: ctx.popN(n + 1)}
+			return Projection{Fun: x, Args: ctx.popN(n + 1)}
 		}
-		res := ctx.variadics[v.Fun].Func(ctx, args)
+		res := ctx.variadics[x.Fun].Func(ctx, args)
 		ctx.dropN(n + 1)
 		return res
 	case ProjectionOne:
@@ -51,27 +51,27 @@ func (ctx *Context) applyN(v V, n int) V {
 		arg := ctx.top()
 		if arg == nil {
 			ctx.drop()
-			return v
+			return x
 		}
-		ctx.push(v.Arg)
-		return ctx.applyN(v.Fun, 2)
+		ctx.push(x.Arg)
+		return ctx.applyN(x.Fun, 2)
 	case Projection:
-		return ctx.applyProjection(v, n)
+		return ctx.applyProjection(x, n)
 	case Composition:
-		res := ctx.applyN(v.Right, n)
+		res := ctx.applyN(x.Right, n)
 		_, ok := res.(error)
 		if ok {
 			return res
 		}
 		ctx.push(res)
-		return ctx.applyN(v.Left, 1)
+		return ctx.applyN(x.Left, 1)
 	case S:
 		switch n {
 		case 1:
-			return applyS(v, ctx.pop())
+			return applyS(x, ctx.pop())
 		case 2:
 			args := ctx.peekN(n)
-			res := applyS2(v, args[1], args[0])
+			res := applyS2(x, args[1], args[0])
 			ctx.dropN(n)
 			return res
 		default:
@@ -80,75 +80,75 @@ func (ctx *Context) applyN(v V, n int) V {
 	case array:
 		switch n {
 		case 1:
-			return ctx.applyArray(v, ctx.pop())
+			return ctx.applyArray(x, ctx.pop())
 		default:
 			args := ctx.peekN(n)
-			res := ctx.applyArrayArgs(v, args[len(args)-1], args[:len(args)-1])
+			res := ctx.applyArrayArgs(x, args[len(args)-1], args[:len(args)-1])
 			ctx.dropN(n)
 			return res
 		}
 	default:
-		return errf("type %s cannot be applied", v.Type())
+		return errf("type %s cannot be applied", x.Type())
 	}
 }
 
 // applyArray applies an array to a value.
-func (ctx *Context) applyArray(a array, x V) V {
-	if x == nil {
-		return a
+func (ctx *Context) applyArray(x array, y V) V {
+	if y == nil {
+		return x
 	}
-	switch z := x.(type) {
+	switch y := y.(type) {
 	case F:
-		if !isI(z) {
-			return errf("a[x] : non-integer index (%g)", z)
+		if !isI(y) {
+			return errf("a[x] : non-integer index (%g)", y)
 		}
-		i := int(z)
+		i := int(y)
 		if i < 0 {
-			i = a.Len() + i
+			i = x.Len() + i
 		}
-		if i < 0 || i >= a.Len() {
+		if i < 0 || i >= x.Len() {
 			return errf("a[x] : out of bounds index: %d", i)
 		}
-		return a.at(i)
+		return x.at(i)
 	case I:
-		i := int(z)
+		i := int(y)
 		if i < 0 {
-			i = a.Len() + i
+			i = x.Len() + i
 		}
-		if i < 0 || i >= a.Len() {
+		if i < 0 || i >= x.Len() {
 			return errf("a[x] : out of bounds index: %d", i)
 		}
-		return a.at(i)
+		return x.at(i)
 	case AV:
-		res := make(AV, z.Len())
-		for i, v := range z {
-			res[i] = ctx.applyArray(a, v)
+		res := make(AV, y.Len())
+		for i, yi := range y {
+			res[i] = ctx.applyArray(x, yi)
 			if err, ok := res[i].(errV); ok {
 				return err
 			}
 		}
 		return canonical(res)
 	case array:
-		indices := toIndices(x)
+		indices := toIndices(y)
 		if err, ok := indices.(errV); ok {
 			return errV("x[y] :") + err
 		}
-		res := a.atIndices(indices.(AI))
+		res := x.atIndices(indices.(AI))
 		return res
 	default:
 		return errf("a[x] : x non-array non-integer")
 	}
 }
 
-func (ctx *Context) applyArrayArgs(v array, arg V, args []V) V {
+func (ctx *Context) applyArrayArgs(x array, arg V, args []V) V {
 	// TODO: annotate error with depth?
 	if len(args) == 0 {
-		return ctx.applyArray(v, arg)
+		return ctx.applyArray(x, arg)
 	}
 	if arg == nil {
-		res := make(AV, v.Len())
+		res := make(AV, x.Len())
 		for i := 0; i < len(res); i++ {
-			res[i] = ctx.ApplyN(v.at(i), args)
+			res[i] = ctx.ApplyN(x.at(i), args)
 			if err, ok := res[i].(errV); ok {
 				return err
 			}
@@ -159,14 +159,14 @@ func (ctx *Context) applyArrayArgs(v array, arg V, args []V) V {
 	case array:
 		res := make(AV, arg.Len())
 		for i := 0; i < arg.Len(); i++ {
-			res[i] = ctx.applyArrayArgs(v, arg.at(i), args)
+			res[i] = ctx.applyArrayArgs(x, arg.at(i), args)
 			if err, ok := res[i].(errV); ok {
 				return err
 			}
 		}
 		return canonical(res)
 	default:
-		res := ctx.applyArray(v, arg)
+		res := ctx.applyArray(x, arg)
 		if _, ok := res.(errV); ok {
 			return res
 		}
@@ -232,28 +232,28 @@ func (ctx *Context) applyNVariadic(v Variadic, n int) V {
 	return res
 }
 
-func (ctx *Context) applyProjection(v Projection, n int) V {
+func (ctx *Context) applyProjection(p Projection, n int) V {
 	args := ctx.peekN(n)
-	nNils := countNils(v.Args)
+	nNils := countNils(p.Args)
 	switch {
 	case len(args) > nNils:
 		return errs("too many arguments")
 	case len(args) == nNils:
 		n := 0
-		for _, v := range v.Args {
+		for _, arg := range p.Args {
 			switch {
-			case v != nil:
-				ctx.push(v)
+			case arg != nil:
+				ctx.push(arg)
 			default:
 				ctx.push(args[n])
 				n++
 			}
 		}
-		res := ctx.applyN(v.Fun, len(v.Args))
-		ctx.dropN(len(v.Args))
+		res := ctx.applyN(p.Fun, len(p.Args))
+		ctx.dropN(len(p.Args))
 		return res
 	default:
-		vargs := cloneArgs(v.Args)
+		vargs := cloneArgs(p.Args)
 		n := 1
 		for i := len(vargs) - 1; i >= 0; i-- {
 			if vargs[i] == nil {
@@ -265,7 +265,7 @@ func (ctx *Context) applyProjection(v Projection, n int) V {
 			}
 		}
 		ctx.dropN(n)
-		return Projection{Fun: v, Args: vargs}
+		return Projection{Fun: p, Args: vargs}
 	}
 }
 
@@ -323,14 +323,14 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 func (x AV) atIndices(y AI) V {
 	res := make(AV, len(y))
 	xlen := x.Len()
-	for i, idx := range y {
-		if idx < 0 {
-			idx += xlen
+	for i, yi := range y {
+		if yi < 0 {
+			yi += xlen
 		}
-		if idx < 0 || idx >= len(x) {
-			return errf("x[y] : index out of bounds: %d (length %d)", idx, len(x))
+		if yi < 0 || yi >= len(x) {
+			return errf("x[y] : index out of bounds: %d (length %d)", yi, len(x))
 		}
-		res[i] = x[idx]
+		res[i] = x[yi]
 	}
 	return canonical(res)
 }
@@ -338,14 +338,14 @@ func (x AV) atIndices(y AI) V {
 func (x AB) atIndices(y AI) V {
 	res := make(AB, len(y))
 	xlen := x.Len()
-	for i, idx := range y {
-		if idx < 0 {
-			idx += xlen
+	for i, yi := range y {
+		if yi < 0 {
+			yi += xlen
 		}
-		if idx < 0 || idx >= len(x) {
-			return errf("x[y] : index out of bounds: %d (length %d)", idx, len(x))
+		if yi < 0 || yi >= len(x) {
+			return errf("x[y] : index out of bounds: %d (length %d)", yi, len(x))
 		}
-		res[i] = x[idx]
+		res[i] = x[yi]
 	}
 	return res
 }
@@ -353,14 +353,14 @@ func (x AB) atIndices(y AI) V {
 func (x AI) atIndices(y AI) V {
 	res := make(AI, len(y))
 	xlen := x.Len()
-	for i, idx := range y {
-		if idx < 0 {
-			idx += xlen
+	for i, yi := range y {
+		if yi < 0 {
+			yi += xlen
 		}
-		if idx < 0 || idx >= len(x) {
-			return errf("x[y] : index out of bounds: %d (length %d)", idx, len(x))
+		if yi < 0 || yi >= len(x) {
+			return errf("x[y] : index out of bounds: %d (length %d)", yi, len(x))
 		}
-		res[i] = x[idx]
+		res[i] = x[yi]
 	}
 	return res
 }
@@ -368,14 +368,14 @@ func (x AI) atIndices(y AI) V {
 func (x AF) atIndices(y AI) V {
 	res := make(AF, len(y))
 	xlen := x.Len()
-	for i, idx := range y {
-		if idx < 0 {
-			idx += xlen
+	for i, yi := range y {
+		if yi < 0 {
+			yi += xlen
 		}
-		if idx < 0 || idx >= len(x) {
-			return errf("x[y] : index out of bounds: %d (length %d)", idx, len(x))
+		if yi < 0 || yi >= len(x) {
+			return errf("x[y] : index out of bounds: %d (length %d)", yi, len(x))
 		}
-		res[i] = x[idx]
+		res[i] = x[yi]
 	}
 	return res
 }
@@ -383,14 +383,14 @@ func (x AF) atIndices(y AI) V {
 func (x AS) atIndices(y AI) V {
 	res := make(AS, len(y))
 	xlen := x.Len()
-	for i, idx := range y {
-		if idx < 0 {
-			idx += xlen
+	for i, yi := range y {
+		if yi < 0 {
+			yi += xlen
 		}
-		if idx < 0 || idx >= len(x) {
-			return errf("x[y] : index out of bounds: %d (length %d)", idx, len(x))
+		if yi < 0 || yi >= len(x) {
+			return errf("x[y] : index out of bounds: %d (length %d)", yi, len(x))
 		}
-		res[i] = x[idx]
+		res[i] = x[yi]
 	}
 	return res
 }
@@ -423,14 +423,14 @@ func (x AS) set(i int, y V) {
 // setIndices x at y with z (in place).
 func (x AV) setIndices(y AI, z V) error {
 	az := z.(array)
-	for i, idx := range y {
-		if idx < 0 {
-			idx += len(x)
+	for i, yi := range y {
+		if yi < 0 {
+			yi += len(x)
 		}
-		if idx < 0 || idx >= len(x) {
-			return errf("x[y] : index out of bounds: %d (length %d)", idx, len(x))
+		if yi < 0 || yi >= len(x) {
+			return errf("x[y] : index out of bounds: %d (length %d)", yi, len(x))
 		}
-		x[idx] = az.at(i)
+		x[yi] = az.at(i)
 	}
 	return nil
 }
@@ -438,14 +438,14 @@ func (x AV) setIndices(y AI, z V) error {
 // setIndices x at y with z (in place).
 func (x AI) setIndices(y AI, z V) error {
 	az := z.(AI)
-	for i, idx := range y {
-		if idx < 0 {
-			idx += len(x)
+	for i, yi := range y {
+		if yi < 0 {
+			yi += len(x)
 		}
-		if idx < 0 || idx >= len(x) {
-			return errf("x[y] : index out of bounds: %d (length %d)", idx, len(x))
+		if yi < 0 || yi >= len(x) {
+			return errf("x[y] : index out of bounds: %d (length %d)", yi, len(x))
 		}
-		x[idx] = az[i]
+		x[yi] = az[i]
 	}
 	return nil
 }
@@ -453,14 +453,14 @@ func (x AI) setIndices(y AI, z V) error {
 // setIndices x at y with z (in place).
 func (x AF) setIndices(y AI, z V) error {
 	az := z.(AF)
-	for i, idx := range y {
-		if idx < 0 {
-			idx += len(x)
+	for i, yi := range y {
+		if yi < 0 {
+			yi += len(x)
 		}
-		if idx < 0 || idx >= len(x) {
-			return errf("x[y] : index out of bounds: %d (length %d)", idx, len(x))
+		if yi < 0 || yi >= len(x) {
+			return errf("x[y] : index out of bounds: %d (length %d)", yi, len(x))
 		}
-		x[idx] = az[i]
+		x[yi] = az[i]
 	}
 	return nil
 }
@@ -468,14 +468,14 @@ func (x AF) setIndices(y AI, z V) error {
 // setIndices x at y with z (in place).
 func (x AB) setIndices(y AI, z V) error {
 	az := z.(AB)
-	for i, idx := range y {
-		if idx < 0 {
-			idx += len(x)
+	for i, yi := range y {
+		if yi < 0 {
+			yi += len(x)
 		}
-		if idx < 0 || idx >= len(x) {
-			return errf("x[y] : index out of bounds: %d (length %d)", idx, len(x))
+		if yi < 0 || yi >= len(x) {
+			return errf("x[y] : index out of bounds: %d (length %d)", yi, len(x))
 		}
-		x[idx] = az[i]
+		x[yi] = az[i]
 	}
 	return nil
 }
@@ -483,14 +483,14 @@ func (x AB) setIndices(y AI, z V) error {
 // setIndices x at y with z (in place).
 func (x AS) setIndices(y AI, z V) error {
 	az := z.(AS)
-	for i, idx := range y {
-		if idx < 0 {
-			idx += len(x)
+	for i, yi := range y {
+		if yi < 0 {
+			yi += len(x)
 		}
-		if idx < 0 || idx >= len(x) {
-			return errf("x[y] : index out of bounds: %d (length %d)", idx, len(x))
+		if yi < 0 || yi >= len(x) {
+			return errf("x[y] : index out of bounds: %d (length %d)", yi, len(x))
 		}
-		x[idx] = az[i]
+		x[yi] = az[i]
 	}
 	return nil
 }

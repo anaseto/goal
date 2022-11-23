@@ -238,11 +238,11 @@ func toArray(x V) V {
 // toAI converts AF into AI if possible.
 func toAI(x AF) V {
 	r := make(AI, len(x))
-	for i, v := range x {
-		if !isI(F(v)) {
-			return errf("contains non-integer (%g)", v)
+	for i, xi := range x {
+		if !isI(F(xi)) {
+			return errf("contains non-integer (%g)", xi)
 		}
-		r[i] = int(v)
+		r[i] = int(xi)
 	}
 	return r
 }
@@ -462,12 +462,12 @@ func minMax(x AI) (min, max int) {
 	}
 	min = x[0]
 	max = min
-	for _, v := range x[1:] {
+	for _, xi := range x[1:] {
 		switch {
-		case v > max:
-			max = v
-		case v < min:
-			min = v
+		case xi > max:
+			max = xi
+		case xi < min:
+			min = xi
 		}
 	}
 	return
@@ -478,9 +478,9 @@ func maxAI(x AI) int {
 	if len(x) == 0 {
 		return max
 	}
-	for _, v := range x {
-		if v > max {
-			max = v
+	for _, xi := range x {
+		if xi > max {
+			max = xi
 		}
 	}
 	return max
@@ -492,8 +492,8 @@ func minMaxB(x AB) (I, I) {
 	}
 	min := true
 	max := false
-	for _, v := range x {
-		max, min = max || v, min && !v
+	for _, xi := range x {
+		max, min = max || xi, min && !xi
 		if max && !min {
 			break
 		}
@@ -502,8 +502,8 @@ func minMaxB(x AB) (I, I) {
 }
 
 func maxAB(x AB) bool {
-	for _, v := range x {
-		if v {
+	for _, xi := range x {
+		if xi {
 			return true
 		}
 	}
@@ -514,15 +514,15 @@ func maxAB(x AB) bool {
 // the most specialized representation. For example AV{I(2), I(3)} is not
 // canonical, but AI{2, 3} is.
 func isCanonical(x V) (eltype, bool) {
-	switch y := x.(type) {
+	switch xx := x.(type) {
 	case AV:
-		t := aType(y)
+		t := aType(xx)
 		switch t {
 		case tB, tI, tF, tS:
 			return t, false
 		case tV:
-			for _, v := range y {
-				if _, ok := isCanonical(v); !ok {
+			for _, xi := range xx {
+				if _, ok := isCanonical(xi); !ok {
 					return t, false
 				}
 			}
@@ -543,45 +543,45 @@ func assertCanonical(x V) {
 }
 
 // normalize returns a canonical form of an AV array.
-func normalize(y AV, t eltype) V {
+func normalize(x AV, t eltype) V {
 	switch t {
 	case tB:
-		r := make(AB, len(y))
-		for i, v := range y {
-			r[i] = v.(I) != 0
+		r := make(AB, len(x))
+		for i, xi := range x {
+			r[i] = xi.(I) != 0
 		}
 		return r
 	case tI:
-		r := make(AI, len(y))
-		for i, v := range y {
-			r[i] = int(v.(I))
+		r := make(AI, len(x))
+		for i, xi := range x {
+			r[i] = int(xi.(I))
 		}
 		return r
 	case tF:
-		r := make(AF, len(y))
-		for i, v := range y {
-			switch v := v.(type) {
+		r := make(AF, len(x))
+		for i, xi := range x {
+			switch xi := xi.(type) {
 			case F:
-				r[i] = float64(v)
+				r[i] = float64(xi)
 			case I:
-				r[i] = float64(v)
+				r[i] = float64(xi)
 			}
 		}
 		return r
 	case tS:
-		r := make(AS, len(y))
-		for i, v := range y {
-			r[i] = string(v.(S))
+		r := make(AS, len(x))
+		for i, xi := range x {
+			r[i] = string(xi.(S))
 		}
 		return r
 	case tV:
-		for i, v := range y {
-			y[i] = canonical(v)
+		for i, xi := range x {
+			x[i] = canonical(xi)
 		}
-		return y
+		return x
 	default:
 		// should not happen
-		return y
+		return x
 	}
 }
 
@@ -617,8 +617,8 @@ func hasNil(a []V) bool {
 // countNils returns the number of nil values in the given array.
 func countNils(a []V) int {
 	n := 0
-	for _, v := range a {
-		if v == nil {
+	for _, ai := range a {
+		if ai == nil {
 			n++
 		}
 	}
