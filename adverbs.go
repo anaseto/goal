@@ -11,7 +11,7 @@ func fold2(ctx *Context, args []V) V {
 			return fold2vAdd(args[0])
 		}
 	}
-	vv, ok := v.(Function)
+	f, ok := v.(Function)
 	if !ok {
 		switch v := v.(type) {
 		case S:
@@ -20,16 +20,16 @@ func fold2(ctx *Context, args []V) V {
 		// TODO: decode
 		return errf("F/x : F not a function (%s)", v.Type())
 	}
-	if vv.Rank(ctx) != 2 {
+	if f.Rank(ctx) != 2 {
 		// TODO: converge
-		return errf("F/x : F rank is %d (expected 2)", vv.Rank(ctx))
+		return errf("F/x : F rank is %d (expected 2)", f.Rank(ctx))
 	}
 	switch x := args[0].(type) {
 	case array:
 		if x.Len() == 0 {
-			vv, ok := vv.(zeroFun)
+			f, ok := f.(zeroFun)
 			if ok {
-				return vv.zero()
+				return f.zero()
 			}
 			return I(0)
 		}
@@ -182,7 +182,7 @@ func fold3doTimes(ctx *Context, n int, v, y V) V {
 }
 
 func scan2(ctx *Context, v, x V) V {
-	vv, ok := v.(Function)
+	f, ok := v.(Function)
 	if !ok {
 		switch v := v.(type) {
 		case S:
@@ -191,16 +191,16 @@ func scan2(ctx *Context, v, x V) V {
 		// TODO: encode
 		return errf("f\\x : f not a function (%s)", v.Type())
 	}
-	if vv.Rank(ctx) != 2 {
+	if f.Rank(ctx) != 2 {
 		// TODO: converge
-		return errf("f\\x : f rank is %d (expected 2)", vv.Rank(ctx))
+		return errf("f\\x : f rank is %d (expected 2)", f.Rank(ctx))
 	}
 	switch x := x.(type) {
 	case array:
 		if x.Len() == 0 {
-			vv, ok := v.(zeroFun)
+			f, ok := v.(zeroFun)
 			if ok {
-				return vv.zero()
+				return f.zero()
 			}
 			return I(0)
 		}
@@ -239,11 +239,11 @@ func scan2Split(sep S, x V) V {
 }
 
 func scan3(ctx *Context, args []V) V {
-	v, ok := args[1].(Function)
+	f, ok := args[1].(Function)
 	if !ok {
-		return errf("x f'y : f not a function (%s)", v.Type())
+		return errf("x f'y : f not a function (%s)", f.Type())
 	}
-	if v.Rank(ctx) != 2 {
+	if f.Rank(ctx) != 2 {
 		return scan3While(ctx, args)
 		//return errf("rank %d verb (expected 2)", v.Rank(ctx))
 	}
@@ -255,7 +255,7 @@ func scan3(ctx *Context, args []V) V {
 		}
 		ctx.push(y.at(0))
 		ctx.push(args[2])
-		first := ctx.applyN(v, 2)
+		first := ctx.applyN(f, 2)
 		if err, ok := first.(errV); ok {
 			return err
 		}
@@ -263,7 +263,7 @@ func scan3(ctx *Context, args []V) V {
 		for i := 1; i < y.Len(); i++ {
 			ctx.push(y.at(i))
 			ctx.push(res[len(res)-1])
-			next := ctx.applyN(v, 2)
+			next := ctx.applyN(f, 2)
 			if err, ok := next.(errV); ok {
 				return err
 			}
@@ -273,20 +273,20 @@ func scan3(ctx *Context, args []V) V {
 	default:
 		ctx.push(y)
 		ctx.push(args[2])
-		return ctx.applyN(v, 2)
+		return ctx.applyN(f, 2)
 	}
 }
 
 func scan3While(ctx *Context, args []V) V {
-	v := args[1]
+	f := args[1]
 	switch x := args[2].(type) {
 	case F:
 		if !isI(x) {
 			return errf("n f\\y : non-integer n (%g)", x)
 		}
-		return scan3doTimes(ctx, int(x), v, args[0])
+		return scan3doTimes(ctx, int(x), f, args[0])
 	case I:
-		return scan3doTimes(ctx, int(x), v, args[0])
+		return scan3doTimes(ctx, int(x), f, args[0])
 	case Function:
 		y := args[0]
 		res := AV{y}
@@ -300,7 +300,7 @@ func scan3While(ctx *Context, args []V) V {
 				return canonical(res)
 			}
 			ctx.push(y)
-			y = ctx.applyN(v, 1)
+			y = ctx.applyN(f, 1)
 			if err, ok := y.(errV); ok {
 				return err
 			}
@@ -311,11 +311,11 @@ func scan3While(ctx *Context, args []V) V {
 	}
 }
 
-func scan3doTimes(ctx *Context, n int, v, y V) V {
+func scan3doTimes(ctx *Context, n int, f, y V) V {
 	res := AV{y}
 	for i := 0; i < n; i++ {
 		ctx.push(y)
-		y = ctx.applyN(v, 1)
+		y = ctx.applyN(f, 1)
 		if err, ok := y.(errV); ok {
 			return err
 		}
@@ -325,10 +325,10 @@ func scan3doTimes(ctx *Context, n int, v, y V) V {
 }
 
 func each2(ctx *Context, args []V) V {
-	v, ok := args[1].(Function)
+	f, ok := args[1].(Function)
 	if !ok {
 		// TODO: binary search
-		return errf("f'x : f not a function (%s)", v.Type())
+		return errf("f'x : f not a function (%s)", f.Type())
 	}
 	x := toArray(args[0])
 	switch x := x.(type) {
@@ -336,7 +336,7 @@ func each2(ctx *Context, args []V) V {
 		res := make(AV, 0, x.Len())
 		for i := 0; i < x.Len(); i++ {
 			ctx.push(x.at(i))
-			next := ctx.applyN(v, 1)
+			next := ctx.applyN(f, 1)
 			if err, ok := next.(errV); ok {
 				return err
 			}
@@ -350,9 +350,9 @@ func each2(ctx *Context, args []V) V {
 }
 
 func each3(ctx *Context, args []V) V {
-	v, ok := args[1].(Function)
+	f, ok := args[1].(Function)
 	if !ok {
-		return errf("x f'y : f not a function (%s)", v.Type())
+		return errf("x f'y : f not a function (%s)", f.Type())
 	}
 	x, ok := args[2].(array)
 	if !ok {
@@ -370,7 +370,7 @@ func each3(ctx *Context, args []V) V {
 	for i := 0; i < xlen; i++ {
 		ctx.push(y.at(i))
 		ctx.push(x.at(i))
-		next := ctx.applyN(v, 2)
+		next := ctx.applyN(f, 2)
 		if err, ok := next.(errV); ok {
 			return err
 		}
