@@ -306,7 +306,7 @@ const helpIO = `
 IO
 slurp[s]	read file named s	lines:"\n"\slurp["/path/to/file"]
 say[x;...]	print value(s) with newline	say 2+3
-shell[cmd;opts]	run a command through the shell
+shell[cmd]	run a command through the shell
 `
 
 const helpSyntax = `
