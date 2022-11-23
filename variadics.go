@@ -159,10 +159,10 @@ func VMax(ctx *Context, args []V) V {
 	case 1:
 		return reverse(args[0])
 	case 2:
-		v, ok := args[1].(Function)
+		f, ok := args[1].(Function)
 		if ok {
 			ctx.push(args[0])
-			r := ctx.applyN(v, 1)
+			r := ctx.applyN(f, 1)
 			if err, ok := r.(errV); ok {
 				return err
 			}
@@ -204,10 +204,10 @@ func VEqual(ctx *Context, args []V) V {
 	case 1:
 		return group(args[0])
 	case 2:
-		v, ok := args[1].(Function)
+		f, ok := args[1].(Function)
 		if ok {
 			ctx.push(args[0])
-			r := ctx.applyN(v, 1)
+			r := ctx.applyN(f, 1)
 			if err, ok := r.(errV); ok {
 				return err
 			}
@@ -261,10 +261,10 @@ func VTake(ctx *Context, args []V) V {
 	case 1:
 		return I(Length(args[0]))
 	case 2:
-		v, ok := args[1].(Function)
+		f, ok := args[1].(Function)
 		if ok {
 			ctx.push(args[0])
-			r := ctx.applyN(v, 1)
+			r := ctx.applyN(f, 1)
 			if err, ok := r.(errV); ok {
 				return err
 			}
@@ -282,10 +282,10 @@ func VDrop(ctx *Context, args []V) V {
 	case 1:
 		return floor(args[0])
 	case 2:
-		v, ok := args[1].(Function)
+		f, ok := args[1].(Function)
 		if ok {
 			ctx.push(args[0])
-			r := ctx.applyN(v, 1)
+			r := ctx.applyN(f, 1)
 			if err, ok := r.(errV); ok {
 				return err
 			}
@@ -332,9 +332,9 @@ func VApply(ctx *Context, args []V) V {
 	case 1:
 		return S(args[0].Type())
 	case 2:
-		v := args[1]
+		x := args[1]
 		ctx.push(args[0])
-		return ctx.applyN(v, 1)
+		return ctx.applyN(x, 1)
 	case 3:
 		return ctx.amend3(args[2], args[1], args[0])
 	case 4:
@@ -350,12 +350,12 @@ func VApplyN(ctx *Context, args []V) V {
 	case 1:
 		return eval(ctx, args[0])
 	case 2:
-		v := args[1]
+		x := args[1]
 		av := toArray(args[0]).(array)
 		for i := av.Len() - 1; i >= 0; i-- {
 			ctx.push(av.at(i))
 		}
-		return ctx.applyN(v, av.Len())
+		return ctx.applyN(x, av.Len())
 	case 3:
 		return try(ctx, args[2], args[1], args[0])
 	default:

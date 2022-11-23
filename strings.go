@@ -37,8 +37,8 @@ func applyS(s S, x V) V {
 		return applyS(s, z)
 	case AV:
 		r := make(AV, x.Len())
-		for i, v := range x {
-			r[i] = applyS(s, v)
+		for i, xi := range x {
+			r[i] = applyS(s, xi)
 			if err, ok := r[i].(errV); ok {
 				return err
 			}
@@ -142,8 +142,8 @@ func applyS2(s S, x V, y V) V {
 		return applyS2(s, z, y)
 	case AV:
 		r := make(AV, x.Len())
-		for i, v := range x {
-			r[i] = applyS2(s, v, y)
+		for i, xi := range x {
+			r[i] = applyS2(s, xi, y)
 			if err, ok := r[i].(errV); ok {
 				return err
 			}

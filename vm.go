@@ -15,20 +15,20 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 		case opNil:
 			ctx.push(nil)
 		case opGlobal:
-			v := ctx.globals[ops[ip]]
-			if v == nil {
+			x := ctx.globals[ops[ip]]
+			if x == nil {
 				return ip - 1, fmt.Errorf("undefined global: %s",
 					ctx.gNames[ops[ip]])
 			}
-			ctx.push(v)
+			ctx.push(x)
 			ip++
 		case opLocal:
-			v := ctx.stack[ctx.frameIdx-int32(ops[ip])]
-			if v == nil {
+			x := ctx.stack[ctx.frameIdx-int32(ops[ip])]
+			if x == nil {
 				return ip - 1, fmt.Errorf("undefined local: %s",
 					ctx.lambdas[ctx.lambda].Names[int32(ops[ip])])
 			}
-			ctx.push(v)
+			ctx.push(x)
 			ip++
 		case opAssignGlobal:
 			ctx.globals[ops[ip]] = ctx.top()
@@ -102,8 +102,8 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 }
 
 func (ctx *Context) popApplyN(n int) error {
-	v := ctx.pop()
-	r := ctx.applyN(v, n)
+	x := ctx.pop()
+	r := ctx.applyN(x, n)
 	if err, ok := r.(error); ok {
 		return err
 	}
@@ -113,8 +113,8 @@ func (ctx *Context) popApplyN(n int) error {
 
 const maxCallDepth = 100000
 
-func (ctx *Context) push(v V) {
-	ctx.stack = append(ctx.stack, v)
+func (ctx *Context) push(x V) {
+	ctx.stack = append(ctx.stack, x)
 }
 
 func (ctx *Context) pushArgs(args []V) {

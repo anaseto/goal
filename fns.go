@@ -87,45 +87,45 @@ func where(x V) V {
 		}
 	case AB:
 		n := 0
-		for _, v := range x {
-			n += int(B2I(v))
+		for _, xi := range x {
+			n += int(B2I(xi))
 		}
 		r := make(AI, 0, n)
-		for i, v := range x {
-			if v {
+		for i, xi := range x {
+			if xi {
 				r = append(r, i)
 			}
 		}
 		return r
 	case AI:
 		n := 0
-		for _, v := range x {
-			if v < 0 {
+		for _, xi := range x {
+			if xi < 0 {
 				return errf("&x : x contains negative integer (%d)", x)
 			}
-			n += v
+			n += xi
 		}
 		r := make(AI, 0, n)
-		for i, v := range x {
-			for j := 0; j < v; j++ {
+		for i, xi := range x {
+			for j := 0; j < xi; j++ {
 				r = append(r, i)
 			}
 		}
 		return r
 	case AF:
 		n := 0
-		for _, v := range x {
-			if !isI(F(v)) {
-				return errf("&x : x contains non-integer (%g)", v)
+		for _, xi := range x {
+			if !isI(F(xi)) {
+				return errf("&x : x contains non-integer (%g)", xi)
 			}
-			if v < 0 {
-				return errf("&x : x contains negative (%d)", int(v))
+			if xi < 0 {
+				return errf("&x : x contains negative (%d)", int(xi))
 			}
-			n += int(v)
+			n += int(xi)
 		}
 		r := make(AI, 0, n)
-		for i, v := range x {
-			for j := 0; j < int(v); j++ {
+		for i, xi := range x {
+			for j := 0; j < int(xi); j++ {
 				r = append(r, i)
 			}
 		}
@@ -134,31 +134,31 @@ func where(x V) V {
 		switch aType(x) {
 		case tB, tF, tI:
 			n := 0
-			for _, v := range x {
-				switch v := v.(type) {
+			for _, xi := range x {
+				switch xi := xi.(type) {
 				case F:
-					if !isI(v) {
-						return errf("&x : not an integer (%g)", v)
+					if !isI(xi) {
+						return errf("&x : not an integer (%g)", xi)
 					}
-					if v < 0 {
-						return errf("&x : negative integer (%d)", int(v))
+					if xi < 0 {
+						return errf("&x : negative integer (%d)", int(xi))
 					}
-					n += int(v)
+					n += int(xi)
 				case I:
-					if v < 0 {
-						return errf("&x : negative integer (%d)", v)
+					if xi < 0 {
+						return errf("&x : negative integer (%d)", xi)
 					}
-					n += int(v)
+					n += int(xi)
 				}
 			}
 			r := make(AI, 0, n)
-			for i, v := range x {
+			for i, xi := range x {
 				var max I
-				switch v := v.(type) {
+				switch xi := xi.(type) {
 				case I:
-					max = v
+					max = xi
 				case F:
-					max = I(v)
+					max = I(xi)
 				}
 				for j := 0; j < int(max); j++ {
 					r = append(r, i)
@@ -205,11 +205,11 @@ func replicate(x, y V) V {
 		}
 		return repeatAI(x, y)
 	case AF:
-		z := toAI(x)
-		if err, ok := z.(errV); ok {
+		ix := toAI(x)
+		if err, ok := ix.(errV); ok {
 			return errf("f#y : x %v", err)
 		}
-		return replicate(z, y)
+		return replicate(ix, y)
 	case AV:
 		// should be canonical
 		assertCanonical(x)
@@ -257,46 +257,46 @@ func repeat(x V, n int) V {
 
 func repeatAB(x AB, y V) V {
 	n := 0
-	for _, v := range x {
-		n += int(B2I(v))
+	for _, xi := range x {
+		n += int(B2I(xi))
 	}
 	switch y := y.(type) {
 	case AB:
 		r := make(AB, 0, n)
-		for i, v := range x {
-			if v {
+		for i, xi := range x {
+			if xi {
 				r = append(r, y[i])
 			}
 		}
 		return r
 	case AF:
 		r := make(AF, 0, n)
-		for i, v := range x {
-			if v {
+		for i, xi := range x {
+			if xi {
 				r = append(r, y[i])
 			}
 		}
 		return r
 	case AI:
 		r := make(AI, 0, n)
-		for i, v := range x {
-			if v {
+		for i, xi := range x {
+			if xi {
 				r = append(r, y[i])
 			}
 		}
 		return r
 	case AS:
 		r := make(AS, 0, n)
-		for i, v := range x {
-			if v {
+		for i, xi := range x {
+			if xi {
 				r = append(r, y[i])
 			}
 		}
 		return r
 	case AV:
 		r := make(AV, 0, n)
-		for i, v := range x {
-			if v {
+		for i, xi := range x {
+			if xi {
 				r = append(r, y.at(i))
 			}
 		}
@@ -308,49 +308,49 @@ func repeatAB(x AB, y V) V {
 
 func repeatAI(x AI, y V) V {
 	n := 0
-	for _, v := range x {
-		if v < 0 {
-			return errf("f#y : f[y] contains negative integer (%d)", v)
+	for _, xi := range x {
+		if xi < 0 {
+			return errf("f#y : f[y] contains negative integer (%d)", xi)
 		}
-		n += v
+		n += xi
 	}
 	switch y := y.(type) {
 	case AB:
 		r := make(AB, 0, n)
-		for i, v := range x {
-			for j := 0; j < v; j++ {
+		for i, xi := range x {
+			for j := 0; j < xi; j++ {
 				r = append(r, y[i])
 			}
 		}
 		return r
 	case AF:
 		r := make(AF, 0, n)
-		for i, v := range x {
-			for j := 0; j < v; j++ {
+		for i, xi := range x {
+			for j := 0; j < xi; j++ {
 				r = append(r, y[i])
 			}
 		}
 		return r
 	case AI:
 		r := make(AI, 0, n)
-		for i, v := range x {
-			for j := 0; j < v; j++ {
+		for i, xi := range x {
+			for j := 0; j < xi; j++ {
 				r = append(r, y[i])
 			}
 		}
 		return r
 	case AS:
 		r := make(AS, 0, n)
-		for i, v := range x {
-			for j := 0; j < v; j++ {
+		for i, xi := range x {
+			for j := 0; j < xi; j++ {
 				r = append(r, y[i])
 			}
 		}
 		return r
 	case AV:
 		r := make(AV, 0, n)
-		for i, v := range x {
-			for j := 0; j < v; j++ {
+		for i, xi := range x {
+			for j := 0; j < xi; j++ {
 				r = append(r, y[i])
 			}
 		}
@@ -378,11 +378,11 @@ func weedOut(x, y V) V {
 	case AI:
 		return weedOutAI(x, y)
 	case AF:
-		z := toAI(x)
-		if err, ok := z.(errV); ok {
+		ix := toAI(x)
+		if err, ok := ix.(errV); ok {
 			return errf("f#y : x %v", err)
 		}
-		return weedOut(z, y)
+		return weedOut(ix, y)
 	case AV:
 		assertCanonical(x)
 		return errs("f#y : f[y] non-integer")
@@ -393,46 +393,46 @@ func weedOut(x, y V) V {
 
 func weedOutAB(x AB, y V) V {
 	n := 0
-	for _, v := range x {
-		n += 1 - int(B2I(v))
+	for _, xi := range x {
+		n += 1 - int(B2I(xi))
 	}
 	switch y := y.(type) {
 	case AB:
 		r := make(AB, 0, n)
-		for i, v := range x {
-			if !v {
+		for i, xi := range x {
+			if !xi {
 				r = append(r, y[i])
 			}
 		}
 		return r
 	case AF:
 		r := make(AF, 0, n)
-		for i, v := range x {
-			if !v {
+		for i, xi := range x {
+			if !xi {
 				r = append(r, y[i])
 			}
 		}
 		return r
 	case AI:
 		r := make(AI, 0, n)
-		for i, v := range x {
-			if !v {
+		for i, xi := range x {
+			if !xi {
 				r = append(r, y[i])
 			}
 		}
 		return r
 	case AS:
 		r := make(AS, 0, n)
-		for i, v := range x {
-			if !v {
+		for i, xi := range x {
+			if !xi {
 				r = append(r, y[i])
 			}
 		}
 		return r
 	case AV:
 		r := make(AV, 0, n)
-		for i, v := range x {
-			if !v {
+		for i, xi := range x {
+			if !xi {
 				r = append(r, y.at(i))
 			}
 		}
@@ -444,46 +444,46 @@ func weedOutAB(x AB, y V) V {
 
 func weedOutAI(x AI, y V) V {
 	n := 0
-	for _, v := range x {
-		n += int(B2I(v == 0))
+	for _, xi := range x {
+		n += int(B2I(xi == 0))
 	}
 	switch y := y.(type) {
 	case AB:
 		r := make(AB, 0, n)
-		for i, v := range x {
-			if v == 0 {
+		for i, xi := range x {
+			if xi == 0 {
 				r = append(r, y[i])
 			}
 		}
 		return r
 	case AF:
 		r := make(AF, 0, n)
-		for i, v := range x {
-			if v == 0 {
+		for i, xi := range x {
+			if xi == 0 {
 				r = append(r, y[i])
 			}
 		}
 		return r
 	case AI:
 		r := make(AI, 0, n)
-		for i, v := range x {
-			if v == 0 {
+		for i, xi := range x {
+			if xi == 0 {
 				r = append(r, y[i])
 			}
 		}
 		return r
 	case AS:
 		r := make(AS, 0, n)
-		for i, v := range x {
-			if v == 0 {
+		for i, xi := range x {
+			if xi == 0 {
 				r = append(r, y[i])
 			}
 		}
 		return r
 	case AV:
 		r := make(AV, 0, n)
-		for i, v := range x {
-			if v == 0 {
+		for i, xi := range x {
+			if xi == 0 {
 				r = append(r, y[i])
 			}
 		}
@@ -512,13 +512,13 @@ func cast(x, y V) V {
 }
 
 func casti(y V) V {
-	switch z := y.(type) {
+	switch yy := y.(type) {
 	case I:
 		return y
 	case F:
-		return I(z)
+		return I(yy)
 	case S:
-		runes := []rune(z)
+		runes := []rune(yy)
 		r := make(AI, len(runes))
 		for i, rc := range runes {
 			r[i] = int(rc)
@@ -529,17 +529,17 @@ func casti(y V) V {
 	case AI:
 		return y
 	case AS:
-		r := make(AV, z.Len())
-		for i, s := range z {
+		r := make(AV, yy.Len())
+		for i, s := range yy {
 			r[i] = casti(S(s))
 		}
 		return r
 	case AF:
-		return toAI(z)
+		return toAI(yy)
 	case AV:
-		r := make(AV, z.Len())
+		r := make(AV, yy.Len())
 		for i := range r {
-			r[i] = casti(z[i])
+			r[i] = casti(yy[i])
 			if err, ok := r[i].(errV); ok {
 				return err
 			}
@@ -551,24 +551,24 @@ func casti(y V) V {
 }
 
 func castn(y V) V {
-	switch z := y.(type) {
+	switch yy := y.(type) {
 	case I:
 		return y
 	case F:
 		return y
 	case S:
-		v, err := parseNumber(string(z))
+		xi, err := parseNumber(string(yy))
 		if err != nil {
-			return errf("\"i\"$y : non-numeric y (%s) : %v", z, err)
+			return errf("\"i\"$y : non-numeric y (%s) : %v", yy, err)
 		}
-		return v
+		return xi
 	case AB:
 		return y
 	case AI:
 		return y
 	case AS:
-		r := make(AV, z.Len())
-		for i, s := range z {
+		r := make(AV, yy.Len())
+		for i, s := range yy {
 			n, err := parseNumber(s)
 			if err != nil {
 				return errf("\"i\"$y : y contains non-numeric (%s) : %v", s, err)
@@ -579,9 +579,9 @@ func castn(y V) V {
 	case AF:
 		return y
 	case AV:
-		r := make(AV, z.Len())
+		r := make(AV, yy.Len())
 		for i := range r {
-			r[i] = castn(z[i])
+			r[i] = castn(yy[i])
 			if err, ok := r[i].(errV); ok {
 				return err
 			}
@@ -593,25 +593,25 @@ func castn(y V) V {
 }
 
 func casts(y V) V {
-	switch z := y.(type) {
+	switch yy := y.(type) {
 	case I:
-		return S(rune(z))
+		return S(rune(yy))
 	case F:
-		return casts(I(z))
+		return casts(I(yy))
 	case AB:
-		return casts(fromABtoAI(z))
+		return casts(fromABtoAI(yy))
 	case AI:
 		sb := &strings.Builder{}
-		for _, i := range z {
+		for _, i := range yy {
 			sb.WriteRune(rune(i))
 		}
 		return S(sb.String())
 	case AF:
-		return casts(toAI(z))
+		return casts(toAI(yy))
 	case AV:
-		r := make(AV, z.Len())
+		r := make(AV, yy.Len())
 		for i := range r {
-			r[i] = casts(z[i])
+			r[i] = casts(yy[i])
 			if err, ok := r[i].(errV); ok {
 				return err
 			}
@@ -628,12 +628,12 @@ func eval(ctx *Context, x V) V {
 	nctx := ctx.derive()
 	switch x := x.(type) {
 	case S:
-		v, err := nctx.Eval(string(x))
+		r, err := nctx.Eval(string(x))
 		if err != nil {
 			return errf(".s : %v", err)
 		}
 		ctx.merge(nctx)
-		return v
+		return r
 	default:
 		return errType(".x", "x", x)
 	}

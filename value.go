@@ -76,8 +76,8 @@ func (f F) Sprint(ctx *Context) string { return fmt.Sprintf("%g", f) }
 func (i I) Sprint(ctx *Context) string { return fmt.Sprintf("%d", i) }
 func (s S) Sprint(ctx *Context) string { return strconv.Quote(string(s)) }
 
-func (e errV) Matches(v V) bool {
-	err, ok := v.(errV)
+func (e errV) Matches(y V) bool {
+	err, ok := y.(errV)
 	return ok && e == err
 }
 
@@ -304,12 +304,12 @@ func (x AF) slice(i, j int) array { return x[i:j] }
 func (x AS) slice(i, j int) array { return x[i:j] }
 
 // sprintV returns a string for a V deep in an AV.
-func sprintV(ctx *Context, v V) string {
-	av, ok := v.(AV)
+func sprintV(ctx *Context, x V) string {
+	avx, ok := x.(AV)
 	if ok {
-		return av.sprint(ctx, true)
+		return avx.sprint(ctx, true)
 	}
-	return v.Sprint(ctx)
+	return x.Sprint(ctx)
 }
 
 func (x AV) Sprint(ctx *Context) string {
@@ -338,9 +338,9 @@ func (x AV) sprint(ctx *Context, deep bool) string {
 	case tB, tI, tF, tS:
 		sep = " "
 	}
-	for i, v := range x {
-		if v != nil {
-			fmt.Fprintf(sb, "%s", sprintV(ctx, v))
+	for i, xi := range x {
+		if xi != nil {
+			fmt.Fprintf(sb, "%s", sprintV(ctx, xi))
 		}
 		if i < len(x)-1 {
 			sb.WriteString(sep)
@@ -360,8 +360,8 @@ func (x AB) Sprint(ctx *Context) string {
 		fmt.Fprintf(sb, "%d", B2I(x[0]))
 		return sb.String()
 	}
-	for i, v := range x {
-		fmt.Fprintf(sb, "%d", B2I(v))
+	for i, xi := range x {
+		fmt.Fprintf(sb, "%d", B2I(xi))
 		if i < len(x)-1 {
 			sb.WriteRune(' ')
 		}
@@ -379,8 +379,8 @@ func (x AI) Sprint(ctx *Context) string {
 		fmt.Fprintf(sb, "%d", x[0])
 		return sb.String()
 	}
-	for i, v := range x {
-		fmt.Fprintf(sb, "%d", v)
+	for i, xi := range x {
+		fmt.Fprintf(sb, "%d", xi)
 		if i < len(x)-1 {
 			sb.WriteRune(' ')
 		}
@@ -398,8 +398,8 @@ func (x AF) Sprint(ctx *Context) string {
 		fmt.Fprintf(sb, "%g", x[0])
 		return sb.String()
 	}
-	for i, v := range x {
-		fmt.Fprintf(sb, "%g", v)
+	for i, xi := range x {
+		fmt.Fprintf(sb, "%g", xi)
 		if i < len(x)-1 {
 			sb.WriteRune(' ')
 		}
@@ -417,8 +417,8 @@ func (x AS) Sprint(ctx *Context) string {
 		fmt.Fprintf(sb, "%q", x[0])
 		return sb.String()
 	}
-	for i, v := range x {
-		fmt.Fprintf(sb, "%q", v)
+	for i, xi := range x {
+		fmt.Fprintf(sb, "%q", xi)
 		if i < len(x)-1 {
 			sb.WriteRune(' ')
 		}

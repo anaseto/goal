@@ -3,22 +3,22 @@ package goal
 import "strings"
 
 func fold2(ctx *Context, args []V) V {
-	v := args[1]
-	switch v := v.(type) {
+	fv := args[1]
+	switch fv := fv.(type) {
 	case Variadic:
-		switch v {
+		switch fv {
 		case vAdd:
 			return fold2vAdd(args[0])
 		}
 	}
-	f, ok := v.(Function)
+	f, ok := fv.(Function)
 	if !ok {
-		switch v := v.(type) {
+		switch fv := fv.(type) {
 		case S:
-			return fold2Join(v, args[0])
+			return fold2Join(fv, args[0])
 		}
 		// TODO: decode
-		return errf("F/x : F not a function (%s)", v.Type())
+		return errf("F/x : F not a function (%s)", fv.Type())
 	}
 	if f.Rank(ctx) != 2 {
 		// TODO: converge
@@ -37,7 +37,7 @@ func fold2(ctx *Context, args []V) V {
 		for i := 1; i < x.Len(); i++ {
 			ctx.push(x.at(i))
 			ctx.push(r)
-			r = ctx.applyN(v, 2)
+			r = ctx.applyN(fv, 2)
 		}
 		return canonical(r)
 	default:
@@ -57,14 +57,14 @@ func fold2vAdd(x V) V {
 		return n
 	case AI:
 		n := 0
-		for _, v := range x {
-			n += v
+		for _, xi := range x {
+			n += xi
 		}
 		return I(n)
 	case AF:
 		n := 0.0
-		for _, v := range x {
-			n += v
+		for _, xi := range x {
+			n += xi
 		}
 		return F(n)
 	case AS:
@@ -86,8 +86,8 @@ func fold2vAdd(x V) V {
 			return I(0)
 		}
 		r := x[0]
-		for _, v := range x[1:] {
-			r = add(r, v)
+		for _, xi := range x[1:] {
+			r = add(r, xi)
 		}
 		return canonical(r)
 	default:
@@ -108,11 +108,11 @@ func fold2Join(sep S, x V) V {
 }
 
 func fold3(ctx *Context, args []V) V {
-	v, ok := args[1].(Function)
+	f, ok := args[1].(Function)
 	if !ok {
-		return errf("x F/y : F not a function (%s)", v.Type())
+		return errf("x F/y : F not a function (%s)", f.Type())
 	}
-	if v.Rank(ctx) != 2 {
+	if f.Rank(ctx) != 2 {
 		return fold3While(ctx, args)
 	}
 	y := args[0]
@@ -125,7 +125,7 @@ func fold3(ctx *Context, args []V) V {
 		for i := 0; i < y.Len(); i++ {
 			ctx.push(y.at(i))
 			ctx.push(r)
-			r = ctx.applyN(v, 2)
+			r = ctx.applyN(f, 2)
 			if err, ok := r.(errV); ok {
 				return err
 			}
@@ -134,20 +134,20 @@ func fold3(ctx *Context, args []V) V {
 	default:
 		ctx.push(y)
 		ctx.push(args[2])
-		return ctx.applyN(v, 2)
+		return ctx.applyN(f, 2)
 	}
 }
 
 func fold3While(ctx *Context, args []V) V {
-	v := args[1]
+	f := args[1]
 	switch x := args[2].(type) {
 	case F:
 		if !isI(x) {
 			return errf("n f/y : non-integer n (%g)", x)
 		}
-		return fold3doTimes(ctx, int(x), v, args[0])
+		return fold3doTimes(ctx, int(x), f, args[0])
 	case I:
-		return fold3doTimes(ctx, int(x), v, args[0])
+		return fold3doTimes(ctx, int(x), f, args[0])
 	case Function:
 		y := args[0]
 		for {
@@ -160,7 +160,7 @@ func fold3While(ctx *Context, args []V) V {
 				return y
 			}
 			ctx.push(y)
-			y = ctx.applyN(v, 1)
+			y = ctx.applyN(f, 1)
 			if err, ok := y.(errV); ok {
 				return err
 			}
@@ -170,10 +170,10 @@ func fold3While(ctx *Context, args []V) V {
 	}
 }
 
-func fold3doTimes(ctx *Context, n int, v, y V) V {
+func fold3doTimes(ctx *Context, n int, f, y V) V {
 	for i := 0; i < n; i++ {
 		ctx.push(y)
-		y = ctx.applyN(v, 1)
+		y = ctx.applyN(f, 1)
 		if err, ok := y.(errV); ok {
 			return err
 		}
@@ -181,15 +181,15 @@ func fold3doTimes(ctx *Context, n int, v, y V) V {
 	return y
 }
 
-func scan2(ctx *Context, v, x V) V {
-	f, ok := v.(Function)
+func scan2(ctx *Context, fv, x V) V {
+	f, ok := fv.(Function)
 	if !ok {
-		switch v := v.(type) {
+		switch fv := fv.(type) {
 		case S:
-			return scan2Split(v, x)
+			return scan2Split(fv, x)
 		}
 		// TODO: encode
-		return errf("f\\x : f not a function (%s)", v.Type())
+		return errf("f\\x : f not a function (%s)", fv.Type())
 	}
 	if f.Rank(ctx) != 2 {
 		// TODO: converge
@@ -198,7 +198,7 @@ func scan2(ctx *Context, v, x V) V {
 	switch x := x.(type) {
 	case array:
 		if x.Len() == 0 {
-			f, ok := v.(zeroFun)
+			f, ok := fv.(zeroFun)
 			if ok {
 				return f.zero()
 			}
@@ -208,7 +208,7 @@ func scan2(ctx *Context, v, x V) V {
 		for i := 1; i < x.Len(); i++ {
 			ctx.push(x.at(i))
 			ctx.push(r[len(r)-1])
-			next := ctx.applyN(v, 2)
+			next := ctx.applyN(fv, 2)
 			if err, ok := next.(errV); ok {
 				return err
 			}
@@ -245,7 +245,6 @@ func scan3(ctx *Context, args []V) V {
 	}
 	if f.Rank(ctx) != 2 {
 		return scan3While(ctx, args)
-		//return errf("rank %d verb (expected 2)", v.Rank(ctx))
 	}
 	y := args[0]
 	switch y := y.(type) {

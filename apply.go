@@ -129,11 +129,11 @@ func (ctx *Context) applyArray(x array, y V) V {
 		}
 		return canonical(r)
 	case array:
-		indices := toIndices(y)
-		if err, ok := indices.(errV); ok {
+		iy := toIndices(y)
+		if err, ok := iy.(errV); ok {
 			return errV("x[y] :") + err
 		}
-		r := x.atIndices(indices.(AI))
+		r := x.atIndices(iy.(AI))
 		return r
 	default:
 		return errf("a[x] : x non-array non-integer")

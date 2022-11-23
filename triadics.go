@@ -130,6 +130,6 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 		}
 		return x
 	default:
-		return errType("@[v;x;f]", "y", y)
+		return errType("@[x;y;f]", "y", y)
 	}
 }

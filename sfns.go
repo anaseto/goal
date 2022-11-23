@@ -1427,8 +1427,8 @@ func windows(i int, y V) V {
 
 func sumAB(x AB) int {
 	n := 0
-	for _, v := range x {
-		if v {
+	for _, xi := range x {
+		if xi {
 			n++
 		}
 	}
@@ -1455,8 +1455,8 @@ func group(x V) V {
 		aif := ai[:len(ai)-n]
 		ait := ai[len(ai)-n:]
 		iTrue, iFalse := 0, 0
-		for i, v := range x {
-			if v {
+		for i, xi := range x {
+			if xi {
 				ait[iTrue] = i
 				iTrue++
 			} else {
@@ -1562,12 +1562,12 @@ func groupBy(x, y V) V {
 	if _, ok := x.(errV); ok {
 		return errs("f=y : f[y] not an integer array")
 	}
-	ax := x.(AV) // group should always return AV or errV
+	avx := x.(AV) // group should always return AV or errV
 	switch y := y.(type) {
 	case array:
-		r := make(AV, ax.Len())
-		for i, v := range ax {
-			r[i] = y.atIndices(v.(AI))
+		r := make(AV, avx.Len())
+		for i, xi := range avx {
+			r[i] = y.atIndices(xi.(AI))
 		}
 		return r
 	default:

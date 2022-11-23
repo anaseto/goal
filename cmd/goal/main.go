@@ -94,14 +94,14 @@ func runStdin(ctx *goal.Context) {
 		if err != nil && s == "" {
 			return
 		}
-		v, err := ctx.Eval(s)
+		r, err := ctx.Eval(s)
 		if err != nil {
 			fmt.Println("'ERROR " + strings.TrimSuffix(err.Error(), "\n"))
 			continue
 		}
 		assigned := ctx.AssignedLast()
 		if !assigned {
-			echo(ctx, v)
+			echo(ctx, r)
 		}
 	}
 }
@@ -146,9 +146,9 @@ func runCommand(ctx *goal.Context, cmd string) {
 	}
 }
 
-func echo(ctx *goal.Context, v goal.V) {
-	if v != nil {
-		fmt.Printf("%s\n", v.Sprint(ctx))
+func echo(ctx *goal.Context, x goal.V) {
+	if x != nil {
+		fmt.Printf("%s\n", x.Sprint(ctx))
 	}
 }
 
@@ -165,13 +165,13 @@ func usageError(usage bool, msgs ...interface{}) {
 func registerVariadics(ctx *goal.Context) {
 	say := ctx.RegisterVariadic("say", goal.VariadicFun{
 		Func: func(ctx *goal.Context, args []goal.V) goal.V {
-			for _, v := range args {
-				switch v := v.(type) {
+			for _, arg := range args {
+				switch arg := arg.(type) {
 				case goal.S:
-					fmt.Println(string(v))
+					fmt.Println(string(arg))
 					return nil
 				default:
-					fmt.Printf("%v\n", v)
+					fmt.Printf("%v\n", arg)
 					return nil
 				}
 			}
@@ -182,9 +182,9 @@ func registerVariadics(ctx *goal.Context) {
 		Func: func(ctx *goal.Context, args []goal.V) goal.V {
 			switch len(args) {
 			case 1:
-				switch v := args[0].(type) {
+				switch x := args[0].(type) {
 				case goal.S:
-					bytes, err := os.ReadFile(string(v))
+					bytes, err := os.ReadFile(string(x))
 					if err != nil {
 						return goal.Errorf("slurp: %v", err)
 					}

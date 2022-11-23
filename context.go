@@ -58,9 +58,9 @@ func (ctx *Context) RegisterVariadic(name string, vf VariadicFun) Variadic {
 }
 
 // AssignGlobal assigns a value to a global variable name.
-func (ctx *Context) AssignGlobal(name string, v V) {
+func (ctx *Context) AssignGlobal(name string, x V) {
 	id := ctx.global(name)
-	ctx.globals[id] = v
+	ctx.globals[id] = x
 }
 
 // GetGlobal returns the value attached to a global variable with the given
@@ -199,8 +199,8 @@ func (ctx *Context) Show() string {
 	return ctx.programString()
 }
 
-func (ctx *Context) storeConst(v V) int {
-	ctx.constants = append(ctx.constants, v)
+func (ctx *Context) storeConst(x V) int {
+	ctx.constants = append(ctx.constants, x)
 	return len(ctx.constants) - 1
 }
 

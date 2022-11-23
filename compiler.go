@@ -77,8 +77,8 @@ func (ctx *Context) programString() string {
 		fmt.Fprintf(sb, "\t%s\t%d\n", name, id)
 	}
 	fmt.Fprintln(sb, "Constants:")
-	for id, v := range ctx.constants {
-		fmt.Fprintf(sb, "\t%d\t%s\n", id, v.Sprint(ctx))
+	for id, ci := range ctx.constants {
+		fmt.Fprintf(sb, "\t%d\t%s\n", id, ci.Sprint(ctx))
 	}
 	for id, lc := range ctx.lambdas {
 		fmt.Fprintf(sb, "---- Lambda %d (Rank: %d) -----\n", id, lc.Rank)
@@ -346,14 +346,14 @@ func (c *compiler) doToken(tok *astToken) error {
 	c.pos = tok.Pos
 	switch tok.Type {
 	case astNUMBER:
-		v, err := parseNumber(tok.Text)
+		x, err := parseNumber(tok.Text)
 		if err != nil {
 			return err
 		}
 		if c.argc > 0 {
 			return c.errorf("number atoms cannot be applied")
 		}
-		id := c.ctx.storeConst(v)
+		id := c.ctx.storeConst(x)
 		c.push2(opConst, opcode(id))
 		return nil
 	case astSTRING:
@@ -640,12 +640,12 @@ func (c *compiler) doStrand(st *astStrand) error {
 	for _, tok := range st.Lits {
 		switch tok.Type {
 		case astNUMBER:
-			v, err := parseNumber(tok.Text)
+			x, err := parseNumber(tok.Text)
 			if err != nil {
 				c.pos = tok.Pos
 				return c.errorf("number syntax: %v", err)
 			}
-			a = append(a, v)
+			a = append(a, x)
 		case astSTRING:
 			s, err := strconv.Unquote(tok.Text)
 			if err != nil {
@@ -874,12 +874,12 @@ func (c *compiler) doCond(b *astBlock) error {
 		}
 	}
 	c.body()[jmpCond] = opcode(jumpsElse[0] - jmpCond)
-	for i, v := range jumpsCond {
-		c.body()[v] = opcode(jumpsElse[i+1] - v)
+	for i, offset := range jumpsCond {
+		c.body()[offset] = opcode(jumpsElse[i+1] - offset)
 	}
 	end := len(c.body())
-	for _, v := range jumpsEnd {
-		c.body()[v] = opcode(end - v)
+	for _, offset := range jumpsEnd {
+		c.body()[offset] = opcode(end - offset)
 	}
 	c.argc = argc + 1
 	c.apply()
