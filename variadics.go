@@ -162,11 +162,11 @@ func VMax(ctx *Context, args []V) V {
 		v, ok := args[1].(Function)
 		if ok {
 			ctx.push(args[0])
-			res := ctx.applyN(v, 1)
-			if err, ok := res.(errV); ok {
+			r := ctx.applyN(v, 1)
+			if err, ok := r.(errV); ok {
 				return err
 			}
-			return rotate(res, args[0])
+			return rotate(r, args[0])
 		}
 		return maximum(args[1], args[0])
 	default:
@@ -207,11 +207,11 @@ func VEqual(ctx *Context, args []V) V {
 		v, ok := args[1].(Function)
 		if ok {
 			ctx.push(args[0])
-			res := ctx.applyN(v, 1)
-			if err, ok := res.(errV); ok {
+			r := ctx.applyN(v, 1)
+			if err, ok := r.(errV); ok {
 				return err
 			}
-			return groupBy(res, args[0])
+			return groupBy(r, args[0])
 		}
 		return equal(args[1], args[0])
 	default:
@@ -264,11 +264,11 @@ func VTake(ctx *Context, args []V) V {
 		v, ok := args[1].(Function)
 		if ok {
 			ctx.push(args[0])
-			res := ctx.applyN(v, 1)
-			if err, ok := res.(errV); ok {
+			r := ctx.applyN(v, 1)
+			if err, ok := r.(errV); ok {
 				return err
 			}
-			return replicate(res, args[0])
+			return replicate(r, args[0])
 		}
 		return take(args[1], args[0])
 	default:
@@ -285,11 +285,11 @@ func VDrop(ctx *Context, args []V) V {
 		v, ok := args[1].(Function)
 		if ok {
 			ctx.push(args[0])
-			res := ctx.applyN(v, 1)
-			if err, ok := res.(errV); ok {
+			r := ctx.applyN(v, 1)
+			if err, ok := r.(errV); ok {
 				return err
 			}
-			return weedOut(res, args[0])
+			return weedOut(r, args[0])
 		}
 		return drop(args[1], args[0])
 	default:
@@ -419,19 +419,19 @@ func VBytes(ctx *Context, args []V) V {
 func VList(ctx *Context, args []V) V {
 	t, ok := isCanonical(AV(args))
 	if ok {
-		res := cloneArgs(args)
-		reverseArgs(res)
-		return AV(res)
+		r := cloneArgs(args)
+		reverseArgs(r)
+		return AV(r)
 	}
 	switch t {
 	case tB, tI, tF, tS:
-		res := canonical(AV(args))
-		reverseMut(res)
-		return res
+		r := canonical(AV(args))
+		reverseMut(r)
+		return r
 	default:
-		res := cloneArgs(args)
-		reverseArgs(res)
-		return canonical(AV(res))
+		r := cloneArgs(args)
+		reverseArgs(r)
+		return canonical(AV(r))
 	}
 }
 

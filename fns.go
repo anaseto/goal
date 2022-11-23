@@ -519,32 +519,32 @@ func casti(y V) V {
 		return I(z)
 	case S:
 		runes := []rune(z)
-		res := make(AI, len(runes))
-		for i, r := range runes {
-			res[i] = int(r)
+		r := make(AI, len(runes))
+		for i, rc := range runes {
+			r[i] = int(rc)
 		}
-		return res
+		return r
 	case AB:
 		return y
 	case AI:
 		return y
 	case AS:
-		res := make(AV, z.Len())
+		r := make(AV, z.Len())
 		for i, s := range z {
-			res[i] = casti(S(s))
+			r[i] = casti(S(s))
 		}
-		return res
+		return r
 	case AF:
 		return toAI(z)
 	case AV:
-		res := make(AV, z.Len())
-		for i := range res {
-			res[i] = casti(z[i])
-			if err, ok := res[i].(errV); ok {
+		r := make(AV, z.Len())
+		for i := range r {
+			r[i] = casti(z[i])
+			if err, ok := r[i].(errV); ok {
 				return err
 			}
 		}
-		return res
+		return r
 	default:
 		return errs("\"i\"$y : non-numeric y")
 	}
@@ -567,26 +567,26 @@ func castn(y V) V {
 	case AI:
 		return y
 	case AS:
-		res := make(AV, z.Len())
+		r := make(AV, z.Len())
 		for i, s := range z {
 			n, err := parseNumber(s)
 			if err != nil {
 				return errf("\"i\"$y : y contains non-numeric (%s) : %v", s, err)
 			}
-			res[i] = n
+			r[i] = n
 		}
-		return canonical(res)
+		return canonical(r)
 	case AF:
 		return y
 	case AV:
-		res := make(AV, z.Len())
-		for i := range res {
-			res[i] = castn(z[i])
-			if err, ok := res[i].(errV); ok {
+		r := make(AV, z.Len())
+		for i := range r {
+			r[i] = castn(z[i])
+			if err, ok := r[i].(errV); ok {
 				return err
 			}
 		}
-		return res
+		return r
 	default:
 		return errs("\"i\"$y : non-numeric y")
 	}
@@ -609,14 +609,14 @@ func casts(y V) V {
 	case AF:
 		return casts(toAI(z))
 	case AV:
-		res := make(AV, z.Len())
-		for i := range res {
-			res[i] = casts(z[i])
-			if err, ok := res[i].(errV); ok {
+		r := make(AV, z.Len())
+		for i := range r {
+			r[i] = casts(z[i])
+			if err, ok := r[i].(errV); ok {
 				return err
 			}
 		}
-		return res
+		return r
 	default:
 		return errs("\"i\"$y : non-numeric y")
 	}
@@ -645,10 +645,10 @@ func try(ctx *Context, f1, x, f2 V) V {
 	for i := av.Len() - 1; i >= 0; i-- {
 		ctx.push(av.at(i))
 	}
-	res := ctx.applyN(f1, av.Len())
-	if err, ok := res.(errV); ok {
+	r := ctx.applyN(f1, av.Len())
+	if err, ok := r.(errV); ok {
 		ctx.push(S(err))
 		return ctx.applyN(f2, 1)
 	}
-	return res
+	return r
 }

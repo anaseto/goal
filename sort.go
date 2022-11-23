@@ -550,30 +550,30 @@ func searchAI(x AI, y V) V {
 	case F:
 		return I(searchAIF(x, y))
 	case AB:
-		res := make(AI, y.Len())
+		r := make(AI, y.Len())
 		for i, yi := range y {
-			res[i] = searchAII(x, B2I(yi))
+			r[i] = searchAII(x, B2I(yi))
 		}
-		return res
+		return r
 	case AI:
-		res := make(AI, y.Len())
+		r := make(AI, y.Len())
 		for i, yi := range y {
-			res[i] = searchAII(x, I(yi))
+			r[i] = searchAII(x, I(yi))
 		}
-		return res
+		return r
 	case AF:
-		res := make(AI, y.Len())
+		r := make(AI, y.Len())
 		for i, yi := range y {
-			res[i] = searchAIF(x, F(yi))
+			r[i] = searchAIF(x, F(yi))
 		}
-		return res
+		return r
 	case array:
-		res := make(AI, y.Len())
+		r := make(AI, y.Len())
 		for i := 0; i < y.Len(); i++ {
-			res[i] = sort.Search(len(x),
+			r[i] = sort.Search(len(x),
 				func(i int) bool { return less(y.at(i), I(x[i])) })
 		}
-		return res
+		return r
 	default:
 		return I(x.Len())
 	}
@@ -586,30 +586,30 @@ func searchAF(x AF, y V) V {
 	case F:
 		return I(searchAFF(x, y))
 	case AB:
-		res := make(AI, y.Len())
+		r := make(AI, y.Len())
 		for i, yi := range y {
-			res[i] = searchAFI(x, B2I(yi))
+			r[i] = searchAFI(x, B2I(yi))
 		}
-		return res
+		return r
 	case AI:
-		res := make(AI, y.Len())
+		r := make(AI, y.Len())
 		for i, yi := range y {
-			res[i] = searchAFI(x, I(yi))
+			r[i] = searchAFI(x, I(yi))
 		}
-		return res
+		return r
 	case AF:
-		res := make(AI, y.Len())
+		r := make(AI, y.Len())
 		for i, yi := range y {
-			res[i] = searchAFF(x, F(yi))
+			r[i] = searchAFF(x, F(yi))
 		}
-		return res
+		return r
 	case array:
-		res := make(AI, y.Len())
+		r := make(AI, y.Len())
 		for i := 0; i < y.Len(); i++ {
-			res[i] = sort.Search(len(x),
+			r[i] = sort.Search(len(x),
 				func(i int) bool { return less(y.at(i), F(x[i])) })
 		}
-		return res
+		return r
 	default:
 		return I(x.Len())
 	}
@@ -620,18 +620,18 @@ func searchAS(x AS, y V) V {
 	case S:
 		return I(searchASS(x, y))
 	case AS:
-		res := make(AI, y.Len())
+		r := make(AI, y.Len())
 		for i, yi := range y {
-			res[i] = searchASS(x, S(yi))
+			r[i] = searchASS(x, S(yi))
 		}
-		return res
+		return r
 	case array:
-		res := make(AI, y.Len())
+		r := make(AI, y.Len())
 		for i := 0; i < y.Len(); i++ {
-			res[i] = sort.Search(len(x),
+			r[i] = sort.Search(len(x),
 				func(i int) bool { return less(y.at(i), S(x[i])) })
 		}
-		return res
+		return r
 	default:
 		return I(x.Len())
 	}
@@ -640,12 +640,12 @@ func searchAS(x AS, y V) V {
 func searchAV(x AV, y V) V {
 	switch y := y.(type) {
 	case array:
-		res := make(AI, y.Len())
+		r := make(AI, y.Len())
 		for i := 0; i < y.Len(); i++ {
-			res[i] = sort.Search(len(x),
+			r[i] = sort.Search(len(x),
 				func(i int) bool { return less(y.at(i), x[i]) })
 		}
-		return res
+		return r
 	default:
 		return I(sort.Search(len(x),
 			func(i int) bool { return less(y, x[i]) }))

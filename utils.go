@@ -203,14 +203,14 @@ func toIndicesRec(xv V) V {
 	case AF:
 		return toAI(x)
 	case AV:
-		res := make(AV, x.Len())
+		r := make(AV, x.Len())
 		for i, z := range x {
-			res[i] = toIndicesRec(z)
-			if err, ok := res[i].(errV); ok {
+			r[i] = toIndicesRec(z)
+			if err, ok := r[i].(errV); ok {
 				return err
 			}
 		}
-		return canonical(res)
+		return canonical(r)
 	default:
 		return errs("not an indices array")
 	}

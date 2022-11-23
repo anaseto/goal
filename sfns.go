@@ -204,55 +204,55 @@ func cutAI(x AI, y V) V {
 	}
 	switch y := y.(type) {
 	case AB:
-		res := make(AV, len(x))
+		r := make(AV, len(x))
 		for i, from := range x {
 			to := len(y)
 			if i+1 < len(x) {
 				to = x[i+1]
 			}
-			res[i] = y[from:to]
+			r[i] = y[from:to]
 		}
-		return canonical(res)
+		return canonical(r)
 	case AI:
-		res := make(AV, len(x))
+		r := make(AV, len(x))
 		for i, from := range x {
 			to := len(y)
 			if i+1 < len(x) {
 				to = x[i+1]
 			}
-			res[i] = y[from:to]
+			r[i] = y[from:to]
 		}
-		return canonical(res)
+		return canonical(r)
 	case AF:
-		res := make(AV, len(x))
+		r := make(AV, len(x))
 		for i, from := range x {
 			to := len(y)
 			if i+1 < len(x) {
 				to = x[i+1]
 			}
-			res[i] = y[from:to]
+			r[i] = y[from:to]
 		}
-		return canonical(res)
+		return canonical(r)
 	case AS:
-		res := make(AV, len(x))
+		r := make(AV, len(x))
 		for i, from := range x {
 			to := len(y)
 			if i+1 < len(x) {
 				to = x[i+1]
 			}
-			res[i] = y[from:to]
+			r[i] = y[from:to]
 		}
-		return res
+		return r
 	case AV:
-		res := make(AV, len(x))
+		r := make(AV, len(x))
 		for i, from := range x {
 			to := len(y)
 			if i+1 < len(x) {
 				to = x[i+1]
 			}
-			res[i] = y[from:to]
+			r[i] = y[from:to]
 		}
-		return canonical(res)
+		return canonical(r)
 	default:
 		return errs("x_y : y not an array")
 	}
@@ -263,20 +263,20 @@ func drops(s S, y V) V {
 	case S:
 		return S(strings.TrimPrefix(string(y), string(s)))
 	case AS:
-		res := make(AS, y.Len())
+		r := make(AS, y.Len())
 		for i, z := range y {
-			res[i] = strings.TrimPrefix(string(z), string(s))
+			r[i] = strings.TrimPrefix(string(z), string(s))
 		}
-		return res
+		return r
 	case AV:
-		res := make(AV, y.Len())
+		r := make(AV, y.Len())
 		for i, z := range y {
-			res[i] = drops(s, z)
-			if err, ok := res[i].(errV); ok {
+			r[i] = drops(s, z)
+			if err, ok := r[i].(errV); ok {
 				return err
 			}
 		}
-		return res
+		return r
 	default:
 		return errType("s_y", "y", y)
 	}
@@ -288,20 +288,20 @@ func trim(s S, y V) V {
 	case S:
 		return S(strings.Trim(string(y), string(s)))
 	case AS:
-		res := make(AS, y.Len())
+		r := make(AS, y.Len())
 		for i, z := range y {
-			res[i] = strings.Trim(string(z), string(s))
+			r[i] = strings.Trim(string(z), string(s))
 		}
-		return res
+		return r
 	case AV:
-		res := make(AV, y.Len())
+		r := make(AV, y.Len())
 		for i, z := range y {
-			res[i] = trim(s, z)
-			if err, ok := res[i].(errV); ok {
+			r[i] = trim(s, z)
+			if err, ok := r[i].(errV); ok {
 				return err
 			}
 		}
-		return res
+		return r
 	default:
 		return errType("s^y", "y", y)
 	}

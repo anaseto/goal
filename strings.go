@@ -18,7 +18,7 @@ func applyS(s S, x V) V {
 	case AB:
 		return applyS(s, fromABtoAI(x))
 	case AI:
-		res := make(AS, x.Len())
+		r := make(AS, x.Len())
 		for i, n := range x {
 			if n < 0 {
 				n += len(s)
@@ -26,9 +26,9 @@ func applyS(s S, x V) V {
 			if n < 0 || n > len(s) {
 				return errf("s[i] : i out of bounds index (%d)", n)
 			}
-			res[i] = string(s[n:])
+			r[i] = string(s[n:])
 		}
-		return res
+		return r
 	case AF:
 		z := toAI(x)
 		if err, ok := z.(errV); ok {
@@ -36,14 +36,14 @@ func applyS(s S, x V) V {
 		}
 		return applyS(s, z)
 	case AV:
-		res := make(AV, x.Len())
+		r := make(AV, x.Len())
 		for i, v := range x {
-			res[i] = applyS(s, v)
-			if err, ok := res[i].(errV); ok {
+			r[i] = applyS(s, v)
+			if err, ok := r[i].(errV); ok {
 				return err
 			}
 		}
-		return canonical(res)
+		return canonical(r)
 	default:
 		return errf("s[x] : x non-integer (%s)", x.Type())
 	}
@@ -99,7 +99,7 @@ func applyS2(s S, x V, y V) V {
 	case AB:
 		return applyS2(s, fromABtoAI(x), y)
 	case AI:
-		res := make(AS, x.Len())
+		r := make(AS, x.Len())
 		if z, ok := y.(AI); ok {
 			if z.Len() != x.Len() {
 				return errf("s[x;y] : length mismatch: %d (#x) %d (#y)",
@@ -116,9 +116,9 @@ func applyS2(s S, x V, y V) V {
 				if n+l > len(s) {
 					l = len(s) - n
 				}
-				res[i] = string(s[n : n+l])
+				r[i] = string(s[n : n+l])
 			}
-			return res
+			return r
 		}
 		for i, n := range x {
 			if n < 0 {
@@ -131,9 +131,9 @@ func applyS2(s S, x V, y V) V {
 			if n+l > len(s) {
 				l = len(s) - n
 			}
-			res[i] = string(s[n : n+l])
+			r[i] = string(s[n : n+l])
 		}
-		return res
+		return r
 	case AF:
 		z := toAI(x)
 		if err, ok := z.(errV); ok {
@@ -141,14 +141,14 @@ func applyS2(s S, x V, y V) V {
 		}
 		return applyS2(s, z, y)
 	case AV:
-		res := make(AV, x.Len())
+		r := make(AV, x.Len())
 		for i, v := range x {
-			res[i] = applyS2(s, v, y)
-			if err, ok := res[i].(errV); ok {
+			r[i] = applyS2(s, v, y)
+			if err, ok := r[i].(errV); ok {
 				return err
 			}
 		}
-		return canonical(res)
+		return canonical(r)
 	default:
 		return errf("s[x;y] : x non-integer (%s)", x.Type())
 	}
@@ -159,20 +159,20 @@ func bytes(x V) V {
 	case S:
 		return I(len(x))
 	case AS:
-		res := make(AI, x.Len())
+		r := make(AI, x.Len())
 		for i, s := range x {
-			res[i] = len(s)
+			r[i] = len(s)
 		}
-		return res
+		return r
 	case AV:
-		res := make(AV, x.Len())
+		r := make(AV, x.Len())
 		for i, z := range x {
-			res[i] = bytes(z)
-			if err, ok := res[i].(errV); ok {
+			r[i] = bytes(z)
+			if err, ok := r[i].(errV); ok {
 				return err
 			}
 		}
-		return canonical(res)
+		return canonical(r)
 	default:
 		return errType("bytes x", "x", x)
 	}

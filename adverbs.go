@@ -33,13 +33,13 @@ func fold2(ctx *Context, args []V) V {
 			}
 			return I(0)
 		}
-		res := x.at(0)
+		r := x.at(0)
 		for i := 1; i < x.Len(); i++ {
 			ctx.push(x.at(i))
-			ctx.push(res)
-			res = ctx.applyN(v, 2)
+			ctx.push(r)
+			r = ctx.applyN(v, 2)
 		}
-		return canonical(res)
+		return canonical(r)
 	default:
 		return x
 	}
@@ -85,11 +85,11 @@ func fold2vAdd(x V) V {
 		if len(x) == 0 {
 			return I(0)
 		}
-		res := x[0]
+		r := x[0]
 		for _, v := range x[1:] {
-			res = add(res, v)
+			r = add(r, v)
 		}
-		return canonical(res)
+		return canonical(r)
 	default:
 		return x
 	}
@@ -118,19 +118,19 @@ func fold3(ctx *Context, args []V) V {
 	y := args[0]
 	switch y := y.(type) {
 	case array:
-		res := args[2]
+		r := args[2]
 		if y.Len() == 0 {
-			return res
+			return r
 		}
 		for i := 0; i < y.Len(); i++ {
 			ctx.push(y.at(i))
-			ctx.push(res)
-			res = ctx.applyN(v, 2)
-			if err, ok := res.(errV); ok {
+			ctx.push(r)
+			r = ctx.applyN(v, 2)
+			if err, ok := r.(errV); ok {
 				return err
 			}
 		}
-		return canonical(res)
+		return canonical(r)
 	default:
 		ctx.push(y)
 		ctx.push(args[2])
@@ -204,17 +204,17 @@ func scan2(ctx *Context, v, x V) V {
 			}
 			return I(0)
 		}
-		res := AV{x.at(0)}
+		r := AV{x.at(0)}
 		for i := 1; i < x.Len(); i++ {
 			ctx.push(x.at(i))
-			ctx.push(res[len(res)-1])
+			ctx.push(r[len(r)-1])
 			next := ctx.applyN(v, 2)
 			if err, ok := next.(errV); ok {
 				return err
 			}
-			res = append(res, next)
+			r = append(r, next)
 		}
-		return canonical(res)
+		return canonical(r)
 	default:
 		return x
 	}
@@ -259,17 +259,17 @@ func scan3(ctx *Context, args []V) V {
 		if err, ok := first.(errV); ok {
 			return err
 		}
-		res := AV{first}
+		r := AV{first}
 		for i := 1; i < y.Len(); i++ {
 			ctx.push(y.at(i))
-			ctx.push(res[len(res)-1])
+			ctx.push(r[len(r)-1])
 			next := ctx.applyN(f, 2)
 			if err, ok := next.(errV); ok {
 				return err
 			}
-			res = append(res, next)
+			r = append(r, next)
 		}
-		return canonical(res)
+		return canonical(r)
 	default:
 		ctx.push(y)
 		ctx.push(args[2])
@@ -289,7 +289,7 @@ func scan3While(ctx *Context, args []V) V {
 		return scan3doTimes(ctx, int(x), f, args[0])
 	case Function:
 		y := args[0]
-		res := AV{y}
+		r := AV{y}
 		for {
 			ctx.push(y)
 			cond := ctx.applyN(x, 1)
@@ -297,14 +297,14 @@ func scan3While(ctx *Context, args []V) V {
 				return err
 			}
 			if !isTrue(cond) {
-				return canonical(res)
+				return canonical(r)
 			}
 			ctx.push(y)
 			y = ctx.applyN(f, 1)
 			if err, ok := y.(errV); ok {
 				return err
 			}
-			res = append(res, y)
+			r = append(r, y)
 		}
 	default:
 		return errType("x f\\y", "x", x)
@@ -312,16 +312,16 @@ func scan3While(ctx *Context, args []V) V {
 }
 
 func scan3doTimes(ctx *Context, n int, f, y V) V {
-	res := AV{y}
+	r := AV{y}
 	for i := 0; i < n; i++ {
 		ctx.push(y)
 		y = ctx.applyN(f, 1)
 		if err, ok := y.(errV); ok {
 			return err
 		}
-		res = append(res, y)
+		r = append(r, y)
 	}
-	return canonical(res)
+	return canonical(r)
 }
 
 func each2(ctx *Context, args []V) V {
@@ -333,16 +333,16 @@ func each2(ctx *Context, args []V) V {
 	x := toArray(args[0])
 	switch x := x.(type) {
 	case array:
-		res := make(AV, 0, x.Len())
+		r := make(AV, 0, x.Len())
 		for i := 0; i < x.Len(); i++ {
 			ctx.push(x.at(i))
 			next := ctx.applyN(f, 1)
 			if err, ok := next.(errV); ok {
 				return err
 			}
-			res = append(res, next)
+			r = append(r, next)
 		}
-		return canonical(res)
+		return canonical(r)
 	default:
 		// should not happen
 		return errf("f'x : x not an array (%s)", x.Type())
@@ -366,7 +366,7 @@ func each3(ctx *Context, args []V) V {
 	if xlen != y.Len() {
 		return errf("x f'y : length mismatch: %d (#x) vs %d (#y)", x.Len(), y.Len())
 	}
-	res := make(AV, 0, xlen)
+	r := make(AV, 0, xlen)
 	for i := 0; i < xlen; i++ {
 		ctx.push(y.at(i))
 		ctx.push(x.at(i))
@@ -374,7 +374,7 @@ func each3(ctx *Context, args []V) V {
 		if err, ok := next.(errV); ok {
 			return err
 		}
-		res = append(res, next)
+		r = append(r, next)
 	}
-	return canonical(res)
+	return canonical(r)
 }

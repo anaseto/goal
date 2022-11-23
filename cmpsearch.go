@@ -544,16 +544,16 @@ func memberOfAV(x V, y AV) V {
 func memberOfArray(x, y array) V {
 	// NOTE: quadratic algorithm, worst case complexity could be
 	// improved by sorting or string hashing.
-	res := make(AB, x.Len())
+	r := make(AB, x.Len())
 	for i := 0; i < x.Len(); i++ {
 		for j := 0; j < y.Len(); j++ {
 			if Match(x.at(i), y.at(j)) {
-				res[i] = true
+				r[i] = true
 				break
 			}
 		}
 	}
-	return res
+	return r
 }
 
 // OccurrenceCount returns ⊒x.
@@ -650,17 +650,17 @@ func without(x, y V) V {
 		return trim(z, y)
 	case array:
 		y = toArray(y)
-		res := memberOf(y, x)
-		switch bres := res.(type) {
+		r := memberOf(y, x)
+		switch bres := r.(type) {
 		case I:
-			res = I(1 - bres)
+			r = I(1 - bres)
 		case AB:
 			for i, b := range bres {
 				bres[i] = !b
 			}
 		}
-		res = replicate(res, y)
-		return res
+		r = replicate(r, y)
+		return r
 	default:
 		return errType("x^y", "x", x)
 	}
@@ -693,20 +693,20 @@ func findS(s S, y V) V {
 	case S:
 		return I(strings.Index(string(s), string(y)))
 	case AS:
-		res := make(AI, y.Len())
+		r := make(AI, y.Len())
 		for i, ss := range y {
-			res[i] = strings.Index(string(s), string(ss))
+			r[i] = strings.Index(string(s), string(ss))
 		}
-		return res
+		return r
 	case AV:
-		res := make(AV, y.Len())
+		r := make(AV, y.Len())
 		for i, yi := range y {
-			res[i] = findS(s, yi)
-			if err, ok := res[i].(errV); ok {
+			r[i] = findS(s, yi)
+			if err, ok := r[i].(errV); ok {
 				return err
 			}
 		}
-		return res
+		return r
 	default:
 		return errType("s?y", "y", y)
 	}
@@ -780,33 +780,33 @@ func findAB(x AB, y V) V {
 		return findAB(x, I(y))
 	case AB:
 		m := imapAB(x)
-		res := make(AI, y.Len())
+		r := make(AI, y.Len())
 		for i, yi := range y {
-			res[i] = m[B2I(yi)]
+			r[i] = m[B2I(yi)]
 		}
-		return res
+		return r
 	case AI:
 		m := imapAB(x)
-		res := make(AI, y.Len())
+		r := make(AI, y.Len())
 		for i, yi := range y {
 			if yi != 0 && yi != 1 {
-				res[i] = x.Len()
+				r[i] = x.Len()
 			} else {
-				res[i] = m[yi]
+				r[i] = m[yi]
 			}
 		}
-		return res
+		return r
 	case AF:
 		m := imapAB(x)
-		res := make(AI, y.Len())
+		r := make(AI, y.Len())
 		for i, yi := range y {
 			if yi != 0 && yi != 1 {
-				res[i] = x.Len()
+				r[i] = x.Len()
 			} else {
-				res[i] = m[int(yi)]
+				r[i] = m[int(yi)]
 			}
 		}
-		return res
+		return r
 	case array:
 		return findArray(x, y)
 	default:
@@ -832,40 +832,40 @@ func findAF(x AF, y V) V {
 		return I(x.Len())
 	case AB:
 		m := imapAF(x)
-		res := make(AI, y.Len())
+		r := make(AI, y.Len())
 		for i, yi := range y {
 			j, ok := m[float64(B2F(yi))]
 			if ok {
-				res[i] = j
+				r[i] = j
 			} else {
-				res[i] = x.Len()
+				r[i] = x.Len()
 			}
 		}
-		return res
+		return r
 	case AI:
 		m := imapAF(x)
-		res := make(AI, y.Len())
+		r := make(AI, y.Len())
 		for i, yi := range y {
 			j, ok := m[float64(yi)]
 			if ok {
-				res[i] = j
+				r[i] = j
 			} else {
-				res[i] = x.Len()
+				r[i] = x.Len()
 			}
 		}
-		return res
+		return r
 	case AF:
 		m := imapAF(x)
-		res := make(AI, y.Len())
+		r := make(AI, y.Len())
 		for i, yi := range y {
 			j, ok := m[yi]
 			if ok {
-				res[i] = j
+				r[i] = j
 			} else {
-				res[i] = x.Len()
+				r[i] = x.Len()
 			}
 		}
-		return res
+		return r
 	case array:
 		return findArray(x, y)
 	default:
@@ -891,44 +891,44 @@ func findAI(x AI, y V) V {
 		return I(x.Len())
 	case AB:
 		m := imapAI(x)
-		res := make(AI, y.Len())
+		r := make(AI, y.Len())
 		for i, yi := range y {
 			j, ok := m[int(B2I(yi))]
 			if ok {
-				res[i] = j
+				r[i] = j
 			} else {
-				res[i] = x.Len()
+				r[i] = x.Len()
 			}
 		}
-		return res
+		return r
 	case AI:
 		m := imapAI(x)
-		res := make(AI, y.Len())
+		r := make(AI, y.Len())
 		for i, yi := range y {
 			j, ok := m[yi]
 			if ok {
-				res[i] = j
+				r[i] = j
 			} else {
-				res[i] = x.Len()
+				r[i] = x.Len()
 			}
 		}
-		return res
+		return r
 	case AF:
 		m := imapAI(x)
-		res := make(AI, y.Len())
+		r := make(AI, y.Len())
 		for i, yi := range y {
 			if !isI(F(yi)) {
-				res[i] = x.Len()
+				r[i] = x.Len()
 				continue
 			}
 			j, ok := m[int(yi)]
 			if ok {
-				res[i] = j
+				r[i] = j
 			} else {
-				res[i] = x.Len()
+				r[i] = x.Len()
 			}
 		}
-		return res
+		return r
 	case array:
 		return findArray(x, y)
 	default:
@@ -947,16 +947,16 @@ func findAS(x AS, y V) V {
 		return I(x.Len())
 	case AS:
 		m := imapAS(x)
-		res := make(AI, y.Len())
+		r := make(AI, y.Len())
 		for i, yi := range y {
 			j, ok := m[yi]
 			if ok {
-				res[i] = j
+				r[i] = j
 			} else {
-				res[i] = x.Len()
+				r[i] = x.Len()
 			}
 		}
-		return res
+		return r
 	case array:
 		return findArray(x, y)
 	default:
@@ -967,19 +967,19 @@ func findAS(x AS, y V) V {
 func findArray(x, y array) V {
 	// NOTE: quadratic algorithm, worst case complexity could be
 	// improved by sorting or string hashing.
-	res := make(AI, y.Len())
-	for i := range res {
-		res[i] = x.Len()
+	r := make(AI, y.Len())
+	for i := range r {
+		r[i] = x.Len()
 	}
 	for i := 0; i < y.Len(); i++ {
 		for j := 0; j < x.Len(); j++ {
 			if Match(y.at(i), x.at(j)) {
-				res[i] = j
+				r[i] = j
 				break
 			}
 		}
 	}
-	return res
+	return r
 }
 
 func findAV(x AV, y V) V {
