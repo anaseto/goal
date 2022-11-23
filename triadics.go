@@ -2,134 +2,134 @@ package goal
 
 //import "fmt"
 
-func (ctx *Context) amend3(v, x, f V) V {
-	switch v := v.(type) {
+func (ctx *Context) amend3(x, y, f V) V {
+	switch x := x.(type) {
 	case array:
-		x = toIndices(x)
-		if err, ok := x.(errV); ok {
+		y = toIndices(y)
+		if err, ok := y.(errV); ok {
 			return err
 		}
-		return canonical(ctx.amend3array(cloneShallow(v).(array), x, f))
+		return canonical(ctx.amend3array(cloneShallow(x).(array), y, f))
 	default:
-		return errType("@[v;x;f]", "v", v)
+		return errType("@[v;x;f]", "v", x)
 	}
 }
 
-func (ctx *Context) amend3arrayI(v array, x I, f V) V {
-	if x < 0 || int(x) >= v.Len() {
-		return errf("@[v;x;f] : x out of bounds (%d)", x)
+func (ctx *Context) amend3arrayI(x array, y I, f V) V {
+	if y < 0 || int(y) >= x.Len() {
+		return errf("@[v;x;f] : x out of bounds (%d)", y)
 	}
-	z := v.at(int(x))
+	z := x.at(int(y))
 	repl := ctx.Apply(f, z)
 	if err, ok := repl.(errV); ok {
 		return err
 	}
-	if compatEltType(v, repl) {
-		v.set(int(x), repl)
-		return v
+	if compatEltType(x, repl) {
+		x.set(int(y), repl)
+		return x
 	}
-	a := make(AV, v.Len())
+	a := make(AV, x.Len())
 	for i := range a {
-		a[i] = v.at(i)
+		a[i] = x.at(i)
 	}
-	a.set(int(x), repl)
+	a.set(int(y), repl)
 	return a
 }
 
-func (ctx *Context) amend3array(v array, x, f V) V {
-	switch x := x.(type) {
+func (ctx *Context) amend3array(x array, y, f V) V {
+	switch y := y.(type) {
 	case I:
-		return ctx.amend3arrayI(v, x, f)
+		return ctx.amend3arrayI(x, y, f)
 	case AI:
-		for _, idx := range x {
-			v = ctx.amend3array(v, I(idx), f).(array)
+		for _, idx := range y {
+			x = ctx.amend3array(x, I(idx), f).(array)
 		}
-		return v
+		return x
 	case AV:
-		for _, z := range x {
-			v = ctx.amend3array(v, z, f).(array)
+		for _, z := range y {
+			x = ctx.amend3array(x, z, f).(array)
 		}
-		return v
+		return x
 	default:
-		return errType("@[v;x;f]", "x", x)
+		return errType("@[v;x;f]", "x", y)
 	}
 }
 
-func (ctx *Context) amend4(v, x, f, y V) V {
-	switch v := v.(type) {
+func (ctx *Context) amend4(x, y, f, z V) V {
+	switch x := x.(type) {
 	case array:
-		x = toIndices(x)
-		if err, ok := x.(errV); ok {
+		y = toIndices(y)
+		if err, ok := y.(errV); ok {
 			return err
 		}
-		return canonical(ctx.amend4array(cloneShallow(v).(array), x, f, y))
+		return canonical(ctx.amend4array(cloneShallow(x).(array), y, f, z))
 	default:
-		return errType("@[v;x;f]", "v", v)
+		return errType("@[v;x;f]", "v", x)
 	}
 }
 
-func (ctx *Context) amend4arrayI(v array, x I, f, y V) V {
-	if x < 0 || int(x) >= v.Len() {
-		return errf("@[v;x;f;y] : x out of bounds (%d)", x)
+func (ctx *Context) amend4arrayI(x array, y I, f, z V) V {
+	if y < 0 || int(y) >= x.Len() {
+		return errf("@[v;x;f;y] : x out of bounds (%d)", y)
 	}
-	z := v.at(int(x))
-	repl := ctx.Apply2(f, z, y)
+	xy := x.at(int(y))
+	repl := ctx.Apply2(f, xy, z)
 	if err, ok := repl.(errV); ok {
 		return err
 	}
-	if compatEltType(v, repl) {
-		v.set(int(x), repl)
-		return v
+	if compatEltType(x, repl) {
+		x.set(int(y), repl)
+		return x
 	}
-	a := make(AV, v.Len())
+	a := make(AV, x.Len())
 	for i := range a {
-		a[i] = v.at(i)
+		a[i] = x.at(i)
 	}
-	a.set(int(x), repl)
+	a.set(int(y), repl)
 	return a
 }
 
-func (ctx *Context) amend4array(v array, x, f, y V) V {
-	switch x := x.(type) {
+func (ctx *Context) amend4array(x array, y, f, z V) V {
+	switch y := y.(type) {
 	case I:
-		switch y.(type) {
+		switch z.(type) {
 		case array:
 			return errs("@[v;x;f;y] : shape mismatch between x and y")
 		}
-		return ctx.amend4arrayI(v, x, f, y)
+		return ctx.amend4arrayI(x, y, f, z)
 	case AI:
-		ay, ok := y.(array)
+		ay, ok := z.(array)
 		if !ok {
-			for _, idx := range x {
-				v = ctx.amend4arrayI(v, I(idx), f, y).(array)
+			for _, xi := range y {
+				x = ctx.amend4arrayI(x, I(xi), f, z).(array)
 			}
-			return v
+			return x
 		}
-		if ay.Len() != x.Len() {
+		if ay.Len() != y.Len() {
 			return errf("@[v;x;f;y] : length mismatch between x and y (%d vs %d)",
-				x.Len(), ay.Len())
+				y.Len(), ay.Len())
 		}
-		for i, idx := range x {
-			v = ctx.amend4arrayI(v, I(idx), f, ay.at(i)).(array)
+		for i, xi := range y {
+			x = ctx.amend4arrayI(x, I(xi), f, ay.at(i)).(array)
 		}
-		return v
+		return x
 	case AV:
-		ay, ok := y.(array)
+		ay, ok := z.(array)
 		if !ok {
-			for _, z := range x {
-				v = ctx.amend4array(v, z, f, y).(array)
+			for _, xi := range y {
+				x = ctx.amend4array(x, xi, f, z).(array)
 			}
-			return v
+			return x
 		}
-		if ay.Len() != x.Len() {
+		if ay.Len() != y.Len() {
 			return errf("@[v;x;f;y] : length mismatch between x and y (%d vs %d)",
-				x.Len(), ay.Len())
+				y.Len(), ay.Len())
 		}
-		for i, z := range x {
-			v = ctx.amend4array(v, z, f, ay.at(i)).(array)
+		for i, xi := range y {
+			x = ctx.amend4array(x, xi, f, ay.at(i)).(array)
 		}
-		return v
+		return x
 	default:
-		return errType("@[v;x;f]", "x", x)
+		return errType("@[v;x;f]", "x", y)
 	}
 }
