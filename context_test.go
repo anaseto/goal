@@ -204,9 +204,14 @@ var matchTests = [...]matchTest{
 	{`"012345"[2 3;2 1]`, `"23" "3"`},
 	{`bytes "012"`, `3`},
 	{`bytes "é" "è"`, `2 2`},
-	{`@[1 2 3;1;{x+1}]`, `1 3 3`},
-	{`@[1 2 3;0 1;{x+1}]`, `2 3 3`},
-	{`@[1 2 3;(0 1;0 1);{x+1}]`, `(2 3 3;2 3 3)`},
+	{`@[1 2 3;1;1+]`, `1 3 3`},
+	{`@[1 2 3;0 1;10+]`, `11 12 3`},
+	{`@[1 2 3;(0 1;0 1;0);{x+1}]`, `4 4 3`},
+	{`@[1 "a" "b";(1 2;2 1);{x+"c"}]`, `1 "acc" "bcc"`},
+	{`@[8 4 5;1;+;10]`, `8 14 5`},
+	{`@[8 4 5;1 2;+;10 5]`, `8 14 10`},
+	{`@[8 4 5;1 2;+;10]`, `8 14 15`},
+	{`@[8 4 5;(1 2;0);+;(10 5;-2)]`, `6 14 10`},
 }
 
 func TestEval(t *testing.T) {
@@ -230,7 +235,8 @@ func TestEval(t *testing.T) {
 			if !Match(vLeft, vRight) {
 				t.Log(ctxLeft.programString())
 				t.Log(matchString)
-				t.Logf("results: %s vs %s", vLeft.Sprint(ctxLeft), vRight.Sprint(ctxRight))
+				t.Logf("results: %s vs %s\n", vLeft.Sprint(ctxLeft), vRight.Sprint(ctxRight))
+				//t.Logf("results (go): %#v vs %#v", vLeft, vRight)
 				t.Fail()
 			}
 		})

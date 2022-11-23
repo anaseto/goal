@@ -6,6 +6,13 @@ func (ctx *Context) Apply(v, x V) V {
 	return ctx.applyN(v, 1)
 }
 
+// Apply2 calls a value with a two arguments.
+func (ctx *Context) Apply2(v, x, y V) V {
+	ctx.push(y)
+	ctx.push(x)
+	return ctx.applyN(v, 2)
+}
+
 // ApplyN calls a value with one or more arguments. The arguments should be
 // provided in reverse order, given the stack-based right to left semantics
 // used by the language.
@@ -316,13 +323,12 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 func (x AV) atIndices(y AI) V {
 	res := make(AV, len(y))
 	xlen := x.Len()
-	for i := range res {
-		idx := y[i]
+	for i, idx := range y {
 		if idx < 0 {
 			idx += xlen
 		}
 		if idx < 0 || idx >= len(x) {
-			return errf("x[y] : index out of bounds: %d (length %d)", y[i], len(x))
+			return errf("x[y] : index out of bounds: %d (length %d)", idx, len(x))
 		}
 		res[i] = x[idx]
 	}
@@ -332,13 +338,12 @@ func (x AV) atIndices(y AI) V {
 func (x AB) atIndices(y AI) V {
 	res := make(AB, len(y))
 	xlen := x.Len()
-	for i := range res {
-		idx := y[i]
+	for i, idx := range y {
 		if idx < 0 {
 			idx += xlen
 		}
 		if idx < 0 || idx >= len(x) {
-			return errf("x[y] : index out of bounds: %d (length %d)", y[i], len(x))
+			return errf("x[y] : index out of bounds: %d (length %d)", idx, len(x))
 		}
 		res[i] = x[idx]
 	}
@@ -348,13 +353,12 @@ func (x AB) atIndices(y AI) V {
 func (x AI) atIndices(y AI) V {
 	res := make(AI, len(y))
 	xlen := x.Len()
-	for i := range res {
-		idx := y[i]
+	for i, idx := range y {
 		if idx < 0 {
 			idx += xlen
 		}
 		if idx < 0 || idx >= len(x) {
-			return errf("x[y] : index out of bounds: %d (length %d)", y[i], len(x))
+			return errf("x[y] : index out of bounds: %d (length %d)", idx, len(x))
 		}
 		res[i] = x[idx]
 	}
@@ -364,13 +368,12 @@ func (x AI) atIndices(y AI) V {
 func (x AF) atIndices(y AI) V {
 	res := make(AF, len(y))
 	xlen := x.Len()
-	for i := range res {
-		idx := y[i]
+	for i, idx := range y {
 		if idx < 0 {
 			idx += xlen
 		}
 		if idx < 0 || idx >= len(x) {
-			return errf("x[y] : index out of bounds: %d (length %d)", y[i], len(x))
+			return errf("x[y] : index out of bounds: %d (length %d)", idx, len(x))
 		}
 		res[i] = x[idx]
 	}
@@ -380,13 +383,12 @@ func (x AF) atIndices(y AI) V {
 func (x AS) atIndices(y AI) V {
 	res := make(AS, len(y))
 	xlen := x.Len()
-	for i := range res {
-		idx := y[i]
+	for i, idx := range y {
 		if idx < 0 {
 			idx += xlen
 		}
 		if idx < 0 || idx >= len(x) {
-			return errf("x[y] : index out of bounds: %d (length %d)", y[i], len(x))
+			return errf("x[y] : index out of bounds: %d (length %d)", idx, len(x))
 		}
 		res[i] = x[idx]
 	}
@@ -421,15 +423,14 @@ func (x AS) set(i int, y V) {
 // setIndices x at y with z (in place).
 func (x AV) setIndices(y AI, z V) error {
 	az := z.(array)
-	for i := range x {
-		idx := y[i]
+	for i, idx := range y {
 		if idx < 0 {
 			idx += len(x)
 		}
 		if idx < 0 || idx >= len(x) {
-			return errf("x[y] : index out of bounds: %d (length %d)", y[i], len(x))
+			return errf("x[y] : index out of bounds: %d (length %d)", idx, len(x))
 		}
-		x[idx] = az.at(idx)
+		x[idx] = az.at(i)
 	}
 	return nil
 }
@@ -437,14 +438,14 @@ func (x AV) setIndices(y AI, z V) error {
 // setIndices x at y with z (in place).
 func (x AI) setIndices(y AI, z V) error {
 	az := z.(AI)
-	for _, idx := range y {
+	for i, idx := range y {
 		if idx < 0 {
 			idx += len(x)
 		}
 		if idx < 0 || idx >= len(x) {
 			return errf("x[y] : index out of bounds: %d (length %d)", idx, len(x))
 		}
-		x[idx] = az[idx]
+		x[idx] = az[i]
 	}
 	return nil
 }
@@ -452,14 +453,14 @@ func (x AI) setIndices(y AI, z V) error {
 // setIndices x at y with z (in place).
 func (x AF) setIndices(y AI, z V) error {
 	az := z.(AF)
-	for _, idx := range y {
+	for i, idx := range y {
 		if idx < 0 {
 			idx += len(x)
 		}
 		if idx < 0 || idx >= len(x) {
 			return errf("x[y] : index out of bounds: %d (length %d)", idx, len(x))
 		}
-		x[idx] = az[idx]
+		x[idx] = az[i]
 	}
 	return nil
 }
@@ -467,14 +468,14 @@ func (x AF) setIndices(y AI, z V) error {
 // setIndices x at y with z (in place).
 func (x AB) setIndices(y AI, z V) error {
 	az := z.(AB)
-	for _, idx := range y {
+	for i, idx := range y {
 		if idx < 0 {
 			idx += len(x)
 		}
 		if idx < 0 || idx >= len(x) {
 			return errf("x[y] : index out of bounds: %d (length %d)", idx, len(x))
 		}
-		x[idx] = az[idx]
+		x[idx] = az[i]
 	}
 	return nil
 }
@@ -482,14 +483,14 @@ func (x AB) setIndices(y AI, z V) error {
 // setIndices x at y with z (in place).
 func (x AS) setIndices(y AI, z V) error {
 	az := z.(AS)
-	for _, idx := range y {
+	for i, idx := range y {
 		if idx < 0 {
 			idx += len(x)
 		}
 		if idx < 0 || idx >= len(x) {
 			return errf("x[y] : index out of bounds: %d (length %d)", idx, len(x))
 		}
-		x[idx] = az[idx]
+		x[idx] = az[i]
 	}
 	return nil
 }

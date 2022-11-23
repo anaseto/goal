@@ -196,6 +196,8 @@ func toIndicesRec(xv V) V {
 			return errf("non-integer index (%g)", x)
 		}
 		return I(x)
+	case I:
+		return x
 	case AB:
 		return fromABtoAI(x)
 	case AF:
@@ -422,7 +424,7 @@ func sameType(x, y V) bool {
 	}
 }
 
-func sameEltType(x array, y V) bool {
+func compatEltType(x array, y V) bool {
 	switch x.(type) {
 	case AI:
 		_, ok := y.(I)
