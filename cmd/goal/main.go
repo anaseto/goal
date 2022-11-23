@@ -268,8 +268,8 @@ s?y index	"a = a + 1"?"=" "+" -> 2 6
 x?y find	3 2 1?2 -> 1	3 2 1?0	-> 3
 @x  type	@2 -> "i"    @"ab" -> "s"    @2 3 -> "I"
 f@y apply	(|)@1 2 -> 2 1 (like |[1 2] -> 2 1 or |1 2)
-s@y index	"012345"[2] -> "2345"
-a@y index	1 2 3@2 -> 3	1 2 3[2] -> 3
+s@y substr	"012345"[2] -> "2345"	"012345"[2;3] -> "234"
+a@y at		1 2 3@2 -> 3	1 2 3[2] -> 3
 .s  eval	."2+3" -> 5
 x.y applyN	{x+y}.2 3 -> 5    {x+y}[2;3] -> 5    (1 2;3 4)[0;1] -> 2
 
@@ -282,6 +282,7 @@ x in y    member of	2 3 in 0 2 4 -> 1 0
 ocount x  occur-count	ocount 3 2 5 3 2 2 7 -> 0 0 0 1 1 2 0
 icount x  index-count	icount 0 0 1 -1 0 1 2 3 2 -> 3 2 2 1 (same as #'=x)
 sign x    sign		sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
+bytes x	  byte-count	bytes "abc" -> 3 (TODO)
 `
 
 const helpADVERBS = `
