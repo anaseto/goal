@@ -11,13 +11,13 @@ func (ctx *Context) amend3(x, y, f V) V {
 		}
 		return canonical(ctx.amend3array(cloneShallow(x).(array), y, f))
 	default:
-		return errType("@[v;x;f]", "v", x)
+		return errType("@[x;y;f]", "x", x)
 	}
 }
 
 func (ctx *Context) amend3arrayI(x array, y I, f V) V {
 	if y < 0 || int(y) >= x.Len() {
-		return errf("@[v;x;f] : x out of bounds (%d)", y)
+		return errf("@[x;y;f] : x out of bounds (%d)", y)
 	}
 	z := x.at(int(y))
 	repl := ctx.Apply(f, z)
@@ -51,7 +51,7 @@ func (ctx *Context) amend3array(x array, y, f V) V {
 		}
 		return x
 	default:
-		return errType("@[v;x;f]", "x", y)
+		return errType("@[x;y;f]", "y", y)
 	}
 }
 
@@ -64,13 +64,13 @@ func (ctx *Context) amend4(x, y, f, z V) V {
 		}
 		return canonical(ctx.amend4array(cloneShallow(x).(array), y, f, z))
 	default:
-		return errType("@[v;x;f]", "v", x)
+		return errType("@[x;y;f]", "x", x)
 	}
 }
 
 func (ctx *Context) amend4arrayI(x array, y I, f, z V) V {
 	if y < 0 || int(y) >= x.Len() {
-		return errf("@[v;x;f;y] : x out of bounds (%d)", y)
+		return errf("@[x;y;f;z] : x out of bounds (%d)", y)
 	}
 	xy := x.at(int(y))
 	repl := ctx.Apply2(f, xy, z)
@@ -94,7 +94,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 	case I:
 		switch z.(type) {
 		case array:
-			return errs("@[v;x;f;y] : shape mismatch between x and y")
+			return errs("@[x;y;f;z] : shape mismatch between x and y")
 		}
 		return ctx.amend4arrayI(x, y, f, z)
 	case AI:
@@ -106,7 +106,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 			return x
 		}
 		if ay.Len() != y.Len() {
-			return errf("@[v;x;f;y] : length mismatch between x and y (%d vs %d)",
+			return errf("@[x;y;f;z] : length mismatch between x and y (%d vs %d)",
 				y.Len(), ay.Len())
 		}
 		for i, xi := range y {
@@ -122,7 +122,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 			return x
 		}
 		if ay.Len() != y.Len() {
-			return errf("@[v;x;f;y] : length mismatch between x and y (%d vs %d)",
+			return errf("@[x;y;f;z] : length mismatch between x and y (%d vs %d)",
 				y.Len(), ay.Len())
 		}
 		for i, xi := range y {
@@ -130,6 +130,6 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 		}
 		return x
 	default:
-		return errType("@[v;x;f]", "x", y)
+		return errType("@[v;x;f]", "y", y)
 	}
 }
