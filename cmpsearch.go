@@ -638,16 +638,16 @@ func occurrenceCount(x V) V {
 
 // without returns x^y.
 func without(x, y V) V {
-	switch z := x.(type) {
+	switch xx := x.(type) {
 	case I:
-		return windows(int(z), y)
+		return windows(int(xx), y)
 	case F:
-		if !isI(z) {
-			return errf("i^y : i non-integer (%g)", z)
+		if !isI(xx) {
+			return errf("i^y : i non-integer (%g)", xx)
 		}
-		return windows(int(z), y)
+		return windows(int(xx), y)
 	case S:
-		return trim(z, y)
+		return trim(xx, y)
 	case array:
 		y = toArray(y)
 		r := memberOf(y, x)

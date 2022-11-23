@@ -19,8 +19,8 @@ func (ctx *Context) amend3arrayI(x array, y I, f V) V {
 	if y < 0 || int(y) >= x.Len() {
 		return errf("@[x;y;f] : x out of bounds (%d)", y)
 	}
-	z := x.at(int(y))
-	repl := ctx.Apply(f, z)
+	xy := x.at(int(y))
+	repl := ctx.Apply(f, xy)
 	if err, ok := repl.(errV); ok {
 		return err
 	}
@@ -41,13 +41,13 @@ func (ctx *Context) amend3array(x array, y, f V) V {
 	case I:
 		return ctx.amend3arrayI(x, y, f)
 	case AI:
-		for _, idx := range y {
-			x = ctx.amend3array(x, I(idx), f).(array)
+		for _, yi := range y {
+			x = ctx.amend3array(x, I(yi), f).(array)
 		}
 		return x
 	case AV:
-		for _, z := range y {
-			x = ctx.amend3array(x, z, f).(array)
+		for _, yi := range y {
+			x = ctx.amend3array(x, yi, f).(array)
 		}
 		return x
 	default:
@@ -98,35 +98,35 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 		}
 		return ctx.amend4arrayI(x, y, f, z)
 	case AI:
-		ay, ok := z.(array)
+		az, ok := z.(array)
 		if !ok {
 			for _, xi := range y {
 				x = ctx.amend4arrayI(x, I(xi), f, z).(array)
 			}
 			return x
 		}
-		if ay.Len() != y.Len() {
+		if az.Len() != y.Len() {
 			return errf("@[x;y;f;z] : length mismatch between x and y (%d vs %d)",
-				y.Len(), ay.Len())
+				y.Len(), az.Len())
 		}
 		for i, xi := range y {
-			x = ctx.amend4arrayI(x, I(xi), f, ay.at(i)).(array)
+			x = ctx.amend4arrayI(x, I(xi), f, az.at(i)).(array)
 		}
 		return x
 	case AV:
-		ay, ok := z.(array)
+		az, ok := z.(array)
 		if !ok {
 			for _, xi := range y {
 				x = ctx.amend4array(x, xi, f, z).(array)
 			}
 			return x
 		}
-		if ay.Len() != y.Len() {
+		if az.Len() != y.Len() {
 			return errf("@[x;y;f;z] : length mismatch between x and y (%d vs %d)",
-				y.Len(), ay.Len())
+				y.Len(), az.Len())
 		}
 		for i, xi := range y {
-			x = ctx.amend4array(x, xi, f, ay.at(i)).(array)
+			x = ctx.amend4array(x, xi, f, az.at(i)).(array)
 		}
 		return x
 	default:

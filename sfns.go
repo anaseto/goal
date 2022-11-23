@@ -264,14 +264,14 @@ func drops(s S, y V) V {
 		return S(strings.TrimPrefix(string(y), string(s)))
 	case AS:
 		r := make(AS, y.Len())
-		for i, z := range y {
-			r[i] = strings.TrimPrefix(string(z), string(s))
+		for i, yi := range y {
+			r[i] = strings.TrimPrefix(string(yi), string(s))
 		}
 		return r
 	case AV:
 		r := make(AV, y.Len())
-		for i, z := range y {
-			r[i] = drops(s, z)
+		for i, yi := range y {
+			r[i] = drops(s, yi)
 			if err, ok := r[i].(errV); ok {
 				return err
 			}
@@ -289,14 +289,14 @@ func trim(s S, y V) V {
 		return S(strings.Trim(string(y), string(s)))
 	case AS:
 		r := make(AS, y.Len())
-		for i, z := range y {
-			r[i] = strings.Trim(string(z), string(s))
+		for i, yi := range y {
+			r[i] = strings.Trim(string(yi), string(s))
 		}
 		return r
 	case AV:
 		r := make(AV, y.Len())
-		for i, z := range y {
-			r[i] = trim(s, z)
+		for i, yi := range y {
+			r[i] = trim(s, yi)
 			if err, ok := r[i].(errV); ok {
 				return err
 			}
@@ -779,8 +779,8 @@ func flip(x V) V {
 
 func flipAB(x AV) AB {
 	r := make(AB, len(x))
-	for i, z := range x {
-		switch z := z.(type) {
+	for i, xi := range x {
+		switch z := xi.(type) {
 		case I:
 			r[i] = z == 1
 		case AB:
@@ -795,8 +795,8 @@ func flipAVAB(x AV, lines int) AV {
 	a := make(AB, lines*len(x))
 	for j := range r {
 		q := a[j*len(x) : (j+1)*len(x)]
-		for i, z := range x {
-			switch z := z.(type) {
+		for i, xi := range x {
+			switch z := xi.(type) {
 			case I:
 				q[i] = z == 1
 			case AB:
@@ -810,8 +810,8 @@ func flipAVAB(x AV, lines int) AV {
 
 func flipAF(x AV) AF {
 	r := make(AF, len(x))
-	for i, z := range x {
-		switch z := z.(type) {
+	for i, xi := range x {
+		switch z := xi.(type) {
 		case AB:
 			r[i] = float64(B2F(z[0]))
 		case F:
@@ -832,8 +832,8 @@ func flipAVAF(x AV, lines int) AV {
 	a := make(AF, lines*len(x))
 	for j := range r {
 		q := a[j*len(x) : (j+1)*len(x)]
-		for i, z := range x {
-			switch z := z.(type) {
+		for i, xi := range x {
+			switch z := xi.(type) {
 			case AB:
 				q[i] = float64(B2F(z[j]))
 			case F:
@@ -853,8 +853,8 @@ func flipAVAF(x AV, lines int) AV {
 
 func flipAI(x AV) AI {
 	r := make(AI, len(x))
-	for i, z := range x {
-		switch z := z.(type) {
+	for i, xi := range x {
+		switch z := xi.(type) {
 		case AB:
 			r[i] = int(B2I(z[0]))
 		case I:
@@ -871,8 +871,8 @@ func flipAVAI(x AV, lines int) AV {
 	a := make(AI, lines*len(x))
 	for j := range r {
 		q := a[j*len(x) : (j+1)*len(x)]
-		for i, z := range x {
-			switch z := z.(type) {
+		for i, xi := range x {
+			switch z := xi.(type) {
 			case AB:
 				q[i] = int(B2I(z[j]))
 			case I:
@@ -888,8 +888,8 @@ func flipAVAI(x AV, lines int) AV {
 
 func flipAS(x AV) AS {
 	r := make(AS, len(x))
-	for i, z := range x {
-		switch z := z.(type) {
+	for i, xi := range x {
+		switch z := xi.(type) {
 		case S:
 			r[i] = string(z)
 		case AS:
@@ -904,8 +904,8 @@ func flipAVAS(x AV, lines int) AV {
 	a := make(AS, lines*len(x))
 	for j := range r {
 		q := a[j*len(x) : (j+1)*len(x)]
-		for i, z := range x {
-			switch z := z.(type) {
+		for i, xi := range x {
+			switch z := xi.(type) {
 			case S:
 				q[i] = string(z)
 			case AS:
@@ -919,8 +919,8 @@ func flipAVAS(x AV, lines int) AV {
 
 func flipAV(x AV) V {
 	r := make(AV, len(x))
-	for i, z := range x {
-		switch z := z.(type) {
+	for i, xi := range x {
+		switch z := xi.(type) {
 		case array:
 			r[i] = z.at(0)
 		default:
@@ -935,8 +935,8 @@ func flipAVAV(x AV, lines int) AV {
 	a := make(AV, lines*len(x))
 	for j := range r {
 		q := a[j*len(x) : (j+1)*len(x)]
-		for i, z := range x {
-			switch z := z.(type) {
+		for i, xi := range x {
+			switch z := xi.(type) {
 			case array:
 				q[i] = z.at(j)
 			default:

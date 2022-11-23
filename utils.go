@@ -170,8 +170,8 @@ func isIndices(xv V) bool {
 	case AI:
 		return true
 	case AV:
-		for _, z := range x {
-			if !isIndices(z) {
+		for _, xi := range x {
+			if !isIndices(xi) {
 				return false
 			}
 		}

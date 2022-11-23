@@ -166,8 +166,8 @@ func bytes(x V) V {
 		return r
 	case AV:
 		r := make(AV, x.Len())
-		for i, z := range x {
-			r[i] = bytes(z)
+		for i, xi := range x {
+			r[i] = bytes(xi)
 			if err, ok := r[i].(errV); ok {
 				return err
 			}
