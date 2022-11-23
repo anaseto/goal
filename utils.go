@@ -161,28 +161,56 @@ func cloneShallow(x V) V {
 	}
 }
 
-func toIndices(x V, l int) V {
-	x = canonical(x)
-	switch x := x.(type) {
-	case AB:
-		res := make(AI, len(x))
-		for i := range res {
-			res[i] = int(B2I(x[i]))
-		}
-		return res
-	case AF:
-		res := make(AI, len(x))
-		for i := range res {
-			if !isI(F(x[i])) {
-				return errs("x[y] : non-integer indices array")
-			}
-			res[i] = int(x[i])
-		}
-		return res
+// isIndices returns true if we have indices in canonical form, that is,
+// using types I, AI and AV of thoses.
+func isIndices(xv V) bool {
+	switch x := xv.(type) {
+	case I:
+		return true
 	case AI:
-		return x
+		return true
+	case AV:
+		for _, z := range x {
+			if !isIndices(z) {
+				return false
+			}
+		}
+		return true
 	default:
-		return errs("x[y] : not an indices array")
+		return false
+	}
+}
+
+func toIndices(x V) V {
+	if isIndices(x) {
+		return x
+	}
+	return toIndicesRec(x)
+}
+
+func toIndicesRec(xv V) V {
+	assertCanonical(xv)
+	switch x := xv.(type) {
+	case F:
+		if !isI(x) {
+			return errf("non-integer index (%g)", x)
+		}
+		return I(x)
+	case AB:
+		return fromABtoAI(x)
+	case AF:
+		return toAI(x)
+	case AV:
+		res := make(AV, x.Len())
+		for i, z := range x {
+			res[i] = toIndicesRec(z)
+			if err, ok := res[i].(errV); ok {
+				return err
+			}
+		}
+		return canonical(res)
+	default:
+		return errs("not an indices array")
 	}
 }
 
@@ -207,14 +235,12 @@ func toArray(x V) V {
 
 // toAI converts AF into AI if possible.
 func toAI(x AF) V {
-	for _, v := range x {
+	r := make(AI, len(x))
+	for i, v := range x {
 		if !isI(F(v)) {
 			return errf("contains non-integer (%g)", v)
 		}
-	}
-	r := make(AI, len(x))
-	for i := range r {
-		r[i] = int(x[i])
+		r[i] = int(v)
 	}
 	return r
 }
@@ -365,6 +391,53 @@ func aType(x AV) eltype {
 		t = mergeTypes(t, eType(x[i]))
 	}
 	return t
+}
+
+func sameType(x, y V) bool {
+	switch x.(type) {
+	case I:
+		_, ok := y.(I)
+		return ok
+	case F:
+		_, ok := y.(F)
+		return ok
+	case AB:
+		_, ok := y.(AB)
+		return ok
+	case AI:
+		_, ok := y.(AI)
+		return ok
+	case AF:
+		_, ok := y.(AF)
+		return ok
+	case AS:
+		_, ok := y.(AS)
+		return ok
+	case AV:
+		_, ok := y.(AV)
+		return ok
+	default:
+		// TODO: sameType, handle other cases (unused for now)
+		return false
+	}
+}
+
+func sameEltType(x array, y V) bool {
+	switch x.(type) {
+	case AI:
+		_, ok := y.(I)
+		return ok
+	case AF:
+		_, ok := y.(F)
+		return ok
+	case AS:
+		_, ok := y.(S)
+		return ok
+	case AV:
+		return true
+	default:
+		return false
+	}
 }
 
 func isI(x F) bool {

@@ -335,6 +335,10 @@ func VApply(ctx *Context, args []V) V {
 		v := args[1]
 		ctx.push(args[0])
 		return ctx.applyN(v, 1)
+	case 3:
+		return ctx.amend3(args[2], args[1], args[0])
+	case 4:
+		return ctx.amend4(args[3], args[2], args[1], args[0])
 	default:
 		return errRank("@")
 	}

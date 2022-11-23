@@ -260,6 +260,8 @@ type array interface {
 	at(i int) V           // x[i]
 	slice(i, j int) array // x[i:j]
 	atIndices(y AI) V     // x[y] (goal code)
+	set(i int, y V)
+	setIndices(y AI, z V) error
 }
 
 func (x AV) Matches(y V) bool { return matchArray(x, y) }

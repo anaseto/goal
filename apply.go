@@ -93,7 +93,7 @@ func (ctx *Context) applyArray(a array, x V) V {
 	switch z := x.(type) {
 	case F:
 		if !isI(z) {
-			return errf("a[x] : non-integer index: %g", z)
+			return errf("a[x] : non-integer index (%g)", z)
 		}
 		i := int(z)
 		if i < 0 {
@@ -122,9 +122,9 @@ func (ctx *Context) applyArray(a array, x V) V {
 		}
 		return canonical(res)
 	case array:
-		indices := toIndices(x, a.Len())
+		indices := toIndices(x)
 		if err, ok := indices.(errV); ok {
-			return err
+			return errV("x[y] :") + err
 		}
 		res := a.atIndices(indices.(AI))
 		return res
@@ -391,4 +391,105 @@ func (x AS) atIndices(y AI) V {
 		res[i] = x[idx]
 	}
 	return res
+}
+
+// set changes x at i with y (in place).
+func (x AV) set(i int, y V) {
+	x[i] = y
+}
+
+// set changes x at i with y (in place).
+func (x AB) set(i int, y V) {
+	x[i] = y.(I) == 1
+}
+
+// set changes x at i with y (in place).
+func (x AI) set(i int, y V) {
+	x[i] = int(y.(I))
+}
+
+// set changes x at i with y (in place).
+func (x AF) set(i int, y V) {
+	x[i] = float64(y.(F))
+}
+
+// set changes x at i with y (in place).
+func (x AS) set(i int, y V) {
+	x[i] = string(y.(S))
+}
+
+// setIndices x at y with z (in place).
+func (x AV) setIndices(y AI, z V) error {
+	az := z.(array)
+	for i := range x {
+		idx := y[i]
+		if idx < 0 {
+			idx += len(x)
+		}
+		if idx < 0 || idx >= len(x) {
+			return errf("x[y] : index out of bounds: %d (length %d)", y[i], len(x))
+		}
+		x[idx] = az.at(idx)
+	}
+	return nil
+}
+
+// setIndices x at y with z (in place).
+func (x AI) setIndices(y AI, z V) error {
+	az := z.(AI)
+	for _, idx := range y {
+		if idx < 0 {
+			idx += len(x)
+		}
+		if idx < 0 || idx >= len(x) {
+			return errf("x[y] : index out of bounds: %d (length %d)", idx, len(x))
+		}
+		x[idx] = az[idx]
+	}
+	return nil
+}
+
+// setIndices x at y with z (in place).
+func (x AF) setIndices(y AI, z V) error {
+	az := z.(AF)
+	for _, idx := range y {
+		if idx < 0 {
+			idx += len(x)
+		}
+		if idx < 0 || idx >= len(x) {
+			return errf("x[y] : index out of bounds: %d (length %d)", idx, len(x))
+		}
+		x[idx] = az[idx]
+	}
+	return nil
+}
+
+// setIndices x at y with z (in place).
+func (x AB) setIndices(y AI, z V) error {
+	az := z.(AB)
+	for _, idx := range y {
+		if idx < 0 {
+			idx += len(x)
+		}
+		if idx < 0 || idx >= len(x) {
+			return errf("x[y] : index out of bounds: %d (length %d)", idx, len(x))
+		}
+		x[idx] = az[idx]
+	}
+	return nil
+}
+
+// setIndices x at y with z (in place).
+func (x AS) setIndices(y AI, z V) error {
+	az := z.(AS)
+	for _, idx := range y {
+		if idx < 0 {
+			idx += len(x)
+		}
+		if idx < 0 || idx >= len(x) {
+			return errf("x[y] : index out of bounds: %d (length %d)", idx, len(x))
+		}
+		x[idx] = az[idx]
+	}
+	return nil
 }
