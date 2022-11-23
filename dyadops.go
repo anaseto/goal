@@ -32,23 +32,23 @@ func equal(x, y V) V {
 			}
 			r := make(AV, len(x))
 			for i := range r {
-				v := equal(x[i], y.at(i))
-				e, ok := v.(errV)
+				ri := equal(x[i], y.at(i))
+				e, ok := ri.(errV)
 				if ok {
 					return e
 				}
-				r[i] = v
+				r[i] = ri
 			}
 			return r
 		}
 		r := make(AV, len(x))
 		for i := range r {
-			v := equal(x[i], y)
-			e, ok := v.(errV)
+			ri := equal(x[i], y)
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -83,12 +83,12 @@ func equalFV(x F, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := equalFV(F(x), y[i])
-			e, ok := v.(errV)
+			ri := equalFV(F(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -123,12 +123,12 @@ func equalIV(x I, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := equalIV(I(x), y[i])
-			e, ok := v.(errV)
+			ri := equalIV(I(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -149,12 +149,12 @@ func equalSV(x S, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := equalSV(S(x), y[i])
-			e, ok := v.(errV)
+			ri := equalSV(S(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -209,12 +209,12 @@ func equalABV(x AB, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := equalIV(B2I(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := equalIV(B2I(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -269,12 +269,12 @@ func equalAFV(x AF, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := equalFV(F(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := equalFV(F(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -329,12 +329,12 @@ func equalAIV(x AI, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := equalIV(I(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := equalIV(I(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -365,12 +365,12 @@ func equalASV(x AS, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := equalSV(S(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := equalSV(S(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -403,23 +403,23 @@ func lesser(x, y V) V {
 			}
 			r := make(AV, len(x))
 			for i := range r {
-				v := lesser(x[i], y.at(i))
-				e, ok := v.(errV)
+				ri := lesser(x[i], y.at(i))
+				e, ok := ri.(errV)
 				if ok {
 					return e
 				}
-				r[i] = v
+				r[i] = ri
 			}
 			return r
 		}
 		r := make(AV, len(x))
 		for i := range r {
-			v := lesser(x[i], y)
-			e, ok := v.(errV)
+			ri := lesser(x[i], y)
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -454,12 +454,12 @@ func lesserFV(x F, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := lesserFV(F(x), y[i])
-			e, ok := v.(errV)
+			ri := lesserFV(F(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -494,12 +494,12 @@ func lesserIV(x I, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := lesserIV(I(x), y[i])
-			e, ok := v.(errV)
+			ri := lesserIV(I(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -520,12 +520,12 @@ func lesserSV(x S, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := lesserSV(S(x), y[i])
-			e, ok := v.(errV)
+			ri := lesserSV(S(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -580,12 +580,12 @@ func lesserABV(x AB, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := lesserIV(B2I(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := lesserIV(B2I(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -640,12 +640,12 @@ func lesserAFV(x AF, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := lesserFV(F(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := lesserFV(F(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -700,12 +700,12 @@ func lesserAIV(x AI, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := lesserIV(I(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := lesserIV(I(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -736,12 +736,12 @@ func lesserASV(x AS, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := lesserSV(S(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := lesserSV(S(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -774,23 +774,23 @@ func greater(x, y V) V {
 			}
 			r := make(AV, len(x))
 			for i := range r {
-				v := greater(x[i], y.at(i))
-				e, ok := v.(errV)
+				ri := greater(x[i], y.at(i))
+				e, ok := ri.(errV)
 				if ok {
 					return e
 				}
-				r[i] = v
+				r[i] = ri
 			}
 			return r
 		}
 		r := make(AV, len(x))
 		for i := range r {
-			v := greater(x[i], y)
-			e, ok := v.(errV)
+			ri := greater(x[i], y)
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -825,12 +825,12 @@ func greaterFV(x F, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := greaterFV(F(x), y[i])
-			e, ok := v.(errV)
+			ri := greaterFV(F(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -865,12 +865,12 @@ func greaterIV(x I, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := greaterIV(I(x), y[i])
-			e, ok := v.(errV)
+			ri := greaterIV(I(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -891,12 +891,12 @@ func greaterSV(x S, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := greaterSV(S(x), y[i])
-			e, ok := v.(errV)
+			ri := greaterSV(S(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -951,12 +951,12 @@ func greaterABV(x AB, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := greaterIV(B2I(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := greaterIV(B2I(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -1011,12 +1011,12 @@ func greaterAFV(x AF, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := greaterFV(F(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := greaterFV(F(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -1071,12 +1071,12 @@ func greaterAIV(x AI, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := greaterIV(I(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := greaterIV(I(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -1107,12 +1107,12 @@ func greaterASV(x AS, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := greaterSV(S(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := greaterSV(S(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -1145,23 +1145,23 @@ func add(x, y V) V {
 			}
 			r := make(AV, len(x))
 			for i := range r {
-				v := add(x[i], y.at(i))
-				e, ok := v.(errV)
+				ri := add(x[i], y.at(i))
+				e, ok := ri.(errV)
 				if ok {
 					return e
 				}
-				r[i] = v
+				r[i] = ri
 			}
 			return r
 		}
 		r := make(AV, len(x))
 		for i := range r {
-			v := add(x[i], y)
-			e, ok := v.(errV)
+			ri := add(x[i], y)
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -1196,12 +1196,12 @@ func addFV(x F, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := addFV(F(x), y[i])
-			e, ok := v.(errV)
+			ri := addFV(F(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -1236,12 +1236,12 @@ func addIV(x I, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := addIV(I(x), y[i])
-			e, ok := v.(errV)
+			ri := addIV(I(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -1262,12 +1262,12 @@ func addSV(x S, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := addSV(S(x), y[i])
-			e, ok := v.(errV)
+			ri := addSV(S(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -1322,12 +1322,12 @@ func addABV(x AB, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := addIV(B2I(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := addIV(B2I(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -1382,12 +1382,12 @@ func addAFV(x AF, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := addFV(F(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := addFV(F(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -1442,12 +1442,12 @@ func addAIV(x AI, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := addIV(I(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := addIV(I(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -1478,12 +1478,12 @@ func addASV(x AS, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := addSV(S(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := addSV(S(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -1516,23 +1516,23 @@ func subtract(x, y V) V {
 			}
 			r := make(AV, len(x))
 			for i := range r {
-				v := subtract(x[i], y.at(i))
-				e, ok := v.(errV)
+				ri := subtract(x[i], y.at(i))
+				e, ok := ri.(errV)
 				if ok {
 					return e
 				}
-				r[i] = v
+				r[i] = ri
 			}
 			return r
 		}
 		r := make(AV, len(x))
 		for i := range r {
-			v := subtract(x[i], y)
-			e, ok := v.(errV)
+			ri := subtract(x[i], y)
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -1567,12 +1567,12 @@ func subtractFV(x F, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := subtractFV(F(x), y[i])
-			e, ok := v.(errV)
+			ri := subtractFV(F(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -1607,12 +1607,12 @@ func subtractIV(x I, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := subtractIV(I(x), y[i])
-			e, ok := v.(errV)
+			ri := subtractIV(I(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -1633,12 +1633,12 @@ func subtractSV(x S, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := subtractSV(S(x), y[i])
-			e, ok := v.(errV)
+			ri := subtractSV(S(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -1693,12 +1693,12 @@ func subtractABV(x AB, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := subtractIV(B2I(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := subtractIV(B2I(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -1753,12 +1753,12 @@ func subtractAFV(x AF, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := subtractFV(F(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := subtractFV(F(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -1813,12 +1813,12 @@ func subtractAIV(x AI, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := subtractIV(I(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := subtractIV(I(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -1849,12 +1849,12 @@ func subtractASV(x AS, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := subtractSV(S(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := subtractSV(S(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -1887,23 +1887,23 @@ func multiply(x, y V) V {
 			}
 			r := make(AV, len(x))
 			for i := range r {
-				v := multiply(x[i], y.at(i))
-				e, ok := v.(errV)
+				ri := multiply(x[i], y.at(i))
+				e, ok := ri.(errV)
 				if ok {
 					return e
 				}
-				r[i] = v
+				r[i] = ri
 			}
 			return r
 		}
 		r := make(AV, len(x))
 		for i := range r {
-			v := multiply(x[i], y)
-			e, ok := v.(errV)
+			ri := multiply(x[i], y)
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -1946,12 +1946,12 @@ func multiplyFV(x F, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := multiplyFV(F(x), y[i])
-			e, ok := v.(errV)
+			ri := multiplyFV(F(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -1994,12 +1994,12 @@ func multiplyIV(x I, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := multiplyIV(I(x), y[i])
-			e, ok := v.(errV)
+			ri := multiplyIV(I(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -2034,12 +2034,12 @@ func multiplySV(x S, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := multiplySV(S(x), y[i])
-			e, ok := v.(errV)
+			ri := multiplySV(S(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -2109,12 +2109,12 @@ func multiplyABV(x AB, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := multiplyIV(B2I(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := multiplyIV(B2I(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -2184,12 +2184,12 @@ func multiplyAFV(x AF, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := multiplyFV(F(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := multiplyFV(F(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -2259,12 +2259,12 @@ func multiplyAIV(x AI, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := multiplyIV(I(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := multiplyIV(I(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -2319,12 +2319,12 @@ func multiplyASV(x AS, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := multiplySV(S(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := multiplySV(S(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -2353,23 +2353,23 @@ func divide(x, y V) V {
 			}
 			r := make(AV, len(x))
 			for i := range r {
-				v := divide(x[i], y.at(i))
-				e, ok := v.(errV)
+				ri := divide(x[i], y.at(i))
+				e, ok := ri.(errV)
 				if ok {
 					return e
 				}
-				r[i] = v
+				r[i] = ri
 			}
 			return r
 		}
 		r := make(AV, len(x))
 		for i := range r {
-			v := divide(x[i], y)
-			e, ok := v.(errV)
+			ri := divide(x[i], y)
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -2404,12 +2404,12 @@ func divideFV(x F, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := divideFV(F(x), y[i])
-			e, ok := v.(errV)
+			ri := divideFV(F(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -2444,12 +2444,12 @@ func divideIV(x I, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := divideIV(I(x), y[i])
-			e, ok := v.(errV)
+			ri := divideIV(I(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -2504,12 +2504,12 @@ func divideABV(x AB, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := divideIV(B2I(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := divideIV(B2I(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -2564,12 +2564,12 @@ func divideAFV(x AF, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := divideFV(F(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := divideFV(F(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -2624,12 +2624,12 @@ func divideAIV(x AI, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := divideIV(I(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := divideIV(I(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -2662,23 +2662,23 @@ func minimum(x, y V) V {
 			}
 			r := make(AV, len(x))
 			for i := range r {
-				v := minimum(x[i], y.at(i))
-				e, ok := v.(errV)
+				ri := minimum(x[i], y.at(i))
+				e, ok := ri.(errV)
 				if ok {
 					return e
 				}
-				r[i] = v
+				r[i] = ri
 			}
 			return r
 		}
 		r := make(AV, len(x))
 		for i := range r {
-			v := minimum(x[i], y)
-			e, ok := v.(errV)
+			ri := minimum(x[i], y)
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -2713,12 +2713,12 @@ func minimumFV(x F, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := minimumFV(F(x), y[i])
-			e, ok := v.(errV)
+			ri := minimumFV(F(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -2753,12 +2753,12 @@ func minimumIV(x I, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := minimumIV(I(x), y[i])
-			e, ok := v.(errV)
+			ri := minimumIV(I(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -2779,12 +2779,12 @@ func minimumSV(x S, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := minimumSV(S(x), y[i])
-			e, ok := v.(errV)
+			ri := minimumSV(S(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -2839,12 +2839,12 @@ func minimumABV(x AB, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := minimumIV(B2I(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := minimumIV(B2I(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -2899,12 +2899,12 @@ func minimumAFV(x AF, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := minimumFV(F(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := minimumFV(F(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -2959,12 +2959,12 @@ func minimumAIV(x AI, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := minimumIV(I(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := minimumIV(I(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -2995,12 +2995,12 @@ func minimumASV(x AS, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := minimumSV(S(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := minimumSV(S(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -3033,23 +3033,23 @@ func maximum(x, y V) V {
 			}
 			r := make(AV, len(x))
 			for i := range r {
-				v := maximum(x[i], y.at(i))
-				e, ok := v.(errV)
+				ri := maximum(x[i], y.at(i))
+				e, ok := ri.(errV)
 				if ok {
 					return e
 				}
-				r[i] = v
+				r[i] = ri
 			}
 			return r
 		}
 		r := make(AV, len(x))
 		for i := range r {
-			v := maximum(x[i], y)
-			e, ok := v.(errV)
+			ri := maximum(x[i], y)
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -3084,12 +3084,12 @@ func maximumFV(x F, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := maximumFV(F(x), y[i])
-			e, ok := v.(errV)
+			ri := maximumFV(F(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -3124,12 +3124,12 @@ func maximumIV(x I, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := maximumIV(I(x), y[i])
-			e, ok := v.(errV)
+			ri := maximumIV(I(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -3150,12 +3150,12 @@ func maximumSV(x S, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := maximumSV(S(x), y[i])
-			e, ok := v.(errV)
+			ri := maximumSV(S(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -3210,12 +3210,12 @@ func maximumABV(x AB, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := maximumIV(B2I(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := maximumIV(B2I(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -3270,12 +3270,12 @@ func maximumAFV(x AF, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := maximumFV(F(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := maximumFV(F(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -3330,12 +3330,12 @@ func maximumAIV(x AI, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := maximumIV(I(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := maximumIV(I(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -3366,12 +3366,12 @@ func maximumASV(x AS, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := maximumSV(S(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := maximumSV(S(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -3400,23 +3400,23 @@ func modulus(x, y V) V {
 			}
 			r := make(AV, len(x))
 			for i := range r {
-				v := modulus(x[i], y.at(i))
-				e, ok := v.(errV)
+				ri := modulus(x[i], y.at(i))
+				e, ok := ri.(errV)
 				if ok {
 					return e
 				}
-				r[i] = v
+				r[i] = ri
 			}
 			return r
 		}
 		r := make(AV, len(x))
 		for i := range r {
-			v := modulus(x[i], y)
-			e, ok := v.(errV)
+			ri := modulus(x[i], y)
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -3451,12 +3451,12 @@ func modulusFV(x F, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := modulusFV(F(x), y[i])
-			e, ok := v.(errV)
+			ri := modulusFV(F(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -3491,12 +3491,12 @@ func modulusIV(x I, y V) V {
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := modulusIV(I(x), y[i])
-			e, ok := v.(errV)
+			ri := modulusIV(I(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -3551,12 +3551,12 @@ func modulusABV(x AB, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := modulusIV(B2I(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := modulusIV(B2I(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -3611,12 +3611,12 @@ func modulusAFV(x AF, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := modulusFV(F(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := modulusFV(F(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -3671,12 +3671,12 @@ func modulusAIV(x AI, y V) V {
 		}
 		r := make(AV, len(y))
 		for i := range r {
-			v := modulusIV(I(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := modulusIV(I(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:

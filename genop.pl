@@ -271,23 +271,23 @@ EOS
                         }
                         r := make(AV, len(x))
                         for i := range r {
-                                v := ${name}(x[i], y.At(i))
-                                e, ok := v.(errV)
+                                ri := ${name}(x[i], y.at(i))
+                                e, ok := ri.(errV)
                                 if ok {
                                         return e
                                 }
-                                r[i] = v
+                                r[i] = ri
                         }
                         return r
                 }
                 r := make(AV, len(x))
                 for i := range r {
-                        v := ${name}(x[i], y)
-                        e, ok := v.(errV)
+                        ri := ${name}(x[i], y)
+                        e, ok := ri.(errV)
                         if ok {
                                 return e
                         }
-                        r[i] = v
+                        r[i] = ri
                 }
                 return r
 	default:
@@ -342,12 +342,12 @@ EOS
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
-			v := ${name}${t}V($t(x), y[i])
-			e, ok := v.(errV)
+			ri := ${name}${t}V($t(x), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
@@ -411,12 +411,12 @@ EOS
                 }
 		r := make(AV, len(y))
 		for i := range r {
-			v := ${name}${t}V($tt(x[i]), y[i])
-			e, ok := v.(errV)
+			ri := ${name}${t}V($tt(x[i]), y[i])
+			e, ok := ri.(errV)
 			if ok {
 				return e
 			}
-			r[i] = v
+			r[i] = ri
 		}
 		return r
 	default:
