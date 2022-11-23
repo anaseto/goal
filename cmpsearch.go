@@ -55,8 +55,8 @@ func matchArray(x array, y V) bool {
 		if !ok {
 			break
 		}
-		for i, v := range ya {
-			if v != x[i] {
+		for i, yi := range ya {
+			if yi != x[i] {
 				return false
 			}
 		}
@@ -71,8 +71,8 @@ func matchArray(x array, y V) bool {
 }
 
 func matchAB(x, y AB) bool {
-	for i, v := range y {
-		if v != x[i] {
+	for i, yi := range y {
+		if yi != x[i] {
 			return false
 		}
 	}
@@ -80,8 +80,8 @@ func matchAB(x, y AB) bool {
 }
 
 func matchABAI(x AB, y AI) bool {
-	for i, v := range y {
-		if v != int(B2I(x[i])) {
+	for i, yi := range y {
+		if yi != int(B2I(x[i])) {
 			return false
 		}
 	}
@@ -89,8 +89,8 @@ func matchABAI(x AB, y AI) bool {
 }
 
 func matchABAF(x AB, y AF) bool {
-	for i, v := range y {
-		if F(v) != B2F(x[i]) {
+	for i, yi := range y {
+		if F(yi) != B2F(x[i]) {
 			return false
 		}
 	}
@@ -98,8 +98,8 @@ func matchABAF(x AB, y AF) bool {
 }
 
 func matchAI(x, y AI) bool {
-	for i, v := range y {
-		if v != x[i] {
+	for i, yi := range y {
+		if yi != x[i] {
 			return false
 		}
 	}
@@ -107,8 +107,8 @@ func matchAI(x, y AI) bool {
 }
 
 func matchAIAF(x AI, y AF) bool {
-	for i, v := range y {
-		if F(v) != F(x[i]) {
+	for i, yi := range y {
+		if F(yi) != F(x[i]) {
 			return false
 		}
 	}
@@ -116,8 +116,8 @@ func matchAIAF(x AI, y AF) bool {
 }
 
 func matchAF(x, y AF) bool {
-	for i, v := range y {
-		if v != x[i] {
+	for i, yi := range y {
+		if yi != x[i] {
 			return false
 		}
 	}
@@ -134,8 +134,7 @@ func classify(x V) V {
 	case F, I, S:
 		return errf("%%x : x not an array (%s)", x.Type())
 	case AB:
-		v := x[0]
-		if !v {
+		if !x[0] {
 			return x
 		}
 		return not(x)
@@ -143,11 +142,11 @@ func classify(x V) V {
 		r := make(AI, len(x))
 		m := map[float64]int{}
 		n := 0
-		for i, v := range x {
-			c, ok := m[v]
+		for i, xi := range x {
+			c, ok := m[xi]
 			if !ok {
 				r[i] = n
-				m[v] = n
+				m[xi] = n
 				n++
 				continue
 			}
@@ -158,11 +157,11 @@ func classify(x V) V {
 		r := make(AI, len(x))
 		m := map[int]int{}
 		n := 0
-		for i, v := range x {
-			c, ok := m[v]
+		for i, xi := range x {
+			c, ok := m[xi]
 			if !ok {
 				r[i] = n
-				m[v] = n
+				m[xi] = n
 				n++
 				continue
 			}
@@ -173,11 +172,11 @@ func classify(x V) V {
 		r := make(AI, len(x))
 		m := map[string]int{}
 		n := 0
-		for i, v := range x {
-			c, ok := m[v]
+		for i, xi := range x {
+			c, ok := m[xi]
 			if !ok {
 				r[i] = n
-				m[v] = n
+				m[xi] = n
 				n++
 				continue
 			}
@@ -190,9 +189,9 @@ func classify(x V) V {
 		r := make(AI, len(x))
 		n := 0
 	loop:
-		for i, v := range x {
+		for i, xi := range x {
 			for j := range x[:i] {
-				if Match(v, x[j]) {
+				if Match(xi, x[j]) {
 					r[i] = r[j]
 					continue loop
 				}
@@ -230,22 +229,22 @@ func uniq(x V) V {
 	case AF:
 		r := AF{}
 		m := map[float64]struct{}{}
-		for _, v := range x {
-			_, ok := m[v]
+		for _, xi := range x {
+			_, ok := m[xi]
 			if !ok {
-				r = append(r, v)
-				m[v] = struct{}{}
+				r = append(r, xi)
+				m[xi] = struct{}{}
 			}
 		}
 		return r
 	case AI:
 		r := AI{}
 		m := map[int]struct{}{}
-		for _, v := range x {
-			_, ok := m[v]
+		for _, xi := range x {
+			_, ok := m[xi]
 			if !ok {
-				r = append(r, v)
-				m[v] = struct{}{}
+				r = append(r, xi)
+				m[xi] = struct{}{}
 				continue
 			}
 		}
@@ -253,11 +252,11 @@ func uniq(x V) V {
 	case AS:
 		r := AS{}
 		m := map[string]struct{}{}
-		for _, v := range x {
-			_, ok := m[v]
+		for _, xi := range x {
+			_, ok := m[xi]
 			if !ok {
-				r = append(r, v)
-				m[v] = struct{}{}
+				r = append(r, xi)
+				m[xi] = struct{}{}
 				continue
 			}
 		}
@@ -267,13 +266,13 @@ func uniq(x V) V {
 		// improved by sorting or string hashing.
 		r := make(AV, len(x))
 	loop:
-		for i, v := range x {
+		for i, xi := range x {
 			for j := range x[:i] {
-				if Match(v, x[j]) {
+				if Match(xi, x[j]) {
 					continue loop
 				}
 			}
-			r = append(r, v)
+			r = append(r, xi)
 		}
 		return canonical(r)
 	default:
@@ -293,9 +292,9 @@ func markFirsts(x V) V {
 	case AB:
 		r := make(AB, len(x))
 		r[0] = true
-		v := x[0]
+		x0 := x[0]
 		for i := 1; i < len(x); i++ {
-			if x[i] != v {
+			if x[i] != x0 {
 				r[i] = true
 				break
 			}
@@ -304,11 +303,11 @@ func markFirsts(x V) V {
 	case AF:
 		r := make(AB, len(x))
 		m := map[float64]struct{}{}
-		for i, v := range x {
-			_, ok := m[v]
+		for i, xi := range x {
+			_, ok := m[xi]
 			if !ok {
 				r[i] = true
-				m[v] = struct{}{}
+				m[xi] = struct{}{}
 				continue
 			}
 		}
@@ -316,11 +315,11 @@ func markFirsts(x V) V {
 	case AI:
 		r := make(AB, len(x))
 		m := map[int]struct{}{}
-		for i, v := range x {
-			_, ok := m[v]
+		for i, xi := range x {
+			_, ok := m[xi]
 			if !ok {
 				r[i] = true
-				m[v] = struct{}{}
+				m[xi] = struct{}{}
 				continue
 			}
 		}
@@ -328,11 +327,11 @@ func markFirsts(x V) V {
 	case AS:
 		r := make(AB, len(x))
 		m := map[string]struct{}{}
-		for i, v := range x {
-			_, ok := m[v]
+		for i, xi := range x {
+			_, ok := m[xi]
 			if !ok {
 				r[i] = true
-				m[v] = struct{}{}
+				m[xi] = struct{}{}
 				continue
 			}
 		}
@@ -342,9 +341,9 @@ func markFirsts(x V) V {
 		// improved by sorting or string hashing.
 		r := make(AB, len(x))
 	loop:
-		for i, v := range x {
+		for i, xi := range x {
 			for j := range x[:i] {
-				if Match(v, x[j]) {
+				if Match(xi, x[j]) {
 					continue loop
 				}
 			}
@@ -390,11 +389,11 @@ func memberOf(x, y V) V {
 
 func memberOfAB(x V, y AB) V {
 	var t, f bool
-	for _, v := range y {
+	for _, yi := range y {
 		if t && f {
 			break
 		}
-		t, f = t || v, f || !v
+		t, f = t || yi, f || !yi
 	}
 	if t && f {
 		switch x := x.(type) {
@@ -416,10 +415,10 @@ func memberOfAB(x V, y AB) V {
 
 func memberOfAF(x V, y AF) V {
 	m := map[F]struct{}{}
-	for _, v := range y {
-		_, ok := m[F(v)]
+	for _, yi := range y {
+		_, ok := m[F(yi)]
 		if !ok {
-			m[F(v)] = struct{}{}
+			m[F(yi)] = struct{}{}
 			continue
 		}
 	}
@@ -432,20 +431,20 @@ func memberOfAF(x V, y AF) V {
 		return B2I(ok)
 	case AB:
 		r := make(AB, len(x))
-		for i, v := range x {
-			_, r[i] = m[B2F(v)]
+		for i, xi := range x {
+			_, r[i] = m[B2F(xi)]
 		}
 		return r
 	case AI:
 		r := make(AB, len(x))
-		for i, v := range x {
-			_, r[i] = m[F(v)]
+		for i, xi := range x {
+			_, r[i] = m[F(xi)]
 		}
 		return r
 	case AF:
 		r := make(AB, len(x))
-		for i, v := range x {
-			_, r[i] = m[F(v)]
+		for i, xi := range x {
+			_, r[i] = m[F(xi)]
 		}
 		return r
 	case array:
@@ -457,10 +456,10 @@ func memberOfAF(x V, y AF) V {
 
 func memberOfAI(x V, y AI) V {
 	m := map[int]struct{}{}
-	for _, v := range y {
-		_, ok := m[v]
+	for _, yi := range y {
+		_, ok := m[yi]
 		if !ok {
-			m[v] = struct{}{}
+			m[yi] = struct{}{}
 			continue
 		}
 	}
@@ -476,23 +475,23 @@ func memberOfAI(x V, y AI) V {
 		return B2I(ok)
 	case AB:
 		r := make(AB, len(x))
-		for i, v := range x {
-			_, r[i] = m[int(B2I(v))]
+		for i, xi := range x {
+			_, r[i] = m[int(B2I(xi))]
 		}
 		return r
 	case AI:
 		r := make(AB, len(x))
-		for i, v := range x {
-			_, r[i] = m[v]
+		for i, xi := range x {
+			_, r[i] = m[xi]
 		}
 		return r
 	case AF:
 		r := make(AB, len(x))
-		for i, v := range x {
-			if !isI(F(v)) {
+		for i, xi := range x {
+			if !isI(F(xi)) {
 				continue
 			}
-			_, r[i] = m[int(v)]
+			_, r[i] = m[int(xi)]
 		}
 		return r
 	case array:
@@ -504,10 +503,10 @@ func memberOfAI(x V, y AI) V {
 
 func memberOfAS(x V, y AS) V {
 	m := map[string]struct{}{}
-	for _, v := range y {
-		_, ok := m[v]
+	for _, yi := range y {
+		_, ok := m[yi]
 		if !ok {
-			m[v] = struct{}{}
+			m[yi] = struct{}{}
 			continue
 		}
 	}
@@ -517,8 +516,8 @@ func memberOfAS(x V, y AS) V {
 		return B2I(ok)
 	case AS:
 		r := make(AB, len(x))
-		for i, v := range x {
-			_, r[i] = m[v]
+		for i, xi := range x {
+			_, r[i] = m[xi]
 		}
 		return r
 	case array:
@@ -533,8 +532,8 @@ func memberOfAV(x V, y AV) V {
 	case array:
 		return memberOfArray(x, y)
 	default:
-		for _, v := range y {
-			if Match(x, v) {
+		for _, yi := range y {
+			if Match(x, yi) {
 				return B2I(true)
 			}
 		}
@@ -569,8 +568,8 @@ func occurrenceCount(x V) V {
 	case AB:
 		r := make(AI, len(x))
 		var f, t int
-		for i, v := range x {
-			if v {
+		for i, xi := range x {
+			if xi {
 				r[i] = t
 				t++
 				continue
@@ -582,39 +581,39 @@ func occurrenceCount(x V) V {
 	case AF:
 		r := make(AI, len(x))
 		m := map[float64]int{}
-		for i, v := range x {
-			c, ok := m[v]
+		for i, xi := range x {
+			c, ok := m[xi]
 			if !ok {
-				m[v] = 0
+				m[xi] = 0
 				continue
 			}
-			m[v] = c + 1
+			m[xi] = c + 1
 			r[i] = c + 1
 		}
 		return r
 	case AI:
 		r := make(AI, len(x))
 		m := map[int]int{}
-		for i, v := range x {
-			c, ok := m[v]
+		for i, xi := range x {
+			c, ok := m[xi]
 			if !ok {
-				m[v] = 0
+				m[xi] = 0
 				continue
 			}
-			m[v] = c + 1
+			m[xi] = c + 1
 			r[i] = c + 1
 		}
 		return r
 	case AS:
 		r := make(AI, len(x))
 		m := map[string]int{}
-		for i, v := range x {
-			c, ok := m[v]
+		for i, xi := range x {
+			c, ok := m[xi]
 			if !ok {
-				m[v] = 0
+				m[xi] = 0
 				continue
 			}
-			m[v] = c + 1
+			m[xi] = c + 1
 			r[i] = c + 1
 		}
 		return r
@@ -623,9 +622,9 @@ func occurrenceCount(x V) V {
 		// improved by sorting or string hashing.
 		r := make(AI, len(x))
 	loop:
-		for i, v := range x {
+		for i, xi := range x {
 			for j := i - 1; j >= 0; j-- {
-				if Match(v, x[j]) {
+				if Match(xi, x[j]) {
 					r[i] = r[j] + 1
 					continue loop
 				}
@@ -701,8 +700,8 @@ func findS(s S, y V) V {
 		return res
 	case AV:
 		res := make(AV, y.Len())
-		for i, v := range y {
-			res[i] = findS(s, v)
+		for i, yi := range y {
+			res[i] = findS(s, yi)
 			if err, ok := res[i].(errV); ok {
 				return err
 			}
@@ -720,9 +719,9 @@ func imapAB(x AB) (m [2]int) {
 		return m
 	}
 	m[int(B2I(x[0]))] = 0
-	for i, v := range x[1:] {
-		if v != x[0] {
-			m[int(B2I(v))] = i + 1
+	for i, xi := range x[1:] {
+		if xi != x[0] {
+			m[int(B2I(xi))] = i + 1
 			break
 		}
 	}
@@ -731,10 +730,10 @@ func imapAB(x AB) (m [2]int) {
 
 func imapAI(x AI) map[int]int {
 	m := map[int]int{}
-	for i, v := range x {
-		_, ok := m[v]
+	for i, xi := range x {
+		_, ok := m[xi]
 		if !ok {
-			m[v] = i
+			m[xi] = i
 			continue
 		}
 	}
@@ -743,10 +742,10 @@ func imapAI(x AI) map[int]int {
 
 func imapAF(x AF) map[float64]int {
 	m := map[float64]int{}
-	for i, v := range x {
-		_, ok := m[v]
+	for i, xi := range x {
+		_, ok := m[xi]
 		if !ok {
-			m[v] = i
+			m[xi] = i
 			continue
 		}
 	}
@@ -755,10 +754,10 @@ func imapAF(x AF) map[float64]int {
 
 func imapAS(x AS) map[string]int {
 	m := map[string]int{}
-	for i, v := range x {
-		_, ok := m[v]
+	for i, xi := range x {
+		_, ok := m[xi]
 		if !ok {
-			m[v] = i
+			m[xi] = i
 			continue
 		}
 	}
@@ -768,8 +767,8 @@ func imapAS(x AS) map[string]int {
 func findAB(x AB, y V) V {
 	switch y := y.(type) {
 	case I:
-		for i, v := range x {
-			if B2I(v) == y {
+		for i, xi := range x {
+			if B2I(xi) == y {
 				return I(i)
 			}
 		}
@@ -782,29 +781,29 @@ func findAB(x AB, y V) V {
 	case AB:
 		m := imapAB(x)
 		res := make(AI, y.Len())
-		for i, v := range y {
-			res[i] = m[B2I(v)]
+		for i, yi := range y {
+			res[i] = m[B2I(yi)]
 		}
 		return res
 	case AI:
 		m := imapAB(x)
 		res := make(AI, y.Len())
-		for i, v := range y {
-			if v != 0 && v != 1 {
+		for i, yi := range y {
+			if yi != 0 && yi != 1 {
 				res[i] = x.Len()
 			} else {
-				res[i] = m[v]
+				res[i] = m[yi]
 			}
 		}
 		return res
 	case AF:
 		m := imapAB(x)
 		res := make(AI, y.Len())
-		for i, v := range y {
-			if v != 0 && v != 1 {
+		for i, yi := range y {
+			if yi != 0 && yi != 1 {
 				res[i] = x.Len()
 			} else {
-				res[i] = m[int(v)]
+				res[i] = m[int(yi)]
 			}
 		}
 		return res
@@ -818,15 +817,15 @@ func findAB(x AB, y V) V {
 func findAF(x AF, y V) V {
 	switch y := y.(type) {
 	case I:
-		for i, v := range x {
-			if v == float64(y) {
+		for i, xi := range x {
+			if xi == float64(y) {
 				return I(i)
 			}
 		}
 		return I(x.Len())
 	case F:
-		for i, v := range x {
-			if F(v) == y {
+		for i, xi := range x {
+			if F(xi) == y {
 				return I(i)
 			}
 		}
@@ -834,8 +833,8 @@ func findAF(x AF, y V) V {
 	case AB:
 		m := imapAF(x)
 		res := make(AI, y.Len())
-		for i, v := range y {
-			j, ok := m[float64(B2F(v))]
+		for i, yi := range y {
+			j, ok := m[float64(B2F(yi))]
 			if ok {
 				res[i] = j
 			} else {
@@ -846,8 +845,8 @@ func findAF(x AF, y V) V {
 	case AI:
 		m := imapAF(x)
 		res := make(AI, y.Len())
-		for i, v := range y {
-			j, ok := m[float64(v)]
+		for i, yi := range y {
+			j, ok := m[float64(yi)]
 			if ok {
 				res[i] = j
 			} else {
@@ -858,8 +857,8 @@ func findAF(x AF, y V) V {
 	case AF:
 		m := imapAF(x)
 		res := make(AI, y.Len())
-		for i, v := range y {
-			j, ok := m[v]
+		for i, yi := range y {
+			j, ok := m[yi]
 			if ok {
 				res[i] = j
 			} else {
@@ -877,15 +876,15 @@ func findAF(x AF, y V) V {
 func findAI(x AI, y V) V {
 	switch y := y.(type) {
 	case I:
-		for i, v := range x {
-			if I(v) == y {
+		for i, xi := range x {
+			if I(xi) == y {
 				return I(i)
 			}
 		}
 		return I(x.Len())
 	case F:
-		for i, v := range x {
-			if F(v) == y {
+		for i, xi := range x {
+			if F(xi) == y {
 				return I(i)
 			}
 		}
@@ -893,8 +892,8 @@ func findAI(x AI, y V) V {
 	case AB:
 		m := imapAI(x)
 		res := make(AI, y.Len())
-		for i, v := range y {
-			j, ok := m[int(B2I(v))]
+		for i, yi := range y {
+			j, ok := m[int(B2I(yi))]
 			if ok {
 				res[i] = j
 			} else {
@@ -905,8 +904,8 @@ func findAI(x AI, y V) V {
 	case AI:
 		m := imapAI(x)
 		res := make(AI, y.Len())
-		for i, v := range y {
-			j, ok := m[v]
+		for i, yi := range y {
+			j, ok := m[yi]
 			if ok {
 				res[i] = j
 			} else {
@@ -917,12 +916,12 @@ func findAI(x AI, y V) V {
 	case AF:
 		m := imapAI(x)
 		res := make(AI, y.Len())
-		for i, v := range y {
-			if !isI(F(v)) {
+		for i, yi := range y {
+			if !isI(F(yi)) {
 				res[i] = x.Len()
 				continue
 			}
-			j, ok := m[int(v)]
+			j, ok := m[int(yi)]
 			if ok {
 				res[i] = j
 			} else {
@@ -940,8 +939,8 @@ func findAI(x AI, y V) V {
 func findAS(x AS, y V) V {
 	switch y := y.(type) {
 	case S:
-		for i, v := range x {
-			if S(v) == y {
+		for i, xi := range x {
+			if S(xi) == y {
 				return I(i)
 			}
 		}
@@ -949,8 +948,8 @@ func findAS(x AS, y V) V {
 	case AS:
 		m := imapAS(x)
 		res := make(AI, y.Len())
-		for i, v := range y {
-			j, ok := m[v]
+		for i, yi := range y {
+			j, ok := m[yi]
 			if ok {
 				res[i] = j
 			} else {
@@ -986,22 +985,22 @@ func findArray(x, y array) V {
 func findAV(x AV, y V) V {
 	switch y := y.(type) {
 	case F:
-		for i, v := range x {
-			if Match(v, y) {
+		for i, xi := range x {
+			if Match(xi, y) {
 				return I(i)
 			}
 		}
 		return I(x.Len())
 	case I:
-		for i, v := range x {
-			if Match(v, y) {
+		for i, xi := range x {
+			if Match(xi, y) {
 				return I(i)
 			}
 		}
 		return I(x.Len())
 	case S:
-		for i, v := range x {
-			if Match(v, y) {
+		for i, xi := range x {
+			if Match(xi, y) {
 				return I(i)
 			}
 		}
@@ -1009,8 +1008,8 @@ func findAV(x AV, y V) V {
 	case array:
 		return findArray(x, y)
 	default:
-		for i, v := range x {
-			if Match(v, y) {
+		for i, xi := range x {
+			if Match(xi, y) {
 				return I(i)
 			}
 		}
