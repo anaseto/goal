@@ -98,7 +98,7 @@ func errf(format string, a ...interface{}) errV {
 	return errV(fmt.Sprintf(format, a...))
 }
 
-// ErrorF returns a formatted error value.
+// Errorf returns a formatted error value.
 func Errorf(format string, a ...interface{}) V {
 	return errV(fmt.Sprintf(format, a...))
 }
