@@ -217,6 +217,7 @@ var matchTests = [...]matchTest{
 	{`@[1+]`, `"p"`},
 	{`@[+-]`, `"q"`},
 	{`@[(+/)@-]`, `"q"`},
+	{`+/'(1 2;3 4)`, `3 7`},
 }
 
 func TestEval(t *testing.T) {
