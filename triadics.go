@@ -133,3 +133,20 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 		return errType("@[x;y;f]", "y", y)
 	}
 }
+
+// try implements .[f1;x;f2].
+func try(ctx *Context, f1, x, f2 V) V {
+	av := toArray(x).(array)
+	for i := av.Len() - 1; i >= 0; i-- {
+		ctx.push(av.at(i))
+	}
+	r := ctx.applyN(f1, av.Len())
+	if err, ok := r.(errV); ok {
+		ctx.push(S(err))
+		r = ctx.applyN(f2, 1)
+		if err, ok := r.(errV); ok {
+			return errf(".[f1;x;f2] : %v (for f2)", err)
+		}
+	}
+	return r
+}

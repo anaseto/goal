@@ -638,17 +638,3 @@ func eval(ctx *Context, x V) V {
 		return errType(".x", "x", x)
 	}
 }
-
-// try implements .[f1;x;f2].
-func try(ctx *Context, f1, x, f2 V) V {
-	av := toArray(x).(array)
-	for i := av.Len() - 1; i >= 0; i-- {
-		ctx.push(av.at(i))
-	}
-	r := ctx.applyN(f1, av.Len())
-	if err, ok := r.(errV); ok {
-		ctx.push(S(err))
-		return ctx.applyN(f2, 1)
-	}
-	return r
-}
