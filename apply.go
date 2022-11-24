@@ -35,6 +35,15 @@ func (ctx *Context) applyN(x V, n int) V {
 			return ctx.applyVariadic(x)
 		}
 		return ctx.applyNVariadic(x, n)
+	case derivedVerb:
+		ctx.push(x.Arg)
+		args := ctx.peekN(n + 1)
+		if hasNil(args) {
+			return Projection{Fun: x, Args: ctx.popN(n + 1)}
+		}
+		r := ctx.variadics[x.Fun].Func(ctx, args)
+		ctx.dropN(n + 1)
+		return r
 	case ProjectionOne:
 		if n > 1 {
 			return errf("too many arguments: got %d, expected 1", n)
@@ -168,6 +177,10 @@ func (ctx *Context) applyArrayArgs(x array, arg V, args []V) V {
 func (ctx *Context) applyVariadic(v Variadic) V {
 	args := ctx.peek()
 	vv := args[0]
+	if ctx.variadics[v].Adverb {
+		ctx.drop()
+		return derivedVerb{Fun: v, Arg: vv}
+	}
 	if vv == nil {
 		ctx.drop()
 		return Projection{Fun: v, Args: []V{nil}}

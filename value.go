@@ -174,6 +174,14 @@ func (v Variadic) Sprint(ctx *Context) string {
 	return v.String()
 }
 
+// derivedVerb represents values modified by an adverb. This kind value is not
+// visible within the program, as it is only produced as an intermediary value
+// in adverb trains.
+type derivedVerb struct {
+	Fun Variadic
+	Arg V
+}
+
 // Projection represents a partial application of a function. Because variadic
 // verbs do not have a fixed arity, it is possible to produce a projection of
 // arbitrary arity.
@@ -202,6 +210,7 @@ func (v Variadic) Type() string      { return "v" }
 func (p Projection) Type() string    { return "p" }
 func (p ProjectionOne) Type() string { return "p" }
 func (q Composition) Type() string   { return "q" }
+func (r derivedVerb) Type() string   { return "r" }
 func (l Lambda) Type() string        { return "l" }
 
 func (p Projection) Sprint(ctx *Context) string {
@@ -227,6 +236,15 @@ func (p ProjectionOne) Sprint(ctx *Context) string {
 
 func (q Composition) Sprint(ctx *Context) string {
 	return fmt.Sprintf("%s %s", q.Left.Sprint(ctx), q.Right.Sprint(ctx))
+}
+
+func (r derivedVerb) Sprint(ctx *Context) string {
+	switch arg := r.Arg.(type) {
+	case Composition:
+		return fmt.Sprintf("(%s)%s", arg.Sprint(ctx), r.Fun.Sprint(ctx))
+	default:
+		return fmt.Sprintf("%s%s", arg.Sprint(ctx), r.Fun.Sprint(ctx))
+	}
 }
 
 func (l Lambda) Sprint(ctx *Context) string {
@@ -432,6 +450,9 @@ func (p ProjectionOne) Rank(ctx *Context) int { return 1 }
 // Rank for a composition is given by the function on the right.
 func (q Composition) Rank(ctx *Context) int { return q.Right.Rank(ctx) }
 
+// Rank returns 2 for derived verbs.
+func (r derivedVerb) Rank(ctx *Context) int { return 2 }
+
 // Rank for a lambda is the number of arguments, either determined by the
 // signature, or the use of x, y and z in the definition.
 func (l Lambda) Rank(ctx *Context) int { return ctx.lambdas[l].Rank }
@@ -473,6 +494,11 @@ func (p ProjectionOne) Matches(x V) bool {
 func (q Composition) Matches(x V) bool {
 	xq, ok := x.(Composition)
 	return ok && Match(q.Left, xq.Left) && Match(q.Right, xq.Right)
+}
+
+func (r derivedVerb) Matches(x V) bool {
+	xr, ok := x.(derivedVerb)
+	return ok && r.Fun == xr.Fun && Match(r.Arg, xr.Arg)
 }
 
 func (l Lambda) Matches(x V) bool {
