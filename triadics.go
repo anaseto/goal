@@ -23,7 +23,7 @@ func (ctx *Context) amend3arrayI(x array, y I, f V) V {
 	xy := x.at(int(y))
 	repl := ctx.Apply(f, xy)
 	if err, ok := repl.(errV); ok {
-		return errf("calling f in @[x;y;f] : %v", err)
+		return errf("f call in @[x;y;f] : %v", err)
 	}
 	if compatEltType(x, repl) {
 		x.set(int(y), repl)
@@ -77,7 +77,7 @@ func (ctx *Context) amend4arrayI(x array, y I, f, z V) V {
 	xy := x.at(int(y))
 	repl := ctx.Apply2(f, xy, z)
 	if err, ok := repl.(errV); ok {
-		return errf("calling f in @[x;y;f;z] : %v", err)
+		return errf("f call in @[x;y;f;z] : %v", err)
 	}
 	if compatEltType(x, repl) {
 		x.set(int(y), repl)
@@ -147,7 +147,7 @@ func try(ctx *Context, f1, x, f2 V) V {
 		ctx.push(S(err))
 		r = ctx.applyN(f2, 1)
 		if err, ok := r.(errV); ok {
-			return errf("calling f2 in .[f1;x;f2] : %v", err)
+			return errf("f2 call in .[f1;x;f2] : %v", err)
 		}
 	}
 	return r
