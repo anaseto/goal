@@ -33,7 +33,7 @@ func (e *Error) Error() string {
 			if pos.Filename != "" {
 				s, line, col := getPosLine(sources[pos.Filename], pos.Pos)
 				fmt.Fprintf(sb, "%s:%d:%d: %s\n",
-					pos.Filename, line, col, e.Msg)
+					pos.Filename, line, col+1, e.Msg)
 				writeLine(sb, s, col)
 				continue
 			}
@@ -41,7 +41,7 @@ func (e *Error) Error() string {
 		}
 		if pos.Filename != "" {
 			s, line, col := getPosLine(sources[pos.Filename], pos.Pos)
-			fmt.Fprintf(sb, "  (called from) %s:%d:%d:%d\n", pos.Filename, line, col, pos.Pos)
+			fmt.Fprintf(sb, "  (called from) %s:%d:%d:%d\n", pos.Filename, line, col+1, pos.Pos)
 			writeLine(sb, s, col)
 		} else if lc := pos.lambda; lc != nil {
 			s, _, col := getPosLine(lc.Source, pos.Pos-lc.StartPos)
