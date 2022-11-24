@@ -22,7 +22,7 @@ func (ctx *Context) amend3arrayI(x array, y I, f V) V {
 	xy := x.at(int(y))
 	repl := ctx.Apply(f, xy)
 	if err, ok := repl.(errV); ok {
-		return err
+		return errf("@[x;y;f] : %v (f call)", err)
 	}
 	if compatEltType(x, repl) {
 		x.set(int(y), repl)
@@ -75,7 +75,7 @@ func (ctx *Context) amend4arrayI(x array, y I, f, z V) V {
 	xy := x.at(int(y))
 	repl := ctx.Apply2(f, xy, z)
 	if err, ok := repl.(errV); ok {
-		return err
+		return errf("@[x;y;f;z] : %v (f call)", err)
 	}
 	if compatEltType(x, repl) {
 		x.set(int(y), repl)
