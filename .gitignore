@@ -13,4 +13,5 @@
 *.html
 rewrite.sh
 goal.test
-cpuprofile.out
+*.out
+bench-test.go

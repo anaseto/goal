@@ -8,10 +8,12 @@ import (
 	"log"
 	"os"
 	"runtime/debug"
+	"runtime/pprof"
 	"strings"
 )
 
 func main() {
+	cpuprofile := flag.String("cpuprofile", "", "write cpu profile to `file`")
 	optE := flag.String("e", "", "execute command")
 	optD := flag.Bool("d", false, "debug info")
 	flag.Usage = func() {
@@ -20,6 +22,16 @@ func main() {
 		fmt.Fprintln(os.Stderr, "See man page goal(1) for details (TODO).")
 	}
 	flag.Parse()
+	if *cpuprofile != "" {
+		// profiling
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "goal: %v", err)
+			os.Exit(1)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
 	args := flag.Args()
 	ctx := goal.NewContext()
 	registerVariadics(ctx)
