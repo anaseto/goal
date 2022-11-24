@@ -110,7 +110,7 @@ func fold2Join(sep S, x V) V {
 func fold3(ctx *Context, args []V) V {
 	f, ok := args[1].(Function)
 	if !ok {
-		return errf("x F/y : F not a function (%s)", f.Type())
+		return errf("x F/y : F not a function (%s)", args[1].Type())
 	}
 	if f.Rank(ctx) != 2 {
 		return fold3While(ctx, args)
@@ -241,7 +241,7 @@ func scan2Split(sep S, x V) V {
 func scan3(ctx *Context, args []V) V {
 	f, ok := args[1].(Function)
 	if !ok {
-		return errf("x f'y : f not a function (%s)", f.Type())
+		return errf("x f'y : f not a function (%s)", args[1].Type())
 	}
 	if f.Rank(ctx) != 2 {
 		return scan3While(ctx, args)
@@ -327,7 +327,7 @@ func each2(ctx *Context, args []V) V {
 	f, ok := args[1].(Function)
 	if !ok {
 		// TODO: binary search
-		return errf("f'x : f not a function (%s)", f.Type())
+		return errf("f'x : f not a function (%s)", args[1].Type())
 	}
 	x := toArray(args[0])
 	switch x := x.(type) {
@@ -351,15 +351,15 @@ func each2(ctx *Context, args []V) V {
 func each3(ctx *Context, args []V) V {
 	f, ok := args[1].(Function)
 	if !ok {
-		return errf("x f'y : f not a function (%s)", f.Type())
+		return errf("x f'y : f not a function (%s)", args[1].Type())
 	}
 	x, ok := args[2].(array)
 	if !ok {
-		return errf("x f'y : x not an array (%s)", x.Type())
+		return errf("x f'y : x not an array (%s)", args[2].Type())
 	}
 	y, ok := args[0].(array)
 	if !ok {
-		return errf("x f'y : y not an array (%s)", y.Type())
+		return errf("x f'y : y not an array (%s)", args[0].Type())
 	}
 	xlen := x.Len()
 	if xlen != y.Len() {
