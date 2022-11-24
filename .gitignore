@@ -14,4 +14,4 @@
 rewrite.sh
 goal.test
 *.out
-bench-test.go
+bench_test.go
