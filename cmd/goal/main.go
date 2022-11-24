@@ -171,7 +171,7 @@ func registerVariadics(ctx *goal.Context) {
 					fmt.Println(string(arg))
 					return nil
 				default:
-					fmt.Printf("%v\n", arg)
+					fmt.Println(arg.Sprint(ctx))
 					return nil
 				}
 			}
