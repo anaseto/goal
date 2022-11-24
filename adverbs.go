@@ -97,6 +97,8 @@ func fold2vAdd(x V) V {
 
 func fold2Join(sep S, x V) V {
 	switch x := x.(type) {
+	case S:
+		return x
 	case AS:
 		return S(strings.Join([]string(x), string(sep)))
 	case AV:
