@@ -2,6 +2,7 @@ package goal
 
 //import "fmt"
 
+// amend3 implements @[x;y;f].
 func (ctx *Context) amend3(x, y, f V) V {
 	switch x := x.(type) {
 	case array:
@@ -55,6 +56,7 @@ func (ctx *Context) amend3array(x array, y, f V) V {
 	}
 }
 
+// amend4 implements @[x;y;f;z].
 func (ctx *Context) amend4(x, y, f, z V) V {
 	switch x := x.(type) {
 	case array:
