@@ -124,15 +124,15 @@ const (
 	vFind                     // ?
 	vApply                    // @
 	vApplyN                   // .
+	vList                     // (...;...;...)
+	vEach                     // ' (adverb)
+	vFold                     // / (adverb)
+	vScan                     // \ (adverb)
 	vIn                       // in
 	vSign                     // sign
 	vOCount                   // ocount (occurrence count)
 	vICount                   // icount (index count)
 	vBytes                    // bytes (byte count)
-	vList                     // (...;...;...)
-	vEach                     // ' (adverb)
-	vFold                     // / (adverb)
-	vScan                     // \ (adverb)
 )
 
 var vStrings = [...]string{
@@ -174,12 +174,6 @@ func (v Variadic) Sprint(ctx *Context) string {
 	return v.String()
 }
 
-// DerivedVerb represents values modified by an adverb.
-type DerivedVerb struct {
-	Fun Variadic
-	Arg V
-}
-
 // Projection represents a partial application of a function. Because variadic
 // verbs do not have a fixed arity, it is possible to produce a projection of
 // arbitrary arity.
@@ -208,7 +202,6 @@ func (v Variadic) Type() string      { return "v" }
 func (p Projection) Type() string    { return "p" }
 func (p ProjectionOne) Type() string { return "p" }
 func (q Composition) Type() string   { return "q" }
-func (r DerivedVerb) Type() string   { return "r" }
 func (l Lambda) Type() string        { return "l" }
 
 func (p Projection) Sprint(ctx *Context) string {
@@ -234,15 +227,6 @@ func (p ProjectionOne) Sprint(ctx *Context) string {
 
 func (q Composition) Sprint(ctx *Context) string {
 	return fmt.Sprintf("%s %s", q.Left.Sprint(ctx), q.Right.Sprint(ctx))
-}
-
-func (r DerivedVerb) Sprint(ctx *Context) string {
-	switch arg := r.Arg.(type) {
-	case Composition:
-		return fmt.Sprintf("(%s)%s", arg.Sprint(ctx), r.Fun.Sprint(ctx))
-	default:
-		return fmt.Sprintf("%s%s", arg.Sprint(ctx), r.Fun.Sprint(ctx))
-	}
 }
 
 func (l Lambda) Sprint(ctx *Context) string {
@@ -439,9 +423,6 @@ type Function interface {
 // Rank returns 2 for variadics.
 func (v Variadic) Rank(ctx *Context) int { return 2 }
 
-// Rank returns 2 for derived verbs.
-func (r DerivedVerb) Rank(ctx *Context) int { return 2 }
-
 // Rank for a projection is the number of nil arguments.
 func (p Projection) Rank(ctx *Context) int { return countNils(p.Args) }
 
@@ -477,11 +458,6 @@ func (v Variadic) zero() V {
 func (v Variadic) Matches(x V) bool {
 	xv, ok := x.(Variadic)
 	return ok && v == xv
-}
-
-func (r DerivedVerb) Matches(x V) bool {
-	xr, ok := x.(DerivedVerb)
-	return ok && r.Fun == xr.Fun && Match(r.Arg, xr.Arg)
 }
 
 func (p Projection) Matches(x V) bool {

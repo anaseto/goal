@@ -375,8 +375,10 @@ func (c *compiler) doToken(tok *astToken) error {
 		// local scope: argument, local or global variable
 		c.doLocal(tok)
 		return nil
-	case astVERB:
-		return c.doVerb(tok)
+	case astDYAD:
+		return c.doDyad(tok)
+	case astMONAD:
+		return c.doVariadic(tok)
 	default:
 		// should not happen
 		return c.errorf("unexpected token type: %v", tok.Type)
@@ -420,7 +422,7 @@ func (c *compiler) doLocal(tok *astToken) {
 }
 
 func (c *compiler) doVariadic(tok *astToken) error {
-	v := parseBuiltin(tok.Text)
+	v := c.parseBuiltin(tok.Text)
 	opos := c.pos
 	c.pos = tok.Pos
 	c.pushVariadic(v)
@@ -441,7 +443,7 @@ func (c *compiler) pushVariadic(v Variadic) {
 	}
 }
 
-func (c *compiler) doVerb(tok *astToken) error {
+func (c *compiler) doDyad(tok *astToken) error {
 	e := c.it.Peek()
 	argc := c.argc
 	if e == nil || c.arglist {
@@ -483,7 +485,9 @@ func isLeftArg(e expr) bool {
 	switch e := e.(type) {
 	case *astToken:
 		switch e.Type {
-		case astVERB:
+		case astDYAD:
+			return false
+		case astMONAD:
 			return false
 		}
 	case *astAdverbs:
@@ -516,73 +520,17 @@ func (c *compiler) doAssign(verbTok, identTok *astToken) bool {
 	return true
 }
 
-func parseBuiltin(s string) (verb Variadic) {
-	switch s {
-	case ":", "::":
-		verb = vRight
-	case "+":
-		verb = vAdd
-	case "-":
-		verb = vSubtract
-	case "*":
-		verb = vMultiply
-	case "%":
-		verb = vDivide
-	case "!":
-		verb = vMod
-	case "&":
-		verb = vMin
-	case "|":
-		verb = vMax
-	case "<":
-		verb = vLess
-	case ">":
-		verb = vMore
-	case "=":
-		verb = vEqual
-	case "~":
-		verb = vMatch
-	case ",":
-		verb = vJoin
-	case "^":
-		verb = vWithout
-	case "#":
-		verb = vTake
-	case "_":
-		verb = vDrop
-	case "$":
-		verb = vCast
-	case "?":
-		verb = vFind
-	case "@":
-		verb = vApply
-	case ".":
-		verb = vApplyN
-	case "in":
-		verb = vIn
-	case "sign":
-		verb = vSign
-	case "ocount":
-		verb = vOCount
-	case "icount":
-		verb = vICount
-	case "bytes":
-		verb = vBytes
-	case "'":
-		verb = vEach
-	case "/":
-		verb = vFold
-	case "\\":
-		verb = vScan
-	default:
+func (c *compiler) parseBuiltin(s string) Variadic {
+	v, ok := c.ctx.vNames[s]
+	if !ok {
 		panic("unknown variadic op: " + s)
 	}
-	return verb
+	return v
 }
 
 func getVerb(e expr) (*astToken, bool) {
 	tok, ok := e.(*astToken)
-	return tok, ok && tok.Type == astVERB
+	return tok, ok && (tok.Type == astDYAD || tok.Type == astMONAD)
 
 }
 
@@ -802,7 +750,7 @@ func (c *compiler) doArgs(b *astBlock) error {
 		expr := c.it.Peek()
 		switch expr := expr.(type) {
 		case *astToken:
-			if expr.Type == astVERB && expr.Text == "?" {
+			if expr.Type == astDYAD && expr.Text == "?" {
 				err := c.doCond(b)
 				if err != nil {
 					return err

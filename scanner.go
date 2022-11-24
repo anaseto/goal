@@ -17,7 +17,7 @@ func (t Token) String() string {
 	switch t.Type {
 	case ERROR:
 		return t.Text
-	case ADVERB, IDENT, VERB, NUMBER:
+	case ADVERB, IDENT, DYAD, NUMBER:
 		return t.Text
 	case LEFTBRACE:
 		return "{"
@@ -49,40 +49,53 @@ const (
 	EOF
 	ERROR
 	ADVERB
+	DYAD
 	IDENT
 	LEFTBRACE
 	LEFTBRACKET
 	LEFTPAREN
 	NEWLINE
 	NUMBER
+	MONAD
 	RIGHTBRACE
 	RIGHTBRACKET
 	RIGHTPAREN
 	SEMICOLON
 	STRING
-	VERB
+)
+
+// NameType represents the different kinds of special roles for alphanumeric
+// identifiers that act as keywords.
+type NameType int
+
+// These constants represent the different kinds of special names.
+const (
+	NameIdent NameType = iota // a normal identifier (default zero value)
+	NameMonad                 // a builtin monad (cannot have left argument)
+	NameDyad                  // a builtin dyad (can have left argument)
 )
 
 // Scanner represents the state of the scanner.
 type Scanner struct {
-	reader  *strings.Reader // rune reader
-	err     error           // scanning error (if any)
-	peeked  bool            // peeked next
-	npos    int             // position of next rune in the input
-	tpos    int             // current token start position
-	pr      rune            // peeked rune
-	psize   int             // size of last peeked rune
-	start   bool            // at line start
-	exprEnd bool            // at expression start
-	token   Token           // last token
-	source  string          // source string
+	names   map[string]NameType // special keywords
+	reader  *strings.Reader     // rune reader
+	err     error               // scanning error (if any)
+	peeked  bool                // peeked next
+	npos    int                 // position of next rune in the input
+	tpos    int                 // current token start position
+	pr      rune                // peeked rune
+	psize   int                 // size of last peeked rune
+	start   bool                // at line start
+	exprEnd bool                // at expression start
+	token   Token               // last token
+	source  string              // source string
 }
 
 type stateFn func(*Scanner) stateFn
 
 // NewScanner returns a scanner for the given source string.
-func NewScanner(source string) *Scanner {
-	s := &Scanner{}
+func NewScanner(names map[string]NameType, source string) *Scanner {
+	s := &Scanner{names: names}
 	s.source = source
 	s.reader = strings.NewReader(source)
 	s.start = true
@@ -164,9 +177,11 @@ func (s *Scanner) emitString(t TokenType) stateFn {
 }
 
 func (s *Scanner) emitIDENT() stateFn {
-	switch s.source[s.tpos:s.npos] {
-	case "in", "sign", "ocount", "icount", "bytes":
-		return s.emitOp(VERB)
+	switch s.names[s.source[s.tpos:s.npos]] {
+	case NameDyad:
+		return s.emitOp(DYAD)
+	case NameMonad:
+		return s.emitOp(MONAD)
 	default:
 		return s.emitString(IDENT)
 	}
@@ -221,16 +236,16 @@ func scanAny(s *Scanner) stateFn {
 		if !s.exprEnd {
 			return scanMinus
 		}
-		return s.emitOp(VERB)
+		return s.emitOp(DYAD)
 	case ':':
 		r := s.peek()
 		if r == ':' {
 			s.next()
 		}
-		return s.emitOp(VERB)
+		return s.emitOp(DYAD)
 	case '+', '*', '%', '!', '&', '|', '<', '>',
 		'=', '~', ',', '^', '#', '_', '$', '?', '@', '.':
-		return s.emitOp(VERB)
+		return s.emitOp(DYAD)
 	case '"':
 		return scanString
 	case '`':
@@ -387,7 +402,7 @@ func scanMinus(s *Scanner) stateFn {
 	if isDigit(r) {
 		return scanNumber
 	}
-	return s.emitOp(VERB)
+	return s.emitOp(DYAD)
 }
 
 func scanIdent(s *Scanner) stateFn {

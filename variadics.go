@@ -30,15 +30,15 @@ func (ctx *Context) initVariadics() {
 		vFind:     {Func: VFind},
 		vApply:    {Func: VApply},
 		vApplyN:   {Func: VApplyN},
+		vList:     {Func: VList},
+		vEach:     {Func: VEach, Adverb: true},
+		vFold:     {Func: VFold, Adverb: true},
+		vScan:     {Func: VScan, Adverb: true},
 		vIn:       {Func: VIn},
 		vSign:     {Func: VSign},
 		vOCount:   {Func: VOCount},
 		vICount:   {Func: VICount},
 		vBytes:    {Func: VBytes},
-		vList:     {Func: VList},
-		vEach:     {Func: VEach, Adverb: true},
-		vFold:     {Func: VFold, Adverb: true},
-		vScan:     {Func: VScan, Adverb: true},
 	}
 
 	ctx.variadicsNames = []string{
@@ -62,10 +62,15 @@ func (ctx *Context) initVariadics() {
 		vFind:     "?",
 		vApply:    "@",
 		vApplyN:   ".",
-		vList:     "List",
+		vList:     "list",
 		vEach:     "'",
 		vFold:     "/",
 		vScan:     "\\",
+		vIn:       "in",
+		vSign:     "sign",
+		vOCount:   "ocount",
+		vICount:   "icount",
+		vBytes:    "bytes",
 	}
 }
 

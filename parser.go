@@ -49,7 +49,7 @@ func parseReturn(es exprs) exprs {
 	if len(es) == 0 {
 		return es
 	}
-	if e, ok := es[0].(*astToken); ok && e.Type == astVERB && e.Text == ":" {
+	if e, ok := es[0].(*astToken); ok && e.Type == astDYAD && e.Text == ":" {
 		es[0] = &astReturn{Pos: e.Pos}
 	}
 	return es
@@ -135,8 +135,10 @@ func (p *parser) expr() (expr, error) {
 		}
 		p.depth = p.depth[:len(p.depth)-1]
 		return nil, parseCLOSE{tok.Pos}
-	case VERB:
-		return &astToken{Type: astVERB, Pos: tok.Pos, Text: tok.Text}, nil
+	case DYAD:
+		return &astToken{Type: astDYAD, Pos: tok.Pos, Text: tok.Text}, nil
+	case MONAD:
+		return &astToken{Type: astMONAD, Pos: tok.Pos, Text: tok.Text}, nil
 	default:
 		// should not happen
 		return nil, p.errorf("invalid token: %v", tok)

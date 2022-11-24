@@ -75,7 +75,7 @@ func main() {
 }
 
 func runStdin(ctx *goal.Context) {
-	help := ctx.RegisterVariadic("help", goal.VariadicFun{
+	help := ctx.RegisterMonad("help", goal.VariadicFun{
 		Func: func(ctx *goal.Context, args []goal.V) goal.V {
 			if len(args) >= 1 {
 				arg := args[0]
@@ -175,7 +175,7 @@ func usageError(usage bool, msgs ...interface{}) {
 }
 
 func registerVariadics(ctx *goal.Context) {
-	say := ctx.RegisterVariadic("say", goal.VariadicFun{
+	say := ctx.RegisterMonad("say", goal.VariadicFun{
 		Func: func(ctx *goal.Context, args []goal.V) goal.V {
 			for _, arg := range args {
 				switch arg := arg.(type) {
@@ -190,7 +190,7 @@ func registerVariadics(ctx *goal.Context) {
 			return nil
 		}})
 	ctx.AssignGlobal("say", say)
-	slurp := ctx.RegisterVariadic("slurp", goal.VariadicFun{
+	slurp := ctx.RegisterMonad("slurp", goal.VariadicFun{
 		Func: func(ctx *goal.Context, args []goal.V) goal.V {
 			switch len(args) {
 			case 1:
@@ -209,7 +209,7 @@ func registerVariadics(ctx *goal.Context) {
 			}
 		}})
 	ctx.AssignGlobal("slurp", slurp)
-	shell := ctx.RegisterVariadic("shell", goal.VariadicFun{Func: vShell})
+	shell := ctx.RegisterMonad("shell", goal.VariadicFun{Func: vShell})
 	ctx.AssignGlobal("shell", shell)
 }
 

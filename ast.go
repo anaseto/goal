@@ -35,7 +35,8 @@ const (
 	astNUMBER astTokenType = iota
 	astSTRING
 	astIDENT
-	astVERB
+	astMONAD
+	astDYAD
 	astADVERB
 )
 

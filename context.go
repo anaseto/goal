@@ -29,9 +29,11 @@ type Context struct {
 	// parsing, scanning
 	scanner  *Scanner
 	compiler *compiler
-	fname    string            // filename
-	sources  map[string]string // filename: source
-	assigned bool              // last instruction was opAssignGlobal
+	fname    string              // filename
+	sources  map[string]string   // filename: source
+	assigned bool                // last instruction was opAssignGlobal
+	names    map[string]NameType // special keyword names
+	vNames   map[string]Variadic // variadic keywords
 
 	// error positions stack
 	errPos []position
@@ -45,15 +47,81 @@ func NewContext() *Context {
 	ctx.gIDs = map[string]int{}
 	ctx.stack = make([]V, 0, 32)
 	ctx.sources = map[string]string{}
+	ctx.names = map[string]NameType{
+		"in":     NameDyad,
+		"sign":   NameMonad,
+		"ocount": NameMonad,
+		"icount": NameMonad,
+		"bytes":  NameMonad,
+	}
+	ctx.vNames = map[string]Variadic{
+		":":      vRight,
+		"::":     vRight,
+		"+":      vAdd,
+		"-":      vSubtract,
+		"*":      vMultiply,
+		"%":      vDivide,
+		"!":      vMod,
+		"&":      vMin,
+		"|":      vMax,
+		"<":      vLess,
+		">":      vMore,
+		"=":      vEqual,
+		"~":      vMatch,
+		",":      vJoin,
+		"^":      vWithout,
+		"#":      vTake,
+		"_":      vDrop,
+		"$":      vCast,
+		"?":      vFind,
+		"@":      vApply,
+		".":      vApplyN,
+		"'":      vEach,
+		"/":      vFold,
+		"\\":     vScan,
+		"in":     vIn,
+		"sign":   vSign,
+		"ocount": vOCount,
+		"icount": vICount,
+		"bytes":  vBytes,
+	}
 	ctx.initVariadics()
 	return ctx
 }
 
-// RegisterVariadic adds a variadic function to the context.
+// RegisterVariadic adds a variadic function to the context, and returns it, so
+// that it can be assigned to a global variable.
 func (ctx *Context) RegisterVariadic(name string, vf VariadicFun) Variadic {
 	id := len(ctx.variadics)
 	ctx.variadics = append(ctx.variadics, vf)
 	ctx.variadicsNames = append(ctx.variadicsNames, name)
+	return Variadic(id)
+}
+
+// RegisterMonad adds a variadic function to the context, and generates a new
+// monadic keyword for that variadic (parsing will not search for a left
+// argument). The variadic is also returned.
+// Note that while that a keyword defined in such a way will not take a left
+// argument, it is still possible to pass several arguments to it with bracket
+// indexing, like for any value.
+func (ctx *Context) RegisterMonad(name string, vf VariadicFun) Variadic {
+	id := len(ctx.variadics)
+	ctx.variadics = append(ctx.variadics, vf)
+	ctx.variadicsNames = append(ctx.variadicsNames, name)
+	ctx.names[name] = NameMonad
+	ctx.vNames[name] = Variadic(id)
+	return Variadic(id)
+}
+
+// RegisterDyad adds a variadic function to the context, and generates a new
+// dyadic keyword for that variadic (parsing will search for a left argument).
+// The variadic is also returned.
+func (ctx *Context) RegisterDyad(name string, vf VariadicFun) Variadic {
+	id := len(ctx.variadics)
+	ctx.variadics = append(ctx.variadics, vf)
+	ctx.variadicsNames = append(ctx.variadicsNames, name)
+	ctx.names[name] = NameDyad
+	ctx.vNames[name] = Variadic(id)
 	return Variadic(id)
 }
 
@@ -83,7 +151,7 @@ func (ctx *Context) Compile(name string, s string) error {
 	}
 	ctx.fname = name
 	ctx.sources[name] = s
-	ctx.scanner = NewScanner(s)
+	ctx.scanner = NewScanner(ctx.names, s)
 	ctx.compiler = newCompiler(ctx)
 	llen := len(ctx.lambdas)
 	err := ctx.compiler.ParseCompile()
@@ -224,6 +292,8 @@ func (ctx *Context) derive() *Context {
 
 	nctx.variadics = ctx.variadics
 	nctx.variadicsNames = ctx.variadicsNames
+	nctx.names = ctx.names
+	nctx.vNames = ctx.vNames
 	nctx.lambdas = ctx.lambdas
 	nctx.globals = ctx.globals
 	nctx.gNames = ctx.gNames

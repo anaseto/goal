@@ -35,15 +35,6 @@ func (ctx *Context) applyN(x V, n int) V {
 			return ctx.applyVariadic(x)
 		}
 		return ctx.applyNVariadic(x, n)
-	case DerivedVerb:
-		ctx.push(x.Arg)
-		args := ctx.peekN(n + 1)
-		if hasNil(args) {
-			return Projection{Fun: x, Args: ctx.popN(n + 1)}
-		}
-		r := ctx.variadics[x.Fun].Func(ctx, args)
-		ctx.dropN(n + 1)
-		return r
 	case ProjectionOne:
 		if n > 1 {
 			return errf("too many arguments: got %d, expected 1", n)
@@ -177,24 +168,22 @@ func (ctx *Context) applyArrayArgs(x array, arg V, args []V) V {
 func (ctx *Context) applyVariadic(v Variadic) V {
 	args := ctx.peek()
 	vv := args[0]
-	if ctx.variadics[v].Adverb {
-		ctx.drop()
-		return DerivedVerb{Fun: v, Arg: vv}
-	}
 	if vv == nil {
 		ctx.drop()
 		return Projection{Fun: v, Args: []V{nil}}
 	}
-	switch vv := vv.(type) {
-	case Composition:
-		ctx.drop()
-		return Composition{Left: v, Right: vv}
-	case Projection:
-		ctx.drop()
-		return Composition{Left: v, Right: vv}
-	case ProjectionOne:
-		ctx.drop()
-		return Composition{Left: v, Right: vv}
+	if v != vApply {
+		switch vv := vv.(type) {
+		case Composition:
+			ctx.drop()
+			return Composition{Left: v, Right: vv}
+		case Projection:
+			ctx.drop()
+			return Composition{Left: v, Right: vv}
+		case ProjectionOne:
+			ctx.drop()
+			return Composition{Left: v, Right: vv}
+		}
 	}
 	r := ctx.variadics[v].Func(ctx, args)
 	ctx.drop()
@@ -204,10 +193,12 @@ func (ctx *Context) applyVariadic(v Variadic) V {
 func (ctx *Context) applyNVariadic(v Variadic, n int) V {
 	args := ctx.peekN(n)
 	if hasNil(args) {
-		if n == 2 && args[1] != nil {
-			arg := args[1]
-			ctx.dropN(n)
-			return ProjectionOne{Fun: v, Arg: arg}
+		if n == 2 {
+			if args[1] != nil {
+				arg := args[1]
+				ctx.dropN(n)
+				return ProjectionOne{Fun: v, Arg: arg}
+			}
 		}
 		return Projection{Fun: v, Args: ctx.popN(n)}
 	}

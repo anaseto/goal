@@ -12,23 +12,24 @@ func _() {
 	_ = x[EOF-1]
 	_ = x[ERROR-2]
 	_ = x[ADVERB-3]
-	_ = x[IDENT-4]
-	_ = x[LEFTBRACE-5]
-	_ = x[LEFTBRACKET-6]
-	_ = x[LEFTPAREN-7]
-	_ = x[NEWLINE-8]
-	_ = x[NUMBER-9]
-	_ = x[RIGHTBRACE-10]
-	_ = x[RIGHTBRACKET-11]
-	_ = x[RIGHTPAREN-12]
-	_ = x[SEMICOLON-13]
-	_ = x[STRING-14]
-	_ = x[VERB-15]
+	_ = x[DYAD-4]
+	_ = x[IDENT-5]
+	_ = x[LEFTBRACE-6]
+	_ = x[LEFTBRACKET-7]
+	_ = x[LEFTPAREN-8]
+	_ = x[NEWLINE-9]
+	_ = x[NUMBER-10]
+	_ = x[MONAD-11]
+	_ = x[RIGHTBRACE-12]
+	_ = x[RIGHTBRACKET-13]
+	_ = x[RIGHTPAREN-14]
+	_ = x[SEMICOLON-15]
+	_ = x[STRING-16]
 }
 
-const _TokenType_name = "NONEEOFERRORADVERBIDENTLEFTBRACELEFTBRACKETLEFTPARENNEWLINENUMBERRIGHTBRACERIGHTBRACKETRIGHTPARENSEMICOLONSTRINGVERB"
+const _TokenType_name = "NONEEOFERRORADVERBDYADIDENTLEFTBRACELEFTBRACKETLEFTPARENNEWLINENUMBERMONADRIGHTBRACERIGHTBRACKETRIGHTPARENSEMICOLONSTRING"
 
-var _TokenType_index = [...]uint8{0, 4, 7, 12, 18, 23, 32, 43, 52, 59, 65, 75, 87, 97, 106, 112, 116}
+var _TokenType_index = [...]uint8{0, 4, 7, 12, 18, 22, 27, 36, 47, 56, 63, 69, 74, 84, 96, 106, 115, 121}
 
 func (i TokenType) String() string {
 	if i < 0 || i >= TokenType(len(_TokenType_index)-1) {
@@ -43,13 +44,14 @@ func _() {
 	_ = x[astNUMBER-0]
 	_ = x[astSTRING-1]
 	_ = x[astIDENT-2]
-	_ = x[astVERB-3]
-	_ = x[astADVERB-4]
+	_ = x[astMONAD-3]
+	_ = x[astDYAD-4]
+	_ = x[astADVERB-5]
 }
 
-const _astTokenType_name = "astNUMBERastSTRINGastIDENTastVERBastADVERB"
+const _astTokenType_name = "astNUMBERastSTRINGastIDENTastMONADastDYADastADVERB"
 
-var _astTokenType_index = [...]uint8{0, 9, 18, 26, 33, 42}
+var _astTokenType_index = [...]uint8{0, 9, 18, 26, 34, 41, 50}
 
 func (i astTokenType) String() string {
 	if i < 0 || i >= astTokenType(len(_astTokenType_index)-1) {
