@@ -64,7 +64,7 @@ func (ctx *Context) amend4(x, y, f, z V) V {
 		}
 		return canonical(ctx.amend4array(cloneShallow(x).(array), y, f, z))
 	default:
-		return errType("@[x;y;f]", "x", x)
+		return errType("@[x;y;f;z]", "x", x)
 	}
 }
 
@@ -130,7 +130,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 		}
 		return x
 	default:
-		return errType("@[x;y;f]", "y", y)
+		return errType("@[x;y;f;z]", "y", y)
 	}
 }
 
