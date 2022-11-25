@@ -248,9 +248,12 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 	}
 	args := ctx.peekN(n)
 	if lc.Rank > n || hasNil(args) {
-		if n == 1 && args[0] == nil {
-			ctx.drop() // drop nil
-			return ProjectionMonad{Fun: id}
+		if n == 1 {
+			if args[0] == nil {
+				ctx.drop() // drop nil
+				return ProjectionMonad{Fun: id}
+			}
+			return ProjectionFirst{Fun: id, Arg: ctx.pop()}
 		}
 		if n == 2 && args[1] == nil && args[0] != nil {
 			return ProjectionFirst{Fun: id, Arg: ctx.pop()}

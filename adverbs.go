@@ -355,13 +355,38 @@ func each3(ctx *Context, args []V) V {
 	if !ok {
 		return errf("x f'y : f not a function (%s)", args[1].Type())
 	}
-	x, ok := args[2].(array)
-	if !ok {
-		return errf("x f'y : x not an array (%s)", args[2].Type())
+	x, okax := args[2].(array)
+	y, okay := args[0].(array)
+	if !okax && !okay {
+		return ctx.ApplyN(f, args)
 	}
-	y, ok := args[0].(array)
-	if !ok {
-		return errf("x f'y : y not an array (%s)", args[0].Type())
+	if !okax {
+		ylen := y.Len()
+		r := make(AV, 0, ylen)
+		for i := 0; i < ylen; i++ {
+			ctx.push(y.at(i))
+			ctx.push(args[2])
+			next := ctx.applyN(f, 2)
+			if err, ok := next.(errV); ok {
+				return err
+			}
+			r = append(r, next)
+		}
+		return canonical(r)
+	}
+	if !okay {
+		xlen := x.Len()
+		r := make(AV, 0, xlen)
+		for i := 0; i < xlen; i++ {
+			ctx.push(args[0])
+			ctx.push(x.at(i))
+			next := ctx.applyN(f, 2)
+			if err, ok := next.(errV); ok {
+				return err
+			}
+			r = append(r, next)
+		}
+		return canonical(r)
 	}
 	xlen := x.Len()
 	if xlen != y.Len() {
