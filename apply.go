@@ -1,5 +1,7 @@
 package goal
 
+//import "fmt"
+
 // Apply calls a value with a single argument.
 func (ctx *Context) Apply(x, y V) V {
 	ctx.push(y)
@@ -243,29 +245,29 @@ func (ctx *Context) applyProjection(p Projection, n int) V {
 	case len(args) > nNils:
 		return errs("too many arguments")
 	case len(args) == nNils:
-		n := 0
+		nilc := 0
 		for _, arg := range p.Args {
 			switch {
 			case arg != nil:
 				ctx.push(arg)
 			default:
-				ctx.push(args[n])
-				n++
+				ctx.push(args[nilc])
+				nilc++
 			}
 		}
 		r := ctx.applyN(p.Fun, len(p.Args))
-		ctx.dropN(len(p.Args))
+		ctx.dropN(n)
 		return r
 	default:
 		vargs := cloneArgs(p.Args)
-		n := 1
+		nilc := 1
 		for i := len(vargs) - 1; i >= 0; i-- {
 			if vargs[i] == nil {
-				if n > len(args) {
+				if nilc > len(args) {
 					break
 				}
-				vargs[i] = args[len(args)-n]
-				n++
+				vargs[i] = args[len(args)-nilc]
+				nilc++
 			}
 		}
 		ctx.dropN(n)
@@ -280,8 +282,10 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 	lc := ctx.lambdas[int(id)]
 	if lc.Rank < n {
 		return errf("lambda: too many arguments: got %d, expected %d", n, lc.Rank)
-	} else if lc.Rank > n {
-		if lc.Rank == 2 && n == 1 {
+	}
+	args := ctx.peekN(n)
+	if lc.Rank > n || hasNil(args) {
+		if lc.Rank == 2 && n == 1 && args[len(args)-1] != nil {
 			return ProjectionOne{Fun: id, Arg: ctx.pop()}
 		}
 		return Projection{Fun: id, Args: ctx.popN(n)}
