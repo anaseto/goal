@@ -328,7 +328,6 @@ func scan3doTimes(ctx *Context, n int, f, y V) V {
 func each2(ctx *Context, args []V) V {
 	f, ok := args[1].(Function)
 	if !ok {
-		// TODO: binary search
 		return errf("f'x : f not a function (%s)", args[1].Type())
 	}
 	x := toArray(args[0])

@@ -723,13 +723,12 @@ func flip(x V) V {
 	case AV:
 		cols := len(x)
 		if cols == 0 {
-			// (+⟨⟩) ≡ ⋈⟨⟩
 			return AV{x}
 		}
 		lines := -1
 		for _, o := range x {
 			nl := Length(o)
-			if !isArray(o) {
+			if _, ok := o.(array); !ok {
 				continue
 			}
 			switch {
@@ -742,9 +741,7 @@ func flip(x V) V {
 		t := aType(x)
 		switch {
 		case lines <= 0:
-			// (+⟨⟨⟩,…⟩) ≡ ⟨⟩
-			// TODO: error if atoms?
-			return x[0]
+			return AV{x}
 		case lines == 1:
 			switch t {
 			case tB, tAB:

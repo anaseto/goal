@@ -39,15 +39,6 @@ func isNum(x V) bool {
 	}
 }
 
-func isArray(x V) bool {
-	switch x.(type) {
-	case array:
-		return true
-	default:
-		return false
-	}
-}
-
 func divideF(x, y F) F {
 	if y == 0 {
 		return F(math.Inf(int(signF(x))))
