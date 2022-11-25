@@ -46,7 +46,7 @@ func (ctx *Context) applyN(x V, n int) V {
 		r := ctx.variadics[x.Fun].Func(ctx, args)
 		ctx.dropN(n + 1)
 		return r
-	case ProjectionDyad:
+	case ProjectionFirst:
 		if n > 1 {
 			return errf("too many arguments: got %d, expected 1", n)
 		}
@@ -191,7 +191,7 @@ func (ctx *Context) applyNVariadic(v Variadic, n int) V {
 			if args[1] != nil {
 				arg := args[1]
 				ctx.dropN(n)
-				return ProjectionDyad{Fun: v, Arg: arg}
+				return ProjectionFirst{Fun: v, Arg: arg}
 			}
 		}
 		return Projection{Fun: v, Args: ctx.popN(n)}
@@ -253,7 +253,7 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 			return ProjectionMonad{Fun: id}
 		}
 		if n == 2 && args[1] == nil && args[0] != nil {
-			return ProjectionDyad{Fun: id, Arg: ctx.pop()}
+			return ProjectionFirst{Fun: id, Arg: ctx.pop()}
 		}
 		return Projection{Fun: id, Args: ctx.popN(n)}
 	}

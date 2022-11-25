@@ -190,9 +190,9 @@ type Projection struct {
 	Args AV
 }
 
-// ProjectionDyad represents a monadic projection fixing the first argument of
+// ProjectionFirst represents a monadic projection fixing the first argument of
 // a function with rank greater than 2.
-type ProjectionDyad struct {
+type ProjectionFirst struct {
 	Fun Function // function with rank >= 2
 	Arg V        // first argument x
 }
@@ -207,7 +207,7 @@ type Lambda int32
 
 func (v Variadic) Type() string        { return "v" }
 func (p Projection) Type() string      { return "p" }
-func (p ProjectionDyad) Type() string  { return "p" }
+func (p ProjectionFirst) Type() string { return "p" }
 func (p ProjectionMonad) Type() string { return "p" }
 func (r derivedVerb) Type() string     { return "r" }
 func (l Lambda) Type() string          { return "l" }
@@ -229,7 +229,7 @@ func (p Projection) Sprint(ctx *Context) string {
 	return sb.String()
 }
 
-func (p ProjectionDyad) Sprint(ctx *Context) string {
+func (p ProjectionFirst) Sprint(ctx *Context) string {
 	return fmt.Sprintf("%s[%s;]", p.Fun.Sprint(ctx), p.Arg.Sprint(ctx))
 }
 
@@ -439,7 +439,7 @@ func (v Variadic) Rank(ctx *Context) int { return 2 }
 func (p Projection) Rank(ctx *Context) int { return countNils(p.Args) }
 
 // Rank for a 1-arg projection is 1.
-func (p ProjectionDyad) Rank(ctx *Context) int { return 1 }
+func (p ProjectionFirst) Rank(ctx *Context) int { return 1 }
 
 // Rank for a curryfied function is 1.
 func (p ProjectionMonad) Rank(ctx *Context) int { return 1 }
@@ -480,8 +480,8 @@ func (p Projection) Matches(x V) bool {
 	return ok && Match(p.Fun, xp.Fun) && Match(p.Args, xp.Args)
 }
 
-func (p ProjectionDyad) Matches(x V) bool {
-	xp, ok := x.(ProjectionDyad)
+func (p ProjectionFirst) Matches(x V) bool {
+	xp, ok := x.(ProjectionFirst)
 	return ok && Match(p.Fun, xp.Fun) && Match(p.Arg, xp.Arg)
 }
 
