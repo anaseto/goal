@@ -39,6 +39,8 @@ func (ctx *Context) initVariadics() {
 		vOCount:   {Func: VOCount},
 		vICount:   {Func: VICount},
 		vBytes:    {Func: VBytes},
+		vOr:       {Func: VOr},
+		vAnd:      {Func: VAnd},
 	}
 
 	ctx.variadicsNames = []string{
@@ -71,6 +73,8 @@ func (ctx *Context) initVariadics() {
 		vOCount:   "ocount",
 		vICount:   "icount",
 		vBytes:    "bytes",
+		vOr:       "or",
+		vAnd:      "and",
 	}
 }
 
@@ -418,6 +422,26 @@ func VBytes(ctx *Context, args []V) V {
 	default:
 		return errRank("icount")
 	}
+}
+
+// VAnd implements the "and" variadic verb.
+func VAnd(ctx *Context, args []V) V {
+	for _, arg := range args {
+		if isFalse(arg) {
+			return I(0)
+		}
+	}
+	return I(1)
+}
+
+// VOr implements the "or" variadic verb.
+func VOr(ctx *Context, args []V) V {
+	for _, arg := range args {
+		if isFalse(arg) {
+			return I(1)
+		}
+	}
+	return I(0)
 }
 
 // VList implements (...;y;x) array constructor variadic verb.

@@ -133,6 +133,8 @@ const (
 	vOCount                   // ocount (occurrence count)
 	vICount                   // icount (index count)
 	vBytes                    // bytes (byte count)
+	vAnd                      // and
+	vOr                       // or
 )
 
 var vStrings = [...]string{

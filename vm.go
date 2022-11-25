@@ -85,14 +85,20 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ip++
 		case opDrop:
 			ctx.drop()
+		case opJump:
+			ip += int(ops[ip])
 		case opJumpFalse:
-			if isFalse(ctx.pop()) {
+			if isFalse(ctx.top()) {
 				ip += int(ops[ip])
 			} else {
 				ip++
 			}
-		case opJump:
-			ip += int(ops[ip])
+		case opJumpTrue:
+			if isTrue(ctx.top()) {
+				ip += int(ops[ip])
+			} else {
+				ip++
+			}
 		case opReturn:
 			return len(ops), nil
 		}

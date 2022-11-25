@@ -25,8 +25,9 @@ const (
 	opApplyN
 	opApplyNV
 	opDrop
-	opJumpFalse
 	opJump
+	opJumpFalse
+	opJumpTrue
 	opReturn
 
 	opArg = -1 // argument to be computed later
@@ -78,9 +79,11 @@ func (ctx *Context) opcodesString(ops []opcode, lc *lambdaCode) string {
 		case opApplyNV:
 			fmt.Fprintf(sb, "%s\t%d", ctx.variadicsNames[ops[i+1]], ops[i+2])
 		case opJump:
-			fmt.Fprintf(sb, "%d", ops[i+1])
+			fmt.Fprintf(sb, "%d", int(ops[i+1])+1+i)
 		case opJumpFalse:
-			fmt.Fprintf(sb, "%d", ops[i+1])
+			fmt.Fprintf(sb, "%d", int(ops[i+1])+1+i)
+		case opJumpTrue:
+			fmt.Fprintf(sb, "%d", int(ops[i+1])+1+i)
 		}
 		fmt.Fprint(sb, "\n")
 		i += op.argc()

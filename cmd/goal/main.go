@@ -331,6 +331,7 @@ expressions	2*3+4 -> 14	1+|1 2 3 -> 4 3 2	+/1 2 3 -> 6
 index		1 2 3[1] -> 2 (same as x@1) (1 2;3 4)[0;1] -> 2 (same as x.(0;1))
 lambdas		{x+y}[2;3] -> 5		{[a;b;c]a+b+c}[1;2;3] -> 6
 cond		?[1;2;3] -> 2	?[0;2;3] -> 3	?[0;2;"";3;4] -> 4
+and/or		and[1;2] -> 2   and[1;0;3] -> 0   or[0;2] -> 2   or[0;0;0] -> 0
 sequence	[a:2;b:a+3;a+10] -> 12 (bracket block [] at start of expression)
 return		[1;:2;3] -> 2 (a : at start of expression)
 `

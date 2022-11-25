@@ -211,8 +211,8 @@ func (c *compiler) push2(op, arg opcode) {
 		// v ... v v -> v
 		c.slen -= int(arg)
 		c.argc -= int(arg)
-	case opApplyV, opJump:
-	case opApply2V, opJumpFalse:
+	case opApplyV, opJump, opJumpFalse, opJumpTrue:
+	case opApply2V:
 		c.slen--
 		c.argc--
 	default:
@@ -739,10 +739,10 @@ func (ctx *Context) resolveLambda(lc *lambdaCode) {
 
 func (c *compiler) doArgs(b *astBlock) error {
 	body := b.Body
-	if len(body) >= 3 {
-		expr := c.it.Peek()
-		switch expr := expr.(type) {
-		case *astToken:
+	expr := c.it.Peek()
+	switch expr := expr.(type) {
+	case *astToken:
+		if len(body) >= 3 {
 			if expr.Type == astDYAD && expr.Text == "?" {
 				err := c.doCond(b)
 				if err != nil {
@@ -751,6 +751,22 @@ func (c *compiler) doArgs(b *astBlock) error {
 				c.it.Next()
 				return nil
 			}
+		}
+		if expr.Type == astMONAD && expr.Text == "and" {
+			err := c.doAnd(b)
+			if err != nil {
+				return err
+			}
+			c.it.Next()
+			return nil
+		}
+		if expr.Type == astMONAD && expr.Text == "or" {
+			err := c.doOr(b)
+			if err != nil {
+				return err
+			}
+			c.it.Next()
+			return nil
 		}
 	}
 	argc := c.argc
@@ -785,7 +801,6 @@ func (c *compiler) doCond(b *astBlock) error {
 	}
 	argc := c.argc
 	cond := body[0]
-	//slen := c.slen
 	err := c.doExprs(cond)
 	if err != nil {
 		return err
@@ -796,6 +811,7 @@ func (c *compiler) doCond(b *astBlock) error {
 	jumpsElse := []int{}
 	jumpsCond := []int{}
 	for i := 1; i < len(body); i += 2 {
+		c.push(opDrop)
 		then := body[i]
 		err := c.doExprs(then)
 		if err != nil {
@@ -804,6 +820,7 @@ func (c *compiler) doCond(b *astBlock) error {
 		c.push2(opJump, opArg)
 		jumpsEnd = append(jumpsEnd, len(c.body())-1)
 		jumpsElse = append(jumpsElse, len(c.body()))
+		c.push(opDrop)
 		elseCond := body[i+1]
 		err = c.doExprs(elseCond)
 		if err != nil {
@@ -817,6 +834,58 @@ func (c *compiler) doCond(b *astBlock) error {
 	c.body()[jmpCond] = opcode(jumpsElse[0] - jmpCond)
 	for i, offset := range jumpsCond {
 		c.body()[offset] = opcode(jumpsElse[i+1] - offset)
+	}
+	end := len(c.body())
+	for _, offset := range jumpsEnd {
+		c.body()[offset] = opcode(end - offset)
+	}
+	c.argc = argc + 1
+	c.apply()
+	return nil
+}
+
+func (c *compiler) doAnd(b *astBlock) error {
+	body := b.Body
+	argc := c.argc
+	jumpsEnd := []int{}
+	for i, ei := range body {
+		if i > 0 {
+			c.push(opDrop)
+		}
+		err := c.doExprs(ei)
+		if err != nil {
+			return err
+		}
+		if i < len(body)-1 {
+			c.push2(opJumpFalse, opArg)
+			jumpsEnd = append(jumpsEnd, len(c.body())-1)
+		}
+	}
+	end := len(c.body())
+	for _, offset := range jumpsEnd {
+		c.body()[offset] = opcode(end - offset)
+	}
+	c.argc = argc + 1
+	c.apply()
+	return nil
+}
+
+func (c *compiler) doOr(b *astBlock) error {
+	body := b.Body
+	argc := c.argc
+	jumpsEnd := []int{}
+	for i, ei := range body {
+		if i > 0 {
+			c.push(opDrop)
+		}
+		err := c.doExprs(ei)
+		if err != nil {
+			return err
+		}
+		if i < len(body)-1 {
+			c.push2(opJumpTrue, opArg)
+			jumpsEnd = append(jumpsEnd, len(c.body())-1)
+		}
 	}
 	end := len(c.body())
 	for _, offset := range jumpsEnd {
