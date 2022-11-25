@@ -175,8 +175,8 @@ func (v Variadic) Sprint(ctx *Context) string {
 }
 
 // derivedVerb represents values modified by an adverb. This kind value is not
-// visible within the program, as it is only produced as an intermediary value
-// in adverb trains.
+// manipulable within the program, as it is only produced as an intermediary
+// value in adverb trains and only appears as an adverb argument.
 type derivedVerb struct {
 	Fun Variadic
 	Arg V
@@ -190,28 +190,27 @@ type Projection struct {
 	Args AV
 }
 
-// ProjectionOne represents a projection with one argument.
-type ProjectionOne struct {
-	Fun Function
-	Arg V
+// ProjectionDyad represents a monadic projection fixing the first argument of
+// a function with rank greater than 2.
+type ProjectionDyad struct {
+	Fun Function // function with rank >= 2
+	Arg V        // first argument x
 }
 
-// Composition represents a composition of two functions. The left one is
-// always called monadically.
-type Composition struct {
-	Left  Function
-	Right Function
+// Currification represents a monadic projection of a function of any rank.
+type Currification struct {
+	Fun Function
 }
 
 // Lambda represents an user defined function by ID.
 type Lambda int32
 
-func (v Variadic) Type() string      { return "v" }
-func (p Projection) Type() string    { return "p" }
-func (p ProjectionOne) Type() string { return "p" }
-func (q Composition) Type() string   { return "q" }
-func (r derivedVerb) Type() string   { return "r" }
-func (l Lambda) Type() string        { return "l" }
+func (v Variadic) Type() string       { return "v" }
+func (p Projection) Type() string     { return "p" }
+func (p ProjectionDyad) Type() string { return "p" }
+func (p Currification) Type() string  { return "p" }
+func (r derivedVerb) Type() string    { return "r" }
+func (l Lambda) Type() string         { return "l" }
 
 func (p Projection) Sprint(ctx *Context) string {
 	sb := &strings.Builder{}
@@ -230,21 +229,16 @@ func (p Projection) Sprint(ctx *Context) string {
 	return sb.String()
 }
 
-func (p ProjectionOne) Sprint(ctx *Context) string {
+func (p ProjectionDyad) Sprint(ctx *Context) string {
 	return fmt.Sprintf("%s[%s;]", p.Fun.Sprint(ctx), p.Arg.Sprint(ctx))
 }
 
-func (q Composition) Sprint(ctx *Context) string {
-	return fmt.Sprintf("%s %s", q.Left.Sprint(ctx), q.Right.Sprint(ctx))
+func (p Currification) Sprint(ctx *Context) string {
+	return fmt.Sprintf("%s[]", p.Fun.Sprint(ctx))
 }
 
 func (r derivedVerb) Sprint(ctx *Context) string {
-	switch arg := r.Arg.(type) {
-	case Composition:
-		return fmt.Sprintf("(%s)%s", arg.Sprint(ctx), r.Fun.Sprint(ctx))
-	default:
-		return fmt.Sprintf("%s%s", arg.Sprint(ctx), r.Fun.Sprint(ctx))
-	}
+	return fmt.Sprintf("%s%s", r.Arg.Sprint(ctx), r.Fun.Sprint(ctx))
 }
 
 func (l Lambda) Sprint(ctx *Context) string {
@@ -445,10 +439,10 @@ func (v Variadic) Rank(ctx *Context) int { return 2 }
 func (p Projection) Rank(ctx *Context) int { return countNils(p.Args) }
 
 // Rank for a 1-arg projection is 1.
-func (p ProjectionOne) Rank(ctx *Context) int { return 1 }
+func (p ProjectionDyad) Rank(ctx *Context) int { return 1 }
 
-// Rank for a composition is given by the function on the right.
-func (q Composition) Rank(ctx *Context) int { return q.Right.Rank(ctx) }
+// Rank for a curryfied function is 1.
+func (p Currification) Rank(ctx *Context) int { return 1 }
 
 // Rank returns 2 for derived verbs.
 func (r derivedVerb) Rank(ctx *Context) int { return 2 }
@@ -486,14 +480,14 @@ func (p Projection) Matches(x V) bool {
 	return ok && Match(p.Fun, xp.Fun) && Match(p.Args, xp.Args)
 }
 
-func (p ProjectionOne) Matches(x V) bool {
-	xp, ok := x.(ProjectionOne)
+func (p ProjectionDyad) Matches(x V) bool {
+	xp, ok := x.(ProjectionDyad)
 	return ok && Match(p.Fun, xp.Fun) && Match(p.Arg, xp.Arg)
 }
 
-func (q Composition) Matches(x V) bool {
-	xq, ok := x.(Composition)
-	return ok && Match(q.Left, xq.Left) && Match(q.Right, xq.Right)
+func (p Currification) Matches(x V) bool {
+	xp, ok := x.(Currification)
+	return ok && Match(p.Fun, xp.Fun)
 }
 
 func (r derivedVerb) Matches(x V) bool {

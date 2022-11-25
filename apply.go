@@ -46,27 +46,19 @@ func (ctx *Context) applyN(x V, n int) V {
 		r := ctx.variadics[x.Fun].Func(ctx, args)
 		ctx.dropN(n + 1)
 		return r
-	case ProjectionOne:
+	case ProjectionDyad:
 		if n > 1 {
 			return errf("too many arguments: got %d, expected 1", n)
 		}
-		arg := ctx.top()
-		if arg == nil {
-			ctx.drop()
-			return x
-		}
 		ctx.push(x.Arg)
 		return ctx.applyN(x.Fun, 2)
+	case Currification:
+		if n > 1 {
+			return errf("too many arguments: got %d, expected 1", n)
+		}
+		return ctx.applyN(x.Fun, 1)
 	case Projection:
 		return ctx.applyProjection(x, n)
-	case Composition:
-		r := ctx.applyN(x.Right, n)
-		_, ok := r.(error)
-		if ok {
-			return r
-		}
-		ctx.push(r)
-		return ctx.applyN(x.Left, 1)
 	case S:
 		switch n {
 		case 1:
@@ -185,20 +177,7 @@ func (ctx *Context) applyVariadic(v Variadic) V {
 	}
 	if vv == nil {
 		ctx.drop()
-		return Projection{Fun: v, Args: []V{nil}}
-	}
-	if v != vApply {
-		switch vv := vv.(type) {
-		case Composition:
-			ctx.drop()
-			return Composition{Left: v, Right: vv}
-		case Projection:
-			ctx.drop()
-			return Composition{Left: v, Right: vv}
-		case ProjectionOne:
-			ctx.drop()
-			return Composition{Left: v, Right: vv}
-		}
+		return Currification{Fun: v}
 	}
 	r := ctx.variadics[v].Func(ctx, args)
 	ctx.drop()
@@ -212,26 +191,10 @@ func (ctx *Context) applyNVariadic(v Variadic, n int) V {
 			if args[1] != nil {
 				arg := args[1]
 				ctx.dropN(n)
-				return ProjectionOne{Fun: v, Arg: arg}
+				return ProjectionDyad{Fun: v, Arg: arg}
 			}
 		}
 		return Projection{Fun: v, Args: ctx.popN(n)}
-	}
-	if n == 2 && !ctx.variadics[v].Adverb {
-		switch arg := args[0].(type) {
-		case Composition:
-			left := ProjectionOne{Fun: v, Arg: args[1]}
-			ctx.dropN(2)
-			return Composition{Left: left, Right: arg}
-		case Projection:
-			left := ProjectionOne{Fun: v, Arg: args[1]}
-			ctx.dropN(2)
-			return Composition{Left: left, Right: arg}
-		case ProjectionOne:
-			left := ProjectionOne{Fun: v, Arg: args[1]}
-			ctx.dropN(2)
-			return Composition{Left: left, Right: arg}
-		}
 	}
 	r := ctx.variadics[v].Func(ctx, args)
 	ctx.dropN(n)
@@ -285,8 +248,12 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 	}
 	args := ctx.peekN(n)
 	if lc.Rank > n || hasNil(args) {
-		if lc.Rank == 2 && n == 1 && args[len(args)-1] != nil {
-			return ProjectionOne{Fun: id, Arg: ctx.pop()}
+		if n == 1 && args[0] == nil {
+			ctx.drop() // drop nil
+			return Currification{Fun: id}
+		}
+		if n == 2 && args[1] == nil && args[0] != nil {
+			return ProjectionDyad{Fun: id, Arg: ctx.pop()}
 		}
 		return Projection{Fun: id, Args: ctx.popN(n)}
 	}
