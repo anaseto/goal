@@ -197,20 +197,20 @@ type ProjectionDyad struct {
 	Arg V        // first argument x
 }
 
-// Currification represents a monadic projection of a function of any rank.
-type Currification struct {
+// ProjectionMonad represents a monadic projection of a function of any rank.
+type ProjectionMonad struct {
 	Fun Function
 }
 
 // Lambda represents an user defined function by ID.
 type Lambda int32
 
-func (v Variadic) Type() string       { return "v" }
-func (p Projection) Type() string     { return "p" }
-func (p ProjectionDyad) Type() string { return "p" }
-func (p Currification) Type() string  { return "p" }
-func (r derivedVerb) Type() string    { return "r" }
-func (l Lambda) Type() string         { return "l" }
+func (v Variadic) Type() string        { return "v" }
+func (p Projection) Type() string      { return "p" }
+func (p ProjectionDyad) Type() string  { return "p" }
+func (p ProjectionMonad) Type() string { return "p" }
+func (r derivedVerb) Type() string     { return "r" }
+func (l Lambda) Type() string          { return "l" }
 
 func (p Projection) Sprint(ctx *Context) string {
 	sb := &strings.Builder{}
@@ -233,7 +233,7 @@ func (p ProjectionDyad) Sprint(ctx *Context) string {
 	return fmt.Sprintf("%s[%s;]", p.Fun.Sprint(ctx), p.Arg.Sprint(ctx))
 }
 
-func (p Currification) Sprint(ctx *Context) string {
+func (p ProjectionMonad) Sprint(ctx *Context) string {
 	return fmt.Sprintf("%s[]", p.Fun.Sprint(ctx))
 }
 
@@ -442,7 +442,7 @@ func (p Projection) Rank(ctx *Context) int { return countNils(p.Args) }
 func (p ProjectionDyad) Rank(ctx *Context) int { return 1 }
 
 // Rank for a curryfied function is 1.
-func (p Currification) Rank(ctx *Context) int { return 1 }
+func (p ProjectionMonad) Rank(ctx *Context) int { return 1 }
 
 // Rank returns 2 for derived verbs.
 func (r derivedVerb) Rank(ctx *Context) int { return 2 }
@@ -485,8 +485,8 @@ func (p ProjectionDyad) Matches(x V) bool {
 	return ok && Match(p.Fun, xp.Fun) && Match(p.Arg, xp.Arg)
 }
 
-func (p Currification) Matches(x V) bool {
-	xp, ok := x.(Currification)
+func (p ProjectionMonad) Matches(x V) bool {
+	xp, ok := x.(ProjectionMonad)
 	return ok && Match(p.Fun, xp.Fun)
 }
 

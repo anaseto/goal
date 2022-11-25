@@ -446,14 +446,7 @@ func (c *compiler) pushVariadic(v Variadic) {
 func (c *compiler) doDyad(tok *astToken) error {
 	e := c.it.Peek()
 	argc := c.argc
-	if e == nil || c.arglist {
-		return c.doVariadic(tok)
-	}
-	if !isLeftArg(e) {
-		if argc == 0 {
-			c.push(opNil)
-			c.push(opNil)
-		}
+	if e == nil || c.arglist || !isLeftArg(e) {
 		return c.doVariadic(tok)
 	}
 	if identTok, ok := getIdent(e); ok {

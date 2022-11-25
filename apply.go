@@ -52,7 +52,7 @@ func (ctx *Context) applyN(x V, n int) V {
 		}
 		ctx.push(x.Arg)
 		return ctx.applyN(x.Fun, 2)
-	case Currification:
+	case ProjectionMonad:
 		if n > 1 {
 			return errf("too many arguments: got %d, expected 1", n)
 		}
@@ -170,14 +170,14 @@ func (ctx *Context) applyArrayArgs(x array, arg V, args []V) V {
 
 func (ctx *Context) applyVariadic(v Variadic) V {
 	args := ctx.peek()
-	vv := args[0]
+	x := args[0]
 	if ctx.variadics[v].Adverb {
 		ctx.drop()
-		return derivedVerb{Fun: v, Arg: vv}
+		return derivedVerb{Fun: v, Arg: x}
 	}
-	if vv == nil {
+	if x == nil {
 		ctx.drop()
-		return Currification{Fun: v}
+		return ProjectionMonad{Fun: v}
 	}
 	r := ctx.variadics[v].Func(ctx, args)
 	ctx.drop()
@@ -250,7 +250,7 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 	if lc.Rank > n || hasNil(args) {
 		if n == 1 && args[0] == nil {
 			ctx.drop() // drop nil
-			return Currification{Fun: id}
+			return ProjectionMonad{Fun: id}
 		}
 		if n == 2 && args[1] == nil && args[0] != nil {
 			return ProjectionDyad{Fun: id, Arg: ctx.pop()}
