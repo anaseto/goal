@@ -211,6 +211,7 @@ func scanAny(s *Scanner) stateFn {
 		if !s.start {
 			return s.emit(NEWLINE)
 		}
+		return scanAny
 	case ' ', '\t':
 		return scanSpace
 	case '/':
