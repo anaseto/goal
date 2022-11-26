@@ -227,6 +227,7 @@ var matchTests = [...]matchTest{
 	{`or[0;2]`, `2`},
 	{`or[0;0;1]`, `1`},
 	{`or[0;0;0]`, `0`},
+	{"1\n\n2", `2`},
 }
 
 func TestEval(t *testing.T) {

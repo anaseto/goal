@@ -263,9 +263,13 @@ func (c *compiler) applyAt(pos int) {
 }
 
 func (c *compiler) errorf(format string, a ...interface{}) error {
-	// TODO: in case of error, read the file again to get from pos the line
-	// and print the line that produced the error with some column marker.
-	return fmt.Errorf("compile error: "+format, a...)
+	c.ctx.errPos = append(c.ctx.errPos, position{Filename: c.ctx.fname, Pos: c.pos})
+	return fmt.Errorf(format, a...)
+}
+
+func (c *compiler) perrorf(pos int, format string, a ...interface{}) error {
+	c.ctx.errPos = append(c.ctx.errPos, position{Filename: c.ctx.fname, Pos: pos})
+	return fmt.Errorf(format, a...)
 }
 
 func (c *compiler) scope() *lambdaCode {
@@ -753,7 +757,7 @@ func (c *compiler) doArgs(b *astBlock) error {
 			}
 		}
 		if expr.Type == astMONAD && expr.Text == "and" {
-			err := c.doAnd(b)
+			err := c.doAnd(b, expr.Pos)
 			if err != nil {
 				return err
 			}
@@ -761,7 +765,7 @@ func (c *compiler) doArgs(b *astBlock) error {
 			return nil
 		}
 		if expr.Type == astMONAD && expr.Text == "or" {
-			err := c.doOr(b)
+			err := c.doOr(b, expr.Pos)
 			if err != nil {
 				return err
 			}
@@ -844,13 +848,16 @@ func (c *compiler) doCond(b *astBlock) error {
 	return nil
 }
 
-func (c *compiler) doAnd(b *astBlock) error {
+func (c *compiler) doAnd(b *astBlock, pos int) error {
 	body := b.Body
 	argc := c.argc
 	jumpsEnd := []int{}
 	for i, ei := range body {
 		if i > 0 {
 			c.push(opDrop)
+		}
+		if len(ei) == 0 {
+			return c.perrorf(pos, "and[...] : empty argument (%d-th)", i)
 		}
 		err := c.doExprs(ei)
 		if err != nil {
@@ -870,13 +877,16 @@ func (c *compiler) doAnd(b *astBlock) error {
 	return nil
 }
 
-func (c *compiler) doOr(b *astBlock) error {
+func (c *compiler) doOr(b *astBlock, pos int) error {
 	body := b.Body
 	argc := c.argc
 	jumpsEnd := []int{}
 	for i, ei := range body {
 		if i > 0 {
 			c.push(opDrop)
+		}
+		if len(ei) == 0 {
+			return c.perrorf(pos, "or[...] : empty argument (%d-th)", i+1)
 		}
 		err := c.doExprs(ei)
 		if err != nil {

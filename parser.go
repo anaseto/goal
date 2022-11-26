@@ -56,8 +56,7 @@ func parseReturn(es exprs) exprs {
 }
 
 func (p *parser) errorf(format string, a ...interface{}) error {
-	// TODO: in case of error, read the file again to get from pos the line
-	// and print the line that produced the error with some column marker.
+	p.ctx.errPos = append(p.ctx.errPos, position{Filename: p.ctx.fname, Pos: p.token.Pos})
 	return fmt.Errorf("parsing: "+format, a...)
 }
 
