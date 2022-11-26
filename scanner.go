@@ -208,7 +208,9 @@ func scanAny(s *Scanner) stateFn {
 	case eof:
 		return s.emitEOF()
 	case '\n':
-		return s.emit(NEWLINE)
+		if !s.start {
+			return s.emit(NEWLINE)
+		}
 	case ' ', '\t':
 		return scanSpace
 	case '/':
@@ -302,7 +304,10 @@ func scanComment(s *Scanner) stateFn {
 		case eof:
 			return s.emitEOF()
 		case '\n':
-			return s.emit(NEWLINE)
+			if !s.start {
+				return s.emit(NEWLINE)
+			}
+			return scanAny
 		}
 	}
 }
