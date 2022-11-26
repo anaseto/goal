@@ -201,7 +201,9 @@ func (p *parser) pExprBlock() (expr, error) {
 		case parseEOF:
 			pExprsRev(b.Body[len(b.Body)-1])
 			opTok := p.depth[len(p.depth)-1]
-			return b, p.errorf("unexpected EOF without closing previous %s at %d", opTok, opTok.Pos)
+			perr := p.errorf("unexpected EOF without closing previous %s", opTok)
+			p.ctx.errPos = append(p.ctx.errPos, position{Filename: p.ctx.fname, Pos: opTok.Pos})
+			return b, perr
 		case parseSEP:
 			pExprsRev(b.Body[len(b.Body)-1])
 			b.Body = append(b.Body, exprs{})

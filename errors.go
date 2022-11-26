@@ -16,6 +16,7 @@ type position struct {
 type Error struct {
 	Msg string // error message (without location)
 
+	compile   bool
 	positions []position        // error location stack
 	sources   map[string]string // filename: source
 }
@@ -41,7 +42,11 @@ func (e *Error) Error() string {
 		}
 		if pos.Filename != "" {
 			s, line, col := getPosLine(sources[pos.Filename], pos.Pos)
-			fmt.Fprintf(sb, "  (called from) %s:%d:%d:%d\n", pos.Filename, line, col+1, pos.Pos)
+			ctxs := "called from"
+			if e.compile {
+				ctxs = "from"
+			}
+			fmt.Fprintf(sb, "  (%s) %s:%d:%d:%d\n", ctxs, pos.Filename, line, col+1, pos.Pos)
 			writeLine(sb, s, col)
 		} else if lc := pos.lambda; lc != nil {
 			s, _, col := getPosLine(lc.Source, pos.Pos-lc.StartPos)

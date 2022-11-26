@@ -165,7 +165,7 @@ func (ctx *Context) Compile(name string, s string) error {
 		ctx.gCode.last = 0
 		ctx.lambdas = ctx.lambdas[:llen]
 		ctx.assigned = false
-		return ctx.getError(err)
+		return ctx.getError(err, true)
 	}
 	ctx.checkAssign()
 	return nil
@@ -218,23 +218,24 @@ func (ctx *Context) exec() error {
 		ctx.gCode.Body = ctx.gCode.Body[:0]
 		ctx.gCode.Pos = ctx.gCode.Pos[:0]
 		ctx.gCode.last = 0
-		return ctx.getError(err)
+		return ctx.getError(err, false)
 	}
 	ctx.gCode.Body = ctx.gCode.Body[:0]
 	ctx.gCode.Pos = ctx.gCode.Pos[:0]
 	ctx.gCode.last = 0
 	if len(ctx.stack) == 0 {
 		// should not happen
-		return ctx.getError(errors.New("no result: empty stack"))
+		return ctx.getError(errors.New("no result: empty stack"), false)
 	}
 	return nil
 }
 
-func (ctx *Context) getError(err error) error {
+func (ctx *Context) getError(err error, compile bool) error {
 	e := &Error{
 		Msg:       err.Error(),
 		positions: ctx.errPos,
 		sources:   ctx.sources,
+		compile:   compile,
 	}
 	ctx.errPos = nil
 	return e
