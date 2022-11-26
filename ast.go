@@ -13,7 +13,8 @@ type expr interface {
 	node()
 }
 
-// exprs is used to represent a whole expression. It is not a ppExpr.
+// exprs is used to represent a whole expression. It is not a ppExpr. It
+// represents a sequence of expressions applied in sequence.
 type exprs []expr
 
 // astToken represents a simplified token after processing into expr.
@@ -37,7 +38,7 @@ const (
 	astIDENT
 	astMONAD
 	astDYAD
-	astADVERB
+	astADVERB // only within astAdverbs
 )
 
 type astReturn struct {
@@ -53,52 +54,83 @@ type astAdverbs struct {
 	Train []astToken // an adverb sequence
 }
 
-type astParenExpr struct {
+type astParen struct {
 	Exprs    exprs // parenthesized sub-expressions
-	StartPos int
-	EndPos   int
+	StartPos int   // remove?
+	EndPos   int   // remove?
 }
 
-type astBlock struct {
-	Type     astBlockType
+type astApplyN struct {
+	Expr     expr
+	Args     []exprs
+	StartPos int // remove?
+	EndPos   int // remove?
+}
+
+func (a *astApplyN) String() (s string) {
+	s = fmt.Sprintf("%v[%v]", a.Expr, a.Args)
+	return s
+}
+
+func (a *astApplyN) push(e expr) {
+	a.Args[len(a.Args)-1] = append(a.Args[len(a.Args)-1], e)
+}
+
+type astList struct {
+	Args     []exprs
+	StartPos int // remove?
+	EndPos   int // remove?
+}
+
+func (l *astList) String() (s string) {
+	s = fmt.Sprintf("(%v)", l.Args)
+	return s
+}
+
+func (l *astList) push(e expr) {
+	l.Args[len(l.Args)-1] = append(l.Args[len(l.Args)-1], e)
+}
+
+type astSeq struct {
+	Body     []exprs
+	StartPos int // remove?
+	EndPos   int // remove?
+}
+
+func (b *astSeq) String() (s string) {
+	s = fmt.Sprintf("[%v]", b.Body)
+	return s
+}
+
+func (b *astSeq) push(e expr) {
+	b.Body[len(b.Body)-1] = append(b.Body[len(b.Body)-1], e)
+}
+
+type astLambda struct {
 	Body     []exprs
 	Args     []string
 	StartPos int
 	EndPos   int
 }
 
-func (b *astBlock) String() (s string) {
-	switch b.Type {
-	case astLAMBDA:
-		args := "[" + strings.Join([]string(b.Args), ";") + "]"
-		s = fmt.Sprintf("{%s %v %v}", args, b.Type, b.Body)
-	case astARGS:
-		s = fmt.Sprintf("[%v %v]", b.Type, b.Body)
-	case astLIST:
-		s = fmt.Sprintf("(%v %v)", b.Type, b.Body)
-	}
-	return s
+func (b *astLambda) String() (s string) {
+	args := "[" + strings.Join([]string(b.Args), ";") + "]"
+	return fmt.Sprintf("{%s %v}", args, b.Body)
 }
 
-func (b *astBlock) push(e expr) {
+func (b *astLambda) push(e expr) {
 	b.Body[len(b.Body)-1] = append(b.Body[len(b.Body)-1], e)
 }
 
-type astBlockType int
-
-const (
-	astLAMBDA astBlockType = iota
-	astARGS
-	astSEQ
-	astLIST
-)
-
-func (t *astToken) node()      {}
-func (t *astReturn) node()     {}
-func (st *astStrand) node()    {}
-func (ads *astAdverbs) node()  {}
-func (pe *astParenExpr) node() {}
-func (b *astBlock) node()      {}
+func (t *astToken) node()     {}
+func (t *astReturn) node()    {}
+func (st *astStrand) node()   {}
+func (ads *astAdverbs) node() {}
+func (p *astParen) node()     {}
+func (a *astApplyN) node()    {}
+func (l *astList) node()      {}
+func (b *astSeq) node()       {}
+func (b *astLambda) node()    {}
 
 type parseEOF struct{}
 type parseSEP struct{}

@@ -1,6 +1,6 @@
 package goal
 
-//go:generate stringer -type=TokenType,astTokenType,astBlockType,opcode -output stringer.go
+//go:generate stringer -type=TokenType,astTokenType,opcode -output stringer.go
 
 import (
 	"fmt"

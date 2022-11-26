@@ -327,16 +327,19 @@ func (c *compiler) doExpr(e expr) error {
 		if err != nil {
 			return err
 		}
-	case *astParenExpr:
-		err := c.doParenExpr(e)
+	case *astParen:
+		err := c.doParen(e)
 		if err != nil {
 			return err
 		}
-	case *astBlock:
-		oarglist := c.arglist
-		c.arglist = false
-		err := c.doBlock(e)
-		c.arglist = oarglist
+	case *astApplyN:
+		return c.doArgs(e)
+	case *astList:
+		return c.doList(e)
+	case *astSeq:
+		return c.doSeq(e)
+	case *astLambda:
+		err := c.doLambda(e)
 		if err != nil {
 			return err
 		}
@@ -450,7 +453,7 @@ func (c *compiler) pushVariadic(v Variadic) {
 func (c *compiler) doDyad(tok *astToken) error {
 	e := c.it.Peek()
 	argc := c.argc
-	if e == nil || c.arglist || !isLeftArg(e) {
+	if e == nil || !isLeftArg(e) {
 		return c.doVariadic(tok)
 	}
 	if identTok, ok := getIdent(e); ok {
@@ -566,7 +569,7 @@ func (c *compiler) doAdverbs(adverbs *astAdverbs) error {
 		}
 	}
 	nppe := c.it.Peek()
-	if nppe == nil || c.arglist || !isLeftArg(nppe) {
+	if nppe == nil || !isLeftArg(nppe) {
 		c.argc = 2
 		return c.doVariadic(tok)
 	}
@@ -607,37 +610,19 @@ func (c *compiler) doStrand(st *astStrand) error {
 	return nil
 }
 
-func (c *compiler) doParenExpr(pe *astParenExpr) error {
+func (c *compiler) doParen(p *astParen) error {
 	argc := c.argc
 	c.argc = 0
-	oarglist := c.arglist
-	c.arglist = false
-	err := c.doExprs(pe.Exprs)
+	err := c.doExprs(p.Exprs)
 	if err != nil {
 		return err
 	}
-	c.arglist = oarglist
 	c.argc = argc + 1
-	c.applyAt(pe.EndPos)
+	c.applyAt(p.EndPos)
 	return err
 }
 
-func (c *compiler) doBlock(b *astBlock) error {
-	switch b.Type {
-	case astLAMBDA:
-		return c.doLambda(b)
-	case astARGS:
-		return c.doArgs(b)
-	case astSEQ:
-		return c.doSeq(b.Body)
-	case astLIST:
-		return c.doList(b.Body)
-	default:
-		panic(fmt.Sprintf("unknown block type: %d", b.Type))
-	}
-}
-
-func (c *compiler) doLambda(b *astBlock) error {
+func (c *compiler) doLambda(b *astLambda) error {
 	body := b.Body
 	args := b.Args
 	argc := c.argc
@@ -741,9 +726,9 @@ func (ctx *Context) resolveLambda(lc *lambdaCode) {
 	lc.opIdxLocal = nil
 }
 
-func (c *compiler) doArgs(b *astBlock) error {
-	body := b.Body
-	expr := c.it.Peek()
+func (c *compiler) doArgs(b *astApplyN) error {
+	body := b.Args
+	expr := b.Expr
 	switch expr := expr.(type) {
 	case *astToken:
 		if len(body) >= 3 {
@@ -752,7 +737,6 @@ func (c *compiler) doArgs(b *astBlock) error {
 				if err != nil {
 					return err
 				}
-				c.it.Next()
 				return nil
 			}
 		}
@@ -761,7 +745,6 @@ func (c *compiler) doArgs(b *astBlock) error {
 			if err != nil {
 				return err
 			}
-			c.it.Next()
 			return nil
 		}
 		if expr.Type == astMONAD && expr.Text == "or" {
@@ -769,7 +752,6 @@ func (c *compiler) doArgs(b *astBlock) error {
 			if err != nil {
 				return err
 			}
-			c.it.Next()
 			return nil
 		}
 	}
@@ -781,15 +763,8 @@ func (c *compiler) doArgs(b *astBlock) error {
 			return err
 		}
 	}
-	if !c.it.Next() {
-		// should not happpen: it would be a sequence
-		panic(c.errorf("used as a sequence, but args").Error())
-	}
-	e := c.it.Expr()
 	c.argc = len(body)
-	c.arglist = true
-	err := c.doExpr(e)
-	c.arglist = false
+	err := c.doExpr(b.Expr)
 	if err != nil {
 		return err
 	}
@@ -798,8 +773,8 @@ func (c *compiler) doArgs(b *astBlock) error {
 	return nil
 }
 
-func (c *compiler) doCond(b *astBlock) error {
-	body := b.Body
+func (c *compiler) doCond(b *astApplyN) error {
+	body := b.Args
 	if len(body)%2 != 1 {
 		return c.errorf("conditional ?[if;then;else] with even number of statements")
 	}
@@ -848,8 +823,8 @@ func (c *compiler) doCond(b *astBlock) error {
 	return nil
 }
 
-func (c *compiler) doAnd(b *astBlock, pos int) error {
-	body := b.Body
+func (c *compiler) doAnd(b *astApplyN, pos int) error {
+	body := b.Args
 	argc := c.argc
 	jumpsEnd := []int{}
 	for i, ei := range body {
@@ -877,8 +852,8 @@ func (c *compiler) doAnd(b *astBlock, pos int) error {
 	return nil
 }
 
-func (c *compiler) doOr(b *astBlock, pos int) error {
-	body := b.Body
+func (c *compiler) doOr(b *astApplyN, pos int) error {
+	body := b.Args
 	argc := c.argc
 	jumpsEnd := []int{}
 	for i, ei := range body {
@@ -906,7 +881,8 @@ func (c *compiler) doOr(b *astBlock, pos int) error {
 	return nil
 }
 
-func (c *compiler) doSeq(body []exprs) error {
+func (c *compiler) doSeq(b *astSeq) error {
+	body := b.Body
 	argc := c.argc
 	for i, exprs := range body {
 		slen := c.slen
@@ -923,7 +899,8 @@ func (c *compiler) doSeq(body []exprs) error {
 	return nil
 }
 
-func (c *compiler) doList(body []exprs) error {
+func (c *compiler) doList(l *astList) error {
+	body := l.Args
 	argc := c.argc
 	for i := len(body) - 1; i >= 0; i-- {
 		exprs := body[i]

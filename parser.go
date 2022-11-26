@@ -9,9 +9,9 @@ type parser struct {
 	ctx    *Context
 	token  Token // current token
 	pToken Token // peeked token
-	oToken Token // old (previous) token
 	depth  []Token
 	peeked bool
+	exprs  exprs // current sub-expression application list
 }
 
 func newParser(ctx *Context) *parser {
@@ -32,7 +32,7 @@ func (p *parser) Next() (exprs, error) {
 	for {
 		e, err := p.expr()
 		if err != nil {
-			pExprsRev(es)
+			pDoExprs(es)
 			switch err.(type) {
 			case parseSEP:
 				return es, nil
@@ -70,7 +70,6 @@ func (p *parser) peek() Token {
 }
 
 func (p *parser) next() Token {
-	p.oToken = p.token
 	if p.peeked {
 		p.token = p.pToken
 		p.peeked = false
@@ -93,26 +92,31 @@ func closeToken(opTok TokenType) TokenType {
 	}
 }
 
-func (p *parser) expr() (expr, error) {
+// expr returns an applicable subexpression, or an error.
+func (p *parser) expr() (e expr, err error) {
 	switch tok := p.next(); tok.Type {
 	case EOF:
-		return nil, parseEOF{}
+		err = parseEOF{}
 	case NEWLINE, SEMICOLON:
-		return nil, parseSEP{}
+		err = parseSEP{}
 	case ERROR:
-		return nil, p.errorf("%s", tok)
+		err = p.errorf("%s", tok)
 	case ADVERB:
-		return p.pAdverbs()
+		e, err = p.pAdverbs()
 		//return nil, c.errorf("adverb %s at start of expression", tok)
 	case IDENT:
-		return &astToken{Type: astIDENT, Pos: tok.Pos, Text: tok.Text}, nil
-	case LEFTBRACE, LEFTBRACKET, LEFTPAREN:
-		return p.pExprBlock()
+		e = &astToken{Type: astIDENT, Pos: tok.Pos, Text: tok.Text}
+	case LEFTBRACE:
+		e, err = p.pExprBrace()
+	case LEFTBRACKET:
+		e, err = p.pExprBracket()
+	case LEFTPAREN:
+		e, err = p.pExprParen()
 	case NUMBER, STRING:
 		ntok := p.peek()
 		switch ntok.Type {
 		case NUMBER, STRING:
-			return p.pExprStrand()
+			e, err = p.pExprStrand()
 		default:
 			ptok := &astToken{Pos: p.token.Pos, Text: p.token.Text}
 			switch p.token.Type {
@@ -121,60 +125,54 @@ func (p *parser) expr() (expr, error) {
 			case STRING:
 				ptok.Type = astSTRING
 			}
-			return ptok, nil
+			e = ptok
 		}
 	case RIGHTBRACE, RIGHTBRACKET, RIGHTPAREN:
 		if len(p.depth) == 0 {
-			return nil, p.errorf("unexpected %s without opening matching pair", tok)
+			err = p.errorf("unexpected %s without opening matching pair", tok)
+			break
 		}
 		opTok := p.depth[len(p.depth)-1]
 		clTokt := closeToken(opTok.Type)
 		if clTokt != tok.Type {
-			return nil, p.errorf("unexpected %s without closing previous %s at %d", tok, opTok, opTok.Pos)
+			err = p.errorf("unexpected %s without closing previous %s at %d", tok, opTok, opTok.Pos)
+			break
 		}
 		p.depth = p.depth[:len(p.depth)-1]
-		return nil, parseCLOSE{tok.Pos}
+		err = parseCLOSE{tok.Pos}
 	case DYAD:
-		return &astToken{Type: astDYAD, Pos: tok.Pos, Text: tok.Text}, nil
+		e = &astToken{Type: astDYAD, Pos: tok.Pos, Text: tok.Text}
 	case MONAD:
-		return &astToken{Type: astMONAD, Pos: tok.Pos, Text: tok.Text}, nil
+		e = &astToken{Type: astMONAD, Pos: tok.Pos, Text: tok.Text}
 	default:
 		// should not happen
-		return nil, p.errorf("invalid token: %v", tok)
+		err = p.errorf("invalid token: %v", tok)
 	}
+	if err != nil {
+		return e, err
+	}
+	if tok := p.peek(); tok.Type == LEFTBRACKET {
+		p.next()
+		return p.pExprApplyN(e)
+	}
+	return e, err
 }
 
-func (p *parser) pExprBlock() (expr, error) {
-	var bt astBlockType
+func (p *parser) pExprBrace() (expr, error) {
 	p.depth = append(p.depth, p.token)
-	b := &astBlock{StartPos: p.token.Pos}
-	switch p.token.Type {
-	case LEFTBRACE:
-		bt = astLAMBDA
-		ntok := p.peek()
-		if ntok.Type == LEFTBRACKET {
-			p.next()
-			args, err := p.pLambdaArgs()
-			if err != nil {
-				return b, err
-			}
-			if len(args) == 0 {
-				return b, p.errorf("empty argument list")
-			}
-			b.Args = args
+	b := &astLambda{StartPos: p.token.Pos}
+	ntok := p.peek()
+	if ntok.Type == LEFTBRACKET {
+		p.next()
+		args, err := p.pLambdaArgs()
+		if err != nil {
+			return b, err
 		}
-	case LEFTBRACKET:
-		switch p.oToken.Type {
-		case NEWLINE, SEMICOLON, LEFTBRACKET, LEFTPAREN, NONE:
-			bt = astSEQ
-		default:
-			// arguments being applied to something
-			bt = astARGS
+		if len(args) == 0 {
+			return b, p.errorf("empty argument list")
 		}
-	case LEFTPAREN:
-		bt = astLIST
+		b.Args = args
 	}
-	b.Type = bt
 	b.Body = []exprs{}
 	b.Body = append(b.Body, exprs{})
 	for {
@@ -185,27 +183,17 @@ func (p *parser) pExprBlock() (expr, error) {
 		}
 		switch err := err.(type) {
 		case parseCLOSE:
-			pExprsRev(b.Body[len(b.Body)-1])
-			if b.Type == astLIST && len(b.Body) == 1 &&
-				len(b.Body[0]) > 0 {
-				// not a list, but a parenthesized
-				// expression.
-				return &astParenExpr{
-					Exprs:    b.Body[0],
-					StartPos: b.StartPos,
-					EndPos:   err.Pos + 1,
-				}, nil
-			}
+			pDoExprs(b.Body[len(b.Body)-1])
 			b.EndPos = err.Pos + 1
 			return b, nil
 		case parseEOF:
-			pExprsRev(b.Body[len(b.Body)-1])
+			pDoExprs(b.Body[len(b.Body)-1])
 			opTok := p.depth[len(p.depth)-1]
 			perr := p.errorf("unexpected EOF without closing previous %s", opTok)
 			p.ctx.errPos = append(p.ctx.errPos, position{Filename: p.ctx.fname, Pos: opTok.Pos})
 			return b, perr
 		case parseSEP:
-			pExprsRev(b.Body[len(b.Body)-1])
+			pDoExprs(b.Body[len(b.Body)-1])
 			b.Body = append(b.Body, exprs{})
 		default:
 			return b, err
@@ -233,6 +221,116 @@ func (p *parser) pLambdaArgs() ([]string, error) {
 		case SEMICOLON:
 		default:
 			return args, p.errorf("expected ; or ] in argument list but got %s", p.token)
+		}
+	}
+}
+
+func (p *parser) pExprBracket() (expr, error) {
+	// We have a sequence, because the bracket is not applied to a previous
+	// expression.
+	p.depth = append(p.depth, p.token)
+	return p.pExprSeq()
+}
+
+func (p *parser) pExprSeq() (expr, error) {
+	b := &astSeq{StartPos: p.token.Pos}
+	b.Body = []exprs{}
+	b.Body = append(b.Body, exprs{})
+	for {
+		pe, err := p.expr()
+		if err == nil {
+			b.push(pe)
+			continue
+		}
+		switch err := err.(type) {
+		case parseCLOSE:
+			pDoExprs(b.Body[len(b.Body)-1])
+			b.EndPos = err.Pos + 1
+			return b, nil
+		case parseEOF:
+			pDoExprs(b.Body[len(b.Body)-1])
+			opTok := p.depth[len(p.depth)-1]
+			perr := p.errorf("unexpected EOF without closing previous %s", opTok)
+			p.ctx.errPos = append(p.ctx.errPos, position{Filename: p.ctx.fname, Pos: opTok.Pos})
+			return b, perr
+		case parseSEP:
+			pDoExprs(b.Body[len(b.Body)-1])
+			b.Body = append(b.Body, exprs{})
+		default:
+			return b, err
+		}
+	}
+}
+
+func (p *parser) pExprApplyN(e expr) (expr, error) {
+	p.depth = append(p.depth, p.token)
+	a := &astApplyN{
+		Expr:     e,
+		Args:     []exprs{{}},
+		StartPos: p.token.Pos,
+	}
+	for {
+		pe, err := p.expr()
+		if err == nil {
+			a.push(pe)
+			continue
+		}
+		switch err := err.(type) {
+		case parseCLOSE:
+			pDoExprs(a.Args[len(a.Args)-1])
+			a.EndPos = err.Pos + 1
+			return a, nil
+		case parseEOF:
+			pDoExprs(a.Args[len(a.Args)-1])
+			opTok := p.depth[len(p.depth)-1]
+			perr := p.errorf("unexpected EOF without closing previous %s", opTok)
+			p.ctx.errPos = append(p.ctx.errPos, position{Filename: p.ctx.fname, Pos: opTok.Pos})
+			return a, perr
+		case parseSEP:
+			pDoExprs(a.Args[len(a.Args)-1])
+			a.Args = append(a.Args, exprs{})
+		default:
+			return a, err
+		}
+	}
+}
+
+func (p *parser) pExprParen() (expr, error) {
+	p.depth = append(p.depth, p.token)
+	l := &astList{StartPos: p.token.Pos}
+	l.Args = []exprs{}
+	l.Args = append(l.Args, exprs{})
+	for {
+		pe, err := p.expr()
+		if err == nil {
+			l.push(pe)
+			continue
+		}
+		switch err := err.(type) {
+		case parseCLOSE:
+			pDoExprs(l.Args[len(l.Args)-1])
+			if len(l.Args) == 1 && len(l.Args[0]) > 0 {
+				// not a list, but a parenthesized
+				// expression.
+				return &astParen{
+					Exprs:    l.Args[0],
+					StartPos: l.StartPos,
+					EndPos:   err.Pos + 1,
+				}, nil
+			}
+			l.EndPos = err.Pos + 1
+			return l, nil
+		case parseEOF:
+			pDoExprs(l.Args[len(l.Args)-1])
+			opTok := p.depth[len(p.depth)-1]
+			perr := p.errorf("unexpected EOF without closing previous %s", opTok)
+			p.ctx.errPos = append(p.ctx.errPos, position{Filename: p.ctx.fname, Pos: opTok.Pos})
+			return l, perr
+		case parseSEP:
+			pDoExprs(l.Args[len(l.Args)-1])
+			l.Args = append(l.Args, exprs{})
+		default:
+			return l, err
 		}
 	}
 }
@@ -273,11 +371,37 @@ func (p *parser) pExprStrand() (expr, error) {
 	}
 }
 
-func pExprsRev(es exprs) {
+// pDoExprs finalizes parsing of a slice of expressions.
+func pDoExprs(es exprs) {
 	es = parseReturn(es)
 	for i := 0; i < len(es)/2; i++ {
 		es[i], es[len(es)-i-1] = es[len(es)-i-1], es[i]
 	}
+	//arglist := false // last expr was an argument list
+	//for i, e := range es {
+	//switch e := e.(type) {
+	//case *astBlock:
+	//arglist = e.Type == astARGS
+	//case *astToken:
+	//if e.Type == astDYAD && !arglist && i < len(es)-1 {
+	//ne := es[i+1]
+	//if isLeftArg(ne) {
+	//b := &astBlock{
+	//Type:     astARGS,
+	//Body:     []exprs{{ne}, es[:i]},
+	//StartPos: e.Pos,
+	//EndPos:   e.Pos,
+	//}
+	//es[i+1], es[i] = es[i], b
+	//es = es[i:]
+	//arglist = true
+	//}
+	//}
+	//arglist = false
+	//default:
+	//arglist = false
+	//}
+	//}
 }
 
 func bodyRev(body []exprs) {
