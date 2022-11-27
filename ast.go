@@ -51,15 +51,6 @@ const (
 	astADVERB // only within astDerivedVerb
 )
 
-// astReturn represents a return statement with ":".
-type astReturn struct {
-	Pos int
-}
-
-func (t *astReturn) String() string {
-	return "RETURN"
-}
-
 // astStrand represents a stranding of literals, like 1 23 456
 type astStrand struct {
 	Lits []astToken
@@ -167,7 +158,6 @@ func (b *astLambda) String() (s string) {
 
 func (es exprs) node()           {}
 func (t *astToken) node()        {}
-func (t *astReturn) node()       {}
 func (st *astStrand) node()      {}
 func (dv *astDerivedVerb) node() {}
 func (p *astParen) node()        {}

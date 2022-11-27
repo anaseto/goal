@@ -39,15 +39,6 @@ func (p *parser) Next() (expr, error) {
 	return es, nil
 }
 
-func parseReturn(es exprs) {
-	if len(es) == 0 {
-		return
-	}
-	if e, ok := es[0].(*astToken); ok && e.Type == astDYAD && e.Text == ":" {
-		es[0] = &astReturn{Pos: e.Pos}
-	}
-}
-
 func (p *parser) errorf(format string, a ...interface{}) error {
 	p.ctx.errPos = append(p.ctx.errPos, position{Filename: p.ctx.fname, Pos: p.token.Pos})
 	return fmt.Errorf("parsing: "+format, a...)
@@ -392,7 +383,6 @@ func (p *parser) strand() (expr, error) {
 
 // pDoExprs finalizes parsing of a slice of expressions.
 func pDoExprs(es exprs) {
-	parseReturn(es)
 	for i := 0; i < len(es)/2; i++ {
 		es[i], es[len(es)-i-1] = es[len(es)-i-1], es[i]
 	}

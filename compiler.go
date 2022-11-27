@@ -260,12 +260,6 @@ func bool2int(b bool) (i int) {
 
 func (c *compiler) doExpr(e expr, n int) error {
 	switch e := e.(type) {
-	case nil:
-		if n > 0 {
-			return c.errorf("nil cannot be applied")
-		}
-		c.push(opNil)
-		return nil
 	case exprs:
 		return c.doExprs(e, n)
 	case *astToken:
@@ -273,10 +267,6 @@ func (c *compiler) doExpr(e expr, n int) error {
 		if err != nil {
 			return err
 		}
-	case *astReturn:
-		// TODO: astReturn: n == 0?
-		c.pos = e.Pos
-		c.push(opReturn)
 	case *astDerivedVerb:
 		err := c.doDerivedVerb(e, n)
 		if err != nil {
@@ -361,6 +351,11 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 		c.doLocal(tok, n)
 		return nil
 	case astDYAD:
+		if n == 1 && tok.Text == ":" {
+			// n == 1 ensured by parsing
+			c.push(opReturn)
+			return nil
+		}
 		return c.doVariadic(tok, n)
 	case astMONAD:
 		return c.doVariadic(tok, n)
