@@ -171,13 +171,13 @@ func (ctx *Context) applyArrayArgs(x array, arg V, args []V) V {
 func (ctx *Context) applyVariadic(v Variadic) V {
 	args := ctx.peek()
 	x := args[0]
-	if ctx.variadics[v].Adverb {
-		ctx.drop()
-		return derivedVerb{Fun: v, Arg: x}
-	}
 	if x == nil {
 		ctx.drop()
 		return ProjectionMonad{Fun: v}
+	}
+	if ctx.variadics[v].Adverb {
+		ctx.drop()
+		return derivedVerb{Fun: v, Arg: x}
 	}
 	r := ctx.variadics[v].Func(ctx, args)
 	ctx.drop()

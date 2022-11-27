@@ -53,8 +53,8 @@ func NewContext() *Context {
 		"ocount": NameMonad,
 		"icount": NameMonad,
 		"bytes":  NameMonad,
-		"and":    NameMonad,
-		"or":     NameMonad,
+		"and":    NameDyad,
+		"or":     NameDyad,
 	}
 	ctx.vNames = map[string]Variadic{
 		":":      vRight,

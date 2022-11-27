@@ -102,12 +102,9 @@ func (ctx *Context) lambdaString(lc *lambdaCode) string {
 type compiler struct {
 	ctx        *Context      // main execution and compilation context
 	p          *parser       // parsing into text-based non-resolved AST
-	argc       int           // stack length for current sub-expression
-	slen       int           // virtual stack length
 	arglist    bool          // whether current expression has an argument list
 	scopeStack []*lambdaCode // scope information
 	pos        int           // last token position
-	it         astIter       // exprs iterator
 	drop       bool          // whether to add a drop at the end
 }
 
@@ -142,7 +139,8 @@ func (c *compiler) ParseCompileNext() error {
 		c.push(opDrop)
 	}
 	var eof bool
-	exprs, err := c.p.Next()
+	expr, err := c.p.Next()
+	//fmt.Printf("expr: %v\n", expr)
 	if err != nil {
 		_, eof = err.(errEOF)
 		if !eof {
@@ -152,19 +150,19 @@ func (c *compiler) ParseCompileNext() error {
 			return err
 		}
 	}
-	slen := c.slen
-	err = c.doExprs(exprs)
-	c.drop = c.slen > slen
+	err = c.doExpr(expr, 0)
 	if err != nil {
 		ctx.compiler = newCompiler(ctx)
 		return err
 	}
+	c.drop = nonEmpty(expr)
 	if eof {
 		return errEOF{}
 	}
 	return nil
 }
 
+// push pushes a zero-argument opcode to the current's scope code.
 func (c *compiler) push(opc opcode) {
 	lc := c.scope()
 	if lc != nil {
@@ -175,27 +173,9 @@ func (c *compiler) push(opc opcode) {
 		c.ctx.gCode.Pos = append(c.ctx.gCode.Pos, c.pos)
 		c.ctx.gCode.last = len(c.ctx.gCode.Body) - 1
 	}
-	switch opc {
-	case opApply:
-		// v v -> v
-		c.slen--
-		c.argc--
-	case opApply2:
-		// v v v -> v
-		c.slen -= 2
-		c.argc -= 2
-	case opDrop:
-		// v ->
-		c.slen--
-		c.argc--
-	case opAssignLocal, opAssignGlobal, opReturn:
-	default:
-		// -> v
-		c.slen++
-		c.argc++
-	}
 }
 
+// push pushes a one-argument opcode to the current's scope code.
 func (c *compiler) push2(op, arg opcode) {
 	lc := c.scope()
 	if lc != nil {
@@ -206,22 +186,9 @@ func (c *compiler) push2(op, arg opcode) {
 		c.ctx.gCode.Pos = append(c.ctx.gCode.Pos, c.pos, c.pos)
 		c.ctx.gCode.last = len(c.ctx.gCode.Body) - 2
 	}
-	switch op {
-	case opApplyN:
-		// v ... v v -> v
-		c.slen -= int(arg)
-		c.argc -= int(arg)
-	case opApplyV, opJump, opJumpFalse, opJumpTrue:
-	case opApply2V:
-		c.slen--
-		c.argc--
-	default:
-		// -> v
-		c.slen++
-		c.argc++
-	}
 }
 
+// push pushes a two-argument opcode to the current's scope code.
 func (c *compiler) push3(op, arg1, arg2 opcode) {
 	lc := c.scope()
 	if lc != nil {
@@ -232,46 +199,42 @@ func (c *compiler) push3(op, arg1, arg2 opcode) {
 		c.ctx.gCode.Pos = append(c.ctx.gCode.Pos, c.pos, c.pos, c.pos)
 		c.ctx.gCode.last = len(c.ctx.gCode.Body) - 2
 	}
-	switch op {
-	case opApplyNV:
-		// v ... v v -> v
-		c.slen -= int(arg2 - 1)
-		c.argc -= int(arg2 - 1)
-	default:
-		// -> v
-		c.slen++
-		c.argc++
-	}
 }
 
-func (c *compiler) apply() {
+// applyN pushes an apply opcode for the given number of arguments. It does
+// nothing for zero.
+func (c *compiler) applyN(n int) {
 	switch {
-	case c.argc == 2:
+	case n == 1:
 		c.push(opApply)
-	case c.argc == 3:
+	case n == 2:
 		c.push(opApply2)
-	case c.argc > 3:
-		c.push2(opApplyN, opcode(c.argc-1))
+	case n > 2:
+		c.push2(opApplyN, opcode(n))
 	}
 }
 
-func (c *compiler) applyAt(pos int) {
+// applyAtN calls applyN, but recording custom position information.
+func (c *compiler) applyAtN(pos int, n int) {
 	opos := c.pos
 	c.pos = pos
-	c.apply()
+	c.applyN(n)
 	c.pos = opos
 }
 
+// errorf returns a formatted error.
 func (c *compiler) errorf(format string, a ...interface{}) error {
 	c.ctx.errPos = append(c.ctx.errPos, position{Filename: c.ctx.fname, Pos: c.pos})
 	return fmt.Errorf(format, a...)
 }
 
+// perrorf returns a formatted error with custom position information.
 func (c *compiler) perrorf(pos int, format string, a ...interface{}) error {
 	c.ctx.errPos = append(c.ctx.errPos, position{Filename: c.ctx.fname, Pos: pos})
 	return fmt.Errorf(format, a...)
 }
 
+// scope returns the current lambda's scope, or nil.
 func (c *compiler) scope() *lambdaCode {
 	if len(c.scopeStack) == 0 {
 		return nil
@@ -279,6 +242,7 @@ func (c *compiler) scope() *lambdaCode {
 	return c.scopeStack[len(c.scopeStack)-1]
 }
 
+// body returns the current scope's code.
 func (c *compiler) body() []opcode {
 	lc := c.scope()
 	if lc != nil {
@@ -287,59 +251,58 @@ func (c *compiler) body() []opcode {
 	return c.ctx.gCode.Body
 }
 
-func (c *compiler) doExprs(es exprs) error {
-	slen := c.slen
-	c.argc = 0
-	it := c.it
-	c.it = newAstIter(es)
-	for c.it.Next() {
-		e := c.it.Expr()
-		err := c.doExpr(e)
-		if err != nil {
-			return err
-		}
+func bool2int(b bool) (i int) {
+	if b {
+		i = 1
 	}
-	c.it = it
-	if c.slen == slen {
-		c.push(opNil)
-	}
-	return nil
+	return
 }
 
-func (c *compiler) doExpr(e expr) error {
+func (c *compiler) doExpr(e expr, n int) error {
 	switch e := e.(type) {
+	case nil:
+		if n > 0 {
+			return c.errorf("nil cannot be applied")
+		}
+		c.push(opNil)
+		return nil
+	case exprs:
+		return c.doExprs(e, n)
 	case *astToken:
-		err := c.doToken(e)
+		err := c.doToken(e, n)
 		if err != nil {
 			return err
 		}
 	case *astReturn:
+		// TODO: astReturn: n == 0?
 		c.pos = e.Pos
 		c.push(opReturn)
-	case *astAdverbs:
-		err := c.doAdverbs(e)
+	case *astDerivedVerb:
+		err := c.doDerivedVerb(e, n)
 		if err != nil {
 			return err
 		}
 	case *astStrand:
 		c.pos = e.Pos
-		err := c.doStrand(e)
+		err := c.doStrand(e, n)
 		if err != nil {
 			return err
 		}
 	case *astParen:
-		err := c.doParen(e)
+		err := c.doParen(e, n)
 		if err != nil {
 			return err
 		}
+	case *astApply2:
+		return c.doApply2(e, n)
 	case *astApplyN:
-		return c.doArgs(e)
+		return c.doApplyN(e, n)
 	case *astList:
-		return c.doList(e)
+		return c.doList(e, n)
 	case *astSeq:
-		return c.doSeq(e)
+		return c.doSeq(e, n)
 	case *astLambda:
-		err := c.doLambda(e)
+		err := c.doLambda(e, n)
 		if err != nil {
 			return err
 		}
@@ -349,7 +312,22 @@ func (c *compiler) doExpr(e expr) error {
 	return nil
 }
 
-func (c *compiler) doToken(tok *astToken) error {
+func (c *compiler) doExprs(es exprs, n int) error {
+	for i, e := range es {
+		err := c.doExpr(e, bool2int(i > 0))
+		if err != nil {
+			return err
+		}
+	}
+	if len(es) == 0 {
+		c.push(opNil)
+		return nil
+	}
+	c.applyN(n)
+	return nil
+}
+
+func (c *compiler) doToken(tok *astToken, n int) error {
 	c.pos = tok.Pos
 	switch tok.Type {
 	case astNUMBER:
@@ -357,7 +335,7 @@ func (c *compiler) doToken(tok *astToken) error {
 		if err != nil {
 			return err
 		}
-		if c.argc > 0 {
+		if n > 0 {
 			return c.errorf("number atoms cannot be applied")
 		}
 		id := c.ctx.storeConst(x)
@@ -370,22 +348,22 @@ func (c *compiler) doToken(tok *astToken) error {
 		}
 		id := c.ctx.storeConst(S(s))
 		c.push2(opConst, opcode(id))
-		c.apply()
+		c.applyN(n)
 		return nil
 	case astIDENT:
 		// read or apply, not assign
 		if c.scope() == nil {
 			// global scope: global variable
-			c.doGlobal(tok)
+			c.doGlobal(tok, n)
 			return nil
 		}
 		// local scope: argument, local or global variable
-		c.doLocal(tok)
+		c.doLocal(tok, n)
 		return nil
 	case astDYAD:
-		return c.doDyad(tok)
+		return c.doVariadic(tok, n)
 	case astMONAD:
-		return c.doVariadic(tok)
+		return c.doVariadic(tok, n)
 	default:
 		// should not happen
 		return c.errorf("unexpected token type: %v", tok.Type)
@@ -410,35 +388,36 @@ func parseNumber(s string) (V, error) {
 	return nil, errF
 }
 
-func (c *compiler) doGlobal(tok *astToken) {
+func (c *compiler) doGlobal(tok *astToken, n int) {
 	id := c.ctx.global(tok.Text)
 	c.push2(opGlobal, opcode(id))
-	c.apply()
+	c.applyN(n)
 }
 
-func (c *compiler) doLocal(tok *astToken) {
+func (c *compiler) doLocal(tok *astToken, n int) {
 	lc := c.scope()
 	local, ok := lc.local(tok.Text)
 	if ok {
 		c.push2(opLocal, opArg)
 		lc.opIdxLocal[len(lc.Body)-1] = local
-		c.apply()
+		c.applyN(n)
 		return
 	}
-	c.doGlobal(tok)
+	c.doGlobal(tok, n)
 }
 
-func (c *compiler) doVariadic(tok *astToken) error {
+func (c *compiler) doVariadic(tok *astToken, n int) error {
+	// tok.Type either MONAD, DYAD or ADVERB
 	v := c.parseBuiltin(tok.Text)
 	opos := c.pos
 	c.pos = tok.Pos
-	c.pushVariadic(v)
+	c.pushVariadic(v, n)
 	c.pos = opos
 	return nil
 }
 
-func (c *compiler) pushVariadic(v Variadic) {
-	switch c.argc {
+func (c *compiler) pushVariadic(v Variadic, n int) {
+	switch n {
 	case 0:
 		c.push2(opVariadic, opcode(v))
 	case 1:
@@ -446,33 +425,8 @@ func (c *compiler) pushVariadic(v Variadic) {
 	case 2:
 		c.push2(opApply2V, opcode(v))
 	default:
-		c.push3(opApplyNV, opcode(v), opcode(c.argc))
+		c.push3(opApplyNV, opcode(v), opcode(n))
 	}
-}
-
-func (c *compiler) doDyad(tok *astToken) error {
-	e := c.it.Peek()
-	argc := c.argc
-	if e == nil || !isLeftArg(e) {
-		return c.doVariadic(tok)
-	}
-	if identTok, ok := getIdent(e); ok {
-		if c.doAssign(tok, identTok) {
-			c.it.Next()
-			return nil
-		}
-	}
-	if argc == 0 {
-		c.push(opNil)
-	}
-	c.it.Next()
-	c.argc = 0
-	err := c.doExpr(e)
-	if err != nil {
-		return err
-	}
-	c.argc = 2
-	return c.doVariadic(tok)
 }
 
 func getIdent(e expr) (*astToken, bool) {
@@ -490,34 +444,46 @@ func isLeftArg(e expr) bool {
 		case astMONAD:
 			return false
 		}
-	case *astAdverbs:
+	case *astDerivedVerb:
 		return false
 	}
 	return true
 }
 
-func (c *compiler) doAssign(verbTok, identTok *astToken) bool {
-	if verbTok.Text != ":" && verbTok.Text != "::" || c.argc != 1 {
-		return false
+func (c *compiler) doAssign(verbTok *astToken, left, right expr, n int) (bool, error) {
+	var identTok *astToken
+	switch left := left.(type) {
+	case *astToken:
+		if left.Type != astIDENT {
+			return false, nil
+		}
+		identTok = left
+	default:
+		return false, nil
+	}
+	err := c.doExpr(right, 0)
+	if err != nil {
+		return false, err
 	}
 	lc := c.scope()
 	if lc == nil || verbTok.Text == "::" {
 		id := c.ctx.global(identTok.Text)
 		c.push2(opAssignGlobal, opcode(id))
-		return true
+		return true, nil
 	}
 	local, ok := lc.local(identTok.Text)
 	if ok {
 		c.push2(opAssignLocal, opArg)
 		lc.opIdxLocal[len(lc.Body)-1] = local
-		return true
+		return true, nil
 	}
 	local = lambdaLocal{Type: localVar, ID: lc.nVars}
 	lc.Locals[identTok.Text] = local
 	c.push2(opAssignLocal, opArg)
 	lc.opIdxLocal[len(lc.Body)-1] = local
 	lc.nVars++
-	return true
+	c.applyN(n)
+	return true, nil
 }
 
 func (c *compiler) parseBuiltin(s string) Variadic {
@@ -534,56 +500,23 @@ func getVerb(e expr) (*astToken, bool) {
 
 }
 
-func (c *compiler) doAdverbs(adverbs *astAdverbs) error {
-	tok := &adverbs.Train[len(adverbs.Train)-1]
-	ads := adverbs.Train[:len(adverbs.Train)-1]
-	argc := c.argc
-	e := c.it.Peek()
-	if e == nil {
-		if len(ads) > 0 {
-			return errf("adverb train should modify a value")
-		}
-		c.push(opNil)
-		return c.doVariadic(tok)
+func (c *compiler) doDerivedVerb(dv *astDerivedVerb, n int) error {
+	if dv.Verb == nil {
+		return c.doVariadic(dv.Adverb, n)
 	}
-	if argc == 0 {
-		c.push(opNil)
-	}
-	c.it.Next()
-	var err error
-	c.argc = 0
-	if vTok, ok := getVerb(e); ok {
-		err = c.doVariadic(vTok)
-	} else {
-		err = c.doExpr(e)
-	}
+	err := c.doExpr(dv.Verb, 0)
 	if err != nil {
 		return err
 	}
-	for i := range ads {
-		atok := &ads[i]
-		c.argc = 1
-		err := c.doVariadic(atok)
-		if err != nil {
-			return err
-		}
-	}
-	nppe := c.it.Peek()
-	if nppe == nil || !isLeftArg(nppe) {
-		c.argc = 2
-		return c.doVariadic(tok)
-	}
-	c.it.Next()
-	c.argc = 0
-	err = c.doExpr(nppe)
+	err = c.doVariadic(dv.Adverb, 1)
 	if err != nil {
 		return err
 	}
-	c.argc = 3
-	return c.doVariadic(tok)
+	c.applyN(n)
+	return nil
 }
 
-func (c *compiler) doStrand(st *astStrand) error {
+func (c *compiler) doStrand(st *astStrand, n int) error {
 	a := make(AV, 0, len(st.Lits))
 	for _, tok := range st.Lits {
 		switch tok.Type {
@@ -606,29 +539,22 @@ func (c *compiler) doStrand(st *astStrand) error {
 	id := c.ctx.storeConst(canonical(a))
 	c.pos = st.Pos
 	c.push2(opConst, opcode(id))
-	c.apply()
+	c.applyN(n)
 	return nil
 }
 
-func (c *compiler) doParen(p *astParen) error {
-	argc := c.argc
-	c.argc = 0
-	err := c.doExprs(p.Exprs)
+func (c *compiler) doParen(p *astParen, n int) error {
+	err := c.doExpr(p.Expr, 0)
 	if err != nil {
 		return err
 	}
-	c.argc = argc + 1
-	c.applyAt(p.EndPos)
+	c.applyAtN(p.EndPos, n)
 	return err
 }
 
-func (c *compiler) doLambda(b *astLambda) error {
+func (c *compiler) doLambda(b *astLambda, n int) error {
 	body := b.Body
 	args := b.Args
-	argc := c.argc
-	slen := c.slen
-	c.slen = 0
-	c.argc = 0
 	lc := &lambdaCode{
 		Locals:     map[string]lambdaLocal{},
 		opIdxLocal: map[int]lambdaLocal{},
@@ -640,13 +566,12 @@ func (c *compiler) doLambda(b *astLambda) error {
 			return err
 		}
 	}
-	for i, exprs := range body {
-		slen := c.slen
-		err := c.doExprs(exprs)
+	for i, expr := range body {
+		err := c.doExpr(expr, 0)
 		if err != nil {
 			return err
 		}
-		if i < len(body)-1 && c.slen > slen {
+		if i < len(body)-1 && nonEmpty(expr) {
 			c.push(opDrop)
 		}
 	}
@@ -658,10 +583,8 @@ func (c *compiler) doLambda(b *astLambda) error {
 	lc.Source = c.ctx.sources[c.ctx.fname][lc.StartPos:lc.EndPos]
 	lc.Filename = c.ctx.fname
 	c.ctx.resolveLambda(lc)
-	c.argc = argc
-	c.slen = slen
 	c.push2(opLambda, opcode(id))
-	c.applyAt(b.EndPos)
+	c.applyAtN(b.EndPos, n)
 	return nil
 }
 
@@ -726,61 +649,120 @@ func (ctx *Context) resolveLambda(lc *lambdaCode) {
 	lc.opIdxLocal = nil
 }
 
-func (c *compiler) doArgs(b *astApplyN) error {
-	body := b.Args
-	expr := b.Expr
-	switch expr := expr.(type) {
+func (c *compiler) doApply2(a *astApply2, n int) error {
+	switch v := a.Verb.(type) {
 	case *astToken:
-		if len(body) >= 3 {
-			if expr.Type == astDYAD && expr.Text == "?" {
-				err := c.doCond(b)
+		if v.Type != astDYAD {
+			break
+		}
+		switch v.Text {
+		case "and":
+			aN := &astApplyN{
+				Verb: a.Verb,
+				Args: []expr{a.Left, a.Right},
+			}
+			err := c.doAnd(aN, n, v.Pos)
+			if err != nil {
+				return err
+			}
+			return nil
+		case "or":
+			aN := &astApplyN{
+				Verb: a.Verb,
+				Args: []expr{a.Left, a.Right},
+			}
+			err := c.doOr(aN, n, v.Pos)
+			if err != nil {
+				return err
+			}
+			return nil
+		case ":", "::":
+			done, err := c.doAssign(v, a.Left, a.Right, n)
+			if err != nil || done {
+				return err
+			}
+		}
+	}
+	err := c.doExpr(a.Right, 0)
+	if err != nil {
+		return err
+	}
+	switch e := a.Verb.(type) {
+	case *astToken:
+		// e.Type == astDYAD
+		err = c.doExpr(a.Left, 0)
+		if err != nil {
+			return err
+		}
+		c.doVariadic(e, 2)
+	case *astDerivedVerb:
+		err = c.doExpr(e.Verb, 0)
+		if err != nil {
+			return err
+		}
+		err = c.doExpr(a.Left, 0)
+		if err != nil {
+			return err
+		}
+		c.doVariadic(e.Adverb, 3)
+	default:
+		panic(fmt.Sprintf("bad verb type for apply2: %v", e))
+	}
+	c.applyN(n)
+	return nil
+}
+
+func (c *compiler) doApplyN(a *astApplyN, n int) error {
+	switch v := a.Verb.(type) {
+	case *astToken:
+		if v.Type != astDYAD {
+			break
+		}
+		switch v.Text {
+		case "?":
+			if len(a.Args) >= 3 {
+				err := c.doCond(a, n)
 				if err != nil {
 					return err
 				}
 				return nil
 			}
-		}
-		if expr.Type == astMONAD && expr.Text == "and" {
-			err := c.doAnd(b, expr.Pos)
+		case "and":
+			err := c.doAnd(a, n, v.Pos)
 			if err != nil {
 				return err
 			}
 			return nil
-		}
-		if expr.Type == astMONAD && expr.Text == "or" {
-			err := c.doOr(b, expr.Pos)
+		case "or":
+			err := c.doOr(a, n, v.Pos)
 			if err != nil {
 				return err
 			}
 			return nil
 		}
 	}
-	argc := c.argc
-	for i := len(body) - 1; i >= 0; i-- {
-		exprs := body[i]
-		err := c.doExprs(exprs)
+	for i := len(a.Args) - 1; i >= 0; i-- {
+		ei := a.Args[i]
+		err := c.doExpr(ei, 0)
 		if err != nil {
 			return err
 		}
 	}
-	c.argc = len(body)
-	err := c.doExpr(b.Expr)
+	err := c.doExpr(a.Verb, len(a.Args))
 	if err != nil {
 		return err
 	}
-	c.argc = argc + 1
-	c.apply()
+	c.applyN(n)
 	return nil
 }
 
-func (c *compiler) doCond(b *astApplyN) error {
-	body := b.Args
+func (c *compiler) doCond(a *astApplyN, n int) error {
+	body := a.Args
 	if len(body)%2 != 1 {
 		return c.errorf("conditional ?[if;then;else] with even number of statements")
 	}
-	argc := c.argc
 	cond := body[0]
-	err := c.doExprs(cond)
+	err := c.doExpr(cond, 0)
 	if err != nil {
 		return err
 	}
@@ -792,7 +774,7 @@ func (c *compiler) doCond(b *astApplyN) error {
 	for i := 1; i < len(body); i += 2 {
 		c.push(opDrop)
 		then := body[i]
-		err := c.doExprs(then)
+		err := c.doExpr(then, 0)
 		if err != nil {
 			return err
 		}
@@ -801,7 +783,7 @@ func (c *compiler) doCond(b *astApplyN) error {
 		jumpsElse = append(jumpsElse, len(c.body()))
 		c.push(opDrop)
 		elseCond := body[i+1]
-		err = c.doExprs(elseCond)
+		err = c.doExpr(elseCond, 0)
 		if err != nil {
 			return err
 		}
@@ -818,23 +800,21 @@ func (c *compiler) doCond(b *astApplyN) error {
 	for _, offset := range jumpsEnd {
 		c.body()[offset] = opcode(end - offset)
 	}
-	c.argc = argc + 1
-	c.apply()
+	c.applyN(n)
 	return nil
 }
 
-func (c *compiler) doAnd(b *astApplyN, pos int) error {
-	body := b.Args
-	argc := c.argc
+func (c *compiler) doAnd(a *astApplyN, n int, pos int) error {
+	body := a.Args
 	jumpsEnd := []int{}
 	for i, ei := range body {
 		if i > 0 {
 			c.push(opDrop)
 		}
-		if len(ei) == 0 {
+		if !nonEmpty(ei) {
 			return c.perrorf(pos, "and[...] : empty argument (%d-th)", i)
 		}
-		err := c.doExprs(ei)
+		err := c.doExpr(ei, 0)
 		if err != nil {
 			return err
 		}
@@ -847,23 +827,21 @@ func (c *compiler) doAnd(b *astApplyN, pos int) error {
 	for _, offset := range jumpsEnd {
 		c.body()[offset] = opcode(end - offset)
 	}
-	c.argc = argc + 1
-	c.apply()
+	c.applyN(n)
 	return nil
 }
 
-func (c *compiler) doOr(b *astApplyN, pos int) error {
+func (c *compiler) doOr(b *astApplyN, n int, pos int) error {
 	body := b.Args
-	argc := c.argc
 	jumpsEnd := []int{}
 	for i, ei := range body {
 		if i > 0 {
 			c.push(opDrop)
 		}
-		if len(ei) == 0 {
+		if !nonEmpty(ei) {
 			return c.perrorf(pos, "or[...] : empty argument (%d-th)", i+1)
 		}
-		err := c.doExprs(ei)
+		err := c.doExpr(ei, 0)
 		if err != nil {
 			return err
 		}
@@ -876,43 +854,36 @@ func (c *compiler) doOr(b *astApplyN, pos int) error {
 	for _, offset := range jumpsEnd {
 		c.body()[offset] = opcode(end - offset)
 	}
-	c.argc = argc + 1
-	c.apply()
+	c.applyN(n)
 	return nil
 }
 
-func (c *compiler) doSeq(b *astSeq) error {
+func (c *compiler) doSeq(b *astSeq, n int) error {
 	body := b.Body
-	argc := c.argc
-	for i, exprs := range body {
-		slen := c.slen
-		err := c.doExprs(exprs)
+	for i, ei := range body {
+		err := c.doExpr(ei, 0)
 		if err != nil {
 			return err
 		}
-		if i < len(body)-1 && c.slen > slen {
+		if i < len(body)-1 && nonEmpty(ei) {
 			c.push(opDrop)
 		}
 	}
-	c.argc = argc + 1
-	c.apply()
+	c.applyN(n)
 	return nil
 }
 
-func (c *compiler) doList(l *astList) error {
+func (c *compiler) doList(l *astList, n int) error {
 	body := l.Args
-	argc := c.argc
 	for i := len(body) - 1; i >= 0; i-- {
-		exprs := body[i]
-		c.argc = 0
-		err := c.doExprs(exprs)
+		ei := body[i]
+		err := c.doExpr(ei, 0)
 		if err != nil {
 			return err
 		}
 	}
 	c.push2(opVariadic, opcode(vList))
 	c.push2(opApplyN, opcode(len(body)))
-	c.argc = argc + 1
-	c.apply()
+	c.applyN(n)
 	return nil
 }

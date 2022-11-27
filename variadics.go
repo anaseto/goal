@@ -428,20 +428,20 @@ func VBytes(ctx *Context, args []V) V {
 func VAnd(ctx *Context, args []V) V {
 	for _, arg := range args {
 		if isFalse(arg) {
-			return I(0)
+			return arg
 		}
 	}
-	return I(1)
+	return args[0]
 }
 
 // VOr implements the "or" variadic verb.
 func VOr(ctx *Context, args []V) V {
 	for _, arg := range args {
-		if isFalse(arg) {
-			return I(1)
+		if isTrue(arg) {
+			return arg
 		}
 	}
-	return I(0)
+	return args[0]
 }
 
 // VList implements (...;y;x) array constructor variadic verb.

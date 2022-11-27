@@ -13,9 +13,19 @@ type expr interface {
 	node()
 }
 
-// exprs is used to represent a whole expression. It is not a ppExpr. It
-// represents a sequence of expressions applied in sequence.
+// exprs represents a sequence of expressions applied in sequence monadically.
 type exprs []expr
+
+func (es exprs) String() string {
+	sb := &strings.Builder{}
+	for i, e := range es {
+		fmt.Fprintf(sb, "%v", e)
+		if i < len(es)-1 {
+			fmt.Fprint(sb, " ")
+		}
+	}
+	return sb.String()
+}
 
 // astToken represents a simplified token after processing into expr.
 type astToken struct {
@@ -25,7 +35,7 @@ type astToken struct {
 }
 
 func (t *astToken) String() string {
-	return fmt.Sprintf("{%v %d %s}", t.Type, t.Pos, t.Text)
+	return fmt.Sprintf("%v[%s]", t.Type, t.Text)
 }
 
 // astTokenType represents tokens in a ppExpr.
@@ -38,76 +48,113 @@ const (
 	astIDENT
 	astMONAD
 	astDYAD
-	astADVERB // only within astAdverbs
+	astADVERB // only within astDerivedVerb
 )
 
+// astReturn represents a return statement with ":".
 type astReturn struct {
 	Pos int
 }
 
+func (t *astReturn) String() string {
+	return "RETURN"
+}
+
+// astStrand represents a stranding of literals, like 1 23 456
 type astStrand struct {
-	Lits []astToken // stranding of literals, like 1 23 456
+	Lits []astToken
 	Pos  int
 }
 
-type astAdverbs struct {
-	Train []astToken // an adverb sequence
+func astTokensString(toks []astToken) string {
+	sb := &strings.Builder{}
+	for i, e := range toks {
+		fmt.Fprintf(sb, "%v[%s]", e.Type, e.Text)
+		if i < len(toks)-1 {
+			fmt.Fprint(sb, ";")
+		}
+	}
+	return sb.String()
+}
+
+func (t *astStrand) String() string {
+	return fmt.Sprintf("STRAND[%s]", astTokensString(t.Lits))
+}
+
+// astDerivedVerb represents a derived verb.
+type astDerivedVerb struct {
+	Adverb *astToken
+	Verb   expr
+}
+
+func (t *astDerivedVerb) String() string {
+	return fmt.Sprintf("DERIVED[%s;%v]", t.Adverb.Text, t.Verb)
 }
 
 type astParen struct {
-	Exprs    exprs // parenthesized sub-expressions
-	StartPos int   // remove?
-	EndPos   int   // remove?
+	Expr     expr // parenthesized sub-expressions
+	StartPos int  // remove?
+	EndPos   int  // remove?
+}
+
+type astApply2 struct {
+	Verb  expr // dyad or derived verb
+	Left  expr
+	Right expr
+}
+
+func (a *astApply2) String() (s string) {
+	s = fmt.Sprintf("%v[%v;%v]", a.Verb, a.Left, a.Right)
+	return s
+}
+
+func argsString(es []expr) string {
+	sb := &strings.Builder{}
+	for i, e := range es {
+		fmt.Fprintf(sb, "%v", e)
+		if i < len(es)-1 {
+			fmt.Fprint(sb, ";")
+		}
+	}
+	return sb.String()
 }
 
 type astApplyN struct {
-	Expr     expr
-	Args     []exprs
+	Verb     expr
+	Args     []expr
 	StartPos int // remove?
 	EndPos   int // remove?
 }
 
 func (a *astApplyN) String() (s string) {
-	s = fmt.Sprintf("%v[%v]", a.Expr, a.Args)
+	s = fmt.Sprintf("%v[%s]", a.Verb, argsString(a.Args))
 	return s
 }
 
-func (a *astApplyN) push(e expr) {
-	a.Args[len(a.Args)-1] = append(a.Args[len(a.Args)-1], e)
-}
-
 type astList struct {
-	Args     []exprs
+	Args     []expr
 	StartPos int // remove?
 	EndPos   int // remove?
 }
 
 func (l *astList) String() (s string) {
-	s = fmt.Sprintf("(%v)", l.Args)
+	s = fmt.Sprintf("list[%d;%s]", len(l.Args), argsString(l.Args))
 	return s
 }
 
-func (l *astList) push(e expr) {
-	l.Args[len(l.Args)-1] = append(l.Args[len(l.Args)-1], e)
-}
-
 type astSeq struct {
-	Body     []exprs
+	Body     []expr
 	StartPos int // remove?
 	EndPos   int // remove?
 }
 
 func (b *astSeq) String() (s string) {
-	s = fmt.Sprintf("[%v]", b.Body)
+	s = fmt.Sprintf("[%v]", argsString(b.Body))
 	return s
 }
 
-func (b *astSeq) push(e expr) {
-	b.Body[len(b.Body)-1] = append(b.Body[len(b.Body)-1], e)
-}
-
 type astLambda struct {
-	Body     []exprs
+	Body     []expr
 	Args     []string
 	StartPos int
 	EndPos   int
@@ -115,70 +162,39 @@ type astLambda struct {
 
 func (b *astLambda) String() (s string) {
 	args := "[" + strings.Join([]string(b.Args), ";") + "]"
-	return fmt.Sprintf("{%s %v}", args, b.Body)
+	return fmt.Sprintf("{%s %v}", args, argsString(b.Body))
 }
 
-func (b *astLambda) push(e expr) {
-	b.Body[len(b.Body)-1] = append(b.Body[len(b.Body)-1], e)
+func (es exprs) node()           {}
+func (t *astToken) node()        {}
+func (t *astReturn) node()       {}
+func (st *astStrand) node()      {}
+func (dv *astDerivedVerb) node() {}
+func (p *astParen) node()        {}
+func (a *astApply2) node()       {}
+func (a *astApplyN) node()       {}
+func (l *astList) node()         {}
+func (b *astSeq) node()          {}
+func (b *astLambda) node()       {}
+
+func nonEmpty(e expr) bool {
+	switch e := e.(type) {
+	case exprs:
+		return len(e) > 0
+	case *astParen:
+		return nonEmpty(e.Expr)
+	default:
+		return true
+	}
 }
 
-func (t *astToken) node()     {}
-func (t *astReturn) node()    {}
-func (st *astStrand) node()   {}
-func (ads *astAdverbs) node() {}
-func (p *astParen) node()     {}
-func (a *astApplyN) node()    {}
-func (l *astList) node()      {}
-func (b *astSeq) node()       {}
-func (b *astLambda) node()    {}
+type parseEOF struct {
+	Pos int
+}
 
-type parseEOF struct{}
-type parseSEP struct{}
 type parseCLOSE struct {
 	Pos int
 }
 
 func (p parseEOF) Error() string   { return "EOF" }
-func (p parseSEP) Error() string   { return "SEP" }
 func (p parseCLOSE) Error() string { return "CLOSE" }
-
-// astIter is an iterator for exprs slices, with peek functionality.
-type astIter struct {
-	exprs exprs
-	i     int
-}
-
-func newAstIter(es exprs) astIter {
-	return astIter{exprs: es, i: -1}
-}
-
-func (it *astIter) Next() bool {
-	it.i++
-	return it.i < len(it.exprs)
-}
-
-func (it *astIter) Expr() expr {
-	return it.exprs[it.i]
-}
-
-func (it *astIter) Index() int {
-	return it.i
-}
-
-func (it *astIter) Set(i int) {
-	it.i = i
-}
-
-func (it *astIter) Peek() expr {
-	if it.i+1 >= len(it.exprs) {
-		return nil
-	}
-	return it.exprs[it.i+1]
-}
-
-func (it *astIter) PeekN(n int) expr {
-	if it.i+n >= len(it.exprs) {
-		return nil
-	}
-	return it.exprs[it.i+n]
-}
