@@ -230,6 +230,8 @@ var matchTests = [...]matchTest{
 	{"1\n\n2", `2`},
 	{"@(:)", `"v"`},
 	{"1,:2", `2`},
+	{"1,:[2]", `2`},
+	{"1,:[2] 3", `2`},
 }
 
 func TestEval(t *testing.T) {

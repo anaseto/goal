@@ -352,7 +352,6 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 		return nil
 	case astDYAD:
 		if n == 1 && tok.Text == ":" {
-			// n == 1 ensured by parsing
 			c.push(opReturn)
 			return nil
 		}
@@ -734,6 +733,24 @@ func (c *compiler) doApplyN(a *astApplyN, n int) error {
 				return err
 			}
 			return nil
+		case ":", "::":
+			switch len(a.Args) {
+			case 1:
+				// TODO: :[arg] when n > 0 ?
+				if n == 0 && v.Text == ":" {
+					err := c.doExpr(a.Args[0], 0)
+					if err != nil {
+						return err
+					}
+					c.push(opReturn)
+					return nil
+				}
+			case 2:
+				done, err := c.doAssign(v, a.Args[0], a.Args[1], n)
+				if err != nil || done {
+					return err
+				}
+			}
 		}
 	}
 	for i := len(a.Args) - 1; i >= 0; i-- {
@@ -747,7 +764,7 @@ func (c *compiler) doApplyN(a *astApplyN, n int) error {
 	if err != nil {
 		return err
 	}
-	c.applyN(n)
+	c.applyAtN(a.EndPos, n)
 	return nil
 }
 
