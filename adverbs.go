@@ -16,9 +16,10 @@ func fold2(ctx *Context, args []V) V {
 		switch fv := fv.(type) {
 		case S:
 			return fold2Join(fv, args[0])
+		case I, F, AB, AI, AF:
+			return fold2Decode(fv, args[0])
 		}
-		// TODO: decode
-		return errf("F/x : F not a function (%s)", fv.Type())
+		return errType("F/x", "F", fv)
 	}
 	if f.Rank(ctx) != 2 {
 		// TODO: converge
@@ -106,6 +107,98 @@ func fold2Join(sep S, x V) V {
 		return errf("s/x : x not a string array (%s)", x.Type())
 	default:
 		return errf("s/x : x not a string array (%s)", x.Type())
+	}
+}
+
+func fold2Decode(f V, x V) V {
+	switch f := f.(type) {
+	case I:
+		switch x := x.(type) {
+		case I:
+			return x
+		case F:
+			if !isI(x) {
+				return errf("I/x : x non-integer (%g)", x)
+			}
+			return I(x)
+		case AI:
+			r := 0
+			n := 1
+			for i := len(x) - 1; i >= 0; i-- {
+				r += x[i] * n
+				n *= int(f)
+			}
+			return I(r)
+		case AB:
+			r := 0
+			n := 1
+			for i := len(x) - 1; i >= 0; i-- {
+				r += int(B2I(x[i])) * n
+				n *= int(f)
+			}
+			return I(r)
+		case AF:
+			aix := toAI(x)
+			if err, ok := aix.(errV); ok {
+				return err
+			}
+			return fold2Decode(f, aix)
+		default:
+			return errType("I/x", "x", x)
+		}
+	case F:
+		if !isI(f) {
+			return errf("I/x : I non-integer (%g)", f)
+		}
+		return fold2Decode(I(f), x)
+	case AB:
+		return fold2Decode(fromABtoAI(f), x)
+	case AI:
+		switch x := x.(type) {
+		case I:
+			r := 0
+			n := 1
+			for i := len(f) - 1; i >= 0; i-- {
+				r += int(x) * n
+				n *= f[i]
+			}
+			return I(r)
+		case F:
+			if !isI(x) {
+				return errf("I/x : x non-integer (%g)", x)
+			}
+			return fold2Decode(f, I(x))
+		case AI:
+			if len(f) != len(x) {
+				return errf("I/x : length mismatch: %d (#I) %d (#x)", len(f), len(x))
+			}
+			r := 0
+			n := 1
+			for i := len(x) - 1; i >= 0; i-- {
+				r += x[i] * n
+				n *= f[i]
+			}
+			return I(r)
+		case AB:
+			return fold2Decode(f, fromABtoAI(x))
+		case AF:
+			aix := toAI(x)
+			if err, ok := aix.(errV); ok {
+				return err
+			}
+			return fold2Decode(f, aix)
+		default:
+			return errType("I/x", "x", x)
+		}
+	case AF:
+		aif := toAI(f)
+		if err, ok := aif.(errV); ok {
+			return err
+		}
+		return fold2Decode(aif, x)
+	default:
+		// should not happen
+		return errType("I/x", "I", f)
 	}
 }
 
