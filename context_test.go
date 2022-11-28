@@ -387,12 +387,12 @@ func BenchmarkFoldDo(b *testing.B) {
 	}
 }
 
-//func BenchmarkFib(b *testing.B) {
-//for n := 0; n < b.N; n++ {
-//ctx := NewContext()
-//ctx.Eval("fib:{?[x~0;0;x~1;1;(fib x-1)+(fib x-2)]}; fib 35")
-//}
-//}
+func BenchmarkFib(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		ctx := NewContext()
+		ctx.Eval("fib:{?[x~0;0;x~1;1;(fib x-1)+(fib x-2)]}; fib 35")
+	}
+}
 
 func BenchmarkFibTailRec(b *testing.B) {
 	for n := 0; n < b.N; n++ {

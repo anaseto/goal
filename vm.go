@@ -40,7 +40,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ctx.push(Variadic(ops[ip]))
 			ip++
 		case opLambda:
-			ctx.push(Lambda(ops[ip]))
+			ctx.push(ctx.lambdaVs[ops[ip]])
 			ip++
 		case opApply:
 			err := ctx.popApplyN(1)

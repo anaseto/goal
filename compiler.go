@@ -573,6 +573,7 @@ func (c *compiler) doLambda(b *astLambda, n int) error {
 	c.scopeStack = c.scopeStack[:len(c.scopeStack)-1]
 	id := len(c.ctx.lambdas)
 	c.ctx.lambdas = append(c.ctx.lambdas, lc)
+	c.ctx.lambdaVs = append(c.ctx.lambdaVs, Lambda(id))
 	lc.StartPos = b.StartPos
 	lc.EndPos = b.EndPos
 	lc.Source = c.ctx.sources[c.ctx.fname][lc.StartPos:lc.EndPos]
