@@ -315,6 +315,8 @@ f f/x   while	{x<100}{x*2}/4 -> 128
 f f\x   whiles	{x<100}{x*2}\4 -> 4 8 16 32 64 128
 s/x	join	","/"a" "b" "c" -> "a,b,c"
 s\x	split	","\"a,b,c" -> "a" "b" "c"
+I/x	encode	24 60 60/1 2 3 -> 3723	2/1 1 0 -> 6
+I\x	decode	24 60 60\3723 -> 1 2 3	2\6 -> 1 1 0
 `
 const helpIO = `
 IO

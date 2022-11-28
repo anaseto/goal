@@ -282,9 +282,10 @@ func scan2(ctx *Context, fv, x V) V {
 		switch fv := fv.(type) {
 		case S:
 			return scan2Split(fv, x)
+		case I, F, AB, AI, AF:
+			return scan2Encode(fv, x)
 		}
-		// TODO: encode
-		return errf("f\\x : f not a function (%s)", fv.Type())
+		return errType("f\\x", "f", fv)
 	}
 	if f.Rank(ctx) != 2 {
 		// TODO: converge
@@ -330,6 +331,135 @@ func scan2Split(sep S, x V) V {
 		return errf("s/x : x not a string atom or array (%s)", x.Type())
 	default:
 		return errf("s/x : x not a string atom or array (%s)", x.Type())
+	}
+}
+
+func encodeBaseDigits(b int, x int) int {
+	if b < 0 {
+		b = -b
+	}
+	if x < 0 {
+		x = -x
+	}
+	n := 1
+	for x >= b {
+		x /= b
+		n++
+	}
+	return n
+}
+
+func scan2Encode(f V, x V) V {
+	switch f := f.(type) {
+	case I:
+		if f == 0 {
+			return errs("i\\x : base i is zero")
+		}
+		switch x := x.(type) {
+		case I:
+			n := encodeBaseDigits(int(f), int(x))
+			r := make(AI, n)
+			for i := n - 1; i >= 0; i-- {
+				r[i] = int(x % f)
+				x /= f
+			}
+			return r
+		case F:
+			if !isI(x) {
+				return errf("i\\x : x non-integer (%g)", x)
+			}
+			return scan2Encode(f, I(x))
+		case AI:
+			min, max := minMax(x)
+			max = int(maxI(absI(I(min)), absI(I(max))))
+			n := encodeBaseDigits(int(f), int(max))
+			ai := make(AI, n*len(x))
+			copy(ai[(n-1)*len(x):], x)
+			for i := n - 1; i >= 0; i-- {
+				for j := 0; j < len(x); j++ {
+					ox := ai[i*len(x)+j]
+					ai[i*len(x)+j] = ox % int(f)
+					if i > 0 {
+						ai[(i-1)*len(x)+j] = ox / int(f)
+					}
+				}
+			}
+			r := make(AV, n)
+			for i := range r {
+				r[i] = ai[i*len(x) : (i+1)*len(x)]
+			}
+			return r
+		case AB:
+			return scan2Encode(f, fromABtoAI(x))
+		case AF:
+			aix := toAI(x)
+			if err, ok := aix.(errV); ok {
+				return err
+			}
+			return scan2Encode(f, aix)
+		default:
+			return errType("i\\x", "x", x)
+		}
+	case F:
+		if !isI(f) {
+			return errf("i\\x : i non-integer (%g)", f)
+		}
+		return scan2Encode(I(f), x)
+	case AB:
+		return scan2Encode(fromABtoAI(f), x)
+	case AI:
+		switch x := x.(type) {
+		case I:
+			n := f.Len()
+			r := make(AI, n)
+			for i := n - 1; i >= 0 && x > 0; i-- {
+				r[i] = int(x) % f[i]
+				x /= I(f[i])
+			}
+			return r
+		case F:
+			if !isI(x) {
+				return errf("I/x : x non-integer (%g)", x)
+			}
+			return scan2Encode(f, I(x))
+		case AI:
+			n := f.Len()
+			ai := make(AI, n*len(x))
+			copy(ai[(n-1)*len(x):], x)
+			for i := n - 1; i >= 0; i-- {
+				for j := 0; j < len(x); j++ {
+					ox := ai[i*len(x)+j]
+					ai[i*len(x)+j] = ox % f[i]
+					if i > 0 {
+						ai[(i-1)*len(x)+j] = ox / f[i]
+					}
+				}
+			}
+			r := make(AV, n)
+			for i := range r {
+				r[i] = ai[i*len(x) : (i+1)*len(x)]
+			}
+			return r
+		case AB:
+			return scan2Encode(f, fromABtoAI(x))
+		case AF:
+			aix := toAI(x)
+			if err, ok := aix.(errV); ok {
+				return err
+			}
+			return scan2Encode(f, aix)
+		default:
+			return errType("I\\x", "x", x)
+		}
+	case AF:
+		aif := toAI(f)
+		if err, ok := aif.(errV); ok {
+			return err
+		}
+		return scan2Encode(aif, x)
+	default:
+		// should not happen
+		return errType("I\\x", "I", f)
 	}
 }
 
