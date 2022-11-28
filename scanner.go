@@ -77,19 +77,19 @@ const (
 
 // Scanner represents the state of the scanner.
 type Scanner struct {
-	names     map[string]NameType // special keywords
-	reader    *strings.Reader     // rune reader
-	err       error               // scanning error (if any)
-	peeked    bool                // peeked next
-	npos      int                 // position of next rune in the input
-	tpos      int                 // current token start position
-	pr        rune                // peeked rune
-	psize     int                 // size of last peeked rune
-	start     bool                // at line start
-	exprEnd   bool                // at expression start
-	listStart bool                // at list start
-	token     Token               // last token
-	source    string              // source string
+	names   map[string]NameType // special keywords
+	reader  *strings.Reader     // rune reader
+	err     error               // scanning error (if any)
+	peeked  bool                // peeked next
+	npos    int                 // position of next rune in the input
+	tpos    int                 // current token start position
+	pr      rune                // peeked rune
+	psize   int                 // size of last peeked rune
+	start   bool                // at line start
+	exprEnd bool                // at expression start
+	delimOp bool                // at list start
+	token   Token               // last token
+	source  string              // source string
 }
 
 type stateFn func(*Scanner) stateFn
@@ -154,7 +154,7 @@ func (s *Scanner) next() rune {
 func (s *Scanner) emit(t TokenType) stateFn {
 	s.token = Token{Type: t, Pos: s.tpos}
 	s.start = t == NEWLINE
-	s.listStart = t == LEFTPAREN
+	s.delimOp = t == LEFTPAREN || t == LEFTBRACKET || t == LEFTBRACE
 	switch t {
 	case LEFTBRACE, LEFTBRACKET, LEFTPAREN, NEWLINE, SEMICOLON, EOF:
 		// all of these don't have additional content, so we don't do
@@ -174,7 +174,7 @@ func (s *Scanner) emitError(err string) stateFn {
 func (s *Scanner) emitString(t TokenType) stateFn {
 	s.token = Token{Type: t, Pos: s.tpos, Text: s.source[s.tpos:s.npos]}
 	s.start = false
-	s.listStart = false
+	s.delimOp = false
 	s.exprEnd = true
 	return nil
 }
@@ -193,7 +193,7 @@ func (s *Scanner) emitIDENT() stateFn {
 func (s *Scanner) emitOp(t TokenType) stateFn {
 	s.token = Token{Type: t, Pos: s.tpos, Text: s.source[s.tpos:s.npos]}
 	s.start = false
-	s.listStart = false
+	s.delimOp = false
 	s.exprEnd = false
 	return nil
 }
@@ -212,7 +212,7 @@ func scanAny(s *Scanner) stateFn {
 	case eof:
 		return s.emitEOF()
 	case '\n':
-		if !s.start && !s.listStart {
+		if !s.start && !s.delimOp {
 			return s.emit(NEWLINE)
 		}
 		return scanAny
