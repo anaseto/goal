@@ -323,7 +323,7 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 	case astNUMBER:
 		x, err := parseNumber(tok.Text)
 		if err != nil {
-			return err
+			return c.errorf("parse number: %v", err)
 		}
 		if n > 0 {
 			return c.errorf("number atoms cannot be applied")
@@ -334,7 +334,7 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 	case astSTRING:
 		s, err := strconv.Unquote(tok.Text)
 		if err != nil {
-			return err
+			return c.errorf("string: %v", err)
 		}
 		id := c.ctx.storeConst(S(s))
 		c.push2(opConst, opcode(id))
@@ -518,14 +518,14 @@ func (c *compiler) doStrand(st *astStrand, n int) error {
 			x, err := parseNumber(tok.Text)
 			if err != nil {
 				c.pos = tok.Pos
-				return c.errorf("number syntax: %v", err)
+				return c.errorf("number: %v", err)
 			}
 			a = append(a, x)
 		case astSTRING:
 			s, err := strconv.Unquote(tok.Text)
 			if err != nil {
 				c.pos = tok.Pos
-				return c.errorf("string syntax: %v", err)
+				return c.errorf("string: %v", err)
 			}
 			a = append(a, S(s))
 		}
@@ -824,7 +824,7 @@ func (c *compiler) doAnd(a *astApplyN, n int, pos int) error {
 			c.push(opDrop)
 		}
 		if !nonEmpty(ei) {
-			return c.perrorf(pos, "and[...] : empty argument (%d-th)", i)
+			return c.perrorf(pos, "and[...] : empty argument (%d-th)", i+1)
 		}
 		err := c.doExpr(ei, 0)
 		if err != nil {

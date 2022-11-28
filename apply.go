@@ -81,6 +81,8 @@ func (ctx *Context) applyN(x V, n int) V {
 			ctx.dropN(n)
 			return r
 		}
+	case nil:
+		return errs("nil cannot be applied")
 	default:
 		return errf("type %s cannot be applied", x.Type())
 	}

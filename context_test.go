@@ -2,6 +2,7 @@ package goal
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -238,7 +239,7 @@ func TestEval(t *testing.T) {
 	for i, mt := range matchTests {
 		mt := mt
 		name := fmt.Sprintf("String%d", i)
-		matchString := fmt.Sprintf("(%v) ~ (%v)", mt.Left, mt.Right)
+		matchString := fmt.Sprintf("(%s) ~ (%s)", mt.Left, mt.Right)
 		t.Run(name, func(t *testing.T) {
 			ctxLeft := NewContext()
 			err := ctxLeft.Compile("", mt.Left)
@@ -270,6 +271,69 @@ func TestEval(t *testing.T) {
 				}
 				//t.Logf("results (go): %#v vs %#v", vLeft, vRight)
 				t.Fail()
+			}
+		})
+	}
+}
+
+var matchErrors = [...]matchTest{
+	{"{}[2]2", "nil cannot be applied"},
+	{"(1)2", "type n cannot be applied"},       // exec
+	{"1[2]", "number atoms cannot be applied"}, // compiling
+	{"{x}[2;3]", "too many arguments"},
+	{"{x+y}[2][2;3]", "too many arguments"},
+	{"(!5)[7]", "out of bounds"},
+	{"2.3 5[7]", "out of bounds"},
+	{`"a" "b"[7]`, "out of bounds"},
+	{`0 1 0[7]`, "out of bounds"},
+	{"(!5)[`a`]", "non-array"},
+	{"{", "EOF"},
+	{")", "unexpected ) without opening"},
+	{"{)", "unexpected ) without closing"},
+	{"]", "unexpected ] without opening"},
+	{"{]", "unexpected ] without closing"},
+	{"{[]}", "empty argument list"},
+	{"{[1]}", "expected identifier or ] in argument list"},
+	{"{[a 1]}", "expected ; or ] in argument list"},
+	{"1.a", "number:"},
+	{`"\%"`, "string:"},
+	{"{[a;a]}", "name a appears twice"},
+	{"?[1;2;3;4]", "even number of statements"},
+	{"and[1;;3;4]", "empty argument (2-th)"},
+	{"or[1;;3;4]", "empty argument (2-th)"},
+}
+
+func TestErrors(t *testing.T) {
+	for i, mt := range matchErrors {
+		mt := mt
+		name := fmt.Sprintf("String%d", i)
+		matchString := fmt.Sprintf("%s", mt.Left)
+		t.Run(name, func(t *testing.T) {
+			ctx := NewContext()
+			err := ctx.Compile("", mt.Left)
+			ps := ctx.programString()
+			if err == nil {
+				var v V
+				v, err = ctx.Run()
+				if err == nil {
+					t.Log(ps)
+					t.Log(matchString)
+					t.Errorf("no error left: result: %v\nexpected: %v", v, mt.Right)
+				}
+			}
+			e, ok := err.(*Error)
+			if !ok {
+				// should never happen
+				t.Log(ps)
+				t.Log(matchString)
+				t.Errorf("bad error: `%v`\nexpected:`%v`", err, mt.Right)
+			}
+			if !strings.Contains(e.Msg, mt.Right) {
+				t.Log(ps)
+				t.Log(matchString)
+				t.Logf("\n   error: %v\nexpected: %v", e.Msg, mt.Right)
+				t.Fail()
+				return
 			}
 		})
 	}
