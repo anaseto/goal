@@ -118,7 +118,7 @@ func fold2Decode(f V, x V) V {
 			return x
 		case F:
 			if !isI(x) {
-				return errf("I/x : x non-integer (%g)", x)
+				return errf("i/x : x non-integer (%g)", x)
 			}
 			return I(x)
 		case AI:
@@ -144,11 +144,11 @@ func fold2Decode(f V, x V) V {
 			}
 			return fold2Decode(f, aix)
 		default:
-			return errType("I/x", "x", x)
+			return errType("i/x", "x", x)
 		}
 	case F:
 		if !isI(f) {
-			return errf("I/x : I non-integer (%g)", f)
+			return errf("i/x : i non-integer (%g)", f)
 		}
 		return fold2Decode(I(f), x)
 	case AB:
