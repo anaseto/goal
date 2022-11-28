@@ -41,7 +41,7 @@ func (p *parser) Next() (expr, error) {
 
 func (p *parser) errorf(format string, a ...interface{}) error {
 	p.ctx.errPos = append(p.ctx.errPos, position{Filename: p.ctx.fname, Pos: p.token.Pos})
-	return fmt.Errorf("parsing: "+format, a...)
+	return fmt.Errorf("syntax: "+format, a...)
 }
 
 func (p *parser) peek() Token {
@@ -89,7 +89,15 @@ func (p *parser) expr(es exprs) (exprs, error) {
 			return es, err
 		}
 		return es, nil
-	case NEWLINE, SEMICOLON:
+	case NEWLINE:
+		switch p.peek().Type {
+		case RIGHTPAREN, RIGHTBRACKET, RIGHTBRACE:
+			// Ignore a trailing newline if there is nothing before
+			// closing delimiter.
+			return p.expr(es)
+		}
+		return es, nil
+	case SEMICOLON:
 		return es, nil
 	case ERROR:
 		err = p.errorf("%s", tok)
@@ -107,10 +115,15 @@ func (p *parser) expr(es exprs) (exprs, error) {
 		// handled after each expr() below.
 		e, err = p.sequence()
 	case LEFTPAREN:
-		e, err = p.list()
-	case NUMBER, STRING:
 		ntok := p.peek()
-		switch ntok.Type {
+		if ntok.Type == RIGHTPAREN {
+			p.next()
+			e = &astToken{Type: astEMPTYLIST, Pos: tok.Pos, Text: tok.Text}
+		} else {
+			e, err = p.list()
+		}
+	case NUMBER, STRING:
+		switch p.peek().Type {
 		case NUMBER, STRING:
 			e, err = p.strand()
 		default:
@@ -214,15 +227,22 @@ func (p *parser) lambda() (expr, error) {
 	for {
 		es, err := p.expr(exprs{})
 		if err == nil {
-			pDoExprs(es)
-			b.Body = append(b.Body, es)
+			if len(es) > 0 {
+				pDoExprs(es)
+				b.Body = append(b.Body, es)
+			}
 			continue
 		}
 		switch err := err.(type) {
 		case parseCLOSE:
-			pDoExprs(es)
-			b.Body = append(b.Body, es)
+			if len(es) > 0 {
+				pDoExprs(es)
+				b.Body = append(b.Body, es)
+			}
 			b.EndPos = err.Pos + 1
+			if len(b.Body) == 0 {
+				return b, p.errorf("empty lambda")
+			}
 			return b, nil
 		default:
 			return b, err
@@ -249,7 +269,7 @@ func (p *parser) lambdaArgs() ([]string, error) {
 			return args, nil
 		case SEMICOLON:
 		default:
-			return args, p.errorf("expected ; or ] in argument list but got %s", p.token)
+			return args, p.errorf("expected ; or ] in argument list, but got %s", p.token)
 		}
 	}
 }
@@ -261,15 +281,22 @@ func (p *parser) sequence() (expr, error) {
 	for {
 		es, err := p.expr(exprs{})
 		if err == nil {
-			pDoExprs(es)
-			b.Body = append(b.Body, es)
+			if len(es) > 0 {
+				pDoExprs(es)
+				b.Body = append(b.Body, es)
+			}
 			continue
 		}
 		switch err := err.(type) {
 		case parseCLOSE:
-			pDoExprs(es)
-			b.Body = append(b.Body, es)
+			if len(es) > 0 {
+				pDoExprs(es)
+				b.Body = append(b.Body, es)
+			}
 			b.EndPos = err.Pos + 1
+			if len(b.Body) == 0 {
+				return b, p.errorf("empty sequence")
+			}
 			return b, nil
 		default:
 			return b, err
@@ -329,19 +356,25 @@ func (p *parser) list() (expr, error) {
 	for {
 		es, err := p.expr(exprs{})
 		if err == nil {
+			if len(es) == 0 {
+				return l, p.errorf("empty slot in list")
+			}
 			pDoExprs(es)
 			l.Args = append(l.Args, es)
 			continue
 		}
 		switch err := err.(type) {
 		case parseCLOSE:
+			if len(es) == 0 {
+				return l, p.errorf("empty slot in list")
+			}
 			pDoExprs(es)
 			l.Args = append(l.Args, es)
-			if len(l.Args) == 1 && nonEmpty(l.Args[0]) {
+			if len(l.Args) == 1 {
 				// not a list, but a parenthesized
 				// expression.
 				return &astParen{
-					Expr:     l.Args[0],
+					Expr:     es,
 					StartPos: l.StartPos,
 					EndPos:   err.Pos + 1,
 				}, nil
@@ -386,31 +419,6 @@ func pDoExprs(es exprs) {
 	for i := 0; i < len(es)/2; i++ {
 		es[i], es[len(es)-i-1] = es[len(es)-i-1], es[i]
 	}
-	//arglist := false // last expr was an argument list
-	//for i, e := range es {
-	//switch e := e.(type) {
-	//case *astBlock:
-	//arglist = e.Type == astARGS
-	//case *astToken:
-	//if e.Type == astDYAD && !arglist && i < len(es)-1 {
-	//ne := es[i+1]
-	//if isLeftArg(ne) {
-	//b := &astBlock{
-	//Type:     astARGS,
-	//Body:     []exprs{{ne}, es[:i]},
-	//StartPos: e.Pos,
-	//EndPos:   e.Pos,
-	//}
-	//es[i+1], es[i] = es[i], b
-	//es = es[i:]
-	//arglist = true
-	//}
-	//}
-	//arglist = false
-	//default:
-	//arglist = false
-	//}
-	//}
 }
 
 func bodyRev(body []exprs) {

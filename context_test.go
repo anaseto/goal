@@ -22,7 +22,7 @@ var matchTests = [...]matchTest{
 	{`a:1 3 5;;;|a`, "5 3 1"},
 	{`a:1 3 5;a[2 0 1 0]`, "5 1 3 1"},
 	{`(1;2;(3;4);4+1)`, "(1;2;(3;4);5)"},
-	{`(1;2;(3;4);4+1;)`, "(1;2;(3;4);5;)"},
+	//{`(1;2;(3;4);4+1;)`, "(1;2;(3;4);5;)"},
 	{`f:1+`, "+[1;]"},
 	{`f:1+;f 5`, "6"},
 	{`#(1;2;3)`, "3"},
@@ -245,6 +245,7 @@ var matchTests = [...]matchTest{
 	{`2\6`, `1 1 0`},
 	{`2\6 9`, `(0 1;1 0;1 0;0 1)`},
 	{`2\(6 9;6)`, `((0 1;1 0;1 0;0 1);1 1 0)`},
+	{`#()`, `0`},
 }
 
 func TestEval(t *testing.T) {
@@ -289,7 +290,6 @@ func TestEval(t *testing.T) {
 }
 
 var matchErrors = [...]matchTest{
-	{"{}[2]2", "nil cannot be applied"},
 	{"(1)2", "type n cannot be applied"}, // exec
 	{"1[2]", "type n cannot be applied"}, // compiling
 	{"{x}[2;3]", "too many arguments"},
@@ -309,11 +309,14 @@ var matchErrors = [...]matchTest{
 	{"{[a 1]}", "expected ; or ] in argument list"},
 	{"1.a", "number: invalid syntax"},
 	{`"\%"`, "string: invalid syntax"},
-	{"{[a;a]}", "name a appears twice"},
+	{"{[a;a]a}", "name a appears twice"},
 	{"?[1;2;3;4]", "even number of statements"},
 	{"and[1;;3;4]", "empty argument (2-th)"},
 	{"or[1;;3;4]", "empty argument (2-th)"},
 	{"1 2+1 2 3", "length mismatch"},
+	{"{}", "empty lambda"},
+	{"[]", "empty sequence"},
+	{"(;)", "empty slot in list"},
 }
 
 func TestErrors(t *testing.T) {

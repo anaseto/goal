@@ -49,6 +49,7 @@ const (
 	astMONAD
 	astDYAD
 	astADVERB // only within astDerivedVerb
+	astEMPTYLIST
 )
 
 // astStrand represents a stranding of literals, like 1 23 456

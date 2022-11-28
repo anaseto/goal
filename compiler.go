@@ -358,6 +358,11 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 		return c.doVariadic(tok, n)
 	case astMONAD:
 		return c.doVariadic(tok, n)
+	case astEMPTYLIST:
+		id := c.ctx.storeConst(AV{})
+		c.push2(opConst, opcode(id))
+		c.applyN(n)
+		return nil
 	default:
 		// should not happen
 		return c.errorf("unexpected token type: %v", tok.Type)
