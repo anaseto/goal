@@ -143,6 +143,15 @@ func fold2Decode(f V, x V) V {
 				return err
 			}
 			return fold2Decode(f, aix)
+		case AV:
+			r := make(AV, x.Len())
+			for i, xi := range x {
+				r[i] = fold2Decode(f, xi)
+				if err, ok := r[i].(errV); ok {
+					return err
+				}
+			}
+			return canonical(r)
 		default:
 			return errType("i/x", "x", x)
 		}
@@ -187,6 +196,15 @@ func fold2Decode(f V, x V) V {
 				return err
 			}
 			return fold2Decode(f, aix)
+		case AV:
+			r := make(AV, x.Len())
+			for i, xi := range x {
+				r[i] = fold2Decode(f, xi)
+				if err, ok := r[i].(errV); ok {
+					return err
+				}
+			}
+			return canonical(r)
 		default:
 			return errType("I/x", "x", x)
 		}
@@ -397,6 +415,15 @@ func scan2Encode(f V, x V) V {
 				return err
 			}
 			return scan2Encode(f, aix)
+		case AV:
+			r := make(AV, x.Len())
+			for i, xi := range x {
+				r[i] = scan2Encode(f, xi)
+				if err, ok := r[i].(errV); ok {
+					return err
+				}
+			}
+			return canonical(r)
 		default:
 			return errType("i\\x", "x", x)
 		}
@@ -448,6 +475,15 @@ func scan2Encode(f V, x V) V {
 				return err
 			}
 			return scan2Encode(f, aix)
+		case AV:
+			r := make(AV, x.Len())
+			for i, xi := range x {
+				r[i] = scan2Encode(f, xi)
+				if err, ok := r[i].(errV); ok {
+					return err
+				}
+			}
+			return canonical(r)
 		default:
 			return errType("I\\x", "x", x)
 		}
