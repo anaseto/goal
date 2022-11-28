@@ -278,8 +278,8 @@ func TestEval(t *testing.T) {
 
 var matchErrors = [...]matchTest{
 	{"{}[2]2", "nil cannot be applied"},
-	{"(1)2", "type n cannot be applied"},       // exec
-	{"1[2]", "number atoms cannot be applied"}, // compiling
+	{"(1)2", "type n cannot be applied"}, // exec
+	{"1[2]", "type n cannot be applied"}, // compiling
 	{"{x}[2;3]", "too many arguments"},
 	{"{x+y}[2][2;3]", "too many arguments"},
 	{"(!5)[7]", "out of bounds"},
@@ -295,12 +295,13 @@ var matchErrors = [...]matchTest{
 	{"{[]}", "empty argument list"},
 	{"{[1]}", "expected identifier or ] in argument list"},
 	{"{[a 1]}", "expected ; or ] in argument list"},
-	{"1.a", "number:"},
-	{`"\%"`, "string:"},
+	{"1.a", "number: invalid syntax"},
+	{`"\%"`, "string: invalid syntax"},
 	{"{[a;a]}", "name a appears twice"},
 	{"?[1;2;3;4]", "even number of statements"},
 	{"and[1;;3;4]", "empty argument (2-th)"},
 	{"or[1;;3;4]", "empty argument (2-th)"},
+	{"1 2+1 2 3", "length mismatch"},
 }
 
 func TestErrors(t *testing.T) {

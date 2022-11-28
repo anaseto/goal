@@ -323,10 +323,10 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 	case astNUMBER:
 		x, err := parseNumber(tok.Text)
 		if err != nil {
-			return c.errorf("parse number: %v", err)
+			return c.errorf("number: %v", err)
 		}
 		if n > 0 {
-			return c.errorf("number atoms cannot be applied")
+			return c.errorf("type n cannot be applied")
 		}
 		id := c.ctx.storeConst(x)
 		c.push2(opConst, opcode(id))
@@ -379,7 +379,8 @@ func parseNumber(s string) (V, error) {
 	if errF == nil {
 		return F(f), nil
 	}
-	return nil, errF
+	err := errF.(*strconv.NumError)
+	return nil, err.Err
 }
 
 func (c *compiler) doGlobal(tok *astToken, n int) {
