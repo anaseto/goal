@@ -260,7 +260,7 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 	nVars := len(lc.Names) - lc.Rank
 	olen := len(ctx.stack)
 	for i := 0; i < nVars; i++ {
-		ctx.push(newBV(nil))
+		ctx.push(V{})
 	}
 	oframeIdx := ctx.frameIdx
 	ctx.frameIdx = int32(len(ctx.stack) - 1)

@@ -141,7 +141,7 @@ func (ctx *Context) AssignGlobal(name string, x V) {
 func (ctx *Context) GetGlobal(name string) (V, bool) {
 	id, ok := ctx.gIDs[name]
 	if !ok {
-		return nil, false
+		return V{}, false
 	}
 	return ctx.globals[id], true
 }
@@ -175,11 +175,11 @@ func (ctx *Context) Compile(name string, s string) error {
 // Run runs compiled code, if not already done, and returns the result value.
 func (ctx *Context) Run() (V, error) {
 	if len(ctx.gCode.Body) == 0 {
-		return nil, nil
+		return V{}, nil
 	}
 	err := ctx.exec()
 	if err != nil {
-		return nil, err
+		return V{}, err
 	}
 	return ctx.pop(), nil
 }
@@ -188,7 +188,7 @@ func (ctx *Context) Run() (V, error) {
 func (ctx *Context) Eval(s string) (V, error) {
 	err := ctx.Compile("", s)
 	if err != nil {
-		return nil, err
+		return V{}, err
 	}
 	return ctx.Run()
 }
@@ -214,7 +214,7 @@ func (ctx *Context) exec() error {
 	ip, err := ctx.execute(ctx.gCode.Body)
 	if err != nil {
 		ctx.stack = ctx.stack[0:]
-		ctx.push(nil)
+		ctx.push(V{})
 		ctx.updateErrPos(ip, nil)
 		ctx.gCode.Body = ctx.gCode.Body[:0]
 		ctx.gCode.Pos = ctx.gCode.Pos[:0]
@@ -283,7 +283,7 @@ func (ctx *Context) global(s string) int {
 	if ok {
 		return id
 	}
-	ctx.globals = append(ctx.globals, nil)
+	ctx.globals = append(ctx.globals, V{})
 	ctx.gIDs[s] = len(ctx.gNames)
 	ctx.gNames = append(ctx.gNames, s)
 	return len(ctx.gNames) - 1
