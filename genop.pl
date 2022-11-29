@@ -319,7 +319,7 @@ EOS
         $type = "B2I" if $type eq "B";
         print $out <<EOS;
 	case $tt:
-		return $type($expr)
+		return newBV($type($expr))
 EOS
     }
     for my $tt (sort keys %types) {

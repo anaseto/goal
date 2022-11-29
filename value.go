@@ -53,7 +53,7 @@ func isErr(x V) bool {
 }
 
 func (f F) Matches(y V) bool {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case I:
 		return f == F(y)
 	case F:
@@ -64,7 +64,7 @@ func (f F) Matches(y V) bool {
 }
 
 func (i I) Matches(y V) bool {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case I:
 		return i == y
 	case F:
@@ -75,7 +75,7 @@ func (i I) Matches(y V) bool {
 }
 
 func (s S) Matches(y V) bool {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case S:
 		return s == y
 	default:
@@ -481,13 +481,13 @@ type zeroFun interface {
 func (v Variadic) zero() V {
 	switch v {
 	case vAdd, vSubtract:
-		return I(0)
+		return newBV(I(0))
 	case vMultiply:
-		return I(1)
+		return newBV(I(1))
 	case vMin:
-		return I(math.MinInt)
+		return newBV(I(math.MinInt))
 	case vMax:
-		return I(math.MaxInt)
+		return newBV(I(math.MaxInt))
 	}
 	return nil
 }

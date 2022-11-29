@@ -20,7 +20,7 @@ func B2F(b bool) (f F) {
 }
 
 func num2I(x V) (n I) {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case I:
 		n = x
 	case F:
@@ -48,107 +48,107 @@ func divideF(x, y F) F {
 
 func modI(x, y I) I {
 	if y == 0 {
-		return y
+		return newBV(y)
 	}
 	return y % x
 }
 
 func modF(x, y F) F {
 	if y == 0 {
-		return y
+		return newBV(y)
 	}
 	return F(math.Mod(float64(y), float64(x)))
 }
 
 func minI(x, y I) I {
 	if x < y {
-		return x
+		return newBV(x)
 	}
-	return y
+	return newBV(y)
 }
 
 func maxI(x, y I) I {
 	if x < y {
-		return y
+		return newBV(y)
 	}
-	return x
+	return newBV(x)
 }
 
 func minS(x, y S) S {
 	if x < y {
-		return x
+		return newBV(x)
 	}
-	return y
+	return newBV(y)
 }
 
 func maxS(x, y S) S {
 	if x < y {
-		return y
+		return newBV(y)
 	}
-	return x
+	return newBV(x)
 }
 
 func clone(x V) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case F:
-		return x
+		return newBV(x)
 	case I:
-		return x
+		return newBV(x)
 	case S:
-		return x
+		return newBV(x)
 	case AB:
 		r := make(AB, len(x))
 		copy(r, x)
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AF, len(x))
 		copy(r, x)
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AI, len(x))
 		copy(r, x)
-		return r
+		return newBV(r)
 	case AS:
 		r := make(AS, len(x))
 		copy(r, x)
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(x))
 		for i := range r {
 			r[i] = clone(x[i])
 		}
-		return r
+		return newBV(r)
 	case errV:
-		return x
+		return newBV(x)
 	default:
-		return x
+		return newBV(x)
 	}
 }
 
 func cloneShallow(x V) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case AB:
 		r := make(AB, len(x))
 		copy(r, x)
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AF, len(x))
 		copy(r, x)
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AI, len(x))
 		copy(r, x)
-		return r
+		return newBV(r)
 	case AS:
 		r := make(AS, len(x))
 		copy(r, x)
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(x))
 		copy(r, x)
-		return r
+		return newBV(r)
 	default:
-		return x
+		return newBV(x)
 	}
 }
 
@@ -174,7 +174,7 @@ func isIndices(xv V) bool {
 
 func toIndices(x V) V {
 	if isIndices(x) {
-		return x
+		return newBV(x)
 	}
 	return toIndicesRec(x)
 }
@@ -186,9 +186,9 @@ func toIndicesRec(xv V) V {
 		if !isI(x) {
 			return errf("non-integer index (%g)", x)
 		}
-		return I(x)
+		return newBV(I(x))
 	case I:
-		return x
+		return newBV(x)
 	case AB:
 		return fromABtoAI(x)
 	case AF:
@@ -209,7 +209,7 @@ func toIndicesRec(xv V) V {
 
 // toArray converts atoms into 1-length arrays. It returns arrays as-is.
 func toArray(x V) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case F:
 		return AF{float64(x)}
 	case I:
@@ -220,7 +220,7 @@ func toArray(x V) V {
 	case S:
 		return AS{string(x)}
 	case array:
-		return x
+		return newBV(x)
 	default:
 		return AV{x}
 	}
@@ -235,7 +235,7 @@ func toAI(x AF) V {
 		}
 		r[i] = int(xi)
 	}
-	return r
+	return newBV(r)
 }
 
 // fromABtoAI converts AB into AI (for simplifying code, used only for
@@ -245,11 +245,11 @@ func fromABtoAI(x AB) V {
 	for i := range r {
 		r[i] = int(B2I(x[i]))
 	}
-	return r
+	return newBV(r)
 }
 
 func isFalse(x V) bool {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case F:
 		return x == 0
 	case I:
@@ -262,7 +262,7 @@ func isFalse(x V) bool {
 }
 
 func isTrue(x V) bool {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case F:
 		return x != 0
 	case I:
@@ -300,7 +300,7 @@ func mergeTypes(t, s eltype) eltype {
 
 // eType returns the eltype of x.
 func eType(x V) eltype {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case F:
 		return tF
 	case I:
@@ -327,7 +327,7 @@ func eType(x V) eltype {
 
 // cType returns the canonical eltype of x. XXX: unused.
 func cType(x V) eltype {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case AB:
 		return tAB
 	case F:
@@ -505,7 +505,7 @@ func maxAB(x AB) bool {
 // the most specialized representation. For example AV{I(2), I(3)} is not
 // canonical, but AI{2, 3} is.
 func isCanonical(x V) (eltype, bool) {
-	switch xx := x.(type) {
+	switch xx := x.BV.(type) {
 	case AV:
 		t := aType(xx)
 		switch t {
@@ -541,13 +541,13 @@ func normalize(x AV, t eltype) V {
 		for i, xi := range x {
 			r[i] = xi.(I) != 0
 		}
-		return r
+		return newBV(r)
 	case tI:
 		r := make(AI, len(x))
 		for i, xi := range x {
 			r[i] = int(xi.(I))
 		}
-		return r
+		return newBV(r)
 	case tF:
 		r := make(AF, len(x))
 		for i, xi := range x {
@@ -558,21 +558,21 @@ func normalize(x AV, t eltype) V {
 				r[i] = float64(xi)
 			}
 		}
-		return r
+		return newBV(r)
 	case tS:
 		r := make(AS, len(x))
 		for i, xi := range x {
 			r[i] = string(xi.(S))
 		}
-		return r
+		return newBV(r)
 	case tV:
 		for i, xi := range x {
 			x[i] = canonical(xi)
 		}
-		return x
+		return newBV(x)
 	default:
 		// should not happen
-		return x
+		return newBV(x)
 	}
 }
 
@@ -580,7 +580,7 @@ func normalize(x AV, t eltype) V {
 func canonical(x V) V {
 	t, ok := isCanonical(x)
 	if ok {
-		return x
+		return newBV(x)
 	}
 	return normalize(x.(AV), t)
 }

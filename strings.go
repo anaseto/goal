@@ -1,7 +1,7 @@
 package goal
 
 func applyS(s S, x V) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case I:
 		if x < 0 {
 			x += I(len(s))
@@ -28,7 +28,7 @@ func applyS(s S, x V) V {
 			}
 			r[i] = string(s[n:])
 		}
-		return r
+		return newBV(r)
 	case AF:
 		z := toAI(x)
 		if err, ok := z.(errV); ok {
@@ -51,7 +51,7 @@ func applyS(s S, x V) V {
 
 func applyS2(s S, x V, y V) V {
 	var l int
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case I:
 		if y < 0 {
 			return errf("s[x;y] : y negative (%d)", y)
@@ -76,7 +76,7 @@ func applyS2(s S, x V, y V) V {
 	default:
 		return errType("s[x;y]", "y", y)
 	}
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case I:
 		if x < 0 {
 			x += I(len(s))
@@ -118,7 +118,7 @@ func applyS2(s S, x V, y V) V {
 				}
 				r[i] = string(s[n : n+l])
 			}
-			return r
+			return newBV(r)
 		}
 		for i, n := range x {
 			if n < 0 {
@@ -133,7 +133,7 @@ func applyS2(s S, x V, y V) V {
 			}
 			r[i] = string(s[n : n+l])
 		}
-		return r
+		return newBV(r)
 	case AF:
 		z := toAI(x)
 		if err, ok := z.(errV); ok {
@@ -155,7 +155,7 @@ func applyS2(s S, x V, y V) V {
 }
 
 func bytes(x V) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case S:
 		return I(len(x))
 	case AS:
@@ -163,7 +163,7 @@ func bytes(x V) V {
 		for i, s := range x {
 			r[i] = len(s)
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, x.Len())
 		for i, xi := range x {

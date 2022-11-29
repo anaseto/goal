@@ -456,7 +456,7 @@ func VList(ctx *Context, args []V) V {
 	case tB, tI, tF, tS:
 		r := canonical(AV(args))
 		reverseMut(r)
-		return r
+		return newBV(r)
 	default:
 		r := cloneArgs(args)
 		reverseArgs(r)

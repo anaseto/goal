@@ -29,7 +29,7 @@ func (ctx *Context) ApplyN(x V, args []V) V {
 // applyN applies x with the top n arguments in the stack. It consumes the
 // arguments, but does not push the result, returing it instead.
 func (ctx *Context) applyN(x V, n int) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case Lambda:
 		return ctx.applyLambda(x, n)
 	case Variadic:
@@ -45,7 +45,7 @@ func (ctx *Context) applyN(x V, n int) V {
 		}
 		r := ctx.variadics[x.Fun].Func(ctx, args)
 		ctx.dropN(n + 1)
-		return r
+		return newBV(r)
 	case ProjectionFirst:
 		if n > 1 {
 			return errf("too many arguments: got %d, expected 1", n)
@@ -67,7 +67,7 @@ func (ctx *Context) applyN(x V, n int) V {
 			args := ctx.peekN(n)
 			r := applyS2(x, args[1], args[0])
 			ctx.dropN(n)
-			return r
+			return newBV(r)
 		default:
 			return errf("too many arguments")
 		}
@@ -79,7 +79,7 @@ func (ctx *Context) applyN(x V, n int) V {
 			args := ctx.peekN(n)
 			r := ctx.applyArrayArgs(x, args[len(args)-1], args[:len(args)-1])
 			ctx.dropN(n)
-			return r
+			return newBV(r)
 		}
 	default:
 		return errf("type %s cannot be applied", x.Type())
@@ -89,9 +89,9 @@ func (ctx *Context) applyN(x V, n int) V {
 // applyArray applies an array to a value.
 func (ctx *Context) applyArray(x array, y V) V {
 	if y == nil {
-		return x
+		return newBV(x)
 	}
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		if !isI(y) {
 			return errf("a[x] : non-integer index (%g)", y)
@@ -128,7 +128,7 @@ func (ctx *Context) applyArray(x array, y V) V {
 			return errV("x[y] :") + err
 		}
 		r := x.atIndices(iy.(AI))
-		return r
+		return newBV(r)
 	default:
 		return errf("a[x] : x non-array non-integer")
 	}
@@ -162,7 +162,7 @@ func (ctx *Context) applyArrayArgs(x array, arg V, args []V) V {
 	default:
 		r := ctx.applyArray(x, arg)
 		if _, ok := r.(errV); ok {
-			return r
+			return newBV(r)
 		}
 		return ctx.ApplyN(r, args)
 	}
@@ -181,7 +181,7 @@ func (ctx *Context) applyVariadic(v Variadic) V {
 	}
 	r := ctx.variadics[v].Func(ctx, args)
 	ctx.drop()
-	return r
+	return newBV(r)
 }
 
 func (ctx *Context) applyNVariadic(v Variadic, n int) V {
@@ -198,7 +198,7 @@ func (ctx *Context) applyNVariadic(v Variadic, n int) V {
 	}
 	r := ctx.variadics[v].Func(ctx, args)
 	ctx.dropN(n)
-	return r
+	return newBV(r)
 }
 
 func (ctx *Context) applyProjection(p Projection, n int) V {
@@ -220,7 +220,7 @@ func (ctx *Context) applyProjection(p Projection, n int) V {
 		}
 		r := ctx.applyN(p.Fun, len(p.Args))
 		ctx.dropN(n)
-		return r
+		return newBV(r)
 	default:
 		vargs := cloneArgs(p.Args)
 		nilc := 1
@@ -295,7 +295,7 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 	}
 	ctx.dropN(n)
 	ctx.frameIdx = oframeIdx
-	return r
+	return newBV(r)
 }
 
 func (x AV) atIndices(y AI) V {
@@ -325,7 +325,7 @@ func (x AB) atIndices(y AI) V {
 		}
 		r[i] = x[yi]
 	}
-	return r
+	return newBV(r)
 }
 
 func (x AI) atIndices(y AI) V {
@@ -340,7 +340,7 @@ func (x AI) atIndices(y AI) V {
 		}
 		r[i] = x[yi]
 	}
-	return r
+	return newBV(r)
 }
 
 func (x AF) atIndices(y AI) V {
@@ -355,7 +355,7 @@ func (x AF) atIndices(y AI) V {
 		}
 		r[i] = x[yi]
 	}
-	return r
+	return newBV(r)
 }
 
 func (x AS) atIndices(y AI) V {
@@ -370,7 +370,7 @@ func (x AS) atIndices(y AI) V {
 		}
 		r[i] = x[yi]
 	}
-	return r
+	return newBV(r)
 }
 
 // set changes x at i with y (in place).

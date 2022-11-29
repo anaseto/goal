@@ -57,9 +57,9 @@ func equal(x, y V) V {
 func equalFV(x F, y V) V {
 	switch y := y.BV.(type) {
 	case F:
-		return B2I(x == y)
+		return newBV(B2I(x == y))
 	case I:
-		return B2I(x == F(y))
+		return newBV(B2I(x == F(y)))
 	case AB:
 		r := make(AB, y.Len())
 		for i := range r {
@@ -96,9 +96,9 @@ func equalFV(x F, y V) V {
 func equalIV(x I, y V) V {
 	switch y := y.BV.(type) {
 	case F:
-		return B2I(F(x) == y)
+		return newBV(B2I(F(x) == y))
 	case I:
-		return B2I(x == y)
+		return newBV(B2I(x == y))
 	case AB:
 		r := make(AB, y.Len())
 		for i := range r {
@@ -135,7 +135,7 @@ func equalIV(x I, y V) V {
 func equalSV(x S, y V) V {
 	switch y := y.BV.(type) {
 	case S:
-		return B2I(x == y)
+		return newBV(B2I(x == y))
 	case AS:
 		r := make(AB, y.Len())
 		for i := range r {
@@ -419,9 +419,9 @@ func lesser(x, y V) V {
 func lesserFV(x F, y V) V {
 	switch y := y.BV.(type) {
 	case F:
-		return B2I(x < y)
+		return newBV(B2I(x < y))
 	case I:
-		return B2I(x < F(y))
+		return newBV(B2I(x < F(y)))
 	case AB:
 		r := make(AB, y.Len())
 		for i := range r {
@@ -458,9 +458,9 @@ func lesserFV(x F, y V) V {
 func lesserIV(x I, y V) V {
 	switch y := y.BV.(type) {
 	case F:
-		return B2I(F(x) < y)
+		return newBV(B2I(F(x) < y))
 	case I:
-		return B2I(x < y)
+		return newBV(B2I(x < y))
 	case AB:
 		r := make(AB, y.Len())
 		for i := range r {
@@ -497,7 +497,7 @@ func lesserIV(x I, y V) V {
 func lesserSV(x S, y V) V {
 	switch y := y.BV.(type) {
 	case S:
-		return B2I(x < y)
+		return newBV(B2I(x < y))
 	case AS:
 		r := make(AB, y.Len())
 		for i := range r {
@@ -781,9 +781,9 @@ func greater(x, y V) V {
 func greaterFV(x F, y V) V {
 	switch y := y.BV.(type) {
 	case F:
-		return B2I(x > y)
+		return newBV(B2I(x > y))
 	case I:
-		return B2I(x > F(y))
+		return newBV(B2I(x > F(y)))
 	case AB:
 		r := make(AB, y.Len())
 		for i := range r {
@@ -820,9 +820,9 @@ func greaterFV(x F, y V) V {
 func greaterIV(x I, y V) V {
 	switch y := y.BV.(type) {
 	case F:
-		return B2I(F(x) > y)
+		return newBV(B2I(F(x) > y))
 	case I:
-		return B2I(x > y)
+		return newBV(B2I(x > y))
 	case AB:
 		r := make(AB, y.Len())
 		for i := range r {
@@ -859,7 +859,7 @@ func greaterIV(x I, y V) V {
 func greaterSV(x S, y V) V {
 	switch y := y.BV.(type) {
 	case S:
-		return B2I(x > y)
+		return newBV(B2I(x > y))
 	case AS:
 		r := make(AB, y.Len())
 		for i := range r {
@@ -1143,9 +1143,9 @@ func add(x, y V) V {
 func addFV(x F, y V) V {
 	switch y := y.BV.(type) {
 	case F:
-		return F(x + y)
+		return newBV(F(x + y))
 	case I:
-		return F(x + F(y))
+		return newBV(F(x + F(y)))
 	case AB:
 		r := make(AF, y.Len())
 		for i := range r {
@@ -1182,9 +1182,9 @@ func addFV(x F, y V) V {
 func addIV(x I, y V) V {
 	switch y := y.BV.(type) {
 	case F:
-		return F(F(x) + y)
+		return newBV(F(F(x) + y))
 	case I:
-		return I(x + y)
+		return newBV(I(x + y))
 	case AB:
 		r := make(AI, y.Len())
 		for i := range r {
@@ -1221,7 +1221,7 @@ func addIV(x I, y V) V {
 func addSV(x S, y V) V {
 	switch y := y.BV.(type) {
 	case S:
-		return S(x + y)
+		return newBV(S(x + y))
 	case AS:
 		r := make(AS, y.Len())
 		for i := range r {
@@ -1505,9 +1505,9 @@ func subtract(x, y V) V {
 func subtractFV(x F, y V) V {
 	switch y := y.BV.(type) {
 	case F:
-		return F(x - y)
+		return newBV(F(x - y))
 	case I:
-		return F(x - F(y))
+		return newBV(F(x - F(y)))
 	case AB:
 		r := make(AF, y.Len())
 		for i := range r {
@@ -1544,9 +1544,9 @@ func subtractFV(x F, y V) V {
 func subtractIV(x I, y V) V {
 	switch y := y.BV.(type) {
 	case F:
-		return F(F(x) - y)
+		return newBV(F(F(x) - y))
 	case I:
-		return I(x - y)
+		return newBV(I(x - y))
 	case AB:
 		r := make(AI, y.Len())
 		for i := range r {
@@ -1583,7 +1583,7 @@ func subtractIV(x I, y V) V {
 func subtractSV(x S, y V) V {
 	switch y := y.BV.(type) {
 	case S:
-		return S(strings.TrimSuffix(string(x), string(y)))
+		return newBV(S(strings.TrimSuffix(string(x), string(y))))
 	case AS:
 		r := make(AS, y.Len())
 		for i := range r {
@@ -1867,11 +1867,11 @@ func multiply(x, y V) V {
 func multiplyFV(x F, y V) V {
 	switch y := y.BV.(type) {
 	case F:
-		return F(x * y)
+		return newBV(F(x * y))
 	case I:
-		return F(x * F(y))
+		return newBV(F(x * F(y)))
 	case S:
-		return S(strings.Repeat(string(y), int(float64(x))))
+		return newBV(S(strings.Repeat(string(y), int(float64(x)))))
 	case AB:
 		r := make(AF, y.Len())
 		for i := range r {
@@ -1914,11 +1914,11 @@ func multiplyFV(x F, y V) V {
 func multiplyIV(x I, y V) V {
 	switch y := y.BV.(type) {
 	case F:
-		return F(F(x) * y)
+		return newBV(F(F(x) * y))
 	case I:
-		return I(x * y)
+		return newBV(I(x * y))
 	case S:
-		return S(strings.Repeat(string(y), int(x)))
+		return newBV(S(strings.Repeat(string(y), int(x))))
 	case AB:
 		r := make(AI, y.Len())
 		for i := range r {
@@ -1961,9 +1961,9 @@ func multiplyIV(x I, y V) V {
 func multiplySV(x S, y V) V {
 	switch y := y.BV.(type) {
 	case F:
-		return S(strings.Repeat(string(x), int(float64(y))))
+		return newBV(S(strings.Repeat(string(x), int(float64(y)))))
 	case I:
-		return S(strings.Repeat(string(x), int(y)))
+		return newBV(S(strings.Repeat(string(x), int(y))))
 	case AB:
 		r := make(AS, y.Len())
 		for i := range r {
@@ -2324,9 +2324,9 @@ func divide(x, y V) V {
 func divideFV(x F, y V) V {
 	switch y := y.BV.(type) {
 	case F:
-		return F(divideF(x, y))
+		return newBV(F(divideF(x, y)))
 	case I:
-		return F(divideF(x, F(y)))
+		return newBV(F(divideF(x, F(y))))
 	case AB:
 		r := make(AF, y.Len())
 		for i := range r {
@@ -2363,9 +2363,9 @@ func divideFV(x F, y V) V {
 func divideIV(x I, y V) V {
 	switch y := y.BV.(type) {
 	case F:
-		return F(divideF(F(x), y))
+		return newBV(F(divideF(F(x), y)))
 	case I:
-		return F(divideF(F(x), F(y)))
+		return newBV(F(divideF(F(x), F(y))))
 	case AB:
 		r := make(AF, y.Len())
 		for i := range r {
@@ -2626,9 +2626,9 @@ func minimum(x, y V) V {
 func minimumFV(x F, y V) V {
 	switch y := y.BV.(type) {
 	case F:
-		return F(F(math.Min(float64(x), float64(y))))
+		return newBV(F(F(math.Min(float64(x), float64(y)))))
 	case I:
-		return F(F(math.Min(float64(x), float64(y))))
+		return newBV(F(F(math.Min(float64(x), float64(y)))))
 	case AB:
 		r := make(AF, y.Len())
 		for i := range r {
@@ -2665,9 +2665,9 @@ func minimumFV(x F, y V) V {
 func minimumIV(x I, y V) V {
 	switch y := y.BV.(type) {
 	case F:
-		return F(F(math.Min(float64(x), float64(y))))
+		return newBV(F(F(math.Min(float64(x), float64(y)))))
 	case I:
-		return I(minI(x, y))
+		return newBV(I(minI(x, y)))
 	case AB:
 		r := make(AI, y.Len())
 		for i := range r {
@@ -2704,7 +2704,7 @@ func minimumIV(x I, y V) V {
 func minimumSV(x S, y V) V {
 	switch y := y.BV.(type) {
 	case S:
-		return S(minS(x, y))
+		return newBV(S(minS(x, y)))
 	case AS:
 		r := make(AS, y.Len())
 		for i := range r {
@@ -2988,9 +2988,9 @@ func maximum(x, y V) V {
 func maximumFV(x F, y V) V {
 	switch y := y.BV.(type) {
 	case F:
-		return F(F(math.Max(float64(x), float64(y))))
+		return newBV(F(F(math.Max(float64(x), float64(y)))))
 	case I:
-		return F(F(math.Max(float64(x), float64(y))))
+		return newBV(F(F(math.Max(float64(x), float64(y)))))
 	case AB:
 		r := make(AF, y.Len())
 		for i := range r {
@@ -3027,9 +3027,9 @@ func maximumFV(x F, y V) V {
 func maximumIV(x I, y V) V {
 	switch y := y.BV.(type) {
 	case F:
-		return F(F(math.Max(float64(x), float64(y))))
+		return newBV(F(F(math.Max(float64(x), float64(y)))))
 	case I:
-		return I(maxI(x, y))
+		return newBV(I(maxI(x, y)))
 	case AB:
 		r := make(AI, y.Len())
 		for i := range r {
@@ -3066,7 +3066,7 @@ func maximumIV(x I, y V) V {
 func maximumSV(x S, y V) V {
 	switch y := y.BV.(type) {
 	case S:
-		return S(maxS(x, y))
+		return newBV(S(maxS(x, y)))
 	case AS:
 		r := make(AS, y.Len())
 		for i := range r {
@@ -3346,9 +3346,9 @@ func modulus(x, y V) V {
 func modulusFV(x F, y V) V {
 	switch y := y.BV.(type) {
 	case F:
-		return I(modF(x, y))
+		return newBV(I(modF(x, y)))
 	case I:
-		return I(modF(x, F(y)))
+		return newBV(I(modF(x, F(y))))
 	case AB:
 		r := make(AI, y.Len())
 		for i := range r {
@@ -3385,9 +3385,9 @@ func modulusFV(x F, y V) V {
 func modulusIV(x I, y V) V {
 	switch y := y.BV.(type) {
 	case F:
-		return I(modF(F(x), y))
+		return newBV(I(modF(F(x), y)))
 	case I:
-		return I(modI(x, y))
+		return newBV(I(modI(x, y)))
 	case AB:
 		r := make(AI, y.Len())
 		for i := range r {

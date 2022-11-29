@@ -10,7 +10,7 @@ func enum(x V) V {
 	if err, ok := x.(errV); ok {
 		return errV("!x : ") + err
 	}
-	switch xx := x.(type) {
+	switch xx := x.BV.(type) {
 	case I:
 		return rangeI(xx)
 	case AI:
@@ -28,7 +28,7 @@ func rangeI(n I) V {
 	for i := range r {
 		r[i] = i
 	}
-	return r
+	return newBV(r)
 }
 
 func rangeArray(x AI) V {
@@ -55,12 +55,12 @@ func rangeArray(x AI) V {
 		}
 		r[i] = a
 	}
-	return r
+	return newBV(r)
 }
 
 // where returns &x.
 func where(x V) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case I:
 		switch {
 		case x < 0:
@@ -69,7 +69,7 @@ func where(x V) V {
 			return AI{}
 		default:
 			r := make(AI, x)
-			return r
+			return newBV(r)
 		}
 	case F:
 		if !isI(x) {
@@ -83,7 +83,7 @@ func where(x V) V {
 			return AI{}
 		default:
 			r := make(AI, n)
-			return r
+			return newBV(r)
 		}
 	case AB:
 		n := 0
@@ -96,7 +96,7 @@ func where(x V) V {
 				r = append(r, i)
 			}
 		}
-		return r
+		return newBV(r)
 	case AI:
 		n := 0
 		for _, xi := range x {
@@ -111,7 +111,7 @@ func where(x V) V {
 				r = append(r, i)
 			}
 		}
-		return r
+		return newBV(r)
 	case AF:
 		n := 0
 		for _, xi := range x {
@@ -129,7 +129,7 @@ func where(x V) V {
 				r = append(r, i)
 			}
 		}
-		return r
+		return newBV(r)
 	case AV:
 		switch aType(x) {
 		case tB, tF, tI:
@@ -164,7 +164,7 @@ func where(x V) V {
 					r = append(r, i)
 				}
 			}
-			return r
+			return newBV(r)
 		default:
 			return errs("&x : x non-integer")
 		}
@@ -175,7 +175,7 @@ func where(x V) V {
 
 // replicate returns {x}#y.
 func replicate(x, y V) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case I:
 		switch {
 		case x < 0:
@@ -220,38 +220,38 @@ func replicate(x, y V) V {
 }
 
 func repeat(x V, n int) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case F:
 		r := make(AF, n)
 		for i := range r {
 			r[i] = float64(x)
 		}
-		return r
+		return newBV(r)
 	case I:
 		if isBI(x) {
 			r := make(AB, n)
 			for i := range r {
 				r[i] = x == 1
 			}
-			return r
+			return newBV(r)
 		}
 		r := make(AI, n)
 		for i := range r {
 			r[i] = int(x)
 		}
-		return r
+		return newBV(r)
 	case S:
 		r := make(AS, n)
 		for i := range r {
 			r[i] = string(x)
 		}
-		return r
+		return newBV(r)
 	default:
 		r := make(AV, n)
 		for i := range r {
 			r[i] = x
 		}
-		return r
+		return newBV(r)
 	}
 }
 
@@ -260,7 +260,7 @@ func repeatAB(x AB, y V) V {
 	for _, xi := range x {
 		n += int(B2I(xi))
 	}
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case AB:
 		r := make(AB, 0, n)
 		for i, xi := range x {
@@ -268,7 +268,7 @@ func repeatAB(x AB, y V) V {
 				r = append(r, y[i])
 			}
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AF, 0, n)
 		for i, xi := range x {
@@ -276,7 +276,7 @@ func repeatAB(x AB, y V) V {
 				r = append(r, y[i])
 			}
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AI, 0, n)
 		for i, xi := range x {
@@ -284,7 +284,7 @@ func repeatAB(x AB, y V) V {
 				r = append(r, y[i])
 			}
 		}
-		return r
+		return newBV(r)
 	case AS:
 		r := make(AS, 0, n)
 		for i, xi := range x {
@@ -292,7 +292,7 @@ func repeatAB(x AB, y V) V {
 				r = append(r, y[i])
 			}
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, 0, n)
 		for i, xi := range x {
@@ -314,7 +314,7 @@ func repeatAI(x AI, y V) V {
 		}
 		n += xi
 	}
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case AB:
 		r := make(AB, 0, n)
 		for i, xi := range x {
@@ -322,7 +322,7 @@ func repeatAI(x AI, y V) V {
 				r = append(r, y[i])
 			}
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AF, 0, n)
 		for i, xi := range x {
@@ -330,7 +330,7 @@ func repeatAI(x AI, y V) V {
 				r = append(r, y[i])
 			}
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AI, 0, n)
 		for i, xi := range x {
@@ -338,7 +338,7 @@ func repeatAI(x AI, y V) V {
 				r = append(r, y[i])
 			}
 		}
-		return r
+		return newBV(r)
 	case AS:
 		r := make(AS, 0, n)
 		for i, xi := range x {
@@ -346,7 +346,7 @@ func repeatAI(x AI, y V) V {
 				r = append(r, y[i])
 			}
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, 0, n)
 		for i, xi := range x {
@@ -362,17 +362,17 @@ func repeatAI(x AI, y V) V {
 
 // weedOut implements {x}_y
 func weedOut(x, y V) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case I:
 		if x != 0 {
 			return AV{}
 		}
-		return y
+		return newBV(y)
 	case F:
 		if x != 0 {
 			return AV{}
 		}
-		return y
+		return newBV(y)
 	case AB:
 		return weedOutAB(x, y)
 	case AI:
@@ -396,7 +396,7 @@ func weedOutAB(x AB, y V) V {
 	for _, xi := range x {
 		n += 1 - int(B2I(xi))
 	}
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case AB:
 		r := make(AB, 0, n)
 		for i, xi := range x {
@@ -404,7 +404,7 @@ func weedOutAB(x AB, y V) V {
 				r = append(r, y[i])
 			}
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AF, 0, n)
 		for i, xi := range x {
@@ -412,7 +412,7 @@ func weedOutAB(x AB, y V) V {
 				r = append(r, y[i])
 			}
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AI, 0, n)
 		for i, xi := range x {
@@ -420,7 +420,7 @@ func weedOutAB(x AB, y V) V {
 				r = append(r, y[i])
 			}
 		}
-		return r
+		return newBV(r)
 	case AS:
 		r := make(AS, 0, n)
 		for i, xi := range x {
@@ -428,7 +428,7 @@ func weedOutAB(x AB, y V) V {
 				r = append(r, y[i])
 			}
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, 0, n)
 		for i, xi := range x {
@@ -447,7 +447,7 @@ func weedOutAI(x AI, y V) V {
 	for _, xi := range x {
 		n += int(B2I(xi == 0))
 	}
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case AB:
 		r := make(AB, 0, n)
 		for i, xi := range x {
@@ -455,7 +455,7 @@ func weedOutAI(x AI, y V) V {
 				r = append(r, y[i])
 			}
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AF, 0, n)
 		for i, xi := range x {
@@ -463,7 +463,7 @@ func weedOutAI(x AI, y V) V {
 				r = append(r, y[i])
 			}
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AI, 0, n)
 		for i, xi := range x {
@@ -471,7 +471,7 @@ func weedOutAI(x AI, y V) V {
 				r = append(r, y[i])
 			}
 		}
-		return r
+		return newBV(r)
 	case AS:
 		r := make(AS, 0, n)
 		for i, xi := range x {
@@ -479,7 +479,7 @@ func weedOutAI(x AI, y V) V {
 				r = append(r, y[i])
 			}
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, 0, n)
 		for i, xi := range x {
@@ -512,28 +512,28 @@ func cast(x, y V) V {
 }
 
 func casti(y V) V {
-	switch yy := y.(type) {
+	switch yy := y.BV.(type) {
 	case I:
-		return y
+		return newBV(y)
 	case F:
-		return I(yy)
+		return newBV(I(yy))
 	case S:
 		runes := []rune(yy)
 		r := make(AI, len(runes))
 		for i, rc := range runes {
 			r[i] = int(rc)
 		}
-		return r
+		return newBV(r)
 	case AB:
-		return y
+		return newBV(y)
 	case AI:
-		return y
+		return newBV(y)
 	case AS:
 		r := make(AV, yy.Len())
 		for i, s := range yy {
 			r[i] = casti(S(s))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		return toAI(yy)
 	case AV:
@@ -544,18 +544,18 @@ func casti(y V) V {
 				return err
 			}
 		}
-		return r
+		return newBV(r)
 	default:
 		return errs("\"i\"$y : non-numeric y")
 	}
 }
 
 func castn(y V) V {
-	switch yy := y.(type) {
+	switch yy := y.BV.(type) {
 	case I:
-		return y
+		return newBV(y)
 	case F:
-		return y
+		return newBV(y)
 	case S:
 		xi, err := parseNumber(string(yy))
 		if err != nil {
@@ -563,9 +563,9 @@ func castn(y V) V {
 		}
 		return xi
 	case AB:
-		return y
+		return newBV(y)
 	case AI:
-		return y
+		return newBV(y)
 	case AS:
 		r := make(AV, yy.Len())
 		for i, s := range yy {
@@ -577,7 +577,7 @@ func castn(y V) V {
 		}
 		return canonical(r)
 	case AF:
-		return y
+		return newBV(y)
 	case AV:
 		r := make(AV, yy.Len())
 		for i := range r {
@@ -586,14 +586,14 @@ func castn(y V) V {
 				return err
 			}
 		}
-		return r
+		return newBV(r)
 	default:
 		return errs("\"i\"$y : non-numeric y")
 	}
 }
 
 func casts(y V) V {
-	switch yy := y.(type) {
+	switch yy := y.BV.(type) {
 	case I:
 		return S(rune(yy))
 	case F:
@@ -616,7 +616,7 @@ func casts(y V) V {
 				return err
 			}
 		}
-		return r
+		return newBV(r)
 	default:
 		return errs("\"i\"$y : non-numeric y")
 	}
@@ -626,14 +626,14 @@ func casts(y V) V {
 func eval(ctx *Context, x V) V {
 	assertCanonical(x)
 	nctx := ctx.derive()
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case S:
 		r, err := nctx.Eval(string(x))
 		if err != nil {
 			return errf(".s : %v", err)
 		}
 		ctx.merge(nctx)
-		return r
+		return newBV(r)
 	default:
 		return errType(".x", "x", x)
 	}

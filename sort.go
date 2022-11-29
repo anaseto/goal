@@ -34,7 +34,7 @@ func (bs sortAV) Swap(i, j int) {
 }
 
 func less(x, y V) bool {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case F:
 		return lessF(x, y)
 	case I:
@@ -72,7 +72,7 @@ func less(x, y V) bool {
 }
 
 func lessF(x F, y V) bool {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return x < y
 	case I:
@@ -103,7 +103,7 @@ func lessF(x F, y V) bool {
 }
 
 func lessI(x I, y V) bool {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return F(x) < y
 	case I:
@@ -134,7 +134,7 @@ func lessI(x I, y V) bool {
 }
 
 func lessS(x S, y V) bool {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case S:
 		return x < y
 	case AS:
@@ -153,7 +153,7 @@ func lessS(x S, y V) bool {
 }
 
 func lessAB(x AB, y V) bool {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return !lessF(y, x)
 	case I:
@@ -192,7 +192,7 @@ func lessAB(x AB, y V) bool {
 }
 
 func lessAI(x AI, y V) bool {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return !lessF(y, x)
 	case I:
@@ -231,7 +231,7 @@ func lessAI(x AI, y V) bool {
 }
 
 func lessAF(x AF, y V) bool {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return !lessF(y, x)
 	case I:
@@ -270,7 +270,7 @@ func lessAF(x AF, y V) bool {
 }
 
 func lessAS(x AS, y V) bool {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case S:
 		return !lessS(y, x)
 	case AS:
@@ -293,7 +293,7 @@ func lessAS(x AS, y V) bool {
 }
 
 func lessAV(x AV, y V) bool {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return less(x[0], y)
 	case I:
@@ -336,22 +336,22 @@ func sortUp(x V) V {
 	// TODO: avoid cases of double clone
 	assertCanonical(x)
 	x = cloneShallow(x)
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case AB:
 		sort.Stable(sortAB(x))
-		return x
+		return newBV(x)
 	case AF:
 		sort.Stable(sort.Float64Slice(x))
-		return x
+		return newBV(x)
 	case AI:
 		sort.Stable(sort.IntSlice(x))
-		return x
+		return newBV(x)
 	case AS:
 		sort.Stable(sort.StringSlice(x))
-		return x
+		return newBV(x)
 	case AV:
 		sort.Stable(sortAV(x))
-		return x
+		return newBV(x)
 	default:
 		return errf("^x : x not an array (%s)", x.Type())
 	}
@@ -447,12 +447,12 @@ func permRange(n int) AI {
 	for i := range r {
 		r[i] = i
 	}
-	return r
+	return newBV(r)
 }
 
 // ascend returns <x.
 func ascend(x V) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case AB:
 		p := &permutationAB{Perm: permRange(len(x)), X: sortAB(x)}
 		sort.Stable(p)
@@ -491,7 +491,7 @@ func descend(x V) V {
 
 // search implements x$y.
 func search(x V, y V) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case AB:
 		if !sort.IsSorted(sortAB(x)) {
 			return errDomain("x$y", "x is not ascending")
@@ -544,7 +544,7 @@ func searchASS(x AS, y S) int {
 }
 
 func searchAI(x AI, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case I:
 		return I(searchAII(x, y))
 	case F:
@@ -554,33 +554,33 @@ func searchAI(x AI, y V) V {
 		for i, yi := range y {
 			r[i] = searchAII(x, B2I(yi))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AI, y.Len())
 		for i, yi := range y {
 			r[i] = searchAII(x, I(yi))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AI, y.Len())
 		for i, yi := range y {
 			r[i] = searchAIF(x, F(yi))
 		}
-		return r
+		return newBV(r)
 	case array:
 		r := make(AI, y.Len())
 		for i := 0; i < y.Len(); i++ {
 			r[i] = sort.Search(len(x),
 				func(i int) bool { return less(y.at(i), I(x[i])) })
 		}
-		return r
+		return newBV(r)
 	default:
 		return I(x.Len())
 	}
 }
 
 func searchAF(x AF, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case I:
 		return I(searchAFI(x, y))
 	case F:
@@ -590,33 +590,33 @@ func searchAF(x AF, y V) V {
 		for i, yi := range y {
 			r[i] = searchAFI(x, B2I(yi))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AI, y.Len())
 		for i, yi := range y {
 			r[i] = searchAFI(x, I(yi))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AI, y.Len())
 		for i, yi := range y {
 			r[i] = searchAFF(x, F(yi))
 		}
-		return r
+		return newBV(r)
 	case array:
 		r := make(AI, y.Len())
 		for i := 0; i < y.Len(); i++ {
 			r[i] = sort.Search(len(x),
 				func(i int) bool { return less(y.at(i), F(x[i])) })
 		}
-		return r
+		return newBV(r)
 	default:
 		return I(x.Len())
 	}
 }
 
 func searchAS(x AS, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case S:
 		return I(searchASS(x, y))
 	case AS:
@@ -624,28 +624,28 @@ func searchAS(x AS, y V) V {
 		for i, yi := range y {
 			r[i] = searchASS(x, S(yi))
 		}
-		return r
+		return newBV(r)
 	case array:
 		r := make(AI, y.Len())
 		for i := 0; i < y.Len(); i++ {
 			r[i] = sort.Search(len(x),
 				func(i int) bool { return less(y.at(i), S(x[i])) })
 		}
-		return r
+		return newBV(r)
 	default:
 		return I(x.Len())
 	}
 }
 
 func searchAV(x AV, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case array:
 		r := make(AI, y.Len())
 		for i := 0; i < y.Len(); i++ {
 			r[i] = sort.Search(len(x),
 				func(i int) bool { return less(y.at(i), x[i]) })
 		}
-		return r
+		return newBV(r)
 	default:
 		return I(sort.Search(len(x),
 			func(i int) bool { return less(y, x[i]) }))

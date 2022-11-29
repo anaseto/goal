@@ -4,7 +4,7 @@ package goal
 
 // amend3 implements @[x;y;f].
 func (ctx *Context) amend3(x, y, f V) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case array:
 		y = toIndices(y)
 		if err, ok := y.(errV); ok {
@@ -27,7 +27,7 @@ func (ctx *Context) amend3arrayI(x array, y I, f V) V {
 	}
 	if compatEltType(x, repl) {
 		x.set(int(y), repl)
-		return x
+		return newBV(x)
 	}
 	a := make(AV, x.Len())
 	for i := range a {
@@ -38,19 +38,19 @@ func (ctx *Context) amend3arrayI(x array, y I, f V) V {
 }
 
 func (ctx *Context) amend3array(x array, y, f V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case I:
 		return ctx.amend3arrayI(x, y, f)
 	case AI:
 		for _, yi := range y {
 			x = ctx.amend3array(x, I(yi), f).(array)
 		}
-		return x
+		return newBV(x)
 	case AV:
 		for _, yi := range y {
 			x = ctx.amend3array(x, yi, f).(array)
 		}
-		return x
+		return newBV(x)
 	default:
 		return errType("@[x;y;f]", "y", y)
 	}
@@ -58,7 +58,7 @@ func (ctx *Context) amend3array(x array, y, f V) V {
 
 // amend4 implements @[x;y;f;z].
 func (ctx *Context) amend4(x, y, f, z V) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case array:
 		y = toIndices(y)
 		if err, ok := y.(errV); ok {
@@ -81,7 +81,7 @@ func (ctx *Context) amend4arrayI(x array, y I, f, z V) V {
 	}
 	if compatEltType(x, repl) {
 		x.set(int(y), repl)
-		return x
+		return newBV(x)
 	}
 	a := make(AV, x.Len())
 	for i := range a {
@@ -92,7 +92,7 @@ func (ctx *Context) amend4arrayI(x array, y I, f, z V) V {
 }
 
 func (ctx *Context) amend4array(x array, y, f, z V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case I:
 		switch z.(type) {
 		case array:
@@ -105,7 +105,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 			for _, xi := range y {
 				x = ctx.amend4arrayI(x, I(xi), f, z).(array)
 			}
-			return x
+			return newBV(x)
 		}
 		if az.Len() != y.Len() {
 			return errf("@[x;y;f;z] : length mismatch between x and y (%d vs %d)",
@@ -114,14 +114,14 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 		for i, xi := range y {
 			x = ctx.amend4arrayI(x, I(xi), f, az.at(i)).(array)
 		}
-		return x
+		return newBV(x)
 	case AV:
 		az, ok := z.(array)
 		if !ok {
 			for _, xi := range y {
 				x = ctx.amend4array(x, xi, f, z).(array)
 			}
-			return x
+			return newBV(x)
 		}
 		if az.Len() != y.Len() {
 			return errf("@[x;y;f;z] : length mismatch between x and y (%d vs %d)",
@@ -130,7 +130,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 		for i, xi := range y {
 			x = ctx.amend4array(x, xi, f, az.at(i)).(array)
 		}
-		return x
+		return newBV(x)
 	default:
 		return errType("@[x;y;f;z]", "y", y)
 	}
@@ -150,5 +150,5 @@ func try(ctx *Context, f1, x, f2 V) V {
 			return errf("f2 call in .[f1;x;f2] : %v", err)
 		}
 	}
-	return r
+	return newBV(r)
 }

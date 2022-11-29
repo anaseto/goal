@@ -22,7 +22,7 @@ func matchArray(x array, y V) bool {
 	if l != ya.Len() {
 		return false
 	}
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case AB:
 		switch ya := ya.(type) {
 		case AB:
@@ -130,12 +130,12 @@ func classify(x V) V {
 		return AB{}
 	}
 	assertCanonical(x)
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case F, I, S:
 		return errf("%%x : x not an array (%s)", x.Type())
 	case AB:
 		if !x[0] {
-			return x
+			return newBV(x)
 		}
 		return not(x)
 	case AF:
@@ -152,7 +152,7 @@ func classify(x V) V {
 			}
 			r[i] = c
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AI, len(x))
 		m := map[int]int{}
@@ -167,7 +167,7 @@ func classify(x V) V {
 			}
 			r[i] = c
 		}
-		return r
+		return newBV(r)
 	case AS:
 		r := make(AI, len(x))
 		m := map[string]int{}
@@ -182,7 +182,7 @@ func classify(x V) V {
 			}
 			r[i] = c
 		}
-		return r
+		return newBV(r)
 	case AV:
 		// NOTE: quadratic algorithm, worst case complexity could be
 		// improved by sorting or string hashing.
@@ -199,7 +199,7 @@ func classify(x V) V {
 			r[i] = n
 			n++
 		}
-		return r
+		return newBV(r)
 	default:
 		return errf("%%x : x not an array (%s)", x.Type())
 	}
@@ -208,16 +208,16 @@ func classify(x V) V {
 // uniq returns ?x.
 func uniq(x V) V {
 	if Length(x) == 0 {
-		return x
+		return newBV(x)
 	}
 	assertCanonical(x)
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case F, I, S:
 		// NOTE: ?atom could be used for something.
 		return errf("?x : x not an array (%s)", x.Type())
 	case AB:
 		if len(x) == 0 {
-			return x
+			return newBV(x)
 		}
 		b := x[0]
 		for i := 1; i < len(x); i++ {
@@ -236,7 +236,7 @@ func uniq(x V) V {
 				m[xi] = struct{}{}
 			}
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := AI{}
 		m := map[int]struct{}{}
@@ -248,7 +248,7 @@ func uniq(x V) V {
 				continue
 			}
 		}
-		return r
+		return newBV(r)
 	case AS:
 		r := AS{}
 		m := map[string]struct{}{}
@@ -260,7 +260,7 @@ func uniq(x V) V {
 				continue
 			}
 		}
-		return r
+		return newBV(r)
 	case AV:
 		// NOTE: quadratic algorithm, worst case complexity could be
 		// improved by sorting or string hashing.
@@ -286,7 +286,7 @@ func markFirsts(x V) V {
 		return AB{}
 	}
 	assertCanonical(x)
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case F, I, S:
 		return errf("∊x : x not an array (%s)", x.Type())
 	case AB:
@@ -299,7 +299,7 @@ func markFirsts(x V) V {
 				break
 			}
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AB, len(x))
 		m := map[float64]struct{}{}
@@ -311,7 +311,7 @@ func markFirsts(x V) V {
 				continue
 			}
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AB, len(x))
 		m := map[int]struct{}{}
@@ -323,7 +323,7 @@ func markFirsts(x V) V {
 				continue
 			}
 		}
-		return r
+		return newBV(r)
 	case AS:
 		r := make(AB, len(x))
 		m := map[string]struct{}{}
@@ -335,7 +335,7 @@ func markFirsts(x V) V {
 				continue
 			}
 		}
-		return r
+		return newBV(r)
 	case AV:
 		// NOTE: quadratic algorithm, worst case complexity could be
 		// improved by sorting or string hashing.
@@ -349,7 +349,7 @@ func markFirsts(x V) V {
 			}
 			r[i] = true
 		}
-		return r
+		return newBV(r)
 	default:
 		return errf("∊x : x not an array (%s)", x.Type())
 	}
@@ -358,10 +358,10 @@ func markFirsts(x V) V {
 // memberOf returns x in y.
 func memberOf(x, y V) V {
 	if Length(y) == 0 {
-		switch x := x.(type) {
+		switch x := x.BV.(type) {
 		case array:
 			r := make(AB, x.Len())
-			return r
+			return newBV(r)
 		default:
 			return B2I(false)
 		}
@@ -371,7 +371,7 @@ func memberOf(x, y V) V {
 	}
 	assertCanonical(x)
 	assertCanonical(y)
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case AB:
 		return memberOfAB(x, y)
 	case AF:
@@ -396,13 +396,13 @@ func memberOfAB(x V, y AB) V {
 		t, f = t || yi, f || !yi
 	}
 	if t && f {
-		switch x := x.(type) {
+		switch x := x.BV.(type) {
 		case array:
 			r := make(AB, x.Len())
 			for i := range r {
 				r[i] = true
 			}
-			return r
+			return newBV(r)
 		default:
 			return B2I(true)
 		}
@@ -422,7 +422,7 @@ func memberOfAF(x V, y AF) V {
 			continue
 		}
 	}
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case I:
 		_, ok := m[F(x)]
 		return B2I(ok)
@@ -434,19 +434,19 @@ func memberOfAF(x V, y AF) V {
 		for i, xi := range x {
 			_, r[i] = m[B2F(xi)]
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AB, len(x))
 		for i, xi := range x {
 			_, r[i] = m[F(xi)]
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AB, len(x))
 		for i, xi := range x {
 			_, r[i] = m[F(xi)]
 		}
-		return r
+		return newBV(r)
 	case array:
 		return memberOfArray(x, y)
 	default:
@@ -463,7 +463,7 @@ func memberOfAI(x V, y AI) V {
 			continue
 		}
 	}
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case I:
 		_, ok := m[int(x)]
 		return B2I(ok)
@@ -478,13 +478,13 @@ func memberOfAI(x V, y AI) V {
 		for i, xi := range x {
 			_, r[i] = m[int(B2I(xi))]
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AB, len(x))
 		for i, xi := range x {
 			_, r[i] = m[xi]
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AB, len(x))
 		for i, xi := range x {
@@ -493,7 +493,7 @@ func memberOfAI(x V, y AI) V {
 			}
 			_, r[i] = m[int(xi)]
 		}
-		return r
+		return newBV(r)
 	case array:
 		return memberOfArray(x, y)
 	default:
@@ -510,7 +510,7 @@ func memberOfAS(x V, y AS) V {
 			continue
 		}
 	}
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case S:
 		_, ok := m[string(x)]
 		return B2I(ok)
@@ -519,7 +519,7 @@ func memberOfAS(x V, y AS) V {
 		for i, xi := range x {
 			_, r[i] = m[xi]
 		}
-		return r
+		return newBV(r)
 	case array:
 		return memberOfArray(x, y)
 	default:
@@ -528,7 +528,7 @@ func memberOfAS(x V, y AS) V {
 }
 
 func memberOfAV(x V, y AV) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case array:
 		return memberOfArray(x, y)
 	default:
@@ -553,7 +553,7 @@ func memberOfArray(x, y array) V {
 			}
 		}
 	}
-	return r
+	return newBV(r)
 }
 
 // OccurrenceCount returns ⊒x.
@@ -562,7 +562,7 @@ func occurrenceCount(x V) V {
 		return AB{}
 	}
 	assertCanonical(x)
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case F, I, S:
 		return errf("⊒x : x not an array (%s)", x.Type())
 	case AB:
@@ -577,7 +577,7 @@ func occurrenceCount(x V) V {
 			r[i] = f
 			f++
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AI, len(x))
 		m := map[float64]int{}
@@ -590,7 +590,7 @@ func occurrenceCount(x V) V {
 			m[xi] = c + 1
 			r[i] = c + 1
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AI, len(x))
 		m := map[int]int{}
@@ -603,7 +603,7 @@ func occurrenceCount(x V) V {
 			m[xi] = c + 1
 			r[i] = c + 1
 		}
-		return r
+		return newBV(r)
 	case AS:
 		r := make(AI, len(x))
 		m := map[string]int{}
@@ -616,7 +616,7 @@ func occurrenceCount(x V) V {
 			m[xi] = c + 1
 			r[i] = c + 1
 		}
-		return r
+		return newBV(r)
 	case AV:
 		// NOTE: quadratic algorithm, worst case complexity could be
 		// improved by sorting or string hashing.
@@ -630,7 +630,7 @@ func occurrenceCount(x V) V {
 				}
 			}
 		}
-		return r
+		return newBV(r)
 	default:
 		return errf("⊒x : x not an array (%s)", x.Type())
 	}
@@ -638,7 +638,7 @@ func occurrenceCount(x V) V {
 
 // without returns x^y.
 func without(x, y V) V {
-	switch xx := x.(type) {
+	switch xx := x.BV.(type) {
 	case I:
 		return windows(int(xx), y)
 	case F:
@@ -660,7 +660,7 @@ func without(x, y V) V {
 			}
 		}
 		r = replicate(r, y)
-		return r
+		return newBV(r)
 	default:
 		return errType("x^y", "x", x)
 	}
@@ -670,7 +670,7 @@ func without(x, y V) V {
 func find(x, y V) V {
 	assertCanonical(y)
 	assertCanonical(x)
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case S:
 		return findS(x, y)
 	case AB:
@@ -689,7 +689,7 @@ func find(x, y V) V {
 }
 
 func findS(s S, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case S:
 		return I(strings.Index(string(s), string(y)))
 	case AS:
@@ -697,7 +697,7 @@ func findS(s S, y V) V {
 		for i, ss := range y {
 			r[i] = strings.Index(string(s), string(ss))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, y.Len())
 		for i, yi := range y {
@@ -706,7 +706,7 @@ func findS(s S, y V) V {
 				return err
 			}
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("s?y", "y", y)
 	}
@@ -765,11 +765,11 @@ func imapAS(x AS) map[string]int {
 }
 
 func findAB(x AB, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case I:
 		for i, xi := range x {
 			if B2I(xi) == y {
-				return I(i)
+				return newBV(I(i))
 			}
 		}
 		return I(x.Len())
@@ -784,7 +784,7 @@ func findAB(x AB, y V) V {
 		for i, yi := range y {
 			r[i] = m[B2I(yi)]
 		}
-		return r
+		return newBV(r)
 	case AI:
 		m := imapAB(x)
 		r := make(AI, y.Len())
@@ -795,7 +795,7 @@ func findAB(x AB, y V) V {
 				r[i] = m[yi]
 			}
 		}
-		return r
+		return newBV(r)
 	case AF:
 		m := imapAB(x)
 		r := make(AI, y.Len())
@@ -806,7 +806,7 @@ func findAB(x AB, y V) V {
 				r[i] = m[int(yi)]
 			}
 		}
-		return r
+		return newBV(r)
 	case array:
 		return findArray(x, y)
 	default:
@@ -815,18 +815,18 @@ func findAB(x AB, y V) V {
 }
 
 func findAF(x AF, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case I:
 		for i, xi := range x {
 			if xi == float64(y) {
-				return I(i)
+				return newBV(I(i))
 			}
 		}
 		return I(x.Len())
 	case F:
 		for i, xi := range x {
 			if F(xi) == y {
-				return I(i)
+				return newBV(I(i))
 			}
 		}
 		return I(x.Len())
@@ -841,7 +841,7 @@ func findAF(x AF, y V) V {
 				r[i] = x.Len()
 			}
 		}
-		return r
+		return newBV(r)
 	case AI:
 		m := imapAF(x)
 		r := make(AI, y.Len())
@@ -853,7 +853,7 @@ func findAF(x AF, y V) V {
 				r[i] = x.Len()
 			}
 		}
-		return r
+		return newBV(r)
 	case AF:
 		m := imapAF(x)
 		r := make(AI, y.Len())
@@ -865,7 +865,7 @@ func findAF(x AF, y V) V {
 				r[i] = x.Len()
 			}
 		}
-		return r
+		return newBV(r)
 	case array:
 		return findArray(x, y)
 	default:
@@ -874,18 +874,18 @@ func findAF(x AF, y V) V {
 }
 
 func findAI(x AI, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case I:
 		for i, xi := range x {
 			if I(xi) == y {
-				return I(i)
+				return newBV(I(i))
 			}
 		}
 		return I(x.Len())
 	case F:
 		for i, xi := range x {
 			if F(xi) == y {
-				return I(i)
+				return newBV(I(i))
 			}
 		}
 		return I(x.Len())
@@ -900,7 +900,7 @@ func findAI(x AI, y V) V {
 				r[i] = x.Len()
 			}
 		}
-		return r
+		return newBV(r)
 	case AI:
 		m := imapAI(x)
 		r := make(AI, y.Len())
@@ -912,7 +912,7 @@ func findAI(x AI, y V) V {
 				r[i] = x.Len()
 			}
 		}
-		return r
+		return newBV(r)
 	case AF:
 		m := imapAI(x)
 		r := make(AI, y.Len())
@@ -928,7 +928,7 @@ func findAI(x AI, y V) V {
 				r[i] = x.Len()
 			}
 		}
-		return r
+		return newBV(r)
 	case array:
 		return findArray(x, y)
 	default:
@@ -937,11 +937,11 @@ func findAI(x AI, y V) V {
 }
 
 func findAS(x AS, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case S:
 		for i, xi := range x {
 			if S(xi) == y {
-				return I(i)
+				return newBV(I(i))
 			}
 		}
 		return I(x.Len())
@@ -956,7 +956,7 @@ func findAS(x AS, y V) V {
 				r[i] = x.Len()
 			}
 		}
-		return r
+		return newBV(r)
 	case array:
 		return findArray(x, y)
 	default:
@@ -979,29 +979,29 @@ func findArray(x, y array) V {
 			}
 		}
 	}
-	return r
+	return newBV(r)
 }
 
 func findAV(x AV, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		for i, xi := range x {
 			if Match(xi, y) {
-				return I(i)
+				return newBV(I(i))
 			}
 		}
 		return I(x.Len())
 	case I:
 		for i, xi := range x {
 			if Match(xi, y) {
-				return I(i)
+				return newBV(I(i))
 			}
 		}
 		return I(x.Len())
 	case S:
 		for i, xi := range x {
 			if Match(xi, y) {
-				return I(i)
+				return newBV(I(i))
 			}
 		}
 		return I(x.Len())
@@ -1010,7 +1010,7 @@ func findAV(x AV, y V) V {
 	default:
 		for i, xi := range x {
 			if Match(xi, y) {
-				return I(i)
+				return newBV(I(i))
 			}
 		}
 		return I(x.Len())
