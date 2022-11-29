@@ -10,10 +10,10 @@ type Matcher interface {
 
 // Match returns true if the two values match like in x~y.
 func Match(x, y V) bool {
-	return x != nil && x.Matches(y) || x == nil && y == nil
+	return x.BV != nil && x.BV.Matches(y.BV) || x.BV == nil && y.BV == nil
 }
 
-func matchArray(x array, y V) bool {
+func matchArray(x array, y Value) bool {
 	ya, ok := y.(array)
 	if !ok {
 		return false

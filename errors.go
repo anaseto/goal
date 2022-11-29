@@ -113,7 +113,7 @@ func NewError(s string) V {
 	return errs(s)
 }
 
-func errType(op, sym string, x V) V {
+func errType(op, sym string, x Value) V {
 	return errf("%s : bad type for %s (%s)", op, sym, x.Type())
 }
 

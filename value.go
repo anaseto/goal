@@ -10,11 +10,19 @@ import (
 )
 
 type V struct {
-	Type     ValueType // unused for now (boxed or specific)
+	VT       ValueType // unused for now (boxed or specific)
 	RefCount int16
 	Flags    int8  // unused for now (for sorted)
 	UV       int32 // unused for now (unboxed small integer)
 	BV       Value // boxed value
+}
+
+func (v V) Type() string {
+	return v.BV.Type()
+}
+
+func (v V) Sprint(ctx *Context) string {
+	return v.BV.Sprint(ctx)
 }
 
 func newBV(bv Value) V {
@@ -28,7 +36,7 @@ type ValueType int8
 type Value interface {
 	// Matches returns true if the value matches another (in the sense of
 	// the ~ operator).
-	Matches(x V) bool
+	Matches(x Value) bool
 	// Sprint returns a prettified string representation of the value.
 	Sprint(*Context) string
 	// Type returns the name of the value's type.
@@ -52,8 +60,8 @@ func isErr(x V) bool {
 	return ok
 }
 
-func (f F) Matches(y V) bool {
-	switch y := y.BV.(type) {
+func (f F) Matches(y Value) bool {
+	switch y := y.(type) {
 	case I:
 		return f == F(y)
 	case F:
@@ -63,8 +71,8 @@ func (f F) Matches(y V) bool {
 	}
 }
 
-func (i I) Matches(y V) bool {
-	switch y := y.BV.(type) {
+func (i I) Matches(y Value) bool {
+	switch y := y.(type) {
 	case I:
 		return i == y
 	case F:
@@ -74,8 +82,8 @@ func (i I) Matches(y V) bool {
 	}
 }
 
-func (s S) Matches(y V) bool {
-	switch y := y.BV.(type) {
+func (s S) Matches(y Value) bool {
+	switch y := y.(type) {
 	case S:
 		return s == y
 	default:
@@ -96,7 +104,7 @@ func (f F) Sprint(ctx *Context) string { return fmt.Sprintf("%g", f) }
 func (i I) Sprint(ctx *Context) string { return fmt.Sprintf("%d", i) }
 func (s S) Sprint(ctx *Context) string { return strconv.Quote(string(s)) }
 
-func (e errV) Matches(y V) bool {
+func (e errV) Matches(y Value) bool {
 	err, ok := y.(errV)
 	return ok && e == err
 }
@@ -282,11 +290,11 @@ type array interface {
 	setIndices(y AI, z V) error
 }
 
-func (x AV) Matches(y V) bool { return matchArray(x, y) }
-func (x AB) Matches(y V) bool { return matchArray(x, y) }
-func (x AI) Matches(y V) bool { return matchArray(x, y) }
-func (x AF) Matches(y V) bool { return matchArray(x, y) }
-func (x AS) Matches(y V) bool { return matchArray(x, y) }
+func (x AV) Matches(y Value) bool { return matchArray(x, y) }
+func (x AB) Matches(y Value) bool { return matchArray(x, y) }
+func (x AI) Matches(y Value) bool { return matchArray(x, y) }
+func (x AF) Matches(y Value) bool { return matchArray(x, y) }
+func (x AS) Matches(y Value) bool { return matchArray(x, y) }
 
 // Len returns the length of the array.
 func (x AV) Len() int { return len(x) }
@@ -492,32 +500,32 @@ func (v Variadic) zero() V {
 	return nil
 }
 
-func (v Variadic) Matches(x V) bool {
+func (v Variadic) Matches(x Value) bool {
 	xv, ok := x.(Variadic)
 	return ok && v == xv
 }
 
-func (p Projection) Matches(x V) bool {
+func (p Projection) Matches(x Value) bool {
 	xp, ok := x.(Projection)
 	return ok && Match(p.Fun, xp.Fun) && Match(p.Args, xp.Args)
 }
 
-func (p ProjectionFirst) Matches(x V) bool {
+func (p ProjectionFirst) Matches(x Value) bool {
 	xp, ok := x.(ProjectionFirst)
 	return ok && Match(p.Fun, xp.Fun) && Match(p.Arg, xp.Arg)
 }
 
-func (p ProjectionMonad) Matches(x V) bool {
+func (p ProjectionMonad) Matches(x Value) bool {
 	xp, ok := x.(ProjectionMonad)
 	return ok && Match(p.Fun, xp.Fun)
 }
 
-func (r DerivedVerb) Matches(x V) bool {
+func (r DerivedVerb) Matches(x Value) bool {
 	xr, ok := x.(DerivedVerb)
 	return ok && r.Fun == xr.Fun && Match(r.Arg, xr.Arg)
 }
 
-func (l Lambda) Matches(x V) bool {
+func (l Lambda) Matches(x Value) bool {
 	xl, ok := x.(Lambda)
 	return ok && l == xl
 }

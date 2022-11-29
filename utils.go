@@ -501,32 +501,36 @@ func maxAB(x AB) bool {
 	return false
 }
 
-// isCanonical returns true if the value is in canonical form, that is, it uses
-// the most specialized representation. For example AV{I(2), I(3)} is not
-// canonical, but AI{2, 3} is.
-func isCanonical(x V) (eltype, bool) {
-	switch xx := x.BV.(type) {
+func isCanonicalV(x V) (eltype, bool) {
+	switch xv := x.(type) {
 	case AV:
-		t := aType(xx)
-		switch t {
-		case tB, tI, tF, tS:
-			return t, false
-		case tV:
-			for _, xi := range xx {
-				if _, ok := isCanonical(xi); !ok {
-					return t, false
-				}
-			}
-			return t, true
-		default:
-			return t, true
-		}
+		return isCanonical(xv)
 	default:
-		return tV, true
+		return true
 	}
 }
 
-func assertCanonical(x V) {
+// isCanonical returns true if the array is in canonical form, that is, it uses
+// the most specialized representation. For example AV{I(2), I(3)} is not
+// canonical, but AI{2, 3} is.
+func isCanonical(x AV) (eltype, bool) {
+	t := aType(xx)
+	switch t {
+	case tB, tI, tF, tS:
+		return t, false
+	case tV:
+		for _, xi := range xx {
+			if _, ok := isCanonicalV(xi); !ok {
+				return t, false
+			}
+		}
+		return t, true
+	default:
+		return t, true
+	}
+}
+
+func assertCanonical(x AV) {
 	_, ok := isCanonical(x)
 	if !ok {
 		panic(fmt.Sprintf("not canonical: %#v", x))
@@ -534,20 +538,20 @@ func assertCanonical(x V) {
 }
 
 // normalize returns a canonical form of an AV array.
-func normalize(x AV, t eltype) V {
+func normalize(x AV, t eltype) Value {
 	switch t {
 	case tB:
 		r := make(AB, len(x))
 		for i, xi := range x {
 			r[i] = xi.(I) != 0
 		}
-		return newBV(r)
+		return r
 	case tI:
 		r := make(AI, len(x))
 		for i, xi := range x {
 			r[i] = int(xi.(I))
 		}
-		return newBV(r)
+		return r
 	case tF:
 		r := make(AF, len(x))
 		for i, xi := range x {
@@ -558,41 +562,55 @@ func normalize(x AV, t eltype) V {
 				r[i] = float64(xi)
 			}
 		}
-		return newBV(r)
+		return r
 	case tS:
 		r := make(AS, len(x))
 		for i, xi := range x {
 			r[i] = string(xi.(S))
 		}
-		return newBV(r)
+		return r
 	case tV:
 		for i, xi := range x {
-			x[i] = canonical(xi)
+			x[i] = canonicalV(xi)
 		}
-		return newBV(x)
+		return x
 	default:
 		// should not happen
-		return newBV(x)
+		return x
 	}
 }
 
 // canonical returns the canonical form of a given value.
-func canonical(x V) V {
+func canonicalV(x V) V {
+	switch xv := x.AB.(type) {
+	case AV:
+		t, ok := isCanonical(xv)
+		if ok {
+			return x
+		}
+		return newBV(normalize(xv, t))
+	default:
+		return x
+	}
+}
+
+// canonical returns the canonical form of a given value.
+func canonical(x AV) Value {
 	t, ok := isCanonical(x)
 	if ok {
-		return newBV(x)
+		return x
 	}
-	return normalize(x.(AV), t)
+	return normalize(x, t)
 }
 
 // toCanonical returns the canonical form of a given value, and false if it was
 // already canonical.
-func toCanonical(x V) (V, bool) {
+func toCanonical(x AV) (Value, bool) {
 	t, ok := isCanonical(x)
 	if ok {
 		return x, false
 	}
-	return normalize(x.(AV), t), true
+	return normalize(x, t), true
 }
 
 // hasNil returns true if there is a nil value in the given array.
