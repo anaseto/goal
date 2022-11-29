@@ -266,10 +266,10 @@ EOS
 	case AV:
                 switch y := y.BV.(type) {
                 case array:
-                        if y.Len() != len(x) {
-                                return errf("x${errOp}y : length mismatch: %d vs %d", len(x), y.Len())
+                        if y.Len() != x.Len() {
+                                return errf("x${errOp}y : length mismatch: %d vs %d", x.Len(), y.Len())
                         }
-                        r := make(AV, len(x))
+                        r := make(AV, x.Len())
                         for i := range r {
                                 ri := ${name}(x[i], y.at(i))
                                 if isErr(ri) {
@@ -279,7 +279,7 @@ EOS
                         }
                         return newBV(r)
                 }
-                r := make(AV, len(x))
+                r := make(AV, x.Len())
                 for i := range r {
                         ri := ${name}(x[i], y)
                         if isErr(ri) {
@@ -329,7 +329,7 @@ EOS
         my $rtype = $atypes{$type};
         print $out <<EOS;
 	case A$tt:
-		r := make(A$type, len(y))
+		r := make(A$type, y.Len())
 		for i := range r {
 			r[i] = $rtype($iexpr)
 		}
@@ -338,7 +338,7 @@ EOS
     }
     print $out <<EOS if $t !~ /^A/;
 	case AV:
-		r := make(AV, len(y))
+		r := make(AV, y.Len())
 		for i := range r {
 			ri := ${name}${t}V($t(x), y[i])
                         if isErr(ri) {
@@ -372,7 +372,7 @@ EOS
         my $rtype = $atypes{$type};
         print $out <<EOS;
 	case $tt:
-		r := make(A$type, len(x))
+		r := make(A$type, x.Len())
 		for i := range r {
 			r[i] = $rtype($iexpr)
 		}
@@ -386,10 +386,10 @@ EOS
         my $rtype = $atypes{$type};
         print $out <<EOS;
 	case A$tt:
-                if len(x) != len(y) {
-                        return errf("x${errOp}y : length mismatch: %d vs %d", len(x), len(y))
+                if x.Len() != y.Len() {
+                        return errf("x${errOp}y : length mismatch: %d vs %d", x.Len(), y.Len())
                 }
-		r := make(A$type, len(y))
+		r := make(A$type, y.Len())
 		for i := range r {
 			r[i] = $rtype($iexpr)
 		}
@@ -403,10 +403,10 @@ EOS
     }
     print $out <<EOS if $t !~ /^A/;
 	case AV:
-                if len(x) != len(y) {
-                        return errf("x${errOp}y : length mismatch: %d vs %d", len(x), len(y))
+                if x.Len() != y.Len() {
+                        return errf("x${errOp}y : length mismatch: %d vs %d", x.Len(), y.Len())
                 }
-		r := make(AV, len(y))
+		r := make(AV, y.Len())
 		for i := range r {
 			ri := ${name}${t}V($tt(x[i]), y[i])
                         if isErr(ri) {
