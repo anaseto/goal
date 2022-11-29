@@ -9,7 +9,7 @@ import (
 
 // equal returns x=y.
 func equal(x, y V) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case F:
 		return equalFV(x, y)
 	case I:
@@ -25,7 +25,7 @@ func equal(x, y V) V {
 	case AS:
 		return equalASV(x, y)
 	case AV:
-		switch y := y.(type) {
+		switch y := y.BV.(type) {
 		case array:
 			if y.Len() != len(x) {
 				return errf("x=y : length mismatch: %d vs %d", len(x), y.Len())
@@ -33,31 +33,29 @@ func equal(x, y V) V {
 			r := make(AV, len(x))
 			for i := range r {
 				ri := equal(x[i], y.at(i))
-				e, ok := ri.(errV)
-				if ok {
-					return e
+				if isErr(ri) {
+					return ri
 				}
 				r[i] = ri
 			}
-			return r
+			return newBV(r)
 		}
 		r := make(AV, len(x))
 		for i := range r {
 			ri := equal(x[i], y)
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x=y", "x", x)
 	}
 }
 
 func equalFV(x F, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return B2I(x == y)
 	case I:
@@ -67,37 +65,36 @@ func equalFV(x F, y V) V {
 		for i := range r {
 			r[i] = bool(F(x) == B2F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AB, len(y))
 		for i := range r {
 			r[i] = bool(F(x) == F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AB, len(y))
 		for i := range r {
 			r[i] = bool(F(x) == F(I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := equalFV(F(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x=y", "y", y)
 	}
 }
 
 func equalIV(x I, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return B2I(F(x) == y)
 	case I:
@@ -107,37 +104,36 @@ func equalIV(x I, y V) V {
 		for i := range r {
 			r[i] = bool(I(x) == B2I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AB, len(y))
 		for i := range r {
 			r[i] = bool(F(I(x)) == F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AB, len(y))
 		for i := range r {
 			r[i] = bool(I(x) == I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := equalIV(I(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x=y", "y", y)
 	}
 }
 
 func equalSV(x S, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case S:
 		return B2I(x == y)
 	case AS:
@@ -145,37 +141,36 @@ func equalSV(x S, y V) V {
 		for i := range r {
 			r[i] = bool(S(x) == S(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := equalSV(S(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x=y", "y", y)
 	}
 }
 
 func equalABV(x AB, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AB, len(x))
 		for i := range r {
 			r[i] = bool(B2F(x[i]) == F(y))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AB, len(x))
 		for i := range r {
 			r[i] = bool(B2I(x[i]) == I(y))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x=y : length mismatch: %d vs %d", len(x), len(y))
@@ -184,7 +179,7 @@ func equalABV(x AB, y V) V {
 		for i := range r {
 			r[i] = bool(x[i] == y[i])
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x=y : length mismatch: %d vs %d", len(x), len(y))
@@ -193,7 +188,7 @@ func equalABV(x AB, y V) V {
 		for i := range r {
 			r[i] = bool(B2F(x[i]) == F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x=y : length mismatch: %d vs %d", len(x), len(y))
@@ -202,7 +197,7 @@ func equalABV(x AB, y V) V {
 		for i := range r {
 			r[i] = bool(B2I(x[i]) == I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x=y : length mismatch: %d vs %d", len(x), len(y))
@@ -210,32 +205,31 @@ func equalABV(x AB, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := equalIV(B2I(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x=y", "y", y)
 	}
 }
 
 func equalAFV(x AF, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AB, len(x))
 		for i := range r {
 			r[i] = bool(F(x[i]) == F(y))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AB, len(x))
 		for i := range r {
 			r[i] = bool(F(x[i]) == F(I(y)))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x=y : length mismatch: %d vs %d", len(x), len(y))
@@ -244,7 +238,7 @@ func equalAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = bool(F(x[i]) == B2F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x=y : length mismatch: %d vs %d", len(x), len(y))
@@ -253,7 +247,7 @@ func equalAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = bool(F(x[i]) == F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x=y : length mismatch: %d vs %d", len(x), len(y))
@@ -262,7 +256,7 @@ func equalAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = bool(F(x[i]) == F(I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x=y : length mismatch: %d vs %d", len(x), len(y))
@@ -270,32 +264,31 @@ func equalAFV(x AF, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := equalFV(F(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x=y", "y", y)
 	}
 }
 
 func equalAIV(x AI, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AB, len(x))
 		for i := range r {
 			r[i] = bool(F(I(x[i])) == F(y))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AB, len(x))
 		for i := range r {
 			r[i] = bool(I(x[i]) == I(y))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x=y : length mismatch: %d vs %d", len(x), len(y))
@@ -304,7 +297,7 @@ func equalAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = bool(I(x[i]) == B2I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x=y : length mismatch: %d vs %d", len(x), len(y))
@@ -313,7 +306,7 @@ func equalAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = bool(F(I(x[i])) == F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x=y : length mismatch: %d vs %d", len(x), len(y))
@@ -322,7 +315,7 @@ func equalAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = bool(I(x[i]) == I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x=y : length mismatch: %d vs %d", len(x), len(y))
@@ -330,26 +323,25 @@ func equalAIV(x AI, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := equalIV(I(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x=y", "y", y)
 	}
 }
 
 func equalASV(x AS, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case S:
 		r := make(AB, len(x))
 		for i := range r {
 			r[i] = bool(S(x[i]) == S(y))
 		}
-		return r
+		return newBV(r)
 	case AS:
 		if len(x) != len(y) {
 			return errf("x=y : length mismatch: %d vs %d", len(x), len(y))
@@ -358,7 +350,7 @@ func equalASV(x AS, y V) V {
 		for i := range r {
 			r[i] = bool(S(x[i]) == S(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x=y : length mismatch: %d vs %d", len(x), len(y))
@@ -366,13 +358,12 @@ func equalASV(x AS, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := equalSV(S(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x=y", "y", y)
 	}
@@ -380,7 +371,7 @@ func equalASV(x AS, y V) V {
 
 // lesser returns x<y.
 func lesser(x, y V) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case F:
 		return lesserFV(x, y)
 	case I:
@@ -396,7 +387,7 @@ func lesser(x, y V) V {
 	case AS:
 		return lesserASV(x, y)
 	case AV:
-		switch y := y.(type) {
+		switch y := y.BV.(type) {
 		case array:
 			if y.Len() != len(x) {
 				return errf("x<y : length mismatch: %d vs %d", len(x), y.Len())
@@ -404,31 +395,29 @@ func lesser(x, y V) V {
 			r := make(AV, len(x))
 			for i := range r {
 				ri := lesser(x[i], y.at(i))
-				e, ok := ri.(errV)
-				if ok {
-					return e
+				if isErr(ri) {
+					return ri
 				}
 				r[i] = ri
 			}
-			return r
+			return newBV(r)
 		}
 		r := make(AV, len(x))
 		for i := range r {
 			ri := lesser(x[i], y)
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x<y", "x", x)
 	}
 }
 
 func lesserFV(x F, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return B2I(x < y)
 	case I:
@@ -438,37 +427,36 @@ func lesserFV(x F, y V) V {
 		for i := range r {
 			r[i] = bool(F(x) < B2F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AB, len(y))
 		for i := range r {
 			r[i] = bool(F(x) < F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AB, len(y))
 		for i := range r {
 			r[i] = bool(F(x) < F(I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := lesserFV(F(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x<y", "y", y)
 	}
 }
 
 func lesserIV(x I, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return B2I(F(x) < y)
 	case I:
@@ -478,37 +466,36 @@ func lesserIV(x I, y V) V {
 		for i := range r {
 			r[i] = bool(I(x) < B2I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AB, len(y))
 		for i := range r {
 			r[i] = bool(F(I(x)) < F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AB, len(y))
 		for i := range r {
 			r[i] = bool(I(x) < I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := lesserIV(I(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x<y", "y", y)
 	}
 }
 
 func lesserSV(x S, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case S:
 		return B2I(x < y)
 	case AS:
@@ -516,37 +503,36 @@ func lesserSV(x S, y V) V {
 		for i := range r {
 			r[i] = bool(S(x) < S(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := lesserSV(S(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x<y", "y", y)
 	}
 }
 
 func lesserABV(x AB, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AB, len(x))
 		for i := range r {
 			r[i] = bool(B2F(x[i]) < F(y))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AB, len(x))
 		for i := range r {
 			r[i] = bool(B2I(x[i]) < I(y))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x<y : length mismatch: %d vs %d", len(x), len(y))
@@ -555,7 +541,7 @@ func lesserABV(x AB, y V) V {
 		for i := range r {
 			r[i] = bool(!x[i] && y[i])
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x<y : length mismatch: %d vs %d", len(x), len(y))
@@ -564,7 +550,7 @@ func lesserABV(x AB, y V) V {
 		for i := range r {
 			r[i] = bool(B2F(x[i]) < F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x<y : length mismatch: %d vs %d", len(x), len(y))
@@ -573,7 +559,7 @@ func lesserABV(x AB, y V) V {
 		for i := range r {
 			r[i] = bool(B2I(x[i]) < I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x<y : length mismatch: %d vs %d", len(x), len(y))
@@ -581,32 +567,31 @@ func lesserABV(x AB, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := lesserIV(B2I(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x<y", "y", y)
 	}
 }
 
 func lesserAFV(x AF, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AB, len(x))
 		for i := range r {
 			r[i] = bool(F(x[i]) < F(y))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AB, len(x))
 		for i := range r {
 			r[i] = bool(F(x[i]) < F(I(y)))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x<y : length mismatch: %d vs %d", len(x), len(y))
@@ -615,7 +600,7 @@ func lesserAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = bool(F(x[i]) < B2F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x<y : length mismatch: %d vs %d", len(x), len(y))
@@ -624,7 +609,7 @@ func lesserAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = bool(F(x[i]) < F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x<y : length mismatch: %d vs %d", len(x), len(y))
@@ -633,7 +618,7 @@ func lesserAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = bool(F(x[i]) < F(I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x<y : length mismatch: %d vs %d", len(x), len(y))
@@ -641,32 +626,31 @@ func lesserAFV(x AF, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := lesserFV(F(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x<y", "y", y)
 	}
 }
 
 func lesserAIV(x AI, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AB, len(x))
 		for i := range r {
 			r[i] = bool(F(I(x[i])) < F(y))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AB, len(x))
 		for i := range r {
 			r[i] = bool(I(x[i]) < I(y))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x<y : length mismatch: %d vs %d", len(x), len(y))
@@ -675,7 +659,7 @@ func lesserAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = bool(I(x[i]) < B2I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x<y : length mismatch: %d vs %d", len(x), len(y))
@@ -684,7 +668,7 @@ func lesserAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = bool(F(I(x[i])) < F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x<y : length mismatch: %d vs %d", len(x), len(y))
@@ -693,7 +677,7 @@ func lesserAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = bool(I(x[i]) < I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x<y : length mismatch: %d vs %d", len(x), len(y))
@@ -701,26 +685,25 @@ func lesserAIV(x AI, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := lesserIV(I(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x<y", "y", y)
 	}
 }
 
 func lesserASV(x AS, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case S:
 		r := make(AB, len(x))
 		for i := range r {
 			r[i] = bool(S(x[i]) < S(y))
 		}
-		return r
+		return newBV(r)
 	case AS:
 		if len(x) != len(y) {
 			return errf("x<y : length mismatch: %d vs %d", len(x), len(y))
@@ -729,7 +712,7 @@ func lesserASV(x AS, y V) V {
 		for i := range r {
 			r[i] = bool(S(x[i]) < S(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x<y : length mismatch: %d vs %d", len(x), len(y))
@@ -737,13 +720,12 @@ func lesserASV(x AS, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := lesserSV(S(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x<y", "y", y)
 	}
@@ -751,7 +733,7 @@ func lesserASV(x AS, y V) V {
 
 // greater returns x>y.
 func greater(x, y V) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case F:
 		return greaterFV(x, y)
 	case I:
@@ -767,7 +749,7 @@ func greater(x, y V) V {
 	case AS:
 		return greaterASV(x, y)
 	case AV:
-		switch y := y.(type) {
+		switch y := y.BV.(type) {
 		case array:
 			if y.Len() != len(x) {
 				return errf("x>y : length mismatch: %d vs %d", len(x), y.Len())
@@ -775,31 +757,29 @@ func greater(x, y V) V {
 			r := make(AV, len(x))
 			for i := range r {
 				ri := greater(x[i], y.at(i))
-				e, ok := ri.(errV)
-				if ok {
-					return e
+				if isErr(ri) {
+					return ri
 				}
 				r[i] = ri
 			}
-			return r
+			return newBV(r)
 		}
 		r := make(AV, len(x))
 		for i := range r {
 			ri := greater(x[i], y)
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x>y", "x", x)
 	}
 }
 
 func greaterFV(x F, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return B2I(x > y)
 	case I:
@@ -809,37 +789,36 @@ func greaterFV(x F, y V) V {
 		for i := range r {
 			r[i] = bool(F(x) > B2F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AB, len(y))
 		for i := range r {
 			r[i] = bool(F(x) > F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AB, len(y))
 		for i := range r {
 			r[i] = bool(F(x) > F(I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := greaterFV(F(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x>y", "y", y)
 	}
 }
 
 func greaterIV(x I, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return B2I(F(x) > y)
 	case I:
@@ -849,37 +828,36 @@ func greaterIV(x I, y V) V {
 		for i := range r {
 			r[i] = bool(I(x) > B2I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AB, len(y))
 		for i := range r {
 			r[i] = bool(F(I(x)) > F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AB, len(y))
 		for i := range r {
 			r[i] = bool(I(x) > I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := greaterIV(I(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x>y", "y", y)
 	}
 }
 
 func greaterSV(x S, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case S:
 		return B2I(x > y)
 	case AS:
@@ -887,37 +865,36 @@ func greaterSV(x S, y V) V {
 		for i := range r {
 			r[i] = bool(S(x) > S(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := greaterSV(S(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x>y", "y", y)
 	}
 }
 
 func greaterABV(x AB, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AB, len(x))
 		for i := range r {
 			r[i] = bool(B2F(x[i]) > F(y))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AB, len(x))
 		for i := range r {
 			r[i] = bool(B2I(x[i]) > I(y))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x>y : length mismatch: %d vs %d", len(x), len(y))
@@ -926,7 +903,7 @@ func greaterABV(x AB, y V) V {
 		for i := range r {
 			r[i] = bool(x[i] && !y[i])
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x>y : length mismatch: %d vs %d", len(x), len(y))
@@ -935,7 +912,7 @@ func greaterABV(x AB, y V) V {
 		for i := range r {
 			r[i] = bool(B2F(x[i]) > F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x>y : length mismatch: %d vs %d", len(x), len(y))
@@ -944,7 +921,7 @@ func greaterABV(x AB, y V) V {
 		for i := range r {
 			r[i] = bool(B2I(x[i]) > I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x>y : length mismatch: %d vs %d", len(x), len(y))
@@ -952,32 +929,31 @@ func greaterABV(x AB, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := greaterIV(B2I(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x>y", "y", y)
 	}
 }
 
 func greaterAFV(x AF, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AB, len(x))
 		for i := range r {
 			r[i] = bool(F(x[i]) > F(y))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AB, len(x))
 		for i := range r {
 			r[i] = bool(F(x[i]) > F(I(y)))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x>y : length mismatch: %d vs %d", len(x), len(y))
@@ -986,7 +962,7 @@ func greaterAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = bool(F(x[i]) > B2F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x>y : length mismatch: %d vs %d", len(x), len(y))
@@ -995,7 +971,7 @@ func greaterAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = bool(F(x[i]) > F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x>y : length mismatch: %d vs %d", len(x), len(y))
@@ -1004,7 +980,7 @@ func greaterAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = bool(F(x[i]) > F(I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x>y : length mismatch: %d vs %d", len(x), len(y))
@@ -1012,32 +988,31 @@ func greaterAFV(x AF, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := greaterFV(F(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x>y", "y", y)
 	}
 }
 
 func greaterAIV(x AI, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AB, len(x))
 		for i := range r {
 			r[i] = bool(F(I(x[i])) > F(y))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AB, len(x))
 		for i := range r {
 			r[i] = bool(I(x[i]) > I(y))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x>y : length mismatch: %d vs %d", len(x), len(y))
@@ -1046,7 +1021,7 @@ func greaterAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = bool(I(x[i]) > B2I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x>y : length mismatch: %d vs %d", len(x), len(y))
@@ -1055,7 +1030,7 @@ func greaterAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = bool(F(I(x[i])) > F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x>y : length mismatch: %d vs %d", len(x), len(y))
@@ -1064,7 +1039,7 @@ func greaterAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = bool(I(x[i]) > I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x>y : length mismatch: %d vs %d", len(x), len(y))
@@ -1072,26 +1047,25 @@ func greaterAIV(x AI, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := greaterIV(I(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x>y", "y", y)
 	}
 }
 
 func greaterASV(x AS, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case S:
 		r := make(AB, len(x))
 		for i := range r {
 			r[i] = bool(S(x[i]) > S(y))
 		}
-		return r
+		return newBV(r)
 	case AS:
 		if len(x) != len(y) {
 			return errf("x>y : length mismatch: %d vs %d", len(x), len(y))
@@ -1100,7 +1074,7 @@ func greaterASV(x AS, y V) V {
 		for i := range r {
 			r[i] = bool(S(x[i]) > S(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x>y : length mismatch: %d vs %d", len(x), len(y))
@@ -1108,13 +1082,12 @@ func greaterASV(x AS, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := greaterSV(S(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x>y", "y", y)
 	}
@@ -1122,7 +1095,7 @@ func greaterASV(x AS, y V) V {
 
 // add returns x+y.
 func add(x, y V) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case F:
 		return addFV(x, y)
 	case I:
@@ -1138,7 +1111,7 @@ func add(x, y V) V {
 	case AS:
 		return addASV(x, y)
 	case AV:
-		switch y := y.(type) {
+		switch y := y.BV.(type) {
 		case array:
 			if y.Len() != len(x) {
 				return errf("x+y : length mismatch: %d vs %d", len(x), y.Len())
@@ -1146,31 +1119,29 @@ func add(x, y V) V {
 			r := make(AV, len(x))
 			for i := range r {
 				ri := add(x[i], y.at(i))
-				e, ok := ri.(errV)
-				if ok {
-					return e
+				if isErr(ri) {
+					return ri
 				}
 				r[i] = ri
 			}
-			return r
+			return newBV(r)
 		}
 		r := make(AV, len(x))
 		for i := range r {
 			ri := add(x[i], y)
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x+y", "x", x)
 	}
 }
 
 func addFV(x F, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return F(x + y)
 	case I:
@@ -1180,37 +1151,36 @@ func addFV(x F, y V) V {
 		for i := range r {
 			r[i] = float64(F(x) + B2F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AF, len(y))
 		for i := range r {
 			r[i] = float64(F(x) + F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AF, len(y))
 		for i := range r {
 			r[i] = float64(F(x) + F(I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := addFV(F(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x+y", "y", y)
 	}
 }
 
 func addIV(x I, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return F(F(x) + y)
 	case I:
@@ -1220,37 +1190,36 @@ func addIV(x I, y V) V {
 		for i := range r {
 			r[i] = int(I(x) + B2I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AF, len(y))
 		for i := range r {
 			r[i] = float64(F(I(x)) + F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AI, len(y))
 		for i := range r {
 			r[i] = int(I(x) + I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := addIV(I(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x+y", "y", y)
 	}
 }
 
 func addSV(x S, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case S:
 		return S(x + y)
 	case AS:
@@ -1258,37 +1227,36 @@ func addSV(x S, y V) V {
 		for i := range r {
 			r[i] = string(S(x) + S(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := addSV(S(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x+y", "y", y)
 	}
 }
 
 func addABV(x AB, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(B2F(x[i]) + F(y))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AI, len(x))
 		for i := range r {
 			r[i] = int(B2I(x[i]) + I(y))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x+y : length mismatch: %d vs %d", len(x), len(y))
@@ -1297,7 +1265,7 @@ func addABV(x AB, y V) V {
 		for i := range r {
 			r[i] = int(B2I(x[i]) + B2I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x+y : length mismatch: %d vs %d", len(x), len(y))
@@ -1306,7 +1274,7 @@ func addABV(x AB, y V) V {
 		for i := range r {
 			r[i] = float64(B2F(x[i]) + F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x+y : length mismatch: %d vs %d", len(x), len(y))
@@ -1315,7 +1283,7 @@ func addABV(x AB, y V) V {
 		for i := range r {
 			r[i] = int(B2I(x[i]) + I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x+y : length mismatch: %d vs %d", len(x), len(y))
@@ -1323,32 +1291,31 @@ func addABV(x AB, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := addIV(B2I(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x+y", "y", y)
 	}
 }
 
 func addAFV(x AF, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(F(x[i]) + F(y))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(F(x[i]) + F(I(y)))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x+y : length mismatch: %d vs %d", len(x), len(y))
@@ -1357,7 +1324,7 @@ func addAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = float64(F(x[i]) + B2F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x+y : length mismatch: %d vs %d", len(x), len(y))
@@ -1366,7 +1333,7 @@ func addAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = float64(F(x[i]) + F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x+y : length mismatch: %d vs %d", len(x), len(y))
@@ -1375,7 +1342,7 @@ func addAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = float64(F(x[i]) + F(I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x+y : length mismatch: %d vs %d", len(x), len(y))
@@ -1383,32 +1350,31 @@ func addAFV(x AF, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := addFV(F(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x+y", "y", y)
 	}
 }
 
 func addAIV(x AI, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(F(I(x[i])) + F(y))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AI, len(x))
 		for i := range r {
 			r[i] = int(I(x[i]) + I(y))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x+y : length mismatch: %d vs %d", len(x), len(y))
@@ -1417,7 +1383,7 @@ func addAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = int(I(x[i]) + B2I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x+y : length mismatch: %d vs %d", len(x), len(y))
@@ -1426,7 +1392,7 @@ func addAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = float64(F(I(x[i])) + F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x+y : length mismatch: %d vs %d", len(x), len(y))
@@ -1435,7 +1401,7 @@ func addAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = int(I(x[i]) + I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x+y : length mismatch: %d vs %d", len(x), len(y))
@@ -1443,26 +1409,25 @@ func addAIV(x AI, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := addIV(I(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x+y", "y", y)
 	}
 }
 
 func addASV(x AS, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case S:
 		r := make(AS, len(x))
 		for i := range r {
 			r[i] = string(S(x[i]) + S(y))
 		}
-		return r
+		return newBV(r)
 	case AS:
 		if len(x) != len(y) {
 			return errf("x+y : length mismatch: %d vs %d", len(x), len(y))
@@ -1471,7 +1436,7 @@ func addASV(x AS, y V) V {
 		for i := range r {
 			r[i] = string(S(x[i]) + S(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x+y : length mismatch: %d vs %d", len(x), len(y))
@@ -1479,13 +1444,12 @@ func addASV(x AS, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := addSV(S(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x+y", "y", y)
 	}
@@ -1493,7 +1457,7 @@ func addASV(x AS, y V) V {
 
 // subtract returns x-y.
 func subtract(x, y V) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case F:
 		return subtractFV(x, y)
 	case I:
@@ -1509,7 +1473,7 @@ func subtract(x, y V) V {
 	case AS:
 		return subtractASV(x, y)
 	case AV:
-		switch y := y.(type) {
+		switch y := y.BV.(type) {
 		case array:
 			if y.Len() != len(x) {
 				return errf("x-y : length mismatch: %d vs %d", len(x), y.Len())
@@ -1517,31 +1481,29 @@ func subtract(x, y V) V {
 			r := make(AV, len(x))
 			for i := range r {
 				ri := subtract(x[i], y.at(i))
-				e, ok := ri.(errV)
-				if ok {
-					return e
+				if isErr(ri) {
+					return ri
 				}
 				r[i] = ri
 			}
-			return r
+			return newBV(r)
 		}
 		r := make(AV, len(x))
 		for i := range r {
 			ri := subtract(x[i], y)
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x-y", "x", x)
 	}
 }
 
 func subtractFV(x F, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return F(x - y)
 	case I:
@@ -1551,37 +1513,36 @@ func subtractFV(x F, y V) V {
 		for i := range r {
 			r[i] = float64(F(x) - B2F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AF, len(y))
 		for i := range r {
 			r[i] = float64(F(x) - F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AF, len(y))
 		for i := range r {
 			r[i] = float64(F(x) - F(I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := subtractFV(F(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x-y", "y", y)
 	}
 }
 
 func subtractIV(x I, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return F(F(x) - y)
 	case I:
@@ -1591,37 +1552,36 @@ func subtractIV(x I, y V) V {
 		for i := range r {
 			r[i] = int(I(x) - B2I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AF, len(y))
 		for i := range r {
 			r[i] = float64(F(I(x)) - F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AI, len(y))
 		for i := range r {
 			r[i] = int(I(x) - I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := subtractIV(I(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x-y", "y", y)
 	}
 }
 
 func subtractSV(x S, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case S:
 		return S(strings.TrimSuffix(string(x), string(y)))
 	case AS:
@@ -1629,37 +1589,36 @@ func subtractSV(x S, y V) V {
 		for i := range r {
 			r[i] = string(strings.TrimSuffix(string(S(x)), string(S(y[i]))))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := subtractSV(S(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x-y", "y", y)
 	}
 }
 
 func subtractABV(x AB, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(B2F(x[i]) - F(y))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AI, len(x))
 		for i := range r {
 			r[i] = int(B2I(x[i]) - I(y))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x-y : length mismatch: %d vs %d", len(x), len(y))
@@ -1668,7 +1627,7 @@ func subtractABV(x AB, y V) V {
 		for i := range r {
 			r[i] = int(B2I(x[i]) - B2I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x-y : length mismatch: %d vs %d", len(x), len(y))
@@ -1677,7 +1636,7 @@ func subtractABV(x AB, y V) V {
 		for i := range r {
 			r[i] = float64(B2F(x[i]) - F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x-y : length mismatch: %d vs %d", len(x), len(y))
@@ -1686,7 +1645,7 @@ func subtractABV(x AB, y V) V {
 		for i := range r {
 			r[i] = int(B2I(x[i]) - I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x-y : length mismatch: %d vs %d", len(x), len(y))
@@ -1694,32 +1653,31 @@ func subtractABV(x AB, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := subtractIV(B2I(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x-y", "y", y)
 	}
 }
 
 func subtractAFV(x AF, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(F(x[i]) - F(y))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(F(x[i]) - F(I(y)))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x-y : length mismatch: %d vs %d", len(x), len(y))
@@ -1728,7 +1686,7 @@ func subtractAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = float64(F(x[i]) - B2F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x-y : length mismatch: %d vs %d", len(x), len(y))
@@ -1737,7 +1695,7 @@ func subtractAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = float64(F(x[i]) - F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x-y : length mismatch: %d vs %d", len(x), len(y))
@@ -1746,7 +1704,7 @@ func subtractAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = float64(F(x[i]) - F(I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x-y : length mismatch: %d vs %d", len(x), len(y))
@@ -1754,32 +1712,31 @@ func subtractAFV(x AF, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := subtractFV(F(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x-y", "y", y)
 	}
 }
 
 func subtractAIV(x AI, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(F(I(x[i])) - F(y))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AI, len(x))
 		for i := range r {
 			r[i] = int(I(x[i]) - I(y))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x-y : length mismatch: %d vs %d", len(x), len(y))
@@ -1788,7 +1745,7 @@ func subtractAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = int(I(x[i]) - B2I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x-y : length mismatch: %d vs %d", len(x), len(y))
@@ -1797,7 +1754,7 @@ func subtractAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = float64(F(I(x[i])) - F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x-y : length mismatch: %d vs %d", len(x), len(y))
@@ -1806,7 +1763,7 @@ func subtractAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = int(I(x[i]) - I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x-y : length mismatch: %d vs %d", len(x), len(y))
@@ -1814,26 +1771,25 @@ func subtractAIV(x AI, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := subtractIV(I(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x-y", "y", y)
 	}
 }
 
 func subtractASV(x AS, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case S:
 		r := make(AS, len(x))
 		for i := range r {
 			r[i] = string(strings.TrimSuffix(string(S(x[i])), string(S(y))))
 		}
-		return r
+		return newBV(r)
 	case AS:
 		if len(x) != len(y) {
 			return errf("x-y : length mismatch: %d vs %d", len(x), len(y))
@@ -1842,7 +1798,7 @@ func subtractASV(x AS, y V) V {
 		for i := range r {
 			r[i] = string(strings.TrimSuffix(string(S(x[i])), string(S(y[i]))))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x-y : length mismatch: %d vs %d", len(x), len(y))
@@ -1850,13 +1806,12 @@ func subtractASV(x AS, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := subtractSV(S(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x-y", "y", y)
 	}
@@ -1864,7 +1819,7 @@ func subtractASV(x AS, y V) V {
 
 // multiply returns x*y.
 func multiply(x, y V) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case F:
 		return multiplyFV(x, y)
 	case I:
@@ -1880,7 +1835,7 @@ func multiply(x, y V) V {
 	case AS:
 		return multiplyASV(x, y)
 	case AV:
-		switch y := y.(type) {
+		switch y := y.BV.(type) {
 		case array:
 			if y.Len() != len(x) {
 				return errf("x*y : length mismatch: %d vs %d", len(x), y.Len())
@@ -1888,31 +1843,29 @@ func multiply(x, y V) V {
 			r := make(AV, len(x))
 			for i := range r {
 				ri := multiply(x[i], y.at(i))
-				e, ok := ri.(errV)
-				if ok {
-					return e
+				if isErr(ri) {
+					return ri
 				}
 				r[i] = ri
 			}
-			return r
+			return newBV(r)
 		}
 		r := make(AV, len(x))
 		for i := range r {
 			ri := multiply(x[i], y)
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x*y", "x", x)
 	}
 }
 
 func multiplyFV(x F, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return F(x * y)
 	case I:
@@ -1924,43 +1877,42 @@ func multiplyFV(x F, y V) V {
 		for i := range r {
 			r[i] = float64(F(x) * B2F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AF, len(y))
 		for i := range r {
 			r[i] = float64(F(x) * F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AF, len(y))
 		for i := range r {
 			r[i] = float64(F(x) * F(I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AS:
 		r := make(AS, len(y))
 		for i := range r {
 			r[i] = string(strings.Repeat(string(S(y[i])), int(float64(F(x)))))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := multiplyFV(F(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x*y", "y", y)
 	}
 }
 
 func multiplyIV(x I, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return F(F(x) * y)
 	case I:
@@ -1972,43 +1924,42 @@ func multiplyIV(x I, y V) V {
 		for i := range r {
 			r[i] = int(I(x) * B2I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AF, len(y))
 		for i := range r {
 			r[i] = float64(F(I(x)) * F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AI, len(y))
 		for i := range r {
 			r[i] = int(I(x) * I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AS:
 		r := make(AS, len(y))
 		for i := range r {
 			r[i] = string(strings.Repeat(string(S(y[i])), int(I(x))))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := multiplyIV(I(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x*y", "y", y)
 	}
 }
 
 func multiplySV(x S, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return S(strings.Repeat(string(x), int(float64(y))))
 	case I:
@@ -2018,55 +1969,54 @@ func multiplySV(x S, y V) V {
 		for i := range r {
 			r[i] = string(strings.Repeat(string(S(x)), int(B2I(y[i]))))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AS, len(y))
 		for i := range r {
 			r[i] = string(strings.Repeat(string(S(x)), int(float64(F(y[i])))))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AS, len(y))
 		for i := range r {
 			r[i] = string(strings.Repeat(string(S(x)), int(I(y[i]))))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := multiplySV(S(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x*y", "y", y)
 	}
 }
 
 func multiplyABV(x AB, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(B2F(x[i]) * F(y))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AI, len(x))
 		for i := range r {
 			r[i] = int(B2I(x[i]) * I(y))
 		}
-		return r
+		return newBV(r)
 	case S:
 		r := make(AS, len(x))
 		for i := range r {
 			r[i] = string(strings.Repeat(string(S(y)), int(B2I(x[i]))))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x*y : length mismatch: %d vs %d", len(x), len(y))
@@ -2075,7 +2025,7 @@ func multiplyABV(x AB, y V) V {
 		for i := range r {
 			r[i] = bool(x[i] && y[i])
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x*y : length mismatch: %d vs %d", len(x), len(y))
@@ -2084,7 +2034,7 @@ func multiplyABV(x AB, y V) V {
 		for i := range r {
 			r[i] = float64(B2F(x[i]) * F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x*y : length mismatch: %d vs %d", len(x), len(y))
@@ -2093,7 +2043,7 @@ func multiplyABV(x AB, y V) V {
 		for i := range r {
 			r[i] = int(B2I(x[i]) * I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AS:
 		if len(x) != len(y) {
 			return errf("x*y : length mismatch: %d vs %d", len(x), len(y))
@@ -2102,7 +2052,7 @@ func multiplyABV(x AB, y V) V {
 		for i := range r {
 			r[i] = string(strings.Repeat(string(S(y[i])), int(B2I(x[i]))))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x*y : length mismatch: %d vs %d", len(x), len(y))
@@ -2110,38 +2060,37 @@ func multiplyABV(x AB, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := multiplyIV(B2I(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x*y", "y", y)
 	}
 }
 
 func multiplyAFV(x AF, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(F(x[i]) * F(y))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(F(x[i]) * F(I(y)))
 		}
-		return r
+		return newBV(r)
 	case S:
 		r := make(AS, len(x))
 		for i := range r {
 			r[i] = string(strings.Repeat(string(S(y)), int(float64(F(x[i])))))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x*y : length mismatch: %d vs %d", len(x), len(y))
@@ -2150,7 +2099,7 @@ func multiplyAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = float64(F(x[i]) * B2F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x*y : length mismatch: %d vs %d", len(x), len(y))
@@ -2159,7 +2108,7 @@ func multiplyAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = float64(F(x[i]) * F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x*y : length mismatch: %d vs %d", len(x), len(y))
@@ -2168,7 +2117,7 @@ func multiplyAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = float64(F(x[i]) * F(I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AS:
 		if len(x) != len(y) {
 			return errf("x*y : length mismatch: %d vs %d", len(x), len(y))
@@ -2177,7 +2126,7 @@ func multiplyAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = string(strings.Repeat(string(S(y[i])), int(float64(F(x[i])))))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x*y : length mismatch: %d vs %d", len(x), len(y))
@@ -2185,38 +2134,37 @@ func multiplyAFV(x AF, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := multiplyFV(F(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x*y", "y", y)
 	}
 }
 
 func multiplyAIV(x AI, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(F(I(x[i])) * F(y))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AI, len(x))
 		for i := range r {
 			r[i] = int(I(x[i]) * I(y))
 		}
-		return r
+		return newBV(r)
 	case S:
 		r := make(AS, len(x))
 		for i := range r {
 			r[i] = string(strings.Repeat(string(S(y)), int(I(x[i]))))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x*y : length mismatch: %d vs %d", len(x), len(y))
@@ -2225,7 +2173,7 @@ func multiplyAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = int(I(x[i]) * B2I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x*y : length mismatch: %d vs %d", len(x), len(y))
@@ -2234,7 +2182,7 @@ func multiplyAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = float64(F(I(x[i])) * F(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x*y : length mismatch: %d vs %d", len(x), len(y))
@@ -2243,7 +2191,7 @@ func multiplyAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = int(I(x[i]) * I(y[i]))
 		}
-		return r
+		return newBV(r)
 	case AS:
 		if len(x) != len(y) {
 			return errf("x*y : length mismatch: %d vs %d", len(x), len(y))
@@ -2252,7 +2200,7 @@ func multiplyAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = string(strings.Repeat(string(S(y[i])), int(I(x[i]))))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x*y : length mismatch: %d vs %d", len(x), len(y))
@@ -2260,32 +2208,31 @@ func multiplyAIV(x AI, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := multiplyIV(I(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x*y", "y", y)
 	}
 }
 
 func multiplyASV(x AS, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AS, len(x))
 		for i := range r {
 			r[i] = string(strings.Repeat(string(S(x[i])), int(float64(F(y)))))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AS, len(x))
 		for i := range r {
 			r[i] = string(strings.Repeat(string(S(x[i])), int(I(y))))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x*y : length mismatch: %d vs %d", len(x), len(y))
@@ -2294,7 +2241,7 @@ func multiplyASV(x AS, y V) V {
 		for i := range r {
 			r[i] = string(strings.Repeat(string(S(x[i])), int(B2I(y[i]))))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x*y : length mismatch: %d vs %d", len(x), len(y))
@@ -2303,7 +2250,7 @@ func multiplyASV(x AS, y V) V {
 		for i := range r {
 			r[i] = string(strings.Repeat(string(S(x[i])), int(float64(F(y[i])))))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x*y : length mismatch: %d vs %d", len(x), len(y))
@@ -2312,7 +2259,7 @@ func multiplyASV(x AS, y V) V {
 		for i := range r {
 			r[i] = string(strings.Repeat(string(S(x[i])), int(I(y[i]))))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x*y : length mismatch: %d vs %d", len(x), len(y))
@@ -2320,13 +2267,12 @@ func multiplyASV(x AS, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := multiplySV(S(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x*y", "y", y)
 	}
@@ -2334,7 +2280,7 @@ func multiplyASV(x AS, y V) V {
 
 // divide returns x%y.
 func divide(x, y V) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case F:
 		return divideFV(x, y)
 	case I:
@@ -2346,7 +2292,7 @@ func divide(x, y V) V {
 	case AI:
 		return divideAIV(x, y)
 	case AV:
-		switch y := y.(type) {
+		switch y := y.BV.(type) {
 		case array:
 			if y.Len() != len(x) {
 				return errf("x%%y : length mismatch: %d vs %d", len(x), y.Len())
@@ -2354,31 +2300,29 @@ func divide(x, y V) V {
 			r := make(AV, len(x))
 			for i := range r {
 				ri := divide(x[i], y.at(i))
-				e, ok := ri.(errV)
-				if ok {
-					return e
+				if isErr(ri) {
+					return ri
 				}
 				r[i] = ri
 			}
-			return r
+			return newBV(r)
 		}
 		r := make(AV, len(x))
 		for i := range r {
 			ri := divide(x[i], y)
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x%%y", "x", x)
 	}
 }
 
 func divideFV(x F, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return F(divideF(x, y))
 	case I:
@@ -2388,37 +2332,36 @@ func divideFV(x F, y V) V {
 		for i := range r {
 			r[i] = float64(divideF(F(x), B2F(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AF, len(y))
 		for i := range r {
 			r[i] = float64(divideF(F(x), F(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AF, len(y))
 		for i := range r {
 			r[i] = float64(divideF(F(x), F(I(y[i]))))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := divideFV(F(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x%%y", "y", y)
 	}
 }
 
 func divideIV(x I, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return F(divideF(F(x), y))
 	case I:
@@ -2428,49 +2371,48 @@ func divideIV(x I, y V) V {
 		for i := range r {
 			r[i] = float64(divideF(F(I(x)), B2F(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AF, len(y))
 		for i := range r {
 			r[i] = float64(divideF(F(I(x)), F(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AF, len(y))
 		for i := range r {
 			r[i] = float64(divideF(F(I(x)), F(I(y[i]))))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := divideIV(I(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x%%y", "y", y)
 	}
 }
 
 func divideABV(x AB, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(divideF(B2F(x[i]), F(y)))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(divideF(B2F(x[i]), F(I(y))))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x%%y : length mismatch: %d vs %d", len(x), len(y))
@@ -2479,7 +2421,7 @@ func divideABV(x AB, y V) V {
 		for i := range r {
 			r[i] = float64(divideF(B2F(x[i]), B2F(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x%%y : length mismatch: %d vs %d", len(x), len(y))
@@ -2488,7 +2430,7 @@ func divideABV(x AB, y V) V {
 		for i := range r {
 			r[i] = float64(divideF(B2F(x[i]), F(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x%%y : length mismatch: %d vs %d", len(x), len(y))
@@ -2497,7 +2439,7 @@ func divideABV(x AB, y V) V {
 		for i := range r {
 			r[i] = float64(divideF(B2F(x[i]), F(I(y[i]))))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x%%y : length mismatch: %d vs %d", len(x), len(y))
@@ -2505,32 +2447,31 @@ func divideABV(x AB, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := divideIV(B2I(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x%%y", "y", y)
 	}
 }
 
 func divideAFV(x AF, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(divideF(F(x[i]), F(y)))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(divideF(F(x[i]), F(I(y))))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x%%y : length mismatch: %d vs %d", len(x), len(y))
@@ -2539,7 +2480,7 @@ func divideAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = float64(divideF(F(x[i]), B2F(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x%%y : length mismatch: %d vs %d", len(x), len(y))
@@ -2548,7 +2489,7 @@ func divideAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = float64(divideF(F(x[i]), F(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x%%y : length mismatch: %d vs %d", len(x), len(y))
@@ -2557,7 +2498,7 @@ func divideAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = float64(divideF(F(x[i]), F(I(y[i]))))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x%%y : length mismatch: %d vs %d", len(x), len(y))
@@ -2565,32 +2506,31 @@ func divideAFV(x AF, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := divideFV(F(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x%%y", "y", y)
 	}
 }
 
 func divideAIV(x AI, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(divideF(F(I(x[i])), F(y)))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(divideF(F(I(x[i])), F(I(y))))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x%%y : length mismatch: %d vs %d", len(x), len(y))
@@ -2599,7 +2539,7 @@ func divideAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = float64(divideF(F(I(x[i])), B2F(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x%%y : length mismatch: %d vs %d", len(x), len(y))
@@ -2608,7 +2548,7 @@ func divideAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = float64(divideF(F(I(x[i])), F(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x%%y : length mismatch: %d vs %d", len(x), len(y))
@@ -2617,7 +2557,7 @@ func divideAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = float64(divideF(F(I(x[i])), F(I(y[i]))))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x%%y : length mismatch: %d vs %d", len(x), len(y))
@@ -2625,13 +2565,12 @@ func divideAIV(x AI, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := divideIV(I(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x%%y", "y", y)
 	}
@@ -2639,7 +2578,7 @@ func divideAIV(x AI, y V) V {
 
 // minimum returns x&y.
 func minimum(x, y V) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case F:
 		return minimumFV(x, y)
 	case I:
@@ -2655,7 +2594,7 @@ func minimum(x, y V) V {
 	case AS:
 		return minimumASV(x, y)
 	case AV:
-		switch y := y.(type) {
+		switch y := y.BV.(type) {
 		case array:
 			if y.Len() != len(x) {
 				return errf("x&y : length mismatch: %d vs %d", len(x), y.Len())
@@ -2663,31 +2602,29 @@ func minimum(x, y V) V {
 			r := make(AV, len(x))
 			for i := range r {
 				ri := minimum(x[i], y.at(i))
-				e, ok := ri.(errV)
-				if ok {
-					return e
+				if isErr(ri) {
+					return ri
 				}
 				r[i] = ri
 			}
-			return r
+			return newBV(r)
 		}
 		r := make(AV, len(x))
 		for i := range r {
 			ri := minimum(x[i], y)
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x&y", "x", x)
 	}
 }
 
 func minimumFV(x F, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return F(F(math.Min(float64(x), float64(y))))
 	case I:
@@ -2697,37 +2634,36 @@ func minimumFV(x F, y V) V {
 		for i := range r {
 			r[i] = float64(F(math.Min(float64(F(x)), float64(B2F(y[i])))))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AF, len(y))
 		for i := range r {
 			r[i] = float64(F(math.Min(float64(F(x)), float64(F(y[i])))))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AF, len(y))
 		for i := range r {
 			r[i] = float64(F(math.Min(float64(F(x)), float64(I(y[i])))))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := minimumFV(F(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x&y", "y", y)
 	}
 }
 
 func minimumIV(x I, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return F(F(math.Min(float64(x), float64(y))))
 	case I:
@@ -2737,37 +2673,36 @@ func minimumIV(x I, y V) V {
 		for i := range r {
 			r[i] = int(minI(I(x), B2I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AF, len(y))
 		for i := range r {
 			r[i] = float64(F(math.Min(float64(I(x)), float64(F(y[i])))))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AI, len(y))
 		for i := range r {
 			r[i] = int(minI(I(x), I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := minimumIV(I(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x&y", "y", y)
 	}
 }
 
 func minimumSV(x S, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case S:
 		return S(minS(x, y))
 	case AS:
@@ -2775,37 +2710,36 @@ func minimumSV(x S, y V) V {
 		for i := range r {
 			r[i] = string(minS(S(x), S(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := minimumSV(S(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x&y", "y", y)
 	}
 }
 
 func minimumABV(x AB, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(F(math.Min(float64(B2F(x[i])), float64(F(y)))))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AI, len(x))
 		for i := range r {
 			r[i] = int(minI(B2I(x[i]), I(y)))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x&y : length mismatch: %d vs %d", len(x), len(y))
@@ -2814,7 +2748,7 @@ func minimumABV(x AB, y V) V {
 		for i := range r {
 			r[i] = bool(x[i] && y[i])
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x&y : length mismatch: %d vs %d", len(x), len(y))
@@ -2823,7 +2757,7 @@ func minimumABV(x AB, y V) V {
 		for i := range r {
 			r[i] = float64(F(math.Min(float64(B2F(x[i])), float64(F(y[i])))))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x&y : length mismatch: %d vs %d", len(x), len(y))
@@ -2832,7 +2766,7 @@ func minimumABV(x AB, y V) V {
 		for i := range r {
 			r[i] = int(minI(B2I(x[i]), I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x&y : length mismatch: %d vs %d", len(x), len(y))
@@ -2840,32 +2774,31 @@ func minimumABV(x AB, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := minimumIV(B2I(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x&y", "y", y)
 	}
 }
 
 func minimumAFV(x AF, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(F(math.Min(float64(F(x[i])), float64(F(y)))))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(F(math.Min(float64(F(x[i])), float64(I(y)))))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x&y : length mismatch: %d vs %d", len(x), len(y))
@@ -2874,7 +2807,7 @@ func minimumAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = float64(F(math.Min(float64(F(x[i])), float64(B2F(y[i])))))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x&y : length mismatch: %d vs %d", len(x), len(y))
@@ -2883,7 +2816,7 @@ func minimumAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = float64(F(math.Min(float64(F(x[i])), float64(F(y[i])))))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x&y : length mismatch: %d vs %d", len(x), len(y))
@@ -2892,7 +2825,7 @@ func minimumAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = float64(F(math.Min(float64(F(x[i])), float64(I(y[i])))))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x&y : length mismatch: %d vs %d", len(x), len(y))
@@ -2900,32 +2833,31 @@ func minimumAFV(x AF, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := minimumFV(F(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x&y", "y", y)
 	}
 }
 
 func minimumAIV(x AI, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(F(math.Min(float64(I(x[i])), float64(F(y)))))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AI, len(x))
 		for i := range r {
 			r[i] = int(minI(I(x[i]), I(y)))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x&y : length mismatch: %d vs %d", len(x), len(y))
@@ -2934,7 +2866,7 @@ func minimumAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = int(minI(I(x[i]), B2I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x&y : length mismatch: %d vs %d", len(x), len(y))
@@ -2943,7 +2875,7 @@ func minimumAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = float64(F(math.Min(float64(I(x[i])), float64(F(y[i])))))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x&y : length mismatch: %d vs %d", len(x), len(y))
@@ -2952,7 +2884,7 @@ func minimumAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = int(minI(I(x[i]), I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x&y : length mismatch: %d vs %d", len(x), len(y))
@@ -2960,26 +2892,25 @@ func minimumAIV(x AI, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := minimumIV(I(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x&y", "y", y)
 	}
 }
 
 func minimumASV(x AS, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case S:
 		r := make(AS, len(x))
 		for i := range r {
 			r[i] = string(minS(S(x[i]), S(y)))
 		}
-		return r
+		return newBV(r)
 	case AS:
 		if len(x) != len(y) {
 			return errf("x&y : length mismatch: %d vs %d", len(x), len(y))
@@ -2988,7 +2919,7 @@ func minimumASV(x AS, y V) V {
 		for i := range r {
 			r[i] = string(minS(S(x[i]), S(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x&y : length mismatch: %d vs %d", len(x), len(y))
@@ -2996,13 +2927,12 @@ func minimumASV(x AS, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := minimumSV(S(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x&y", "y", y)
 	}
@@ -3010,7 +2940,7 @@ func minimumASV(x AS, y V) V {
 
 // maximum returns x|y.
 func maximum(x, y V) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case F:
 		return maximumFV(x, y)
 	case I:
@@ -3026,7 +2956,7 @@ func maximum(x, y V) V {
 	case AS:
 		return maximumASV(x, y)
 	case AV:
-		switch y := y.(type) {
+		switch y := y.BV.(type) {
 		case array:
 			if y.Len() != len(x) {
 				return errf("x|y : length mismatch: %d vs %d", len(x), y.Len())
@@ -3034,31 +2964,29 @@ func maximum(x, y V) V {
 			r := make(AV, len(x))
 			for i := range r {
 				ri := maximum(x[i], y.at(i))
-				e, ok := ri.(errV)
-				if ok {
-					return e
+				if isErr(ri) {
+					return ri
 				}
 				r[i] = ri
 			}
-			return r
+			return newBV(r)
 		}
 		r := make(AV, len(x))
 		for i := range r {
 			ri := maximum(x[i], y)
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x|y", "x", x)
 	}
 }
 
 func maximumFV(x F, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return F(F(math.Max(float64(x), float64(y))))
 	case I:
@@ -3068,37 +2996,36 @@ func maximumFV(x F, y V) V {
 		for i := range r {
 			r[i] = float64(F(math.Max(float64(F(x)), float64(B2F(y[i])))))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AF, len(y))
 		for i := range r {
 			r[i] = float64(F(math.Max(float64(F(x)), float64(F(y[i])))))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AF, len(y))
 		for i := range r {
 			r[i] = float64(F(math.Max(float64(F(x)), float64(I(y[i])))))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := maximumFV(F(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x|y", "y", y)
 	}
 }
 
 func maximumIV(x I, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return F(F(math.Max(float64(x), float64(y))))
 	case I:
@@ -3108,37 +3035,36 @@ func maximumIV(x I, y V) V {
 		for i := range r {
 			r[i] = int(maxI(I(x), B2I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AF, len(y))
 		for i := range r {
 			r[i] = float64(F(math.Max(float64(I(x)), float64(F(y[i])))))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AI, len(y))
 		for i := range r {
 			r[i] = int(maxI(I(x), I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := maximumIV(I(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x|y", "y", y)
 	}
 }
 
 func maximumSV(x S, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case S:
 		return S(maxS(x, y))
 	case AS:
@@ -3146,37 +3072,36 @@ func maximumSV(x S, y V) V {
 		for i := range r {
 			r[i] = string(maxS(S(x), S(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := maximumSV(S(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x|y", "y", y)
 	}
 }
 
 func maximumABV(x AB, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(F(math.Max(float64(B2F(x[i])), float64(F(y)))))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AI, len(x))
 		for i := range r {
 			r[i] = int(maxI(B2I(x[i]), I(y)))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x|y : length mismatch: %d vs %d", len(x), len(y))
@@ -3185,7 +3110,7 @@ func maximumABV(x AB, y V) V {
 		for i := range r {
 			r[i] = bool(x[i] || y[i])
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x|y : length mismatch: %d vs %d", len(x), len(y))
@@ -3194,7 +3119,7 @@ func maximumABV(x AB, y V) V {
 		for i := range r {
 			r[i] = float64(F(math.Max(float64(B2F(x[i])), float64(F(y[i])))))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x|y : length mismatch: %d vs %d", len(x), len(y))
@@ -3203,7 +3128,7 @@ func maximumABV(x AB, y V) V {
 		for i := range r {
 			r[i] = int(maxI(B2I(x[i]), I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x|y : length mismatch: %d vs %d", len(x), len(y))
@@ -3211,32 +3136,31 @@ func maximumABV(x AB, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := maximumIV(B2I(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x|y", "y", y)
 	}
 }
 
 func maximumAFV(x AF, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(F(math.Max(float64(F(x[i])), float64(F(y)))))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(F(math.Max(float64(F(x[i])), float64(I(y)))))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x|y : length mismatch: %d vs %d", len(x), len(y))
@@ -3245,7 +3169,7 @@ func maximumAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = float64(F(math.Max(float64(F(x[i])), float64(B2F(y[i])))))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x|y : length mismatch: %d vs %d", len(x), len(y))
@@ -3254,7 +3178,7 @@ func maximumAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = float64(F(math.Max(float64(F(x[i])), float64(F(y[i])))))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x|y : length mismatch: %d vs %d", len(x), len(y))
@@ -3263,7 +3187,7 @@ func maximumAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = float64(F(math.Max(float64(F(x[i])), float64(I(y[i])))))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x|y : length mismatch: %d vs %d", len(x), len(y))
@@ -3271,32 +3195,31 @@ func maximumAFV(x AF, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := maximumFV(F(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x|y", "y", y)
 	}
 }
 
 func maximumAIV(x AI, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AF, len(x))
 		for i := range r {
 			r[i] = float64(F(math.Max(float64(I(x[i])), float64(F(y)))))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AI, len(x))
 		for i := range r {
 			r[i] = int(maxI(I(x[i]), I(y)))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x|y : length mismatch: %d vs %d", len(x), len(y))
@@ -3305,7 +3228,7 @@ func maximumAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = int(maxI(I(x[i]), B2I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x|y : length mismatch: %d vs %d", len(x), len(y))
@@ -3314,7 +3237,7 @@ func maximumAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = float64(F(math.Max(float64(I(x[i])), float64(F(y[i])))))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x|y : length mismatch: %d vs %d", len(x), len(y))
@@ -3323,7 +3246,7 @@ func maximumAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = int(maxI(I(x[i]), I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x|y : length mismatch: %d vs %d", len(x), len(y))
@@ -3331,26 +3254,25 @@ func maximumAIV(x AI, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := maximumIV(I(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x|y", "y", y)
 	}
 }
 
 func maximumASV(x AS, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case S:
 		r := make(AS, len(x))
 		for i := range r {
 			r[i] = string(maxS(S(x[i]), S(y)))
 		}
-		return r
+		return newBV(r)
 	case AS:
 		if len(x) != len(y) {
 			return errf("x|y : length mismatch: %d vs %d", len(x), len(y))
@@ -3359,7 +3281,7 @@ func maximumASV(x AS, y V) V {
 		for i := range r {
 			r[i] = string(maxS(S(x[i]), S(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x|y : length mismatch: %d vs %d", len(x), len(y))
@@ -3367,13 +3289,12 @@ func maximumASV(x AS, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := maximumSV(S(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x|y", "y", y)
 	}
@@ -3381,7 +3302,7 @@ func maximumASV(x AS, y V) V {
 
 // modulus returns x mod y.
 func modulus(x, y V) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 	case F:
 		return modulusFV(x, y)
 	case I:
@@ -3393,7 +3314,7 @@ func modulus(x, y V) V {
 	case AI:
 		return modulusAIV(x, y)
 	case AV:
-		switch y := y.(type) {
+		switch y := y.BV.(type) {
 		case array:
 			if y.Len() != len(x) {
 				return errf("x mod y : length mismatch: %d vs %d", len(x), y.Len())
@@ -3401,31 +3322,29 @@ func modulus(x, y V) V {
 			r := make(AV, len(x))
 			for i := range r {
 				ri := modulus(x[i], y.at(i))
-				e, ok := ri.(errV)
-				if ok {
-					return e
+				if isErr(ri) {
+					return ri
 				}
 				r[i] = ri
 			}
-			return r
+			return newBV(r)
 		}
 		r := make(AV, len(x))
 		for i := range r {
 			ri := modulus(x[i], y)
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x mod y", "x", x)
 	}
 }
 
 func modulusFV(x F, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return I(modF(x, y))
 	case I:
@@ -3435,37 +3354,36 @@ func modulusFV(x F, y V) V {
 		for i := range r {
 			r[i] = int(modF(F(x), F(B2I(y[i]))))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AI, len(y))
 		for i := range r {
 			r[i] = int(modF(F(x), F(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AI, len(y))
 		for i := range r {
 			r[i] = int(modF(F(x), F(I(y[i]))))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := modulusFV(F(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x mod y", "y", y)
 	}
 }
 
 func modulusIV(x I, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		return I(modF(F(x), y))
 	case I:
@@ -3475,49 +3393,48 @@ func modulusIV(x I, y V) V {
 		for i := range r {
 			r[i] = int(modI(I(x), B2I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		r := make(AI, len(y))
 		for i := range r {
 			r[i] = int(modF(F(I(x)), F(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		r := make(AI, len(y))
 		for i := range r {
 			r[i] = int(modI(I(x), I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		r := make(AV, len(y))
 		for i := range r {
 			ri := modulusIV(I(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x mod y", "y", y)
 	}
 }
 
 func modulusABV(x AB, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AI, len(x))
 		for i := range r {
 			r[i] = int(modF(F(B2I(x[i])), F(y)))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AI, len(x))
 		for i := range r {
 			r[i] = int(modI(B2I(x[i]), I(y)))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x mod y : length mismatch: %d vs %d", len(x), len(y))
@@ -3526,7 +3443,7 @@ func modulusABV(x AB, y V) V {
 		for i := range r {
 			r[i] = int(modI(B2I(x[i]), B2I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x mod y : length mismatch: %d vs %d", len(x), len(y))
@@ -3535,7 +3452,7 @@ func modulusABV(x AB, y V) V {
 		for i := range r {
 			r[i] = int(modF(F(B2I(x[i])), F(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x mod y : length mismatch: %d vs %d", len(x), len(y))
@@ -3544,7 +3461,7 @@ func modulusABV(x AB, y V) V {
 		for i := range r {
 			r[i] = int(modI(B2I(x[i]), I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x mod y : length mismatch: %d vs %d", len(x), len(y))
@@ -3552,32 +3469,31 @@ func modulusABV(x AB, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := modulusIV(B2I(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x mod y", "y", y)
 	}
 }
 
 func modulusAFV(x AF, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AI, len(x))
 		for i := range r {
 			r[i] = int(modF(F(x[i]), F(y)))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AI, len(x))
 		for i := range r {
 			r[i] = int(modF(F(x[i]), F(I(y))))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x mod y : length mismatch: %d vs %d", len(x), len(y))
@@ -3586,7 +3502,7 @@ func modulusAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = int(modF(F(x[i]), F(B2I(y[i]))))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x mod y : length mismatch: %d vs %d", len(x), len(y))
@@ -3595,7 +3511,7 @@ func modulusAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = int(modF(F(x[i]), F(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x mod y : length mismatch: %d vs %d", len(x), len(y))
@@ -3604,7 +3520,7 @@ func modulusAFV(x AF, y V) V {
 		for i := range r {
 			r[i] = int(modF(F(x[i]), F(I(y[i]))))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x mod y : length mismatch: %d vs %d", len(x), len(y))
@@ -3612,32 +3528,31 @@ func modulusAFV(x AF, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := modulusFV(F(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x mod y", "y", y)
 	}
 }
 
 func modulusAIV(x AI, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 	case F:
 		r := make(AI, len(x))
 		for i := range r {
 			r[i] = int(modF(F(I(x[i])), F(y)))
 		}
-		return r
+		return newBV(r)
 	case I:
 		r := make(AI, len(x))
 		for i := range r {
 			r[i] = int(modI(I(x[i]), I(y)))
 		}
-		return r
+		return newBV(r)
 	case AB:
 		if len(x) != len(y) {
 			return errf("x mod y : length mismatch: %d vs %d", len(x), len(y))
@@ -3646,7 +3561,7 @@ func modulusAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = int(modI(I(x[i]), B2I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AF:
 		if len(x) != len(y) {
 			return errf("x mod y : length mismatch: %d vs %d", len(x), len(y))
@@ -3655,7 +3570,7 @@ func modulusAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = int(modF(F(I(x[i])), F(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AI:
 		if len(x) != len(y) {
 			return errf("x mod y : length mismatch: %d vs %d", len(x), len(y))
@@ -3664,7 +3579,7 @@ func modulusAIV(x AI, y V) V {
 		for i := range r {
 			r[i] = int(modI(I(x[i]), I(y[i])))
 		}
-		return r
+		return newBV(r)
 	case AV:
 		if len(x) != len(y) {
 			return errf("x mod y : length mismatch: %d vs %d", len(x), len(y))
@@ -3672,13 +3587,12 @@ func modulusAIV(x AI, y V) V {
 		r := make(AV, len(y))
 		for i := range r {
 			ri := modulusIV(I(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+			if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x mod y", "y", y)
 	}

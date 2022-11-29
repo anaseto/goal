@@ -247,7 +247,7 @@ sub genOp {
     print $out <<EOS;
 // ${name} returns x${op}y.
 func ${name}(x, y V) V {
-	switch x := x.(type) {
+	switch x := x.BV.(type) {
 EOS
     for my $t (sort keys %types) {
         next if $t eq "B";
@@ -264,7 +264,7 @@ EOS
     }
     print $out <<EOS;
 	case AV:
-                switch y := y.(type) {
+                switch y := y.BV.(type) {
                 case array:
                         if y.Len() != len(x) {
                                 return errf("x${errOp}y : length mismatch: %d vs %d", len(x), y.Len())
@@ -272,24 +272,22 @@ EOS
                         r := make(AV, len(x))
                         for i := range r {
                                 ri := ${name}(x[i], y.at(i))
-                                e, ok := ri.(errV)
-                                if ok {
-                                        return e
+                                if isErr(ri) {
+                                        return ri
                                 }
                                 r[i] = ri
                         }
-                        return r
+                        return newBV(r)
                 }
                 r := make(AV, len(x))
                 for i := range r {
                         ri := ${name}(x[i], y)
-                        e, ok := ri.(errV)
-                        if ok {
-                                return e
+                        if isErr(ri) {
+                                return ri
                         }
                         r[i] = ri
                 }
-                return r
+                return newBV(r)
 	default:
 		return errType("x${errOp}y", "x", x)
 	}
@@ -312,7 +310,7 @@ sub genLeftExpanded {
     open my $out, '>', \$s;
     print $out <<EOS;
 func ${name}${t}V(x $t, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 EOS
     for my $tt (sort keys %types) {
         next if $tt eq "B";
@@ -335,7 +333,7 @@ EOS
 		for i := range r {
 			r[i] = $rtype($iexpr)
 		}
-		return r
+		return newBV(r)
 EOS
     }
     print $out <<EOS if $t !~ /^A/;
@@ -343,13 +341,12 @@ EOS
 		r := make(AV, len(y))
 		for i := range r {
 			ri := ${name}${t}V($t(x), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+                        if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x${errOp}y", "y", y)
 	}
@@ -365,7 +362,7 @@ sub genLeftArrayExpanded {
     open my $out, '>', \$s;
     print $out <<EOS;
 func ${name}A${t}V(x A$t, y V) V {
-	switch y := y.(type) {
+	switch y := y.BV.(type) {
 EOS
     for my $tt (sort keys %types) {
         next if $tt eq "B";
@@ -379,7 +376,7 @@ EOS
 		for i := range r {
 			r[i] = $rtype($iexpr)
 		}
-		return r
+		return newBV(r)
 EOS
     }
     for my $tt (sort keys %types) {
@@ -396,7 +393,7 @@ EOS
 		for i := range r {
 			r[i] = $rtype($iexpr)
 		}
-		return r
+		return newBV(r)
 EOS
     }
     my $tt = $t;
@@ -412,13 +409,12 @@ EOS
 		r := make(AV, len(y))
 		for i := range r {
 			ri := ${name}${t}V($tt(x[i]), y[i])
-			e, ok := ri.(errV)
-			if ok {
-				return e
+                        if isErr(ri) {
+				return ri
 			}
 			r[i] = ri
 		}
-		return r
+		return newBV(r)
 	default:
 		return errType("x${errOp}y", "y", y)
 	}

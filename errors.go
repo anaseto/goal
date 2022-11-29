@@ -91,36 +91,36 @@ func getPosLine(s string, pos int) (string, int, int) {
 	return s[start:], count, pos - start
 }
 
-func errNYI(s string) errV {
-	return errV("NYI: " + s)
+func errNYI(s string) V {
+	return errs("NYI: " + s)
 }
 
-func errs(s string) errV {
-	return errV(s)
+func errs(s string) V {
+	return newBV(errV(s))
 }
 
-func errf(format string, a ...interface{}) errV {
-	return errV(fmt.Sprintf(format, a...))
+func errf(format string, a ...interface{}) V {
+	return errs(fmt.Sprintf(format, a...))
 }
 
 // Errorf returns a formatted error value.
 func Errorf(format string, a ...interface{}) V {
-	return errV(fmt.Sprintf(format, a...))
+	return errs(fmt.Sprintf(format, a...))
 }
 
 // NewError returns an error value.
 func NewError(s string) V {
-	return errV(s)
+	return errs(s)
 }
 
-func errType(op, sym string, x V) errV {
+func errType(op, sym string, x V) V {
 	return errf("%s : bad type for %s (%s)", op, sym, x.Type())
 }
 
-func errDomain(op, s string) errV {
-	return errV(op + " : " + s)
+func errDomain(op, s string) V {
+	return errs(op + " : " + s)
 }
 
-func errRank(op string) errV {
-	return errV(op + " got too many arguments")
+func errRank(op string) V {
+	return errs(op + " got too many arguments")
 }

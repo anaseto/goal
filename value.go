@@ -9,8 +9,23 @@ import (
 	"strings"
 )
 
-// V represents any kind of value.
-type V interface {
+type V struct {
+	Type     ValueType // unused for now (boxed or specific)
+	RefCount int16
+	Flags    int8  // unused for now (for sorted)
+	UV       int32 // unused for now (unboxed small integer)
+	BV       Value // boxed value
+}
+
+func newBV(bv Value) V {
+	return V{BV: bv}
+}
+
+// ValueType represents the kinds of values.
+type ValueType int8
+
+// Value represents any kind of boxed value.
+type Value interface {
 	// Matches returns true if the value matches another (in the sense of
 	// the ~ operator).
 	Matches(x V) bool
@@ -31,6 +46,11 @@ type S string
 
 // errV represents errors
 type errV string
+
+func isErr(x V) bool {
+	_, ok := x.BV.(errV)
+	return ok
+}
 
 func (f F) Matches(y V) bool {
 	switch y := y.(type) {
@@ -253,7 +273,7 @@ func (l Lambda) Sprint(ctx *Context) string {
 // array interface is satisfied by the different kind of supported arrays.
 // Typical implementation is given in comments.
 type array interface {
-	V
+	Value
 	Len() int
 	at(i int) V           // x[i]
 	slice(i, j int) array // x[i:j]
@@ -430,7 +450,7 @@ func (x AS) Sprint(ctx *Context) string {
 // the arity of the function that is passed to it.
 // Note that arrays do also have a “rank” but do not implement this interface.
 type Function interface {
-	V
+	Value
 	Rank(ctx *Context) int
 }
 
