@@ -8,24 +8,24 @@ import (
 // negate returns -x.
 func negate(x V) V {
 	switch x := x.BV.(type) {
-	case F:
-		return -x
 	case I:
-		return -x
+		return newBV(-x)
+	case F:
+		return newBV(-x)
 	case AB:
 		r := make(AI, len(x))
 		for i := range r {
 			r[i] = int(-B2I(x[i]))
 		}
 		return newBV(r)
-	case AF:
-		r := make(AF, len(x))
+	case AI:
+		r := make(AI, len(x))
 		for i := range r {
 			r[i] = -x[i]
 		}
 		return newBV(r)
-	case AI:
-		r := make(AI, len(x))
+	case AF:
+		r := make(AF, len(x))
 		for i := range r {
 			r[i] = -x[i]
 		}
@@ -44,198 +44,198 @@ func negate(x V) V {
 func signF(x F) I {
 	switch {
 	case x > 0:
-		return newBV(I(1))
+		return I(1)
 	case x < 0:
-		return newBV(I(-1))
+		return I(-1)
 	default:
-		return newBV(I(0))
+		return I(0)
 	}
 }
 
 func signI(x I) I {
 	switch {
 	case x > 0:
-		return newBV(I(1))
+		return I(1)
 	case x < 0:
-		return newBV(I(-1))
+		return I(-1)
 	default:
-		return newBV(I(0))
+		return I(0)
 	}
 }
 
 // sign returns sign x.
 func sign(x V) V {
-	switch x := x.BV.(type) {
-	case F:
-		return signF(x)
+	switch xv := x.BV.(type) {
 	case I:
-		return signI(x)
+		return newBV(signI(xv))
+	case F:
+		return newBV(signF(xv))
 	case AB:
-		return newBV(x)
-	case AF:
-		r := make(AI, len(x))
+		return x
+	case AI:
+		r := make(AI, xv.Len())
 		for i := range r {
-			r[i] = int(signF(F(x[i])))
+			r[i] = int(signI(I(xv[i])))
 		}
 		return newBV(r)
-	case AI:
-		r := make(AI, len(x))
+	case AF:
+		r := make(AI, xv.Len())
 		for i := range r {
-			r[i] = int(signI(I(x[i])))
+			r[i] = int(signF(F(xv[i])))
 		}
 		return newBV(r)
 	case AV:
-		r := make(AV, len(x))
+		r := make(AV, xv.Len())
 		for i := range r {
-			r[i] = sign(x[i])
+			r[i] = sign(xv[i])
 		}
 		return newBV(r)
 	default:
-		return errType("sign x", "x", x)
+		return errType("sign x", "x", xv)
 	}
 }
 
 // floor returns _x.
 func floor(x V) V {
-	switch x := x.BV.(type) {
-	case F:
-		return F(math.Floor(float64(x)))
+	switch xv := x.BV.(type) {
 	case I:
-		return newBV(x)
+		return x
+	case F:
+		return newBV(F(math.Floor(float64(xv))))
 	case S:
-		return S(strings.ToLower(string(x)))
+		return newBV(S(strings.ToLower(string(xv))))
 	case AB:
-		return newBV(x)
+		return x
+	case AI:
+		return x
 	case AF:
-		r := make(AI, len(x))
+		r := make(AI, xv.Len())
 		for i := range r {
 			// NOTE: we assume conversion is possible, leaving
 			// handling NaN, INF or big floats to the program.
-			r[i] = int(math.Floor(x[i]))
+			r[i] = int(math.Floor(xv[i]))
 		}
 		return newBV(r)
-	case AI:
-		return newBV(x)
 	case AS:
-		r := make(AS, len(x))
+		r := make(AS, xv.Len())
 		for i := range r {
-			r[i] = strings.ToLower(x[i])
+			r[i] = strings.ToLower(xv[i])
 		}
 		return newBV(r)
 	case AV:
-		r := make(AV, len(x))
+		r := make(AV, xv.Len())
 		for i := range r {
-			r[i] = floor(x[i])
+			r[i] = floor(xv[i])
 		}
 		return newBV(r)
 	default:
-		return errType("_N", "N", x)
+		return errType("_N", "N", xv)
 	}
 }
 
-// ceil returns ⌈x.
+// ceil returns ⌈x. XXX unused for now
 func ceil(x V) V {
-	switch x := x.BV.(type) {
-	case F:
-		return F(math.Ceil(float64(x)))
+	switch xv := x.BV.(type) {
 	case I:
-		return newBV(x)
+		return x
+	case F:
+		return newBV(F(math.Ceil(float64(xv))))
 	case S:
-		return S(strings.ToUpper(string(x)))
+		return newBV(S(strings.ToUpper(string(xv))))
 	case AB:
-		return newBV(x)
+		return x
+	case AI:
+		return x
 	case AF:
-		r := make(AI, len(x))
+		r := make(AI, xv.Len())
 		for i := range r {
-			r[i] = int(math.Ceil(x[i]))
+			r[i] = int(math.Ceil(xv[i]))
 		}
 		return newBV(r)
-	case AI:
-		return newBV(x)
 	case AS:
-		r := make(AS, len(x))
+		r := make(AS, xv.Len())
 		for i := range r {
-			r[i] = strings.ToUpper(x[i])
+			r[i] = strings.ToUpper(xv[i])
 		}
 		return newBV(r)
 	case AV:
-		r := make(AV, len(x))
+		r := make(AV, xv.Len())
 		for i := range r {
-			r[i] = ceil(x[i])
+			r[i] = ceil(xv[i])
 		}
 		return newBV(r)
 	default:
-		return errType("ceil x", "x", x)
+		return errType("ceil x", "x", xv)
 	}
 }
 
 // not returns ~x.
 func not(x V) V {
-	switch x := x.BV.(type) {
-	case F:
-		return B2I(x == 0)
+	switch xv := x.BV.(type) {
 	case I:
-		return B2I(x == 0)
+		return newBV(B2I(xv == 0))
+	case F:
+		return newBV(B2I(xv == 0))
 	case S:
-		return B2I(x == "")
+		return newBV(B2I(xv == ""))
 	case AB:
-		r := make(AB, len(x))
+		r := make(AB, xv.Len())
 		for i := range r {
-			r[i] = !x[i]
-		}
-		return newBV(r)
-	case AF:
-		r := make(AB, len(x))
-		for i := range r {
-			r[i] = x[i] == 0
+			r[i] = !xv[i]
 		}
 		return newBV(r)
 	case AI:
-		r := make(AB, len(x))
+		r := make(AB, xv.Len())
 		for i := range r {
-			r[i] = x[i] == 0
+			r[i] = xv[i] == 0
+		}
+		return newBV(r)
+	case AF:
+		r := make(AB, xv.Len())
+		for i := range r {
+			r[i] = xv[i] == 0
 		}
 		return newBV(r)
 	case AV:
-		r := make(AV, len(x))
+		r := make(AV, xv.Len())
 		for i := range r {
-			r[i] = not(x[i])
+			r[i] = not(xv[i])
 		}
 		return newBV(r)
 	default:
-		return B2I(!isTrue(x))
+		return newBV(B2I(!isTrue(x)))
 	}
 }
 
 // abs returns abs[x].
 func abs(x V) V {
-	switch x := x.BV.(type) {
-	case F:
-		return F(math.Abs(float64(x)))
+	switch xv := x.BV.(type) {
 	case I:
-		return absI(x)
+		return newBV(absI(xv))
+	case F:
+		return newBV(F(math.Abs(float64(xv))))
 	case AB:
-		return newBV(x)
-	case AF:
-		r := make(AF, len(x))
+		return x
+	case AI:
+		r := make(AI, xv.Len())
 		for i := range r {
-			r[i] = math.Abs(x[i])
+			r[i] = int(absI(I(xv[i])))
 		}
 		return newBV(r)
-	case AI:
-		r := make(AI, len(x))
+	case AF:
+		r := make(AF, xv.Len())
 		for i := range r {
-			r[i] = int(absI(I(x[i])))
+			r[i] = math.Abs(xv[i])
 		}
 		return newBV(r)
 	case AV:
-		r := make(AV, len(x))
+		r := make(AV, xv.Len())
 		for i := range r {
-			r[i] = abs(x[i])
+			r[i] = abs(xv[i])
 		}
 		return newBV(r)
 	default:
-		return errType("abs x", "x", x)
+		return errType("abs x", "x", xv)
 	}
 }
 
@@ -243,5 +243,5 @@ func absI(x I) I {
 	if x < 0 {
 		return -x
 	}
-	return newBV(x)
+	return x
 }
