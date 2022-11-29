@@ -60,6 +60,11 @@ func isErr(x V) bool {
 	return ok
 }
 
+func isFunction(x V) bool {
+	_, ok := x.BV.(Function)
+	return ok
+}
+
 func (f F) Matches(y Value) bool {
 	switch y := y.(type) {
 	case I:
@@ -216,20 +221,20 @@ type DerivedVerb struct {
 // verbs do not have a fixed arity, it is possible to produce a projection of
 // arbitrary arity.
 type Projection struct {
-	Fun  Function
+	Fun  V
 	Args AV
 }
 
 // ProjectionFirst represents a monadic projection fixing the first argument of
 // a function with rank greater than 2.
 type ProjectionFirst struct {
-	Fun Function // function with rank >= 2
-	Arg V        // first argument x
+	Fun V // function with rank >= 2
+	Arg V // first argument x
 }
 
 // ProjectionMonad represents a monadic projection of a function of any rank.
 type ProjectionMonad struct {
-	Fun Function
+	Fun V
 }
 
 // Lambda represents an user defined function by ID.
@@ -287,7 +292,7 @@ type array interface {
 	slice(i, j int) array // x[i:j]
 	atIndices(y AI) V     // x[y] (goal code)
 	set(i int, y V)
-	setIndices(y AI, z V) error
+	//setIndices(y AI, z V) error
 }
 
 func (x AV) Matches(y Value) bool { return matchArray(x, y) }

@@ -154,14 +154,14 @@ func cloneShallow(x V) V {
 
 // isIndices returns true if we have indices in canonical form, that is,
 // using types I, AI and AV of thoses.
-func isIndices(xv V) bool {
-	switch x := xv.(type) {
+func isIndices(x V) bool {
+	switch xv := x.BV.(type) {
 	case I:
 		return true
 	case AI:
 		return true
 	case AV:
-		for _, xi := range x {
+		for _, xi := range xv {
 			if !isIndices(xi) {
 				return false
 			}
@@ -174,13 +174,13 @@ func isIndices(xv V) bool {
 
 func toIndices(x V) V {
 	if isIndices(x) {
-		return newBV(x)
+		return x
 	}
 	return toIndicesRec(x)
 }
 
 func toIndicesRec(xv V) V {
-	assertCanonical(xv)
+	//assertCanonical(xv)
 	switch x := xv.(type) {
 	case F:
 		if !isI(x) {
@@ -197,11 +197,11 @@ func toIndicesRec(xv V) V {
 		r := make(AV, x.Len())
 		for i, z := range x {
 			r[i] = toIndicesRec(z)
-			if err, ok := r[i].(errV); ok {
-				return err
+			if isErr(r[i]) {
+				return r[i]
 			}
 		}
-		return canonical(r)
+		return newBV(canonical(r))
 	default:
 		return errs("not an indices array")
 	}
