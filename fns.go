@@ -7,14 +7,14 @@ import (
 // enum returns !x.
 func enum(x V) V {
 	x = toIndices(x)
-	if err, ok := x.(errV); ok {
-		return errV("!x : ") + err
+	if isErr(x) {
+		return errf("!x : %v", x)
 	}
-	switch xx := x.BV.(type) {
+	switch xv := x.BV.(type) {
 	case I:
-		return rangeI(xx)
+		return rangeI(xv)
 	case AI:
-		return rangeArray(xx)
+		return rangeArray(xv)
 	default:
 		return errs("!x : x nested array")
 	}
@@ -35,7 +35,7 @@ func rangeArray(x AI) V {
 	cols := 1
 	for _, n := range x {
 		if n == 0 {
-			return AV{}
+			return newBV(AV{})
 		}
 		cols *= n
 	}
@@ -53,7 +53,7 @@ func rangeArray(x AI) V {
 				}
 			}
 		}
-		r[i] = a
+		r[i] = newBV(a)
 	}
 	return newBV(r)
 }
@@ -66,7 +66,7 @@ func where(x V) V {
 		case x < 0:
 			return errf("&x : x negative (%d)", x)
 		case x == 0:
-			return AI{}
+			return newBV(AI{})
 		default:
 			r := make(AI, x)
 			return newBV(r)
@@ -80,7 +80,7 @@ func where(x V) V {
 		case n < 0:
 			return errf("&x : x negative (%d)", n)
 		case n == 0:
-			return AI{}
+			return newBV(AI{})
 		default:
 			r := make(AI, n)
 			return newBV(r)
@@ -135,7 +135,7 @@ func where(x V) V {
 		case tB, tF, tI:
 			n := 0
 			for _, xi := range x {
-				switch xi := xi.(type) {
+				switch xi := xi.BV.(type) {
 				case F:
 					if !isI(xi) {
 						return errf("&x : not an integer (%g)", xi)
@@ -154,7 +154,7 @@ func where(x V) V {
 			r := make(AI, 0, n)
 			for i, xi := range x {
 				var max I
-				switch xi := xi.(type) {
+				switch xi := xi.BV.(type) {
 				case I:
 					max = xi
 				case F:
@@ -206,8 +206,8 @@ func replicate(x, y V) V {
 		return repeatAI(x, y)
 	case AF:
 		ix := toAI(x)
-		if err, ok := ix.(errV); ok {
-			return errf("f#y : x %v", err)
+		if isErr(ix) {
+			return errf("f#y : x %v", ix)
 		}
 		return replicate(ix, y)
 	case AV:
@@ -220,30 +220,30 @@ func replicate(x, y V) V {
 }
 
 func repeat(x V, n int) V {
-	switch x := x.BV.(type) {
+	switch xv := x.BV.(type) {
 	case F:
 		r := make(AF, n)
 		for i := range r {
-			r[i] = float64(x)
+			r[i] = float64(xv)
 		}
 		return newBV(r)
 	case I:
-		if isBI(x) {
+		if isBI(xv) {
 			r := make(AB, n)
 			for i := range r {
-				r[i] = x == 1
+				r[i] = xv == 1
 			}
 			return newBV(r)
 		}
 		r := make(AI, n)
 		for i := range r {
-			r[i] = int(x)
+			r[i] = int(xv)
 		}
 		return newBV(r)
 	case S:
 		r := make(AS, n)
 		for i := range r {
-			r[i] = string(x)
+			r[i] = string(xv)
 		}
 		return newBV(r)
 	default:
@@ -300,7 +300,7 @@ func repeatAB(x AB, y V) V {
 				r = append(r, y.at(i))
 			}
 		}
-		return canonical(r)
+		return newBV(canonical(r))
 	default:
 		return errs("f#y : y not an array")
 	}
@@ -354,7 +354,7 @@ func repeatAI(x AI, y V) V {
 				r = append(r, y[i])
 			}
 		}
-		return canonical(r)
+		return newBV(canonical(r))
 	default:
 		return errs("f#y : y not an array")
 	}
@@ -365,26 +365,26 @@ func weedOut(x, y V) V {
 	switch x := x.BV.(type) {
 	case I:
 		if x != 0 {
-			return AV{}
+			return newBV(AV{})
 		}
-		return newBV(y)
+		return y
 	case F:
 		if x != 0 {
-			return AV{}
+			return newBV(AV{})
 		}
-		return newBV(y)
+		return y
 	case AB:
 		return weedOutAB(x, y)
 	case AI:
 		return weedOutAI(x, y)
 	case AF:
 		ix := toAI(x)
-		if err, ok := ix.(errV); ok {
-			return errf("f#y : x %v", err)
+		if isErr(ix) {
+			return errf("f#y : x %v", ix)
 		}
 		return weedOut(ix, y)
 	case AV:
-		assertCanonical(x)
+		//assertCanonical(x)
 		return errs("f#y : f[y] non-integer")
 	default:
 		return errs("f_y : f[y] non-integer")
@@ -436,7 +436,7 @@ func weedOutAB(x AB, y V) V {
 				r = append(r, y.at(i))
 			}
 		}
-		return canonical(r)
+		return newBV(canonical(r))
 	default:
 		return errs("f_y : y not an array")
 	}
@@ -487,7 +487,7 @@ func weedOutAI(x AI, y V) V {
 				r = append(r, y[i])
 			}
 		}
-		return canonical(r)
+		return newBV(canonical(r))
 	default:
 		return errs("f_y : y not an array")
 	}
@@ -495,7 +495,7 @@ func weedOutAI(x AI, y V) V {
 
 // cast implements x$y.
 func cast(x, y V) V {
-	s, ok := x.(S)
+	s, ok := x.BV.(S)
 	if !ok {
 		return errf("s$y : s not a string (%s)", x.Type())
 	}
@@ -512,36 +512,36 @@ func cast(x, y V) V {
 }
 
 func casti(y V) V {
-	switch yy := y.BV.(type) {
+	switch yv := y.BV.(type) {
 	case I:
-		return newBV(y)
+		return y
 	case F:
-		return newBV(I(yy))
+		return newBV(I(yv))
 	case S:
-		runes := []rune(yy)
+		runes := []rune(yv)
 		r := make(AI, len(runes))
 		for i, rc := range runes {
 			r[i] = int(rc)
 		}
 		return newBV(r)
 	case AB:
-		return newBV(y)
+		return y
 	case AI:
-		return newBV(y)
+		return y
 	case AS:
-		r := make(AV, yy.Len())
-		for i, s := range yy {
-			r[i] = casti(S(s))
+		r := make(AV, yv.Len())
+		for i, s := range yv {
+			r[i] = casti(newBV(S(s)))
 		}
 		return newBV(r)
 	case AF:
-		return toAI(yy)
+		return toAI(yv)
 	case AV:
-		r := make(AV, yy.Len())
+		r := make(AV, yv.Len())
 		for i := range r {
-			r[i] = casti(yy[i])
-			if err, ok := r[i].(errV); ok {
-				return err
+			r[i] = casti(yv[i])
+			if isErr(r[i]) {
+				return r[i]
 			}
 		}
 		return newBV(r)
@@ -551,39 +551,39 @@ func casti(y V) V {
 }
 
 func castn(y V) V {
-	switch yy := y.BV.(type) {
+	switch yv := y.BV.(type) {
 	case I:
-		return newBV(y)
+		return y
 	case F:
-		return newBV(y)
+		return y
 	case S:
-		xi, err := parseNumber(string(yy))
+		xi, err := parseNumber(string(yv))
 		if err != nil {
-			return errf("\"i\"$y : non-numeric y (%s) : %v", yy, err)
+			return errf("\"i\"$y : non-numeric y (%s) : %v", yv, err)
 		}
-		return xi
+		return newBV(xi)
 	case AB:
-		return newBV(y)
+		return y
 	case AI:
-		return newBV(y)
+		return y
 	case AS:
-		r := make(AV, yy.Len())
-		for i, s := range yy {
+		r := make(AV, yv.Len())
+		for i, s := range yv {
 			n, err := parseNumber(s)
 			if err != nil {
 				return errf("\"i\"$y : y contains non-numeric (%s) : %v", s, err)
 			}
-			r[i] = n
+			r[i] = newBV(n)
 		}
-		return canonical(r)
+		return newBV(canonical(r))
 	case AF:
-		return newBV(y)
+		return y
 	case AV:
-		r := make(AV, yy.Len())
+		r := make(AV, yv.Len())
 		for i := range r {
-			r[i] = castn(yy[i])
-			if err, ok := r[i].(errV); ok {
-				return err
+			r[i] = castn(yv[i])
+			if isErr(r[i]) {
+				return r[i]
 			}
 		}
 		return newBV(r)
@@ -593,27 +593,27 @@ func castn(y V) V {
 }
 
 func casts(y V) V {
-	switch yy := y.BV.(type) {
+	switch yv := y.BV.(type) {
 	case I:
-		return S(rune(yy))
+		return newBV(S(rune(yv)))
 	case F:
-		return casts(I(yy))
+		return casts(newBV(I(yv)))
 	case AB:
-		return casts(fromABtoAI(yy))
+		return casts(fromABtoAI(yv))
 	case AI:
 		sb := &strings.Builder{}
-		for _, i := range yy {
+		for _, i := range yv {
 			sb.WriteRune(rune(i))
 		}
-		return S(sb.String())
+		return newBV(S(sb.String()))
 	case AF:
-		return casts(toAI(yy))
+		return casts(toAI(yv))
 	case AV:
-		r := make(AV, yy.Len())
+		r := make(AV, yv.Len())
 		for i := range r {
-			r[i] = casts(yy[i])
-			if err, ok := r[i].(errV); ok {
-				return err
+			r[i] = casts(yv[i])
+			if isErr(r[i]) {
+				return r[i]
 			}
 		}
 		return newBV(r)
@@ -624,7 +624,7 @@ func casts(y V) V {
 
 // eval implements .s.
 func eval(ctx *Context, x V) V {
-	assertCanonical(x)
+	//assertCanonical(x)
 	nctx := ctx.derive()
 	switch x := x.BV.(type) {
 	case S:
@@ -633,7 +633,7 @@ func eval(ctx *Context, x V) V {
 			return errf(".s : %v", err)
 		}
 		ctx.merge(nctx)
-		return newBV(r)
+		return r
 	default:
 		return errType(".x", "x", x)
 	}
