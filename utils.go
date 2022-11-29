@@ -148,7 +148,7 @@ func cloneShallow(x V) V {
 		copy(r, x)
 		return newBV(r)
 	default:
-		return newBV(x)
+		return x
 	}
 }
 
@@ -601,6 +601,14 @@ func canonical(x AV) Value {
 		return x
 	}
 	return normalize(x, t)
+}
+
+// canonical returns the canonical form of a given value.
+func canonicalArray(x array) Value {
+	if xv, ok := x.(AV); ok {
+		return canonical(x)
+	}
+	return x
 }
 
 // toCanonical returns the canonical form of a given value, and false if it was
