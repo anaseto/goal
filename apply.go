@@ -37,7 +37,7 @@ func (ctx *Context) applyN(x V, n int) V {
 			return ctx.applyVariadic(x)
 		}
 		return ctx.applyNVariadic(x, n)
-	case derivedVerb:
+	case DerivedVerb:
 		ctx.push(x.Arg)
 		args := ctx.peekN(n + 1)
 		if hasNil(args) {
@@ -177,7 +177,7 @@ func (ctx *Context) applyVariadic(v Variadic) V {
 	}
 	if ctx.variadics[v].Adverb {
 		ctx.drop()
-		return derivedVerb{Fun: v, Arg: x}
+		return DerivedVerb{Fun: v, Arg: x}
 	}
 	r := ctx.variadics[v].Func(ctx, args)
 	ctx.drop()

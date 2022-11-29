@@ -176,10 +176,10 @@ func (v Variadic) Sprint(ctx *Context) string {
 	return v.String()
 }
 
-// derivedVerb represents values modified by an adverb. This kind value is not
+// DerivedVerb represents values modified by an adverb. This kind value is not
 // manipulable within the program, as it is only produced as an intermediary
 // value in adverb trains and only appears as an adverb argument.
-type derivedVerb struct {
+type DerivedVerb struct {
 	Fun Variadic
 	Arg V
 }
@@ -211,7 +211,7 @@ func (v Variadic) Type() string        { return "v" }
 func (p Projection) Type() string      { return "p" }
 func (p ProjectionFirst) Type() string { return "p" }
 func (p ProjectionMonad) Type() string { return "p" }
-func (r derivedVerb) Type() string     { return "r" }
+func (r DerivedVerb) Type() string     { return "r" }
 func (l Lambda) Type() string          { return "l" }
 
 func (p Projection) Sprint(ctx *Context) string {
@@ -239,7 +239,7 @@ func (p ProjectionMonad) Sprint(ctx *Context) string {
 	return fmt.Sprintf("%s[]", p.Fun.Sprint(ctx))
 }
 
-func (r derivedVerb) Sprint(ctx *Context) string {
+func (r DerivedVerb) Sprint(ctx *Context) string {
 	return fmt.Sprintf("%s%s", r.Arg.Sprint(ctx), r.Fun.Sprint(ctx))
 }
 
@@ -447,7 +447,7 @@ func (p ProjectionFirst) Rank(ctx *Context) int { return 1 }
 func (p ProjectionMonad) Rank(ctx *Context) int { return 1 }
 
 // Rank returns 2 for derived verbs.
-func (r derivedVerb) Rank(ctx *Context) int { return 2 }
+func (r DerivedVerb) Rank(ctx *Context) int { return 2 }
 
 // Rank for a lambda is the number of arguments, either determined by the
 // signature, or the use of x, y and z in the definition.
@@ -492,8 +492,8 @@ func (p ProjectionMonad) Matches(x V) bool {
 	return ok && Match(p.Fun, xp.Fun)
 }
 
-func (r derivedVerb) Matches(x V) bool {
-	xr, ok := x.(derivedVerb)
+func (r DerivedVerb) Matches(x V) bool {
+	xr, ok := x.(DerivedVerb)
 	return ok && r.Fun == xr.Fun && Match(r.Arg, xr.Arg)
 }
 
