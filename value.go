@@ -9,27 +9,48 @@ import (
 	"strings"
 )
 
+// V represents a boxed or unboxed value.
 type V struct {
-	VT       ValueType // unused for now (boxed or specific)
-	Flags    int8      // unused for now (for sorted)
-	RefCount int
-	BV       Value // boxed value
+	Kind  ValueKind // int, boxed
+	Flags int8      // unused for now (for sorted)
+	N     int       // refcount or unboxed integer value
+	BV    Value     // boxed value
 }
 
 func (v V) Type() string {
-	return v.BV.Type()
+	switch v.Kind {
+	case Int:
+		return "n"
+	case Boxed:
+		return v.BV.Type()
+	default:
+		return ""
+	}
 }
 
 func (v V) Sprint(ctx *Context) string {
-	return v.BV.Sprint(ctx)
+	switch v.Kind {
+	case Int:
+		return fmt.Sprintf("%d", v.N)
+	case Boxed:
+		return v.BV.Sprint(ctx)
+	default:
+		return "nil"
+	}
 }
 
 func newBV(bv Value) V {
-	return V{BV: bv}
+	return V{Kind: Boxed, BV: bv}
 }
 
-// ValueType represents the kinds of values.
-type ValueType int8
+// ValueKind represents the kinds of values.
+type ValueKind int8
+
+const (
+	Nil ValueKind = iota
+	Int
+	Boxed // boxed value (BV field)
+)
 
 // Value represents any kind of boxed value.
 type Value interface {
