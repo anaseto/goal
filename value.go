@@ -17,6 +17,7 @@ type V struct {
 	BV    Value     // boxed value
 }
 
+// Type returns the name of the value's type.
 func (v V) Type() string {
 	switch v.Kind {
 	case Int:
@@ -28,6 +29,7 @@ func (v V) Type() string {
 	}
 }
 
+// Sprint returns a prettified string representation of the value.
 func (v V) Sprint(ctx *Context) string {
 	switch v.Kind {
 	case Int:
