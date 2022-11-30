@@ -565,21 +565,23 @@ func assertCanonical(x AV) {
 	}
 }
 
-// normalize returns a canonical form of an AV array.
-func normalize(x AV, t eltype) Value {
+// normalize returns a canonical form of an AV array. It returns true if a
+// shallow clone was made.
+func normalize(x AV) (Value, bool) {
+	t := aType(x)
 	switch t {
 	case tB:
 		r := make(AB, x.Len())
 		for i, xi := range x {
 			r[i] = xi.Value.(I) != 0
 		}
-		return r
+		return r, true
 	case tI:
 		r := make(AI, x.Len())
 		for i, xi := range x {
 			r[i] = int(xi.Value.(I))
 		}
-		return r
+		return r, true
 	case tF:
 		r := make(AF, x.Len())
 		for i, xi := range x {
@@ -590,63 +592,43 @@ func normalize(x AV, t eltype) Value {
 				r[i] = float64(xi)
 			}
 		}
-		return r
+		return r, true
 	case tS:
 		r := make(AS, x.Len())
 		for i, xi := range x {
 			r[i] = string(xi.Value.(S))
 		}
-		return r
+		return r, true
 	case tV:
 		for i, xi := range x {
 			x[i] = canonicalV(xi)
 		}
-		return x
+		return x, false
 	default:
 		// should not happen
-		return x
+		return x, false
 	}
 }
 
-// canonical returns the canonical form of a given value.
+// canonicalV returns the canonical form of a given value.
 func canonicalV(x V) V {
 	switch xv := x.Value.(type) {
 	case AV:
-		t, ok := isCanonical(xv)
-		if ok {
-			return x
+		r, b := normalize(xv)
+		if b {
+			return NewV(r)
 		}
-		return NewV(normalize(xv, t))
+		x.Value = r
+		return x
 	default:
 		return x
 	}
 }
 
-// canonical returns the canonical form of a given value.
+// canonical returns the canonical form of a given generic array.
 func canonical(x AV) Value {
-	t, ok := isCanonical(x)
-	if ok {
-		return x
-	}
-	return normalize(x, t)
-}
-
-// canonical returns the canonical form of a given value.
-func canonicalArray(x array) Value {
-	if xv, ok := x.(AV); ok {
-		return canonical(xv)
-	}
-	return x
-}
-
-// toCanonical returns the canonical form of a given value, and false if it was
-// already canonical.
-func toCanonical(x AV) (Value, bool) {
-	t, ok := isCanonical(x)
-	if ok {
-		return x, false
-	}
-	return normalize(x, t), true
+	r, _ := normalize(x)
+	return r
 }
 
 // hasNil returns true if there is a nil value in the given array.

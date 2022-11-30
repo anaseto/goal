@@ -168,20 +168,22 @@ func drop(x, y V) V {
 }
 
 func dropi(i int, y V) V {
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 	case array:
 		switch {
 		case i >= 0:
-			if i > y.Len() {
-				i = y.Len()
+			if i > yv.Len() {
+				i = yv.Len()
 			}
-			return NewV(canonicalArray(y.slice(i, y.Len())))
+			y.Value = yv.slice(i, yv.Len())
+			return canonicalV(y)
 		default:
-			i = y.Len() + i
+			i = yv.Len() + i
 			if i < 0 {
 				i = 0
 			}
-			return NewV(canonicalArray(y.slice(0, i)))
+			y.Value = yv.slice(0, i)
+			return canonicalV(y)
 		}
 	default:
 		return errs("i_y : y not an array")
