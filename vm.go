@@ -37,10 +37,10 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ctx.stack[ctx.frameIdx-int32(ops[ip])] = ctx.top()
 			ip++
 		case opVariadic:
-			ctx.push(NewVariadic(Variadic(ops[ip])))
+			ctx.push(NewVariadic(variadic(ops[ip])))
 			ip++
 		case opLambda:
-			ctx.push(NewLambda(Lambda(ops[ip])))
+			ctx.push(NewLambda(lambda(ops[ip])))
 			ip++
 		case opApply:
 			err := ctx.popApplyN(1)
@@ -48,7 +48,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 				return ip - 1, err
 			}
 		case opApplyV:
-			v := Variadic(ops[ip])
+			v := variadic(ops[ip])
 			r := ctx.applyVariadic(v)
 			if r.IsErr() {
 				return ip - 1, r.Value.(error)
@@ -61,7 +61,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 				return ip - 1, err
 			}
 		case opApply2V:
-			v := Variadic(ops[ip])
+			v := variadic(ops[ip])
 			r := ctx.applyNVariadic(v, 2)
 			if r.IsErr() {
 				return ip - 1, r.Value.(error)
@@ -75,7 +75,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			}
 			ip++
 		case opApplyNV:
-			v := Variadic(ops[ip])
+			v := variadic(ops[ip])
 			ip++
 			r := ctx.applyNVariadic(v, int(ops[ip]))
 			if r.IsErr() {

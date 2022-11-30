@@ -416,7 +416,7 @@ func (c *compiler) doVariadic(tok *astToken, n int) error {
 	return nil
 }
 
-func (c *compiler) pushVariadic(v Variadic, n int) {
+func (c *compiler) pushVariadic(v variadic, n int) {
 	switch n {
 	case 0:
 		c.push2(opVariadic, opcode(v))
@@ -486,7 +486,7 @@ func (c *compiler) doAssign(verbTok *astToken, left, right expr, n int) (bool, e
 	return true, nil
 }
 
-func (c *compiler) parseBuiltin(s string) Variadic {
+func (c *compiler) parseBuiltin(s string) variadic {
 	v, ok := c.ctx.vNames[s]
 	if !ok {
 		panic("unknown variadic op: " + s)

@@ -30,13 +30,13 @@ func (ctx *Context) ApplyN(x V, args []V) V {
 // arguments, but does not push the result, returing it instead.
 func (ctx *Context) applyN(x V, n int) V {
 	switch x.Kind {
-	case IntLambda:
-		return ctx.applyLambda(x.Lambda(), n)
-	case IntVariadic:
+	case Lambda:
+		return ctx.applyLambda(x.lambda(), n)
+	case Variadic:
 		if n == 1 {
-			return ctx.applyVariadic(x.Variadic())
+			return ctx.applyVariadic(x.variadic())
 		}
-		return ctx.applyNVariadic(x.Variadic(), n)
+		return ctx.applyNVariadic(x.variadic(), n)
 	}
 	switch xv := x.Value.(type) {
 	case DerivedVerb:
@@ -172,7 +172,7 @@ func (ctx *Context) applyArrayArgs(x V, arg V, args []V) V {
 	}
 }
 
-func (ctx *Context) applyVariadic(v Variadic) V {
+func (ctx *Context) applyVariadic(v variadic) V {
 	args := ctx.peek()
 	x := args[0]
 	if x == (V{}) {
@@ -188,7 +188,7 @@ func (ctx *Context) applyVariadic(v Variadic) V {
 	return r
 }
 
-func (ctx *Context) applyNVariadic(v Variadic, n int) V {
+func (ctx *Context) applyNVariadic(v variadic, n int) V {
 	args := ctx.peekN(n)
 	if hasNil(args) {
 		if n == 2 {
@@ -242,7 +242,7 @@ func (ctx *Context) applyProjection(p Projection, n int) V {
 	}
 }
 
-func (ctx *Context) applyLambda(id Lambda, n int) V {
+func (ctx *Context) applyLambda(id lambda, n int) V {
 	if ctx.callDepth > maxCallDepth {
 		return errs("lambda: exceeded maximum call depth")
 	}

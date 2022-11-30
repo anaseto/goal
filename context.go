@@ -33,7 +33,7 @@ type Context struct {
 	sources  map[string]string   // filename: source
 	assigned bool                // last instruction was opAssignGlobal
 	names    map[string]NameType // special keyword names
-	vNames   map[string]Variadic // variadic keywords
+	vNames   map[string]variadic // variadic keywords
 
 	// error positions stack
 	errPos []position
@@ -56,7 +56,7 @@ func NewContext() *Context {
 		"and":    NameDyad,
 		"or":     NameDyad,
 	}
-	ctx.vNames = map[string]Variadic{
+	ctx.vNames = map[string]variadic{
 		":":      vRight,
 		"::":     vRight,
 		"+":      vAdd,
@@ -99,7 +99,7 @@ func (ctx *Context) RegisterVariadic(name string, vf VariadicFun) V {
 	id := len(ctx.variadics)
 	ctx.variadics = append(ctx.variadics, vf)
 	ctx.variadicsNames = append(ctx.variadicsNames, name)
-	return NewVariadic(Variadic(id))
+	return NewVariadic(variadic(id))
 }
 
 // RegisterMonad adds a variadic function to the context, and generates a new
@@ -113,8 +113,8 @@ func (ctx *Context) RegisterMonad(name string, vf VariadicFun) V {
 	ctx.variadics = append(ctx.variadics, vf)
 	ctx.variadicsNames = append(ctx.variadicsNames, name)
 	ctx.names[name] = NameMonad
-	ctx.vNames[name] = Variadic(id)
-	return NewVariadic(Variadic(id))
+	ctx.vNames[name] = variadic(id)
+	return NewVariadic(variadic(id))
 }
 
 // RegisterDyad adds a variadic function to the context, and generates a new
@@ -125,8 +125,8 @@ func (ctx *Context) RegisterDyad(name string, vf VariadicFun) V {
 	ctx.variadics = append(ctx.variadics, vf)
 	ctx.variadicsNames = append(ctx.variadicsNames, name)
 	ctx.names[name] = NameDyad
-	ctx.vNames[name] = Variadic(id)
-	return NewVariadic(Variadic(id))
+	ctx.vNames[name] = variadic(id)
+	return NewVariadic(variadic(id))
 }
 
 // AssignGlobal assigns a value to a global variable name.

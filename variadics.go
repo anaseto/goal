@@ -1,6 +1,95 @@
 package goal
 
-//import "fmt"
+import (
+	"fmt"
+	"math"
+)
+
+// variadic represents a built-in function.
+type variadic int32
+
+const (
+	vRight    variadic = iota // :
+	vAdd                      // +
+	vSubtract                 // -
+	vMultiply                 // *
+	vDivide                   // %
+	vMod                      // !
+	vMin                      // &
+	vMax                      // |
+	vLess                     // <
+	vMore                     // >
+	vEqual                    // =
+	vMatch                    // ~
+	vJoin                     // ,
+	vWithout                  // ^
+	vTake                     // #
+	vDrop                     // _
+	vCast                     // $
+	vFind                     // ?
+	vApply                    // @
+	vApplyN                   // .
+	vList                     // (...;...;...)
+	vEach                     // ' (adverb)
+	vFold                     // / (adverb)
+	vScan                     // \ (adverb)
+	vIn                       // in
+	vSign                     // sign
+	vOCount                   // ocount (occurrence count)
+	vICount                   // icount (index count)
+	vBytes                    // bytes (byte count)
+	vAnd                      // and
+	vOr                       // or
+)
+
+func (v variadic) zero() V {
+	switch v {
+	case vAdd, vSubtract:
+		return NewI(0)
+	case vMultiply:
+		return NewI(1)
+	case vMin:
+		return NewI(math.MinInt)
+	case vMax:
+		return NewI(math.MaxInt)
+	}
+	return V{}
+}
+
+var vStrings = [...]string{
+	vRight:    ":",
+	vAdd:      "+",
+	vSubtract: "-",
+	vMultiply: "*",
+	vDivide:   "%",
+	vMod:      "!",
+	vMin:      "&",
+	vMax:      "|",
+	vLess:     "<",
+	vMore:     ">",
+	vEqual:    "=",
+	vMatch:    "~",
+	vJoin:     ",",
+	vWithout:  "^",
+	vTake:     "#",
+	vDrop:     "_",
+	vCast:     "$",
+	vFind:     "?",
+	vApply:    "@",
+	vApplyN:   ".",
+	vIn:       "in",
+	vList:     "list",
+	vEach:     "'",
+	vFold:     "/",
+	vScan:     "\\",
+}
+
+func (v variadic) String() string {
+	if v <= vScan {
+		return vStrings[v]
+	}
+	return fmt.Sprintf("{Variadic %d}", v)
+}
 
 // VariadicFun represents a variadic function, either a verb or an adverb.
 type VariadicFun struct {

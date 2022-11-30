@@ -5,8 +5,8 @@ import "strings"
 func fold2(ctx *Context, args []V) V {
 	f := args[1]
 	switch f.Kind {
-	case IntVariadic:
-		switch f.Variadic() {
+	case Variadic:
+		switch f.variadic() {
 		case vAdd:
 			return fold2vAdd(args[0])
 		}

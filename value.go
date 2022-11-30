@@ -4,7 +4,6 @@ package goal
 
 import (
 	"fmt"
-	"math"
 	"strconv"
 	"strings"
 )
@@ -12,7 +11,7 @@ import (
 // V represents a boxed or unboxed value.
 type V struct {
 	Kind  ValueKind // int, boxed
-	Flags int8      // unused for now (for sorted)
+	Flags Flags     // unused for now (for sorted)
 	N     int       // refcount or unboxed integer value
 	Value Value     // boxed value
 }
@@ -21,12 +20,18 @@ type V struct {
 type ValueKind int8
 
 const (
-	Nil ValueKind = iota
-	Int
-	IntVariadic
-	IntLambda
-	Boxed // boxed value (Value field)
+	Nil      ValueKind = iota
+	Int                // unboxed int
+	Variadic           // unboxed
+	Lambda             // unboxed
+	Boxed              // boxed value (Value field)
 )
+
+// Flags is an optional field of V for extra information.
+type Flags int8
+
+// lambda represents an user defined function by ID.
+type lambda int32
 
 // Value represents any kind of boxed value.
 type Value interface {
@@ -39,14 +44,26 @@ type Value interface {
 	Type() string
 }
 
+// variadic retrieves the variadic value from N field. It assumes Kind is
+// IntVariadic.
+func (v V) variadic() variadic {
+	return variadic(v.N)
+}
+
+// Variadic retrieves the lambda value from N field. It assumes Kind is
+// IntLambda.
+func (v V) lambda() lambda {
+	return lambda(v.N)
+}
+
 // Type returns the name of the value's type.
 func (v V) Type() string {
 	switch v.Kind {
 	case Int:
 		return "n"
-	case IntVariadic:
+	case Variadic:
 		return "v"
-	case IntLambda:
+	case Lambda:
 		return "l"
 	case Boxed:
 		return v.Value.Type()
@@ -55,29 +72,14 @@ func (v V) Type() string {
 	}
 }
 
-// Variadic retrieves the Variadic value from N field. It assumes Kind is
-// IntVariadic.
-func (v V) Variadic() Variadic {
-	return Variadic(v.N)
-}
-
-// Variadic retrieves the Lambda value from N field. It assumes Kind is
-// IntLambda.
-func (v V) Lambda() Lambda {
-	return Lambda(v.N)
-}
-
-// Lambda represents an user defined function by ID.
-type Lambda int32
-
 // Sprint returns a prettified string representation of the value.
 func (v V) Sprint(ctx *Context) string {
 	switch v.Kind {
 	case Int:
 		return fmt.Sprintf("%d", v.N)
-	case IntVariadic:
-		return Variadic(v.N).String()
-	case IntLambda:
+	case Variadic:
+		return variadic(v.N).String()
+	case Lambda:
 		if v.N < 0 || v.N >= len(ctx.lambdas) {
 			return fmt.Sprintf("{Lambda %d}", v.N)
 		}
@@ -89,15 +91,17 @@ func (v V) Sprint(ctx *Context) string {
 	}
 }
 
+// Rank returns the default rank of the value. It returns 0 for non-function
+// values.
 func (v V) Rank(ctx *Context) int {
 	switch v.Kind {
-	case IntVariadic:
+	case Variadic:
 		return 2
-	case IntLambda:
+	case Lambda:
 		return ctx.lambdas[v.N].Rank
 	case Boxed:
-		if vf, ok := v.Value.(Function); ok {
-			return vf.Rank(ctx)
+		if vf, ok := v.Value.(function); ok {
+			return vf.rank(ctx)
 		}
 		return 0
 	default:
@@ -111,13 +115,13 @@ func NewV(bv Value) V {
 }
 
 // NewVariadic returns a new int value.
-func NewVariadic(v Variadic) V {
-	return V{Kind: IntVariadic, N: int(v)}
+func NewVariadic(v variadic) V {
+	return V{Kind: Variadic, N: int(v)}
 }
 
 // NewLambda returns a new int value.
-func NewLambda(v Lambda) V {
-	return V{Kind: IntLambda, N: int(v)}
+func NewLambda(v lambda) V {
+	return V{Kind: Lambda, N: int(v)}
 }
 
 // NewI returns a new int value.
@@ -154,10 +158,10 @@ func (x V) IsErr() bool {
 
 func (x V) IsFunction() bool {
 	switch x.Kind {
-	case IntVariadic, IntLambda:
+	case Variadic, Lambda:
 		return true
 	case Boxed:
-		_, ok := x.Value.(Function)
+		_, ok := x.Value.(function)
 		return ok
 	default:
 		return false
@@ -232,97 +236,11 @@ type AI []int
 // AS represents an array of strings.
 type AS []string // string array
 
-// Variadic represents a built-in function.
-type Variadic int32
-
-const (
-	vRight    Variadic = iota // :
-	vAdd                      // +
-	vSubtract                 // -
-	vMultiply                 // *
-	vDivide                   // %
-	vMod                      // !
-	vMin                      // &
-	vMax                      // |
-	vLess                     // <
-	vMore                     // >
-	vEqual                    // =
-	vMatch                    // ~
-	vJoin                     // ,
-	vWithout                  // ^
-	vTake                     // #
-	vDrop                     // _
-	vCast                     // $
-	vFind                     // ?
-	vApply                    // @
-	vApplyN                   // .
-	vList                     // (...;...;...)
-	vEach                     // ' (adverb)
-	vFold                     // / (adverb)
-	vScan                     // \ (adverb)
-	vIn                       // in
-	vSign                     // sign
-	vOCount                   // ocount (occurrence count)
-	vICount                   // icount (index count)
-	vBytes                    // bytes (byte count)
-	vAnd                      // and
-	vOr                       // or
-)
-
-func (v Variadic) zero() V {
-	switch v {
-	case vAdd, vSubtract:
-		return NewI(0)
-	case vMultiply:
-		return NewI(1)
-	case vMin:
-		return NewI(math.MinInt)
-	case vMax:
-		return NewI(math.MaxInt)
-	}
-	return V{}
-}
-
-var vStrings = [...]string{
-	vRight:    ":",
-	vAdd:      "+",
-	vSubtract: "-",
-	vMultiply: "*",
-	vDivide:   "%",
-	vMod:      "!",
-	vMin:      "&",
-	vMax:      "|",
-	vLess:     "<",
-	vMore:     ">",
-	vEqual:    "=",
-	vMatch:    "~",
-	vJoin:     ",",
-	vWithout:  "^",
-	vTake:     "#",
-	vDrop:     "_",
-	vCast:     "$",
-	vFind:     "?",
-	vApply:    "@",
-	vApplyN:   ".",
-	vIn:       "in",
-	vList:     "list",
-	vEach:     "'",
-	vFold:     "/",
-	vScan:     "\\",
-}
-
-func (v Variadic) String() string {
-	if v <= vScan {
-		return vStrings[v]
-	}
-	return fmt.Sprintf("{Variadic %d}", v)
-}
-
 // DerivedVerb represents values modified by an adverb. This kind value is not
 // manipulable within the program, as it is only produced as an intermediary
 // value in adverb trains and only appears as an adverb argument.
 type DerivedVerb struct {
-	Fun Variadic
+	Fun variadic
 	Arg V
 }
 
@@ -554,30 +472,30 @@ func (x AS) Sprint(ctx *Context) string {
 	return sb.String()
 }
 
-// Function interface is satisfied by the different kind of functions. A
+// function interface is satisfied by the different kind of functions. A
 // function is a value thas has a default rank. The default rank is used in
 // situations where an adverb or function has different meanings depending on
 // the arity of the function that is passed to it.
 // Note that arrays do also have a “rank” but do not implement this interface.
-type Function interface {
+type function interface {
 	Value
-	Rank(ctx *Context) int
+	rank(ctx *Context) int
 }
 
 // Rank for a projection is the number of nil arguments.
-func (p Projection) Rank(ctx *Context) int { return countNils(p.Args) }
+func (p Projection) rank(ctx *Context) int { return countNils(p.Args) }
 
 // Rank for a 1-arg projection is 1.
-func (p ProjectionFirst) Rank(ctx *Context) int { return 1 }
+func (p ProjectionFirst) rank(ctx *Context) int { return 1 }
 
 // Rank for a curryfied function is 1.
-func (p ProjectionMonad) Rank(ctx *Context) int { return 1 }
+func (p ProjectionMonad) rank(ctx *Context) int { return 1 }
 
 // Rank returns 2 for derived verbs.
-func (r DerivedVerb) Rank(ctx *Context) int { return 2 }
+func (r DerivedVerb) rank(ctx *Context) int { return 2 }
 
 type zeroFun interface {
-	Function
+	function
 	zero() V
 }
 
