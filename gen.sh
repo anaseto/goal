@@ -1,4 +1,4 @@
 #!/bin/sh
 
-perl genop.pl > dyadops.go
-gofmt -s -w dyadops.go
+perl genop.pl > arithd.go
+gofmt -s -w arithd.go
