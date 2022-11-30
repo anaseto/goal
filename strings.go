@@ -157,7 +157,7 @@ func applyS2(s S, x V, y V) V {
 func bytes(x V) V {
 	switch x := x.Value.(type) {
 	case S:
-		return NewV(I(len(x)))
+		return NewI(len(x))
 	case AS:
 		r := make(AI, x.Len())
 		for i, s := range x {

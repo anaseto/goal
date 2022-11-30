@@ -46,6 +46,21 @@ func NewV(bv Value) V {
 	return V{Kind: Boxed, Value: bv}
 }
 
+// NewI returns a new int value.
+func NewI(i int) V {
+	return V{Kind: Boxed, Value: I(i)}
+}
+
+// NewF returns a new float64 value.
+func NewF(f float64) V {
+	return V{Kind: Boxed, Value: F(f)}
+}
+
+// NewS returns a new string value.
+func NewS(s string) V {
+	return V{Kind: Boxed, Value: S(s)}
+}
+
 // ValueKind represents the kinds of values.
 type ValueKind int8
 
@@ -347,9 +362,9 @@ func (x AS) Type() string { return "S" }
 
 func (x AV) at(i int) V { return x[i] }
 func (x AB) at(i int) V { return NewV(B2I(x[i])) }
-func (x AI) at(i int) V { return NewV(I(x[i])) }
-func (x AF) at(i int) V { return NewV(F(x[i])) }
-func (x AS) at(i int) V { return NewV(S(x[i])) }
+func (x AI) at(i int) V { return NewI(x[i]) }
+func (x AF) at(i int) V { return NewF(x[i]) }
+func (x AS) at(i int) V { return NewS(x[i]) }
 
 func (x AV) slice(i, j int) array { return x[i:j] }
 func (x AB) slice(i, j int) array { return x[i:j] }
@@ -517,13 +532,13 @@ type zeroFun interface {
 func (v Variadic) zero() V {
 	switch v {
 	case vAdd, vSubtract:
-		return NewV(I(0))
+		return NewI(0)
 	case vMultiply:
-		return NewV(I(1))
+		return NewI(1)
 	case vMin:
-		return NewV(I(math.MinInt))
+		return NewI(math.MinInt)
 	case vMax:
-		return NewV(I(math.MaxInt))
+		return NewI(math.MaxInt)
 	}
 	return V{}
 }

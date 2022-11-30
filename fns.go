@@ -516,7 +516,7 @@ func casti(y V) V {
 	case I:
 		return y
 	case F:
-		return NewV(I(yv))
+		return NewI(int(yv))
 	case S:
 		runes := []rune(yv)
 		r := make(AI, len(runes))
@@ -531,7 +531,7 @@ func casti(y V) V {
 	case AS:
 		r := make(AV, yv.Len())
 		for i, s := range yv {
-			r[i] = casti(NewV(S(s)))
+			r[i] = casti(NewS(s))
 		}
 		return NewV(r)
 	case AF:
@@ -595,9 +595,9 @@ func castn(y V) V {
 func casts(y V) V {
 	switch yv := y.Value.(type) {
 	case I:
-		return NewV(S(rune(yv)))
+		return NewS(string(rune(yv)))
 	case F:
-		return casts(NewV(I(yv)))
+		return casts(NewI(int(yv)))
 	case AB:
 		return casts(fromABtoAI(yv))
 	case AI:
@@ -605,7 +605,7 @@ func casts(y V) V {
 		for _, i := range yv {
 			sb.WriteRune(rune(i))
 		}
-		return NewV(S(sb.String()))
+		return NewS(sb.String())
 	case AF:
 		return casts(toAI(yv))
 	case AV:

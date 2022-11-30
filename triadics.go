@@ -168,7 +168,7 @@ func try(ctx *Context, f1, x, f2 V) V {
 	}
 	r := ctx.applyN(f1, av.Len())
 	if err, ok := r.Value.(errV); ok {
-		ctx.push(NewV(S(err)))
+		ctx.push(NewS(string(err)))
 		r = ctx.applyN(f2, 1)
 		if isErr(r) {
 			return errf("f2 call in .[f1;x;f2] : %v", r)

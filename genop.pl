@@ -247,7 +247,7 @@ sub genOp {
     print $out <<EOS;
 // ${name} returns x${op}y.
 func ${name}(x, y V) V {
-	switch x := x.BV.(type) {
+	switch x := x.Value.(type) {
 EOS
     for my $t (sort keys %types) {
         next if $t eq "B";
@@ -264,7 +264,7 @@ EOS
     }
     print $out <<EOS;
 	case AV:
-                switch y := y.BV.(type) {
+                switch y := y.Value.(type) {
                 case array:
                         if y.Len() != x.Len() {
                                 return errf("x${errOp}y : length mismatch: %d vs %d", x.Len(), y.Len())
@@ -277,7 +277,7 @@ EOS
                                 }
                                 r[i] = ri
                         }
-                        return newBV(r)
+                        return NewV(r)
                 }
                 r := make(AV, x.Len())
                 for i := range r {
@@ -287,7 +287,7 @@ EOS
                         }
                         r[i] = ri
                 }
-                return newBV(r)
+                return NewV(r)
 	default:
 		return errType("x${errOp}y", "x", x)
 	}
@@ -310,7 +310,7 @@ sub genLeftExpanded {
     open my $out, '>', \$s;
     print $out <<EOS;
 func ${name}${t}V(x $t, y V) V {
-	switch y := y.BV.(type) {
+	switch y := y.Value.(type) {
 EOS
     for my $tt (sort keys %types) {
         next if $tt eq "B";
@@ -319,7 +319,7 @@ EOS
         $type = "B2I" if $type eq "B";
         print $out <<EOS;
 	case $tt:
-		return newBV($type($expr))
+		return NewV($type($expr))
 EOS
     }
     for my $tt (sort keys %types) {
@@ -333,7 +333,7 @@ EOS
 		for i := range r {
 			r[i] = $rtype($iexpr)
 		}
-		return newBV(r)
+		return NewV(r)
 EOS
     }
     print $out <<EOS if $t !~ /^A/;
@@ -346,7 +346,7 @@ EOS
 			}
 			r[i] = ri
 		}
-		return newBV(r)
+		return NewV(r)
 	default:
 		return errType("x${errOp}y", "y", y)
 	}
@@ -362,7 +362,7 @@ sub genLeftArrayExpanded {
     open my $out, '>', \$s;
     print $out <<EOS;
 func ${name}A${t}V(x A$t, y V) V {
-	switch y := y.BV.(type) {
+	switch y := y.Value.(type) {
 EOS
     for my $tt (sort keys %types) {
         next if $tt eq "B";
@@ -376,7 +376,7 @@ EOS
 		for i := range r {
 			r[i] = $rtype($iexpr)
 		}
-		return newBV(r)
+		return NewV(r)
 EOS
     }
     for my $tt (sort keys %types) {
@@ -393,7 +393,7 @@ EOS
 		for i := range r {
 			r[i] = $rtype($iexpr)
 		}
-		return newBV(r)
+		return NewV(r)
 EOS
     }
     my $tt = $t;
@@ -414,7 +414,7 @@ EOS
 			}
 			r[i] = ri
 		}
-		return newBV(r)
+		return NewV(r)
 	default:
 		return errType("x${errOp}y", "y", y)
 	}

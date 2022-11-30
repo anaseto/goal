@@ -213,7 +213,7 @@ func toIndicesRec(x V) V {
 		if !isI(xv) {
 			return errf("non-integer index (%g)", xv)
 		}
-		return NewV(I(xv))
+		return NewI(int(xv))
 	case I:
 		return NewV(xv)
 	case AB:

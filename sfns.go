@@ -121,13 +121,13 @@ func first(x V) V {
 		if x.Len() == 0 {
 			switch x.(type) {
 			case AB:
-				return NewV(I(0))
+				return NewI(0)
 			case AF:
-				return NewV(F(0))
+				return NewF(0)
 			case AI:
-				return NewV(I(0))
+				return NewI(0)
 			case AS:
-				return NewV(S(""))
+				return NewS("")
 			default:
 				return V{}
 			}
@@ -261,7 +261,7 @@ func cutAI(x AI, y V) V {
 func drops(s S, y V) V {
 	switch y := y.Value.(type) {
 	case S:
-		return NewV(S(strings.TrimPrefix(string(y), string(s))))
+		return NewS(strings.TrimPrefix(string(y), string(s)))
 	case AS:
 		r := make(AS, y.Len())
 		for i, yi := range y {
@@ -286,7 +286,7 @@ func drops(s S, y V) V {
 func trim(s S, y V) V {
 	switch y := y.Value.(type) {
 	case S:
-		return NewV(S(strings.Trim(string(y), string(s))))
+		return NewS(strings.Trim(string(y), string(s)))
 	case AS:
 		r := make(AS, y.Len())
 		for i, yi := range y {

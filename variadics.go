@@ -270,7 +270,7 @@ func VWithout(ctx *Context, args []V) V {
 func VTake(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return NewV(I(Length(args[0])))
+		return NewI(Length(args[0]))
 	case 2:
 		x, y := args[1], args[0]
 		_, ok := x.Value.(Function)
@@ -314,7 +314,7 @@ func VDrop(ctx *Context, args []V) V {
 func VCast(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return NewV(S(args[0].Sprint(ctx)))
+		return NewS(args[0].Sprint(ctx))
 	case 2:
 		x, y := args[1], args[0]
 		switch x.Value.(type) {
@@ -344,7 +344,7 @@ func VFind(ctx *Context, args []V) V {
 func VApply(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return NewV(S(args[0].Type()))
+		return NewS(args[0].Type())
 	case 2:
 		x := args[1]
 		ctx.push(args[0])

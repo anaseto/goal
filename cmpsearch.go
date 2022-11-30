@@ -450,7 +450,7 @@ func memberOfAF(x V, y AF) V {
 	case array:
 		return memberOfArray(x, y)
 	default:
-		return NewV(I(0))
+		return NewI(0)
 	}
 }
 
@@ -497,7 +497,7 @@ func memberOfAI(x V, y AI) V {
 	case array:
 		return memberOfArray(x, y)
 	default:
-		return NewV(I(0))
+		return NewI(0)
 	}
 }
 
@@ -523,7 +523,7 @@ func memberOfAS(x V, y AS) V {
 	case array:
 		return memberOfArray(x, y)
 	default:
-		return NewV(I(0))
+		return NewI(0)
 	}
 }
 
@@ -653,7 +653,7 @@ func without(x, y V) V {
 		r := memberOf(y, x)
 		switch bres := r.Value.(type) {
 		case I:
-			r = NewV(I(1 - bres))
+			r = NewI(int(1 - bres))
 		case AB:
 			for i, b := range bres {
 				bres[i] = !b
@@ -691,7 +691,7 @@ func find(x, y V) V {
 func findS(s S, y V) V {
 	switch y := y.Value.(type) {
 	case S:
-		return NewV(I(strings.Index(string(s), string(y))))
+		return NewI(strings.Index(string(s), string(y)))
 	case AS:
 		r := make(AI, y.Len())
 		for i, ss := range y {
@@ -769,15 +769,15 @@ func findAB(x AB, y V) V {
 	case I:
 		for i, xi := range x {
 			if B2I(xi) == y {
-				return NewV(I(i))
+				return NewI(i)
 			}
 		}
-		return NewV(I(x.Len()))
+		return NewI(x.Len())
 	case F:
 		if !isI(y) {
-			return NewV(I(x.Len()))
+			return NewI(x.Len())
 		}
-		return findAB(x, NewV(I(y)))
+		return findAB(x, NewI(int(y)))
 	case AB:
 		m := imapAB(x)
 		r := make(AI, y.Len())
@@ -811,7 +811,7 @@ func findAB(x AB, y V) V {
 		// TODO: findArray may be redundant (canonical values)
 		return findArray(x, y)
 	default:
-		return NewV(I(x.Len()))
+		return NewI(x.Len())
 	}
 }
 
@@ -820,17 +820,17 @@ func findAF(x AF, y V) V {
 	case I:
 		for i, xi := range x {
 			if xi == float64(y) {
-				return NewV(I(i))
+				return NewI(i)
 			}
 		}
-		return NewV(I(x.Len()))
+		return NewI(x.Len())
 	case F:
 		for i, xi := range x {
 			if F(xi) == y {
-				return NewV(I(i))
+				return NewI(i)
 			}
 		}
-		return NewV(I(x.Len()))
+		return NewI(x.Len())
 	case AB:
 		m := imapAF(x)
 		r := make(AI, y.Len())
@@ -870,7 +870,7 @@ func findAF(x AF, y V) V {
 	case array:
 		return findArray(x, y)
 	default:
-		return NewV(I(x.Len()))
+		return NewI(x.Len())
 	}
 }
 
@@ -879,17 +879,17 @@ func findAI(x AI, y V) V {
 	case I:
 		for i, xi := range x {
 			if I(xi) == y {
-				return NewV(I(i))
+				return NewI(i)
 			}
 		}
-		return NewV(I(x.Len()))
+		return NewI(x.Len())
 	case F:
 		for i, xi := range x {
 			if F(xi) == y {
-				return NewV(I(i))
+				return NewI(i)
 			}
 		}
-		return NewV(I(x.Len()))
+		return NewI(x.Len())
 	case AB:
 		m := imapAI(x)
 		r := make(AI, y.Len())
@@ -933,7 +933,7 @@ func findAI(x AI, y V) V {
 	case array:
 		return findArray(x, y)
 	default:
-		return NewV(I(x.Len()))
+		return NewI(x.Len())
 	}
 }
 
@@ -942,10 +942,10 @@ func findAS(x AS, y V) V {
 	case S:
 		for i, xi := range x {
 			if S(xi) == y {
-				return NewV(I(i))
+				return NewI(i)
 			}
 		}
-		return NewV(I(x.Len()))
+		return NewI(x.Len())
 	case AS:
 		m := imapAS(x)
 		r := make(AI, y.Len())
@@ -961,7 +961,7 @@ func findAS(x AS, y V) V {
 	case array:
 		return findArray(x, y)
 	default:
-		return NewV(I(x.Len()))
+		return NewI(x.Len())
 	}
 }
 
@@ -990,9 +990,9 @@ func findAV(x AV, y V) V {
 	default:
 		for i, xi := range x {
 			if Match(y, xi) {
-				return NewV(I(i))
+				return NewI(i)
 			}
 		}
-		return NewV(I(x.Len()))
+		return NewI(x.Len())
 	}
 }

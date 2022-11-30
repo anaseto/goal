@@ -336,7 +336,7 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 		if err != nil {
 			return c.errorf("string: %v", err)
 		}
-		id := c.ctx.storeConst(NewV(S(s)))
+		id := c.ctx.storeConst(NewS(s))
 		c.push2(opConst, opcode(id))
 		c.applyN(n)
 		return nil
@@ -533,7 +533,7 @@ func (c *compiler) doStrand(st *astStrand, n int) error {
 				c.pos = tok.Pos
 				return c.errorf("string: %v", err)
 			}
-			a = append(a, NewV(S(s)))
+			a = append(a, NewS(s))
 		}
 	}
 	id := c.ctx.storeConst(NewV(canonical(a)))

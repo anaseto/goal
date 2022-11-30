@@ -101,9 +101,9 @@ func floor(x V) V {
 	case I:
 		return x
 	case F:
-		return NewV(F(math.Floor(float64(xv))))
+		return NewF(math.Floor(float64(xv)))
 	case S:
-		return NewV(S(strings.ToLower(string(xv))))
+		return NewS(strings.ToLower(string(xv)))
 	case AB:
 		return x
 	case AI:
@@ -139,9 +139,9 @@ func ceil(x V) V {
 	case I:
 		return x
 	case F:
-		return NewV(F(math.Ceil(float64(xv))))
+		return NewF(math.Ceil(float64(xv)))
 	case S:
-		return NewV(S(strings.ToUpper(string(xv))))
+		return NewS(strings.ToUpper(string(xv)))
 	case AB:
 		return x
 	case AI:
@@ -213,7 +213,7 @@ func abs(x V) V {
 	case I:
 		return NewV(absI(xv))
 	case F:
-		return NewV(F(math.Abs(float64(xv))))
+		return NewF(math.Abs(float64(xv)))
 	case AB:
 		return x
 	case AI:
