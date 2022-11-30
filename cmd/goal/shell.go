@@ -14,7 +14,7 @@ func vShell(ctx *goal.Context, args []goal.V) goal.V {
 		return goal.Errorf("shell[cmd] : too many arguments (%d)", len(args))
 	}
 	var cmds string
-	switch arg := args[len(args)-1].(type) {
+	switch arg := args[len(args)-1].BV.(type) {
 	case goal.S:
 		cmds = string(arg)
 	default:
@@ -26,5 +26,5 @@ func vShell(ctx *goal.Context, args []goal.V) goal.V {
 	if err != nil {
 		return goal.Errorf("shell[cmd] : %v", err)
 	}
-	return goal.S(bytes)
+	return newBV(goal.S(bytes))
 }

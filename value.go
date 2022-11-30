@@ -11,9 +11,8 @@ import (
 
 type V struct {
 	VT       ValueType // unused for now (boxed or specific)
-	RefCount int16
-	Flags    int8  // unused for now (for sorted)
-	UV       int32 // unused for now (unboxed small integer)
+	Flags    int8      // unused for now (for sorted)
+	RefCount int
 	BV       Value // boxed value
 }
 
