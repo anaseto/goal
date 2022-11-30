@@ -29,7 +29,7 @@ func (ctx *Context) ApplyN(x V, args []V) V {
 // applyN applies x with the top n arguments in the stack. It consumes the
 // arguments, but does not push the result, returing it instead.
 func (ctx *Context) applyN(x V, n int) V {
-	switch xv := x.BV.(type) {
+	switch xv := x.Value.(type) {
 	case Lambda:
 		return ctx.applyLambda(xv, n)
 	case Variadic:
@@ -41,7 +41,7 @@ func (ctx *Context) applyN(x V, n int) V {
 		ctx.push(xv.Arg)
 		args := ctx.peekN(n + 1)
 		if hasNil(args) {
-			return newBV(Projection{Fun: x, Args: ctx.popN(n + 1)})
+			return NewV(Projection{Fun: x, Args: ctx.popN(n + 1)})
 		}
 		r := ctx.variadics[xv.Fun].Func(ctx, args)
 		ctx.dropN(n + 1)
@@ -88,11 +88,11 @@ func (ctx *Context) applyN(x V, n int) V {
 
 // applyArray applies an array to a value.
 func (ctx *Context) applyArray(x V, y V) V {
-	xv := x.BV.(array)
+	xv := x.Value.(array)
 	if y == (V{}) {
 		return x
 	}
-	switch yv := y.BV.(type) {
+	switch yv := y.Value.(type) {
 	case F:
 		if !isI(yv) {
 			return errf("x[y] : non-integer index (%g)", yv)
@@ -122,13 +122,13 @@ func (ctx *Context) applyArray(x V, y V) V {
 				return r[i]
 			}
 		}
-		return newBV(canonical(r))
+		return NewV(canonical(r))
 	case array:
 		iy := toIndices(y)
 		if isErr(iy) {
-			return errf("x[y] : %v", iy.BV)
+			return errf("x[y] : %v", iy.Value)
 		}
-		r := xv.atIndices(iy.BV.(AI))
+		r := xv.atIndices(iy.Value.(AI))
 		return r
 	default:
 		return errf("x[y] : y non-array non-integer (%s)", y.Type())
@@ -136,7 +136,7 @@ func (ctx *Context) applyArray(x V, y V) V {
 }
 
 func (ctx *Context) applyArrayArgs(x V, arg V, args []V) V {
-	xv := x.BV.(array)
+	xv := x.Value.(array)
 	// TODO: annotate error with depth?
 	if len(args) == 0 {
 		return ctx.applyArray(x, arg)
@@ -149,9 +149,9 @@ func (ctx *Context) applyArrayArgs(x V, arg V, args []V) V {
 				return r[i]
 			}
 		}
-		return newBV(canonical(r))
+		return NewV(canonical(r))
 	}
-	switch argv := arg.BV.(type) {
+	switch argv := arg.Value.(type) {
 	case array:
 		r := make(AV, argv.Len())
 		for i := 0; i < argv.Len(); i++ {
@@ -160,7 +160,7 @@ func (ctx *Context) applyArrayArgs(x V, arg V, args []V) V {
 				return r[i]
 			}
 		}
-		return newBV(canonical(r))
+		return NewV(canonical(r))
 	default:
 		r := ctx.applyArray(x, arg)
 		if isErr(r) {
@@ -175,11 +175,11 @@ func (ctx *Context) applyVariadic(v Variadic) V {
 	x := args[0]
 	if x == (V{}) {
 		ctx.drop()
-		return newBV(ProjectionMonad{Fun: newBV(v)})
+		return NewV(ProjectionMonad{Fun: NewV(v)})
 	}
 	if ctx.variadics[v].Adverb {
 		ctx.drop()
-		return newBV(DerivedVerb{Fun: v, Arg: x})
+		return NewV(DerivedVerb{Fun: v, Arg: x})
 	}
 	r := ctx.variadics[v].Func(ctx, args)
 	ctx.drop()
@@ -193,10 +193,10 @@ func (ctx *Context) applyNVariadic(v Variadic, n int) V {
 			if args[1] != (V{}) {
 				arg := args[1]
 				ctx.dropN(n)
-				return newBV(ProjectionFirst{Fun: newBV(v), Arg: arg})
+				return NewV(ProjectionFirst{Fun: NewV(v), Arg: arg})
 			}
 		}
-		return newBV(Projection{Fun: newBV(v), Args: ctx.popN(n)})
+		return NewV(Projection{Fun: NewV(v), Args: ctx.popN(n)})
 	}
 	r := ctx.variadics[v].Func(ctx, args)
 	ctx.dropN(n)
@@ -236,7 +236,7 @@ func (ctx *Context) applyProjection(p Projection, n int) V {
 			}
 		}
 		ctx.dropN(n)
-		return newBV(Projection{Fun: newBV(p), Args: vargs})
+		return NewV(Projection{Fun: NewV(p), Args: vargs})
 	}
 }
 
@@ -253,14 +253,14 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 		if n == 1 {
 			if args[0] == (V{}) {
 				ctx.drop() // drop nil
-				return newBV(ProjectionMonad{Fun: newBV(id)})
+				return NewV(ProjectionMonad{Fun: NewV(id)})
 			}
-			return newBV(ProjectionFirst{Fun: newBV(id), Arg: ctx.pop()})
+			return NewV(ProjectionFirst{Fun: NewV(id), Arg: ctx.pop()})
 		}
 		if n == 2 && args[1] == (V{}) && args[0] != (V{}) {
-			return newBV(ProjectionFirst{Fun: newBV(id), Arg: ctx.pop()})
+			return NewV(ProjectionFirst{Fun: NewV(id), Arg: ctx.pop()})
 		}
-		return newBV(Projection{Fun: newBV(id), Args: ctx.popN(n)})
+		return NewV(Projection{Fun: NewV(id), Args: ctx.popN(n)})
 	}
 	nVars := len(lc.Names) - lc.Rank
 	olen := len(ctx.stack)
@@ -312,7 +312,7 @@ func (x AV) atIndices(y AI) V {
 		}
 		r[i] = x[yi]
 	}
-	return newBV(canonical(r))
+	return NewV(canonical(r))
 }
 
 func (x AB) atIndices(y AI) V {
@@ -327,7 +327,7 @@ func (x AB) atIndices(y AI) V {
 		}
 		r[i] = x[yi]
 	}
-	return newBV(r)
+	return NewV(r)
 }
 
 func (x AI) atIndices(y AI) V {
@@ -342,7 +342,7 @@ func (x AI) atIndices(y AI) V {
 		}
 		r[i] = x[yi]
 	}
-	return newBV(r)
+	return NewV(r)
 }
 
 func (x AF) atIndices(y AI) V {
@@ -357,7 +357,7 @@ func (x AF) atIndices(y AI) V {
 		}
 		r[i] = x[yi]
 	}
-	return newBV(r)
+	return NewV(r)
 }
 
 func (x AS) atIndices(y AI) V {
@@ -372,7 +372,7 @@ func (x AS) atIndices(y AI) V {
 		}
 		r[i] = x[yi]
 	}
-	return newBV(r)
+	return NewV(r)
 }
 
 // set changes x at i with y (in place).
@@ -382,22 +382,22 @@ func (x AV) set(i int, y V) {
 
 // set changes x at i with y (in place).
 func (x AB) set(i int, y V) {
-	x[i] = y.BV.(I) == 1
+	x[i] = y.Value.(I) == 1
 }
 
 // set changes x at i with y (in place).
 func (x AI) set(i int, y V) {
-	x[i] = int(y.BV.(I))
+	x[i] = int(y.Value.(I))
 }
 
 // set changes x at i with y (in place).
 func (x AF) set(i int, y V) {
-	x[i] = float64(y.BV.(F))
+	x[i] = float64(y.Value.(F))
 }
 
 // set changes x at i with y (in place).
 func (x AS) set(i int, y V) {
-	x[i] = string(y.BV.(S))
+	x[i] = string(y.Value.(S))
 }
 
 //// setIndices x at y with z (in place).

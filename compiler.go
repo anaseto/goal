@@ -328,7 +328,7 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 		if n > 0 {
 			return c.errorf("type n cannot be applied")
 		}
-		id := c.ctx.storeConst(newBV(x))
+		id := c.ctx.storeConst(NewV(x))
 		c.push2(opConst, opcode(id))
 		return nil
 	case astSTRING:
@@ -336,7 +336,7 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 		if err != nil {
 			return c.errorf("string: %v", err)
 		}
-		id := c.ctx.storeConst(newBV(S(s)))
+		id := c.ctx.storeConst(NewV(S(s)))
 		c.push2(opConst, opcode(id))
 		c.applyN(n)
 		return nil
@@ -359,7 +359,7 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 	case astMONAD:
 		return c.doVariadic(tok, n)
 	case astEMPTYLIST:
-		id := c.ctx.storeConst(newBV(AV{}))
+		id := c.ctx.storeConst(NewV(AV{}))
 		c.push2(opConst, opcode(id))
 		c.applyN(n)
 		return nil
@@ -526,17 +526,17 @@ func (c *compiler) doStrand(st *astStrand, n int) error {
 				c.pos = tok.Pos
 				return c.errorf("number: %v", err)
 			}
-			a = append(a, newBV(x))
+			a = append(a, NewV(x))
 		case astSTRING:
 			s, err := strconv.Unquote(tok.Text)
 			if err != nil {
 				c.pos = tok.Pos
 				return c.errorf("string: %v", err)
 			}
-			a = append(a, newBV(S(s)))
+			a = append(a, NewV(S(s)))
 		}
 	}
-	id := c.ctx.storeConst(newBV(canonical(a)))
+	id := c.ctx.storeConst(NewV(canonical(a)))
 	c.pos = st.Pos
 	c.push2(opConst, opcode(id))
 	c.applyN(n)
@@ -578,7 +578,7 @@ func (c *compiler) doLambda(b *astLambda, n int) error {
 	c.scopeStack = c.scopeStack[:len(c.scopeStack)-1]
 	id := len(c.ctx.lambdas)
 	c.ctx.lambdas = append(c.ctx.lambdas, lc)
-	c.ctx.lambdaVs = append(c.ctx.lambdaVs, newBV(Lambda(id)))
+	c.ctx.lambdaVs = append(c.ctx.lambdaVs, NewV(Lambda(id)))
 	lc.StartPos = b.StartPos
 	lc.EndPos = b.EndPos
 	lc.Source = c.ctx.sources[c.ctx.fname][lc.StartPos:lc.EndPos]

@@ -169,7 +169,7 @@ func VMax(ctx *Context, args []V) V {
 		return reverse(args[0])
 	case 2:
 		x, y := args[1], args[0]
-		_, ok := x.BV.(Function)
+		_, ok := x.Value.(Function)
 		if ok {
 			ctx.push(y)
 			r := ctx.applyN(x, 1)
@@ -215,7 +215,7 @@ func VEqual(ctx *Context, args []V) V {
 		return group(args[0])
 	case 2:
 		x, y := args[1], args[0]
-		_, ok := x.BV.(Function)
+		_, ok := x.Value.(Function)
 		if ok {
 			ctx.push(args[0])
 			r := ctx.applyN(x, 1)
@@ -236,7 +236,7 @@ func VMatch(ctx *Context, args []V) V {
 	case 1:
 		return not(args[0])
 	case 2:
-		return newBV(B2I(Match(args[1], args[0])))
+		return NewV(B2I(Match(args[1], args[0])))
 	default:
 		return errRank("~")
 	}
@@ -270,10 +270,10 @@ func VWithout(ctx *Context, args []V) V {
 func VTake(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return newBV(I(Length(args[0])))
+		return NewV(I(Length(args[0])))
 	case 2:
 		x, y := args[1], args[0]
-		_, ok := x.BV.(Function)
+		_, ok := x.Value.(Function)
 		if ok {
 			ctx.push(y)
 			r := ctx.applyN(x, 1)
@@ -295,7 +295,7 @@ func VDrop(ctx *Context, args []V) V {
 		return floor(args[0])
 	case 2:
 		x, y := args[1], args[0]
-		_, ok := x.BV.(Function)
+		_, ok := x.Value.(Function)
 		if ok {
 			ctx.push(y)
 			r := ctx.applyN(x, 1)
@@ -314,10 +314,10 @@ func VDrop(ctx *Context, args []V) V {
 func VCast(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return newBV(S(args[0].Sprint(ctx)))
+		return NewV(S(args[0].Sprint(ctx)))
 	case 2:
 		x, y := args[1], args[0]
-		switch x.BV.(type) {
+		switch x.Value.(type) {
 		case array:
 			return search(x, y)
 		default:
@@ -344,7 +344,7 @@ func VFind(ctx *Context, args []V) V {
 func VApply(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return newBV(S(args[0].Type()))
+		return NewV(S(args[0].Type()))
 	case 2:
 		x := args[1]
 		ctx.push(args[0])
@@ -365,7 +365,7 @@ func VApplyN(ctx *Context, args []V) V {
 		return eval(ctx, args[0])
 	case 2:
 		x := args[1]
-		av := toArray(args[0]).BV.(array)
+		av := toArray(args[0]).Value.(array)
 		for i := av.Len() - 1; i >= 0; i-- {
 			ctx.push(av.at(i))
 		}
@@ -455,17 +455,17 @@ func VList(ctx *Context, args []V) V {
 	if ok {
 		r := cloneArgs(args)
 		reverseArgs(r)
-		return newBV(AV(r))
+		return NewV(AV(r))
 	}
 	switch t {
 	case tB, tI, tF, tS:
-		r := newBV(canonical(AV(args)))
+		r := NewV(canonical(AV(args)))
 		reverseMut(r)
 		return r
 	default:
 		r := cloneArgs(args)
 		reverseArgs(r)
-		return newBV(canonical(AV(r)))
+		return NewV(canonical(AV(r)))
 	}
 }
 

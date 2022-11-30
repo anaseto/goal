@@ -9,7 +9,7 @@ import (
 
 // Length returns the length of a value like in #x.
 func Length(x V) int {
-	switch x := x.BV.(type) {
+	switch x := x.Value.(type) {
 	case array:
 		return x.Len()
 	default:
@@ -18,7 +18,7 @@ func Length(x V) int {
 }
 
 func reverseMut(x V) {
-	switch x := x.BV.(type) {
+	switch x := x.Value.(type) {
 	case AB:
 		for i := 0; i < len(x)/2; i++ {
 			x[i], x[len(x)-i-1] = x[len(x)-i-1], x[i]
@@ -46,7 +46,7 @@ func reverseMut(x V) {
 
 // reverse returns |x.
 func reverse(x V) V {
-	switch xv := x.BV.(type) {
+	switch xv := x.Value.(type) {
 	case array:
 		r := cloneShallow(x)
 		reverseMut(r)
@@ -59,7 +59,7 @@ func reverse(x V) V {
 // Rotate returns f|y.
 func rotate(x, y V) V {
 	i := 0
-	switch x := x.BV.(type) {
+	switch x := x.Value.(type) {
 	case I:
 		i = int(x)
 	case F:
@@ -78,37 +78,37 @@ func rotate(x, y V) V {
 	if i < 0 {
 		i += lenx
 	}
-	switch y := y.BV.(type) {
+	switch y := y.Value.(type) {
 	case AB:
 		r := make(AB, lenx)
 		for j := 0; j < lenx; j++ {
 			r[j] = y[(j+i)%lenx]
 		}
-		return newBV(r)
+		return NewV(r)
 	case AF:
 		r := make(AF, lenx)
 		for j := 0; j < lenx; j++ {
 			r[j] = y[(j+i)%lenx]
 		}
-		return newBV(r)
+		return NewV(r)
 	case AI:
 		r := make(AI, lenx)
 		for j := 0; j < lenx; j++ {
 			r[j] = y[(j+i)%lenx]
 		}
-		return newBV(r)
+		return NewV(r)
 	case AS:
 		r := make(AS, lenx)
 		for j := 0; j < lenx; j++ {
 			r[j] = y[(j+i)%lenx]
 		}
-		return newBV(r)
+		return NewV(r)
 	case AV:
 		r := make(AV, lenx)
 		for j := 0; j < lenx; j++ {
 			r[j] = y[(j+i)%lenx]
 		}
-		return newBV(r)
+		return NewV(r)
 	default:
 		return errType("f|y", "y", y)
 	}
@@ -116,31 +116,31 @@ func rotate(x, y V) V {
 
 // first returns *x.
 func first(x V) V {
-	switch x := x.BV.(type) {
+	switch x := x.Value.(type) {
 	case array:
 		if x.Len() == 0 {
 			switch x.(type) {
 			case AB:
-				return newBV(I(0))
+				return NewV(I(0))
 			case AF:
-				return newBV(F(0))
+				return NewV(F(0))
 			case AI:
-				return newBV(I(0))
+				return NewV(I(0))
 			case AS:
-				return newBV(S(""))
+				return NewV(S(""))
 			default:
 				return V{}
 			}
 		}
 		return x.at(0)
 	default:
-		return newBV(x)
+		return NewV(x)
 	}
 }
 
 // drop returns i_x and s_x.
 func drop(x, y V) V {
-	switch x := x.BV.(type) {
+	switch x := x.Value.(type) {
 	case I:
 		return dropi(int(x), y)
 	case F:
@@ -169,20 +169,20 @@ func drop(x, y V) V {
 }
 
 func dropi(i int, y V) V {
-	switch y := y.BV.(type) {
+	switch y := y.Value.(type) {
 	case array:
 		switch {
 		case i >= 0:
 			if i > y.Len() {
 				i = y.Len()
 			}
-			return newBV(canonicalArray(y.slice(i, y.Len())))
+			return NewV(canonicalArray(y.slice(i, y.Len())))
 		default:
 			i = y.Len() + i
 			if i < 0 {
 				i = 0
 			}
-			return newBV(canonicalArray(y.slice(0, i)))
+			return NewV(canonicalArray(y.slice(0, i)))
 		}
 	default:
 		return errs("i_y : y not an array")
@@ -200,9 +200,9 @@ func cutAI(x AI, y V) V {
 		}
 	}
 	if x.Len() == 0 {
-		return newBV(AV{})
+		return NewV(AV{})
 	}
-	switch yv := y.BV.(type) {
+	switch yv := y.Value.(type) {
 	case AB:
 		r := make(AV, x.Len())
 		for i, from := range x {
@@ -210,9 +210,9 @@ func cutAI(x AI, y V) V {
 			if i+1 < x.Len() {
 				to = x[i+1]
 			}
-			r[i] = newBV(yv[from:to])
+			r[i] = NewV(yv[from:to])
 		}
-		return newBV(r)
+		return NewV(r)
 	case AI:
 		r := make(AV, x.Len())
 		for i, from := range x {
@@ -220,9 +220,9 @@ func cutAI(x AI, y V) V {
 			if i+1 < x.Len() {
 				to = x[i+1]
 			}
-			r[i] = newBV(yv[from:to])
+			r[i] = NewV(yv[from:to])
 		}
-		return newBV(r)
+		return NewV(r)
 	case AF:
 		r := make(AV, x.Len())
 		for i, from := range x {
@@ -230,9 +230,9 @@ func cutAI(x AI, y V) V {
 			if i+1 < x.Len() {
 				to = x[i+1]
 			}
-			r[i] = newBV(yv[from:to])
+			r[i] = NewV(yv[from:to])
 		}
-		return newBV(r)
+		return NewV(r)
 	case AS:
 		r := make(AV, x.Len())
 		for i, from := range x {
@@ -240,9 +240,9 @@ func cutAI(x AI, y V) V {
 			if i+1 < x.Len() {
 				to = x[i+1]
 			}
-			r[i] = newBV(yv[from:to])
+			r[i] = NewV(yv[from:to])
 		}
-		return newBV(r)
+		return NewV(r)
 	case AV:
 		r := make(AV, x.Len())
 		for i, from := range x {
@@ -250,24 +250,24 @@ func cutAI(x AI, y V) V {
 			if i+1 < x.Len() {
 				to = x[i+1]
 			}
-			r[i] = newBV(yv[from:to])
+			r[i] = NewV(yv[from:to])
 		}
-		return newBV(canonical(r))
+		return NewV(canonical(r))
 	default:
 		return errf("x_y : y not an array (%s)", yv.Type())
 	}
 }
 
 func drops(s S, y V) V {
-	switch y := y.BV.(type) {
+	switch y := y.Value.(type) {
 	case S:
-		return newBV(S(strings.TrimPrefix(string(y), string(s))))
+		return NewV(S(strings.TrimPrefix(string(y), string(s))))
 	case AS:
 		r := make(AS, y.Len())
 		for i, yi := range y {
 			r[i] = strings.TrimPrefix(string(yi), string(s))
 		}
-		return newBV(r)
+		return NewV(r)
 	case AV:
 		r := make(AV, y.Len())
 		for i, yi := range y {
@@ -276,7 +276,7 @@ func drops(s S, y V) V {
 				return r[i]
 			}
 		}
-		return newBV(r)
+		return NewV(r)
 	default:
 		return errType("s_y", "y", y)
 	}
@@ -284,15 +284,15 @@ func drops(s S, y V) V {
 
 // trim returns s^y.
 func trim(s S, y V) V {
-	switch y := y.BV.(type) {
+	switch y := y.Value.(type) {
 	case S:
-		return newBV(S(strings.Trim(string(y), string(s))))
+		return NewV(S(strings.Trim(string(y), string(s))))
 	case AS:
 		r := make(AS, y.Len())
 		for i, yi := range y {
 			r[i] = strings.Trim(string(yi), string(s))
 		}
-		return newBV(r)
+		return NewV(r)
 	case AV:
 		r := make(AV, y.Len())
 		for i, yi := range y {
@@ -301,7 +301,7 @@ func trim(s S, y V) V {
 				return r[i]
 			}
 		}
-		return newBV(r)
+		return NewV(r)
 	default:
 		return errType("s^y", "y", y)
 	}
@@ -310,7 +310,7 @@ func trim(s S, y V) V {
 // take returns i#x.
 func take(x, y V) V {
 	i := 0
-	switch x := x.BV.(type) {
+	switch x := x.Value.(type) {
 	case I:
 		i = int(x)
 	case F:
@@ -321,18 +321,18 @@ func take(x, y V) V {
 	default:
 		return errf("i#y : non-integer i (%s)", x.Type())
 	}
-	yv := toArray(y).BV.(array)
+	yv := toArray(y).Value.(array)
 	switch {
 	case i >= 0:
 		if i > yv.Len() {
 			return takeCyclic(yv, i)
 		}
-		return newBV(yv.slice(0, i))
+		return NewV(yv.slice(0, i))
 	default:
 		if i < -yv.Len() {
 			return takeCyclic(yv, i)
 		}
-		return newBV(yv.slice(yv.Len()+i, yv.Len()))
+		return NewV(yv.slice(yv.Len()+i, yv.Len()))
 	}
 }
 
@@ -355,7 +355,7 @@ func takeCyclic(y array, n int) V {
 		} else {
 			copy(r[i:n], y[:n-i])
 		}
-		return newBV(r)
+		return NewV(r)
 	case AF:
 		r := make(AF, n)
 		for i+step < n {
@@ -367,7 +367,7 @@ func takeCyclic(y array, n int) V {
 		} else {
 			copy(r[i:n], y[:n-i])
 		}
-		return newBV(r)
+		return NewV(r)
 	case AI:
 		r := make(AI, n)
 		for i+step < n {
@@ -379,7 +379,7 @@ func takeCyclic(y array, n int) V {
 		} else {
 			copy(r[i:n], y[:n-i])
 		}
-		return newBV(r)
+		return NewV(r)
 	case AS:
 		r := make(AS, n)
 		for i+step < n {
@@ -391,7 +391,7 @@ func takeCyclic(y array, n int) V {
 		} else {
 			copy(r[i:n], y[:n-i])
 		}
-		return newBV(r)
+		return NewV(r)
 	case AV:
 		r := make(AV, n)
 		for i+step < n {
@@ -403,9 +403,9 @@ func takeCyclic(y array, n int) V {
 		} else {
 			copy(r[i:n], y[:n-i])
 		}
-		return newBV(r)
+		return NewV(r)
 	default:
-		return newBV(y)
+		return NewV(y)
 	}
 }
 
@@ -416,16 +416,16 @@ func shiftBefore(x, y V) V {
 	if max == 0 {
 		return y
 	}
-	switch y := y.BV.(type) {
+	switch y := y.Value.(type) {
 	case AB:
-		switch x := x.BV.(type) {
+		switch x := x.Value.(type) {
 		case AB:
 			r := make(AB, len(y))
 			for i := 0; i < max; i++ {
 				r[i] = x[i]
 			}
 			copy(r[max:], y[:len(y)-max])
-			return newBV(r)
+			return NewV(r)
 		case AF:
 			r := make(AF, len(y))
 			for i := 0; i < max; i++ {
@@ -434,7 +434,7 @@ func shiftBefore(x, y V) V {
 			for i := max; i < len(y); i++ {
 				r[i] = float64(B2F(y[i-max]))
 			}
-			return newBV(r)
+			return NewV(r)
 		case AI:
 			r := make(AI, len(y))
 			for i := 0; i < max; i++ {
@@ -443,45 +443,45 @@ func shiftBefore(x, y V) V {
 			for i := max; i < len(y); i++ {
 				r[i] = int(B2I(y[i-max]))
 			}
-			return newBV(r)
+			return NewV(r)
 		default:
 			return errType("x»y", "y", y)
 		}
 	case AF:
-		switch x := x.BV.(type) {
+		switch x := x.Value.(type) {
 		case AB:
 			r := make(AF, len(y))
 			for i := 0; i < max; i++ {
 				r[i] = float64(B2F(x[i]))
 			}
 			copy(r[max:], y[:len(y)-max])
-			return newBV(r)
+			return NewV(r)
 		case AF:
 			r := make(AF, len(y))
 			for i := 0; i < max; i++ {
 				r[i] = x[i]
 			}
 			copy(r[max:], y[:len(y)-max])
-			return newBV(r)
+			return NewV(r)
 		case AI:
 			r := make(AF, len(y))
 			for i := 0; i < max; i++ {
 				r[i] = float64(x[i])
 			}
 			copy(r[max:], y[:len(y)-max])
-			return newBV(r)
+			return NewV(r)
 		default:
 			return errType("x»y", "y", y)
 		}
 	case AI:
-		switch x := x.BV.(type) {
+		switch x := x.Value.(type) {
 		case AB:
 			r := make(AI, len(y))
 			for i := 0; i < max; i++ {
 				r[i] = int(B2I(x[i]))
 			}
 			copy(r[max:], y[:len(y)-max])
-			return newBV(r)
+			return NewV(r)
 		case AF:
 			r := make(AF, len(y))
 			for i := 0; i < max; i++ {
@@ -490,38 +490,38 @@ func shiftBefore(x, y V) V {
 			for i := max; i < len(y); i++ {
 				r[i] = float64(y[i-max])
 			}
-			return newBV(r)
+			return NewV(r)
 		case AI:
 			r := make(AI, len(y))
 			for i := 0; i < max; i++ {
 				r[i] = x[i]
 			}
 			copy(r[max:], y[:len(y)-max])
-			return newBV(r)
+			return NewV(r)
 		default:
 			return errType("x»y", "y", y)
 		}
 	case AS:
-		switch x := x.BV.(type) {
+		switch x := x.Value.(type) {
 		case AS:
 			r := make(AS, len(y))
 			for i := 0; i < max; i++ {
 				r[i] = x[i]
 			}
 			copy(r[max:], y[:len(y)-max])
-			return newBV(r)
+			return NewV(r)
 		default:
 			return errType("x»y", "y", y)
 		}
 	case AV:
-		switch x := x.BV.(type) {
+		switch x := x.Value.(type) {
 		case array:
 			r := make(AV, len(y))
 			for i := 0; i < max; i++ {
 				r[i] = x.at(i)
 			}
 			copy(r[max:], y[:len(y)-max])
-			return newBV(canonical(r))
+			return NewV(canonical(r))
 		default:
 			return errType("x»y", "y", y)
 		}
@@ -532,27 +532,27 @@ func shiftBefore(x, y V) V {
 
 // nudge returns »x. XXX unused for now
 func nudge(x V) V {
-	switch x := x.BV.(type) {
+	switch x := x.Value.(type) {
 	case AB:
 		r := make(AB, x.Len())
 		copy(r[1:], x[0:x.Len()-1])
-		return newBV(r)
+		return NewV(r)
 	case AI:
 		r := make(AI, x.Len())
 		copy(r[1:], x[0:x.Len()-1])
-		return newBV(r)
+		return NewV(r)
 	case AF:
 		r := make(AF, x.Len())
 		copy(r[1:], x[0:x.Len()-1])
-		return newBV(r)
+		return NewV(r)
 	case AS:
 		r := make(AS, x.Len())
 		copy(r[1:], x[0:x.Len()-1])
-		return newBV(r)
+		return NewV(r)
 	case AV:
 		r := make(AV, x.Len())
 		copy(r[1:], x[0:x.Len()-1])
-		return newBV(canonical(r))
+		return NewV(canonical(r))
 	default:
 		return errs("»x : not an array")
 	}
@@ -565,16 +565,16 @@ func shiftAfter(x, y V) V {
 	if max == 0 {
 		return y
 	}
-	switch y := y.BV.(type) {
+	switch y := y.Value.(type) {
 	case AB:
-		switch x := x.BV.(type) {
+		switch x := x.Value.(type) {
 		case AB:
 			r := make(AB, len(y))
 			for i := 0; i < max; i++ {
 				r[len(y)-1-i] = x[i]
 			}
 			copy(r[:len(y)-max], y[max:])
-			return newBV(r)
+			return NewV(r)
 		case AF:
 			r := make(AF, len(y))
 			for i := 0; i < max; i++ {
@@ -583,7 +583,7 @@ func shiftAfter(x, y V) V {
 			for i := max; i < len(y); i++ {
 				r[i-max] = float64(B2F(y[i]))
 			}
-			return newBV(r)
+			return NewV(r)
 		case AI:
 			r := make(AI, len(y))
 			for i := 0; i < max; i++ {
@@ -592,45 +592,45 @@ func shiftAfter(x, y V) V {
 			for i := max; i < len(y); i++ {
 				r[i-max] = int(B2I(y[i]))
 			}
-			return newBV(r)
+			return NewV(r)
 		default:
 			return errType("x«y", "y", y)
 		}
 	case AF:
-		switch x := x.BV.(type) {
+		switch x := x.Value.(type) {
 		case AB:
 			r := make(AF, len(y))
 			for i := 0; i < max; i++ {
 				r[len(y)-1-i] = float64(B2F(x[i]))
 			}
 			copy(r[:len(y)-max], y[max:])
-			return newBV(r)
+			return NewV(r)
 		case AF:
 			r := make(AF, len(y))
 			for i := 0; i < max; i++ {
 				r[len(y)-1-i] = x[i]
 			}
 			copy(r[:len(y)-max], y[max:])
-			return newBV(r)
+			return NewV(r)
 		case AI:
 			r := make(AF, len(y))
 			for i := 0; i < max; i++ {
 				r[len(y)-1-i] = float64(x[i])
 			}
 			copy(r[:len(y)-max], y[max:])
-			return newBV(r)
+			return NewV(r)
 		default:
 			return errType("x«y", "y", y)
 		}
 	case AI:
-		switch x := x.BV.(type) {
+		switch x := x.Value.(type) {
 		case AB:
 			r := make(AI, len(y))
 			for i := 0; i < max; i++ {
 				r[len(y)-1-i] = int(B2I(x[i]))
 			}
 			copy(r[:len(y)-max], y[max:])
-			return newBV(r)
+			return NewV(r)
 		case AF:
 			r := make(AF, len(y))
 			for i := 0; i < max; i++ {
@@ -639,38 +639,38 @@ func shiftAfter(x, y V) V {
 			for i := max; i < len(y); i++ {
 				r[i-max] = float64(y[max])
 			}
-			return newBV(r)
+			return NewV(r)
 		case AI:
 			r := make(AI, len(y))
 			for i := 0; i < max; i++ {
 				r[len(y)-1-i] = x[i]
 			}
 			copy(r[:len(y)-max], y[max:])
-			return newBV(r)
+			return NewV(r)
 		default:
 			return errType("x«y", "y", y)
 		}
 	case AS:
-		switch x := x.BV.(type) {
+		switch x := x.Value.(type) {
 		case AS:
 			r := make(AS, len(y))
 			for i := 0; i < max; i++ {
 				r[len(y)-1-i] = x[i]
 			}
 			copy(r[:len(y)-max], y[max:])
-			return newBV(r)
+			return NewV(r)
 		default:
 			return errType("x«y", "y", y)
 		}
 	case AV:
-		switch x := x.BV.(type) {
+		switch x := x.Value.(type) {
 		case array:
 			r := make(AV, len(y))
 			for i := 0; i < max; i++ {
 				r[len(y)-1-i] = x.at(i)
 			}
 			copy(r[:len(y)-max], y[max:])
-			return newBV(canonical(r))
+			return NewV(canonical(r))
 		default:
 			return errType("x«y", "y", y)
 		}
@@ -684,27 +684,27 @@ func nudgeBack(x V) V {
 	if Length(x) == 0 {
 		return x
 	}
-	switch x := x.BV.(type) {
+	switch x := x.Value.(type) {
 	case AB:
 		r := make(AB, x.Len())
 		copy(r[0:x.Len()-1], x[1:])
-		return newBV(r)
+		return NewV(r)
 	case AI:
 		r := make(AI, x.Len())
 		copy(r[0:x.Len()-1], x[1:])
-		return newBV(r)
+		return NewV(r)
 	case AF:
 		r := make(AF, x.Len())
 		copy(r[0:x.Len()-1], x[1:])
-		return newBV(r)
+		return NewV(r)
 	case AS:
 		r := make(AS, x.Len())
 		copy(r[0:x.Len()-1], x[1:])
-		return newBV(r)
+		return NewV(r)
 	case AV:
 		r := make(AV, x.Len())
 		copy(r[0:x.Len()-1], x[1:])
-		return newBV(canonical(r))
+		return NewV(canonical(r))
 	default:
 		return errs("«x : x not an array")
 	}
@@ -714,16 +714,16 @@ func nudgeBack(x V) V {
 func flip(x V) V {
 	//assertCanonical(x)
 	x = toArray(x)
-	switch xv := x.BV.(type) {
+	switch xv := x.Value.(type) {
 	case AV:
 		cols := xv.Len()
 		if cols == 0 {
-			return newBV(AV{x})
+			return NewV(AV{x})
 		}
 		lines := -1
 		for _, o := range xv {
 			nl := Length(o)
-			if _, ok := o.BV.(array); !ok {
+			if _, ok := o.Value.(array); !ok {
 				continue
 			}
 			switch {
@@ -736,43 +736,43 @@ func flip(x V) V {
 		t := aType(xv)
 		switch {
 		case lines <= 0:
-			return newBV(AV{x})
+			return NewV(AV{x})
 		case lines == 1:
 			switch t {
 			case tB, tAB:
-				return newBV(AV{newBV(flipAB(xv))})
+				return NewV(AV{NewV(flipAB(xv))})
 			case tF, tAF:
-				return newBV(AV{newBV(flipAF(xv))})
+				return NewV(AV{NewV(flipAF(xv))})
 			case tI, tAI:
-				return newBV(AV{newBV(flipAI(xv))})
+				return NewV(AV{NewV(flipAI(xv))})
 			case tS, tAS:
-				return newBV(AV{newBV(flipAS(xv))})
+				return NewV(AV{NewV(flipAS(xv))})
 			default:
-				return newBV(AV{flipAV(xv)})
+				return NewV(AV{flipAV(xv)})
 			}
 		default:
 			switch t {
 			case tB, tAB:
-				return newBV(flipAVAB(xv, lines))
+				return NewV(flipAVAB(xv, lines))
 			case tF, tAF:
-				return newBV(flipAVAF(xv, lines))
+				return NewV(flipAVAF(xv, lines))
 			case tI, tAI:
-				return newBV(flipAVAI(xv, lines))
+				return NewV(flipAVAI(xv, lines))
 			case tS, tAS:
-				return newBV(flipAVAS(xv, lines))
+				return NewV(flipAVAS(xv, lines))
 			default:
-				return newBV(flipAVAV(xv, lines))
+				return NewV(flipAVAV(xv, lines))
 			}
 		}
 	default:
-		return newBV(AV{x})
+		return NewV(AV{x})
 	}
 }
 
 func flipAB(x AV) AB {
 	r := make(AB, x.Len())
 	for i, xi := range x {
-		switch z := xi.BV.(type) {
+		switch z := xi.Value.(type) {
 		case I:
 			r[i] = z == 1
 		case AB:
@@ -788,14 +788,14 @@ func flipAVAB(x AV, lines int) AV {
 	for j := range r {
 		q := a[j*x.Len() : (j+1)*x.Len()]
 		for i, xi := range x {
-			switch z := xi.BV.(type) {
+			switch z := xi.Value.(type) {
 			case I:
 				q[i] = z == 1
 			case AB:
 				q[i] = z[j]
 			}
 		}
-		r[j] = newBV(q)
+		r[j] = NewV(q)
 	}
 	return r
 }
@@ -803,7 +803,7 @@ func flipAVAB(x AV, lines int) AV {
 func flipAF(x AV) AF {
 	r := make(AF, x.Len())
 	for i, xi := range x {
-		switch z := xi.BV.(type) {
+		switch z := xi.Value.(type) {
 		case AB:
 			r[i] = float64(B2F(z[0]))
 		case F:
@@ -825,7 +825,7 @@ func flipAVAF(x AV, lines int) AV {
 	for j := range r {
 		q := a[j*x.Len() : (j+1)*x.Len()]
 		for i, xi := range x {
-			switch z := xi.BV.(type) {
+			switch z := xi.Value.(type) {
 			case AB:
 				q[i] = float64(B2F(z[j]))
 			case F:
@@ -838,7 +838,7 @@ func flipAVAF(x AV, lines int) AV {
 				q[i] = float64(z[j])
 			}
 		}
-		r[j] = newBV(q)
+		r[j] = NewV(q)
 	}
 	return r
 }
@@ -846,7 +846,7 @@ func flipAVAF(x AV, lines int) AV {
 func flipAI(x AV) AI {
 	r := make(AI, x.Len())
 	for i, xi := range x {
-		switch z := xi.BV.(type) {
+		switch z := xi.Value.(type) {
 		case AB:
 			r[i] = int(B2I(z[0]))
 		case I:
@@ -864,7 +864,7 @@ func flipAVAI(x AV, lines int) AV {
 	for j := range r {
 		q := a[j*x.Len() : (j+1)*x.Len()]
 		for i, xi := range x {
-			switch z := xi.BV.(type) {
+			switch z := xi.Value.(type) {
 			case AB:
 				q[i] = int(B2I(z[j]))
 			case I:
@@ -873,7 +873,7 @@ func flipAVAI(x AV, lines int) AV {
 				q[i] = z[j]
 			}
 		}
-		r[j] = newBV(q)
+		r[j] = NewV(q)
 	}
 	return r
 }
@@ -881,7 +881,7 @@ func flipAVAI(x AV, lines int) AV {
 func flipAS(x AV) AS {
 	r := make(AS, x.Len())
 	for i, xi := range x {
-		switch z := xi.BV.(type) {
+		switch z := xi.Value.(type) {
 		case S:
 			r[i] = string(z)
 		case AS:
@@ -897,14 +897,14 @@ func flipAVAS(x AV, lines int) AV {
 	for j := range r {
 		q := a[j*x.Len() : (j+1)*x.Len()]
 		for i, xi := range x {
-			switch z := xi.BV.(type) {
+			switch z := xi.Value.(type) {
 			case S:
 				q[i] = string(z)
 			case AS:
 				q[i] = z[j]
 			}
 		}
-		r[j] = newBV(q)
+		r[j] = NewV(q)
 	}
 	return r
 }
@@ -912,14 +912,14 @@ func flipAVAS(x AV, lines int) AV {
 func flipAV(x AV) V {
 	r := make(AV, x.Len())
 	for i, xi := range x {
-		switch z := xi.BV.(type) {
+		switch z := xi.Value.(type) {
 		case array:
 			r[i] = z.at(0)
 		default:
 			r[i] = xi
 		}
 	}
-	return newBV(canonical(r))
+	return NewV(canonical(r))
 }
 
 func flipAVAV(x AV, lines int) AV {
@@ -928,21 +928,21 @@ func flipAVAV(x AV, lines int) AV {
 	for j := range r {
 		q := a[j*x.Len() : (j+1)*x.Len()]
 		for i, xi := range x {
-			switch z := xi.BV.(type) {
+			switch z := xi.Value.(type) {
 			case array:
 				q[i] = z.at(j)
 			default:
 				q[i] = xi
 			}
 		}
-		r[j] = newBV(q)
+		r[j] = NewV(q)
 	}
 	return r
 }
 
 // joinTo returns x,y.
 func joinTo(x, y V) V {
-	switch xv := x.BV.(type) {
+	switch xv := x.Value.(type) {
 	case F:
 		return joinToF(xv, y, true)
 	case I:
@@ -960,118 +960,118 @@ func joinTo(x, y V) V {
 	case AV:
 		return joinToAV(y, xv, false)
 	default:
-		switch yv := y.BV.(type) {
+		switch yv := y.Value.(type) {
 		case array:
-			return newBV(joinAtomToArray(x, yv, true))
+			return NewV(joinAtomToArray(x, yv, true))
 		default:
-			return newBV(AV{x, y})
+			return NewV(AV{x, y})
 		}
 	}
 }
 
 func joinToI(x I, y V, left bool) V {
-	switch yv := y.BV.(type) {
+	switch yv := y.Value.(type) {
 	case F:
 		if left {
-			return newBV(AF{float64(x), float64(yv)})
+			return NewV(AF{float64(x), float64(yv)})
 		}
-		return newBV(AF{float64(yv), float64(x)})
+		return NewV(AF{float64(yv), float64(x)})
 	case I:
 		if left {
-			return newBV(AI{int(x), int(yv)})
+			return NewV(AI{int(x), int(yv)})
 		}
-		return newBV(AI{int(yv), int(x)})
+		return NewV(AI{int(yv), int(x)})
 	case S:
 		if left {
-			return newBV(AV{newBV(x), y})
+			return NewV(AV{NewV(x), y})
 		}
-		return newBV(AV{y, newBV(x)})
+		return NewV(AV{y, NewV(x)})
 	case AB:
-		return joinToAB(newBV(x), yv, left)
+		return joinToAB(NewV(x), yv, left)
 	case AF:
-		return joinToAF(newBV(x), yv, left)
+		return joinToAF(NewV(x), yv, left)
 	case AI:
-		return joinToAI(newBV(x), yv, left)
+		return joinToAI(NewV(x), yv, left)
 	case AS:
-		return joinToAS(newBV(x), yv, left)
+		return joinToAS(NewV(x), yv, left)
 	case AV:
-		return joinToAV(newBV(x), yv, left)
+		return joinToAV(NewV(x), yv, left)
 	default:
-		return newBV(AV{newBV(x), y})
+		return NewV(AV{NewV(x), y})
 	}
 }
 
 func joinToF(x F, y V, left bool) V {
-	switch yv := y.BV.(type) {
+	switch yv := y.Value.(type) {
 	case F:
 		if left {
-			return newBV(AF{float64(x), float64(yv)})
+			return NewV(AF{float64(x), float64(yv)})
 		}
-		return newBV(AF{float64(yv), float64(x)})
+		return NewV(AF{float64(yv), float64(x)})
 	case I:
 		if left {
-			return newBV(AF{float64(x), float64(yv)})
+			return NewV(AF{float64(x), float64(yv)})
 		}
-		return newBV(AF{float64(yv), float64(x)})
+		return NewV(AF{float64(yv), float64(x)})
 	case S:
 		if left {
-			return newBV(AV{newBV(x), y})
+			return NewV(AV{NewV(x), y})
 		}
-		return newBV(AV{y, newBV(x)})
+		return NewV(AV{y, NewV(x)})
 	case AB:
-		return joinToAB(newBV(x), yv, left)
+		return joinToAB(NewV(x), yv, left)
 	case AF:
-		return joinToAF(newBV(x), yv, left)
+		return joinToAF(NewV(x), yv, left)
 	case AI:
-		return joinToAI(newBV(x), yv, left)
+		return joinToAI(NewV(x), yv, left)
 	case AS:
-		return joinToAS(newBV(x), yv, left)
+		return joinToAS(NewV(x), yv, left)
 	case AV:
-		return joinToAV(newBV(x), yv, left)
+		return joinToAV(NewV(x), yv, left)
 	default:
-		return newBV(AV{newBV(x), y})
+		return NewV(AV{NewV(x), y})
 	}
 }
 
 func joinToS(x S, y V, left bool) V {
-	switch yv := y.BV.(type) {
+	switch yv := y.Value.(type) {
 	case F:
 		if left {
-			return newBV(AV{newBV(x), y})
+			return NewV(AV{NewV(x), y})
 		}
-		return newBV(AV{y, newBV(x)})
+		return NewV(AV{y, NewV(x)})
 	case I:
 		if left {
-			return newBV(AV{newBV(x), y})
+			return NewV(AV{NewV(x), y})
 		}
-		return newBV(AV{y, newBV(x)})
+		return NewV(AV{y, NewV(x)})
 	case S:
 		if left {
-			return newBV(AS{string(x), string(yv)})
+			return NewV(AS{string(x), string(yv)})
 		}
-		return newBV(AS{string(yv), string(x)})
+		return NewV(AS{string(yv), string(x)})
 	case AB:
-		return joinToAB(newBV(x), yv, left)
+		return joinToAB(NewV(x), yv, left)
 	case AF:
-		return joinToAF(newBV(x), yv, left)
+		return joinToAF(NewV(x), yv, left)
 	case AI:
-		return joinToAI(newBV(x), yv, left)
+		return joinToAI(NewV(x), yv, left)
 	case AS:
-		return joinToAS(newBV(x), yv, left)
+		return joinToAS(NewV(x), yv, left)
 	case AV:
-		return joinToAV(newBV(x), yv, left)
+		return joinToAV(NewV(x), yv, left)
 	default:
-		return newBV(AV{newBV(x), y})
+		return NewV(AV{NewV(x), y})
 	}
 }
 
 func joinToAV(x V, y AV, left bool) V {
-	switch xv := x.BV.(type) {
+	switch xv := x.Value.(type) {
 	case array:
 		if left {
-			return newBV(joinArrays(xv, y))
+			return NewV(joinArrays(xv, y))
 		}
-		return newBV(joinArrays(y, xv))
+		return NewV(joinArrays(y, xv))
 	default:
 		r := make(AV, len(y)+1)
 		if left {
@@ -1081,7 +1081,7 @@ func joinToAV(x V, y AV, left bool) V {
 			r[len(r)-1] = x
 			copy(r[:len(r)-1], y)
 		}
-		return newBV(r)
+		return NewV(r)
 	}
 }
 
@@ -1113,7 +1113,7 @@ func joinAtomToArray(x V, y array, left bool) AV {
 }
 
 func joinToAS(x V, y AS, left bool) V {
-	switch xv := x.BV.(type) {
+	switch xv := x.Value.(type) {
 	case S:
 		r := make(AS, len(y)+1)
 		if left {
@@ -1123,7 +1123,7 @@ func joinToAS(x V, y AS, left bool) V {
 			r[len(r)-1] = string(xv)
 			copy(r[:len(r)-1], y)
 		}
-		return newBV(r)
+		return NewV(r)
 	case AS:
 		r := make(AS, len(y)+xv.Len())
 		if left {
@@ -1133,19 +1133,19 @@ func joinToAS(x V, y AS, left bool) V {
 			copy(r[:len(y)], y)
 			copy(r[len(y):], xv)
 		}
-		return newBV(r)
+		return NewV(r)
 	case array:
 		if left {
-			return newBV(joinArrays(xv, y))
+			return NewV(joinArrays(xv, y))
 		}
-		return newBV(joinArrays(y, xv))
+		return NewV(joinArrays(y, xv))
 	default:
-		return newBV(joinAtomToArray(x, y, left))
+		return NewV(joinAtomToArray(x, y, left))
 	}
 }
 
 func joinToAB(x V, y AB, left bool) V {
-	switch xv := x.BV.(type) {
+	switch xv := x.Value.(type) {
 	case F:
 		r := make(AF, len(y)+1)
 		if left {
@@ -1159,7 +1159,7 @@ func joinToAB(x V, y AB, left bool) V {
 				r[i] = float64(B2F(y[i]))
 			}
 		}
-		return newBV(r)
+		return NewV(r)
 	case I:
 		if isBI(xv) {
 			r := make(AB, len(y)+1)
@@ -1170,7 +1170,7 @@ func joinToAB(x V, y AB, left bool) V {
 				r[len(r)-1] = xv == 1
 				copy(r[:len(r)-1], y)
 			}
-			return newBV(r)
+			return NewV(r)
 		}
 		r := make(AI, len(y)+1)
 		if left {
@@ -1184,34 +1184,34 @@ func joinToAB(x V, y AB, left bool) V {
 				r[i] = int(B2I(y[i]))
 			}
 		}
-		return newBV(r)
+		return NewV(r)
 	case AB:
 		if left {
-			return newBV(joinABAB(xv, y))
+			return NewV(joinABAB(xv, y))
 		}
-		return newBV(joinABAB(y, xv))
+		return NewV(joinABAB(y, xv))
 	case AI:
 		if left {
-			return newBV(joinAIAB(xv, y))
+			return NewV(joinAIAB(xv, y))
 		}
-		return newBV(joinABAI(y, xv))
+		return NewV(joinABAI(y, xv))
 	case AF:
 		if left {
-			return newBV(joinAFAB(xv, y))
+			return NewV(joinAFAB(xv, y))
 		}
-		return newBV(joinABAF(y, xv))
+		return NewV(joinABAF(y, xv))
 	case array:
 		if left {
-			return newBV(joinArrays(xv, y))
+			return NewV(joinArrays(xv, y))
 		}
-		return newBV(joinArrays(y, xv))
+		return NewV(joinArrays(y, xv))
 	default:
-		return newBV(joinAtomToArray(x, y, left))
+		return NewV(joinAtomToArray(x, y, left))
 	}
 }
 
 func joinToAI(x V, y AI, left bool) V {
-	switch xv := x.BV.(type) {
+	switch xv := x.Value.(type) {
 	case F:
 		r := make(AF, len(y)+1)
 		if left {
@@ -1225,7 +1225,7 @@ func joinToAI(x V, y AI, left bool) V {
 				r[i] = float64(y[i])
 			}
 		}
-		return newBV(r)
+		return NewV(r)
 	case I:
 		r := make(AI, len(y)+1)
 		if left {
@@ -1235,34 +1235,34 @@ func joinToAI(x V, y AI, left bool) V {
 			r[len(r)-1] = int(xv)
 			copy(r[:len(r)-1], y)
 		}
-		return newBV(r)
+		return NewV(r)
 	case AB:
 		if left {
-			return newBV(joinABAI(xv, y))
+			return NewV(joinABAI(xv, y))
 		}
-		return newBV(joinAIAB(y, xv))
+		return NewV(joinAIAB(y, xv))
 	case AI:
 		if left {
-			return newBV(joinAIAI(xv, y))
+			return NewV(joinAIAI(xv, y))
 		}
-		return newBV(joinAIAI(y, xv))
+		return NewV(joinAIAI(y, xv))
 	case AF:
 		if left {
-			return newBV(joinAFAI(xv, y))
+			return NewV(joinAFAI(xv, y))
 		}
-		return newBV(joinAIAF(y, xv))
+		return NewV(joinAIAF(y, xv))
 	case array:
 		if left {
-			return newBV(joinArrays(xv, y))
+			return NewV(joinArrays(xv, y))
 		}
-		return newBV(joinArrays(y, xv))
+		return NewV(joinArrays(y, xv))
 	default:
-		return newBV(joinAtomToArray(x, y, left))
+		return NewV(joinAtomToArray(x, y, left))
 	}
 }
 
 func joinToAF(x V, y AF, left bool) V {
-	switch xv := x.BV.(type) {
+	switch xv := x.Value.(type) {
 	case F:
 		r := make(AF, len(y)+1)
 		if left {
@@ -1272,7 +1272,7 @@ func joinToAF(x V, y AF, left bool) V {
 			r[len(r)-1] = float64(xv)
 			copy(r[:len(r)-1], y)
 		}
-		return newBV(r)
+		return NewV(r)
 	case I:
 		r := make(AF, len(y)+1)
 		if left {
@@ -1282,29 +1282,29 @@ func joinToAF(x V, y AF, left bool) V {
 			r[len(r)-1] = float64(xv)
 			copy(r[:len(r)-1], y)
 		}
-		return newBV(r)
+		return NewV(r)
 	case AB:
 		if left {
-			return newBV(joinABAF(xv, y))
+			return NewV(joinABAF(xv, y))
 		}
-		return newBV(joinAFAB(y, xv))
+		return NewV(joinAFAB(y, xv))
 	case AI:
 		if left {
-			return newBV(joinAIAF(xv, y))
+			return NewV(joinAIAF(xv, y))
 		}
-		return newBV(joinAFAI(y, xv))
+		return NewV(joinAFAI(y, xv))
 	case AF:
 		if left {
-			return newBV(joinAFAF(xv, y))
+			return NewV(joinAFAF(xv, y))
 		}
-		return newBV(joinAFAF(y, xv))
+		return NewV(joinAFAF(y, xv))
 	case array:
 		if left {
-			return newBV(joinArrays(xv, y))
+			return NewV(joinArrays(xv, y))
 		}
-		return newBV(joinArrays(y, xv))
+		return NewV(joinArrays(y, xv))
 	default:
-		return newBV(joinAtomToArray(x, y, left))
+		return NewV(joinAtomToArray(x, y, left))
 	}
 }
 
@@ -1385,33 +1385,33 @@ func joinAFAI(x AF, y AI) AF {
 
 // enlist returns ,x.
 func enlist(x V) V {
-	switch xv := x.BV.(type) {
+	switch xv := x.Value.(type) {
 	case F:
-		return newBV(AF{float64(xv)})
+		return NewV(AF{float64(xv)})
 	case I:
 		if isBI(xv) {
-			return newBV(AB{xv == 1})
+			return NewV(AB{xv == 1})
 		}
-		return newBV(AI{int(xv)})
+		return NewV(AI{int(xv)})
 	case S:
-		return newBV(AS{string(xv)})
+		return NewV(AS{string(xv)})
 	default:
-		return newBV(AV{x})
+		return NewV(AV{x})
 	}
 }
 
 // windows returns i^y.
 func windows(i int, y V) V {
-	switch y := y.BV.(type) {
+	switch y := y.Value.(type) {
 	case array:
 		if i <= 0 || i >= y.Len()+1 {
 			return errf("i^y : i out of range !%d (%d)", y.Len()+1, i)
 		}
 		r := make(AV, 1+y.Len()-i)
 		for j := range r {
-			r[j] = newBV(y.slice(j, j+i))
+			r[j] = NewV(y.slice(j, j+i))
 		}
-		return newBV(canonical(r))
+		return NewV(canonical(r))
 	default:
 		return errs("i^y : y not an array")
 	}
@@ -1430,9 +1430,9 @@ func sumAB(x AB) int {
 // group returns =x.
 func group(x V) V {
 	if Length(x) == 0 {
-		return newBV(AV{})
+		return NewV(AV{})
 	}
-	switch x := x.BV.(type) {
+	switch x := x.Value.(type) {
 	case AB:
 		n := sumAB(x)
 		r := make(AV, int(B2I(n > 0)+1))
@@ -1441,8 +1441,8 @@ func group(x V) V {
 			for i := range ai {
 				ai[i] = i
 			}
-			r[0] = newBV(ai)
-			return newBV(r)
+			r[0] = NewV(ai)
+			return NewV(r)
 		}
 		aif := ai[:len(ai)-n]
 		ait := ai[len(ai)-n:]
@@ -1456,9 +1456,9 @@ func group(x V) V {
 				iFalse++
 			}
 		}
-		r[0] = newBV(aif)
-		r[1] = newBV(ait)
-		return newBV(r)
+		r[0] = NewV(aif)
+		r[1] = NewV(ait)
+		return NewV(r)
 	case AI:
 		max := maxAI(x)
 		if max < 0 {
@@ -1484,7 +1484,7 @@ func group(x V) V {
 		pj := 0
 		ai := make(AI, x.Len()-countn)
 		for i := range r {
-			r[i] = newBV(ai[pj:scounts[i]])
+			r[i] = NewV(ai[pj:scounts[i]])
 			pj = scounts[i]
 		}
 		for i, j := range x {
@@ -1494,7 +1494,7 @@ func group(x V) V {
 			ai[scounts[j]-counts[j]] = i
 			counts[j]--
 		}
-		return newBV(r)
+		return NewV(r)
 	case AF:
 		z := toAI(x)
 		if isErr(z) {
@@ -1512,12 +1512,12 @@ func group(x V) V {
 // icount efficiently returns #'=x.
 func icount(x V) V {
 	if Length(x) == 0 {
-		return newBV(AI{})
+		return NewV(AI{})
 	}
-	switch x := x.BV.(type) {
+	switch x := x.Value.(type) {
 	case AB:
 		n := sumAB(x)
-		return newBV(AI{x.Len() - n, n})
+		return NewV(AI{x.Len() - n, n})
 	case AI:
 		max := maxAI(x)
 		if max < 0 {
@@ -1529,7 +1529,7 @@ func icount(x V) V {
 				counts[j]++
 			}
 		}
-		return newBV(counts)
+		return NewV(counts)
 	case AF:
 		z := toAI(x)
 		if isErr(z) {
@@ -1554,14 +1554,14 @@ func groupBy(x, y V) V {
 	if isErr(x) {
 		return errs("f=y : f[y] not an integer array")
 	}
-	avx := x.BV.(AV) // group should always return AV or errV
-	switch y := y.BV.(type) {
+	avx := x.Value.(AV) // group should always return AV or errV
+	switch y := y.Value.(type) {
 	case array:
 		r := make(AV, avx.Len())
 		for i, xi := range avx {
-			r[i] = y.atIndices(xi.BV.(AI))
+			r[i] = y.atIndices(xi.Value.(AI))
 		}
-		return newBV(r)
+		return NewV(r)
 	default:
 		return errs("f=y : y not array")
 	}

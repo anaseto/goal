@@ -96,7 +96,7 @@ func errNYI(s string) V {
 }
 
 func errs(s string) V {
-	return newBV(errV(s))
+	return NewV(errV(s))
 }
 
 func errf(format string, a ...interface{}) V {

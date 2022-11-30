@@ -20,7 +20,7 @@ func B2F(b bool) (f F) {
 }
 
 func num2I(x V) (n I) {
-	switch x := x.BV.(type) {
+	switch x := x.Value.(type) {
 	case I:
 		n = x
 	case F:
@@ -31,7 +31,7 @@ func num2I(x V) (n I) {
 }
 
 func isNum(x V) bool {
-	switch x.BV.(type) {
+	switch x.Value.(type) {
 	case I, F:
 		return true
 	default:
@@ -89,64 +89,64 @@ func maxS(x, y S) S {
 }
 
 func clone(x V) V {
-	switch x := x.BV.(type) {
+	switch x := x.Value.(type) {
 	case F:
-		return newBV(x)
+		return NewV(x)
 	case I:
-		return newBV(x)
+		return NewV(x)
 	case S:
-		return newBV(x)
+		return NewV(x)
 	case AB:
 		r := make(AB, x.Len())
 		copy(r, x)
-		return newBV(r)
+		return NewV(r)
 	case AF:
 		r := make(AF, x.Len())
 		copy(r, x)
-		return newBV(r)
+		return NewV(r)
 	case AI:
 		r := make(AI, x.Len())
 		copy(r, x)
-		return newBV(r)
+		return NewV(r)
 	case AS:
 		r := make(AS, x.Len())
 		copy(r, x)
-		return newBV(r)
+		return NewV(r)
 	case AV:
 		r := make(AV, x.Len())
 		for i := range r {
 			r[i] = clone(x[i])
 		}
-		return newBV(r)
+		return NewV(r)
 	case errV:
-		return newBV(x)
+		return NewV(x)
 	default:
-		return newBV(x)
+		return NewV(x)
 	}
 }
 
 func cloneShallow(x V) V {
-	switch xv := x.BV.(type) {
+	switch xv := x.Value.(type) {
 	case AB:
 		r := make(AB, xv.Len())
 		copy(r, xv)
-		return newBV(r)
+		return NewV(r)
 	case AF:
 		r := make(AF, xv.Len())
 		copy(r, xv)
-		return newBV(r)
+		return NewV(r)
 	case AI:
 		r := make(AI, xv.Len())
 		copy(r, xv)
-		return newBV(r)
+		return NewV(r)
 	case AS:
 		r := make(AS, xv.Len())
 		copy(r, xv)
-		return newBV(r)
+		return NewV(r)
 	case AV:
 		r := make(AV, xv.Len())
 		copy(r, xv)
-		return newBV(r)
+		return NewV(r)
 	default:
 		return x
 	}
@@ -182,7 +182,7 @@ func cloneShallowArray(x array) array {
 // isIndices returns true if we have indices in canonical form, that is,
 // using types I, AI and AV of thoses.
 func isIndices(x V) bool {
-	switch xv := x.BV.(type) {
+	switch xv := x.Value.(type) {
 	case I:
 		return true
 	case AI:
@@ -208,14 +208,14 @@ func toIndices(x V) V {
 
 func toIndicesRec(x V) V {
 	//assertCanonical(x)
-	switch xv := x.BV.(type) {
+	switch xv := x.Value.(type) {
 	case F:
 		if !isI(xv) {
 			return errf("non-integer index (%g)", xv)
 		}
-		return newBV(I(xv))
+		return NewV(I(xv))
 	case I:
-		return newBV(xv)
+		return NewV(xv)
 	case AB:
 		return fromABtoAI(xv)
 	case AF:
@@ -228,7 +228,7 @@ func toIndicesRec(x V) V {
 				return r[i]
 			}
 		}
-		return newBV(canonical(r))
+		return NewV(canonical(r))
 	default:
 		return errs("not an indices array")
 	}
@@ -236,20 +236,20 @@ func toIndicesRec(x V) V {
 
 // toArray converts atoms into 1-length arrays. It returns arrays as-is.
 func toArray(x V) V {
-	switch xv := x.BV.(type) {
+	switch xv := x.Value.(type) {
 	case F:
-		return newBV(AF{float64(xv)})
+		return NewV(AF{float64(xv)})
 	case I:
 		if xv == 0 || xv == 1 {
-			return newBV(AB{xv == 1})
+			return NewV(AB{xv == 1})
 		}
-		return newBV(AI{int(xv)})
+		return NewV(AI{int(xv)})
 	case S:
-		return newBV(AS{string(xv)})
+		return NewV(AS{string(xv)})
 	case array:
-		return newBV(xv)
+		return NewV(xv)
 	default:
-		return newBV(AV{x})
+		return NewV(AV{x})
 	}
 }
 
@@ -262,7 +262,7 @@ func toAI(x AF) V {
 		}
 		r[i] = int(xi)
 	}
-	return newBV(r)
+	return NewV(r)
 }
 
 // fromABtoAI converts AB into AI (for simplifying code, used only for
@@ -272,11 +272,11 @@ func fromABtoAI(x AB) V {
 	for i := range r {
 		r[i] = int(B2I(x[i]))
 	}
-	return newBV(r)
+	return NewV(r)
 }
 
 func isFalse(x V) bool {
-	switch xv := x.BV.(type) {
+	switch xv := x.Value.(type) {
 	case F:
 		return xv == 0
 	case I:
@@ -289,7 +289,7 @@ func isFalse(x V) bool {
 }
 
 func isTrue(x V) bool {
-	switch xv := x.BV.(type) {
+	switch xv := x.Value.(type) {
 	case F:
 		return xv != 0
 	case I:
@@ -327,7 +327,7 @@ func mergeTypes(t, s eltype) eltype {
 
 // eType returns the eltype of x.
 func eType(x V) eltype {
-	switch x := x.BV.(type) {
+	switch x := x.Value.(type) {
 	case F:
 		return tF
 	case I:
@@ -354,7 +354,7 @@ func eType(x V) eltype {
 
 // cType returns the canonical eltype of x. XXX: unused.
 func cType(x V) eltype {
-	switch x := x.BV.(type) {
+	switch x := x.Value.(type) {
 	case AB:
 		return tAB
 	case F:
@@ -414,27 +414,27 @@ func aType(x AV) eltype {
 }
 
 func sameType(x, y V) bool {
-	switch x.BV.(type) {
+	switch x.Value.(type) {
 	case I:
-		_, ok := y.BV.(I)
+		_, ok := y.Value.(I)
 		return ok
 	case F:
-		_, ok := y.BV.(F)
+		_, ok := y.Value.(F)
 		return ok
 	case AB:
-		_, ok := y.BV.(AB)
+		_, ok := y.Value.(AB)
 		return ok
 	case AI:
-		_, ok := y.BV.(AI)
+		_, ok := y.Value.(AI)
 		return ok
 	case AF:
-		_, ok := y.BV.(AF)
+		_, ok := y.Value.(AF)
 		return ok
 	case AS:
-		_, ok := y.BV.(AS)
+		_, ok := y.Value.(AS)
 		return ok
 	case AV:
-		_, ok := y.BV.(AV)
+		_, ok := y.Value.(AV)
 		return ok
 	default:
 		// TODO: sameType, handle other cases (unused for now)
@@ -445,13 +445,13 @@ func sameType(x, y V) bool {
 func compatEltType(x array, y V) bool {
 	switch x.(type) {
 	case AI:
-		_, ok := y.BV.(I)
+		_, ok := y.Value.(I)
 		return ok
 	case AF:
-		_, ok := y.BV.(F)
+		_, ok := y.Value.(F)
 		return ok
 	case AS:
-		_, ok := y.BV.(S)
+		_, ok := y.Value.(S)
 		return ok
 	case AV:
 		return true
@@ -529,7 +529,7 @@ func maxAB(x AB) bool {
 }
 
 func isCanonicalV(x V) bool {
-	switch xv := x.BV.(type) {
+	switch xv := x.Value.(type) {
 	case AV:
 		_, ok := isCanonical(xv)
 		return ok
@@ -571,19 +571,19 @@ func normalize(x AV, t eltype) Value {
 	case tB:
 		r := make(AB, x.Len())
 		for i, xi := range x {
-			r[i] = xi.BV.(I) != 0
+			r[i] = xi.Value.(I) != 0
 		}
 		return r
 	case tI:
 		r := make(AI, x.Len())
 		for i, xi := range x {
-			r[i] = int(xi.BV.(I))
+			r[i] = int(xi.Value.(I))
 		}
 		return r
 	case tF:
 		r := make(AF, x.Len())
 		for i, xi := range x {
-			switch xi := xi.BV.(type) {
+			switch xi := xi.Value.(type) {
 			case F:
 				r[i] = float64(xi)
 			case I:
@@ -594,7 +594,7 @@ func normalize(x AV, t eltype) Value {
 	case tS:
 		r := make(AS, x.Len())
 		for i, xi := range x {
-			r[i] = string(xi.BV.(S))
+			r[i] = string(xi.Value.(S))
 		}
 		return r
 	case tV:
@@ -610,13 +610,13 @@ func normalize(x AV, t eltype) Value {
 
 // canonical returns the canonical form of a given value.
 func canonicalV(x V) V {
-	switch xv := x.BV.(type) {
+	switch xv := x.Value.(type) {
 	case AV:
 		t, ok := isCanonical(xv)
 		if ok {
 			return x
 		}
-		return newBV(normalize(xv, t))
+		return NewV(normalize(xv, t))
 	default:
 		return x
 	}

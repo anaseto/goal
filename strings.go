@@ -1,7 +1,7 @@
 package goal
 
 func applyS(s S, x V) V {
-	switch xv := x.BV.(type) {
+	switch xv := x.Value.(type) {
 	case I:
 		if xv < 0 {
 			xv += I(len(s))
@@ -9,7 +9,7 @@ func applyS(s S, x V) V {
 		if xv < 0 || xv > I(len(s)) {
 			return errf("s[i] : i out of bounds index (%d)", xv)
 		}
-		return newBV(s[xv:])
+		return NewV(s[xv:])
 	case F:
 		if !isI(xv) {
 			return errf("s[x] : x non-integer (%g)", xv)
@@ -28,7 +28,7 @@ func applyS(s S, x V) V {
 			}
 			r[i] = string(s[n:])
 		}
-		return newBV(r)
+		return NewV(r)
 	case AF:
 		z := toAI(xv)
 		if isErr(z) {
@@ -43,7 +43,7 @@ func applyS(s S, x V) V {
 				return r[i]
 			}
 		}
-		return newBV(canonical(r))
+		return NewV(canonical(r))
 	default:
 		return errf("s[x] : x non-integer (%s)", xv.Type())
 	}
@@ -51,7 +51,7 @@ func applyS(s S, x V) V {
 
 func applyS2(s S, x V, y V) V {
 	var l int
-	switch y := y.BV.(type) {
+	switch y := y.Value.(type) {
 	case I:
 		if y < 0 {
 			return errf("s[x;y] : y negative (%d)", y)
@@ -76,7 +76,7 @@ func applyS2(s S, x V, y V) V {
 	default:
 		return errType("s[x;y]", "y", y)
 	}
-	switch xv := x.BV.(type) {
+	switch xv := x.Value.(type) {
 	case I:
 		if xv < 0 {
 			xv += I(len(s))
@@ -84,13 +84,13 @@ func applyS2(s S, x V, y V) V {
 		if xv < 0 || xv > I(len(s)) {
 			return errf("s[i;y] : i out of bounds index (%d)", xv)
 		}
-		if _, ok := y.BV.(AI); ok {
+		if _, ok := y.Value.(AI); ok {
 			return errf("s[x;y] : x is an atom but y is an array")
 		}
 		if int(xv)+l > len(s) {
 			l = len(s) - int(xv)
 		}
-		return newBV(s[xv : int(xv)+l])
+		return NewV(s[xv : int(xv)+l])
 	case F:
 		if !isI(xv) {
 			return errf("s[x;y] : x non-integer (%g)", xv)
@@ -100,7 +100,7 @@ func applyS2(s S, x V, y V) V {
 		return applyS2(s, fromABtoAI(xv), y)
 	case AI:
 		r := make(AS, xv.Len())
-		if z, ok := y.BV.(AI); ok {
+		if z, ok := y.Value.(AI); ok {
 			if z.Len() != xv.Len() {
 				return errf("s[x;y] : length mismatch: %d (#x) %d (#y)",
 					xv.Len(), z.Len())
@@ -118,7 +118,7 @@ func applyS2(s S, x V, y V) V {
 				}
 				r[i] = string(s[n : n+l])
 			}
-			return newBV(r)
+			return NewV(r)
 		}
 		for i, n := range xv {
 			if n < 0 {
@@ -133,7 +133,7 @@ func applyS2(s S, x V, y V) V {
 			}
 			r[i] = string(s[n : n+l])
 		}
-		return newBV(r)
+		return NewV(r)
 	case AF:
 		z := toAI(xv)
 		if isErr(z) {
@@ -148,22 +148,22 @@ func applyS2(s S, x V, y V) V {
 				return r[i]
 			}
 		}
-		return newBV(canonical(r))
+		return NewV(canonical(r))
 	default:
 		return errf("s[x;y] : x non-integer (%s)", xv.Type())
 	}
 }
 
 func bytes(x V) V {
-	switch x := x.BV.(type) {
+	switch x := x.Value.(type) {
 	case S:
-		return newBV(I(len(x)))
+		return NewV(I(len(x)))
 	case AS:
 		r := make(AI, x.Len())
 		for i, s := range x {
 			r[i] = len(s)
 		}
-		return newBV(r)
+		return NewV(r)
 	case AV:
 		r := make(AV, x.Len())
 		for i, xi := range x {
@@ -172,7 +172,7 @@ func bytes(x V) V {
 				return r[i]
 			}
 		}
-		return newBV(canonical(r))
+		return NewV(canonical(r))
 	default:
 		return errType("bytes x", "x", x)
 	}

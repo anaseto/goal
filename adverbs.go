@@ -4,16 +4,16 @@ import "strings"
 
 func fold2(ctx *Context, args []V) V {
 	fv := args[1]
-	switch fv := fv.BV.(type) {
+	switch fv := fv.Value.(type) {
 	case Variadic:
 		switch fv {
 		case vAdd:
 			return fold2vAdd(args[0])
 		}
 	}
-	f, ok := fv.BV.(Function)
+	f, ok := fv.Value.(Function)
 	if !ok {
-		switch f := fv.BV.(type) {
+		switch f := fv.Value.(type) {
 		case S:
 			return fold2Join(f, args[0])
 		case I, F, AB, AI, AF:
@@ -27,14 +27,14 @@ func fold2(ctx *Context, args []V) V {
 		return errf("F/x : F rank is %d (expected 2)", f.Rank(ctx))
 	}
 	x := args[0]
-	switch x := x.BV.(type) {
+	switch x := x.Value.(type) {
 	case array:
 		if x.Len() == 0 {
 			f, ok := f.(zeroFun)
 			if ok {
 				return f.zero()
 			}
-			return newBV(I(0))
+			return NewV(I(0))
 		}
 		r := x.at(0)
 		for i := 1; i < x.Len(); i++ {
@@ -44,12 +44,12 @@ func fold2(ctx *Context, args []V) V {
 		}
 		return r
 	default:
-		return newBV(x)
+		return NewV(x)
 	}
 }
 
 func fold2vAdd(x V) V {
-	switch x := x.BV.(type) {
+	switch x := x.Value.(type) {
 	case AB:
 		n := 0
 		for _, b := range x {
@@ -57,22 +57,22 @@ func fold2vAdd(x V) V {
 				n++
 			}
 		}
-		return newBV(I(n))
+		return NewV(I(n))
 	case AI:
 		n := 0
 		for _, xi := range x {
 			n += xi
 		}
-		return newBV(I(n))
+		return NewV(I(n))
 	case AF:
 		n := 0.0
 		for _, xi := range x {
 			n += xi
 		}
-		return newBV(F(n))
+		return NewV(F(n))
 	case AS:
 		if len(x) == 0 {
-			return newBV(S(""))
+			return NewV(S(""))
 		}
 		n := 0
 		for _, s := range x {
@@ -83,10 +83,10 @@ func fold2vAdd(x V) V {
 		for _, s := range x {
 			b.WriteString(s)
 		}
-		return newBV(S(b.String()))
+		return NewV(S(b.String()))
 	case AV:
 		if len(x) == 0 {
-			return newBV(I(0))
+			return NewV(I(0))
 		}
 		r := x[0]
 		for _, xi := range x[1:] {
@@ -94,16 +94,16 @@ func fold2vAdd(x V) V {
 		}
 		return r
 	default:
-		return newBV(x)
+		return NewV(x)
 	}
 }
 
 func fold2Join(sep S, x V) V {
-	switch xv := x.BV.(type) {
+	switch xv := x.Value.(type) {
 	case S:
 		return x
 	case AS:
-		return newBV(S(strings.Join([]string(xv), string(sep))))
+		return NewV(S(strings.Join([]string(xv), string(sep))))
 	case AV:
 		assertCanonical(xv)
 		return errf("s/x : x not a string array (%s)", xv.Type())
@@ -113,16 +113,16 @@ func fold2Join(sep S, x V) V {
 }
 
 func fold2Decode(f V, x V) V {
-	switch fv := f.BV.(type) {
+	switch fv := f.Value.(type) {
 	case I:
-		switch x := x.BV.(type) {
+		switch x := x.Value.(type) {
 		case I:
-			return newBV(x)
+			return NewV(x)
 		case F:
 			if !isI(x) {
 				return errf("i/x : x non-integer (%g)", x)
 			}
-			return newBV(I(x))
+			return NewV(I(x))
 		case AI:
 			r := 0
 			n := 1
@@ -130,7 +130,7 @@ func fold2Decode(f V, x V) V {
 				r += x[i] * n
 				n *= int(fv)
 			}
-			return newBV(I(r))
+			return NewV(I(r))
 		case AB:
 			r := 0
 			n := 1
@@ -138,7 +138,7 @@ func fold2Decode(f V, x V) V {
 				r += int(B2I(x[i])) * n
 				n *= int(fv)
 			}
-			return newBV(I(r))
+			return NewV(I(r))
 		case AF:
 			aix := toAI(x)
 			if isErr(aix) {
@@ -153,7 +153,7 @@ func fold2Decode(f V, x V) V {
 					return r[i]
 				}
 			}
-			return newBV(canonical(r))
+			return NewV(canonical(r))
 		default:
 			return errType("i/x", "x", x)
 		}
@@ -161,11 +161,11 @@ func fold2Decode(f V, x V) V {
 		if !isI(fv) {
 			return errf("i/x : i non-integer (%g)", fv)
 		}
-		return fold2Decode(newBV(I(fv)), x)
+		return fold2Decode(NewV(I(fv)), x)
 	case AB:
 		return fold2Decode(fromABtoAI(fv), x)
 	case AI:
-		switch x := x.BV.(type) {
+		switch x := x.Value.(type) {
 		case I:
 			r := 0
 			n := 1
@@ -173,12 +173,12 @@ func fold2Decode(f V, x V) V {
 				r += int(x) * n
 				n *= fv[i]
 			}
-			return newBV(I(r))
+			return NewV(I(r))
 		case F:
 			if !isI(x) {
 				return errf("I/x : x non-integer (%g)", x)
 			}
-			return fold2Decode(f, newBV(I(x)))
+			return fold2Decode(f, NewV(I(x)))
 		case AI:
 			if len(fv) != len(x) {
 				return errf("I/x : length mismatch: %d (#I) %d (#x)", len(fv), len(x))
@@ -189,7 +189,7 @@ func fold2Decode(f V, x V) V {
 				r += x[i] * n
 				n *= fv[i]
 			}
-			return newBV(I(r))
+			return NewV(I(r))
 		case AB:
 			return fold2Decode(f, fromABtoAI(x))
 		case AF:
@@ -206,7 +206,7 @@ func fold2Decode(f V, x V) V {
 					return r[i]
 				}
 			}
-			return newBV(canonical(r))
+			return NewV(canonical(r))
 		default:
 			return errType("I/x", "x", x)
 		}
@@ -224,7 +224,7 @@ func fold2Decode(f V, x V) V {
 
 func fold3(ctx *Context, args []V) V {
 	f := args[1]
-	ff, ok := f.BV.(Function)
+	ff, ok := f.Value.(Function)
 	if !ok {
 		return errf("x F/y : F not a function (%s)", args[1].Type())
 	}
@@ -232,7 +232,7 @@ func fold3(ctx *Context, args []V) V {
 		return fold3While(ctx, args)
 	}
 	y := args[0]
-	switch yv := y.BV.(type) {
+	switch yv := y.Value.(type) {
 	case array:
 		r := args[2]
 		if yv.Len() == 0 {
@@ -258,7 +258,7 @@ func fold3While(ctx *Context, args []V) V {
 	f := args[1]
 	x := args[2]
 	y := args[0]
-	switch xv := x.BV.(type) {
+	switch xv := x.Value.(type) {
 	case F:
 		if !isI(xv) {
 			return errf("n f/y : non-integer n (%g)", xv)
@@ -299,9 +299,9 @@ func fold3doTimes(ctx *Context, n int, f, y V) V {
 }
 
 func scan2(ctx *Context, f, x V) V {
-	ff, ok := f.BV.(Function)
+	ff, ok := f.Value.(Function)
 	if !ok {
-		switch fv := f.BV.(type) {
+		switch fv := f.Value.(type) {
 		case S:
 			return scan2Split(fv, x)
 		case I, F, AB, AI, AF:
@@ -314,14 +314,14 @@ func scan2(ctx *Context, f, x V) V {
 		// TODO: converge
 		return errf("f\\x : f rank is %d (expected 2)", ff.Rank(ctx))
 	}
-	switch xv := x.BV.(type) {
+	switch xv := x.Value.(type) {
 	case array:
 		if xv.Len() == 0 {
 			ff, ok := ff.(zeroFun)
 			if ok {
 				return ff.zero()
 			}
-			return newBV(I(0))
+			return NewV(I(0))
 		}
 		r := AV{xv.at(0)}
 		for i := 1; i < xv.Len(); i++ {
@@ -333,22 +333,22 @@ func scan2(ctx *Context, f, x V) V {
 			}
 			r = append(r, next)
 		}
-		return newBV(canonical(r))
+		return NewV(canonical(r))
 	default:
 		return x
 	}
 }
 
 func scan2Split(sep S, x V) V {
-	switch x := x.BV.(type) {
+	switch x := x.Value.(type) {
 	case S:
-		return newBV(AS(strings.Split(string(x), string(sep))))
+		return NewV(AS(strings.Split(string(x), string(sep))))
 	case AS:
 		r := make(AV, len(x))
 		for i := range r {
-			r[i] = newBV(AS(strings.Split(x[i], string(sep))))
+			r[i] = NewV(AS(strings.Split(x[i], string(sep))))
 		}
-		return newBV(r)
+		return NewV(r)
 	case AV:
 		assertCanonical(x)
 		return errf("s/x : x not a string atom or array (%s)", x.Type())
@@ -373,12 +373,12 @@ func encodeBaseDigits(b int, x int) int {
 }
 
 func scan2Encode(f V, x V) V {
-	switch fv := f.BV.(type) {
+	switch fv := f.Value.(type) {
 	case I:
 		if fv == 0 {
 			return errs("i\\x : base i is zero")
 		}
-		switch x := x.BV.(type) {
+		switch x := x.Value.(type) {
 		case I:
 			n := encodeBaseDigits(int(fv), int(x))
 			r := make(AI, n)
@@ -386,12 +386,12 @@ func scan2Encode(f V, x V) V {
 				r[i] = int(x % fv)
 				x /= fv
 			}
-			return newBV(r)
+			return NewV(r)
 		case F:
 			if !isI(x) {
 				return errf("i\\x : x non-integer (%g)", x)
 			}
-			return scan2Encode(f, newBV(I(x)))
+			return scan2Encode(f, NewV(I(x)))
 		case AI:
 			min, max := minMax(x)
 			max = int(maxI(absI(I(min)), absI(I(max))))
@@ -409,9 +409,9 @@ func scan2Encode(f V, x V) V {
 			}
 			r := make(AV, n)
 			for i := range r {
-				r[i] = newBV(ai[i*len(x) : (i+1)*len(x)])
+				r[i] = NewV(ai[i*len(x) : (i+1)*len(x)])
 			}
-			return newBV(r)
+			return NewV(r)
 		case AB:
 			return scan2Encode(f, fromABtoAI(x))
 		case AF:
@@ -428,7 +428,7 @@ func scan2Encode(f V, x V) V {
 					return r[i]
 				}
 			}
-			return newBV(canonical(r))
+			return NewV(canonical(r))
 		default:
 			return errType("i\\x", "x", x)
 		}
@@ -436,11 +436,11 @@ func scan2Encode(f V, x V) V {
 		if !isI(fv) {
 			return errf("i\\x : i non-integer (%g)", fv)
 		}
-		return scan2Encode(newBV(I(fv)), x)
+		return scan2Encode(NewV(I(fv)), x)
 	case AB:
 		return scan2Encode(fromABtoAI(fv), x)
 	case AI:
-		switch x := x.BV.(type) {
+		switch x := x.Value.(type) {
 		case I:
 			n := fv.Len()
 			r := make(AI, n)
@@ -448,12 +448,12 @@ func scan2Encode(f V, x V) V {
 				r[i] = int(x) % fv[i]
 				x /= I(fv[i])
 			}
-			return newBV(r)
+			return NewV(r)
 		case F:
 			if !isI(x) {
 				return errf("I/x : x non-integer (%g)", x)
 			}
-			return scan2Encode(f, newBV(I(x)))
+			return scan2Encode(f, NewV(I(x)))
 		case AI:
 			n := fv.Len()
 			ai := make(AI, n*len(x))
@@ -469,9 +469,9 @@ func scan2Encode(f V, x V) V {
 			}
 			r := make(AV, n)
 			for i := range r {
-				r[i] = newBV(ai[i*len(x) : (i+1)*len(x)])
+				r[i] = NewV(ai[i*len(x) : (i+1)*len(x)])
 			}
-			return newBV(r)
+			return NewV(r)
 		case AB:
 			return scan2Encode(f, fromABtoAI(x))
 		case AF:
@@ -488,7 +488,7 @@ func scan2Encode(f V, x V) V {
 					return r[i]
 				}
 			}
-			return newBV(canonical(r))
+			return NewV(canonical(r))
 		default:
 			return errType("I\\x", "x", x)
 		}
@@ -506,7 +506,7 @@ func scan2Encode(f V, x V) V {
 
 func scan3(ctx *Context, args []V) V {
 	f := args[1]
-	ff, ok := f.BV.(Function)
+	ff, ok := f.Value.(Function)
 	if !ok {
 		return errf("x f'y : f not a function (%s)", f.Type())
 	}
@@ -515,10 +515,10 @@ func scan3(ctx *Context, args []V) V {
 	}
 	y := args[0]
 	x := args[2]
-	switch yv := y.BV.(type) {
+	switch yv := y.Value.(type) {
 	case array:
 		if yv.Len() == 0 {
-			return newBV(AV{})
+			return NewV(AV{})
 		}
 		ctx.push(yv.at(0))
 		ctx.push(x)
@@ -536,7 +536,7 @@ func scan3(ctx *Context, args []V) V {
 			}
 			r = append(r, next)
 		}
-		return newBV(canonical(r))
+		return NewV(canonical(r))
 	default:
 		ctx.push(y)
 		ctx.push(x)
@@ -548,7 +548,7 @@ func scan3While(ctx *Context, args []V) V {
 	f := args[1]
 	x := args[2]
 	y := args[0]
-	switch xv := x.BV.(type) {
+	switch xv := x.Value.(type) {
 	case F:
 		if !isI(xv) {
 			return errf("n f\\y : non-integer n (%g)", xv)
@@ -565,7 +565,7 @@ func scan3While(ctx *Context, args []V) V {
 				return cond
 			}
 			if !isTrue(cond) {
-				return newBV(canonical(r))
+				return NewV(canonical(r))
 			}
 			ctx.push(y)
 			y = ctx.applyN(f, 1)
@@ -589,17 +589,17 @@ func scan3doTimes(ctx *Context, n int, f, y V) V {
 		}
 		r = append(r, y)
 	}
-	return newBV(canonical(r))
+	return NewV(canonical(r))
 }
 
 func each2(ctx *Context, args []V) V {
 	f := args[1]
-	_, ok := f.BV.(Function)
+	_, ok := f.Value.(Function)
 	if !ok {
 		return errf("f'x : f not a function (%s)", f.Type())
 	}
 	x := toArray(args[0])
-	switch x := x.BV.(type) {
+	switch x := x.Value.(type) {
 	case array:
 		r := make(AV, 0, x.Len())
 		for i := 0; i < x.Len(); i++ {
@@ -610,7 +610,7 @@ func each2(ctx *Context, args []V) V {
 			}
 			r = append(r, next)
 		}
-		return newBV(canonical(r))
+		return NewV(canonical(r))
 	default:
 		// should not happen
 		return errf("f'x : x not an array (%s)", x.Type())
@@ -619,12 +619,12 @@ func each2(ctx *Context, args []V) V {
 
 func each3(ctx *Context, args []V) V {
 	f := args[1]
-	_, ok := f.BV.(Function)
+	_, ok := f.Value.(Function)
 	if !ok {
 		return errf("x f'y : f not a function (%s)", f.Type())
 	}
-	x, okax := args[2].BV.(array)
-	y, okay := args[0].BV.(array)
+	x, okax := args[2].Value.(array)
+	y, okay := args[0].Value.(array)
 	if !okax && !okay {
 		return ctx.ApplyN(f, args)
 	}
@@ -640,7 +640,7 @@ func each3(ctx *Context, args []V) V {
 			}
 			r = append(r, next)
 		}
-		return newBV(canonical(r))
+		return NewV(canonical(r))
 	}
 	if !okay {
 		xlen := x.Len()
@@ -654,7 +654,7 @@ func each3(ctx *Context, args []V) V {
 			}
 			r = append(r, next)
 		}
-		return newBV(canonical(r))
+		return NewV(canonical(r))
 	}
 	xlen := x.Len()
 	if xlen != y.Len() {
@@ -670,5 +670,5 @@ func each3(ctx *Context, args []V) V {
 		}
 		r = append(r, next)
 	}
-	return newBV(canonical(r))
+	return NewV(canonical(r))
 }

@@ -14,7 +14,7 @@ type V struct {
 	Kind  ValueKind // int, boxed
 	Flags int8      // unused for now (for sorted)
 	N     int       // refcount or unboxed integer value
-	BV    Value     // boxed value
+	Value Value     // boxed value
 }
 
 // Type returns the name of the value's type.
@@ -23,7 +23,7 @@ func (v V) Type() string {
 	case Int:
 		return "n"
 	case Boxed:
-		return v.BV.Type()
+		return v.Value.Type()
 	default:
 		return ""
 	}
@@ -35,14 +35,15 @@ func (v V) Sprint(ctx *Context) string {
 	case Int:
 		return fmt.Sprintf("%d", v.N)
 	case Boxed:
-		return v.BV.Sprint(ctx)
+		return v.Value.Sprint(ctx)
 	default:
 		return "nil"
 	}
 }
 
-func newBV(bv Value) V {
-	return V{Kind: Boxed, BV: bv}
+// NewV returns a new boxed value.
+func NewV(bv Value) V {
+	return V{Kind: Boxed, Value: bv}
 }
 
 // ValueKind represents the kinds of values.
@@ -51,7 +52,7 @@ type ValueKind int8
 const (
 	Nil ValueKind = iota
 	Int
-	Boxed // boxed value (BV field)
+	Boxed // boxed value (Value field)
 )
 
 // Value represents any kind of boxed value.
@@ -78,12 +79,12 @@ type S string
 type errV string
 
 func isErr(x V) bool {
-	_, ok := x.BV.(errV)
+	_, ok := x.Value.(errV)
 	return ok
 }
 
 func isFunction(x V) bool {
-	_, ok := x.BV.(Function)
+	_, ok := x.Value.(Function)
 	return ok
 }
 
@@ -345,10 +346,10 @@ func (x AF) Type() string { return "F" }
 func (x AS) Type() string { return "S" }
 
 func (x AV) at(i int) V { return x[i] }
-func (x AB) at(i int) V { return newBV(B2I(x[i])) }
-func (x AI) at(i int) V { return newBV(I(x[i])) }
-func (x AF) at(i int) V { return newBV(F(x[i])) }
-func (x AS) at(i int) V { return newBV(S(x[i])) }
+func (x AB) at(i int) V { return NewV(B2I(x[i])) }
+func (x AI) at(i int) V { return NewV(I(x[i])) }
+func (x AF) at(i int) V { return NewV(F(x[i])) }
+func (x AS) at(i int) V { return NewV(S(x[i])) }
 
 func (x AV) slice(i, j int) array { return x[i:j] }
 func (x AB) slice(i, j int) array { return x[i:j] }
@@ -358,7 +359,7 @@ func (x AS) slice(i, j int) array { return x[i:j] }
 
 // sprintV returns a string for a V deep in an AV.
 func sprintV(ctx *Context, x V) string {
-	avx, ok := x.BV.(AV)
+	avx, ok := x.Value.(AV)
 	if ok {
 		return avx.sprint(ctx, true)
 	}
@@ -516,13 +517,13 @@ type zeroFun interface {
 func (v Variadic) zero() V {
 	switch v {
 	case vAdd, vSubtract:
-		return newBV(I(0))
+		return NewV(I(0))
 	case vMultiply:
-		return newBV(I(1))
+		return NewV(I(1))
 	case vMin:
-		return newBV(I(math.MinInt))
+		return NewV(I(math.MinInt))
 	case vMax:
-		return newBV(I(math.MaxInt))
+		return NewV(I(math.MaxInt))
 	}
 	return V{}
 }
