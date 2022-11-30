@@ -20,30 +20,52 @@ type V struct {
 // Type returns the name of the value's type.
 func (v V) Type() string {
 	switch v.Kind {
+	case Nil:
+		return "nil"
 	case Int:
 		return "n"
-	case Boxed:
-		return v.Value.Type()
 	default:
-		return ""
+		return v.Value.Type()
 	}
+}
+
+// Variadic retrieves the Variadic value from N field. It assumes Kind is
+// IntVariadic.
+func (v V) Variadic() Variadic {
+	return Variadic(v.N)
+}
+
+// Variadic retrieves the Lambda value from N field. It assumes Kind is
+// IntLambda.
+func (v V) Lambda() Lambda {
+	return Lambda(v.N)
 }
 
 // Sprint returns a prettified string representation of the value.
 func (v V) Sprint(ctx *Context) string {
 	switch v.Kind {
+	case Nil:
+		return "nil"
 	case Int:
 		return fmt.Sprintf("%d", v.N)
-	case Boxed:
-		return v.Value.Sprint(ctx)
 	default:
-		return "nil"
+		return v.Value.Sprint(ctx)
 	}
 }
 
 // NewV returns a new boxed value.
 func NewV(bv Value) V {
 	return V{Kind: Boxed, Value: bv}
+}
+
+// NewVariadic returns a new int value.
+func NewVariadic(v Variadic) V {
+	return V{Kind: IntVariadic, N: int(v)}
+}
+
+// NewLambda returns a new int value.
+func NewLambda(v Lambda) V {
+	return V{Kind: IntLambda, N: int(v)}
 }
 
 // NewI returns a new int value.
@@ -67,6 +89,8 @@ type ValueKind int8
 const (
 	Nil ValueKind = iota
 	Int
+	IntVariadic
+	IntLambda
 	Boxed // boxed value (Value field)
 )
 

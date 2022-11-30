@@ -10,7 +10,18 @@ type Matcher interface {
 
 // Match returns true if the two values match like in x~y.
 func Match(x, y V) bool {
-	return x.Value != nil && x.Value.Matches(y.Value) || x.Value == nil && y.Value == nil
+	switch x.Kind {
+	case Nil:
+		return y.Kind == Nil
+	case Int:
+		if y.Kind == Int {
+			return x.N == y.N
+		}
+		yf, ok := y.Value.(F)
+		return ok && F(x.N) == yf
+	default:
+		return y.Kind == Boxed && x.Value.Matches(y.Value)
+	}
 }
 
 func matchArray(x array, y Value) bool {
