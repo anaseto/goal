@@ -1,25 +1,25 @@
 package goal
 
 func applyS(s S, x V) V {
-	switch x := x.BV.(type) {
+	switch xv := x.BV.(type) {
 	case I:
-		if x < 0 {
-			x += I(len(s))
+		if xv < 0 {
+			xv += I(len(s))
 		}
-		if x < 0 || x > I(len(s)) {
-			return errf("s[i] : i out of bounds index (%d)", x)
+		if xv < 0 || xv > I(len(s)) {
+			return errf("s[i] : i out of bounds index (%d)", xv)
 		}
-		return s[x:]
+		return newBV(s[xv:])
 	case F:
-		if !isI(x) {
-			return errf("s[x] : x non-integer (%g)", x)
+		if !isI(xv) {
+			return errf("s[x] : x non-integer (%g)", xv)
 		}
 		return applyS(s, x)
 	case AB:
-		return applyS(s, fromABtoAI(x))
+		return applyS(s, fromABtoAI(xv))
 	case AI:
-		r := make(AS, x.Len())
-		for i, n := range x {
+		r := make(AS, xv.Len())
+		for i, n := range xv {
 			if n < 0 {
 				n += len(s)
 			}
@@ -30,22 +30,22 @@ func applyS(s S, x V) V {
 		}
 		return newBV(r)
 	case AF:
-		z := toAI(x)
-		if err, ok := z.(errV); ok {
-			return err
+		z := toAI(xv)
+		if isErr(z) {
+			return z
 		}
 		return applyS(s, z)
 	case AV:
-		r := make(AV, x.Len())
-		for i, xi := range x {
+		r := make(AV, xv.Len())
+		for i, xi := range xv {
 			r[i] = applyS(s, xi)
-			if err, ok := r[i].(errV); ok {
-				return err
+			if isErr(r[i]) {
+				return r[i]
 			}
 		}
-		return canonical(r)
+		return newBV(canonical(r))
 	default:
-		return errf("s[x] : x non-integer (%s)", x.Type())
+		return errf("s[x] : x non-integer (%s)", xv.Type())
 	}
 }
 
@@ -69,43 +69,43 @@ func applyS2(s S, x V, y V) V {
 		return applyS2(s, x, fromABtoAI(y))
 	case AF:
 		z := toAI(y)
-		if err, ok := z.(errV); ok {
-			return err
+		if isErr(z) {
+			return z
 		}
 		return applyS2(s, x, z)
 	default:
 		return errType("s[x;y]", "y", y)
 	}
-	switch x := x.BV.(type) {
+	switch xv := x.BV.(type) {
 	case I:
-		if x < 0 {
-			x += I(len(s))
+		if xv < 0 {
+			xv += I(len(s))
 		}
-		if x < 0 || x > I(len(s)) {
-			return errf("s[i;y] : i out of bounds index (%d)", x)
+		if xv < 0 || xv > I(len(s)) {
+			return errf("s[i;y] : i out of bounds index (%d)", xv)
 		}
-		if _, ok := y.(AI); ok {
+		if _, ok := y.BV.(AI); ok {
 			return errf("s[x;y] : x is an atom but y is an array")
 		}
-		if int(x)+l > len(s) {
-			l = len(s) - int(x)
+		if int(xv)+l > len(s) {
+			l = len(s) - int(xv)
 		}
-		return s[x : int(x)+l]
+		return newBV(s[xv : int(xv)+l])
 	case F:
-		if !isI(x) {
-			return errf("s[x;y] : x non-integer (%g)", x)
+		if !isI(xv) {
+			return errf("s[x;y] : x non-integer (%g)", xv)
 		}
 		return applyS2(s, x, y)
 	case AB:
-		return applyS2(s, fromABtoAI(x), y)
+		return applyS2(s, fromABtoAI(xv), y)
 	case AI:
-		r := make(AS, x.Len())
-		if z, ok := y.(AI); ok {
-			if z.Len() != x.Len() {
+		r := make(AS, xv.Len())
+		if z, ok := y.BV.(AI); ok {
+			if z.Len() != xv.Len() {
 				return errf("s[x;y] : length mismatch: %d (#x) %d (#y)",
-					x.Len(), z.Len())
+					xv.Len(), z.Len())
 			}
-			for i, n := range x {
+			for i, n := range xv {
 				if n < 0 {
 					n += len(s)
 				}
@@ -120,7 +120,7 @@ func applyS2(s S, x V, y V) V {
 			}
 			return newBV(r)
 		}
-		for i, n := range x {
+		for i, n := range xv {
 			if n < 0 {
 				n += len(s)
 			}
@@ -135,29 +135,29 @@ func applyS2(s S, x V, y V) V {
 		}
 		return newBV(r)
 	case AF:
-		z := toAI(x)
-		if err, ok := z.(errV); ok {
-			return err
+		z := toAI(xv)
+		if isErr(z) {
+			return z
 		}
 		return applyS2(s, z, y)
 	case AV:
-		r := make(AV, x.Len())
-		for i, xi := range x {
+		r := make(AV, xv.Len())
+		for i, xi := range xv {
 			r[i] = applyS2(s, xi, y)
-			if err, ok := r[i].(errV); ok {
-				return err
+			if isErr(r[i]) {
+				return r[i]
 			}
 		}
-		return canonical(r)
+		return newBV(canonical(r))
 	default:
-		return errf("s[x;y] : x non-integer (%s)", x.Type())
+		return errf("s[x;y] : x non-integer (%s)", xv.Type())
 	}
 }
 
 func bytes(x V) V {
 	switch x := x.BV.(type) {
 	case S:
-		return I(len(x))
+		return newBV(I(len(x)))
 	case AS:
 		r := make(AI, x.Len())
 		for i, s := range x {
@@ -168,11 +168,11 @@ func bytes(x V) V {
 		r := make(AV, x.Len())
 		for i, xi := range x {
 			r[i] = bytes(xi)
-			if err, ok := r[i].(errV); ok {
-				return err
+			if isErr(r[i]) {
+				return r[i]
 			}
 		}
-		return canonical(r)
+		return newBV(canonical(r))
 	default:
 		return errType("bytes x", "x", x)
 	}

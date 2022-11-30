@@ -152,6 +152,33 @@ func cloneShallow(x V) V {
 	}
 }
 
+func cloneShallowArray(x array) array {
+	switch x := x.(type) {
+	case AB:
+		r := make(AB, len(x))
+		copy(r, x)
+		return newBV(r)
+	case AF:
+		r := make(AF, len(x))
+		copy(r, x)
+		return newBV(r)
+	case AI:
+		r := make(AI, len(x))
+		copy(r, x)
+		return newBV(r)
+	case AS:
+		r := make(AS, len(x))
+		copy(r, x)
+		return newBV(r)
+	case AV:
+		r := make(AV, len(x))
+		copy(r, x)
+		return newBV(r)
+	default:
+		return x
+	}
+}
+
 // isIndices returns true if we have indices in canonical form, that is,
 // using types I, AI and AV of thoses.
 func isIndices(x V) bool {
