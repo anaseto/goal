@@ -681,3 +681,13 @@ func cloneArgs(a []V) []V {
 	copy(args, a)
 	return args
 }
+
+func sumAB(x AB) int {
+	n := 0
+	for _, xi := range x {
+		if xi {
+			n++
+		}
+	}
+	return n
+}

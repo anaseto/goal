@@ -1,5 +1,7 @@
 package goal
 
+import "strings"
+
 func applyS(s S, x V) V {
 	switch xv := x.Value.(type) {
 	case I:
@@ -175,5 +177,183 @@ func bytes(x V) V {
 		return NewV(canonical(r))
 	default:
 		return errType("bytes x", "x", x)
+	}
+}
+
+// cast implements s$y.
+func cast(x, y V) V {
+	s, ok := x.Value.(S)
+	if !ok {
+		return errf("s$y : s not a string (%s)", x.Type())
+	}
+	switch s {
+	case "i":
+		return casti(y)
+	case "n":
+		return castn(y)
+	case "s":
+		return casts(y)
+	default:
+		return errf("s$y : unsupported \"%s\" value for s", s)
+	}
+}
+
+func casti(y V) V {
+	switch yv := y.Value.(type) {
+	case I:
+		return y
+	case F:
+		return NewI(int(yv))
+	case S:
+		runes := []rune(yv)
+		r := make(AI, len(runes))
+		for i, rc := range runes {
+			r[i] = int(rc)
+		}
+		return NewV(r)
+	case AB:
+		return y
+	case AI:
+		return y
+	case AS:
+		r := make(AV, yv.Len())
+		for i, s := range yv {
+			r[i] = casti(NewS(s))
+		}
+		return NewV(r)
+	case AF:
+		return toAI(yv)
+	case AV:
+		r := make(AV, yv.Len())
+		for i := range r {
+			r[i] = casti(yv[i])
+			if r[i].IsErr() {
+				return r[i]
+			}
+		}
+		return NewV(r)
+	default:
+		return errs("\"i\"$y : non-numeric y")
+	}
+}
+
+func castn(y V) V {
+	switch yv := y.Value.(type) {
+	case I:
+		return y
+	case F:
+		return y
+	case S:
+		xi, err := parseNumber(string(yv))
+		if err != nil {
+			return errf("\"i\"$y : non-numeric y (%s) : %v", yv, err)
+		}
+		return NewV(xi)
+	case AB:
+		return y
+	case AI:
+		return y
+	case AS:
+		r := make(AV, yv.Len())
+		for i, s := range yv {
+			n, err := parseNumber(s)
+			if err != nil {
+				return errf("\"i\"$y : y contains non-numeric (%s) : %v", s, err)
+			}
+			r[i] = NewV(n)
+		}
+		return NewV(canonical(r))
+	case AF:
+		return y
+	case AV:
+		r := make(AV, yv.Len())
+		for i := range r {
+			r[i] = castn(yv[i])
+			if r[i].IsErr() {
+				return r[i]
+			}
+		}
+		return NewV(r)
+	default:
+		return errs("\"i\"$y : non-numeric y")
+	}
+}
+
+func casts(y V) V {
+	switch yv := y.Value.(type) {
+	case I:
+		return NewS(string(rune(yv)))
+	case F:
+		return casts(NewI(int(yv)))
+	case AB:
+		return casts(fromABtoAI(yv))
+	case AI:
+		sb := &strings.Builder{}
+		for _, i := range yv {
+			sb.WriteRune(rune(i))
+		}
+		return NewS(sb.String())
+	case AF:
+		return casts(toAI(yv))
+	case AV:
+		r := make(AV, yv.Len())
+		for i := range r {
+			r[i] = casts(yv[i])
+			if r[i].IsErr() {
+				return r[i]
+			}
+		}
+		return NewV(r)
+	default:
+		return errs("\"i\"$y : non-numeric y")
+	}
+}
+
+func drops(s S, y V) V {
+	switch y := y.Value.(type) {
+	case S:
+		return NewS(strings.TrimPrefix(string(y), string(s)))
+	case AS:
+		r := make(AS, y.Len())
+		for i, yi := range y {
+			r[i] = strings.TrimPrefix(string(yi), string(s))
+		}
+		return NewV(r)
+	case AV:
+		r := make(AV, y.Len())
+		for i, yi := range y {
+			r[i] = drops(s, yi)
+			if r[i].IsErr() {
+				return r[i]
+			}
+		}
+		return NewV(r)
+	default:
+		return errType("s_y", "y", y)
+	}
+}
+
+// trim returns s^y.
+func trim(s S, y V) V {
+	switch y := y.Value.(type) {
+	case S:
+		return NewS(strings.Trim(string(y), string(s)))
+	case AS:
+		r := make(AS, y.Len())
+		for i, yi := range y {
+			r[i] = strings.Trim(string(yi), string(s))
+		}
+		return NewV(r)
+	case AV:
+		r := make(AV, y.Len())
+		for i, yi := range y {
+			r[i] = trim(s, yi)
+			if r[i].IsErr() {
+				return r[i]
+			}
+		}
+		return NewV(r)
+	default:
+		return errType("s^y", "y", y)
 	}
 }
