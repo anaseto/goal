@@ -261,7 +261,7 @@ func fold3While(ctx *Context, args []V) V {
 	switch xv := x.BV.(type) {
 	case F:
 		if !isI(xv) {
-			return errf("n f/y : non-integer n (%g)", x)
+			return errf("n f/y : non-integer n (%g)", xv)
 		}
 		return fold3doTimes(ctx, int(xv), f, y)
 	case I:

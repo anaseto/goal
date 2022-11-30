@@ -167,12 +167,12 @@ func try(ctx *Context, f1, x, f2 V) V {
 		ctx.push(av.at(i))
 	}
 	r := ctx.applyN(f1, av.Len())
-	if err, ok := r.(errV); ok {
-		ctx.push(S(err))
+	if err, ok := r.BV.(errV); ok {
+		ctx.push(newBV(S(err)))
 		r = ctx.applyN(f2, 1)
-		if err, ok := r.(errV); ok {
-			return errf("f2 call in .[f1;x;f2] : %v", err)
+		if isErr(r) {
+			return errf("f2 call in .[f1;x;f2] : %v", r)
 		}
 	}
-	return newBV(r)
+	return r
 }

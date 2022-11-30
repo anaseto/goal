@@ -253,7 +253,7 @@ func (p Projection) Sprint(ctx *Context) string {
 	sb.WriteRune('[')
 	for i := len(p.Args) - 1; i >= 0; i-- {
 		arg := p.Args[i]
-		if arg != nil {
+		if arg != (V{}) {
 			fmt.Fprintf(sb, "%s", arg.Sprint(ctx))
 		}
 		if i > 0 {
@@ -323,10 +323,10 @@ func (x AF) Type() string { return "F" }
 func (x AS) Type() string { return "S" }
 
 func (x AV) at(i int) V { return x[i] }
-func (x AB) at(i int) V { return B2I(x[i]) }
-func (x AI) at(i int) V { return I(x[i]) }
-func (x AF) at(i int) V { return F(x[i]) }
-func (x AS) at(i int) V { return S(x[i]) }
+func (x AB) at(i int) V { return newBV(B2I(x[i])) }
+func (x AI) at(i int) V { return newBV(I(x[i])) }
+func (x AF) at(i int) V { return newBV(F(x[i])) }
+func (x AS) at(i int) V { return newBV(S(x[i])) }
 
 func (x AV) slice(i, j int) array { return x[i:j] }
 func (x AB) slice(i, j int) array { return x[i:j] }
@@ -336,7 +336,7 @@ func (x AS) slice(i, j int) array { return x[i:j] }
 
 // sprintV returns a string for a V deep in an AV.
 func sprintV(ctx *Context, x V) string {
-	avx, ok := x.(AV)
+	avx, ok := x.BV.(AV)
 	if ok {
 		return avx.sprint(ctx, true)
 	}
@@ -370,7 +370,7 @@ func (x AV) sprint(ctx *Context, deep bool) string {
 		sep = " "
 	}
 	for i, xi := range x {
-		if xi != nil {
+		if xi != (V{}) {
 			fmt.Fprintf(sb, "%s", sprintV(ctx, xi))
 		}
 		if i < len(x)-1 {
@@ -502,7 +502,7 @@ func (v Variadic) zero() V {
 	case vMax:
 		return newBV(I(math.MaxInt))
 	}
-	return nil
+	return V{}
 }
 
 func (v Variadic) Matches(x Value) bool {
@@ -512,7 +512,7 @@ func (v Variadic) Matches(x Value) bool {
 
 func (p Projection) Matches(x Value) bool {
 	xp, ok := x.(Projection)
-	return ok && Match(p.Fun, xp.Fun) && Match(p.Args, xp.Args)
+	return ok && Match(p.Fun, xp.Fun) && p.Args.Matches(xp.Args)
 }
 
 func (p ProjectionFirst) Matches(x Value) bool {

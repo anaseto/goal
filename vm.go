@@ -13,10 +13,10 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ctx.push(ctx.constants[ops[ip]])
 			ip++
 		case opNil:
-			ctx.push(nil)
+			ctx.push(V{})
 		case opGlobal:
 			x := ctx.globals[ops[ip]]
-			if x == nil {
+			if x == (V{}) {
 				return ip - 1, fmt.Errorf("undefined global: %s",
 					ctx.gNames[ops[ip]])
 			}
@@ -24,7 +24,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ip++
 		case opLocal:
 			x := ctx.stack[ctx.frameIdx-int32(ops[ip])]
-			if x == nil {
+			if x == (V{}) {
 				return ip - 1, fmt.Errorf("undefined local: %s",
 					ctx.lambdas[ctx.lambda].Names[int32(ops[ip])])
 			}
@@ -37,7 +37,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ctx.stack[ctx.frameIdx-int32(ops[ip])] = ctx.top()
 			ip++
 		case opVariadic:
-			ctx.push(Variadic(ops[ip]))
+			ctx.push(newBV(Variadic(ops[ip])))
 			ip++
 		case opLambda:
 			ctx.push(ctx.lambdaVs[ops[ip]])
@@ -63,8 +63,8 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 		case opApply2V:
 			v := Variadic(ops[ip])
 			r := ctx.applyNVariadic(v, 2)
-			if err, ok := r.(error); ok && err != nil {
-				return ip - 1, err
+			if isErr(r) {
+				return ip - 1, r.BV.(error)
 			}
 			ctx.push(r)
 			ip++
@@ -78,8 +78,8 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			v := Variadic(ops[ip])
 			ip++
 			r := ctx.applyNVariadic(v, int(ops[ip]))
-			if err, ok := r.(error); ok && err != nil {
-				return ip - 2, err
+			if isErr(r) {
+				return ip - 2, r.BV.(error)
 			}
 			ctx.push(r)
 			ip++
@@ -129,7 +129,7 @@ func (ctx *Context) pushArgs(args []V) {
 
 func (ctx *Context) pop() V {
 	arg := ctx.stack[len(ctx.stack)-1]
-	ctx.stack[len(ctx.stack)-1] = nil
+	ctx.stack[len(ctx.stack)-1] = V{}
 	ctx.stack = ctx.stack[:len(ctx.stack)-1]
 	return arg
 }
@@ -142,7 +142,7 @@ func (ctx *Context) popN(n int) []V {
 	topN := ctx.stack[len(ctx.stack)-n:]
 	args := cloneArgs(topN)
 	for i := range topN {
-		topN[i] = nil
+		topN[i] = V{}
 	}
 	ctx.stack = ctx.stack[:len(ctx.stack)-n]
 	return args
@@ -157,14 +157,14 @@ func (ctx *Context) peekN(n int) []V {
 }
 
 func (ctx *Context) drop() {
-	ctx.stack[len(ctx.stack)-1] = nil
+	ctx.stack[len(ctx.stack)-1] = V{}
 	ctx.stack = ctx.stack[:len(ctx.stack)-1]
 }
 
 func (ctx *Context) dropN(n int) {
 	topN := ctx.stack[len(ctx.stack)-n:]
 	for i := range topN {
-		topN[i] = nil
+		topN[i] = V{}
 	}
 	ctx.stack = ctx.stack[:len(ctx.stack)-n]
 }

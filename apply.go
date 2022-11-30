@@ -74,10 +74,10 @@ func (ctx *Context) applyN(x V, n int) V {
 	case array:
 		switch n {
 		case 1:
-			return ctx.applyArray(xv, ctx.pop())
+			return ctx.applyArray(x, ctx.pop())
 		default:
 			args := ctx.peekN(n)
-			r := ctx.applyArrayArgs(xv, args[len(args)-1], args[:len(args)-1])
+			r := ctx.applyArrayArgs(x, args[len(args)-1], args[:len(args)-1])
 			ctx.dropN(n)
 			return r
 		}
@@ -87,29 +87,33 @@ func (ctx *Context) applyN(x V, n int) V {
 }
 
 // applyArray applies an array to a value.
-func (ctx *Context) applyArray(x array, y V) V {
+func (ctx *Context) applyArray(x V, y V) V {
+	xv := x.BV.(array)
+	if y == (V{}) {
+		return x
+	}
 	switch yv := y.BV.(type) {
 	case F:
 		if !isI(yv) {
-			return errf("a[x] : non-integer index (%g)", y)
+			return errf("x[y] : non-integer index (%g)", yv)
 		}
 		i := int(yv)
 		if i < 0 {
-			i = x.Len() + i
+			i = xv.Len() + i
 		}
-		if i < 0 || i >= x.Len() {
-			return errf("a[x] : out of bounds index: %d", i)
+		if i < 0 || i >= xv.Len() {
+			return errf("x[y] : out of bounds index: %d", i)
 		}
-		return x.at(i)
+		return xv.at(i)
 	case I:
 		i := int(yv)
 		if i < 0 {
-			i = x.Len() + i
+			i = xv.Len() + i
 		}
-		if i < 0 || i >= x.Len() {
-			return errf("a[x] : out of bounds index: %d", i)
+		if i < 0 || i >= xv.Len() {
+			return errf("x[y] : out of bounds index: %d", i)
 		}
-		return x.at(i)
+		return xv.at(i)
 	case AV:
 		r := make(AV, yv.Len())
 		for i, yi := range yv {
@@ -124,22 +128,23 @@ func (ctx *Context) applyArray(x array, y V) V {
 		if isErr(iy) {
 			return errf("x[y] : %v", iy.BV)
 		}
-		r := x.atIndices(iy.BV.(AI))
+		r := xv.atIndices(iy.BV.(AI))
 		return r
 	default:
-		return errf("a[x] : x non-array non-integer")
+		return errf("x[y] : y non-array non-integer (%s)", y.Type())
 	}
 }
 
-func (ctx *Context) applyArrayArgs(x array, arg V, args []V) V {
+func (ctx *Context) applyArrayArgs(x V, arg V, args []V) V {
+	xv := x.BV.(array)
 	// TODO: annotate error with depth?
 	if len(args) == 0 {
 		return ctx.applyArray(x, arg)
 	}
-	if arg.BV == nil {
-		r := make(AV, x.Len())
+	if arg == (V{}) {
+		r := make(AV, xv.Len())
 		for i := 0; i < len(r); i++ {
-			r[i] = ctx.ApplyN(x.at(i), args)
+			r[i] = ctx.ApplyN(xv.at(i), args)
 			if isErr(r[i]) {
 				return r[i]
 			}
@@ -168,7 +173,7 @@ func (ctx *Context) applyArrayArgs(x array, arg V, args []V) V {
 func (ctx *Context) applyVariadic(v Variadic) V {
 	args := ctx.peek()
 	x := args[0]
-	if x.BV == nil {
+	if x == (V{}) {
 		ctx.drop()
 		return newBV(ProjectionMonad{Fun: newBV(v)})
 	}
@@ -185,7 +190,7 @@ func (ctx *Context) applyNVariadic(v Variadic, n int) V {
 	args := ctx.peekN(n)
 	if hasNil(args) {
 		if n == 2 {
-			if args[1].BV != nil {
+			if args[1] != (V{}) {
 				arg := args[1]
 				ctx.dropN(n)
 				return newBV(ProjectionFirst{Fun: newBV(v), Arg: arg})
@@ -208,7 +213,7 @@ func (ctx *Context) applyProjection(p Projection, n int) V {
 		nilc := 0
 		for _, arg := range p.Args {
 			switch {
-			case arg.BV != nil:
+			case arg != (V{}):
 				ctx.push(arg)
 			default:
 				ctx.push(args[nilc])
@@ -222,7 +227,7 @@ func (ctx *Context) applyProjection(p Projection, n int) V {
 		vargs := cloneArgs(p.Args)
 		nilc := 1
 		for i := len(vargs) - 1; i >= 0; i-- {
-			if vargs[i].BV == nil {
+			if vargs[i] == (V{}) {
 				if nilc > len(args) {
 					break
 				}
@@ -246,13 +251,13 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 	args := ctx.peekN(n)
 	if lc.Rank > n || hasNil(args) {
 		if n == 1 {
-			if args[0].BV == nil {
+			if args[0] == (V{}) {
 				ctx.drop() // drop nil
 				return newBV(ProjectionMonad{Fun: newBV(id)})
 			}
 			return newBV(ProjectionFirst{Fun: newBV(id), Arg: ctx.pop()})
 		}
-		if n == 2 && args[1].BV == nil && args[0].BV != nil {
+		if n == 2 && args[1] == (V{}) && args[0] != (V{}) {
 			return newBV(ProjectionFirst{Fun: newBV(id), Arg: ctx.pop()})
 		}
 		return newBV(Projection{Fun: newBV(id), Args: ctx.popN(n)})

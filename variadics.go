@@ -168,16 +168,17 @@ func VMax(ctx *Context, args []V) V {
 	case 1:
 		return reverse(args[0])
 	case 2:
-		f, ok := args[1].(Function)
+		x, y := args[1], args[0]
+		_, ok := x.BV.(Function)
 		if ok {
-			ctx.push(args[0])
-			r := ctx.applyN(f, 1)
-			if err, ok := r.(errV); ok {
-				return err
+			ctx.push(y)
+			r := ctx.applyN(x, 1)
+			if isErr(r) {
+				return r
 			}
-			return rotate(r, args[0])
+			return rotate(r, y)
 		}
-		return maximum(args[1], args[0])
+		return maximum(x, y)
 	default:
 		return errRank("|")
 	}
@@ -213,16 +214,17 @@ func VEqual(ctx *Context, args []V) V {
 	case 1:
 		return group(args[0])
 	case 2:
-		f, ok := args[1].(Function)
+		x, y := args[1], args[0]
+		_, ok := x.BV.(Function)
 		if ok {
 			ctx.push(args[0])
-			r := ctx.applyN(f, 1)
-			if err, ok := r.(errV); ok {
-				return err
+			r := ctx.applyN(x, 1)
+			if isErr(r) {
+				return r
 			}
-			return groupBy(r, args[0])
+			return groupBy(r, y)
 		}
-		return equal(args[1], args[0])
+		return equal(x, y)
 	default:
 		return errRank("=")
 	}
@@ -234,7 +236,7 @@ func VMatch(ctx *Context, args []V) V {
 	case 1:
 		return not(args[0])
 	case 2:
-		return B2I(Match(args[1], args[0]))
+		return newBV(B2I(Match(args[1], args[0])))
 	default:
 		return errRank("~")
 	}
@@ -268,18 +270,19 @@ func VWithout(ctx *Context, args []V) V {
 func VTake(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return I(Length(args[0]))
+		return newBV(I(Length(args[0])))
 	case 2:
-		f, ok := args[1].(Function)
+		x, y := args[1], args[0]
+		_, ok := x.BV.(Function)
 		if ok {
-			ctx.push(args[0])
-			r := ctx.applyN(f, 1)
-			if err, ok := r.(errV); ok {
-				return err
+			ctx.push(y)
+			r := ctx.applyN(x, 1)
+			if isErr(r) {
+				return r
 			}
-			return replicate(r, args[0])
+			return replicate(r, y)
 		}
-		return take(args[1], args[0])
+		return take(x, y)
 	default:
 		return errRank("#")
 	}
@@ -291,16 +294,17 @@ func VDrop(ctx *Context, args []V) V {
 	case 1:
 		return floor(args[0])
 	case 2:
-		f, ok := args[1].(Function)
+		x, y := args[1], args[0]
+		_, ok := x.BV.(Function)
 		if ok {
-			ctx.push(args[0])
-			r := ctx.applyN(f, 1)
-			if err, ok := r.(errV); ok {
-				return err
+			ctx.push(y)
+			r := ctx.applyN(x, 1)
+			if isErr(r) {
+				return r
 			}
-			return weedOut(r, args[0])
+			return weedOut(r, y)
 		}
-		return drop(args[1], args[0])
+		return drop(x, y)
 	default:
 		return errRank("_")
 	}
@@ -310,13 +314,14 @@ func VDrop(ctx *Context, args []V) V {
 func VCast(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return S(args[0].Sprint(ctx))
+		return newBV(S(args[0].Sprint(ctx)))
 	case 2:
-		switch args[1].(type) {
+		x, y := args[1], args[0]
+		switch x.BV.(type) {
 		case array:
-			return search(args[1], args[0])
+			return search(x, y)
 		default:
-			return cast(args[1], args[0])
+			return cast(x, y)
 		}
 	default:
 		return errRank("$")
@@ -339,7 +344,7 @@ func VFind(ctx *Context, args []V) V {
 func VApply(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return S(args[0].Type())
+		return newBV(S(args[0].Type()))
 	case 2:
 		x := args[1]
 		ctx.push(args[0])
@@ -360,7 +365,7 @@ func VApplyN(ctx *Context, args []V) V {
 		return eval(ctx, args[0])
 	case 2:
 		x := args[1]
-		av := toArray(args[0]).(array)
+		av := toArray(args[0]).BV.(array)
 		for i := av.Len() - 1; i >= 0; i-- {
 			ctx.push(av.at(i))
 		}
@@ -450,17 +455,17 @@ func VList(ctx *Context, args []V) V {
 	if ok {
 		r := cloneArgs(args)
 		reverseArgs(r)
-		return AV(r)
+		return newBV(AV(r))
 	}
 	switch t {
 	case tB, tI, tF, tS:
-		r := canonical(AV(args))
+		r := newBV(canonical(AV(args)))
 		reverseMut(r)
-		return newBV(r)
+		return r
 	default:
 		r := cloneArgs(args)
 		reverseArgs(r)
-		return canonical(AV(r))
+		return newBV(canonical(AV(r)))
 	}
 }
 
@@ -474,7 +479,7 @@ func VEach(ctx *Context, args []V) V {
 	default:
 		return errRank("'")
 	}
-	return nil
+	return V{}
 }
 
 // VFold implements the / variadic adverb.
@@ -487,7 +492,7 @@ func VFold(ctx *Context, args []V) V {
 	default:
 		return errRank("/")
 	}
-	return nil
+	return V{}
 }
 
 // VScan implements the \ variadic adverb.
@@ -500,5 +505,5 @@ func VScan(ctx *Context, args []V) V {
 	default:
 		return errRank("\\")
 	}
-	return nil
+	return V{}
 }

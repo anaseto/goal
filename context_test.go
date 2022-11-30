@@ -277,7 +277,7 @@ func TestEval(t *testing.T) {
 			if !Match(vLeft, vRight) {
 				t.Log(ps)
 				t.Log(matchString)
-				if vLeft != nil {
+				if vLeft != (V{}) {
 					t.Logf("results: %s vs %s\n", vLeft.Sprint(ctxLeft), vRight.Sprint(ctxRight))
 				} else {
 					t.Logf("results: %v vs %s\n", vLeft, vRight.Sprint(ctxRight))
