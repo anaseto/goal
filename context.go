@@ -95,11 +95,11 @@ func NewContext() *Context {
 
 // RegisterVariadic adds a variadic function to the context, and returns it, so
 // that it can be assigned to a global variable.
-func (ctx *Context) RegisterVariadic(name string, vf VariadicFun) Variadic {
+func (ctx *Context) RegisterVariadic(name string, vf VariadicFun) V {
 	id := len(ctx.variadics)
 	ctx.variadics = append(ctx.variadics, vf)
 	ctx.variadicsNames = append(ctx.variadicsNames, name)
-	return Variadic(id)
+	return NewVariadic(Variadic(id))
 }
 
 // RegisterMonad adds a variadic function to the context, and generates a new
@@ -108,25 +108,25 @@ func (ctx *Context) RegisterVariadic(name string, vf VariadicFun) Variadic {
 // Note that while that a keyword defined in such a way will not take a left
 // argument, it is still possible to pass several arguments to it with bracket
 // indexing, like for any value.
-func (ctx *Context) RegisterMonad(name string, vf VariadicFun) Variadic {
+func (ctx *Context) RegisterMonad(name string, vf VariadicFun) V {
 	id := len(ctx.variadics)
 	ctx.variadics = append(ctx.variadics, vf)
 	ctx.variadicsNames = append(ctx.variadicsNames, name)
 	ctx.names[name] = NameMonad
 	ctx.vNames[name] = Variadic(id)
-	return Variadic(id)
+	return NewVariadic(Variadic(id))
 }
 
 // RegisterDyad adds a variadic function to the context, and generates a new
 // dyadic keyword for that variadic (parsing will search for a left argument).
 // The variadic is also returned.
-func (ctx *Context) RegisterDyad(name string, vf VariadicFun) Variadic {
+func (ctx *Context) RegisterDyad(name string, vf VariadicFun) V {
 	id := len(ctx.variadics)
 	ctx.variadics = append(ctx.variadics, vf)
 	ctx.variadicsNames = append(ctx.variadicsNames, name)
 	ctx.names[name] = NameDyad
 	ctx.vNames[name] = Variadic(id)
-	return Variadic(id)
+	return NewVariadic(Variadic(id))
 }
 
 // AssignGlobal assigns a value to a global variable name.

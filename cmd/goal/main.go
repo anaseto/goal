@@ -80,15 +80,15 @@ func runStdin(ctx *goal.Context) {
 			if len(args) >= 1 {
 				arg := args[0]
 				switch {
-				case goal.Match(arg, goal.NewV(goal.S("+"))):
+				case goal.Match(arg, goal.NewS("+")):
 					fmt.Println(strings.TrimSpace(helpVERBS))
-				case goal.Match(arg, goal.NewV(goal.S("nv"))):
+				case goal.Match(arg, goal.NewS("nv")):
 					fmt.Println(strings.TrimSpace(helpNAMEDVERBS))
-				case goal.Match(arg, goal.NewV(goal.S("'"))):
+				case goal.Match(arg, goal.NewS("'")):
 					fmt.Println(strings.TrimSpace(helpADVERBS))
-				case goal.Match(arg, goal.NewV(goal.S("io"))):
+				case goal.Match(arg, goal.NewS("io")):
 					fmt.Println(strings.TrimSpace(helpIO))
-				case goal.Match(arg, goal.NewV(goal.S("syn"))):
+				case goal.Match(arg, goal.NewS("syn")):
 					fmt.Println(strings.TrimSpace(helpSyntax))
 				default:
 					fmt.Println(strings.TrimSpace(helpTopics))
@@ -96,8 +96,8 @@ func runStdin(ctx *goal.Context) {
 			}
 			return goal.V{}
 		}})
-	ctx.AssignGlobal("help", goal.NewV(help))
-	ctx.AssignGlobal("h", goal.NewV(help))
+	ctx.AssignGlobal("help", help)
+	ctx.AssignGlobal("h", help)
 	lr := lineReader{r: bufio.NewReader(os.Stdin)}
 	fmt.Printf("goal repl, type help\"\" for basic info.\n")
 	for {
@@ -189,7 +189,7 @@ func registerVariadics(ctx *goal.Context) {
 			}
 			return goal.V{}
 		}})
-	ctx.AssignGlobal("say", goal.NewV(say))
+	ctx.AssignGlobal("say", say)
 	slurp := ctx.RegisterMonad("slurp", goal.VariadicFun{
 		Func: func(ctx *goal.Context, args []goal.V) goal.V {
 			switch len(args) {
@@ -200,7 +200,7 @@ func registerVariadics(ctx *goal.Context) {
 					if err != nil {
 						return goal.Errorf("slurp: %v", err)
 					}
-					return goal.NewV(goal.S(bytes))
+					return goal.NewS(string(bytes))
 				default:
 					return goal.NewError("slurp: non-string filename")
 				}
@@ -208,9 +208,9 @@ func registerVariadics(ctx *goal.Context) {
 				return goal.NewError("slurp: too many arguments")
 			}
 		}})
-	ctx.AssignGlobal("slurp", goal.NewV(slurp))
+	ctx.AssignGlobal("slurp", slurp)
 	shell := ctx.RegisterMonad("shell", goal.VariadicFun{Func: vShell})
-	ctx.AssignGlobal("shell", goal.NewV(shell))
+	ctx.AssignGlobal("shell", shell)
 }
 
 const helpTopics = `
