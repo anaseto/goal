@@ -18,7 +18,6 @@ type Context struct {
 
 	// values
 	globals        []V
-	lambdaVs       []V
 	constants      []V
 	variadics      []VariadicFun
 	variadicsNames []string
@@ -301,7 +300,6 @@ func (ctx *Context) derive() *Context {
 	nctx.names = ctx.names
 	nctx.vNames = ctx.vNames
 	nctx.lambdas = ctx.lambdas
-	nctx.lambdaVs = ctx.lambdaVs
 	nctx.globals = ctx.globals
 	nctx.gNames = ctx.gNames
 	nctx.gIDs = ctx.gIDs
@@ -313,7 +311,6 @@ func (ctx *Context) derive() *Context {
 // merge integrates changes from a context created with derive.
 func (ctx *Context) merge(nctx *Context) {
 	ctx.lambdas = nctx.lambdas
-	ctx.lambdaVs = nctx.lambdaVs
 	ctx.globals = nctx.globals
 	ctx.gNames = nctx.gNames
 	ctx.gIDs = nctx.gIDs

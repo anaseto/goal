@@ -19,6 +19,10 @@ func Match(x, y V) bool {
 		}
 		yf, ok := y.Value.(F)
 		return ok && F(x.N) == yf
+	case IntVariadic:
+		return y.Kind == IntVariadic && x.N == y.N
+	case IntLambda:
+		return y.Kind == IntLambda && x.N == y.N
 	default:
 		return y.Kind == Boxed && x.Value.Matches(y.Value)
 	}

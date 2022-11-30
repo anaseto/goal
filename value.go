@@ -17,15 +17,41 @@ type V struct {
 	Value Value     // boxed value
 }
 
+// ValueKind represents the kinds of values.
+type ValueKind int8
+
+const (
+	Nil ValueKind = iota
+	Int
+	IntVariadic
+	IntLambda
+	Boxed // boxed value (Value field)
+)
+
+// Value represents any kind of boxed value.
+type Value interface {
+	// Matches returns true if the value matches another (in the sense of
+	// the ~ operator).
+	Matches(x Value) bool
+	// Sprint returns a prettified string representation of the value.
+	Sprint(*Context) string
+	// Type returns the name of the value's type.
+	Type() string
+}
+
 // Type returns the name of the value's type.
 func (v V) Type() string {
 	switch v.Kind {
-	case Nil:
-		return "nil"
 	case Int:
 		return "n"
-	default:
+	case IntVariadic:
+		return "v"
+	case IntLambda:
+		return "l"
+	case Boxed:
 		return v.Value.Type()
+	default:
+		return ""
 	}
 }
 
@@ -44,12 +70,32 @@ func (v V) Lambda() Lambda {
 // Sprint returns a prettified string representation of the value.
 func (v V) Sprint(ctx *Context) string {
 	switch v.Kind {
-	case Nil:
-		return "nil"
 	case Int:
 		return fmt.Sprintf("%d", v.N)
-	default:
+	case IntVariadic:
+		return "v"
+	case IntLambda:
+		return "l"
+	case Boxed:
 		return v.Value.Sprint(ctx)
+	default:
+		return ""
+	}
+}
+
+func (v V) Rank(ctx *Context) int {
+	switch v.Kind {
+	case IntVariadic:
+		return 2
+	case IntLambda:
+		return ctx.lambdas[v.N].Rank
+	case Boxed:
+		if vf, ok := v.Value.(Function); ok {
+			return vf.Rank(ctx)
+		}
+		return 0
+	default:
+		return 0
 	}
 }
 
@@ -83,28 +129,6 @@ func NewS(s string) V {
 	return V{Kind: Boxed, Value: S(s)}
 }
 
-// ValueKind represents the kinds of values.
-type ValueKind int8
-
-const (
-	Nil ValueKind = iota
-	Int
-	IntVariadic
-	IntLambda
-	Boxed // boxed value (Value field)
-)
-
-// Value represents any kind of boxed value.
-type Value interface {
-	// Matches returns true if the value matches another (in the sense of
-	// the ~ operator).
-	Matches(x Value) bool
-	// Sprint returns a prettified string representation of the value.
-	Sprint(*Context) string
-	// Type returns the name of the value's type.
-	Type() string
-}
-
 // F represents real numbers.
 type F float64
 
@@ -123,8 +147,15 @@ func isErr(x V) bool {
 }
 
 func isFunction(x V) bool {
-	_, ok := x.Value.(Function)
-	return ok
+	switch x.Kind {
+	case IntVariadic, IntLambda:
+		return true
+	case Boxed:
+		_, ok := x.Value.(Function)
+		return ok
+	default:
+		return false
+	}
 }
 
 func (f F) Matches(y Value) bool {
@@ -267,10 +298,6 @@ func (v Variadic) String() string {
 	return fmt.Sprintf("{Variadic %d}", v)
 }
 
-func (v Variadic) Sprint(ctx *Context) string {
-	return v.String()
-}
-
 // DerivedVerb represents values modified by an adverb. This kind value is not
 // manipulable within the program, as it is only produced as an intermediary
 // value in adverb trains and only appears as an adverb argument.
@@ -302,7 +329,6 @@ type ProjectionMonad struct {
 // Lambda represents an user defined function by ID.
 type Lambda int32
 
-func (v Variadic) Type() string        { return "v" }
 func (p Projection) Type() string      { return "p" }
 func (p ProjectionFirst) Type() string { return "p" }
 func (p ProjectionMonad) Type() string { return "p" }
@@ -335,7 +361,7 @@ func (p ProjectionMonad) Sprint(ctx *Context) string {
 }
 
 func (r DerivedVerb) Sprint(ctx *Context) string {
-	return fmt.Sprintf("%s%s", r.Arg.Sprint(ctx), r.Fun.Sprint(ctx))
+	return fmt.Sprintf("%s%s", r.Arg.Sprint(ctx), r.Fun.String())
 }
 
 func (l Lambda) Sprint(ctx *Context) string {
@@ -529,9 +555,6 @@ type Function interface {
 	Rank(ctx *Context) int
 }
 
-// Rank returns 2 for variadics.
-func (v Variadic) Rank(ctx *Context) int { return 2 }
-
 // Rank for a projection is the number of nil arguments.
 func (p Projection) Rank(ctx *Context) int { return countNils(p.Args) }
 
@@ -543,10 +566,6 @@ func (p ProjectionMonad) Rank(ctx *Context) int { return 1 }
 
 // Rank returns 2 for derived verbs.
 func (r DerivedVerb) Rank(ctx *Context) int { return 2 }
-
-// Rank for a lambda is the number of arguments, either determined by the
-// signature, or the use of x, y and z in the definition.
-func (l Lambda) Rank(ctx *Context) int { return ctx.lambdas[l].Rank }
 
 type zeroFun interface {
 	Function
@@ -567,11 +586,6 @@ func (v Variadic) zero() V {
 	return V{}
 }
 
-func (v Variadic) Matches(x Value) bool {
-	xv, ok := x.(Variadic)
-	return ok && v == xv
-}
-
 func (p Projection) Matches(x Value) bool {
 	xp, ok := x.(Projection)
 	return ok && Match(p.Fun, xp.Fun) && p.Args.Matches(xp.Args)
@@ -590,9 +604,4 @@ func (p ProjectionMonad) Matches(x Value) bool {
 func (r DerivedVerb) Matches(x Value) bool {
 	xr, ok := x.(DerivedVerb)
 	return ok && r.Fun == xr.Fun && Match(r.Arg, xr.Arg)
-}
-
-func (l Lambda) Matches(x Value) bool {
-	xl, ok := x.(Lambda)
-	return ok && l == xl
 }

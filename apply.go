@@ -29,14 +29,16 @@ func (ctx *Context) ApplyN(x V, args []V) V {
 // applyN applies x with the top n arguments in the stack. It consumes the
 // arguments, but does not push the result, returing it instead.
 func (ctx *Context) applyN(x V, n int) V {
-	switch xv := x.Value.(type) {
-	case Lambda:
-		return ctx.applyLambda(xv, n)
-	case Variadic:
+	switch x.Kind {
+	case IntLambda:
+		return ctx.applyLambda(x.Lambda(), n)
+	case IntVariadic:
 		if n == 1 {
-			return ctx.applyVariadic(xv)
+			return ctx.applyVariadic(x.Variadic())
 		}
-		return ctx.applyNVariadic(xv, n)
+		return ctx.applyNVariadic(x.Variadic(), n)
+	}
+	switch xv := x.Value.(type) {
 	case DerivedVerb:
 		ctx.push(xv.Arg)
 		args := ctx.peekN(n + 1)
@@ -175,7 +177,7 @@ func (ctx *Context) applyVariadic(v Variadic) V {
 	x := args[0]
 	if x == (V{}) {
 		ctx.drop()
-		return NewV(ProjectionMonad{Fun: NewV(v)})
+		return NewV(ProjectionMonad{Fun: NewVariadic(v)})
 	}
 	if ctx.variadics[v].Adverb {
 		ctx.drop()
@@ -193,10 +195,10 @@ func (ctx *Context) applyNVariadic(v Variadic, n int) V {
 			if args[1] != (V{}) {
 				arg := args[1]
 				ctx.dropN(n)
-				return NewV(ProjectionFirst{Fun: NewV(v), Arg: arg})
+				return NewV(ProjectionFirst{Fun: NewVariadic(v), Arg: arg})
 			}
 		}
-		return NewV(Projection{Fun: NewV(v), Args: ctx.popN(n)})
+		return NewV(Projection{Fun: NewVariadic(v), Args: ctx.popN(n)})
 	}
 	r := ctx.variadics[v].Func(ctx, args)
 	ctx.dropN(n)
@@ -253,14 +255,14 @@ func (ctx *Context) applyLambda(id Lambda, n int) V {
 		if n == 1 {
 			if args[0] == (V{}) {
 				ctx.drop() // drop nil
-				return NewV(ProjectionMonad{Fun: NewV(id)})
+				return NewV(ProjectionMonad{Fun: NewLambda(id)})
 			}
-			return NewV(ProjectionFirst{Fun: NewV(id), Arg: ctx.pop()})
+			return NewV(ProjectionFirst{Fun: NewLambda(id), Arg: ctx.pop()})
 		}
 		if n == 2 && args[1] == (V{}) && args[0] != (V{}) {
-			return NewV(ProjectionFirst{Fun: NewV(id), Arg: ctx.pop()})
+			return NewV(ProjectionFirst{Fun: NewLambda(id), Arg: ctx.pop()})
 		}
-		return NewV(Projection{Fun: NewV(id), Args: ctx.popN(n)})
+		return NewV(Projection{Fun: NewLambda(id), Args: ctx.popN(n)})
 	}
 	nVars := len(lc.Names) - lc.Rank
 	olen := len(ctx.stack)

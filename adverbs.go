@@ -3,23 +3,22 @@ package goal
 import "strings"
 
 func fold2(ctx *Context, args []V) V {
-	fv := args[1]
-	switch fv := fv.Value.(type) {
-	case Variadic:
-		switch fv {
+	f := args[1]
+	switch f.Kind {
+	case IntVariadic:
+		switch f.Variadic() {
 		case vAdd:
 			return fold2vAdd(args[0])
 		}
 	}
-	f, ok := fv.Value.(Function)
-	if !ok {
-		switch f := fv.Value.(type) {
+	if !isFunction(f) {
+		switch fv := f.Value.(type) {
 		case S:
-			return fold2Join(f, args[0])
+			return fold2Join(fv, args[0])
 		case I, F, AB, AI, AF:
-			return fold2Decode(fv, args[0])
+			return fold2Decode(f, args[0])
 		default:
-			return errType("F/x", "F", f)
+			return errType("F/x", "F", fv)
 		}
 	}
 	if f.Rank(ctx) != 2 {
@@ -30,7 +29,7 @@ func fold2(ctx *Context, args []V) V {
 	switch x := x.Value.(type) {
 	case array:
 		if x.Len() == 0 {
-			f, ok := f.(zeroFun)
+			f, ok := f.Value.(zeroFun)
 			if ok {
 				return f.zero()
 			}
@@ -40,7 +39,7 @@ func fold2(ctx *Context, args []V) V {
 		for i := 1; i < x.Len(); i++ {
 			ctx.push(x.at(i))
 			ctx.push(r)
-			r = ctx.applyN(fv, 2)
+			r = ctx.applyN(f, 2)
 		}
 		return r
 	default:
@@ -224,11 +223,10 @@ func fold2Decode(f V, x V) V {
 
 func fold3(ctx *Context, args []V) V {
 	f := args[1]
-	ff, ok := f.Value.(Function)
-	if !ok {
-		return errf("x F/y : F not a function (%s)", args[1].Type())
+	if !isFunction(f) {
+		return errf("x F/y : F not a function (%s)", f.Type())
 	}
-	if ff.Rank(ctx) != 2 {
+	if f.Rank(ctx) != 2 {
 		return fold3While(ctx, args)
 	}
 	y := args[0]
@@ -258,15 +256,7 @@ func fold3While(ctx *Context, args []V) V {
 	f := args[1]
 	x := args[2]
 	y := args[0]
-	switch xv := x.Value.(type) {
-	case F:
-		if !isI(xv) {
-			return errf("n f/y : non-integer n (%g)", xv)
-		}
-		return fold3doTimes(ctx, int(xv), f, y)
-	case I:
-		return fold3doTimes(ctx, int(xv), f, y)
-	case Function:
+	if isFunction(x) {
 		for {
 			ctx.push(y)
 			cond := ctx.applyN(x, 1)
@@ -282,6 +272,15 @@ func fold3While(ctx *Context, args []V) V {
 				return y
 			}
 		}
+	}
+	switch xv := x.Value.(type) {
+	case F:
+		if !isI(xv) {
+			return errf("n f/y : non-integer n (%g)", xv)
+		}
+		return fold3doTimes(ctx, int(xv), f, y)
+	case I:
+		return fold3doTimes(ctx, int(xv), f, y)
 	default:
 		return errType("x f/y", "x", xv)
 	}
@@ -299,8 +298,7 @@ func fold3doTimes(ctx *Context, n int, f, y V) V {
 }
 
 func scan2(ctx *Context, f, x V) V {
-	ff, ok := f.Value.(Function)
-	if !ok {
+	if !isFunction(f) {
 		switch fv := f.Value.(type) {
 		case S:
 			return scan2Split(fv, x)
@@ -310,14 +308,14 @@ func scan2(ctx *Context, f, x V) V {
 			return errType("f\\x", "f", fv)
 		}
 	}
-	if ff.Rank(ctx) != 2 {
+	if f.Rank(ctx) != 2 {
 		// TODO: converge
-		return errf("f\\x : f rank is %d (expected 2)", ff.Rank(ctx))
+		return errf("f\\x : f rank is %d (expected 2)", f.Rank(ctx))
 	}
 	switch xv := x.Value.(type) {
 	case array:
 		if xv.Len() == 0 {
-			ff, ok := ff.(zeroFun)
+			ff, ok := f.Value.(zeroFun)
 			if ok {
 				return ff.zero()
 			}
@@ -506,11 +504,10 @@ func scan2Encode(f V, x V) V {
 
 func scan3(ctx *Context, args []V) V {
 	f := args[1]
-	ff, ok := f.Value.(Function)
-	if !ok {
+	if !isFunction(f) {
 		return errf("x f'y : f not a function (%s)", f.Type())
 	}
-	if ff.Rank(ctx) != 2 {
+	if f.Rank(ctx) != 2 {
 		return scan3While(ctx, args)
 	}
 	y := args[0]
@@ -548,15 +545,7 @@ func scan3While(ctx *Context, args []V) V {
 	f := args[1]
 	x := args[2]
 	y := args[0]
-	switch xv := x.Value.(type) {
-	case F:
-		if !isI(xv) {
-			return errf("n f\\y : non-integer n (%g)", xv)
-		}
-		return scan3doTimes(ctx, int(xv), f, y)
-	case I:
-		return scan3doTimes(ctx, int(xv), f, y)
-	case Function:
+	if isFunction(x) {
 		r := AV{y}
 		for {
 			ctx.push(y)
@@ -574,6 +563,15 @@ func scan3While(ctx *Context, args []V) V {
 			}
 			r = append(r, y)
 		}
+	}
+	switch xv := x.Value.(type) {
+	case F:
+		if !isI(xv) {
+			return errf("n f\\y : non-integer n (%g)", xv)
+		}
+		return scan3doTimes(ctx, int(xv), f, y)
+	case I:
+		return scan3doTimes(ctx, int(xv), f, y)
 	default:
 		return errType("x f\\y", "x", xv)
 	}
@@ -594,8 +592,7 @@ func scan3doTimes(ctx *Context, n int, f, y V) V {
 
 func each2(ctx *Context, args []V) V {
 	f := args[1]
-	_, ok := f.Value.(Function)
-	if !ok {
+	if !isFunction(f) {
 		return errf("f'x : f not a function (%s)", f.Type())
 	}
 	x := toArray(args[0])
@@ -619,8 +616,7 @@ func each2(ctx *Context, args []V) V {
 
 func each3(ctx *Context, args []V) V {
 	f := args[1]
-	_, ok := f.Value.(Function)
-	if !ok {
+	if !isFunction(f) {
 		return errf("x f'y : f not a function (%s)", f.Type())
 	}
 	x, okax := args[2].Value.(array)
