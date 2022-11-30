@@ -279,12 +279,14 @@ func take(x, y V) V {
 		if i > yv.Len() {
 			return takeCyclic(yv, i)
 		}
-		return NewV(yv.slice(0, i))
+		y.Value = yv.slice(0, i)
+		return canonicalV(y)
 	default:
 		if i < -yv.Len() {
 			return takeCyclic(yv, i)
 		}
-		return NewV(yv.slice(yv.Len()+i, yv.Len()))
+		y.Value = yv.slice(yv.Len()+i, yv.Len())
+		return canonicalV(y)
 	}
 }
 
@@ -664,14 +666,16 @@ func nudgeBack(x V) V {
 
 // windows returns i^y.
 func windows(i int, y V) V {
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 	case array:
-		if i <= 0 || i >= y.Len()+1 {
-			return errf("i^y : i out of range !%d (%d)", y.Len()+1, i)
+		if i <= 0 || i >= yv.Len()+1 {
+			return errf("i^y : i out of range !%d (%d)", yv.Len()+1, i)
 		}
-		r := make(AV, 1+y.Len()-i)
+		r := make(AV, 1+yv.Len()-i)
 		for j := range r {
-			r[j] = NewV(y.slice(j, j+i))
+			yc := y
+			yc.Value = yv.slice(j, j+i)
+			r[j] = canonicalV(yc)
 		}
 		return NewV(canonical(r))
 	default:
