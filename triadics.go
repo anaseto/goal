@@ -7,7 +7,7 @@ func (ctx *Context) amend3(x, y, f V) V {
 	switch x := x.Value.(type) {
 	case array:
 		y = toIndices(y)
-		if isErr(y) {
+		if y.IsErr() {
 			return y
 		}
 		return canonicalV(ctx.amend3array(cloneShallowArray(x), y, f))
@@ -22,7 +22,7 @@ func (ctx *Context) amend3arrayI(x array, y I, f V) V {
 	}
 	xy := x.at(int(y))
 	repl := ctx.Apply(f, xy)
-	if isErr(repl) {
+	if repl.IsErr() {
 		return errf("f call in @[x;y;f] : %v", repl)
 	}
 	if compatEltType(x, repl) {
@@ -44,7 +44,7 @@ func (ctx *Context) amend3array(x array, y, f V) V {
 	case AI:
 		for _, yi := range y {
 			ax := ctx.amend3arrayI(x, I(yi), f)
-			if isErr(ax) {
+			if ax.IsErr() {
 				return ax
 			}
 			x = ax.Value.(array)
@@ -53,7 +53,7 @@ func (ctx *Context) amend3array(x array, y, f V) V {
 	case AV:
 		for _, yi := range y {
 			ax := ctx.amend3array(x, yi, f)
-			if isErr(ax) {
+			if ax.IsErr() {
 				return ax
 			}
 			x = ax.Value.(array)
@@ -69,7 +69,7 @@ func (ctx *Context) amend4(x, y, f, z V) V {
 	switch x := x.Value.(type) {
 	case array:
 		y = toIndices(y)
-		if isErr(y) {
+		if y.IsErr() {
 			return y
 		}
 		return canonicalV(ctx.amend4array(cloneShallowArray(x), y, f, z))
@@ -84,7 +84,7 @@ func (ctx *Context) amend4arrayI(x array, y I, f, z V) V {
 	}
 	xy := x.at(int(y))
 	repl := ctx.Apply2(f, xy, z)
-	if isErr(repl) {
+	if repl.IsErr() {
 		return errf("f call in @[x;y;f;z] : %v", repl)
 	}
 	if compatEltType(x, repl) {
@@ -112,7 +112,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 		if !ok {
 			for _, xi := range y {
 				ax := ctx.amend4arrayI(x, I(xi), f, z)
-				if isErr(ax) {
+				if ax.IsErr() {
 					return ax
 				}
 				x = ax.Value.(array)
@@ -125,7 +125,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 		}
 		for i, xi := range y {
 			ax := ctx.amend4arrayI(x, I(xi), f, az.at(i))
-			if isErr(ax) {
+			if ax.IsErr() {
 				return ax
 			}
 			x = ax.Value.(array)
@@ -136,7 +136,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 		if !ok {
 			for _, xi := range y {
 				ax := ctx.amend4array(x, xi, f, z)
-				if isErr(ax) {
+				if ax.IsErr() {
 					return ax
 				}
 				x = ax.Value.(array)
@@ -149,7 +149,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 		}
 		for i, xi := range y {
 			ax := ctx.amend4array(x, xi, f, az.at(i))
-			if isErr(ax) {
+			if ax.IsErr() {
 				return ax
 			}
 			x = ax.Value.(array)
@@ -170,7 +170,7 @@ func try(ctx *Context, f1, x, f2 V) V {
 	if err, ok := r.Value.(errV); ok {
 		ctx.push(NewS(string(err)))
 		r = ctx.applyN(f2, 1)
-		if isErr(r) {
+		if r.IsErr() {
 			return errf("f2 call in .[f1;x;f2] : %v", r)
 		}
 	}

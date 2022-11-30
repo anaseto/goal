@@ -489,7 +489,7 @@ func ascend(x V) V {
 // descend returns >x.
 func descend(x V) V {
 	p := ascend(x)
-	if isErr(p) {
+	if p.IsErr() {
 		return errs(">" + strings.TrimPrefix(p.Value.(errV).Error(), "<"))
 	}
 	reverseMut(p)

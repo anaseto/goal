@@ -33,7 +33,7 @@ func equal(x, y V) V {
 			r := make(AV, x.Len())
 			for i := range r {
 				ri := equal(x[i], y.at(i))
-				if isErr(ri) {
+				if ri.IsErr() {
 					return ri
 				}
 				r[i] = ri
@@ -43,7 +43,7 @@ func equal(x, y V) V {
 		r := make(AV, x.Len())
 		for i := range r {
 			ri := equal(x[i], y)
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -82,7 +82,7 @@ func equalFV(x F, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := equalFV(F(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -121,7 +121,7 @@ func equalIV(x I, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := equalIV(I(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -146,7 +146,7 @@ func equalSV(x S, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := equalSV(S(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -205,7 +205,7 @@ func equalABV(x AB, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := equalIV(B2I(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -264,7 +264,7 @@ func equalAFV(x AF, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := equalFV(F(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -323,7 +323,7 @@ func equalAIV(x AI, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := equalIV(I(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -358,7 +358,7 @@ func equalASV(x AS, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := equalSV(S(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -395,7 +395,7 @@ func lesser(x, y V) V {
 			r := make(AV, x.Len())
 			for i := range r {
 				ri := lesser(x[i], y.at(i))
-				if isErr(ri) {
+				if ri.IsErr() {
 					return ri
 				}
 				r[i] = ri
@@ -405,7 +405,7 @@ func lesser(x, y V) V {
 		r := make(AV, x.Len())
 		for i := range r {
 			ri := lesser(x[i], y)
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -444,7 +444,7 @@ func lesserFV(x F, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := lesserFV(F(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -483,7 +483,7 @@ func lesserIV(x I, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := lesserIV(I(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -508,7 +508,7 @@ func lesserSV(x S, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := lesserSV(S(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -567,7 +567,7 @@ func lesserABV(x AB, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := lesserIV(B2I(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -626,7 +626,7 @@ func lesserAFV(x AF, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := lesserFV(F(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -685,7 +685,7 @@ func lesserAIV(x AI, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := lesserIV(I(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -720,7 +720,7 @@ func lesserASV(x AS, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := lesserSV(S(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -757,7 +757,7 @@ func greater(x, y V) V {
 			r := make(AV, x.Len())
 			for i := range r {
 				ri := greater(x[i], y.at(i))
-				if isErr(ri) {
+				if ri.IsErr() {
 					return ri
 				}
 				r[i] = ri
@@ -767,7 +767,7 @@ func greater(x, y V) V {
 		r := make(AV, x.Len())
 		for i := range r {
 			ri := greater(x[i], y)
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -806,7 +806,7 @@ func greaterFV(x F, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := greaterFV(F(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -845,7 +845,7 @@ func greaterIV(x I, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := greaterIV(I(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -870,7 +870,7 @@ func greaterSV(x S, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := greaterSV(S(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -929,7 +929,7 @@ func greaterABV(x AB, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := greaterIV(B2I(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -988,7 +988,7 @@ func greaterAFV(x AF, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := greaterFV(F(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -1047,7 +1047,7 @@ func greaterAIV(x AI, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := greaterIV(I(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -1082,7 +1082,7 @@ func greaterASV(x AS, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := greaterSV(S(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -1119,7 +1119,7 @@ func add(x, y V) V {
 			r := make(AV, x.Len())
 			for i := range r {
 				ri := add(x[i], y.at(i))
-				if isErr(ri) {
+				if ri.IsErr() {
 					return ri
 				}
 				r[i] = ri
@@ -1129,7 +1129,7 @@ func add(x, y V) V {
 		r := make(AV, x.Len())
 		for i := range r {
 			ri := add(x[i], y)
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -1168,7 +1168,7 @@ func addFV(x F, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := addFV(F(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -1207,7 +1207,7 @@ func addIV(x I, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := addIV(I(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -1232,7 +1232,7 @@ func addSV(x S, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := addSV(S(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -1291,7 +1291,7 @@ func addABV(x AB, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := addIV(B2I(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -1350,7 +1350,7 @@ func addAFV(x AF, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := addFV(F(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -1409,7 +1409,7 @@ func addAIV(x AI, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := addIV(I(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -1444,7 +1444,7 @@ func addASV(x AS, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := addSV(S(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -1481,7 +1481,7 @@ func subtract(x, y V) V {
 			r := make(AV, x.Len())
 			for i := range r {
 				ri := subtract(x[i], y.at(i))
-				if isErr(ri) {
+				if ri.IsErr() {
 					return ri
 				}
 				r[i] = ri
@@ -1491,7 +1491,7 @@ func subtract(x, y V) V {
 		r := make(AV, x.Len())
 		for i := range r {
 			ri := subtract(x[i], y)
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -1530,7 +1530,7 @@ func subtractFV(x F, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := subtractFV(F(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -1569,7 +1569,7 @@ func subtractIV(x I, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := subtractIV(I(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -1594,7 +1594,7 @@ func subtractSV(x S, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := subtractSV(S(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -1653,7 +1653,7 @@ func subtractABV(x AB, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := subtractIV(B2I(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -1712,7 +1712,7 @@ func subtractAFV(x AF, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := subtractFV(F(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -1771,7 +1771,7 @@ func subtractAIV(x AI, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := subtractIV(I(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -1806,7 +1806,7 @@ func subtractASV(x AS, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := subtractSV(S(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -1843,7 +1843,7 @@ func multiply(x, y V) V {
 			r := make(AV, x.Len())
 			for i := range r {
 				ri := multiply(x[i], y.at(i))
-				if isErr(ri) {
+				if ri.IsErr() {
 					return ri
 				}
 				r[i] = ri
@@ -1853,7 +1853,7 @@ func multiply(x, y V) V {
 		r := make(AV, x.Len())
 		for i := range r {
 			ri := multiply(x[i], y)
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -1900,7 +1900,7 @@ func multiplyFV(x F, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := multiplyFV(F(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -1947,7 +1947,7 @@ func multiplyIV(x I, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := multiplyIV(I(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -1986,7 +1986,7 @@ func multiplySV(x S, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := multiplySV(S(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -2060,7 +2060,7 @@ func multiplyABV(x AB, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := multiplyIV(B2I(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -2134,7 +2134,7 @@ func multiplyAFV(x AF, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := multiplyFV(F(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -2208,7 +2208,7 @@ func multiplyAIV(x AI, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := multiplyIV(I(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -2267,7 +2267,7 @@ func multiplyASV(x AS, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := multiplySV(S(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -2300,7 +2300,7 @@ func divide(x, y V) V {
 			r := make(AV, x.Len())
 			for i := range r {
 				ri := divide(x[i], y.at(i))
-				if isErr(ri) {
+				if ri.IsErr() {
 					return ri
 				}
 				r[i] = ri
@@ -2310,7 +2310,7 @@ func divide(x, y V) V {
 		r := make(AV, x.Len())
 		for i := range r {
 			ri := divide(x[i], y)
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -2349,7 +2349,7 @@ func divideFV(x F, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := divideFV(F(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -2388,7 +2388,7 @@ func divideIV(x I, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := divideIV(I(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -2447,7 +2447,7 @@ func divideABV(x AB, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := divideIV(B2I(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -2506,7 +2506,7 @@ func divideAFV(x AF, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := divideFV(F(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -2565,7 +2565,7 @@ func divideAIV(x AI, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := divideIV(I(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -2602,7 +2602,7 @@ func minimum(x, y V) V {
 			r := make(AV, x.Len())
 			for i := range r {
 				ri := minimum(x[i], y.at(i))
-				if isErr(ri) {
+				if ri.IsErr() {
 					return ri
 				}
 				r[i] = ri
@@ -2612,7 +2612,7 @@ func minimum(x, y V) V {
 		r := make(AV, x.Len())
 		for i := range r {
 			ri := minimum(x[i], y)
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -2651,7 +2651,7 @@ func minimumFV(x F, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := minimumFV(F(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -2690,7 +2690,7 @@ func minimumIV(x I, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := minimumIV(I(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -2715,7 +2715,7 @@ func minimumSV(x S, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := minimumSV(S(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -2774,7 +2774,7 @@ func minimumABV(x AB, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := minimumIV(B2I(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -2833,7 +2833,7 @@ func minimumAFV(x AF, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := minimumFV(F(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -2892,7 +2892,7 @@ func minimumAIV(x AI, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := minimumIV(I(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -2927,7 +2927,7 @@ func minimumASV(x AS, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := minimumSV(S(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -2964,7 +2964,7 @@ func maximum(x, y V) V {
 			r := make(AV, x.Len())
 			for i := range r {
 				ri := maximum(x[i], y.at(i))
-				if isErr(ri) {
+				if ri.IsErr() {
 					return ri
 				}
 				r[i] = ri
@@ -2974,7 +2974,7 @@ func maximum(x, y V) V {
 		r := make(AV, x.Len())
 		for i := range r {
 			ri := maximum(x[i], y)
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -3013,7 +3013,7 @@ func maximumFV(x F, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := maximumFV(F(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -3052,7 +3052,7 @@ func maximumIV(x I, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := maximumIV(I(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -3077,7 +3077,7 @@ func maximumSV(x S, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := maximumSV(S(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -3136,7 +3136,7 @@ func maximumABV(x AB, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := maximumIV(B2I(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -3195,7 +3195,7 @@ func maximumAFV(x AF, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := maximumFV(F(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -3254,7 +3254,7 @@ func maximumAIV(x AI, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := maximumIV(I(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -3289,7 +3289,7 @@ func maximumASV(x AS, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := maximumSV(S(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -3322,7 +3322,7 @@ func modulus(x, y V) V {
 			r := make(AV, x.Len())
 			for i := range r {
 				ri := modulus(x[i], y.at(i))
-				if isErr(ri) {
+				if ri.IsErr() {
 					return ri
 				}
 				r[i] = ri
@@ -3332,7 +3332,7 @@ func modulus(x, y V) V {
 		r := make(AV, x.Len())
 		for i := range r {
 			ri := modulus(x[i], y)
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -3371,7 +3371,7 @@ func modulusFV(x F, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := modulusFV(F(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -3410,7 +3410,7 @@ func modulusIV(x I, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := modulusIV(I(x), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -3469,7 +3469,7 @@ func modulusABV(x AB, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := modulusIV(B2I(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -3528,7 +3528,7 @@ func modulusAFV(x AF, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := modulusFV(F(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -3587,7 +3587,7 @@ func modulusAIV(x AI, y V) V {
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := modulusIV(I(x[i]), y[i])
-			if isErr(ri) {
+			if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri

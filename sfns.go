@@ -156,7 +156,7 @@ func drop(x, y V) V {
 		return cutAI(x, y)
 	case AF:
 		z := toAI(x)
-		if isErr(z) {
+		if z.IsErr() {
 			return z
 		}
 		return drop(z, y)
@@ -272,7 +272,7 @@ func drops(s S, y V) V {
 		r := make(AV, y.Len())
 		for i, yi := range y {
 			r[i] = drops(s, yi)
-			if isErr(r[i]) {
+			if r[i].IsErr() {
 				return r[i]
 			}
 		}
@@ -297,7 +297,7 @@ func trim(s S, y V) V {
 		r := make(AV, y.Len())
 		for i, yi := range y {
 			r[i] = trim(s, yi)
-			if isErr(r[i]) {
+			if r[i].IsErr() {
 				return r[i]
 			}
 		}
@@ -1497,7 +1497,7 @@ func group(x V) V {
 		return NewV(r)
 	case AF:
 		z := toAI(x)
-		if isErr(z) {
+		if z.IsErr() {
 			return z
 		}
 		return group(z)
@@ -1532,7 +1532,7 @@ func icount(x V) V {
 		return NewV(counts)
 	case AF:
 		z := toAI(x)
-		if isErr(z) {
+		if z.IsErr() {
 			return z
 		}
 		return icount(z)
@@ -1551,7 +1551,7 @@ func groupBy(x, y V) V {
 			Length(x), Length(y))
 	}
 	x = group(x)
-	if isErr(x) {
+	if x.IsErr() {
 		return errs("f=y : f[y] not an integer array")
 	}
 	avx := x.Value.(AV) // group should always return AV or errV

@@ -169,10 +169,10 @@ func VMax(ctx *Context, args []V) V {
 		return reverse(args[0])
 	case 2:
 		x, y := args[1], args[0]
-		if isFunction(x) {
+		if x.IsFunction() {
 			ctx.push(y)
 			r := ctx.applyN(x, 1)
-			if isErr(r) {
+			if r.IsErr() {
 				return r
 			}
 			return rotate(r, y)
@@ -214,10 +214,10 @@ func VEqual(ctx *Context, args []V) V {
 		return group(args[0])
 	case 2:
 		x, y := args[1], args[0]
-		if isFunction(x) {
+		if x.IsFunction() {
 			ctx.push(args[0])
 			r := ctx.applyN(x, 1)
-			if isErr(r) {
+			if r.IsErr() {
 				return r
 			}
 			return groupBy(r, y)
@@ -271,10 +271,10 @@ func VTake(ctx *Context, args []V) V {
 		return NewI(Length(args[0]))
 	case 2:
 		x, y := args[1], args[0]
-		if isFunction(x) {
+		if x.IsFunction() {
 			ctx.push(y)
 			r := ctx.applyN(x, 1)
-			if isErr(r) {
+			if r.IsErr() {
 				return r
 			}
 			return replicate(r, y)
@@ -292,10 +292,10 @@ func VDrop(ctx *Context, args []V) V {
 		return floor(args[0])
 	case 2:
 		x, y := args[1], args[0]
-		if isFunction(x) {
+		if x.IsFunction() {
 			ctx.push(y)
 			r := ctx.applyN(x, 1)
-			if isErr(r) {
+			if r.IsErr() {
 				return r
 			}
 			return weedOut(r, y)

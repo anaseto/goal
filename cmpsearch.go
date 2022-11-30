@@ -717,7 +717,7 @@ func findS(s S, y V) V {
 		r := make(AV, y.Len())
 		for i, yi := range y {
 			r[i] = findS(s, yi)
-			if isErr(r[i]) {
+			if r[i].IsErr() {
 				return r[i]
 			}
 		}

@@ -224,7 +224,7 @@ func toIndicesRec(x V) V {
 		r := make(AV, xv.Len())
 		for i, z := range xv {
 			r[i] = toIndicesRec(z)
-			if isErr(r[i]) {
+			if r[i].IsErr() {
 				return r[i]
 			}
 		}

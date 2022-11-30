@@ -7,7 +7,7 @@ import (
 // enum returns !x.
 func enum(x V) V {
 	x = toIndices(x)
-	if isErr(x) {
+	if x.IsErr() {
 		return errf("!x : %v", x)
 	}
 	switch xv := x.Value.(type) {
@@ -206,7 +206,7 @@ func replicate(x, y V) V {
 		return repeatAI(x, y)
 	case AF:
 		ix := toAI(x)
-		if isErr(ix) {
+		if ix.IsErr() {
 			return errf("f#y : x %v", ix)
 		}
 		return replicate(ix, y)
@@ -379,7 +379,7 @@ func weedOut(x, y V) V {
 		return weedOutAI(x, y)
 	case AF:
 		ix := toAI(x)
-		if isErr(ix) {
+		if ix.IsErr() {
 			return errf("f#y : x %v", ix)
 		}
 		return weedOut(ix, y)
@@ -540,7 +540,7 @@ func casti(y V) V {
 		r := make(AV, yv.Len())
 		for i := range r {
 			r[i] = casti(yv[i])
-			if isErr(r[i]) {
+			if r[i].IsErr() {
 				return r[i]
 			}
 		}
@@ -582,7 +582,7 @@ func castn(y V) V {
 		r := make(AV, yv.Len())
 		for i := range r {
 			r[i] = castn(yv[i])
-			if isErr(r[i]) {
+			if r[i].IsErr() {
 				return r[i]
 			}
 		}
@@ -612,7 +612,7 @@ func casts(y V) V {
 		r := make(AV, yv.Len())
 		for i := range r {
 			r[i] = casts(yv[i])
-			if isErr(r[i]) {
+			if r[i].IsErr() {
 				return r[i]
 			}
 		}

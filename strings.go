@@ -31,7 +31,7 @@ func applyS(s S, x V) V {
 		return NewV(r)
 	case AF:
 		z := toAI(xv)
-		if isErr(z) {
+		if z.IsErr() {
 			return z
 		}
 		return applyS(s, z)
@@ -39,7 +39,7 @@ func applyS(s S, x V) V {
 		r := make(AV, xv.Len())
 		for i, xi := range xv {
 			r[i] = applyS(s, xi)
-			if isErr(r[i]) {
+			if r[i].IsErr() {
 				return r[i]
 			}
 		}
@@ -69,7 +69,7 @@ func applyS2(s S, x V, y V) V {
 		return applyS2(s, x, fromABtoAI(y))
 	case AF:
 		z := toAI(y)
-		if isErr(z) {
+		if z.IsErr() {
 			return z
 		}
 		return applyS2(s, x, z)
@@ -136,7 +136,7 @@ func applyS2(s S, x V, y V) V {
 		return NewV(r)
 	case AF:
 		z := toAI(xv)
-		if isErr(z) {
+		if z.IsErr() {
 			return z
 		}
 		return applyS2(s, z, y)
@@ -144,7 +144,7 @@ func applyS2(s S, x V, y V) V {
 		r := make(AV, xv.Len())
 		for i, xi := range xv {
 			r[i] = applyS2(s, xi, y)
-			if isErr(r[i]) {
+			if r[i].IsErr() {
 				return r[i]
 			}
 		}
@@ -168,7 +168,7 @@ func bytes(x V) V {
 		r := make(AV, x.Len())
 		for i, xi := range x {
 			r[i] = bytes(xi)
-			if isErr(r[i]) {
+			if r[i].IsErr() {
 				return r[i]
 			}
 		}

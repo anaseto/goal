@@ -67,15 +67,21 @@ func (v V) Lambda() Lambda {
 	return Lambda(v.N)
 }
 
+// Lambda represents an user defined function by ID.
+type Lambda int32
+
 // Sprint returns a prettified string representation of the value.
 func (v V) Sprint(ctx *Context) string {
 	switch v.Kind {
 	case Int:
 		return fmt.Sprintf("%d", v.N)
 	case IntVariadic:
-		return "v"
+		return Variadic(v.N).String()
 	case IntLambda:
-		return "l"
+		if v.N < 0 || v.N >= len(ctx.lambdas) {
+			return fmt.Sprintf("{Lambda %d}", v.N)
+		}
+		return ctx.lambdas[v.N].Source
 	case Boxed:
 		return v.Value.Sprint(ctx)
 	default:
@@ -141,12 +147,12 @@ type S string
 // errV represents errors
 type errV string
 
-func isErr(x V) bool {
+func (x V) IsErr() bool {
 	_, ok := x.Value.(errV)
 	return ok
 }
 
-func isFunction(x V) bool {
+func (x V) IsFunction() bool {
 	switch x.Kind {
 	case IntVariadic, IntLambda:
 		return true
@@ -263,6 +269,20 @@ const (
 	vOr                       // or
 )
 
+func (v Variadic) zero() V {
+	switch v {
+	case vAdd, vSubtract:
+		return NewI(0)
+	case vMultiply:
+		return NewI(1)
+	case vMin:
+		return NewI(math.MinInt)
+	case vMax:
+		return NewI(math.MaxInt)
+	}
+	return V{}
+}
+
 var vStrings = [...]string{
 	vRight:    ":",
 	vAdd:      "+",
@@ -326,14 +346,10 @@ type ProjectionMonad struct {
 	Fun V
 }
 
-// Lambda represents an user defined function by ID.
-type Lambda int32
-
 func (p Projection) Type() string      { return "p" }
 func (p ProjectionFirst) Type() string { return "p" }
 func (p ProjectionMonad) Type() string { return "p" }
 func (r DerivedVerb) Type() string     { return "r" }
-func (l Lambda) Type() string          { return "l" }
 
 func (p Projection) Sprint(ctx *Context) string {
 	sb := &strings.Builder{}
@@ -362,13 +378,6 @@ func (p ProjectionMonad) Sprint(ctx *Context) string {
 
 func (r DerivedVerb) Sprint(ctx *Context) string {
 	return fmt.Sprintf("%s%s", r.Arg.Sprint(ctx), r.Fun.String())
-}
-
-func (l Lambda) Sprint(ctx *Context) string {
-	if l < 0 || int(l) >= len(ctx.lambdas) {
-		return fmt.Sprintf("{Lambda %d}", l)
-	}
-	return ctx.lambdas[l].Source
 }
 
 // array interface is satisfied by the different kind of supported arrays.
@@ -570,20 +579,6 @@ func (r DerivedVerb) Rank(ctx *Context) int { return 2 }
 type zeroFun interface {
 	Function
 	zero() V
-}
-
-func (v Variadic) zero() V {
-	switch v {
-	case vAdd, vSubtract:
-		return NewI(0)
-	case vMultiply:
-		return NewI(1)
-	case vMin:
-		return NewI(math.MinInt)
-	case vMax:
-		return NewI(math.MaxInt)
-	}
-	return V{}
 }
 
 func (p Projection) Matches(x Value) bool {

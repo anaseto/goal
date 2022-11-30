@@ -11,7 +11,7 @@ func fold2(ctx *Context, args []V) V {
 			return fold2vAdd(args[0])
 		}
 	}
-	if !isFunction(f) {
+	if !f.IsFunction() {
 		switch fv := f.Value.(type) {
 		case S:
 			return fold2Join(fv, args[0])
@@ -140,7 +140,7 @@ func fold2Decode(f V, x V) V {
 			return NewI(r)
 		case AF:
 			aix := toAI(x)
-			if isErr(aix) {
+			if aix.IsErr() {
 				return aix
 			}
 			return fold2Decode(f, aix)
@@ -148,7 +148,7 @@ func fold2Decode(f V, x V) V {
 			r := make(AV, x.Len())
 			for i, xi := range x {
 				r[i] = fold2Decode(f, xi)
-				if isErr(r[i]) {
+				if r[i].IsErr() {
 					return r[i]
 				}
 			}
@@ -193,7 +193,7 @@ func fold2Decode(f V, x V) V {
 			return fold2Decode(f, fromABtoAI(x))
 		case AF:
 			aix := toAI(x)
-			if isErr(aix) {
+			if aix.IsErr() {
 				return aix
 			}
 			return fold2Decode(f, aix)
@@ -201,7 +201,7 @@ func fold2Decode(f V, x V) V {
 			r := make(AV, x.Len())
 			for i, xi := range x {
 				r[i] = fold2Decode(f, xi)
-				if isErr(r[i]) {
+				if r[i].IsErr() {
 					return r[i]
 				}
 			}
@@ -211,7 +211,7 @@ func fold2Decode(f V, x V) V {
 		}
 	case AF:
 		aif := toAI(fv)
-		if isErr(aif) {
+		if aif.IsErr() {
 			return aif
 		}
 		return fold2Decode(aif, x)
@@ -223,7 +223,7 @@ func fold2Decode(f V, x V) V {
 
 func fold3(ctx *Context, args []V) V {
 	f := args[1]
-	if !isFunction(f) {
+	if !f.IsFunction() {
 		return errf("x F/y : F not a function (%s)", f.Type())
 	}
 	if f.Rank(ctx) != 2 {
@@ -240,7 +240,7 @@ func fold3(ctx *Context, args []V) V {
 			ctx.push(yv.at(i))
 			ctx.push(r)
 			r = ctx.applyN(f, 2)
-			if isErr(r) {
+			if r.IsErr() {
 				return r
 			}
 		}
@@ -256,11 +256,11 @@ func fold3While(ctx *Context, args []V) V {
 	f := args[1]
 	x := args[2]
 	y := args[0]
-	if isFunction(x) {
+	if x.IsFunction() {
 		for {
 			ctx.push(y)
 			cond := ctx.applyN(x, 1)
-			if isErr(cond) {
+			if cond.IsErr() {
 				return cond
 			}
 			if !isTrue(cond) {
@@ -268,7 +268,7 @@ func fold3While(ctx *Context, args []V) V {
 			}
 			ctx.push(y)
 			y = ctx.applyN(f, 1)
-			if isErr(y) {
+			if y.IsErr() {
 				return y
 			}
 		}
@@ -290,7 +290,7 @@ func fold3doTimes(ctx *Context, n int, f, y V) V {
 	for i := 0; i < n; i++ {
 		ctx.push(y)
 		y = ctx.applyN(f, 1)
-		if isErr(y) {
+		if y.IsErr() {
 			return y
 		}
 	}
@@ -298,7 +298,7 @@ func fold3doTimes(ctx *Context, n int, f, y V) V {
 }
 
 func scan2(ctx *Context, f, x V) V {
-	if !isFunction(f) {
+	if !f.IsFunction() {
 		switch fv := f.Value.(type) {
 		case S:
 			return scan2Split(fv, x)
@@ -326,7 +326,7 @@ func scan2(ctx *Context, f, x V) V {
 			ctx.push(xv.at(i))
 			ctx.push(r[len(r)-1])
 			next := ctx.applyN(f, 2)
-			if isErr(next) {
+			if next.IsErr() {
 				return next
 			}
 			r = append(r, next)
@@ -414,7 +414,7 @@ func scan2Encode(f V, x V) V {
 			return scan2Encode(f, fromABtoAI(x))
 		case AF:
 			aix := toAI(x)
-			if isErr(aix) {
+			if aix.IsErr() {
 				return aix
 			}
 			return scan2Encode(f, aix)
@@ -422,7 +422,7 @@ func scan2Encode(f V, x V) V {
 			r := make(AV, x.Len())
 			for i, xi := range x {
 				r[i] = scan2Encode(f, xi)
-				if isErr(r[i]) {
+				if r[i].IsErr() {
 					return r[i]
 				}
 			}
@@ -474,7 +474,7 @@ func scan2Encode(f V, x V) V {
 			return scan2Encode(f, fromABtoAI(x))
 		case AF:
 			aix := toAI(x)
-			if isErr(aix) {
+			if aix.IsErr() {
 				return aix
 			}
 			return scan2Encode(f, aix)
@@ -482,7 +482,7 @@ func scan2Encode(f V, x V) V {
 			r := make(AV, x.Len())
 			for i, xi := range x {
 				r[i] = scan2Encode(f, xi)
-				if isErr(r[i]) {
+				if r[i].IsErr() {
 					return r[i]
 				}
 			}
@@ -492,7 +492,7 @@ func scan2Encode(f V, x V) V {
 		}
 	case AF:
 		aif := toAI(fv)
-		if isErr(aif) {
+		if aif.IsErr() {
 			return aif
 		}
 		return scan2Encode(aif, x)
@@ -504,7 +504,7 @@ func scan2Encode(f V, x V) V {
 
 func scan3(ctx *Context, args []V) V {
 	f := args[1]
-	if !isFunction(f) {
+	if !f.IsFunction() {
 		return errf("x f'y : f not a function (%s)", f.Type())
 	}
 	if f.Rank(ctx) != 2 {
@@ -520,7 +520,7 @@ func scan3(ctx *Context, args []V) V {
 		ctx.push(yv.at(0))
 		ctx.push(x)
 		first := ctx.applyN(f, 2)
-		if isErr(first) {
+		if first.IsErr() {
 			return first
 		}
 		r := AV{first}
@@ -528,7 +528,7 @@ func scan3(ctx *Context, args []V) V {
 			ctx.push(yv.at(i))
 			ctx.push(r[len(r)-1])
 			next := ctx.applyN(f, 2)
-			if isErr(next) {
+			if next.IsErr() {
 				return next
 			}
 			r = append(r, next)
@@ -545,12 +545,12 @@ func scan3While(ctx *Context, args []V) V {
 	f := args[1]
 	x := args[2]
 	y := args[0]
-	if isFunction(x) {
+	if x.IsFunction() {
 		r := AV{y}
 		for {
 			ctx.push(y)
 			cond := ctx.applyN(x, 1)
-			if isErr(cond) {
+			if cond.IsErr() {
 				return cond
 			}
 			if !isTrue(cond) {
@@ -558,7 +558,7 @@ func scan3While(ctx *Context, args []V) V {
 			}
 			ctx.push(y)
 			y = ctx.applyN(f, 1)
-			if isErr(y) {
+			if y.IsErr() {
 				return y
 			}
 			r = append(r, y)
@@ -582,7 +582,7 @@ func scan3doTimes(ctx *Context, n int, f, y V) V {
 	for i := 0; i < n; i++ {
 		ctx.push(y)
 		y = ctx.applyN(f, 1)
-		if isErr(y) {
+		if y.IsErr() {
 			return y
 		}
 		r = append(r, y)
@@ -592,7 +592,7 @@ func scan3doTimes(ctx *Context, n int, f, y V) V {
 
 func each2(ctx *Context, args []V) V {
 	f := args[1]
-	if !isFunction(f) {
+	if !f.IsFunction() {
 		return errf("f'x : f not a function (%s)", f.Type())
 	}
 	x := toArray(args[0])
@@ -602,7 +602,7 @@ func each2(ctx *Context, args []V) V {
 		for i := 0; i < x.Len(); i++ {
 			ctx.push(x.at(i))
 			next := ctx.applyN(f, 1)
-			if isErr(next) {
+			if next.IsErr() {
 				return next
 			}
 			r = append(r, next)
@@ -616,7 +616,7 @@ func each2(ctx *Context, args []V) V {
 
 func each3(ctx *Context, args []V) V {
 	f := args[1]
-	if !isFunction(f) {
+	if !f.IsFunction() {
 		return errf("x f'y : f not a function (%s)", f.Type())
 	}
 	x, okax := args[2].Value.(array)
@@ -631,7 +631,7 @@ func each3(ctx *Context, args []V) V {
 			ctx.push(y.at(i))
 			ctx.push(args[2])
 			next := ctx.applyN(f, 2)
-			if isErr(next) {
+			if next.IsErr() {
 				return next
 			}
 			r = append(r, next)
@@ -645,7 +645,7 @@ func each3(ctx *Context, args []V) V {
 			ctx.push(args[0])
 			ctx.push(x.at(i))
 			next := ctx.applyN(f, 2)
-			if isErr(next) {
+			if next.IsErr() {
 				return next
 			}
 			r = append(r, next)
@@ -661,7 +661,7 @@ func each3(ctx *Context, args []V) V {
 		ctx.push(y.at(i))
 		ctx.push(x.at(i))
 		next := ctx.applyN(f, 2)
-		if isErr(next) {
+		if next.IsErr() {
 			return next
 		}
 		r = append(r, next)

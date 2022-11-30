@@ -120,14 +120,14 @@ func (ctx *Context) applyArray(x V, y V) V {
 		r := make(AV, yv.Len())
 		for i, yi := range yv {
 			r[i] = ctx.applyArray(x, yi)
-			if isErr(r[i]) {
+			if r[i].IsErr() {
 				return r[i]
 			}
 		}
 		return NewV(canonical(r))
 	case array:
 		iy := toIndices(y)
-		if isErr(iy) {
+		if iy.IsErr() {
 			return errf("x[y] : %v", iy.Value)
 		}
 		r := xv.atIndices(iy.Value.(AI))
@@ -147,7 +147,7 @@ func (ctx *Context) applyArrayArgs(x V, arg V, args []V) V {
 		r := make(AV, xv.Len())
 		for i := 0; i < len(r); i++ {
 			r[i] = ctx.ApplyN(xv.at(i), args)
-			if isErr(r[i]) {
+			if r[i].IsErr() {
 				return r[i]
 			}
 		}
@@ -158,14 +158,14 @@ func (ctx *Context) applyArrayArgs(x V, arg V, args []V) V {
 		r := make(AV, argv.Len())
 		for i := 0; i < argv.Len(); i++ {
 			r[i] = ctx.applyArrayArgs(x, argv.at(i), args)
-			if isErr(r[i]) {
+			if r[i].IsErr() {
 				return r[i]
 			}
 		}
 		return NewV(canonical(r))
 	default:
 		r := ctx.applyArray(x, arg)
-		if isErr(r) {
+		if r.IsErr() {
 			return r
 		}
 		return ctx.ApplyN(r, args)
