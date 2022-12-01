@@ -14,29 +14,29 @@ func negate(x V) V {
 	case F:
 		return NewV(-x)
 	case *AB:
-		r := make([]int, len(x))
+		r := make([]int, x.Len())
 		for i := range r {
-			r[i] = int(-B2I(x[i]))
+			r[i] = int(-B2I(x.At(i)))
 		}
-		return NewV(r)
+		return NewAI(r)
 	case *AI:
-		r := make([]int, len(x))
+		r := make([]int, x.Len())
 		for i := range r {
-			r[i] = -x[i]
+			r[i] = -x.At(i)
 		}
-		return NewV(r)
+		return NewAI(r)
 	case *AF:
-		r := make([]float64, len(x))
+		r := make([]float64, x.Len())
 		for i := range r {
-			r[i] = -x[i]
+			r[i] = -x.At(i)
 		}
-		return NewV(r)
+		return NewAF(r)
 	case *AV:
-		r := make([]V, len(x))
+		r := make([]V, x.Len())
 		for i := range r {
-			r[i] = negate(x[i])
+			r[i] = negate(x.At(i))
 		}
-		return NewV(r)
+		return NewAV(r)
 	default:
 		return errType("-x", "x", x)
 	}
@@ -79,19 +79,19 @@ func sign(x V) V {
 		for i := range r {
 			r[i] = int(signI(xv.At(i)))
 		}
-		return NewV(r)
+		return NewAI(r)
 	case *AF:
 		r := make([]int, xv.Len())
 		for i := range r {
 			r[i] = int(signF(F(xv.At(i))))
 		}
-		return NewV(r)
+		return NewAI(r)
 	case *AV:
 		r := make([]V, xv.Len())
 		for i := range r {
 			r[i] = sign(xv.At(i))
 		}
-		return NewV(r)
+		return NewAV(r)
 	default:
 		return errType("sign x", "x", xv)
 	}
@@ -118,19 +118,19 @@ func floor(x V) V {
 			// handling NaN, INF or big floats to the program.
 			r[i] = int(math.Floor(xv.At(i)))
 		}
-		return NewV(r)
+		return NewAI(r)
 	case *AS:
 		r := make([]string, xv.Len())
 		for i := range r {
 			r[i] = strings.ToLower(xv.At(i))
 		}
-		return NewV(r)
+		return NewAS(r)
 	case *AV:
 		r := make([]V, xv.Len())
 		for i := range r {
 			r[i] = floor(xv.At(i))
 		}
-		return NewV(r)
+		return NewAV(r)
 	default:
 		return errType("_N", "N", xv)
 	}
@@ -155,19 +155,19 @@ func ceil(x V) V {
 		for i := range r {
 			r[i] = int(math.Ceil(xv.At(i)))
 		}
-		return NewV(r)
+		return NewAI(r)
 	case *AS:
 		r := make([]string, xv.Len())
 		for i := range r {
 			r[i] = strings.ToUpper(xv.At(i))
 		}
-		return NewV(r)
+		return NewAS(r)
 	case *AV:
 		r := make([]V, xv.Len())
 		for i := range r {
 			r[i] = ceil(xv.At(i))
 		}
-		return NewV(r)
+		return NewAV(r)
 	default:
 		return errType("ceil x", "x", xv)
 	}
@@ -188,25 +188,25 @@ func not(x V) V {
 		for i := range r {
 			r[i] = !xv.At(i)
 		}
-		return NewV(r)
+		return NewAB(r)
 	case *AI:
 		r := make([]bool, xv.Len())
 		for i := range r {
 			r[i] = xv.At(i) == 0
 		}
-		return NewV(r)
+		return NewAB(r)
 	case *AF:
 		r := make([]bool, xv.Len())
 		for i := range r {
 			r[i] = xv.At(i) == 0
 		}
-		return NewV(r)
+		return NewAB(r)
 	case *AV:
 		r := make([]V, xv.Len())
 		for i := range r {
 			r[i] = not(xv.At(i))
 		}
-		return NewV(r)
+		return NewAV(r)
 	default:
 		return NewI(B2I(!isTrue(x)))
 	}
@@ -227,19 +227,19 @@ func abs(x V) V {
 		for i := range r {
 			r[i] = int(absI(xv.At(i)))
 		}
-		return NewV(r)
+		return NewAI(r)
 	case *AF:
 		r := make([]float64, xv.Len())
 		for i := range r {
 			r[i] = math.Abs(xv.At(i))
 		}
-		return NewV(r)
+		return NewAF(r)
 	case *AV:
 		r := make([]V, xv.Len())
 		for i := range r {
 			r[i] = abs(xv.At(i))
 		}
-		return NewV(r)
+		return NewAV(r)
 	default:
 		return errType("abs x", "x", xv)
 	}
