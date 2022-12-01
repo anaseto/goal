@@ -256,7 +256,7 @@ func cutAI(x AI, y V) V {
 			}
 			r[i] = NewV(yv[from:to])
 		}
-		return NewV(canonical(r))
+		return canonicalV(NewAV(r))
 	default:
 		return errf("x_y : y not an array (%s)", yv.Type())
 	}
@@ -480,7 +480,7 @@ func shiftBefore(x, y V) V {
 				r[i] = x.at(i)
 			}
 			copy(r[max:], y[:len(y)-max])
-			return NewV(canonical(r))
+			return canonicalV(NewAV(r))
 		default:
 			return errType("x»y", "y", y)
 		}
@@ -511,7 +511,7 @@ func nudge(x V) V {
 	case *AV:
 		r := make([]V, x.Len())
 		copy(r[1:], x[0:x.Len()-1])
-		return NewV(canonical(r))
+		return canonicalV(NewAV(r))
 	default:
 		return errs("»x : not an array")
 	}
@@ -629,7 +629,7 @@ func shiftAfter(x, y V) V {
 				r[len(y)-1-i] = x.at(i)
 			}
 			copy(r[:len(y)-max], y[max:])
-			return NewV(canonical(r))
+			return canonicalV(NewAV(r))
 		default:
 			return errType("x«y", "y", y)
 		}
@@ -663,7 +663,7 @@ func nudgeBack(x V) V {
 	case *AV:
 		r := make([]V, x.Len())
 		copy(r[0:x.Len()-1], x[1:])
-		return NewV(canonical(r))
+		return canonicalV(NewAV(r))
 	default:
 		return errs("«x : x not an array")
 	}
@@ -682,7 +682,7 @@ func windows(i int, y V) V {
 			yc.Value = yv.slice(j, j+i)
 			r[j] = canonicalV(yc)
 		}
-		return NewV(canonical(r))
+		return canonicalV(NewAV(r))
 	default:
 		return errs("i^y : y not an array")
 	}

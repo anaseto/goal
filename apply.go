@@ -126,7 +126,7 @@ func (ctx *Context) applyArray(x V, y V) V {
 				return r[i]
 			}
 		}
-		return NewV(canonical(r))
+		return canonicalV(NewAV(r))
 	case array:
 		iy := toIndices(y)
 		if iy.IsErr() {
@@ -153,7 +153,7 @@ func (ctx *Context) applyArrayArgs(x V, arg V, args []V) V {
 				return r[i]
 			}
 		}
-		return NewV(canonical(r))
+		return canonicalV(NewAV(r))
 	}
 	switch argv := arg.Value.(type) {
 	case array:
@@ -164,7 +164,7 @@ func (ctx *Context) applyArrayArgs(x V, arg V, args []V) V {
 				return r[i]
 			}
 		}
-		return NewV(canonical(r))
+		return canonicalV(NewAV(r))
 	default:
 		r := ctx.applyArray(x, arg)
 		if r.IsErr() {
@@ -316,7 +316,7 @@ func (x AV) atIndices(y AI) V {
 		}
 		r[i] = x[yi]
 	}
-	return NewV(canonical(r))
+	return canonicalV(NewAV(r))
 }
 
 func (x AB) atIndices(y AI) V {

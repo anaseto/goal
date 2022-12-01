@@ -47,7 +47,7 @@ func applyS(s S, x V) V {
 				return r[i]
 			}
 		}
-		return NewV(canonical(r))
+		return canonicalV(NewAV(r))
 	default:
 		return errf("s[x] : x non-integer (%s)", xv.Type())
 	}
@@ -157,7 +157,7 @@ func applyS2(s S, x V, y V) V {
 				return r[i]
 			}
 		}
-		return NewV(canonical(r))
+		return canonicalV(NewAV(r))
 	default:
 		return errf("s[x;y] : x non-integer (%s)", xv.Type())
 	}
@@ -181,7 +181,7 @@ func bytes(x V) V {
 				return r[i]
 			}
 		}
-		return NewV(canonical(r))
+		return canonicalV(NewAV(r))
 	default:
 		return errType("bytes x", "x", x)
 	}
@@ -271,7 +271,7 @@ func castn(y V) V {
 			}
 			r[i] = n
 		}
-		return NewV(canonical(r))
+		return canonicalV(NewAV(r))
 	case *AF:
 		return y
 	case *AV:

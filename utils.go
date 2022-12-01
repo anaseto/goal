@@ -222,7 +222,7 @@ func toIndicesRec(x V) V {
 				return r[i]
 			}
 		}
-		return NewV(canonical(r))
+		return canonicalV(NewAV(r))
 	default:
 		return errs("not an indices array")
 	}
