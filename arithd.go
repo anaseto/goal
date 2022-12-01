@@ -65,25 +65,25 @@ func equalFV(x F, y V) V {
 	case *AB:
 		r := make([]bool, y.Len())
 		for i := range r {
-			r[i] = bool(F(x) == B2F(y[i]))
+			r[i] = bool(F(x) == B2F(y.At(i)))
 		}
 		return NewAB(r)
 	case *AF:
 		r := make([]bool, y.Len())
 		for i := range r {
-			r[i] = bool(F(x) == F(y[i]))
+			r[i] = bool(F(x) == F(y.At(i)))
 		}
 		return NewAB(r)
 	case *AI:
 		r := make([]bool, y.Len())
 		for i := range r {
-			r[i] = bool(F(x) == F(y[i]))
+			r[i] = bool(F(x) == F(y.At(i)))
 		}
 		return NewAB(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := equalFV(x, y[i])
+			ri := equalFV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -105,25 +105,25 @@ func equalIV(x int, y V) V {
 	case *AB:
 		r := make([]bool, y.Len())
 		for i := range r {
-			r[i] = bool(x == B2I(y[i]))
+			r[i] = bool(x == B2I(y.At(i)))
 		}
 		return NewAB(r)
 	case *AF:
 		r := make([]bool, y.Len())
 		for i := range r {
-			r[i] = bool(F(x) == F(y[i]))
+			r[i] = bool(F(x) == F(y.At(i)))
 		}
 		return NewAB(r)
 	case *AI:
 		r := make([]bool, y.Len())
 		for i := range r {
-			r[i] = bool(x == y[i])
+			r[i] = bool(x == y.At(i))
 		}
 		return NewAB(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := equalIV(x, y[i])
+			ri := equalIV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -142,13 +142,13 @@ func equalSV(x S, y V) V {
 	case *AS:
 		r := make([]bool, y.Len())
 		for i := range r {
-			r[i] = bool(S(x) == S(y[i]))
+			r[i] = bool(S(x) == S(y.At(i)))
 		}
 		return NewAB(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := equalSV(x, y[i])
+			ri := equalSV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -433,25 +433,25 @@ func lesserFV(x F, y V) V {
 	case *AB:
 		r := make([]bool, y.Len())
 		for i := range r {
-			r[i] = bool(F(x) < B2F(y[i]))
+			r[i] = bool(F(x) < B2F(y.At(i)))
 		}
 		return NewAB(r)
 	case *AF:
 		r := make([]bool, y.Len())
 		for i := range r {
-			r[i] = bool(F(x) < F(y[i]))
+			r[i] = bool(F(x) < F(y.At(i)))
 		}
 		return NewAB(r)
 	case *AI:
 		r := make([]bool, y.Len())
 		for i := range r {
-			r[i] = bool(F(x) < F(y[i]))
+			r[i] = bool(F(x) < F(y.At(i)))
 		}
 		return NewAB(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := lesserFV(x, y[i])
+			ri := lesserFV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -473,25 +473,25 @@ func lesserIV(x int, y V) V {
 	case *AB:
 		r := make([]bool, y.Len())
 		for i := range r {
-			r[i] = bool(x < B2I(y[i]))
+			r[i] = bool(x < B2I(y.At(i)))
 		}
 		return NewAB(r)
 	case *AF:
 		r := make([]bool, y.Len())
 		for i := range r {
-			r[i] = bool(F(x) < F(y[i]))
+			r[i] = bool(F(x) < F(y.At(i)))
 		}
 		return NewAB(r)
 	case *AI:
 		r := make([]bool, y.Len())
 		for i := range r {
-			r[i] = bool(x < y[i])
+			r[i] = bool(x < y.At(i))
 		}
 		return NewAB(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := lesserIV(x, y[i])
+			ri := lesserIV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -510,13 +510,13 @@ func lesserSV(x S, y V) V {
 	case *AS:
 		r := make([]bool, y.Len())
 		for i := range r {
-			r[i] = bool(S(x) < S(y[i]))
+			r[i] = bool(S(x) < S(y.At(i)))
 		}
 		return NewAB(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := lesserSV(x, y[i])
+			ri := lesserSV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -801,25 +801,25 @@ func greaterFV(x F, y V) V {
 	case *AB:
 		r := make([]bool, y.Len())
 		for i := range r {
-			r[i] = bool(F(x) > B2F(y[i]))
+			r[i] = bool(F(x) > B2F(y.At(i)))
 		}
 		return NewAB(r)
 	case *AF:
 		r := make([]bool, y.Len())
 		for i := range r {
-			r[i] = bool(F(x) > F(y[i]))
+			r[i] = bool(F(x) > F(y.At(i)))
 		}
 		return NewAB(r)
 	case *AI:
 		r := make([]bool, y.Len())
 		for i := range r {
-			r[i] = bool(F(x) > F(y[i]))
+			r[i] = bool(F(x) > F(y.At(i)))
 		}
 		return NewAB(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := greaterFV(x, y[i])
+			ri := greaterFV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -841,25 +841,25 @@ func greaterIV(x int, y V) V {
 	case *AB:
 		r := make([]bool, y.Len())
 		for i := range r {
-			r[i] = bool(x > B2I(y[i]))
+			r[i] = bool(x > B2I(y.At(i)))
 		}
 		return NewAB(r)
 	case *AF:
 		r := make([]bool, y.Len())
 		for i := range r {
-			r[i] = bool(F(x) > F(y[i]))
+			r[i] = bool(F(x) > F(y.At(i)))
 		}
 		return NewAB(r)
 	case *AI:
 		r := make([]bool, y.Len())
 		for i := range r {
-			r[i] = bool(x > y[i])
+			r[i] = bool(x > y.At(i))
 		}
 		return NewAB(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := greaterIV(x, y[i])
+			ri := greaterIV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -878,13 +878,13 @@ func greaterSV(x S, y V) V {
 	case *AS:
 		r := make([]bool, y.Len())
 		for i := range r {
-			r[i] = bool(S(x) > S(y[i]))
+			r[i] = bool(S(x) > S(y.At(i)))
 		}
 		return NewAB(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := greaterSV(x, y[i])
+			ri := greaterSV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -1169,25 +1169,25 @@ func addFV(x F, y V) V {
 	case *AB:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(F(x) + B2F(y[i]))
+			r[i] = float64(F(x) + B2F(y.At(i)))
 		}
 		return NewAF(r)
 	case *AF:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(F(x) + F(y[i]))
+			r[i] = float64(F(x) + F(y.At(i)))
 		}
 		return NewAF(r)
 	case *AI:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(F(x) + F(y[i]))
+			r[i] = float64(F(x) + F(y.At(i)))
 		}
 		return NewAF(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := addFV(x, y[i])
+			ri := addFV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -1209,25 +1209,25 @@ func addIV(x int, y V) V {
 	case *AB:
 		r := make([]int, y.Len())
 		for i := range r {
-			r[i] = int(x + B2I(y[i]))
+			r[i] = int(x + B2I(y.At(i)))
 		}
 		return NewAI(r)
 	case *AF:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(F(x) + F(y[i]))
+			r[i] = float64(F(x) + F(y.At(i)))
 		}
 		return NewAF(r)
 	case *AI:
 		r := make([]int, y.Len())
 		for i := range r {
-			r[i] = int(x + y[i])
+			r[i] = int(x + y.At(i))
 		}
 		return NewAI(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := addIV(x, y[i])
+			ri := addIV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -1246,13 +1246,13 @@ func addSV(x S, y V) V {
 	case *AS:
 		r := make([]string, y.Len())
 		for i := range r {
-			r[i] = string(S(x) + S(y[i]))
+			r[i] = string(S(x) + S(y.At(i)))
 		}
 		return NewAS(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := addSV(x, y[i])
+			ri := addSV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -1537,25 +1537,25 @@ func subtractFV(x F, y V) V {
 	case *AB:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(F(x) - B2F(y[i]))
+			r[i] = float64(F(x) - B2F(y.At(i)))
 		}
 		return NewAF(r)
 	case *AF:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(F(x) - F(y[i]))
+			r[i] = float64(F(x) - F(y.At(i)))
 		}
 		return NewAF(r)
 	case *AI:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(F(x) - F(y[i]))
+			r[i] = float64(F(x) - F(y.At(i)))
 		}
 		return NewAF(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := subtractFV(x, y[i])
+			ri := subtractFV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -1577,25 +1577,25 @@ func subtractIV(x int, y V) V {
 	case *AB:
 		r := make([]int, y.Len())
 		for i := range r {
-			r[i] = int(x - B2I(y[i]))
+			r[i] = int(x - B2I(y.At(i)))
 		}
 		return NewAI(r)
 	case *AF:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(F(x) - F(y[i]))
+			r[i] = float64(F(x) - F(y.At(i)))
 		}
 		return NewAF(r)
 	case *AI:
 		r := make([]int, y.Len())
 		for i := range r {
-			r[i] = int(x - y[i])
+			r[i] = int(x - y.At(i))
 		}
 		return NewAI(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := subtractIV(x, y[i])
+			ri := subtractIV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -1614,13 +1614,13 @@ func subtractSV(x S, y V) V {
 	case *AS:
 		r := make([]string, y.Len())
 		for i := range r {
-			r[i] = string(strings.TrimSuffix(string(S(x)), string(S(y[i]))))
+			r[i] = string(strings.TrimSuffix(string(S(x)), string(S(y.At(i)))))
 		}
 		return NewAS(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := subtractSV(x, y[i])
+			ri := subtractSV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -1907,31 +1907,31 @@ func multiplyFV(x F, y V) V {
 	case *AB:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(F(x) * B2F(y[i]))
+			r[i] = float64(F(x) * B2F(y.At(i)))
 		}
 		return NewAF(r)
 	case *AF:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(F(x) * F(y[i]))
+			r[i] = float64(F(x) * F(y.At(i)))
 		}
 		return NewAF(r)
 	case *AI:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(F(x) * F(y[i]))
+			r[i] = float64(F(x) * F(y.At(i)))
 		}
 		return NewAF(r)
 	case *AS:
 		r := make([]string, y.Len())
 		for i := range r {
-			r[i] = string(strings.Repeat(string(S(y[i])), int(float64(F(x)))))
+			r[i] = string(strings.Repeat(string(S(y.At(i))), int(float64(F(x)))))
 		}
 		return NewAS(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := multiplyFV(x, y[i])
+			ri := multiplyFV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -1955,31 +1955,31 @@ func multiplyIV(x int, y V) V {
 	case *AB:
 		r := make([]int, y.Len())
 		for i := range r {
-			r[i] = int(x * B2I(y[i]))
+			r[i] = int(x * B2I(y.At(i)))
 		}
 		return NewAI(r)
 	case *AF:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(F(x) * F(y[i]))
+			r[i] = float64(F(x) * F(y.At(i)))
 		}
 		return NewAF(r)
 	case *AI:
 		r := make([]int, y.Len())
 		for i := range r {
-			r[i] = int(x * y[i])
+			r[i] = int(x * y.At(i))
 		}
 		return NewAI(r)
 	case *AS:
 		r := make([]string, y.Len())
 		for i := range r {
-			r[i] = string(strings.Repeat(string(S(y[i])), int(x)))
+			r[i] = string(strings.Repeat(string(S(y.At(i))), int(x)))
 		}
 		return NewAS(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := multiplyIV(x, y[i])
+			ri := multiplyIV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -2001,25 +2001,25 @@ func multiplySV(x S, y V) V {
 	case *AB:
 		r := make([]string, y.Len())
 		for i := range r {
-			r[i] = string(strings.Repeat(string(S(x)), int(B2I(y[i]))))
+			r[i] = string(strings.Repeat(string(S(x)), int(B2I(y.At(i)))))
 		}
 		return NewAS(r)
 	case *AF:
 		r := make([]string, y.Len())
 		for i := range r {
-			r[i] = string(strings.Repeat(string(S(x)), int(float64(F(y[i])))))
+			r[i] = string(strings.Repeat(string(S(x)), int(float64(F(y.At(i))))))
 		}
 		return NewAS(r)
 	case *AI:
 		r := make([]string, y.Len())
 		for i := range r {
-			r[i] = string(strings.Repeat(string(S(x)), int(y[i])))
+			r[i] = string(strings.Repeat(string(S(x)), int(y.At(i))))
 		}
 		return NewAS(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := multiplySV(x, y[i])
+			ri := multiplySV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -2370,25 +2370,25 @@ func divideFV(x F, y V) V {
 	case *AB:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(divideF(F(x), B2F(y[i])))
+			r[i] = float64(divideF(F(x), B2F(y.At(i))))
 		}
 		return NewAF(r)
 	case *AF:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(divideF(F(x), F(y[i])))
+			r[i] = float64(divideF(F(x), F(y.At(i))))
 		}
 		return NewAF(r)
 	case *AI:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(divideF(F(x), F(y[i])))
+			r[i] = float64(divideF(F(x), F(y.At(i))))
 		}
 		return NewAF(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := divideFV(x, y[i])
+			ri := divideFV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -2410,25 +2410,25 @@ func divideIV(x int, y V) V {
 	case *AB:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(divideF(F(x), B2F(y[i])))
+			r[i] = float64(divideF(F(x), B2F(y.At(i))))
 		}
 		return NewAF(r)
 	case *AF:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(divideF(F(x), F(y[i])))
+			r[i] = float64(divideF(F(x), F(y.At(i))))
 		}
 		return NewAF(r)
 	case *AI:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(divideF(F(x), F(y[i])))
+			r[i] = float64(divideF(F(x), F(y.At(i))))
 		}
 		return NewAF(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := divideIV(x, y[i])
+			ri := divideIV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -2678,25 +2678,25 @@ func minimumFV(x F, y V) V {
 	case *AB:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(F(math.Min(float64(F(x)), float64(B2F(y[i])))))
+			r[i] = float64(F(math.Min(float64(F(x)), float64(B2F(y.At(i))))))
 		}
 		return NewAF(r)
 	case *AF:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(F(math.Min(float64(F(x)), float64(F(y[i])))))
+			r[i] = float64(F(math.Min(float64(F(x)), float64(F(y.At(i))))))
 		}
 		return NewAF(r)
 	case *AI:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(F(math.Min(float64(F(x)), float64(y[i]))))
+			r[i] = float64(F(math.Min(float64(F(x)), float64(y.At(i)))))
 		}
 		return NewAF(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := minimumFV(x, y[i])
+			ri := minimumFV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -2718,25 +2718,25 @@ func minimumIV(x int, y V) V {
 	case *AB:
 		r := make([]int, y.Len())
 		for i := range r {
-			r[i] = int(minI(x, B2I(y[i])))
+			r[i] = int(minI(x, B2I(y.At(i))))
 		}
 		return NewAI(r)
 	case *AF:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(F(math.Min(float64(x), float64(F(y[i])))))
+			r[i] = float64(F(math.Min(float64(x), float64(F(y.At(i))))))
 		}
 		return NewAF(r)
 	case *AI:
 		r := make([]int, y.Len())
 		for i := range r {
-			r[i] = int(minI(x, y[i]))
+			r[i] = int(minI(x, y.At(i)))
 		}
 		return NewAI(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := minimumIV(x, y[i])
+			ri := minimumIV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -2755,13 +2755,13 @@ func minimumSV(x S, y V) V {
 	case *AS:
 		r := make([]string, y.Len())
 		for i := range r {
-			r[i] = string(minS(S(x), S(y[i])))
+			r[i] = string(minS(S(x), S(y.At(i))))
 		}
 		return NewAS(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := minimumSV(x, y[i])
+			ri := minimumSV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -3046,25 +3046,25 @@ func maximumFV(x F, y V) V {
 	case *AB:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(F(math.Max(float64(F(x)), float64(B2F(y[i])))))
+			r[i] = float64(F(math.Max(float64(F(x)), float64(B2F(y.At(i))))))
 		}
 		return NewAF(r)
 	case *AF:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(F(math.Max(float64(F(x)), float64(F(y[i])))))
+			r[i] = float64(F(math.Max(float64(F(x)), float64(F(y.At(i))))))
 		}
 		return NewAF(r)
 	case *AI:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(F(math.Max(float64(F(x)), float64(y[i]))))
+			r[i] = float64(F(math.Max(float64(F(x)), float64(y.At(i)))))
 		}
 		return NewAF(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := maximumFV(x, y[i])
+			ri := maximumFV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -3086,25 +3086,25 @@ func maximumIV(x int, y V) V {
 	case *AB:
 		r := make([]int, y.Len())
 		for i := range r {
-			r[i] = int(maxI(x, B2I(y[i])))
+			r[i] = int(maxI(x, B2I(y.At(i))))
 		}
 		return NewAI(r)
 	case *AF:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(F(math.Max(float64(x), float64(F(y[i])))))
+			r[i] = float64(F(math.Max(float64(x), float64(F(y.At(i))))))
 		}
 		return NewAF(r)
 	case *AI:
 		r := make([]int, y.Len())
 		for i := range r {
-			r[i] = int(maxI(x, y[i]))
+			r[i] = int(maxI(x, y.At(i)))
 		}
 		return NewAI(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := maximumIV(x, y[i])
+			ri := maximumIV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -3123,13 +3123,13 @@ func maximumSV(x S, y V) V {
 	case *AS:
 		r := make([]string, y.Len())
 		for i := range r {
-			r[i] = string(maxS(S(x), S(y[i])))
+			r[i] = string(maxS(S(x), S(y.At(i))))
 		}
 		return NewAS(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := maximumSV(x, y[i])
+			ri := maximumSV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -3410,25 +3410,25 @@ func modulusFV(x F, y V) V {
 	case *AB:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(modF(F(x), F(B2I(y[i]))))
+			r[i] = float64(modF(F(x), F(B2I(y.At(i)))))
 		}
 		return NewAF(r)
 	case *AF:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(modF(F(x), F(y[i])))
+			r[i] = float64(modF(F(x), F(y.At(i))))
 		}
 		return NewAF(r)
 	case *AI:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(modF(F(x), F(y[i])))
+			r[i] = float64(modF(F(x), F(y.At(i))))
 		}
 		return NewAF(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := modulusFV(x, y[i])
+			ri := modulusFV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -3450,25 +3450,25 @@ func modulusIV(x int, y V) V {
 	case *AB:
 		r := make([]int, y.Len())
 		for i := range r {
-			r[i] = int(modI(x, B2I(y[i])))
+			r[i] = int(modI(x, B2I(y.At(i))))
 		}
 		return NewAI(r)
 	case *AF:
 		r := make([]float64, y.Len())
 		for i := range r {
-			r[i] = float64(modF(F(x), F(y[i])))
+			r[i] = float64(modF(F(x), F(y.At(i))))
 		}
 		return NewAF(r)
 	case *AI:
 		r := make([]int, y.Len())
 		for i := range r {
-			r[i] = int(modI(x, y[i]))
+			r[i] = int(modI(x, y.At(i)))
 		}
 		return NewAI(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := modulusIV(x, y[i])
+			ri := modulusIV(x, y.At(i))
 			if ri.IsErr() {
 				return ri
 			}

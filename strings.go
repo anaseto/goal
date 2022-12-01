@@ -90,7 +90,7 @@ func applyS2(s S, x V, y V) V {
 		if xv < 0 || xv > len(s) {
 			return errf("s[i;y] : i out of bounds index (%d)", xv)
 		}
-		if _, ok := y.Value.(AI); ok {
+		if _, ok := y.Value.(*AI); ok {
 			return errf("s[x;y] : x is an atom but y is an array")
 		}
 		if int(xv)+l > len(s) {
@@ -109,7 +109,7 @@ func applyS2(s S, x V, y V) V {
 		return applyS2(s, fromABtoAI(xv), y)
 	case *AI:
 		r := make([]string, xv.Len())
-		if z, ok := y.Value.(AI); ok {
+		if z, ok := y.Value.(*AI); ok {
 			if z.Len() != xv.Len() {
 				return errf("s[x;y] : length mismatch: %d (#x) %d (#y)",
 					xv.Len(), z.Len())

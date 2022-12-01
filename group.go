@@ -127,12 +127,12 @@ func groupBy(x, y V) V {
 	if x.IsErr() {
 		return errs("f=y : f[y] not an integer array")
 	}
-	avx := x.Value.(AV) // group should always return AV or errV
+	avx := x.Value.(*AV) // group should always return AV or errV
 	switch y := y.Value.(type) {
 	case array:
 		r := make([]V, avx.Len())
 		for i, xi := range avx {
-			r[i] = y.atIndices(xi.Value.(AI))
+			r[i] = y.atIndices(xi.Value.(*AI))
 		}
 		return NewV(r)
 	default:

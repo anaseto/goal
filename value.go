@@ -63,18 +63,18 @@ func (v V) F() F {
 }
 
 // AB retrieves the AB value. It assumes Value type is AB.
-func (v V) AB() AB {
-	return v.Value.(AB)
+func (v V) AB() *AB {
+	return v.Value.(*AB)
 }
 
 // AI retrieves the AI value. It assumes Value type is AI.
-func (v V) AI() AI {
-	return v.Value.(AI)
+func (v V) AI() *AI {
+	return v.Value.(*AI)
 }
 
 // AF retrieves the AF value. It assumes Value type is AF.
-func (v V) AF() AF {
-	return v.Value.(AF)
+func (v V) AF() *AF {
+	return v.Value.(*AF)
 }
 
 // Type returns the name of the value's type.
@@ -357,7 +357,7 @@ type array interface {
 	Len() int
 	at(i int) V           // x[i]
 	slice(i, j int) array // x[i:j]
-	atIndices(y AI) V     // x[y] (goal code)
+	atIndices(y []int) V  // x[y] (goal code)
 	set(i int, y V)
 	//setIndices(y AI, z V) error
 }
@@ -503,7 +503,7 @@ func (x *AS) Sprint(ctx *Context) string {
 
 // sprintV returns a string for a V deep in an AV.
 func sprintV(ctx *Context, x V) string {
-	avx, ok := x.Value.(AV)
+	avx, ok := x.Value.(*AV)
 	if ok {
 		return avx.sprint(ctx, true)
 	}

@@ -427,19 +427,19 @@ func sameType(x, y V) bool {
 		_, ok := y.Value.(F)
 		return ok
 	case *AB:
-		_, ok := y.Value.(AB)
+		_, ok := y.Value.(*AB)
 		return ok
 	case *AI:
-		_, ok := y.Value.(AI)
+		_, ok := y.Value.(*AI)
 		return ok
 	case *AF:
-		_, ok := y.Value.(AF)
+		_, ok := y.Value.(*AF)
 		return ok
 	case *AS:
-		_, ok := y.Value.(AS)
+		_, ok := y.Value.(*AS)
 		return ok
 	case *AV:
-		_, ok := y.Value.(AV)
+		_, ok := y.Value.(*AV)
 		return ok
 	default:
 		// TODO: sameType, handle other cases (unused for now)

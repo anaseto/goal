@@ -159,7 +159,7 @@ func lessS(x V, y V) bool {
 }
 
 func lessAB(x V, y V) bool {
-	xv := x.Value.(AB)
+	xv := x.Value.(*AB)
 	if y.IsInt() {
 		return !lessI(y, x)
 	}
@@ -200,7 +200,7 @@ func lessAB(x V, y V) bool {
 }
 
 func lessAI(x V, y V) bool {
-	xv := x.Value.(AI)
+	xv := x.Value.(*AI)
 	if y.IsInt() {
 		return !lessI(y, x)
 	}
@@ -241,7 +241,7 @@ func lessAI(x V, y V) bool {
 }
 
 func lessAF(x V, y V) bool {
-	xv := x.Value.(AF)
+	xv := x.Value.(*AF)
 	if y.IsInt() {
 		return !lessI(y, x)
 	}
@@ -282,7 +282,7 @@ func lessAF(x V, y V) bool {
 }
 
 func lessAS(x V, y V) bool {
-	xv := x.Value.(AS)
+	xv := x.Value.(*AS)
 	switch yv := y.Value.(type) {
 	case S:
 		return !lessS(y, x)
@@ -306,7 +306,7 @@ func lessAS(x V, y V) bool {
 }
 
 func lessAV(x V, y V) bool {
-	xv := x.Value.(AV)
+	xv := x.Value.(*AV)
 	if y.IsInt() {
 		return less(xv.At(0), y)
 	}
@@ -510,7 +510,7 @@ func search(x V, y V) V {
 		if !sort.IsSorted(sortAB(x)) {
 			return errDomain("x$y", "x is not ascending")
 		}
-		return searchAI(fromABtoAI(x).Value.(AI), y)
+		return searchAI(fromABtoAI(x).Value.(*AI), y)
 	case *AI:
 		if !sort.IsSorted(sort.IntSlice(x)) {
 			return errDomain("x$y", "x is not ascending")

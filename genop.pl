@@ -361,7 +361,7 @@ EOS
     for my $tt (sort keys %types) {
         my $expr = $cases->{"${t}_$tt"}->[0];
         my $type = $cases->{"${t}_$tt"}->[1];
-        my $iexpr = subst($expr, $t, $tt, "x", "y[i]");
+        my $iexpr = subst($expr, $t, $tt, "x", "y.At(i)");
         my $rtype = $atypes{$type};
         print $out <<EOS;
 	case *A$tt:
@@ -376,7 +376,7 @@ EOS
 	case *AV:
 		r := make([]V, y.Len())
 		for i := range r {
-			ri := ${name}${t}V(x, y[i])
+			ri := ${name}${t}V(x, y.At(i))
                         if ri.IsErr() {
 				return ri
 			}

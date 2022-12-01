@@ -132,7 +132,7 @@ func (ctx *Context) applyArray(x V, y V) V {
 		if iy.IsErr() {
 			return errf("x[y] : %v", iy.Value)
 		}
-		r := xv.atIndices(iy.Value.(AI))
+		r := xv.atIndices(iy.Value.(*AI).Slice)
 		return r
 	default:
 		return errf("x[y] : y non-array non-integer (%s)", y.Type())
@@ -304,104 +304,104 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 	return r
 }
 
-func (x AV) atIndices(y AI) V {
+func (x *AV) atIndices(y []int) V {
 	r := make([]V, len(y))
 	xlen := x.Len()
 	for i, yi := range y {
 		if yi < 0 {
 			yi += xlen
 		}
-		if yi < 0 || yi >= len(x) {
-			return errf("x[y] : index out of bounds: %d (length %d)", yi, len(x))
+		if yi < 0 || yi >= x.Len() {
+			return errf("x[y] : index out of bounds: %d (length %d)", yi, x.Len())
 		}
-		r[i] = x[yi]
+		r[i] = x.At(yi)
 	}
 	return canonicalV(NewAV(r))
 }
 
-func (x AB) atIndices(y AI) V {
+func (x *AB) atIndices(y []int) V {
 	r := make([]bool, len(y))
 	xlen := x.Len()
 	for i, yi := range y {
 		if yi < 0 {
 			yi += xlen
 		}
-		if yi < 0 || yi >= len(x) {
-			return errf("x[y] : index out of bounds: %d (length %d)", yi, len(x))
+		if yi < 0 || yi >= x.Len() {
+			return errf("x[y] : index out of bounds: %d (length %d)", yi, x.Len())
 		}
-		r[i] = x[yi]
+		r[i] = x.At(yi)
 	}
-	return NewV(r)
+	return NewAB(r)
 }
 
-func (x AI) atIndices(y AI) V {
+func (x *AI) atIndices(y []int) V {
 	r := make([]int, len(y))
 	xlen := x.Len()
 	for i, yi := range y {
 		if yi < 0 {
 			yi += xlen
 		}
-		if yi < 0 || yi >= len(x) {
-			return errf("x[y] : index out of bounds: %d (length %d)", yi, len(x))
+		if yi < 0 || yi >= x.Len() {
+			return errf("x[y] : index out of bounds: %d (length %d)", yi, x.Len())
 		}
-		r[i] = x[yi]
+		r[i] = x.At(yi)
 	}
-	return NewV(r)
+	return NewAI(r)
 }
 
-func (x AF) atIndices(y AI) V {
+func (x *AF) atIndices(y []int) V {
 	r := make([]float64, len(y))
 	xlen := x.Len()
 	for i, yi := range y {
 		if yi < 0 {
 			yi += xlen
 		}
-		if yi < 0 || yi >= len(x) {
-			return errf("x[y] : index out of bounds: %d (length %d)", yi, len(x))
+		if yi < 0 || yi >= x.Len() {
+			return errf("x[y] : index out of bounds: %d (length %d)", yi, x.Len())
 		}
-		r[i] = x[yi]
+		r[i] = x.At(yi)
 	}
-	return NewV(r)
+	return NewAF(r)
 }
 
-func (x AS) atIndices(y AI) V {
+func (x *AS) atIndices(y []int) V {
 	r := make([]string, len(y))
 	xlen := x.Len()
 	for i, yi := range y {
 		if yi < 0 {
 			yi += xlen
 		}
-		if yi < 0 || yi >= len(x) {
-			return errf("x[y] : index out of bounds: %d (length %d)", yi, len(x))
+		if yi < 0 || yi >= x.Len() {
+			return errf("x[y] : index out of bounds: %d (length %d)", yi, x.Len())
 		}
-		r[i] = x[yi]
+		r[i] = x.At(yi)
 	}
-	return NewV(r)
+	return NewAS(r)
 }
 
 // set changes x at i with y (in place).
 func (x AV) set(i int, y V) {
-	x[i] = y
+	x.Slice[i] = y
 }
 
 // set changes x at i with y (in place).
 func (x AB) set(i int, y V) {
-	x[i] = y.N == 1
+	x.Slice[i] = y.N == 1
 }
 
 // set changes x at i with y (in place).
 func (x AI) set(i int, y V) {
-	x[i] = y.N
+	x.Slice[i] = y.N
 }
 
 // set changes x at i with y (in place).
 func (x AF) set(i int, y V) {
-	x[i] = float64(y.Value.(F))
+	x.Slice[i] = float64(y.Value.(F))
 }
 
 // set changes x at i with y (in place).
 func (x AS) set(i int, y V) {
-	x[i] = string(y.Value.(S))
+	x.Slice[i] = string(y.Value.(S))
 }
 
 //// setIndices x at y with z (in place).
