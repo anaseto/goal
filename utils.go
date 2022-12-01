@@ -666,7 +666,7 @@ func cloneArgs(a []V) []V {
 	return args
 }
 
-func sumAB(x AB) int {
+func sumAB(x *AB) int {
 	n := 0
 	for _, xi := range x.Slice {
 		if xi {
