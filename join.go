@@ -29,7 +29,7 @@ func joinTo(x, y V) V {
 	}
 }
 
-func joinToI(x I, y V, left bool) V {
+func joinToI(x int, y V, left bool) V {
 	switch yv := y.Value.(type) {
 	case F:
 		if left {

@@ -41,25 +41,25 @@ func negate(x V) V {
 	}
 }
 
-func signF(x F) I {
+func signF(x F) int {
 	switch {
 	case x > 0:
-		return I(1)
+		return 1
 	case x < 0:
-		return I(-1)
+		return -1
 	default:
-		return I(0)
+		return 0
 	}
 }
 
-func signI(x I) I {
+func signI(x int) int {
 	switch {
 	case x > 0:
-		return I(1)
+		return 1
 	case x < 0:
-		return I(-1)
+		return -1
 	default:
-		return I(0)
+		return 0
 	}
 }
 
@@ -239,7 +239,7 @@ func abs(x V) V {
 	}
 }
 
-func absI(x I) I {
+func absI(x int) int {
 	if x < 0 {
 		return -x
 	}

@@ -189,13 +189,13 @@ my %dyads = (
     modulus =>  {
         B_B => ["modI(B2I(x), B2I(y))", "I"],
         B_I => ["modI(B2I(x), y)", "I"],
-        B_F => ["modF(F(B2I(x)), y)", "I"],
+        B_F => ["modF(F(B2I(x)), y)", "F"],
         I_B => ["modI(x, B2I(y))", "I"],
         I_I => ["modI(x, y)", "I"],
-        I_F => ["modF(F(x), y)", "I"],
-        F_B => ["modF(x, F(B2I(y)))", "I"],
-        F_I => ["modF(x, F(y))", "I"],
-        F_F => ["modF(x, y)", "I"],
+        I_F => ["modF(F(x), y)", "F"],
+        F_B => ["modF(x, F(B2I(y)))", "F"],
+        F_I => ["modF(x, F(y))", "F"],
+        F_F => ["modF(x, y)", "F"],
     },
 );
 
@@ -247,10 +247,19 @@ sub genOp {
     print $out <<EOS;
 // ${name} returns x${op}y.
 func ${name}(x, y V) V {
+EOS
+    if ($types{"I"}) {
+        print $out <<EOS;
+        if x.IsInt() {
+		return ${namelc}IV(x.Int(), y)
+        }
+EOS
+    }
+        print $out <<EOS;
 	switch x := x.Value.(type) {
 EOS
     for my $t (sort keys %types) {
-        next if $t eq "B";
+        next if $t eq "B" or $t eq "I";
         print $out <<EOS;
 	case $t:
 		return ${namelc}${t}V(x, y)
@@ -272,7 +281,7 @@ EOS
                         r := make(AV, x.Len())
                         for i := range r {
                                 ri := ${name}(x[i], y.at(i))
-                                if isErr(ri) {
+                                if ri.IsErr() {
                                         return ri
                                 }
                                 r[i] = ri
@@ -282,7 +291,7 @@ EOS
                 r := make(AV, x.Len())
                 for i := range r {
                         ri := ${name}(x[i], y)
-                        if isErr(ri) {
+                        if ri.IsErr() {
                                 return ri
                         }
                         r[i] = ri
@@ -308,18 +317,45 @@ sub genLeftExpanded {
     my %types = map { /_(\w)/; $1 => $cases->{"${t}_$1"}} grep { /${t}_(\w)/ } keys $cases->%*;
     my $s = "";
     open my $out, '>', \$s;
+    my $xt = $t;
+    if ($xt eq "I") {
+        $xt = "int"
+    }
     print $out <<EOS;
-func ${name}${t}V(x $t, y V) V {
+func ${name}${t}V(x $xt, y V) V {
+EOS
+    if ($types{"I"}) {
+        my $expr = $cases->{"${t}_I"}->[0];
+        my $type = $cases->{"${t}_I"}->[1];
+        $expr = "B2I($expr)" if $type eq "B";
+        $expr =~ s/\by\b/y.Int()/g;
+        $type = "I" if $type eq "B";
+        my $ret = "NewV($type($expr))";
+        if ($type eq "I") {
+            $ret = "NewI($expr)";
+        }
+        print $out <<EOS;
+        if y.IsInt() {
+            return $ret;
+        }
+EOS
+    }
+    print $out <<EOS;
 	switch y := y.Value.(type) {
 EOS
     for my $tt (sort keys %types) {
-        next if $tt eq "B";
+        next if $tt eq "B" or $tt eq "I";
         my $expr = $cases->{"${t}_$tt"}->[0];
         my $type = $cases->{"${t}_$tt"}->[1];
-        $type = "B2I" if $type eq "B";
+        my $nt = "V";
+        $nt = "I" if $type eq "B" or $type eq "I";
+        $expr = "B2I($expr)" if $type eq "B";
+        $type = "int" if $type eq "B" or $type eq "I";
+        #$type = "int" if $type eq "B";
+		#return New${nt}($type($expr))
         print $out <<EOS;
 	case $tt:
-		return NewV($type($expr))
+		return New${nt}($type($expr))
 EOS
     }
     for my $tt (sort keys %types) {
@@ -340,8 +376,8 @@ EOS
 	case AV:
 		r := make(AV, y.Len())
 		for i := range r {
-			ri := ${name}${t}V($t(x), y[i])
-                        if isErr(ri) {
+			ri := ${name}${t}V(x, y[i])
+                        if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -362,10 +398,27 @@ sub genLeftArrayExpanded {
     open my $out, '>', \$s;
     print $out <<EOS;
 func ${name}A${t}V(x A$t, y V) V {
+EOS
+    if ($types{"I"}) {
+        my $expr = $cases->{"${t}_I"}->[0];
+        my $type = $cases->{"${t}_I"}->[1];
+        my $iexpr = subst($expr, $t, "int", "x[i]", "y.Int()");
+        my $rtype = $atypes{$type};
+        print $out <<EOS;
+        if y.IsInt() {
+            r := make(A$type, x.Len())
+            for i := range r {
+                    r[i] = $rtype($iexpr)
+            }
+            return NewV(r)
+        }
+EOS
+    }
+    print $out <<EOS;
 	switch y := y.Value.(type) {
 EOS
     for my $tt (sort keys %types) {
-        next if $tt eq "B";
+        next if $tt eq "B" or $tt eq "I";
         my $expr = $cases->{"${t}_$tt"}->[0];
         my $type = $cases->{"${t}_$tt"}->[1];
         my $iexpr = subst($expr, $t, $tt, "x[i]", "y");
@@ -400,6 +453,8 @@ EOS
     if ($t eq "B") {
         $t = "I";
         $tt = "B2I";
+    } elsif ($t eq "I") {
+        $tt = "int";
     }
     print $out <<EOS if $t !~ /^A/;
 	case AV:
@@ -409,7 +464,7 @@ EOS
 		r := make(AV, y.Len())
 		for i := range r {
 			ri := ${name}${t}V($tt(x[i]), y[i])
-                        if isErr(ri) {
+                        if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
@@ -425,8 +480,8 @@ EOS
 
 sub subst {
     my ($expr, $t, $tt, $x, $y) = @_;
-    $expr =~ s/(!x|\bB2[IF]\(x\)|\bx)\b/$t($1)/g unless $t eq "B";
-    $expr =~ s/(!y|\bB2[IF]\(y\)|\by)\b/$tt($1)/g unless $tt eq "B";
+    $expr =~ s/(!x|\bB2[IF]\(x\)|\bx)\b/$t($1)/g unless $t eq "B" or $t eq "I";
+    $expr =~ s/(!y|\bB2[IF]\(y\)|\by)\b/$tt($1)/g unless $tt eq "B" or $tt eq "I";
     $expr =~ s/\bx\b/$x/g;
     $expr =~ s/\by\b/$y/g;
     return $expr

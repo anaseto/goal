@@ -530,7 +530,7 @@ func search(x V, y V) V {
 	}
 }
 
-func searchAII(x AI, y I) int {
+func searchAII(x AI, y int) int {
 	return sort.Search(len(x), func(i int) bool { return I(x[i]) > y })
 }
 
@@ -538,7 +538,7 @@ func searchAIF(x AI, y F) int {
 	return sort.Search(len(x), func(i int) bool { return F(x[i]) > y })
 }
 
-func searchAFI(x AF, y I) int {
+func searchAFI(x AF, y int) int {
 	return sort.Search(len(x), func(i int) bool { return x[i] > float64(y) })
 }
 

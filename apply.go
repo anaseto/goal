@@ -94,12 +94,8 @@ func (ctx *Context) applyArray(x V, y V) V {
 	if y == (V{}) {
 		return x
 	}
-	switch yv := y.Value.(type) {
-	case F:
-		if !isI(yv) {
-			return errf("x[y] : non-integer index (%g)", yv)
-		}
-		i := int(yv)
+	if y.IsInt() {
+		i := y.Int()
 		if i < 0 {
 			i = xv.Len() + i
 		}
@@ -107,7 +103,13 @@ func (ctx *Context) applyArray(x V, y V) V {
 			return errf("x[y] : out of bounds index: %d", i)
 		}
 		return xv.at(i)
-	case I:
+
+	}
+	switch yv := y.Value.(type) {
+	case F:
+		if !isI(yv) {
+			return errf("x[y] : non-integer index (%g)", yv)
+		}
 		i := int(yv)
 		if i < 0 {
 			i = xv.Len() + i
@@ -384,12 +386,12 @@ func (x AV) set(i int, y V) {
 
 // set changes x at i with y (in place).
 func (x AB) set(i int, y V) {
-	x[i] = y.Value.(I) == 1
+	x[i] = y.N == 1
 }
 
 // set changes x at i with y (in place).
 func (x AI) set(i int, y V) {
-	x[i] = int(y.Value.(I))
+	x[i] = y.N
 }
 
 // set changes x at i with y (in place).

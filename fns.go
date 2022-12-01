@@ -16,7 +16,7 @@ func enum(x V) V {
 	}
 }
 
-func rangeI(n I) V {
+func rangeI(n int) V {
 	if n < 0 {
 		return errs("!x : x negative")
 	}

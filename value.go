@@ -56,6 +56,16 @@ func (v V) lambda() lambda {
 	return lambda(v.N)
 }
 
+// Int retrieves the int value from N field. It assumes Kind is Int.
+func (v V) Int() int {
+	return v.N
+}
+
+// F retrieves the float64 value. It assumes Value type is F.
+func (v V) F() float64 {
+	return v.Value.(F)
+}
+
 // Type returns the name of the value's type.
 func (v V) Type() string {
 	switch v.Kind {
@@ -126,7 +136,7 @@ func NewLambda(v lambda) V {
 
 // NewI returns a new int value.
 func NewI(i int) V {
-	return V{Kind: Boxed, Value: I(i)}
+	return V{Kind: Int, N: i}
 }
 
 // NewF returns a new float64 value.
@@ -142,14 +152,15 @@ func NewS(s string) V {
 // F represents real numbers.
 type F float64
 
-// I represents integers.
-type I int
-
 // S represents (immutable) strings of bytes.
 type S string
 
 // errV represents errors
 type errV string
+
+func (x V) IsInt() bool {
+	return x.Kind == Int
+}
 
 func (x V) IsErr() bool {
 	_, ok := x.Value.(errV)
@@ -170,21 +181,8 @@ func (x V) IsFunction() bool {
 
 func (f F) Matches(y Value) bool {
 	switch y := y.(type) {
-	case I:
-		return f == F(y)
 	case F:
 		return f == y
-	default:
-		return false
-	}
-}
-
-func (i I) Matches(y Value) bool {
-	switch y := y.(type) {
-	case I:
-		return i == y
-	case F:
-		return F(i) == y
 	default:
 		return false
 	}
@@ -202,14 +200,10 @@ func (s S) Matches(y Value) bool {
 // Type retuns "n" for numeric atoms.
 func (f F) Type() string { return "n" }
 
-// Type retuns "n" for numeric atoms.
-func (i I) Type() string { return "n" }
-
 // Type retuns "s" for string atoms.
 func (s S) Type() string { return "s" }
 
 func (f F) Sprint(ctx *Context) string { return fmt.Sprintf("%g", f) }
-func (i I) Sprint(ctx *Context) string { return fmt.Sprintf("%d", i) }
 func (s S) Sprint(ctx *Context) string { return strconv.Quote(string(s)) }
 
 func (e errV) Matches(y Value) bool {

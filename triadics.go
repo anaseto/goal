@@ -16,7 +16,7 @@ func (ctx *Context) amend3(x, y, f V) V {
 	}
 }
 
-func (ctx *Context) amend3arrayI(x array, y I, f V) V {
+func (ctx *Context) amend3arrayI(x array, y int, f V) V {
 	if y < 0 || int(y) >= x.Len() {
 		return errf("@[x;y;f] : x out of bounds (%d)", y)
 	}
@@ -78,7 +78,7 @@ func (ctx *Context) amend4(x, y, f, z V) V {
 	}
 }
 
-func (ctx *Context) amend4arrayI(x array, y I, f, z V) V {
+func (ctx *Context) amend4arrayI(x array, y int, f, z V) V {
 	if y < 0 || int(y) >= x.Len() {
 		return errf("@[x;y;f;z] : x out of bounds (%d)", y)
 	}

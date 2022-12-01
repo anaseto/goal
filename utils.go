@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-func B2I(b bool) (i I) {
+func B2I(b bool) (i int) {
 	if b {
 		i = 1
 	}
@@ -19,24 +19,24 @@ func B2F(b bool) (f F) {
 	return
 }
 
-func num2I(x V) (n I) {
+func num2I(x V) (n int) {
+	if x.IsInt() {
+		return x.Int()
+	}
 	switch x := x.Value.(type) {
-	case I:
-		n = x
 	case F:
-		n = I(x)
+		n = int(x)
 	}
 	// x is assumed to be a number.
 	return n
 }
 
 func isNum(x V) bool {
-	switch x.Value.(type) {
-	case I, F:
+	if x.IsInt() {
 		return true
-	default:
-		return false
 	}
+	_, ok := x.Value.(F)
+	return ok
 }
 
 func divideF(x, y F) F {
@@ -46,7 +46,7 @@ func divideF(x, y F) F {
 	return x / y
 }
 
-func modI(x, y I) I {
+func modI(x, y int) int {
 	if y == 0 {
 		return y
 	}
@@ -60,14 +60,14 @@ func modF(x, y F) F {
 	return F(math.Mod(float64(y), float64(x)))
 }
 
-func minI(x, y I) I {
+func minI(x, y int) int {
 	if x < y {
 		return x
 	}
 	return y
 }
 
-func maxI(x, y I) I {
+func maxI(x, y int) int {
 	if x < y {
 		return y
 	}
@@ -89,39 +89,31 @@ func maxS(x, y S) S {
 }
 
 func clone(x V) V {
-	switch x := x.Value.(type) {
-	case F:
-		return NewV(x)
-	case I:
-		return NewV(x)
-	case S:
-		return NewV(x)
+	switch xv := x.Value.(type) {
 	case AB:
-		r := make(AB, x.Len())
-		copy(r, x)
+		r := make(AB, xv.Len())
+		copy(r, xv)
 		return NewV(r)
 	case AF:
-		r := make(AF, x.Len())
-		copy(r, x)
+		r := make(AF, xv.Len())
+		copy(r, xv)
 		return NewV(r)
 	case AI:
-		r := make(AI, x.Len())
-		copy(r, x)
+		r := make(AI, xv.Len())
+		copy(r, xv)
 		return NewV(r)
 	case AS:
-		r := make(AS, x.Len())
-		copy(r, x)
+		r := make(AS, xv.Len())
+		copy(r, xv)
 		return NewV(r)
 	case AV:
-		r := make(AV, x.Len())
+		r := make(AV, xv.Len())
 		for i := range r {
-			r[i] = clone(x[i])
+			r[i] = clone(xv[i])
 		}
 		return NewV(r)
-	case errV:
-		return NewV(x)
 	default:
-		return NewV(x)
+		return x
 	}
 }
 
@@ -182,9 +174,10 @@ func cloneShallowArray(x array) array {
 // isIndices returns true if we have indices in canonical form, that is,
 // using types I, AI and AV of thoses.
 func isIndices(x V) bool {
-	switch xv := x.Value.(type) {
-	case I:
+	if x.IsInt() {
 		return true
+	}
+	switch xv := x.Value.(type) {
 	case AI:
 		return true
 	case AV:
@@ -208,14 +201,15 @@ func toIndices(x V) V {
 
 func toIndicesRec(x V) V {
 	//assertCanonical(x)
+	if x.IsInt() {
+		return x
+	}
 	switch xv := x.Value.(type) {
 	case F:
 		if !isI(xv) {
 			return errf("non-integer index (%g)", xv)
 		}
 		return NewI(int(xv))
-	case I:
-		return NewV(xv)
 	case AB:
 		return fromABtoAI(xv)
 	case AF:
@@ -236,14 +230,17 @@ func toIndicesRec(x V) V {
 
 // toArray converts atoms into 1-length arrays. It returns arrays as-is.
 func toArray(x V) V {
+	if x.IsInt() {
+		switch x.Int() {
+		case 0, 1:
+			return NewV(AB{x.Int() == 1})
+		default:
+			return NewV(AI{int(x.Int())})
+		}
+	}
 	switch xv := x.Value.(type) {
 	case F:
 		return NewV(AF{float64(xv)})
-	case I:
-		if xv == 0 || xv == 1 {
-			return NewV(AB{xv == 1})
-		}
-		return NewV(AI{int(xv)})
 	case S:
 		return NewV(AS{string(xv)})
 	case array:
@@ -276,10 +273,11 @@ func fromABtoAI(x AB) V {
 }
 
 func isFalse(x V) bool {
+	if x.IsInt() {
+		return x.Int() == 0
+	}
 	switch xv := x.Value.(type) {
 	case F:
-		return xv == 0
-	case I:
 		return xv == 0
 	case S:
 		return xv == ""
@@ -289,10 +287,11 @@ func isFalse(x V) bool {
 }
 
 func isTrue(x V) bool {
+	if x.IsInt() {
+		return x.Int() != 0
+	}
 	switch xv := x.Value.(type) {
 	case F:
-		return xv != 0
-	case I:
 		return xv != 0
 	case S:
 		return xv != ""
@@ -327,14 +326,17 @@ func mergeTypes(t, s eltype) eltype {
 
 // eType returns the eltype of x.
 func eType(x V) eltype {
+	if x.IsInt() {
+		switch x.Int() {
+		case 0, 1:
+			return tB
+		default:
+			return tI
+		}
+	}
 	switch x := x.Value.(type) {
 	case F:
 		return tF
-	case I:
-		if x == 0 || x == 1 {
-			return tB
-		}
-		return tI
 	case S:
 		return tS
 	case AB:
@@ -354,6 +356,14 @@ func eType(x V) eltype {
 
 // cType returns the canonical eltype of x. XXX: unused.
 func cType(x V) eltype {
+	if x.IsInt() {
+		switch x.Int() {
+		case 0, 1:
+			return tB
+		default:
+			return tI
+		}
+	}
 	switch x := x.Value.(type) {
 	case AB:
 		return tAB
@@ -361,11 +371,6 @@ func cType(x V) eltype {
 		return tF
 	case AF:
 		return tAF
-	case I:
-		if x == 0 || x == 1 {
-			return tB
-		}
-		return tI
 	case AI:
 		return tAI
 	case S:
@@ -414,10 +419,10 @@ func aType(x AV) eltype {
 }
 
 func sameType(x, y V) bool {
+	if x.IsInt() {
+		return y.IsInt()
+	}
 	switch x.Value.(type) {
-	case I:
-		_, ok := y.Value.(I)
-		return ok
 	case F:
 		_, ok := y.Value.(F)
 		return ok
@@ -445,8 +450,7 @@ func sameType(x, y V) bool {
 func compatEltType(x array, y V) bool {
 	switch x.(type) {
 	case AI:
-		_, ok := y.Value.(I)
-		return ok
+		return y.IsInt()
 	case AF:
 		_, ok := y.Value.(F)
 		return ok
@@ -466,7 +470,7 @@ func isI(x F) bool {
 	return math.Floor(float64(x)) == float64(x)
 }
 
-func isBI(x I) bool {
+func isBI(x int) bool {
 	return x == 0 || x == 1
 }
 
@@ -504,7 +508,7 @@ func maxAI(x AI) int {
 	return max
 }
 
-func minMaxB(x AB) (I, I) {
+func minMaxB(x AB) (int, int) {
 	if len(x) == 0 {
 		return 0, 0
 	}
@@ -573,23 +577,22 @@ func normalize(x AV) (Value, bool) {
 	case tB:
 		r := make(AB, x.Len())
 		for i, xi := range x {
-			r[i] = xi.Value.(I) != 0
+			r[i] = xi.Int() != 0
 		}
 		return r, true
 	case tI:
 		r := make(AI, x.Len())
 		for i, xi := range x {
-			r[i] = int(xi.Value.(I))
+			r[i] = int(xi.Int())
 		}
 		return r, true
 	case tF:
 		r := make(AF, x.Len())
 		for i, xi := range x {
-			switch xi := xi.Value.(type) {
-			case F:
-				r[i] = float64(xi)
-			case I:
-				r[i] = float64(xi)
+			if xi.IsInt() {
+				r[i] = float64(xi.Int())
+			} else {
+				r[i] = xi.F()
 			}
 		}
 		return r, true
