@@ -233,20 +233,20 @@ func toArray(x V) V {
 	if x.IsInt() {
 		switch x.Int() {
 		case 0, 1:
-			return NewV(AB{x.Int() == 1})
+			return NewAB([]bool{x.Int() == 1})
 		default:
-			return NewV(AI{int(x.Int())})
+			return NewAI([]int{int(x.Int())})
 		}
 	}
 	switch xv := x.Value.(type) {
 	case F:
-		return NewV(AF{float64(xv)})
+		return NewAF([]float64{float64(xv)})
 	case S:
-		return NewV(AS{string(xv)})
+		return NewAS([]string{string(xv)})
 	case array:
 		return NewV(xv)
 	default:
-		return NewV(AV{x})
+		return NewAV([]V{x})
 	}
 }
 
@@ -269,7 +269,7 @@ func fromABtoAI(x *AB) V {
 	for i := range r {
 		r[i] = int(B2I(x[i]))
 	}
-	return NewV(NewAI(r))
+	return NewAI(r)
 }
 
 func isFalse(x V) bool {
@@ -478,13 +478,13 @@ func isBF(x F) bool {
 	return x == 0 || x == 1
 }
 
-func minMax(x AI) (min, max int) {
-	if len(x) == 0 {
+func minMax(x *AI) (min, max int) {
+	if x.Len() == 0 {
 		return
 	}
 	min = x[0]
 	max = min
-	for _, xi := range x[1:] {
+	for _, xi := range x.Slice[1:] {
 		switch {
 		case xi > max:
 			max = xi
@@ -495,12 +495,12 @@ func minMax(x AI) (min, max int) {
 	return
 }
 
-func maxAI(x AI) int {
+func maxAI(x *AI) int {
 	max := math.MinInt
-	if len(x) == 0 {
+	if x.Len() == 0 {
 		return max
 	}
-	for _, xi := range x {
+	for _, xi := range x.Slice {
 		if xi > max {
 			max = xi
 		}

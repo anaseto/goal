@@ -236,7 +236,7 @@ type AB struct {
 }
 
 // NewAB returns a new boolean array.
-func NewAB(x []bool) *AB {
+func NewAB(x []bool) V {
 	return &AB{Slice: x}
 }
 
@@ -248,7 +248,7 @@ type AI struct {
 }
 
 // NewAI returns a new int array.
-func NewAI(x []int) *AI {
+func NewAI(x []int) V {
 	return &AI{Slice: x}
 }
 
@@ -260,7 +260,7 @@ type AF struct {
 }
 
 // NewAF returns a new array of reals.
-func NewAF(x []float64) *AF {
+func NewAF(x []float64) V {
 	return &AF{Slice: x}
 }
 
@@ -272,7 +272,7 @@ type AS struct {
 }
 
 // NewAS returns a new array of strings.
-func NewAS(x []string) *AS {
+func NewAS(x []string) V {
 	return &AS{Slice: x}
 }
 
@@ -284,7 +284,7 @@ type AV struct {
 }
 
 // NewAV returns a new generic array.
-func NewAV(x []V) *AV {
+func NewAV(x []V) V {
 	return &AV{Slice: x}
 }
 
@@ -301,7 +301,7 @@ type DerivedVerb struct {
 // arbitrary arity.
 type Projection struct {
 	Fun  V
-	Args AV
+	Args []V
 }
 
 // ProjectionFirst represents a monadic projection fixing the first argument of

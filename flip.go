@@ -8,7 +8,7 @@ func flip(x V) V {
 	case *AV:
 		cols := xv.Len()
 		if cols == 0 {
-			return NewV(AV{x})
+			return NewAV([]V{x})
 		}
 		lines := -1
 		for _, o := range xv {
@@ -26,19 +26,19 @@ func flip(x V) V {
 		t := aType(xv)
 		switch {
 		case lines <= 0:
-			return NewV(AV{x})
+			return NewAV([]V{x})
 		case lines == 1:
 			switch t {
 			case tB, tAB:
-				return NewV(AV{NewV(flipAB(xv))})
+				return NewAV([]V{NewV(flipAB(xv))})
 			case tF, tAF:
-				return NewV(AV{NewV(flipAF(xv))})
+				return NewAV([]V{NewV(flipAF(xv))})
 			case tI, tAI:
-				return NewV(AV{NewV(flipAI(xv))})
+				return NewAV([]V{NewV(flipAI(xv))})
 			case tS, tAS:
-				return NewV(AV{NewV(flipAS(xv))})
+				return NewAV([]V{NewV(flipAS(xv))})
 			default:
-				return NewV(AV{flipAV(xv)})
+				return NewAV([]V{flipAV(xv)})
 			}
 		default:
 			switch t {
@@ -55,7 +55,7 @@ func flip(x V) V {
 			}
 		}
 	default:
-		return NewV(AV{x})
+		return NewAV([]V{x})
 	}
 }
 

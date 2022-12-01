@@ -90,7 +90,7 @@ func icount(x V) V {
 	switch x := x.Value.(type) {
 	case *AB:
 		n := sumAB(x)
-		return NewV(AI{x.Len() - n, n})
+		return NewAI([]int{x.Len() - n, n})
 	case *AI:
 		max := maxAI(x)
 		if max < 0 {

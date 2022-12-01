@@ -25,7 +25,7 @@ func joinTo(x, y V) V {
 		case array:
 			return NewV(joinAtomToArray(x, yv, true))
 		default:
-			return NewV(AV{x, y})
+			return NewAV([]V{x, y})
 		}
 	}
 }
@@ -33,21 +33,21 @@ func joinTo(x, y V) V {
 func joinToI(x int, y V, left bool) V {
 	if y.IsInt() {
 		if left {
-			return NewV(AI{int(x), y.Int()})
+			return NewAI([]int{int(x), y.Int()})
 		}
-		return NewV(AI{y.Int(), int(x)})
+		return NewAI([]int{y.Int(), int(x)})
 	}
 	switch yv := y.Value.(type) {
 	case F:
 		if left {
-			return NewV(AF{float64(x), float64(yv)})
+			return NewAF([]float64{float64(x), float64(yv)})
 		}
-		return NewV(AF{float64(yv), float64(x)})
+		return NewAF([]float64{float64(yv), float64(x)})
 	case S:
 		if left {
-			return NewV(AV{NewI(x), y})
+			return NewAV([]V{NewI(x), y})
 		}
-		return NewV(AV{y, NewI(x)})
+		return NewAV([]V{y, NewI(x)})
 	case *AB:
 		return joinToAB(NewI(x), yv, left)
 	case *AF:
@@ -59,28 +59,28 @@ func joinToI(x int, y V, left bool) V {
 	case *AV:
 		return joinToAV(NewI(x), yv, left)
 	default:
-		return NewV(AV{NewI(x), y})
+		return NewAV([]V{NewI(x), y})
 	}
 }
 
 func joinToF(x F, y V, left bool) V {
 	if y.IsInt() {
 		if left {
-			return NewV(AF{float64(x), float64(y.Int())})
+			return NewAF([]float64{float64(x), float64(y.Int())})
 		}
-		return NewV(AF{float64(y.Int()), float64(x)})
+		return NewAF([]float64{float64(y.Int()), float64(x)})
 	}
 	switch yv := y.Value.(type) {
 	case F:
 		if left {
-			return NewV(AF{float64(x), float64(yv)})
+			return NewAF([]float64{float64(x), float64(yv)})
 		}
-		return NewV(AF{float64(yv), float64(x)})
+		return NewAF([]float64{float64(yv), float64(x)})
 	case S:
 		if left {
-			return NewV(AV{NewV(x), y})
+			return NewAV([]V{NewV(x), y})
 		}
-		return NewV(AV{y, NewV(x)})
+		return NewAV([]V{y, NewV(x)})
 	case *AB:
 		return joinToAB(NewV(x), yv, left)
 	case *AF:
@@ -92,28 +92,28 @@ func joinToF(x F, y V, left bool) V {
 	case *AV:
 		return joinToAV(NewV(x), yv, left)
 	default:
-		return NewV(AV{NewV(x), y})
+		return NewAV([]V{NewV(x), y})
 	}
 }
 
 func joinToS(x S, y V, left bool) V {
 	if y.IsInt() {
 		if left {
-			return NewV(AV{NewV(x), y})
+			return NewAV([]V{NewV(x), y})
 		}
-		return NewV(AV{y, NewV(x)})
+		return NewAV([]V{y, NewV(x)})
 	}
 	switch yv := y.Value.(type) {
 	case F:
 		if left {
-			return NewV(AV{NewV(x), y})
+			return NewAV([]V{NewV(x), y})
 		}
-		return NewV(AV{y, NewV(x)})
+		return NewAV([]V{y, NewV(x)})
 	case S:
 		if left {
-			return NewV(AS{string(x), string(yv)})
+			return NewAS([]string{string(x), string(yv)})
 		}
-		return NewV(AS{string(yv), string(x)})
+		return NewAS([]string{string(yv), string(x)})
 	case *AB:
 		return joinToAB(NewV(x), yv, left)
 	case *AF:
@@ -125,7 +125,7 @@ func joinToS(x S, y V, left bool) V {
 	case *AV:
 		return joinToAV(NewV(x), yv, left)
 	default:
-		return NewV(AV{NewV(x), y})
+		return NewAV([]V{NewV(x), y})
 	}
 }
 
@@ -456,16 +456,16 @@ func joinAFAI(x AF, y AI) AF {
 func enlist(x V) V {
 	if x.IsInt() {
 		if isBI(x.Int()) {
-			return NewV(AB{x.Int() == 1})
+			return NewAB([]bool{x.Int() == 1})
 		}
-		return NewV(AI{int(x.Int())})
+		return NewAI([]int{int(x.Int())})
 	}
 	switch xv := x.Value.(type) {
 	case F:
-		return NewV(AF{float64(xv)})
+		return NewAF([]float64{float64(xv)})
 	case S:
-		return NewV(AS{string(xv)})
+		return NewAS([]string{string(xv)})
 	default:
-		return NewV(AV{x})
+		return NewAV([]V{x})
 	}
 }

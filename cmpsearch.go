@@ -236,10 +236,10 @@ func uniq(x V) V {
 		b := x[0]
 		for i := 1; i < x.Len(); i++ {
 			if x[i] != b {
-				return NewV(AB{b, x[i]})
+				return NewAB([]bool{b, x[i]})
 			}
 		}
-		return NewV(AB{b})
+		return NewAB([]bool{b})
 	case *AF:
 		r := AF{}
 		m := map[float64]struct{}{}

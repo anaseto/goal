@@ -155,7 +155,7 @@ func fold2Decode(f V, x V) V {
 					return r[i]
 				}
 			}
-			return NewV(canonical(NewAV(r)))
+			return canonicalV(NewAV(r))
 		default:
 			return errType("i/x", "x", x)
 		}
@@ -212,7 +212,7 @@ func fold2Decode(f V, x V) V {
 					return r[i]
 				}
 			}
-			return NewV(canonical(r))
+			return canonicalV(NewAV(r))
 		default:
 			return errType("I/x", "x", x)
 		}
@@ -332,7 +332,7 @@ func scan2(ctx *Context, f, x V) V {
 			}
 			return NewI(0)
 		}
-		r := AV{xv.at(0)}
+		r := []V{xv.at(0)}
 		for i := 1; i < xv.Len(); i++ {
 			ctx.push(xv.at(i))
 			ctx.push(r[len(r)-1])
@@ -342,7 +342,7 @@ func scan2(ctx *Context, f, x V) V {
 			}
 			r = append(r, next)
 		}
-		return NewV(canonical(r))
+		return canonicalV(NewAV(r))
 	default:
 		return x
 	}
@@ -351,15 +351,15 @@ func scan2(ctx *Context, f, x V) V {
 func scan2Split(sep S, x V) V {
 	switch x := x.Value.(type) {
 	case S:
-		return NewV(AS(strings.Split(string(x), string(sep))))
+		return NewAS(strings.Split(string(x), string(sep)))
 	case *AS:
 		r := make([]V, x.Len())
 		for i := range r {
-			r[i] = NewV(AS(strings.Split(x.At(i), string(sep))))
+			r[i] = NewAS(strings.Split(x.At(i), string(sep)))
 		}
-		return NewV(r)
+		return NewAV(r)
 	case *AV:
-		assertCanonical(x)
+		//assertCanonical(x)
 		return errf("s/x : x not a string atom or array (%s)", x.Type())
 	default:
 		return errf("s/x : x not a string atom or array (%s)", x.Type())
@@ -393,7 +393,7 @@ func scan2Encode(f V, x V) V {
 				r[i] = int(x.Int() % f.Int())
 				x.N /= f.Int()
 			}
-			return NewV(r)
+			return NewAI(r)
 		}
 		switch x := x.Value.(type) {
 		case F:
@@ -406,7 +406,7 @@ func scan2Encode(f V, x V) V {
 			max = maxI(absI(min), absI(max))
 			n := encodeBaseDigits(f.Int(), max)
 			ai := make([]int, n*x.Len())
-			copy(ai[(n-1)*x.Len():], x)
+			copy(ai[(n-1)*x.Len():], x.Slice)
 			for i := n - 1; i >= 0; i-- {
 				for j := 0; j < x.Len(); j++ {
 					ox := ai[i*x.Len()+j]
@@ -418,9 +418,9 @@ func scan2Encode(f V, x V) V {
 			}
 			r := make([]V, n)
 			for i := range r {
-				r[i] = NewV(ai[i*x.Len() : (i+1)*x.Len()])
+				r[i] = NewAI(ai[i*x.Len() : (i+1)*x.Len()])
 			}
-			return NewV(r)
+			return NewAV(r)
 		case *AB:
 			return scan2Encode(f, fromABtoAI(x))
 		case *AF:
@@ -437,7 +437,7 @@ func scan2Encode(f V, x V) V {
 					return r[i]
 				}
 			}
-			return NewV(canonical(r))
+			return canonicalV(NewAV(r))
 		default:
 			return errType("i\\x", "x", x)
 		}
@@ -460,7 +460,7 @@ func scan2Encode(f V, x V) V {
 				r[i] = int(x.Int()) % fv.At(i)
 				x.N /= fv.At(i)
 			}
-			return NewV(r)
+			return NewAI(r)
 
 		}
 		switch x := x.Value.(type) {
@@ -472,7 +472,7 @@ func scan2Encode(f V, x V) V {
 		case *AI:
 			n := fv.Len()
 			ai := make([]int, n*x.Len())
-			copy(ai[(n-1)*x.Len():], x)
+			copy(ai[(n-1)*x.Len():], x.Slice)
 			for i := n - 1; i >= 0; i-- {
 				for j := 0; j < x.Len(); j++ {
 					ox := ai[i*x.Len()+j]
@@ -484,9 +484,9 @@ func scan2Encode(f V, x V) V {
 			}
 			r := make([]V, n)
 			for i := range r {
-				r[i] = NewV(ai[i*x.Len() : (i+1)*x.Len()])
+				r[i] = NewAI(ai[i*x.Len() : (i+1)*x.Len()])
 			}
-			return NewV(r)
+			return NewAV(r)
 		case *AB:
 			return scan2Encode(f, fromABtoAI(x))
 		case *AF:
@@ -503,7 +503,7 @@ func scan2Encode(f V, x V) V {
 					return r[i]
 				}
 			}
-			return NewV(canonical(r))
+			return canonicalV(NewAV(r))
 		default:
 			return errType("I\\x", "x", x)
 		}
@@ -532,7 +532,7 @@ func scan3(ctx *Context, args []V) V {
 	switch yv := y.Value.(type) {
 	case array:
 		if yv.Len() == 0 {
-			return NewV(AV{})
+			return NewAV([]V{})
 		}
 		ctx.push(yv.at(0))
 		ctx.push(x)
@@ -540,7 +540,7 @@ func scan3(ctx *Context, args []V) V {
 		if first.IsErr() {
 			return first
 		}
-		r := AV{first}
+		r := []V{first}
 		for i := 1; i < yv.Len(); i++ {
 			ctx.push(yv.at(i))
 			ctx.push(r[len(r)-1])
@@ -550,7 +550,7 @@ func scan3(ctx *Context, args []V) V {
 			}
 			r = append(r, next)
 		}
-		return NewV(canonical(r))
+		return canonicalV(NewAV(r))
 	default:
 		ctx.push(y)
 		ctx.push(x)
@@ -563,7 +563,7 @@ func scan3While(ctx *Context, args []V) V {
 	x := args[2]
 	y := args[0]
 	if x.IsFunction() {
-		r := AV{y}
+		r := []V{y}
 		for {
 			ctx.push(y)
 			cond := ctx.applyN(x, 1)
@@ -571,7 +571,7 @@ func scan3While(ctx *Context, args []V) V {
 				return cond
 			}
 			if !isTrue(cond) {
-				return NewV(canonical(r))
+				return canonicalV(NewAV(r))
 			}
 			ctx.push(y)
 			y = ctx.applyN(f, 1)
@@ -596,7 +596,7 @@ func scan3While(ctx *Context, args []V) V {
 }
 
 func scan3doTimes(ctx *Context, n int, f, y V) V {
-	r := AV{y}
+	r := []V{y}
 	for i := 0; i < n; i++ {
 		ctx.push(y)
 		y = ctx.applyN(f, 1)
@@ -605,7 +605,7 @@ func scan3doTimes(ctx *Context, n int, f, y V) V {
 		}
 		r = append(r, y)
 	}
-	return NewV(canonical(r))
+	return canonicalV(NewAV(r))
 }
 
 func each2(ctx *Context, args []V) V {
@@ -625,7 +625,7 @@ func each2(ctx *Context, args []V) V {
 			}
 			r = append(r, next)
 		}
-		return NewV(canonical(r))
+		return canonicalV(NewAV(r))
 	default:
 		// should not happen
 		return errf("f'x : x not an array (%s)", x.Type())
@@ -654,7 +654,7 @@ func each3(ctx *Context, args []V) V {
 			}
 			r = append(r, next)
 		}
-		return NewV(canonical(r))
+		return canonicalV(NewAV(r))
 	}
 	if !okay {
 		xlen := x.Len()
@@ -668,7 +668,7 @@ func each3(ctx *Context, args []V) V {
 			}
 			r = append(r, next)
 		}
-		return NewV(canonical(r))
+		return canonicalV(NewAV(r))
 	}
 	xlen := x.Len()
 	if xlen != y.Len() {
@@ -684,5 +684,5 @@ func each3(ctx *Context, args []V) V {
 		}
 		r = append(r, next)
 	}
-	return NewV(canonical(r))
+	return canonicalV(NewAV(r))
 }
