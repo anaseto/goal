@@ -159,7 +159,7 @@ func classify(x V) V {
 		r := make([]int, xv.Len())
 		m := map[float64]int{}
 		n := 0
-		for i, xi := range xv {
+		for i, xi := range xv.Slice {
 			c, ok := m[xi]
 			if !ok {
 				r[i] = n
@@ -174,7 +174,7 @@ func classify(x V) V {
 		r := make([]int, xv.Len())
 		m := map[int]int{}
 		n := 0
-		for i, xi := range xv {
+		for i, xi := range xv.Slice {
 			c, ok := m[xi]
 			if !ok {
 				r[i] = n
@@ -189,7 +189,7 @@ func classify(x V) V {
 		r := make([]int, xv.Len())
 		m := map[string]int{}
 		n := 0
-		for i, xi := range xv {
+		for i, xi := range xv.Slice {
 			c, ok := m[xi]
 			if !ok {
 				r[i] = n
@@ -206,7 +206,7 @@ func classify(x V) V {
 		r := make([]int, xv.Len())
 		n := 0
 	loop:
-		for i, xi := range xv {
+		for i, xi := range xv.Slice {
 			for j := range xv[:i] {
 				if Match(xi, xv.At(j)) {
 					r[i] = r[j]
@@ -581,7 +581,7 @@ func occurrenceCount(x V) V {
 	case *AB:
 		r := make([]int, xv.Len())
 		var f, t int
-		for i, xi := range xv {
+		for i, xi := range xv.Slice {
 			if xi {
 				r[i] = t
 				t++
@@ -594,7 +594,7 @@ func occurrenceCount(x V) V {
 	case *AF:
 		r := make([]int, xv.Len())
 		m := map[float64]int{}
-		for i, xi := range xv {
+		for i, xi := range xv.Slice {
 			c, ok := m[xi]
 			if !ok {
 				m[xi] = 0
@@ -607,7 +607,7 @@ func occurrenceCount(x V) V {
 	case *AI:
 		r := make([]int, xv.Len())
 		m := map[int]int{}
-		for i, xi := range xv {
+		for i, xi := range xv.Slice {
 			c, ok := m[xi]
 			if !ok {
 				m[xi] = 0
@@ -620,7 +620,7 @@ func occurrenceCount(x V) V {
 	case *AS:
 		r := make([]int, xv.Len())
 		m := map[string]int{}
-		for i, xi := range xv {
+		for i, xi := range xv.Slice {
 			c, ok := m[xi]
 			if !ok {
 				m[xi] = 0
@@ -635,7 +635,7 @@ func occurrenceCount(x V) V {
 		// improved by sorting or string hashing.
 		r := make([]int, xv.Len())
 	loop:
-		for i, xi := range xv {
+		for i, xi := range xv.Slice {
 			for j := i - 1; j >= 0; j-- {
 				if Match(xi, xv.At(j)) {
 					r[i] = r[j] + 1

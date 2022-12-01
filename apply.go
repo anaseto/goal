@@ -120,7 +120,7 @@ func (ctx *Context) applyArray(x V, y V) V {
 		return xv.at(i)
 	case *AV:
 		r := make([]V, yv.Len())
-		for i, yi := range yv {
+		for i, yi := range yv.Slice {
 			r[i] = ctx.applyArray(x, yi)
 			if r[i].IsErr() {
 				return r[i]

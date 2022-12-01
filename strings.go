@@ -23,7 +23,7 @@ func applyS(s S, x V) V {
 		return applyS(s, fromABtoAI(xv))
 	case *AI:
 		r := make([]string, xv.Len())
-		for i, n := range xv {
+		for i, n := range xv.Slice {
 			if n < 0 {
 				n += len(s)
 			}
@@ -41,7 +41,7 @@ func applyS(s S, x V) V {
 		return applyS(s, z)
 	case *AV:
 		r := make([]V, xv.Len())
-		for i, xi := range xv {
+		for i, xi := range xv.Slice {
 			r[i] = applyS(s, xi)
 			if r[i].IsErr() {
 				return r[i]
@@ -114,7 +114,7 @@ func applyS2(s S, x V, y V) V {
 				return errf("s[x;y] : length mismatch: %d (#x) %d (#y)",
 					xv.Len(), z.Len())
 			}
-			for i, n := range xv {
+			for i, n := range xv.Slice {
 				if n < 0 {
 					n += len(s)
 				}
@@ -129,7 +129,7 @@ func applyS2(s S, x V, y V) V {
 			}
 			return NewV(r)
 		}
-		for i, n := range xv {
+		for i, n := range xv.Slice {
 			if n < 0 {
 				n += len(s)
 			}
@@ -151,7 +151,7 @@ func applyS2(s S, x V, y V) V {
 		return applyS2(s, z, y)
 	case *AV:
 		r := make([]V, xv.Len())
-		for i, xi := range xv {
+		for i, xi := range xv.Slice {
 			r[i] = applyS2(s, xi, y)
 			if r[i].IsErr() {
 				return r[i]
@@ -225,7 +225,7 @@ func casti(y V) V {
 		return y
 	case *AS:
 		r := make([]V, yv.Len())
-		for i, s := range yv {
+		for i, s := range yv.Slice {
 			r[i] = casti(NewS(s))
 		}
 		return NewV(r)
@@ -264,7 +264,7 @@ func castn(y V) V {
 		return y
 	case *AS:
 		r := make([]V, yv.Len())
-		for i, s := range yv {
+		for i, s := range yv.Slice {
 			n, err := parseNumber(s)
 			if err != nil {
 				return errf("\"i\"$y : y contains non-numeric (%s) : %v", s, err)
@@ -299,7 +299,7 @@ func casts(y V) V {
 		return casts(fromABtoAI(yv))
 	case *AI:
 		sb := &strings.Builder{}
-		for _, i := range yv {
+		for _, i := range yv.Slice {
 			sb.WriteRune(rune(i))
 		}
 		return NewS(sb.String())

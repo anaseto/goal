@@ -11,7 +11,7 @@ func flip(x V) V {
 			return NewAV([]V{x})
 		}
 		lines := -1
-		for _, o := range xv {
+		for _, o := range xv.Slice {
 			nl := Length(o)
 			if _, ok := o.Value.(array); !ok {
 				continue

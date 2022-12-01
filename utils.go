@@ -181,7 +181,7 @@ func isIndices(x V) bool {
 	case *AI:
 		return true
 	case *AV:
-		for _, xi := range xv {
+		for _, xi := range xv.Slice {
 			if !isIndices(xi) {
 				return false
 			}
@@ -216,7 +216,7 @@ func toIndicesRec(x V) V {
 		return toAI(xv)
 	case *AV:
 		r := make([]V, xv.Len())
-		for i, z := range xv {
+		for i, z := range xv.Slice {
 			r[i] = toIndicesRec(z)
 			if r[i].IsErr() {
 				return r[i]
