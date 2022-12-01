@@ -58,16 +58,18 @@ func reverse(x V) V {
 // Rotate returns f|y.
 func rotate(x, y V) V {
 	i := 0
-	switch x := x.Value.(type) {
-	case I:
-		i = int(x)
-	case F:
-		if !isI(x) {
+	if x.IsInt() {
+		i = x.Int()
+	} else {
+		switch x := x.Value.(type) {
+		case F:
+			if !isI(x) {
+				return errf("f|y : non-integer f[y] (%s)", x.Type())
+			}
+			i = int(x)
+		default:
 			return errf("f|y : non-integer f[y] (%s)", x.Type())
 		}
-		i = int(x)
-	default:
-		return errf("f|y : non-integer f[y] (%s)", x.Type())
 	}
 	lenx := Length(y)
 	if lenx == 0 {
@@ -139,9 +141,10 @@ func first(x V) V {
 
 // drop returns i_x and s_x.
 func drop(x, y V) V {
+	if x.IsInt() {
+		return dropi(x.Int(), y)
+	}
 	switch x := x.Value.(type) {
-	case I:
-		return dropi(int(x), y)
 	case F:
 		if !isI(x) {
 			return errf("i_y : non-integer i (%s)", x.Type())
@@ -262,16 +265,18 @@ func cutAI(x AI, y V) V {
 // take returns i#x.
 func take(x, y V) V {
 	i := 0
-	switch x := x.Value.(type) {
-	case I:
-		i = int(x)
-	case F:
-		if !isI(x) {
+	if x.IsInt() {
+		i = x.Int()
+	} else {
+		switch x := x.Value.(type) {
+		case F:
+			if !isI(x) {
+				return errf("i#y : non-integer i (%s)", x.Type())
+			}
+			i = int(x)
+		default:
 			return errf("i#y : non-integer i (%s)", x.Type())
 		}
-		i = int(x)
-	default:
-		return errf("i#y : non-integer i (%s)", x.Type())
 	}
 	yv := toArray(y).Value.(array)
 	switch {
@@ -366,7 +371,7 @@ func takeCyclic(y array, n int) V {
 // ShiftBefore returns x»y. XXX: unused for now.
 func shiftBefore(x, y V) V {
 	x = toArray(x)
-	max := int(minI(I(Length(x)), I(Length(y))))
+	max := minI(Length(x), Length(y))
 	if max == 0 {
 		return y
 	}
@@ -515,7 +520,7 @@ func nudge(x V) V {
 // ShiftAfter returns x«y. XXX: unused for now.
 func shiftAfter(x, y V) V {
 	x = toArray(x)
-	max := int(minI(I(Length(x)), I(Length(y))))
+	max := minI(Length(x), Length(y))
 	if max == 0 {
 		return y
 	}

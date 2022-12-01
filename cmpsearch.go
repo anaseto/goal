@@ -24,6 +24,10 @@ func Match(x, y V) bool {
 	case Lambda:
 		return y.Kind == Lambda && x.N == y.N
 	default:
+		if y.Kind == Int {
+			xf, ok := x.Value.(F)
+			return ok && F(y.N) == xf
+		}
 		return y.Kind == Boxed && x.Value.Matches(y.Value)
 	}
 }

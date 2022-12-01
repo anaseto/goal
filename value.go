@@ -10,10 +10,10 @@ import (
 
 // V represents a boxed or unboxed value.
 type V struct {
-	Kind  ValueKind // int, boxed
-	Flags Flags     // unused for now (for sorted)
-	N     int       // refcount or unboxed integer value
-	Value Value     // boxed value
+	Kind ValueKind // int, boxed
+	//Flags Flags     // unused for now (for sorted)
+	N     int   // refcount or unboxed integer value
+	Value Value // boxed value
 }
 
 // ValueKind represents the kinds of values.
@@ -28,7 +28,7 @@ const (
 )
 
 // Flags is an optional field of V for extra information.
-type Flags int8
+//type Flags int8
 
 // lambda represents an user defined function by ID.
 type lambda int32
@@ -347,7 +347,7 @@ func (x AF) Type() string { return "F" }
 func (x AS) Type() string { return "S" }
 
 func (x AV) at(i int) V { return x[i] }
-func (x AB) at(i int) V { return NewV(B2I(x[i])) }
+func (x AB) at(i int) V { return NewI(B2I(x[i])) }
 func (x AI) at(i int) V { return NewI(x[i]) }
 func (x AF) at(i int) V { return NewF(x[i]) }
 func (x AS) at(i int) V { return NewS(x[i]) }

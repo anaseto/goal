@@ -3,15 +3,17 @@ package goal
 import "strings"
 
 func applyS(s S, x V) V {
-	switch xv := x.Value.(type) {
-	case I:
+	if x.IsInt() {
+		xv := x.Int()
 		if xv < 0 {
-			xv += I(len(s))
+			xv += len(s)
 		}
-		if xv < 0 || xv > I(len(s)) {
+		if xv < 0 || xv > len(s) {
 			return errf("s[i] : i out of bounds index (%d)", xv)
 		}
 		return NewV(s[xv:])
+	}
+	switch xv := x.Value.(type) {
 	case F:
 		if !isI(xv) {
 			return errf("s[x] : x non-integer (%g)", xv)
@@ -53,37 +55,39 @@ func applyS(s S, x V) V {
 
 func applyS2(s S, x V, y V) V {
 	var l int
-	switch y := y.Value.(type) {
-	case I:
-		if y < 0 {
-			return errf("s[x;y] : y negative (%d)", y)
+	if y.IsInt() {
+		if y.Int() < 0 {
+			return errf("s[x;y] : y negative (%d)", y.Int())
 		}
-		l = int(y)
-	case F:
-		if !isI(y) {
-			return errf("s[x;y] : y non-integer (%g)", y)
+		l = y.Int()
+	} else {
+		switch y := y.Value.(type) {
+		case F:
+			if !isI(y) {
+				return errf("s[x;y] : y non-integer (%g)", y)
+			}
+			l = int(y)
+		case AI:
+		case AB:
+			if Length(x) != y.Len() {
+			}
+			return applyS2(s, x, fromABtoAI(y))
+		case AF:
+			z := toAI(y)
+			if z.IsErr() {
+				return z
+			}
+			return applyS2(s, x, z)
+		default:
+			return errType("s[x;y]", "y", y)
 		}
-		l = int(y)
-	case AI:
-	case AB:
-		if Length(x) != y.Len() {
-		}
-		return applyS2(s, x, fromABtoAI(y))
-	case AF:
-		z := toAI(y)
-		if z.IsErr() {
-			return z
-		}
-		return applyS2(s, x, z)
-	default:
-		return errType("s[x;y]", "y", y)
 	}
-	switch xv := x.Value.(type) {
-	case I:
+	if x.IsInt() {
+		xv := x.Int()
 		if xv < 0 {
-			xv += I(len(s))
+			xv += len(s)
 		}
-		if xv < 0 || xv > I(len(s)) {
+		if xv < 0 || xv > len(s) {
 			return errf("s[i;y] : i out of bounds index (%d)", xv)
 		}
 		if _, ok := y.Value.(AI); ok {
@@ -93,6 +97,9 @@ func applyS2(s S, x V, y V) V {
 			l = len(s) - int(xv)
 		}
 		return NewV(s[xv : int(xv)+l])
+
+	}
+	switch xv := x.Value.(type) {
 	case F:
 		if !isI(xv) {
 			return errf("s[x;y] : x non-integer (%g)", xv)
@@ -199,9 +206,10 @@ func cast(x, y V) V {
 }
 
 func casti(y V) V {
-	switch yv := y.Value.(type) {
-	case I:
+	if y.IsInt() {
 		return y
+	}
+	switch yv := y.Value.(type) {
 	case F:
 		return NewI(int(yv))
 	case S:
@@ -238,9 +246,10 @@ func casti(y V) V {
 }
 
 func castn(y V) V {
-	switch yv := y.Value.(type) {
-	case I:
+	if y.IsInt() {
 		return y
+	}
+	switch yv := y.Value.(type) {
 	case F:
 		return y
 	case S:
@@ -248,7 +257,7 @@ func castn(y V) V {
 		if err != nil {
 			return errf("\"i\"$y : non-numeric y (%s) : %v", yv, err)
 		}
-		return NewV(xi)
+		return xi
 	case AB:
 		return y
 	case AI:
@@ -260,7 +269,7 @@ func castn(y V) V {
 			if err != nil {
 				return errf("\"i\"$y : y contains non-numeric (%s) : %v", s, err)
 			}
-			r[i] = NewV(n)
+			r[i] = n
 		}
 		return NewV(canonical(r))
 	case AF:
@@ -280,9 +289,10 @@ func castn(y V) V {
 }
 
 func casts(y V) V {
+	if y.IsInt() {
+		return NewS(string(rune(y.Int())))
+	}
 	switch yv := y.Value.(type) {
-	case I:
-		return NewS(string(rune(yv)))
 	case F:
 		return casts(NewI(int(yv)))
 	case AB:

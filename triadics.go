@@ -38,12 +38,13 @@ func (ctx *Context) amend3arrayI(x array, y int, f V) V {
 }
 
 func (ctx *Context) amend3array(x array, y, f V) V {
+	if y.IsInt() {
+		return ctx.amend3arrayI(x, y.Int(), f)
+	}
 	switch y := y.Value.(type) {
-	case I:
-		return ctx.amend3arrayI(x, y, f)
 	case AI:
 		for _, yi := range y {
-			ax := ctx.amend3arrayI(x, I(yi), f)
+			ax := ctx.amend3arrayI(x, yi, f)
 			if ax.IsErr() {
 				return ax
 			}
@@ -100,18 +101,19 @@ func (ctx *Context) amend4arrayI(x array, y int, f, z V) V {
 }
 
 func (ctx *Context) amend4array(x array, y, f, z V) V {
-	switch y := y.Value.(type) {
-	case I:
+	if y.IsInt() {
 		switch z.Value.(type) {
 		case array:
 			return errs("@[x;y;f;z] : shape mismatch between x and y")
 		}
-		return ctx.amend4arrayI(x, y, f, z)
+		return ctx.amend4arrayI(x, y.Int(), f, z)
+	}
+	switch y := y.Value.(type) {
 	case AI:
 		az, ok := z.Value.(array)
 		if !ok {
 			for _, xi := range y {
-				ax := ctx.amend4arrayI(x, I(xi), f, z)
+				ax := ctx.amend4arrayI(x, xi, f, z)
 				if ax.IsErr() {
 					return ax
 				}
@@ -124,7 +126,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 				y.Len(), az.Len())
 		}
 		for i, xi := range y {
-			ax := ctx.amend4arrayI(x, I(xi), f, az.at(i))
+			ax := ctx.amend4arrayI(x, xi, f, az.at(i))
 			if ax.IsErr() {
 				return ax
 			}

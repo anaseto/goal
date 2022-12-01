@@ -34,11 +34,12 @@ func (bs sortAV) Swap(i, j int) {
 }
 
 func less(x, y V) bool {
+	if x.IsInt() {
+		return lessI(x, y)
+	}
 	switch xv := x.Value.(type) {
 	case F:
 		return lessF(x, y)
-	case I:
-		return lessI(x, y)
 	case S:
 		return lessS(x, y)
 	case AB:
@@ -73,11 +74,12 @@ func less(x, y V) bool {
 
 func lessF(x V, y V) bool {
 	xv := x.Value.(F)
+	if y.IsInt() {
+		return xv < F(y.Int())
+	}
 	switch y := y.Value.(type) {
 	case F:
 		return xv < y
-	case I:
-		return xv < F(y)
 	case AB:
 		if len(y) == 0 {
 			return false
@@ -104,12 +106,13 @@ func lessF(x V, y V) bool {
 }
 
 func lessI(x V, y V) bool {
-	xv := x.Value.(I)
+	xv := x.Int()
+	if y.IsInt() {
+		return xv < y.Int()
+	}
 	switch y := y.Value.(type) {
 	case F:
 		return F(xv) < y
-	case I:
-		return xv < y
 	case AB:
 		if len(y) == 0 {
 			return false
@@ -124,7 +127,7 @@ func lessI(x V, y V) bool {
 		if len(y) == 0 {
 			return false
 		}
-		return xv < I(y[0]) || xv == I(y[0]) && len(y) > 1
+		return xv < y[0] || xv == y[0] && len(y) > 1
 	case AV:
 		if len(y) == 0 {
 			return false
@@ -157,11 +160,12 @@ func lessS(x V, y V) bool {
 
 func lessAB(x V, y V) bool {
 	xv := x.Value.(AB)
+	if y.IsInt() {
+		return !lessI(y, x)
+	}
 	switch yv := y.Value.(type) {
 	case F:
 		return !lessF(y, x)
-	case I:
-		return !lessI(y, x)
 	case AB:
 		for i := 0; i < len(xv) && i < len(yv); i++ {
 			if xv[i] && !yv[i] {
@@ -178,14 +182,14 @@ func lessAB(x V, y V) bool {
 		return len(xv) < len(yv)
 	case AI:
 		for i := 0; i < len(xv) && i < len(yv); i++ {
-			if B2I(xv[i]) > I(yv[i]) {
+			if B2I(xv[i]) > yv[i] {
 				return false
 			}
 		}
 		return len(xv) < len(yv)
 	case AV:
 		for i := 0; i < len(xv) && i < len(yv); i++ {
-			if less(yv[i], NewV(B2I(xv[i]))) {
+			if less(yv[i], NewI(B2I(xv[i]))) {
 				return false
 			}
 		}
@@ -197,14 +201,15 @@ func lessAB(x V, y V) bool {
 
 func lessAI(x V, y V) bool {
 	xv := x.Value.(AI)
+	if y.IsInt() {
+		return !lessI(y, x)
+	}
 	switch yv := y.Value.(type) {
 	case F:
 		return !lessF(y, x)
-	case I:
-		return !lessI(y, x)
 	case AB:
 		for i := 0; i < len(xv) && i < len(yv); i++ {
-			if I(xv[i]) > B2I(yv[i]) {
+			if xv[i] > B2I(yv[i]) {
 				return false
 			}
 		}
@@ -237,11 +242,12 @@ func lessAI(x V, y V) bool {
 
 func lessAF(x V, y V) bool {
 	xv := x.Value.(AF)
+	if y.IsInt() {
+		return !lessI(y, x)
+	}
 	switch yv := y.Value.(type) {
 	case F:
 		return !lessF(y, x)
-	case I:
-		return !lessI(y, x)
 	case AB:
 		for i := 0; i < len(xv) && i < len(yv); i++ {
 			if F(xv[i]) > B2F(yv[i]) {
@@ -301,14 +307,15 @@ func lessAS(x V, y V) bool {
 
 func lessAV(x V, y V) bool {
 	xv := x.Value.(AV)
+	if y.IsInt() {
+		return less(xv[0], y)
+	}
 	switch yv := y.Value.(type) {
 	case F:
 		return less(xv[0], y)
-	case I:
-		return less(xv[0], y)
 	case AB:
 		for i := 0; i < len(xv) && i < len(yv); i++ {
-			if less(NewV(B2I(yv[i])), xv[i]) {
+			if less(NewI(B2I(yv[i])), xv[i]) {
 				return false
 			}
 		}
@@ -531,7 +538,7 @@ func search(x V, y V) V {
 }
 
 func searchAII(x AI, y int) int {
-	return sort.Search(len(x), func(i int) bool { return I(x[i]) > y })
+	return sort.Search(len(x), func(i int) bool { return x[i] > y })
 }
 
 func searchAIF(x AI, y F) int {
@@ -551,9 +558,10 @@ func searchASS(x AS, y S) int {
 }
 
 func searchAI(x AI, y V) V {
+	if y.IsInt() {
+		return NewI(searchAII(x, y.Int()))
+	}
 	switch y := y.Value.(type) {
-	case I:
-		return NewI(searchAII(x, y))
 	case F:
 		return NewI(searchAIF(x, y))
 	case AB:
@@ -565,7 +573,7 @@ func searchAI(x AI, y V) V {
 	case AI:
 		r := make(AI, y.Len())
 		for i, yi := range y {
-			r[i] = searchAII(x, I(yi))
+			r[i] = searchAII(x, yi)
 		}
 		return NewV(r)
 	case AF:
@@ -587,9 +595,10 @@ func searchAI(x AI, y V) V {
 }
 
 func searchAF(x AF, y V) V {
+	if y.IsInt() {
+		return NewI(searchAFI(x, y.Int()))
+	}
 	switch y := y.Value.(type) {
-	case I:
-		return NewI(searchAFI(x, y))
 	case F:
 		return NewI(searchAFF(x, y))
 	case AB:
@@ -601,7 +610,7 @@ func searchAF(x AF, y V) V {
 	case AI:
 		r := make(AI, y.Len())
 		for i, yi := range y {
-			r[i] = searchAFI(x, I(yi))
+			r[i] = searchAFI(x, yi)
 		}
 		return NewV(r)
 	case AF:

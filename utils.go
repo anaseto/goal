@@ -334,7 +334,7 @@ func eType(x V) eltype {
 			return tI
 		}
 	}
-	switch x := x.Value.(type) {
+	switch x.Value.(type) {
 	case F:
 		return tF
 	case S:
@@ -592,7 +592,7 @@ func normalize(x AV) (Value, bool) {
 			if xi.IsInt() {
 				r[i] = float64(xi.Int())
 			} else {
-				r[i] = xi.F()
+				r[i] = float64(xi.F())
 			}
 		}
 		return r, true
