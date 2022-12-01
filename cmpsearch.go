@@ -151,7 +151,7 @@ func classify(x V) V {
 	//assertCanonical(x)
 	switch xv := x.Value.(type) {
 	case *AB:
-		if !xv[0] {
+		if !xv.At(0) {
 			return NewV(xv)
 		}
 		return not(x)
@@ -208,7 +208,7 @@ func classify(x V) V {
 	loop:
 		for i, xi := range xv {
 			for j := range xv[:i] {
-				if Match(xi, xv[j]) {
+				if Match(xi, xv.At(j)) {
 					r[i] = r[j]
 					continue loop
 				}
@@ -637,7 +637,7 @@ func occurrenceCount(x V) V {
 	loop:
 		for i, xi := range xv {
 			for j := i - 1; j >= 0; j-- {
-				if Match(xi, xv[j]) {
+				if Match(xi, xv.At(j)) {
 					r[i] = r[j] + 1
 					continue loop
 				}

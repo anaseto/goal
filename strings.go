@@ -234,7 +234,7 @@ func casti(y V) V {
 	case *AV:
 		r := make([]V, yv.Len())
 		for i := range r {
-			r[i] = casti(yv[i])
+			r[i] = casti(yv.At(i))
 			if r[i].IsErr() {
 				return r[i]
 			}
@@ -277,7 +277,7 @@ func castn(y V) V {
 	case *AV:
 		r := make([]V, yv.Len())
 		for i := range r {
-			r[i] = castn(yv[i])
+			r[i] = castn(yv.At(i))
 			if r[i].IsErr() {
 				return r[i]
 			}
@@ -308,7 +308,7 @@ func casts(y V) V {
 	case *AV:
 		r := make([]V, yv.Len())
 		for i := range r {
-			r[i] = casts(yv[i])
+			r[i] = casts(yv.At(i))
 			if r[i].IsErr() {
 				return r[i]
 			}

@@ -109,7 +109,7 @@ func clone(x V) V {
 	case *AV:
 		r := make([]V, xv.Len())
 		for i := range r {
-			r[i] = clone(xv[i])
+			r[i] = clone(xv.At(i))
 		}
 		return NewV(r)
 	default:

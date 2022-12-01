@@ -168,28 +168,28 @@ func lessAB(x V, y V) bool {
 		return !lessF(y, x)
 	case *AB:
 		for i := 0; i < len(xv) && i < len(yv); i++ {
-			if xv[i] && !yv[i] {
+			if xv.At(i) && !yv.At(i) {
 				return false
 			}
 		}
 		return len(xv) < len(yv)
 	case *AF:
 		for i := 0; i < len(xv) && i < len(yv); i++ {
-			if B2F(xv[i]) > F(yv[i]) {
+			if B2F(xv.At(i)) > F(yv.At(i)) {
 				return false
 			}
 		}
 		return len(xv) < len(yv)
 	case *AI:
 		for i := 0; i < len(xv) && i < len(yv); i++ {
-			if B2I(xv[i]) > yv[i] {
+			if B2I(xv.At(i)) > yv.At(i) {
 				return false
 			}
 		}
 		return len(xv) < len(yv)
 	case *AV:
 		for i := 0; i < len(xv) && i < len(yv); i++ {
-			if less(yv[i], NewI(B2I(xv[i]))) {
+			if less(yv.At(i), NewI(B2I(xv.At(i)))) {
 				return false
 			}
 		}
@@ -209,28 +209,28 @@ func lessAI(x V, y V) bool {
 		return !lessF(y, x)
 	case *AB:
 		for i := 0; i < len(xv) && i < len(yv); i++ {
-			if xv[i] > B2I(yv[i]) {
+			if xv.At(i) > B2I(yv.At(i)) {
 				return false
 			}
 		}
 		return len(xv) < len(yv)
 	case *AF:
 		for i := 0; i < len(xv) && i < len(yv); i++ {
-			if F(xv[i]) > F(yv[i]) {
+			if F(xv.At(i)) > F(yv.At(i)) {
 				return false
 			}
 		}
 		return len(xv) < len(yv)
 	case *AI:
 		for i := 0; i < len(xv) && i < len(yv); i++ {
-			if xv[i] > yv[i] {
+			if xv.At(i) > yv.At(i) {
 				return false
 			}
 		}
 		return len(xv) < len(yv)
 	case *AV:
 		for i := 0; i < len(xv) && i < len(yv); i++ {
-			if less(yv[i], NewI(xv[i])) {
+			if less(yv.At(i), NewI(xv.At(i))) {
 				return false
 			}
 		}
@@ -250,28 +250,28 @@ func lessAF(x V, y V) bool {
 		return !lessF(y, x)
 	case *AB:
 		for i := 0; i < len(xv) && i < len(yv); i++ {
-			if F(xv[i]) > B2F(yv[i]) {
+			if F(xv.At(i)) > B2F(yv.At(i)) {
 				return false
 			}
 		}
 		return len(xv) < len(yv)
 	case *AF:
 		for i := 0; i < len(xv) && i < len(yv); i++ {
-			if xv[i] > yv[i] {
+			if xv.At(i) > yv.At(i) {
 				return false
 			}
 		}
 		return len(xv) < len(yv)
 	case *AI:
 		for i := 0; i < len(xv) && i < len(yv); i++ {
-			if xv[i] > float64(yv[i]) {
+			if xv.At(i) > float64(yv.At(i)) {
 				return false
 			}
 		}
 		return len(xv) < len(yv)
 	case *AV:
 		for i := 0; i < len(xv) && i < len(yv); i++ {
-			if less(yv[i], NewF(xv[i])) {
+			if less(yv.At(i), NewF(xv.At(i))) {
 				return false
 			}
 		}
@@ -288,14 +288,14 @@ func lessAS(x V, y V) bool {
 		return !lessS(y, x)
 	case *AS:
 		for i := 0; i < len(xv) && i < len(yv); i++ {
-			if xv[i] > yv[i] {
+			if xv.At(i) > yv.At(i) {
 				return false
 			}
 		}
 		return len(xv) < len(yv)
 	case *AV:
 		for i := 0; i < len(xv) && i < len(yv); i++ {
-			if less(yv[i], NewS(xv[i])) {
+			if less(yv.At(i), NewS(xv.At(i))) {
 				return false
 			}
 		}
@@ -308,35 +308,35 @@ func lessAS(x V, y V) bool {
 func lessAV(x V, y V) bool {
 	xv := x.Value.(AV)
 	if y.IsInt() {
-		return less(xv[0], y)
+		return less(xv.At(0), y)
 	}
 	switch yv := y.Value.(type) {
 	case F:
-		return less(xv[0], y)
+		return less(xv.At(0), y)
 	case *AB:
 		for i := 0; i < len(xv) && i < len(yv); i++ {
-			if less(NewI(B2I(yv[i])), xv[i]) {
+			if less(NewI(B2I(yv.At(i))), xv.At(i)) {
 				return false
 			}
 		}
 		return len(xv) < len(yv)
 	case *AF:
 		for i := 0; i < len(xv) && i < len(yv); i++ {
-			if less(NewF(yv[i]), xv[i]) {
+			if less(NewF(yv.At(i)), xv.At(i)) {
 				return false
 			}
 		}
 		return len(xv) < len(yv)
 	case *AI:
 		for i := 0; i < len(xv) && i < len(yv); i++ {
-			if less(NewI(yv[i]), xv[i]) {
+			if less(NewI(yv.At(i)), xv.At(i)) {
 				return false
 			}
 		}
 		return len(xv) < len(yv)
 	case *AV:
 		for i := 0; i < len(xv) && i < len(yv); i++ {
-			if less(yv[i], xv[i]) {
+			if less(yv.At(i), xv.At(i)) {
 				return false
 			}
 		}

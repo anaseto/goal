@@ -175,7 +175,7 @@ func fold2Decode(f V, x V) V {
 			n := 1
 			for i := fv.Len() - 1; i >= 0; i-- {
 				r += int(x.Int()) * n
-				n *= fv[i]
+				n *= fv.At(i)
 			}
 			return NewI(r)
 		}
@@ -193,7 +193,7 @@ func fold2Decode(f V, x V) V {
 			n := 1
 			for i := x.Len() - 1; i >= 0; i-- {
 				r += x.At(i) * n
-				n *= fv[i]
+				n *= fv.At(i)
 			}
 			return NewI(r)
 		case *AB:
@@ -457,8 +457,8 @@ func scan2Encode(f V, x V) V {
 			n := fv.Len()
 			r := make([]int, n)
 			for i := n - 1; i >= 0 && x.Int() > 0; i-- {
-				r[i] = int(x.Int()) % fv[i]
-				x.N /= fv[i]
+				r[i] = int(x.Int()) % fv.At(i)
+				x.N /= fv.At(i)
 			}
 			return NewV(r)
 
@@ -476,9 +476,9 @@ func scan2Encode(f V, x V) V {
 			for i := n - 1; i >= 0; i-- {
 				for j := 0; j < x.Len(); j++ {
 					ox := ai[i*x.Len()+j]
-					ai[i*x.Len()+j] = ox % fv[i]
+					ai[i*x.Len()+j] = ox % fv.At(i)
 					if i > 0 {
-						ai[(i-1)*x.Len()+j] = ox / fv[i]
+						ai[(i-1)*x.Len()+j] = ox / fv.At(i)
 					}
 				}
 			}
