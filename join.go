@@ -23,7 +23,7 @@ func joinTo(x, y V) V {
 	default:
 		switch yv := y.Value.(type) {
 		case array:
-			return NewV(joinAtomToArray(x, yv, true))
+			return joinAtomToArray(x, yv, true)
 		default:
 			return NewAV([]V{x, y})
 		}
@@ -129,27 +129,27 @@ func joinToS(x S, y V, left bool) V {
 	}
 }
 
-func joinToAV(x V, y AV, left bool) V {
+func joinToAV(x V, y *AV, left bool) V {
 	switch xv := x.Value.(type) {
 	case array:
 		if left {
-			return NewV(joinArrays(xv, y))
+			return joinArrays(xv, y)
 		}
-		return NewV(joinArrays(y, xv))
+		return joinArrays(y, xv)
 	default:
-		r := make([]V, len(y)+1)
+		r := make([]V, y.Len()+1)
 		if left {
 			r[0] = x
-			copy(r[1:], y)
+			copy(r[1:], y.Slice)
 		} else {
 			r[len(r)-1] = x
-			copy(r[:len(r)-1], y)
+			copy(r[:len(r)-1], y.Slice)
 		}
-		return NewV(r)
+		return NewAV(r)
 	}
 }
 
-func joinArrays(x, y array) AV {
+func joinArrays(x, y array) V {
 	r := make([]V, y.Len()+x.Len())
 	for i := 0; i < x.Len(); i++ {
 		r[i] = x.at(i)
@@ -157,10 +157,10 @@ func joinArrays(x, y array) AV {
 	for i := x.Len(); i < len(r); i++ {
 		r[i] = y.at(i - x.Len())
 	}
-	return r
+	return NewAV(r)
 }
 
-func joinAtomToArray(x V, y array, left bool) AV {
+func joinAtomToArray(x V, y array, left bool) V {
 	r := make([]V, y.Len()+1)
 	if left {
 		r[0] = x
@@ -173,283 +173,283 @@ func joinAtomToArray(x V, y array, left bool) AV {
 			r[i] = y.at(i)
 		}
 	}
-	return r
+	return NewAV(r)
 }
 
-func joinToAS(x V, y AS, left bool) V {
+func joinToAS(x V, y *AS, left bool) V {
 	switch xv := x.Value.(type) {
 	case S:
-		r := make([]string, len(y)+1)
+		r := make([]string, y.Len()+1)
 		if left {
 			r[0] = string(xv)
-			copy(r[1:], y)
+			copy(r[1:], y.Slice)
 		} else {
 			r[len(r)-1] = string(xv)
-			copy(r[:len(r)-1], y)
+			copy(r[:len(r)-1], y.Slice)
 		}
-		return NewV(r)
+		return NewAS(r)
 	case *AS:
-		r := make([]string, len(y)+xv.Len())
+		r := make([]string, y.Len()+xv.Len())
 		if left {
-			copy(r[:xv.Len()], xv)
-			copy(r[xv.Len():], y)
+			copy(r[:xv.Len()], xv.Slice)
+			copy(r[xv.Len():], y.Slice)
 		} else {
-			copy(r[:len(y)], y)
-			copy(r[len(y):], xv)
+			copy(r[:y.Len()], y.Slice)
+			copy(r[y.Len():], xv.Slice)
 		}
-		return NewV(r)
+		return NewAS(r)
 	case array:
 		if left {
-			return NewV(joinArrays(xv, y))
+			return joinArrays(xv, y)
 		}
-		return NewV(joinArrays(y, xv))
+		return joinArrays(y, xv)
 	default:
-		return NewV(joinAtomToArray(x, y, left))
+		return joinAtomToArray(x, y, left)
 	}
 }
 
-func joinToAB(x V, y AB, left bool) V {
+func joinToAB(x V, y *AB, left bool) V {
 	if x.IsInt() {
 		if isBI(x.Int()) {
-			r := make([]bool, len(y)+1)
+			r := make([]bool, y.Len()+1)
 			if left {
 				r[0] = x.Int() == 1
-				copy(r[1:], y)
+				copy(r[1:], y.Slice)
 			} else {
 				r[len(r)-1] = x.Int() == 1
-				copy(r[:len(r)-1], y)
+				copy(r[:len(r)-1], y.Slice)
 			}
-			return NewV(r)
+			return NewAB(r)
 		}
-		r := make([]int, len(y)+1)
+		r := make([]int, y.Len()+1)
 		if left {
 			r[0] = int(x.Int())
 			for i := 1; i < len(r); i++ {
-				r[i] = int(B2I(y[i-1]))
+				r[i] = B2I(y.At(i - 1))
 			}
 		} else {
 			r[len(r)-1] = int(x.Int())
 			for i := 0; i < len(r); i++ {
-				r[i] = int(B2I(y[i]))
+				r[i] = B2I(y.At(i))
 			}
 		}
-		return NewV(r)
+		return NewAI(r)
 
 	}
 	switch xv := x.Value.(type) {
 	case F:
-		r := make([]float64, len(y)+1)
+		r := make([]float64, y.Len()+1)
 		if left {
 			r[0] = float64(xv)
 			for i := 1; i < len(r); i++ {
-				r[i] = float64(B2F(y[i-1]))
+				r[i] = float64(B2F(y.At(i - 1)))
 			}
 		} else {
 			r[len(r)-1] = float64(xv)
 			for i := 0; i < len(r); i++ {
-				r[i] = float64(B2F(y[i]))
+				r[i] = float64(B2F(y.At(i)))
 			}
 		}
-		return NewV(r)
+		return NewAF(r)
 	case *AB:
 		if left {
-			return NewV(joinABAB(xv, y))
+			return joinABAB(xv, y)
 		}
-		return NewV(joinABAB(y, xv))
+		return joinABAB(y, xv)
 	case *AI:
 		if left {
-			return NewV(joinAIAB(xv, y))
+			return joinAIAB(xv, y)
 		}
-		return NewV(joinABAI(y, xv))
+		return joinABAI(y, xv)
 	case *AF:
 		if left {
-			return NewV(joinAFAB(xv, y))
+			return joinAFAB(xv, y)
 		}
-		return NewV(joinABAF(y, xv))
+		return joinABAF(y, xv)
 	case array:
 		if left {
-			return NewV(joinArrays(xv, y))
+			return joinArrays(xv, y)
 		}
-		return NewV(joinArrays(y, xv))
+		return joinArrays(y, xv)
 	default:
-		return NewV(joinAtomToArray(x, y, left))
+		return joinAtomToArray(x, y, left)
 	}
 }
 
-func joinToAI(x V, y AI, left bool) V {
+func joinToAI(x V, y *AI, left bool) V {
 	if x.IsInt() {
-		r := make([]int, len(y)+1)
+		r := make([]int, y.Len()+1)
 		if left {
 			r[0] = x.Int()
-			copy(r[1:], y)
+			copy(r[1:], y.Slice)
 		} else {
 			r[len(r)-1] = x.Int()
-			copy(r[:len(r)-1], y)
+			copy(r[:len(r)-1], y.Slice)
 		}
-		return NewV(r)
+		return NewAI(r)
 
 	}
 	switch xv := x.Value.(type) {
 	case F:
-		r := make([]float64, len(y)+1)
+		r := make([]float64, y.Len()+1)
 		if left {
 			r[0] = float64(xv)
 			for i := 1; i < len(r); i++ {
-				r[i] = float64(y[i-1])
+				r[i] = float64(y.At(i - 1))
 			}
 		} else {
 			r[len(r)-1] = float64(xv)
 			for i := 0; i < len(r)-1; i++ {
-				r[i] = float64(y[i])
+				r[i] = float64(y.At(i))
 			}
 		}
-		return NewV(r)
+		return NewAF(r)
 	case *AB:
 		if left {
-			return NewV(joinABAI(xv, y))
+			return joinABAI(xv, y)
 		}
-		return NewV(joinAIAB(y, xv))
+		return joinAIAB(y, xv)
 	case *AI:
 		if left {
-			return NewV(joinAIAI(xv, y))
+			return joinAIAI(xv, y)
 		}
-		return NewV(joinAIAI(y, xv))
+		return joinAIAI(y, xv)
 	case *AF:
 		if left {
-			return NewV(joinAFAI(xv, y))
+			return joinAFAI(xv, y)
 		}
-		return NewV(joinAIAF(y, xv))
+		return joinAIAF(y, xv)
 	case array:
 		if left {
-			return NewV(joinArrays(xv, y))
+			return joinArrays(xv, y)
 		}
-		return NewV(joinArrays(y, xv))
+		return joinArrays(y, xv)
 	default:
-		return NewV(joinAtomToArray(x, y, left))
+		return joinAtomToArray(x, y, left)
 	}
 }
 
-func joinToAF(x V, y AF, left bool) V {
+func joinToAF(x V, y *AF, left bool) V {
 	if x.IsInt() {
-		r := make([]float64, len(y)+1)
+		r := make([]float64, y.Len()+1)
 		if left {
 			r[0] = float64(x.Int())
-			copy(r[1:], y)
+			copy(r[1:], y.Slice)
 		} else {
 			r[len(r)-1] = float64(x.Int())
-			copy(r[:len(r)-1], y)
+			copy(r[:len(r)-1], y.Slice)
 		}
-		return NewV(r)
+		return NewAF(r)
 	}
 	switch xv := x.Value.(type) {
 	case F:
-		r := make([]float64, len(y)+1)
+		r := make([]float64, y.Len()+1)
 		if left {
 			r[0] = float64(xv)
-			copy(r[1:], y)
+			copy(r[1:], y.Slice)
 		} else {
 			r[len(r)-1] = float64(xv)
-			copy(r[:len(r)-1], y)
+			copy(r[:len(r)-1], y.Slice)
 		}
-		return NewV(r)
+		return NewAF(r)
 	case *AB:
 		if left {
-			return NewV(joinABAF(xv, y))
+			return joinABAF(xv, y)
 		}
-		return NewV(joinAFAB(y, xv))
+		return joinAFAB(y, xv)
 	case *AI:
 		if left {
-			return NewV(joinAIAF(xv, y))
+			return joinAIAF(xv, y)
 		}
-		return NewV(joinAFAI(y, xv))
+		return joinAFAI(y, xv)
 	case *AF:
 		if left {
-			return NewV(joinAFAF(xv, y))
+			return joinAFAF(xv, y)
 		}
-		return NewV(joinAFAF(y, xv))
+		return joinAFAF(y, xv)
 	case array:
 		if left {
-			return NewV(joinArrays(xv, y))
+			return joinArrays(xv, y)
 		}
-		return NewV(joinArrays(y, xv))
+		return joinArrays(y, xv)
 	default:
-		return NewV(joinAtomToArray(x, y, left))
+		return joinAtomToArray(x, y, left)
 	}
 }
 
-func joinABAB(x AB, y AB) AB {
-	r := make([]bool, len(y)+len(x))
-	copy(r[:len(x)], x)
-	copy(r[len(x):], y)
-	return r
+func joinABAB(x *AB, y *AB) V {
+	r := make([]bool, y.Len()+x.Len())
+	copy(r[:x.Len()], x.Slice)
+	copy(r[x.Len():], y.Slice)
+	return NewAB(r)
 }
 
-func joinAIAI(x AI, y AI) AI {
-	r := make([]int, len(y)+len(x))
-	copy(r[:len(x)], x)
-	copy(r[len(x):], y)
-	return r
+func joinAIAI(x *AI, y *AI) V {
+	r := make([]int, y.Len()+x.Len())
+	copy(r[:x.Len()], x.Slice)
+	copy(r[x.Len():], y.Slice)
+	return NewAI(r)
 }
 
-func joinAFAF(x AF, y AF) AF {
-	r := make([]float64, len(y)+len(x))
-	copy(r[:len(x)], x)
-	copy(r[len(x):], y)
-	return r
+func joinAFAF(x *AF, y *AF) V {
+	r := make([]float64, y.Len()+x.Len())
+	copy(r[:x.Len()], x.Slice)
+	copy(r[x.Len():], y.Slice)
+	return NewAF(r)
 }
 
-func joinABAI(x AB, y AI) AI {
-	r := make([]int, len(x)+len(y))
-	for i := 0; i < len(x); i++ {
-		r[i] = int(B2I(x[i]))
+func joinABAI(x *AB, y *AI) V {
+	r := make([]int, x.Len()+y.Len())
+	for i := 0; i < x.Len(); i++ {
+		r[i] = B2I(x.At(i))
 	}
-	copy(r[len(x):], y)
-	return r
+	copy(r[x.Len():], y.Slice)
+	return NewAI(r)
 }
 
-func joinAIAB(x AI, y AB) AI {
-	r := make([]int, len(x)+len(y))
-	copy(r[:len(x)], x)
-	for i := len(x); i < len(r); i++ {
-		r[i] = int(B2I(y[i-len(x)]))
+func joinAIAB(x *AI, y *AB) V {
+	r := make([]int, x.Len()+y.Len())
+	copy(r[:x.Len()], x.Slice)
+	for i := x.Len(); i < len(r); i++ {
+		r[i] = B2I(y.At(i - x.Len()))
 	}
-	return r
+	return NewAI(r)
 }
 
-func joinABAF(x AB, y AF) AF {
-	r := make([]float64, len(x)+len(y))
-	for i := 0; i < len(x); i++ {
-		r[i] = float64(B2F(x[i]))
+func joinABAF(x *AB, y *AF) V {
+	r := make([]float64, x.Len()+y.Len())
+	for i := 0; i < x.Len(); i++ {
+		r[i] = float64(B2F(x.At(i)))
 	}
-	copy(r[len(x):], y)
-	return r
+	copy(r[x.Len():], y.Slice)
+	return NewAF(r)
 }
 
-func joinAFAB(x AF, y AB) AF {
-	r := make([]float64, len(x)+len(y))
-	copy(r[:len(x)], x)
-	for i := len(x); i < len(r); i++ {
-		r[i] = float64(B2F(y[i-len(x)]))
+func joinAFAB(x *AF, y *AB) V {
+	r := make([]float64, x.Len()+y.Len())
+	copy(r[:x.Len()], x.Slice)
+	for i := x.Len(); i < len(r); i++ {
+		r[i] = float64(B2F(y.At(i - x.Len())))
 	}
-	return r
+	return NewAF(r)
 }
 
-func joinAIAF(x AI, y AF) AF {
-	r := make([]float64, len(x)+len(y))
-	for i := 0; i < len(x); i++ {
-		r[i] = float64(x[i])
+func joinAIAF(x *AI, y *AF) V {
+	r := make([]float64, x.Len()+y.Len())
+	for i := 0; i < x.Len(); i++ {
+		r[i] = float64(x.At(i))
 	}
-	copy(r[len(x):], y)
-	return r
+	copy(r[x.Len():], y.Slice)
+	return NewAF(r)
 }
 
-func joinAFAI(x AF, y AI) AF {
-	r := make([]float64, len(x)+len(y))
-	copy(r[:len(x)], x)
-	for i := len(x); i < len(r); i++ {
-		r[i] = float64(y[i-len(x)])
+func joinAFAI(x *AF, y *AI) V {
+	r := make([]float64, x.Len()+y.Len())
+	copy(r[:x.Len()], x.Slice)
+	for i := x.Len(); i < len(r); i++ {
+		r[i] = float64(y.At(i - x.Len()))
 	}
-	return r
+	return NewAF(r)
 }
 
 // enlist returns ,x.
