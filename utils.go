@@ -251,25 +251,25 @@ func toArray(x V) V {
 }
 
 // toAI converts AF into AI if possible.
-func toAI(x AF) V {
+func toAI(x *AF) V {
 	r := make([]int, x.Len())
-	for i, xi := range x {
+	for i, xi := range x.Slice {
 		if !isI(F(xi)) {
 			return errf("contains non-integer (%g)", xi)
 		}
 		r[i] = int(xi)
 	}
-	return NewV(r)
+	return NewAI(r)
 }
 
 // fromABtoAI converts AB into AI (for simplifying code, used only for
 // unfrequent code).
-func fromABtoAI(x AB) V {
+func fromABtoAI(x *AB) V {
 	r := make([]int, x.Len())
 	for i := range r {
 		r[i] = int(B2I(x[i]))
 	}
-	return NewV(r)
+	return NewV(NewAI(r))
 }
 
 func isFalse(x V) bool {
@@ -571,7 +571,7 @@ func assertCanonical(x AV) {
 
 // normalize returns a canonical form of an AV array. It returns true if a
 // shallow clone was made.
-func normalize(x AV) (Value, bool) {
+func normalize(x *AV) (array, bool) {
 	t := aType(x)
 	switch t {
 	case tB:
@@ -617,11 +617,10 @@ func normalize(x AV) (Value, bool) {
 func canonicalV(x V) V {
 	switch xv := x.Value.(type) {
 	case *AV:
-		r, b := normalize(xv)
+		r, b := normalize(xv.Slice)
 		if b {
 			return NewV(r)
 		}
-		x.Value = r
 		return x
 	default:
 		return x
@@ -629,7 +628,7 @@ func canonicalV(x V) V {
 }
 
 // canonical returns the canonical form of a given generic array.
-func canonical(x AV) Value {
+func canonical(x *AV) Value {
 	r, _ := normalize(x)
 	return r
 }
