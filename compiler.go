@@ -359,7 +359,7 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 	case astMONAD:
 		return c.doVariadic(tok, n)
 	case astEMPTYLIST:
-		id := c.ctx.storeConst(NewV(AV{}))
+		id := c.ctx.storeConst(NewAV([]V{}))
 		c.push2(opConst, opcode(id))
 		c.applyN(n)
 		return nil
@@ -536,7 +536,7 @@ func (c *compiler) doStrand(st *astStrand, n int) error {
 			a = append(a, NewS(s))
 		}
 	}
-	id := c.ctx.storeConst(NewV(canonical(a)))
+	id := c.ctx.storeConst(canonicalV(NewAV(a)))
 	c.pos = st.Pos
 	c.push2(opConst, opcode(id))
 	c.applyN(n)

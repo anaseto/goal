@@ -307,7 +307,7 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 func (x *AV) atIndices(y []int) V {
 	r := make([]V, len(y))
 	xlen := x.Len()
-	for i, yi := range y.Slice {
+	for i, yi := range y {
 		if yi < 0 {
 			yi += xlen
 		}
@@ -322,7 +322,7 @@ func (x *AV) atIndices(y []int) V {
 func (x *AB) atIndices(y []int) V {
 	r := make([]bool, len(y))
 	xlen := x.Len()
-	for i, yi := range y.Slice {
+	for i, yi := range y {
 		if yi < 0 {
 			yi += xlen
 		}
@@ -337,7 +337,7 @@ func (x *AB) atIndices(y []int) V {
 func (x *AI) atIndices(y []int) V {
 	r := make([]int, len(y))
 	xlen := x.Len()
-	for i, yi := range y.Slice {
+	for i, yi := range y {
 		if yi < 0 {
 			yi += xlen
 		}
@@ -352,7 +352,7 @@ func (x *AI) atIndices(y []int) V {
 func (x *AF) atIndices(y []int) V {
 	r := make([]float64, len(y))
 	xlen := x.Len()
-	for i, yi := range y.Slice {
+	for i, yi := range y {
 		if yi < 0 {
 			yi += xlen
 		}
@@ -367,7 +367,7 @@ func (x *AF) atIndices(y []int) V {
 func (x *AS) atIndices(y []int) V {
 	r := make([]string, len(y))
 	xlen := x.Len()
-	for i, yi := range y.Slice {
+	for i, yi := range y {
 		if yi < 0 {
 			yi += xlen
 		}

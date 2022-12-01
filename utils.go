@@ -407,13 +407,13 @@ func cTypeAO(x AV) eltype {
 }
 
 // aType returns the most specific eltype of the elements of a generic array.
-func aType(x AV) eltype {
+func aType(x *AV) eltype {
 	if x.Len() == 0 {
 		return tV
 	}
-	t := eType(x[0])
-	for i := 1; i < len(x); i++ {
-		t = mergeTypes(t, eType(x[i]))
+	t := eType(x.Slice[0])
+	for i := 1; i < x.Len(); i++ {
+		t = mergeTypes(t, eType(x.At(i)))
 	}
 	return t
 }

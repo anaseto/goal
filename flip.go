@@ -30,28 +30,28 @@ func flip(x V) V {
 		case lines == 1:
 			switch t {
 			case tB, tAB:
-				return NewAV([]V{NewV(flipAB(xv))})
+				return NewAV([]V{flipAB(xv)})
 			case tF, tAF:
-				return NewAV([]V{NewV(flipAF(xv))})
+				return NewAV([]V{flipAF(xv)})
 			case tI, tAI:
-				return NewAV([]V{NewV(flipAI(xv))})
+				return NewAV([]V{flipAI(xv)})
 			case tS, tAS:
-				return NewAV([]V{NewV(flipAS(xv))})
+				return NewAV([]V{flipAS(xv)})
 			default:
 				return NewAV([]V{flipAV(xv)})
 			}
 		default:
 			switch t {
 			case tB, tAB:
-				return NewV(flipAVAB(xv, lines))
+				return flipAVAB(xv, lines)
 			case tF, tAF:
-				return NewV(flipAVAF(xv, lines))
+				return flipAVAF(xv, lines)
 			case tI, tAI:
-				return NewV(flipAVAI(xv, lines))
+				return flipAVAI(xv, lines)
 			case tS, tAS:
-				return NewV(flipAVAS(xv, lines))
+				return flipAVAS(xv, lines)
 			default:
-				return NewV(flipAVAV(xv, lines))
+				return flipAVAV(xv, lines)
 			}
 		}
 	default:
@@ -59,19 +59,19 @@ func flip(x V) V {
 	}
 }
 
-func flipAB(x AV) AB {
+func flipAB(x *AV) V {
 	r := make([]bool, x.Len())
 	for i, xi := range x.Slice {
 		if xi.IsInt() {
 			r[i] = xi.Int() == 1
 		} else {
-			r[i] = xi.AB()[0]
+			r[i] = xi.AB().At(0)
 		}
 	}
-	return r
+	return NewAB(r)
 }
 
-func flipAVAB(x AV, lines int) AV {
+func flipAVAB(x *AV, lines int) V {
 	r := make([]V, lines)
 	a := make([]bool, lines*x.Len())
 	for j := range r {
@@ -80,15 +80,15 @@ func flipAVAB(x AV, lines int) AV {
 			if xi.IsInt() {
 				q[i] = xi.Int() == 1
 			} else {
-				q[i] = xi.AB()[j]
+				q[i] = xi.AB().At(j)
 			}
 		}
-		r[j] = NewV(q)
+		r[j] = NewAB(q)
 	}
-	return r
+	return NewAV(r)
 }
 
-func flipAF(x AV) AF {
+func flipAF(x *AV) V {
 	r := make([]float64, x.Len())
 	for i, xi := range x.Slice {
 		if xi.IsInt() {
@@ -97,19 +97,19 @@ func flipAF(x AV) AF {
 		}
 		switch z := xi.Value.(type) {
 		case *AB:
-			r[i] = float64(B2F(z[0]))
+			r[i] = float64(B2F(z.At(0)))
 		case F:
 			r[i] = float64(z)
 		case *AF:
-			r[i] = z[0]
+			r[i] = z.At(0)
 		case *AI:
-			r[i] = float64(z[0])
+			r[i] = float64(z.At(0))
 		}
 	}
-	return r
+	return NewAF(r)
 }
 
-func flipAVAF(x AV, lines int) AV {
+func flipAVAF(x *AV, lines int) V {
 	r := make([]V, lines)
 	a := make([]float64, lines*x.Len())
 	for j := range r {
@@ -121,21 +121,21 @@ func flipAVAF(x AV, lines int) AV {
 			}
 			switch z := xi.Value.(type) {
 			case *AB:
-				q[i] = float64(B2F(z[j]))
+				q[i] = float64(B2F(z.At(j)))
 			case F:
 				q[i] = float64(z)
 			case *AF:
-				q[i] = z[j]
+				q[i] = z.At(j)
 			case *AI:
-				q[i] = float64(z[j])
+				q[i] = float64(z.At(j))
 			}
 		}
-		r[j] = NewV(q)
+		r[j] = NewAF(q)
 	}
-	return r
+	return NewAV(r)
 }
 
-func flipAI(x AV) AI {
+func flipAI(x *AV) V {
 	r := make([]int, x.Len())
 	for i, xi := range x.Slice {
 		if xi.IsInt() {
@@ -144,15 +144,15 @@ func flipAI(x AV) AI {
 		}
 		switch z := xi.Value.(type) {
 		case *AB:
-			r[i] = int(B2I(z[0]))
+			r[i] = int(B2I(z.At(0)))
 		case *AI:
-			r[i] = z[0]
+			r[i] = z.At(0)
 		}
 	}
-	return r
+	return NewAI(r)
 }
 
-func flipAVAI(x AV, lines int) AV {
+func flipAVAI(x *AV, lines int) V {
 	r := make([]V, lines)
 	a := make([]int, lines*x.Len())
 	for j := range r {
@@ -164,30 +164,30 @@ func flipAVAI(x AV, lines int) AV {
 			}
 			switch z := xi.Value.(type) {
 			case *AB:
-				q[i] = int(B2I(z[j]))
+				q[i] = int(B2I(z.At(j)))
 			case *AI:
-				q[i] = z[j]
+				q[i] = z.At(j)
 			}
 		}
-		r[j] = NewV(q)
+		r[j] = NewAI(q)
 	}
-	return r
+	return NewAV(r)
 }
 
-func flipAS(x AV) AS {
+func flipAS(x *AV) V {
 	r := make([]string, x.Len())
 	for i, xi := range x.Slice {
 		switch z := xi.Value.(type) {
 		case S:
 			r[i] = string(z)
 		case *AS:
-			r[i] = z[0]
+			r[i] = z.At(0)
 		}
 	}
-	return r
+	return NewAS(r)
 }
 
-func flipAVAS(x AV, lines int) AV {
+func flipAVAS(x *AV, lines int) V {
 	r := make([]V, lines)
 	a := make([]string, lines*x.Len())
 	for j := range r {
@@ -197,15 +197,15 @@ func flipAVAS(x AV, lines int) AV {
 			case S:
 				q[i] = string(z)
 			case *AS:
-				q[i] = z[j]
+				q[i] = z.At(j)
 			}
 		}
-		r[j] = NewV(q)
+		r[j] = NewAS(q)
 	}
-	return r
+	return NewAV(r)
 }
 
-func flipAV(x AV) V {
+func flipAV(x *AV) V {
 	r := make([]V, x.Len())
 	for i, xi := range x.Slice {
 		switch z := xi.Value.(type) {
@@ -218,7 +218,7 @@ func flipAV(x AV) V {
 	return canonicalV(NewAV(r))
 }
 
-func flipAVAV(x AV, lines int) AV {
+func flipAVAV(x *AV, lines int) V {
 	r := make([]V, lines)
 	a := make([]V, lines*x.Len())
 	for j := range r {
@@ -231,7 +231,7 @@ func flipAVAV(x AV, lines int) AV {
 				q[i] = xi
 			}
 		}
-		r[j] = NewV(q)
+		r[j] = NewAV(q)
 	}
-	return r
+	return NewAV(r)
 }
