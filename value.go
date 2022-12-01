@@ -10,10 +10,9 @@ import (
 
 // V represents a boxed or unboxed value.
 type V struct {
-	Kind ValueKind // int, boxed
-	//Flags Flags     // unused for now (for sorted)
-	N     int   // refcount or unboxed integer value
-	Value Value // boxed value
+	Kind  ValueKind // int, boxed
+	N     int       // refcount or unboxed integer value
+	Value Value     // boxed value
 }
 
 // ValueKind represents the kinds of values.
@@ -26,9 +25,6 @@ const (
 	Lambda             // unboxed
 	Boxed              // boxed value (Value field)
 )
-
-// Flags is an optional field of V for extra information.
-//type Flags int8
 
 // lambda represents an user defined function by ID.
 type lambda int32
