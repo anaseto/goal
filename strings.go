@@ -325,13 +325,13 @@ func drops(s S, y V) V {
 		return NewS(strings.TrimPrefix(string(y), string(s)))
 	case *AS:
 		r := make([]string, y.Len())
-		for i, yi := range y {
+		for i, yi := range y.Slice {
 			r[i] = strings.TrimPrefix(string(yi), string(s))
 		}
 		return NewV(r)
 	case *AV:
 		r := make([]V, y.Len())
-		for i, yi := range y {
+		for i, yi := range y.Slice {
 			r[i] = drops(s, yi)
 			if r[i].IsErr() {
 				return r[i]
@@ -350,13 +350,13 @@ func trim(s S, y V) V {
 		return NewS(strings.Trim(string(y), string(s)))
 	case *AS:
 		r := make([]string, y.Len())
-		for i, yi := range y {
+		for i, yi := range y.Slice {
 			r[i] = strings.Trim(string(yi), string(s))
 		}
 		return NewV(r)
 	case *AV:
 		r := make([]V, y.Len())
-		for i, yi := range y {
+		for i, yi := range y.Slice {
 			r[i] = trim(s, yi)
 			if r[i].IsErr() {
 				return r[i]

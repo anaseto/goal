@@ -307,7 +307,7 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 func (x *AV) atIndices(y []int) V {
 	r := make([]V, len(y))
 	xlen := x.Len()
-	for i, yi := range y {
+	for i, yi := range y.Slice {
 		if yi < 0 {
 			yi += xlen
 		}
@@ -322,7 +322,7 @@ func (x *AV) atIndices(y []int) V {
 func (x *AB) atIndices(y []int) V {
 	r := make([]bool, len(y))
 	xlen := x.Len()
-	for i, yi := range y {
+	for i, yi := range y.Slice {
 		if yi < 0 {
 			yi += xlen
 		}
@@ -337,7 +337,7 @@ func (x *AB) atIndices(y []int) V {
 func (x *AI) atIndices(y []int) V {
 	r := make([]int, len(y))
 	xlen := x.Len()
-	for i, yi := range y {
+	for i, yi := range y.Slice {
 		if yi < 0 {
 			yi += xlen
 		}
@@ -352,7 +352,7 @@ func (x *AI) atIndices(y []int) V {
 func (x *AF) atIndices(y []int) V {
 	r := make([]float64, len(y))
 	xlen := x.Len()
-	for i, yi := range y {
+	for i, yi := range y.Slice {
 		if yi < 0 {
 			yi += xlen
 		}
@@ -367,7 +367,7 @@ func (x *AF) atIndices(y []int) V {
 func (x *AS) atIndices(y []int) V {
 	r := make([]string, len(y))
 	xlen := x.Len()
-	for i, yi := range y {
+	for i, yi := range y.Slice {
 		if yi < 0 {
 			yi += xlen
 		}
@@ -407,7 +407,7 @@ func (x AS) set(i int, y V) {
 //// setIndices x at y with z (in place).
 //func (x AV) setIndices(y AI, z V) error {
 //az := z.BV.(array)
-//for i, yi := range y {
+//for i, yi := range y.Slice {
 //if yi < 0 {
 //yi += len(x)
 //}
@@ -422,7 +422,7 @@ func (x AS) set(i int, y V) {
 //// setIndices x at y with z (in place).
 //func (x AI) setIndices(y AI, z V) error {
 //az := z.BV.(AI)
-//for i, yi := range y {
+//for i, yi := range y.Slice {
 //if yi < 0 {
 //yi += len(x)
 //}
@@ -437,7 +437,7 @@ func (x AS) set(i int, y V) {
 //// setIndices x at y with z (in place).
 //func (x AF) setIndices(y AI, z V) error {
 //az := z.BV.(AF)
-//for i, yi := range y {
+//for i, yi := range y.Slice {
 //if yi < 0 {
 //yi += len(x)
 //}
@@ -452,7 +452,7 @@ func (x AS) set(i int, y V) {
 //// setIndices x at y with z (in place).
 //func (x AB) setIndices(y AI, z V) error {
 //az := z.BV.(AB)
-//for i, yi := range y {
+//for i, yi := range y.Slice {
 //if yi < 0 {
 //yi += len(x)
 //}
@@ -467,7 +467,7 @@ func (x AS) set(i int, y V) {
 //// setIndices x at y with z (in place).
 //func (x AS) setIndices(y AI, z V) error {
 //az := z.BV.(AS)
-//for i, yi := range y {
+//for i, yi := range y.Slice {
 //if yi < 0 {
 //yi += len(x)
 //}

@@ -43,7 +43,7 @@ func (ctx *Context) amend3array(x array, y, f V) V {
 	}
 	switch y := y.Value.(type) {
 	case *AI:
-		for _, yi := range y {
+		for _, yi := range y.Slice {
 			ax := ctx.amend3arrayI(x, yi, f)
 			if ax.IsErr() {
 				return ax
@@ -52,7 +52,7 @@ func (ctx *Context) amend3array(x array, y, f V) V {
 		}
 		return NewV(x)
 	case *AV:
-		for _, yi := range y {
+		for _, yi := range y.Slice {
 			ax := ctx.amend3array(x, yi, f)
 			if ax.IsErr() {
 				return ax

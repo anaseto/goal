@@ -566,19 +566,19 @@ func searchAI(x AI, y V) V {
 		return NewI(searchAIF(x, y))
 	case *AB:
 		r := make([]int, y.Len())
-		for i, yi := range y {
+		for i, yi := range y.Slice {
 			r[i] = searchAII(x, B2I(yi))
 		}
 		return NewV(r)
 	case *AI:
 		r := make([]int, y.Len())
-		for i, yi := range y {
+		for i, yi := range y.Slice {
 			r[i] = searchAII(x, yi)
 		}
 		return NewV(r)
 	case *AF:
 		r := make([]int, y.Len())
-		for i, yi := range y {
+		for i, yi := range y.Slice {
 			r[i] = searchAIF(x, F(yi))
 		}
 		return NewV(r)
@@ -603,19 +603,19 @@ func searchAF(x AF, y V) V {
 		return NewI(searchAFF(x, y))
 	case *AB:
 		r := make([]int, y.Len())
-		for i, yi := range y {
+		for i, yi := range y.Slice {
 			r[i] = searchAFI(x, B2I(yi))
 		}
 		return NewV(r)
 	case *AI:
 		r := make([]int, y.Len())
-		for i, yi := range y {
+		for i, yi := range y.Slice {
 			r[i] = searchAFI(x, yi)
 		}
 		return NewV(r)
 	case *AF:
 		r := make([]int, y.Len())
-		for i, yi := range y {
+		for i, yi := range y.Slice {
 			r[i] = searchAFF(x, F(yi))
 		}
 		return NewV(r)
@@ -637,7 +637,7 @@ func searchAS(x AS, y V) V {
 		return NewI(searchASS(x, y))
 	case *AS:
 		r := make([]int, y.Len())
-		for i, yi := range y {
+		for i, yi := range y.Slice {
 			r[i] = searchASS(x, S(yi))
 		}
 		return NewV(r)

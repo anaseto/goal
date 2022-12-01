@@ -969,7 +969,7 @@ func findAS(x *AS, y V) V {
 	case *AS:
 		m := imapAS(x)
 		r := make([]int, y.Len())
-		for i, yi := range y {
+		for i, yi := range y.Slice {
 			j, ok := m[yi]
 			if ok {
 				r[i] = j
