@@ -20,7 +20,7 @@ func group(x V) V {
 		aif := ai[:len(ai)-n]
 		ait := ai[len(ai)-n:]
 		iTrue, iFalse := 0, 0
-		for i, xi := range x {
+		for i, xi := range x.Slice {
 			if xi {
 				ait[iTrue] = i
 				iTrue++

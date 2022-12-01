@@ -175,7 +175,7 @@ func bytes(x V) V {
 		return NewV(r)
 	case *AV:
 		r := make([]V, x.Len())
-		for i, xi := range x {
+		for i, xi := range x.Slice {
 			r[i] = bytes(xi)
 			if r[i].IsErr() {
 				return r[i]

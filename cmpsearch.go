@@ -960,7 +960,7 @@ func findAI(x *AI, y V) V {
 func findAS(x *AS, y V) V {
 	switch y := y.Value.(type) {
 	case S:
-		for i, xi := range x {
+		for i, xi := range x.Slice {
 			if S(xi) == y {
 				return NewI(i)
 			}
@@ -1008,7 +1008,7 @@ func findAV(x *AV, y V) V {
 	case array:
 		return findArray(x, yv)
 	default:
-		for i, xi := range x {
+		for i, xi := range x.Slice {
 			if Match(y, xi) {
 				return NewI(i)
 			}

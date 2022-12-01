@@ -514,7 +514,7 @@ func minMaxB(x AB) (int, int) {
 	}
 	min := true
 	max := false
-	for _, xi := range x {
+	for _, xi := range x.Slice {
 		max, min = max || xi, min && !xi
 		if max && !min {
 			break
@@ -524,7 +524,7 @@ func minMaxB(x AB) (int, int) {
 }
 
 func maxAB(x AB) bool {
-	for _, xi := range x {
+	for _, xi := range x.Slice {
 		if xi {
 			return true
 		}
@@ -551,7 +551,7 @@ func isCanonical(x AV) (eltype, bool) {
 	case tB, tI, tF, tS:
 		return t, false
 	case tV:
-		for _, xi := range x {
+		for _, xi := range x.Slice {
 			if isCanonicalV(xi) {
 				return t, false
 			}
@@ -576,19 +576,19 @@ func normalize(x *AV) (array, bool) {
 	switch t {
 	case tB:
 		r := make([]bool, x.Len())
-		for i, xi := range x {
+		for i, xi := range x.Slice {
 			r[i] = xi.Int() != 0
 		}
 		return r, true
 	case tI:
 		r := make([]int, x.Len())
-		for i, xi := range x {
+		for i, xi := range x.Slice {
 			r[i] = int(xi.Int())
 		}
 		return r, true
 	case tF:
 		r := make([]float64, x.Len())
-		for i, xi := range x {
+		for i, xi := range x.Slice {
 			if xi.IsInt() {
 				r[i] = float64(xi.Int())
 			} else {
@@ -598,12 +598,12 @@ func normalize(x *AV) (array, bool) {
 		return r, true
 	case tS:
 		r := make([]string, x.Len())
-		for i, xi := range x {
+		for i, xi := range x.Slice {
 			r[i] = string(xi.Value.(S))
 		}
 		return r, true
 	case tV:
-		for i, xi := range x {
+		for i, xi := range x.Slice {
 			x[i] = canonicalV(xi)
 		}
 		return x, false
@@ -668,7 +668,7 @@ func cloneArgs(a []V) []V {
 
 func sumAB(x AB) int {
 	n := 0
-	for _, xi := range x {
+	for _, xi := range x.Slice {
 		if xi {
 			n++
 		}
