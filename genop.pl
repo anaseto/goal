@@ -267,36 +267,36 @@ EOS
     }
     for my $t (sort keys %types) {
         print $out <<EOS;
-	case A$t:
+	case *A$t:
 		return ${namelc}A${t}V(x, y)
 EOS
     }
     print $out <<EOS;
-	case AV:
+	case *AV:
                 switch y := y.Value.(type) {
                 case array:
                         if y.Len() != x.Len() {
                                 return errf("x${errOp}y : length mismatch: %d vs %d", x.Len(), y.Len())
                         }
-                        r := make(AV, x.Len())
+                        r := make([]V, x.Len())
                         for i := range r {
-                                ri := ${name}(x[i], y.at(i))
+                                ri := ${name}(x.At(i), y.at(i))
                                 if ri.IsErr() {
                                         return ri
                                 }
                                 r[i] = ri
                         }
-                        return NewV(r)
+                        return NewAV(r)
                 }
-                r := make(AV, x.Len())
+                r := make([]V, x.Len())
                 for i := range r {
-                        ri := ${name}(x[i], y)
+                        ri := ${name}(x.At(i), y)
                         if ri.IsErr() {
                                 return ri
                         }
                         r[i] = ri
                 }
-                return NewV(r)
+                return NewAV(r)
 	default:
 		return errType("x${errOp}y", "x", x)
 	}
@@ -364,17 +364,17 @@ EOS
         my $iexpr = subst($expr, $t, $tt, "x", "y[i]");
         my $rtype = $atypes{$type};
         print $out <<EOS;
-	case A$tt:
-		r := make(A$type, y.Len())
+	case *A$tt:
+		r := make([]$rtype, y.Len())
 		for i := range r {
 			r[i] = $rtype($iexpr)
 		}
-		return NewV(r)
+		return NewA$type(r)
 EOS
     }
     print $out <<EOS if $t !~ /^A/;
-	case AV:
-		r := make(AV, y.Len())
+	case *AV:
+		r := make([]V, y.Len())
 		for i := range r {
 			ri := ${name}${t}V(x, y[i])
                         if ri.IsErr() {
@@ -382,7 +382,7 @@ EOS
 			}
 			r[i] = ri
 		}
-		return NewV(r)
+		return NewAV(r)
 	default:
 		return errType("x${errOp}y", "y", y)
 	}
@@ -397,20 +397,20 @@ sub genLeftArrayExpanded {
     my $s = "";
     open my $out, '>', \$s;
     print $out <<EOS;
-func ${name}A${t}V(x A$t, y V) V {
+func ${name}A${t}V(x *A$t, y V) V {
 EOS
     if ($types{"I"}) {
         my $expr = $cases->{"${t}_I"}->[0];
         my $type = $cases->{"${t}_I"}->[1];
-        my $iexpr = subst($expr, $t, "int", "x[i]", "y.Int()");
+        my $iexpr = subst($expr, $t, "int", "x.At(i)", "y.Int()");
         my $rtype = $atypes{$type};
         print $out <<EOS;
         if y.IsInt() {
-            r := make(A$type, x.Len())
+            r := make([]$rtype, x.Len())
             for i := range r {
                     r[i] = $rtype($iexpr)
             }
-            return NewV(r)
+            return NewA$type(r)
         }
 EOS
     }
@@ -421,32 +421,32 @@ EOS
         next if $tt eq "B" or $tt eq "I";
         my $expr = $cases->{"${t}_$tt"}->[0];
         my $type = $cases->{"${t}_$tt"}->[1];
-        my $iexpr = subst($expr, $t, $tt, "x[i]", "y");
+        my $iexpr = subst($expr, $t, $tt, "x.At(i)", "y");
         my $rtype = $atypes{$type};
         print $out <<EOS;
 	case $tt:
-		r := make(A$type, x.Len())
+		r := make([]$rtype, x.Len())
 		for i := range r {
 			r[i] = $rtype($iexpr)
 		}
-		return NewV(r)
+		return NewA$type(r)
 EOS
     }
     for my $tt (sort keys %types) {
         my $expr = $cases->{"${t}_$tt"}->[0];
         my $type = $cases->{"${t}_$tt"}->[1];
-        my $iexpr = subst($expr, $t, $tt, "x[i]", "y[i]");
+        my $iexpr = subst($expr, $t, $tt, "x.At(i)", "y.At(i)");
         my $rtype = $atypes{$type};
         print $out <<EOS;
-	case A$tt:
+	case *A$tt:
                 if x.Len() != y.Len() {
                         return errf("x${errOp}y : length mismatch: %d vs %d", x.Len(), y.Len())
                 }
-		r := make(A$type, y.Len())
+		r := make([]$rtype, y.Len())
 		for i := range r {
 			r[i] = $rtype($iexpr)
 		}
-		return NewV(r)
+		return NewA$type(r)
 EOS
     }
     my $tt = $t;
@@ -457,19 +457,19 @@ EOS
         $tt = "int";
     }
     print $out <<EOS if $t !~ /^A/;
-	case AV:
+	case *AV:
                 if x.Len() != y.Len() {
                         return errf("x${errOp}y : length mismatch: %d vs %d", x.Len(), y.Len())
                 }
-		r := make(AV, y.Len())
+		r := make([]V, y.Len())
 		for i := range r {
-			ri := ${name}${t}V($tt(x[i]), y[i])
+			ri := ${name}${t}V($tt(x.At(i)), y.At(i))
                         if ri.IsErr() {
 				return ri
 			}
 			r[i] = ri
 		}
-		return NewV(r)
+		return NewAV(r)
 	default:
 		return errType("x${errOp}y", "y", y)
 	}

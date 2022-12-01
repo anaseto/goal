@@ -226,20 +226,67 @@ func (e errV) Type() string               { return "e" }
 func (e errV) Sprint(ctx *Context) string { return fmt.Sprintf("'ERROR %s", e) }
 func (e errV) Error() string              { return string(e) }
 
-// AV represents a generic array.
-type AV []V
+type Flags int16
 
 // AB represents an array of booleans.
-type AB []bool
+type AB struct {
+	rc    int16
+	flags Flags
+	Slice []bool
+}
 
-// AF represents an array of reals.
-type AF []float64
+// NewAB returns a new boolean array.
+func NewAB(x []bool) *AB {
+	return &AB{Slice: x}
+}
 
 // AI represents an array of integers.
-type AI []int
+type AI struct {
+	rc    int16
+	flags Flags
+	Slice []int
+}
+
+// NewAI returns a new int array.
+func NewAI(x []int) *AI {
+	return &AI{Slice: x}
+}
+
+// AF represents an array of reals.
+type AF struct {
+	rc    int16
+	flags Flags
+	Slice []float64
+}
+
+// NewAF returns a new array of reals.
+func NewAF(x []float64) *AF {
+	return &AF{Slice: x}
+}
 
 // AS represents an array of strings.
-type AS []string // string array
+type AS struct {
+	rc    int16
+	flags Flags
+	Slice []string // string array
+}
+
+// NewAS returns a new array of strings.
+func NewAS(x []string) *AS {
+	return &AS{Slice: x}
+}
+
+// AV represents a generic array.
+type AV struct {
+	rc    int16
+	flags Flags
+	Slice []V
+}
+
+// NewAV returns a new generic array.
+func NewAV(x []V) *AV {
+	return &AV{Slice: x}
+}
 
 // DerivedVerb represents values modified by an adverb. This kind value is not
 // manipulable within the program, as it is only produced as an intermediary
@@ -315,44 +362,144 @@ type array interface {
 	//setIndices(y AI, z V) error
 }
 
-func (x AV) Matches(y Value) bool { return matchArray(x, y) }
-func (x AB) Matches(y Value) bool { return matchArray(x, y) }
-func (x AI) Matches(y Value) bool { return matchArray(x, y) }
-func (x AF) Matches(y Value) bool { return matchArray(x, y) }
-func (x AS) Matches(y Value) bool { return matchArray(x, y) }
+func (x *AB) Matches(y Value) bool { return matchArray(x, y) }
+func (x *AI) Matches(y Value) bool { return matchArray(x, y) }
+func (x *AF) Matches(y Value) bool { return matchArray(x, y) }
+func (x *AS) Matches(y Value) bool { return matchArray(x, y) }
+func (x *AV) Matches(y Value) bool { return matchArray(x, y) }
 
 // Len returns the length of the array.
-func (x AV) Len() int { return len(x) }
+func (x *AB) Len() int { return len(x.Slice) }
 
 // Len returns the length of the array.
-func (x AB) Len() int { return len(x) }
+func (x *AI) Len() int { return len(x.Slice) }
 
 // Len returns the length of the array.
-func (x AI) Len() int { return len(x) }
+func (x *AF) Len() int { return len(x.Slice) }
 
 // Len returns the length of the array.
-func (x AF) Len() int { return len(x) }
+func (x *AS) Len() int { return len(x.Slice) }
 
 // Len returns the length of the array.
-func (x AS) Len() int { return len(x) }
+func (x *AV) Len() int { return len(x.Slice) }
 
-func (x AV) Type() string { return "A" }
-func (x AB) Type() string { return "B" }
-func (x AI) Type() string { return "I" }
-func (x AF) Type() string { return "F" }
-func (x AS) Type() string { return "S" }
+// Type returns a string representation of the array's type.
+func (x *AB) Type() string { return "B" }
 
-func (x AV) at(i int) V { return x[i] }
-func (x AB) at(i int) V { return NewI(B2I(x[i])) }
-func (x AI) at(i int) V { return NewI(x[i]) }
-func (x AF) at(i int) V { return NewF(x[i]) }
-func (x AS) at(i int) V { return NewS(x[i]) }
+// Type returns a string representation of the array's type.
+func (x *AI) Type() string { return "I" }
 
-func (x AV) slice(i, j int) array { return x[i:j] }
-func (x AB) slice(i, j int) array { return x[i:j] }
-func (x AI) slice(i, j int) array { return x[i:j] }
-func (x AF) slice(i, j int) array { return x[i:j] }
-func (x AS) slice(i, j int) array { return x[i:j] }
+// Type returns a string representation of the array's type.
+func (x *AF) Type() string { return "F" }
+
+// Type returns a string representation of the array's type.
+func (x *AS) Type() string { return "S" }
+
+// Type returns a string representation of the array's type.
+func (x *AV) Type() string { return "A" }
+
+func (x *AB) at(i int) V { return NewI(B2I(x.Slice[i])) }
+func (x *AI) at(i int) V { return NewI(x.Slice[i]) }
+func (x *AF) at(i int) V { return NewF(x.Slice[i]) }
+func (x *AS) at(i int) V { return NewS(x.Slice[i]) }
+func (x *AV) at(i int) V { return x.Slice[i] }
+
+// At returns array value at the given index.
+func (x *AB) At(i int) bool { return x.Slice[i] }
+
+// At returns array value at the given index.
+func (x *AI) At(i int) int { return x.Slice[i] }
+
+// At returns array value at the given index.
+func (x *AF) At(i int) float64 { return x.Slice[i] }
+
+// At returns array value at the given index.
+func (x *AS) At(i int) string { return x.Slice[i] }
+
+// At returns array value at the given index.
+func (x *AV) At(i int) V { return x.Slice[i] }
+
+func (x *AB) slice(i, j int) array { return &AB{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
+func (x *AI) slice(i, j int) array { return &AI{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
+func (x *AF) slice(i, j int) array { return &AF{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
+func (x *AS) slice(i, j int) array { return &AS{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
+func (x *AV) slice(i, j int) array { return &AV{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
+
+func (x *AB) Sprint(ctx *Context) string {
+	if x.Len() == 0 {
+		return `!0`
+	}
+	sb := &strings.Builder{}
+	if x.Len() == 1 {
+		sb.WriteRune(',')
+		fmt.Fprintf(sb, "%d", B2I(x.At(0)))
+		return sb.String()
+	}
+	for i, xi := range x.Slice {
+		fmt.Fprintf(sb, "%d", B2I(xi))
+		if i < len(x)-1 {
+			sb.WriteRune(' ')
+		}
+	}
+	return sb.String()
+}
+
+func (x *AI) Sprint(ctx *Context) string {
+	if len(x) == 0 {
+		return `!0`
+	}
+	sb := &strings.Builder{}
+	if len(x) == 1 {
+		sb.WriteRune(',')
+		fmt.Fprintf(sb, "%d", x.At(0))
+		return sb.String()
+	}
+	for i, xi := range x.Slice {
+		fmt.Fprintf(sb, "%d", xi)
+		if i < len(x)-1 {
+			sb.WriteRune(' ')
+		}
+	}
+	return sb.String()
+}
+
+func (x *AF) Sprint(ctx *Context) string {
+	if len(x) == 0 {
+		return `!0`
+	}
+	sb := &strings.Builder{}
+	if len(x) == 1 {
+		sb.WriteRune(',')
+		fmt.Fprintf(sb, "%g", x.At(0))
+		return sb.String()
+	}
+	for i, xi := range x.Slice {
+		fmt.Fprintf(sb, "%g", xi)
+		if i < len(x)-1 {
+			sb.WriteRune(' ')
+		}
+	}
+	return sb.String()
+}
+
+func (x *AS) Sprint(ctx *Context) string {
+	if len(x) == 0 {
+		return `0#""`
+	}
+	sb := &strings.Builder{}
+	if len(x) == 1 {
+		sb.WriteRune(',')
+		fmt.Fprintf(sb, "%q", x.At(0))
+		return sb.String()
+	}
+	for i, xi := range x.Slice {
+		fmt.Fprintf(sb, "%q", xi)
+		if i < len(x)-1 {
+			sb.WriteRune(' ')
+		}
+	}
+	return sb.String()
+}
 
 // sprintV returns a string for a V deep in an AV.
 func sprintV(ctx *Context, x V) string {
@@ -374,7 +521,7 @@ func (x AV) sprint(ctx *Context, deep bool) string {
 	sb := &strings.Builder{}
 	if len(x) == 1 {
 		sb.WriteRune(',')
-		fmt.Fprintf(sb, "%s", x[0].Sprint(ctx))
+		fmt.Fprintf(sb, "%s", x.At(0).Sprint(ctx))
 		return sb.String()
 	}
 	sb.WriteRune('(')
@@ -389,7 +536,7 @@ func (x AV) sprint(ctx *Context, deep bool) string {
 	case tB, tI, tF, tS:
 		sep = " "
 	}
-	for i, xi := range x {
+	for i, xi := range x.Slice {
 		if xi != (V{}) {
 			fmt.Fprintf(sb, "%s", sprintV(ctx, xi))
 		}
@@ -398,82 +545,6 @@ func (x AV) sprint(ctx *Context, deep bool) string {
 		}
 	}
 	sb.WriteRune(')')
-	return sb.String()
-}
-
-func (x AB) Sprint(ctx *Context) string {
-	if len(x) == 0 {
-		return `!0`
-	}
-	sb := &strings.Builder{}
-	if len(x) == 1 {
-		sb.WriteRune(',')
-		fmt.Fprintf(sb, "%d", B2I(x[0]))
-		return sb.String()
-	}
-	for i, xi := range x {
-		fmt.Fprintf(sb, "%d", B2I(xi))
-		if i < len(x)-1 {
-			sb.WriteRune(' ')
-		}
-	}
-	return sb.String()
-}
-
-func (x AI) Sprint(ctx *Context) string {
-	if len(x) == 0 {
-		return `!0`
-	}
-	sb := &strings.Builder{}
-	if len(x) == 1 {
-		sb.WriteRune(',')
-		fmt.Fprintf(sb, "%d", x[0])
-		return sb.String()
-	}
-	for i, xi := range x {
-		fmt.Fprintf(sb, "%d", xi)
-		if i < len(x)-1 {
-			sb.WriteRune(' ')
-		}
-	}
-	return sb.String()
-}
-
-func (x AF) Sprint(ctx *Context) string {
-	if len(x) == 0 {
-		return `!0`
-	}
-	sb := &strings.Builder{}
-	if len(x) == 1 {
-		sb.WriteRune(',')
-		fmt.Fprintf(sb, "%g", x[0])
-		return sb.String()
-	}
-	for i, xi := range x {
-		fmt.Fprintf(sb, "%g", xi)
-		if i < len(x)-1 {
-			sb.WriteRune(' ')
-		}
-	}
-	return sb.String()
-}
-
-func (x AS) Sprint(ctx *Context) string {
-	if len(x) == 0 {
-		return `0#""`
-	}
-	sb := &strings.Builder{}
-	if len(x) == 1 {
-		sb.WriteRune(',')
-		fmt.Fprintf(sb, "%q", x[0])
-		return sb.String()
-	}
-	for i, xi := range x {
-		fmt.Fprintf(sb, "%q", xi)
-		if i < len(x)-1 {
-			sb.WriteRune(' ')
-		}
-	}
 	return sb.String()
 }
 
