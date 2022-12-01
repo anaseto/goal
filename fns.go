@@ -10,7 +10,7 @@ func enum(x V) V {
 		return rangeI(x.Int())
 	}
 	switch xv := x.Value.(type) {
-	case AI:
+	case *AI:
 		return rangeArray(xv)
 	default:
 		return errs("!x : x nested array")
@@ -83,7 +83,7 @@ func where(x V) V {
 			r := make([]int, n)
 			return NewV(r)
 		}
-	case AB:
+	case *AB:
 		n := 0
 		for _, xi := range x {
 			n += int(B2I(xi))
@@ -95,7 +95,7 @@ func where(x V) V {
 			}
 		}
 		return NewV(r)
-	case AI:
+	case *AI:
 		n := 0
 		for _, xi := range x {
 			if xi < 0 {
@@ -110,7 +110,7 @@ func where(x V) V {
 			}
 		}
 		return NewV(r)
-	case AF:
+	case *AF:
 		n := 0
 		for _, xi := range x {
 			if !isI(F(xi)) {
@@ -128,7 +128,7 @@ func where(x V) V {
 			}
 		}
 		return NewV(r)
-	case AV:
+	case *AV:
 		switch aType(x) {
 		case tB, tF, tI:
 			n := 0
@@ -192,23 +192,23 @@ func replicate(x, y V) V {
 		default:
 			return repeat(y, n)
 		}
-	case AB:
+	case *AB:
 		if x.Len() != Length(y) {
 			return errf("f#y : length mismatch: %d (f[y]) vs %d (y)", x.Len(), Length(y))
 		}
 		return repeatAB(x, y)
-	case AI:
+	case *AI:
 		if x.Len() != Length(y) {
 			return errf("f#y : length mismatch: %d (f[y]) vs %d (y)", x.Len(), Length(y))
 		}
 		return repeatAI(x, y)
-	case AF:
+	case *AF:
 		ix := toAI(x)
 		if ix.IsErr() {
 			return errf("f#y : x %v", ix)
 		}
 		return replicate(ix, y)
-	case AV:
+	case *AV:
 		// should be canonical
 		assertCanonical(x)
 		return errs("f#y : f[y] non-integer")
@@ -260,7 +260,7 @@ func repeatAB(x AB, y V) V {
 		n += int(B2I(xi))
 	}
 	switch y := y.Value.(type) {
-	case AB:
+	case *AB:
 		r := make([]bool, 0, n)
 		for i, xi := range x {
 			if xi {
@@ -268,7 +268,7 @@ func repeatAB(x AB, y V) V {
 			}
 		}
 		return NewV(r)
-	case AF:
+	case *AF:
 		r := make([]float64, 0, n)
 		for i, xi := range x {
 			if xi {
@@ -276,7 +276,7 @@ func repeatAB(x AB, y V) V {
 			}
 		}
 		return NewV(r)
-	case AI:
+	case *AI:
 		r := make([]int, 0, n)
 		for i, xi := range x {
 			if xi {
@@ -284,7 +284,7 @@ func repeatAB(x AB, y V) V {
 			}
 		}
 		return NewV(r)
-	case AS:
+	case *AS:
 		r := make([]string, 0, n)
 		for i, xi := range x {
 			if xi {
@@ -292,7 +292,7 @@ func repeatAB(x AB, y V) V {
 			}
 		}
 		return NewV(r)
-	case AV:
+	case *AV:
 		r := make([]V, 0, n)
 		for i, xi := range x {
 			if xi {
@@ -314,7 +314,7 @@ func repeatAI(x AI, y V) V {
 		n += xi
 	}
 	switch y := y.Value.(type) {
-	case AB:
+	case *AB:
 		r := make([]bool, 0, n)
 		for i, xi := range x {
 			for j := 0; j < xi; j++ {
@@ -322,7 +322,7 @@ func repeatAI(x AI, y V) V {
 			}
 		}
 		return NewV(r)
-	case AF:
+	case *AF:
 		r := make([]float64, 0, n)
 		for i, xi := range x {
 			for j := 0; j < xi; j++ {
@@ -330,7 +330,7 @@ func repeatAI(x AI, y V) V {
 			}
 		}
 		return NewV(r)
-	case AI:
+	case *AI:
 		r := make([]int, 0, n)
 		for i, xi := range x {
 			for j := 0; j < xi; j++ {
@@ -338,7 +338,7 @@ func repeatAI(x AI, y V) V {
 			}
 		}
 		return NewV(r)
-	case AS:
+	case *AS:
 		r := make([]string, 0, n)
 		for i, xi := range x {
 			for j := 0; j < xi; j++ {
@@ -346,7 +346,7 @@ func repeatAI(x AI, y V) V {
 			}
 		}
 		return NewV(r)
-	case AV:
+	case *AV:
 		r := make([]V, 0, n)
 		for i, xi := range x {
 			for j := 0; j < xi; j++ {
@@ -373,17 +373,17 @@ func weedOut(x, y V) V {
 			return NewV(AV{})
 		}
 		return y
-	case AB:
+	case *AB:
 		return weedOutAB(x, y)
-	case AI:
+	case *AI:
 		return weedOutAI(x, y)
-	case AF:
+	case *AF:
 		ix := toAI(x)
 		if ix.IsErr() {
 			return errf("f#y : x %v", ix)
 		}
 		return weedOut(ix, y)
-	case AV:
+	case *AV:
 		//assertCanonical(x)
 		return errs("f#y : f[y] non-integer")
 	default:
@@ -397,7 +397,7 @@ func weedOutAB(x AB, y V) V {
 		n += 1 - int(B2I(xi))
 	}
 	switch y := y.Value.(type) {
-	case AB:
+	case *AB:
 		r := make([]bool, 0, n)
 		for i, xi := range x {
 			if !xi {
@@ -405,7 +405,7 @@ func weedOutAB(x AB, y V) V {
 			}
 		}
 		return NewV(r)
-	case AF:
+	case *AF:
 		r := make([]float64, 0, n)
 		for i, xi := range x {
 			if !xi {
@@ -413,7 +413,7 @@ func weedOutAB(x AB, y V) V {
 			}
 		}
 		return NewV(r)
-	case AI:
+	case *AI:
 		r := make([]int, 0, n)
 		for i, xi := range x {
 			if !xi {
@@ -421,7 +421,7 @@ func weedOutAB(x AB, y V) V {
 			}
 		}
 		return NewV(r)
-	case AS:
+	case *AS:
 		r := make([]string, 0, n)
 		for i, xi := range x {
 			if !xi {
@@ -429,7 +429,7 @@ func weedOutAB(x AB, y V) V {
 			}
 		}
 		return NewV(r)
-	case AV:
+	case *AV:
 		r := make([]V, 0, n)
 		for i, xi := range x {
 			if !xi {
@@ -448,7 +448,7 @@ func weedOutAI(x AI, y V) V {
 		n += int(B2I(xi == 0))
 	}
 	switch y := y.Value.(type) {
-	case AB:
+	case *AB:
 		r := make([]bool, 0, n)
 		for i, xi := range x {
 			if xi == 0 {
@@ -456,7 +456,7 @@ func weedOutAI(x AI, y V) V {
 			}
 		}
 		return NewV(r)
-	case AF:
+	case *AF:
 		r := make([]float64, 0, n)
 		for i, xi := range x {
 			if xi == 0 {
@@ -464,7 +464,7 @@ func weedOutAI(x AI, y V) V {
 			}
 		}
 		return NewV(r)
-	case AI:
+	case *AI:
 		r := make([]int, 0, n)
 		for i, xi := range x {
 			if xi == 0 {
@@ -472,7 +472,7 @@ func weedOutAI(x AI, y V) V {
 			}
 		}
 		return NewV(r)
-	case AS:
+	case *AS:
 		r := make([]string, 0, n)
 		for i, xi := range x {
 			if xi == 0 {
@@ -480,7 +480,7 @@ func weedOutAI(x AI, y V) V {
 			}
 		}
 		return NewV(r)
-	case AV:
+	case *AV:
 		r := make([]V, 0, n)
 		for i, xi := range x {
 			if xi == 0 {

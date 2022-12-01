@@ -6,7 +6,7 @@ func group(x V) V {
 		return NewV(AV{})
 	}
 	switch x := x.Value.(type) {
-	case AB:
+	case *AB:
 		n := sumAB(x)
 		r := make([]V, int(B2I(n > 0)+1))
 		ai := make([]int, x.Len())
@@ -32,7 +32,7 @@ func group(x V) V {
 		r[0] = NewV(aif)
 		r[1] = NewV(ait)
 		return NewV(r)
-	case AI:
+	case *AI:
 		max := maxAI(x)
 		if max < 0 {
 			max = -1
@@ -68,13 +68,13 @@ func group(x V) V {
 			counts[j]--
 		}
 		return NewV(r)
-	case AF:
+	case *AF:
 		z := toAI(x)
 		if z.IsErr() {
 			return z
 		}
 		return group(z)
-	case AV:
+	case *AV:
 		//assertCanonical(x)
 		return errs("=x : x non-integer array")
 	default:
@@ -88,10 +88,10 @@ func icount(x V) V {
 		return NewV(AI{})
 	}
 	switch x := x.Value.(type) {
-	case AB:
+	case *AB:
 		n := sumAB(x)
 		return NewV(AI{x.Len() - n, n})
-	case AI:
+	case *AI:
 		max := maxAI(x)
 		if max < 0 {
 			max = -1
@@ -103,13 +103,13 @@ func icount(x V) V {
 			}
 		}
 		return NewV(counts)
-	case AF:
+	case *AF:
 		z := toAI(x)
 		if z.IsErr() {
 			return z
 		}
 		return icount(z)
-	case AV:
+	case *AV:
 		//assertCanonical(x)
 		return errs("icount x : x non-integer array")
 	default:

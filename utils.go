@@ -90,23 +90,23 @@ func maxS(x, y S) S {
 
 func clone(x V) V {
 	switch xv := x.Value.(type) {
-	case AB:
+	case *AB:
 		r := make([]bool, xv.Len())
 		copy(r, xv)
 		return NewV(r)
-	case AF:
+	case *AF:
 		r := make([]float64, xv.Len())
 		copy(r, xv)
 		return NewV(r)
-	case AI:
+	case *AI:
 		r := make([]int, xv.Len())
 		copy(r, xv)
 		return NewV(r)
-	case AS:
+	case *AS:
 		r := make([]string, xv.Len())
 		copy(r, xv)
 		return NewV(r)
-	case AV:
+	case *AV:
 		r := make([]V, xv.Len())
 		for i := range r {
 			r[i] = clone(xv[i])
@@ -119,23 +119,23 @@ func clone(x V) V {
 
 func cloneShallow(x V) V {
 	switch xv := x.Value.(type) {
-	case AB:
+	case *AB:
 		r := make([]bool, xv.Len())
 		copy(r, xv)
 		return NewV(r)
-	case AF:
+	case *AF:
 		r := make([]float64, xv.Len())
 		copy(r, xv)
 		return NewV(r)
-	case AI:
+	case *AI:
 		r := make([]int, xv.Len())
 		copy(r, xv)
 		return NewV(r)
-	case AS:
+	case *AS:
 		r := make([]string, xv.Len())
 		copy(r, xv)
 		return NewV(r)
-	case AV:
+	case *AV:
 		r := make([]V, xv.Len())
 		copy(r, xv)
 		return NewV(r)
@@ -146,23 +146,23 @@ func cloneShallow(x V) V {
 
 func cloneShallowArray(x array) array {
 	switch xv := x.(type) {
-	case AB:
+	case *AB:
 		r := make([]bool, xv.Len())
 		copy(r, xv)
 		return r
-	case AF:
+	case *AF:
 		r := make([]float64, xv.Len())
 		copy(r, xv)
 		return r
-	case AI:
+	case *AI:
 		r := make([]int, xv.Len())
 		copy(r, xv)
 		return r
-	case AS:
+	case *AS:
 		r := make([]string, xv.Len())
 		copy(r, xv)
 		return r
-	case AV:
+	case *AV:
 		r := make([]V, xv.Len())
 		copy(r, xv)
 		return r
@@ -178,9 +178,9 @@ func isIndices(x V) bool {
 		return true
 	}
 	switch xv := x.Value.(type) {
-	case AI:
+	case *AI:
 		return true
-	case AV:
+	case *AV:
 		for _, xi := range xv {
 			if !isIndices(xi) {
 				return false
@@ -210,11 +210,11 @@ func toIndicesRec(x V) V {
 			return errf("non-integer index (%g)", xv)
 		}
 		return NewI(int(xv))
-	case AB:
+	case *AB:
 		return fromABtoAI(xv)
-	case AF:
+	case *AF:
 		return toAI(xv)
-	case AV:
+	case *AV:
 		r := make([]V, xv.Len())
 		for i, z := range xv {
 			r[i] = toIndicesRec(z)
@@ -339,15 +339,15 @@ func eType(x V) eltype {
 		return tF
 	case S:
 		return tS
-	case AB:
+	case *AB:
 		return tAB
-	case AF:
+	case *AF:
 		return tAF
-	case AI:
+	case *AI:
 		return tAI
-	case AS:
+	case *AS:
 		return tAS
-	case AV:
+	case *AV:
 		return tAO
 	default:
 		return tV
@@ -365,19 +365,19 @@ func cType(x V) eltype {
 		}
 	}
 	switch x := x.Value.(type) {
-	case AB:
+	case *AB:
 		return tAB
 	case F:
 		return tF
-	case AF:
+	case *AF:
 		return tAF
-	case AI:
+	case *AI:
 		return tAI
 	case S:
 		return tS
-	case AS:
+	case *AS:
 		return tAS
-	case AV:
+	case *AV:
 		return cTypeAO(x)
 	default:
 		return tV
@@ -426,19 +426,19 @@ func sameType(x, y V) bool {
 	case F:
 		_, ok := y.Value.(F)
 		return ok
-	case AB:
+	case *AB:
 		_, ok := y.Value.(AB)
 		return ok
-	case AI:
+	case *AI:
 		_, ok := y.Value.(AI)
 		return ok
-	case AF:
+	case *AF:
 		_, ok := y.Value.(AF)
 		return ok
-	case AS:
+	case *AS:
 		_, ok := y.Value.(AS)
 		return ok
-	case AV:
+	case *AV:
 		_, ok := y.Value.(AV)
 		return ok
 	default:
@@ -449,15 +449,15 @@ func sameType(x, y V) bool {
 
 func compatEltType(x array, y V) bool {
 	switch x.(type) {
-	case AI:
+	case *AI:
 		return y.IsInt()
-	case AF:
+	case *AF:
 		_, ok := y.Value.(F)
 		return ok
-	case AS:
+	case *AS:
 		_, ok := y.Value.(S)
 		return ok
-	case AV:
+	case *AV:
 		return true
 	default:
 		return false
@@ -534,7 +534,7 @@ func maxAB(x AB) bool {
 
 func isCanonicalV(x V) bool {
 	switch xv := x.Value.(type) {
-	case AV:
+	case *AV:
 		_, ok := isCanonical(xv)
 		return ok
 	default:
@@ -616,7 +616,7 @@ func normalize(x AV) (Value, bool) {
 // canonicalV returns the canonical form of a given value.
 func canonicalV(x V) V {
 	switch xv := x.Value.(type) {
-	case AV:
+	case *AV:
 		r, b := normalize(xv)
 		if b {
 			return NewV(r)

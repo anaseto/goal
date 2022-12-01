@@ -13,25 +13,25 @@ func negate(x V) V {
 	switch x := x.Value.(type) {
 	case F:
 		return NewV(-x)
-	case AB:
+	case *AB:
 		r := make([]int, len(x))
 		for i := range r {
 			r[i] = int(-B2I(x[i]))
 		}
 		return NewV(r)
-	case AI:
+	case *AI:
 		r := make([]int, len(x))
 		for i := range r {
 			r[i] = -x[i]
 		}
 		return NewV(r)
-	case AF:
+	case *AF:
 		r := make([]float64, len(x))
 		for i := range r {
 			r[i] = -x[i]
 		}
 		return NewV(r)
-	case AV:
+	case *AV:
 		r := make([]V, len(x))
 		for i := range r {
 			r[i] = negate(x[i])
@@ -72,21 +72,21 @@ func sign(x V) V {
 	switch xv := x.Value.(type) {
 	case F:
 		return NewI(signF(xv))
-	case AB:
+	case *AB:
 		return x
-	case AI:
+	case *AI:
 		r := make([]int, xv.Len())
 		for i := range r {
 			r[i] = int(signI(xv[i]))
 		}
 		return NewV(r)
-	case AF:
+	case *AF:
 		r := make([]int, xv.Len())
 		for i := range r {
 			r[i] = int(signF(F(xv[i])))
 		}
 		return NewV(r)
-	case AV:
+	case *AV:
 		r := make([]V, xv.Len())
 		for i := range r {
 			r[i] = sign(xv[i])
@@ -107,11 +107,11 @@ func floor(x V) V {
 		return NewF(math.Floor(float64(xv)))
 	case S:
 		return NewS(strings.ToLower(string(xv)))
-	case AB:
+	case *AB:
 		return x
-	case AI:
+	case *AI:
 		return x
-	case AF:
+	case *AF:
 		r := make([]int, xv.Len())
 		for i := range r {
 			// NOTE: we assume conversion is possible, leaving
@@ -119,13 +119,13 @@ func floor(x V) V {
 			r[i] = int(math.Floor(xv[i]))
 		}
 		return NewV(r)
-	case AS:
+	case *AS:
 		r := make([]string, xv.Len())
 		for i := range r {
 			r[i] = strings.ToLower(xv[i])
 		}
 		return NewV(r)
-	case AV:
+	case *AV:
 		r := make([]V, xv.Len())
 		for i := range r {
 			r[i] = floor(xv[i])
@@ -146,23 +146,23 @@ func ceil(x V) V {
 		return NewF(math.Ceil(float64(xv)))
 	case S:
 		return NewS(strings.ToUpper(string(xv)))
-	case AB:
+	case *AB:
 		return x
-	case AI:
+	case *AI:
 		return x
-	case AF:
+	case *AF:
 		r := make([]int, xv.Len())
 		for i := range r {
 			r[i] = int(math.Ceil(xv[i]))
 		}
 		return NewV(r)
-	case AS:
+	case *AS:
 		r := make([]string, xv.Len())
 		for i := range r {
 			r[i] = strings.ToUpper(xv[i])
 		}
 		return NewV(r)
-	case AV:
+	case *AV:
 		r := make([]V, xv.Len())
 		for i := range r {
 			r[i] = ceil(xv[i])
@@ -183,25 +183,25 @@ func not(x V) V {
 		return NewI(B2I(xv == 0))
 	case S:
 		return NewI(B2I(xv == ""))
-	case AB:
+	case *AB:
 		r := make([]bool, xv.Len())
 		for i := range r {
 			r[i] = !xv[i]
 		}
 		return NewV(r)
-	case AI:
+	case *AI:
 		r := make([]bool, xv.Len())
 		for i := range r {
 			r[i] = xv[i] == 0
 		}
 		return NewV(r)
-	case AF:
+	case *AF:
 		r := make([]bool, xv.Len())
 		for i := range r {
 			r[i] = xv[i] == 0
 		}
 		return NewV(r)
-	case AV:
+	case *AV:
 		r := make([]V, xv.Len())
 		for i := range r {
 			r[i] = not(xv[i])
@@ -220,21 +220,21 @@ func abs(x V) V {
 	switch xv := x.Value.(type) {
 	case F:
 		return NewF(math.Abs(float64(xv)))
-	case AB:
+	case *AB:
 		return x
-	case AI:
+	case *AI:
 		r := make([]int, xv.Len())
 		for i := range r {
 			r[i] = int(absI(xv[i]))
 		}
 		return NewV(r)
-	case AF:
+	case *AF:
 		r := make([]float64, xv.Len())
 		for i := range r {
 			r[i] = math.Abs(xv[i])
 		}
 		return NewV(r)
-	case AV:
+	case *AV:
 		r := make([]V, xv.Len())
 		for i := range r {
 			r[i] = abs(xv[i])

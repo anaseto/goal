@@ -42,7 +42,7 @@ func (ctx *Context) amend3array(x array, y, f V) V {
 		return ctx.amend3arrayI(x, y.Int(), f)
 	}
 	switch y := y.Value.(type) {
-	case AI:
+	case *AI:
 		for _, yi := range y {
 			ax := ctx.amend3arrayI(x, yi, f)
 			if ax.IsErr() {
@@ -51,7 +51,7 @@ func (ctx *Context) amend3array(x array, y, f V) V {
 			x = ax.Value.(array)
 		}
 		return NewV(x)
-	case AV:
+	case *AV:
 		for _, yi := range y {
 			ax := ctx.amend3array(x, yi, f)
 			if ax.IsErr() {
@@ -109,7 +109,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 		return ctx.amend4arrayI(x, y.Int(), f, z)
 	}
 	switch y := y.Value.(type) {
-	case AI:
+	case *AI:
 		az, ok := z.Value.(array)
 		if !ok {
 			for _, xi := range y {
@@ -133,7 +133,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 			x = ax.Value.(array)
 		}
 		return NewV(x)
-	case AV:
+	case *AV:
 		az, ok := z.Value.(array)
 		if !ok {
 			for _, xi := range y {

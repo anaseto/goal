@@ -10,15 +10,15 @@ func joinTo(x, y V) V {
 		return joinToF(xv, y, true)
 	case S:
 		return joinToS(xv, y, true)
-	case AB:
+	case *AB:
 		return joinToAB(y, xv, false)
-	case AF:
+	case *AF:
 		return joinToAF(y, xv, false)
-	case AI:
+	case *AI:
 		return joinToAI(y, xv, false)
-	case AS:
+	case *AS:
 		return joinToAS(y, xv, false)
-	case AV:
+	case *AV:
 		return joinToAV(y, xv, false)
 	default:
 		switch yv := y.Value.(type) {
@@ -48,15 +48,15 @@ func joinToI(x int, y V, left bool) V {
 			return NewV(AV{NewI(x), y})
 		}
 		return NewV(AV{y, NewI(x)})
-	case AB:
+	case *AB:
 		return joinToAB(NewI(x), yv, left)
-	case AF:
+	case *AF:
 		return joinToAF(NewI(x), yv, left)
-	case AI:
+	case *AI:
 		return joinToAI(NewI(x), yv, left)
-	case AS:
+	case *AS:
 		return joinToAS(NewI(x), yv, left)
-	case AV:
+	case *AV:
 		return joinToAV(NewI(x), yv, left)
 	default:
 		return NewV(AV{NewI(x), y})
@@ -81,15 +81,15 @@ func joinToF(x F, y V, left bool) V {
 			return NewV(AV{NewV(x), y})
 		}
 		return NewV(AV{y, NewV(x)})
-	case AB:
+	case *AB:
 		return joinToAB(NewV(x), yv, left)
-	case AF:
+	case *AF:
 		return joinToAF(NewV(x), yv, left)
-	case AI:
+	case *AI:
 		return joinToAI(NewV(x), yv, left)
-	case AS:
+	case *AS:
 		return joinToAS(NewV(x), yv, left)
-	case AV:
+	case *AV:
 		return joinToAV(NewV(x), yv, left)
 	default:
 		return NewV(AV{NewV(x), y})
@@ -114,15 +114,15 @@ func joinToS(x S, y V, left bool) V {
 			return NewV(AS{string(x), string(yv)})
 		}
 		return NewV(AS{string(yv), string(x)})
-	case AB:
+	case *AB:
 		return joinToAB(NewV(x), yv, left)
-	case AF:
+	case *AF:
 		return joinToAF(NewV(x), yv, left)
-	case AI:
+	case *AI:
 		return joinToAI(NewV(x), yv, left)
-	case AS:
+	case *AS:
 		return joinToAS(NewV(x), yv, left)
-	case AV:
+	case *AV:
 		return joinToAV(NewV(x), yv, left)
 	default:
 		return NewV(AV{NewV(x), y})
@@ -188,7 +188,7 @@ func joinToAS(x V, y AS, left bool) V {
 			copy(r[:len(r)-1], y)
 		}
 		return NewV(r)
-	case AS:
+	case *AS:
 		r := make([]string, len(y)+xv.Len())
 		if left {
 			copy(r[:xv.Len()], xv)
@@ -251,17 +251,17 @@ func joinToAB(x V, y AB, left bool) V {
 			}
 		}
 		return NewV(r)
-	case AB:
+	case *AB:
 		if left {
 			return NewV(joinABAB(xv, y))
 		}
 		return NewV(joinABAB(y, xv))
-	case AI:
+	case *AI:
 		if left {
 			return NewV(joinAIAB(xv, y))
 		}
 		return NewV(joinABAI(y, xv))
-	case AF:
+	case *AF:
 		if left {
 			return NewV(joinAFAB(xv, y))
 		}
@@ -304,17 +304,17 @@ func joinToAI(x V, y AI, left bool) V {
 			}
 		}
 		return NewV(r)
-	case AB:
+	case *AB:
 		if left {
 			return NewV(joinABAI(xv, y))
 		}
 		return NewV(joinAIAB(y, xv))
-	case AI:
+	case *AI:
 		if left {
 			return NewV(joinAIAI(xv, y))
 		}
 		return NewV(joinAIAI(y, xv))
-	case AF:
+	case *AF:
 		if left {
 			return NewV(joinAFAI(xv, y))
 		}
@@ -352,17 +352,17 @@ func joinToAF(x V, y AF, left bool) V {
 			copy(r[:len(r)-1], y)
 		}
 		return NewV(r)
-	case AB:
+	case *AB:
 		if left {
 			return NewV(joinABAF(xv, y))
 		}
 		return NewV(joinAFAB(y, xv))
-	case AI:
+	case *AI:
 		if left {
 			return NewV(joinAIAF(xv, y))
 		}
 		return NewV(joinAFAI(y, xv))
-	case AF:
+	case *AF:
 		if left {
 			return NewV(joinAFAF(xv, y))
 		}

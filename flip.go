@@ -5,7 +5,7 @@ func flip(x V) V {
 	//assertCanonical(x)
 	x = toArray(x)
 	switch xv := x.Value.(type) {
-	case AV:
+	case *AV:
 		cols := xv.Len()
 		if cols == 0 {
 			return NewV(AV{x})
@@ -96,13 +96,13 @@ func flipAF(x AV) AF {
 			continue
 		}
 		switch z := xi.Value.(type) {
-		case AB:
+		case *AB:
 			r[i] = float64(B2F(z[0]))
 		case F:
 			r[i] = float64(z)
-		case AF:
+		case *AF:
 			r[i] = z[0]
-		case AI:
+		case *AI:
 			r[i] = float64(z[0])
 		}
 	}
@@ -120,13 +120,13 @@ func flipAVAF(x AV, lines int) AV {
 				continue
 			}
 			switch z := xi.Value.(type) {
-			case AB:
+			case *AB:
 				q[i] = float64(B2F(z[j]))
 			case F:
 				q[i] = float64(z)
-			case AF:
+			case *AF:
 				q[i] = z[j]
-			case AI:
+			case *AI:
 				q[i] = float64(z[j])
 			}
 		}
@@ -143,9 +143,9 @@ func flipAI(x AV) AI {
 			continue
 		}
 		switch z := xi.Value.(type) {
-		case AB:
+		case *AB:
 			r[i] = int(B2I(z[0]))
-		case AI:
+		case *AI:
 			r[i] = z[0]
 		}
 	}
@@ -163,9 +163,9 @@ func flipAVAI(x AV, lines int) AV {
 				continue
 			}
 			switch z := xi.Value.(type) {
-			case AB:
+			case *AB:
 				q[i] = int(B2I(z[j]))
-			case AI:
+			case *AI:
 				q[i] = z[j]
 			}
 		}
@@ -180,7 +180,7 @@ func flipAS(x AV) AS {
 		switch z := xi.Value.(type) {
 		case S:
 			r[i] = string(z)
-		case AS:
+		case *AS:
 			r[i] = z[0]
 		}
 	}
@@ -196,7 +196,7 @@ func flipAVAS(x AV, lines int) AV {
 			switch z := xi.Value.(type) {
 			case S:
 				q[i] = string(z)
-			case AS:
+			case *AS:
 				q[i] = z[j]
 			}
 		}

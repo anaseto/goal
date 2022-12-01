@@ -118,7 +118,7 @@ func (ctx *Context) applyArray(x V, y V) V {
 			return errf("x[y] : out of bounds index: %d", i)
 		}
 		return xv.at(i)
-	case AV:
+	case *AV:
 		r := make([]V, yv.Len())
 		for i, yi := range yv {
 			r[i] = ctx.applyArray(x, yi)

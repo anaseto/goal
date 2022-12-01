@@ -19,9 +19,9 @@ func applyS(s S, x V) V {
 			return errf("s[x] : x non-integer (%g)", xv)
 		}
 		return applyS(s, x)
-	case AB:
+	case *AB:
 		return applyS(s, fromABtoAI(xv))
-	case AI:
+	case *AI:
 		r := make([]string, xv.Len())
 		for i, n := range xv {
 			if n < 0 {
@@ -33,13 +33,13 @@ func applyS(s S, x V) V {
 			r[i] = string(s[n:])
 		}
 		return NewV(r)
-	case AF:
+	case *AF:
 		z := toAI(xv)
 		if z.IsErr() {
 			return z
 		}
 		return applyS(s, z)
-	case AV:
+	case *AV:
 		r := make([]V, xv.Len())
 		for i, xi := range xv {
 			r[i] = applyS(s, xi)
@@ -67,12 +67,12 @@ func applyS2(s S, x V, y V) V {
 				return errf("s[x;y] : y non-integer (%g)", y)
 			}
 			l = int(y)
-		case AI:
-		case AB:
+		case *AI:
+		case *AB:
 			if Length(x) != y.Len() {
 			}
 			return applyS2(s, x, fromABtoAI(y))
-		case AF:
+		case *AF:
 			z := toAI(y)
 			if z.IsErr() {
 				return z
@@ -105,9 +105,9 @@ func applyS2(s S, x V, y V) V {
 			return errf("s[x;y] : x non-integer (%g)", xv)
 		}
 		return applyS2(s, x, y)
-	case AB:
+	case *AB:
 		return applyS2(s, fromABtoAI(xv), y)
-	case AI:
+	case *AI:
 		r := make([]string, xv.Len())
 		if z, ok := y.Value.(AI); ok {
 			if z.Len() != xv.Len() {
@@ -143,13 +143,13 @@ func applyS2(s S, x V, y V) V {
 			r[i] = string(s[n : n+l])
 		}
 		return NewV(r)
-	case AF:
+	case *AF:
 		z := toAI(xv)
 		if z.IsErr() {
 			return z
 		}
 		return applyS2(s, z, y)
-	case AV:
+	case *AV:
 		r := make([]V, xv.Len())
 		for i, xi := range xv {
 			r[i] = applyS2(s, xi, y)
@@ -167,13 +167,13 @@ func bytes(x V) V {
 	switch x := x.Value.(type) {
 	case S:
 		return NewI(len(x))
-	case AS:
+	case *AS:
 		r := make([]int, x.Len())
 		for i, s := range x {
 			r[i] = len(s)
 		}
 		return NewV(r)
-	case AV:
+	case *AV:
 		r := make([]V, x.Len())
 		for i, xi := range x {
 			r[i] = bytes(xi)
@@ -219,19 +219,19 @@ func casti(y V) V {
 			r[i] = int(rc)
 		}
 		return NewV(r)
-	case AB:
+	case *AB:
 		return y
-	case AI:
+	case *AI:
 		return y
-	case AS:
+	case *AS:
 		r := make([]V, yv.Len())
 		for i, s := range yv {
 			r[i] = casti(NewS(s))
 		}
 		return NewV(r)
-	case AF:
+	case *AF:
 		return toAI(yv)
-	case AV:
+	case *AV:
 		r := make([]V, yv.Len())
 		for i := range r {
 			r[i] = casti(yv[i])
@@ -258,11 +258,11 @@ func castn(y V) V {
 			return errf("\"i\"$y : non-numeric y (%s) : %v", yv, err)
 		}
 		return xi
-	case AB:
+	case *AB:
 		return y
-	case AI:
+	case *AI:
 		return y
-	case AS:
+	case *AS:
 		r := make([]V, yv.Len())
 		for i, s := range yv {
 			n, err := parseNumber(s)
@@ -272,9 +272,9 @@ func castn(y V) V {
 			r[i] = n
 		}
 		return NewV(canonical(r))
-	case AF:
+	case *AF:
 		return y
-	case AV:
+	case *AV:
 		r := make([]V, yv.Len())
 		for i := range r {
 			r[i] = castn(yv[i])
@@ -295,17 +295,17 @@ func casts(y V) V {
 	switch yv := y.Value.(type) {
 	case F:
 		return casts(NewI(int(yv)))
-	case AB:
+	case *AB:
 		return casts(fromABtoAI(yv))
-	case AI:
+	case *AI:
 		sb := &strings.Builder{}
 		for _, i := range yv {
 			sb.WriteRune(rune(i))
 		}
 		return NewS(sb.String())
-	case AF:
+	case *AF:
 		return casts(toAI(yv))
-	case AV:
+	case *AV:
 		r := make([]V, yv.Len())
 		for i := range r {
 			r[i] = casts(yv[i])
@@ -323,13 +323,13 @@ func drops(s S, y V) V {
 	switch y := y.Value.(type) {
 	case S:
 		return NewS(strings.TrimPrefix(string(y), string(s)))
-	case AS:
+	case *AS:
 		r := make([]string, y.Len())
 		for i, yi := range y {
 			r[i] = strings.TrimPrefix(string(yi), string(s))
 		}
 		return NewV(r)
-	case AV:
+	case *AV:
 		r := make([]V, y.Len())
 		for i, yi := range y {
 			r[i] = drops(s, yi)
@@ -348,13 +348,13 @@ func trim(s S, y V) V {
 	switch y := y.Value.(type) {
 	case S:
 		return NewS(strings.Trim(string(y), string(s)))
-	case AS:
+	case *AS:
 		r := make([]string, y.Len())
 		for i, yi := range y {
 			r[i] = strings.Trim(string(yi), string(s))
 		}
 		return NewV(r)
-	case AV:
+	case *AV:
 		r := make([]V, y.Len())
 		for i, yi := range y {
 			r[i] = trim(s, yi)
