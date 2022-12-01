@@ -146,8 +146,6 @@ func classify(x V) V {
 	}
 	//assertCanonical(x)
 	switch xv := x.Value.(type) {
-	case F, I, S:
-		return errf("%%x : x not an array (%s)", x.Type())
 	case AB:
 		if !xv[0] {
 			return NewV(xv)
@@ -227,9 +225,6 @@ func uniq(x V) V {
 	}
 	//assertCanonical(x)
 	switch x := x.Value.(type) {
-	case F, I, S:
-		// NOTE: ?atom could be used for something.
-		return errf("?x : x not an array (%s)", x.Type())
 	case AB:
 		if x.Len() == 0 {
 			return NewV(x)
@@ -291,6 +286,7 @@ func uniq(x V) V {
 		}
 		return NewV(canonical(r))
 	default:
+		// NOTE: ?atom could be used for something.
 		return errf("?x : x not an array (%s)", x.Type())
 	}
 }
@@ -302,8 +298,6 @@ func markFirsts(x V) V {
 	}
 	//assertCanonical(x)
 	switch x := x.Value.(type) {
-	case F, I, S:
-		return errf("∊x : x not an array (%s)", x.Type())
 	case AB:
 		r := make(AB, x.Len())
 		r[0] = true
@@ -378,7 +372,7 @@ func memberOf(x, y V) V {
 			r := make(AB, x.Len())
 			return NewV(r)
 		default:
-			return NewV(B2I(false))
+			return NewI(B2I(false))
 		}
 	}
 	if Length(x) == 0 {
@@ -419,13 +413,13 @@ func memberOfAB(x V, y AB) V {
 			}
 			return NewV(r)
 		default:
-			return NewV(B2I(true))
+			return NewI(B2I(true))
 		}
 	}
 	if t {
-		return equal(x, NewV(B2I(true)))
+		return equal(x, NewI(B2I(true)))
 	}
-	return equal(x, NewV(B2I(false)))
+	return equal(x, NewI(B2I(false)))
 }
 
 func memberOfAF(x V, y AF) V {
@@ -437,13 +431,14 @@ func memberOfAF(x V, y AF) V {
 			continue
 		}
 	}
+	if x.IsInt() {
+		_, ok := m[F(x.Int())]
+		return NewI(B2I(ok))
+	}
 	switch x := x.Value.(type) {
-	case I:
-		_, ok := m[F(x)]
-		return NewV(B2I(ok))
 	case F:
 		_, ok := m[x]
-		return NewV(B2I(ok))
+		return NewI(B2I(ok))
 	case AB:
 		r := make(AB, x.Len())
 		for i, xi := range x {
@@ -478,16 +473,17 @@ func memberOfAI(x V, y AI) V {
 			continue
 		}
 	}
+	if x.IsInt() {
+		_, ok := m[x.Int()]
+		return NewI(B2I(ok))
+	}
 	switch x := x.Value.(type) {
-	case I:
-		_, ok := m[int(x)]
-		return NewV(B2I(ok))
 	case F:
 		if !isI(x) {
-			return NewV(B2I(false))
+			return NewI(B2I(false))
 		}
 		_, ok := m[int(x)]
-		return NewV(B2I(ok))
+		return NewI(B2I(ok))
 	case AB:
 		r := make(AB, x.Len())
 		for i, xi := range x {
@@ -528,7 +524,7 @@ func memberOfAS(x V, y AS) V {
 	switch x := x.Value.(type) {
 	case S:
 		_, ok := m[string(x)]
-		return NewV(B2I(ok))
+		return NewI(B2I(ok))
 	case AS:
 		r := make(AB, x.Len())
 		for i, xi := range x {
@@ -549,10 +545,10 @@ func memberOfAV(x V, y AV) V {
 	default:
 		for _, yi := range y {
 			if Match(x, yi) {
-				return NewV(B2I(true))
+				return NewI(B2I(true))
 			}
 		}
-		return NewV(B2I(false))
+		return NewI(B2I(false))
 	}
 }
 
@@ -578,8 +574,6 @@ func occurrenceCount(x V) V {
 	}
 	//assertCanonical(x)
 	switch xv := x.Value.(type) {
-	case F, I, S:
-		return errf("⊒x : x not an array (%s)", xv.Type())
 	case AB:
 		r := make(AI, xv.Len())
 		var f, t int
@@ -653,9 +647,10 @@ func occurrenceCount(x V) V {
 
 // without returns x^y.
 func without(x, y V) V {
+	if x.IsInt() {
+		return windows(x.Int(), y)
+	}
 	switch xv := x.Value.(type) {
-	case I:
-		return windows(int(xv), y)
 	case F:
 		if !isI(xv) {
 			return errf("i^y : i non-integer (%g)", xv)
@@ -666,9 +661,10 @@ func without(x, y V) V {
 	case array:
 		y = toArray(y)
 		r := memberOf(y, x)
+		if r.IsInt() {
+			r = NewI(1 - r.Int())
+		}
 		switch bres := r.Value.(type) {
-		case I:
-			r = NewI(int(1 - bres))
 		case AB:
 			for i, b := range bres {
 				bres[i] = !b
@@ -780,14 +776,15 @@ func imapAS(x AS) map[string]int {
 }
 
 func findAB(x AB, y V) V {
-	switch y := y.Value.(type) {
-	case I:
+	if y.IsInt() {
 		for i, xi := range x {
-			if B2I(xi) == y {
+			if B2I(xi) == y.Int() {
 				return NewI(i)
 			}
 		}
 		return NewI(x.Len())
+	}
+	switch y := y.Value.(type) {
 	case F:
 		if !isI(y) {
 			return NewI(x.Len())
@@ -831,14 +828,16 @@ func findAB(x AB, y V) V {
 }
 
 func findAF(x AF, y V) V {
-	switch y := y.Value.(type) {
-	case I:
+	if y.IsInt() {
 		for i, xi := range x {
-			if xi == float64(y) {
+			if xi == float64(y.Int()) {
 				return NewI(i)
 			}
 		}
 		return NewI(x.Len())
+
+	}
+	switch y := y.Value.(type) {
 	case F:
 		for i, xi := range x {
 			if F(xi) == y {
@@ -890,14 +889,16 @@ func findAF(x AF, y V) V {
 }
 
 func findAI(x AI, y V) V {
-	switch y := y.Value.(type) {
-	case I:
+	if y.IsInt() {
 		for i, xi := range x {
-			if I(xi) == y {
+			if xi == y.Int() {
 				return NewI(i)
 			}
 		}
 		return NewI(x.Len())
+
+	}
+	switch y := y.Value.(type) {
 	case F:
 		for i, xi := range x {
 			if F(xi) == y {

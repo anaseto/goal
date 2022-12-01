@@ -62,11 +62,10 @@ func flip(x V) V {
 func flipAB(x AV) AB {
 	r := make(AB, x.Len())
 	for i, xi := range x {
-		switch z := xi.Value.(type) {
-		case I:
-			r[i] = z == 1
-		case AB:
-			r[i] = z[0]
+		if xi.IsInt() {
+			r[i] = xi.Int() == 1
+		} else {
+			r[i] = xi.AB()[0]
 		}
 	}
 	return r
@@ -78,11 +77,10 @@ func flipAVAB(x AV, lines int) AV {
 	for j := range r {
 		q := a[j*x.Len() : (j+1)*x.Len()]
 		for i, xi := range x {
-			switch z := xi.Value.(type) {
-			case I:
-				q[i] = z == 1
-			case AB:
-				q[i] = z[j]
+			if xi.IsInt() {
+				q[i] = xi.Int() == 1
+			} else {
+				q[i] = xi.AB()[j]
 			}
 		}
 		r[j] = NewV(q)
@@ -93,6 +91,10 @@ func flipAVAB(x AV, lines int) AV {
 func flipAF(x AV) AF {
 	r := make(AF, x.Len())
 	for i, xi := range x {
+		if xi.IsInt() {
+			r[i] = float64(xi.Int())
+			continue
+		}
 		switch z := xi.Value.(type) {
 		case AB:
 			r[i] = float64(B2F(z[0]))
@@ -100,8 +102,6 @@ func flipAF(x AV) AF {
 			r[i] = float64(z)
 		case AF:
 			r[i] = z[0]
-		case I:
-			r[i] = float64(z)
 		case AI:
 			r[i] = float64(z[0])
 		}
@@ -115,6 +115,10 @@ func flipAVAF(x AV, lines int) AV {
 	for j := range r {
 		q := a[j*x.Len() : (j+1)*x.Len()]
 		for i, xi := range x {
+			if xi.IsInt() {
+				q[i] = float64(xi.Int())
+				continue
+			}
 			switch z := xi.Value.(type) {
 			case AB:
 				q[i] = float64(B2F(z[j]))
@@ -122,8 +126,6 @@ func flipAVAF(x AV, lines int) AV {
 				q[i] = float64(z)
 			case AF:
 				q[i] = z[j]
-			case I:
-				q[i] = float64(z)
 			case AI:
 				q[i] = float64(z[j])
 			}
@@ -136,11 +138,13 @@ func flipAVAF(x AV, lines int) AV {
 func flipAI(x AV) AI {
 	r := make(AI, x.Len())
 	for i, xi := range x {
+		if xi.IsInt() {
+			r[i] = xi.Int()
+			continue
+		}
 		switch z := xi.Value.(type) {
 		case AB:
 			r[i] = int(B2I(z[0]))
-		case I:
-			r[i] = int(z)
 		case AI:
 			r[i] = z[0]
 		}
@@ -154,11 +158,13 @@ func flipAVAI(x AV, lines int) AV {
 	for j := range r {
 		q := a[j*x.Len() : (j+1)*x.Len()]
 		for i, xi := range x {
+			if xi.IsInt() {
+				q[i] = xi.Int()
+				continue
+			}
 			switch z := xi.Value.(type) {
 			case AB:
 				q[i] = int(B2I(z[j]))
-			case I:
-				q[i] = int(z)
 			case AI:
 				q[i] = z[j]
 			}

@@ -328,7 +328,7 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 		if n > 0 {
 			return c.errorf("type n cannot be applied")
 		}
-		id := c.ctx.storeConst(NewV(x))
+		id := c.ctx.storeConst(x)
 		c.push2(opConst, opcode(id))
 		return nil
 	case astSTRING:
@@ -369,7 +369,7 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 	}
 }
 
-func parseNumber(s string) (Value, error) {
+func parseNumber(s string) (V, error) {
 	switch s {
 	case "0w":
 		s = "Inf"
@@ -378,14 +378,14 @@ func parseNumber(s string) (Value, error) {
 	}
 	i, errI := strconv.ParseInt(s, 0, 0)
 	if errI == nil {
-		return I(i), nil
+		return NewI(int(i)), nil
 	}
 	f, errF := strconv.ParseFloat(s, 64)
 	if errF == nil {
-		return F(f), nil
+		return NewV(F(f)), nil
 	}
 	err := errF.(*strconv.NumError)
-	return nil, err.Err
+	return V{}, err.Err
 }
 
 func (c *compiler) doGlobal(tok *astToken, n int) {
@@ -526,7 +526,7 @@ func (c *compiler) doStrand(st *astStrand, n int) error {
 				c.pos = tok.Pos
 				return c.errorf("number: %v", err)
 			}
-			a = append(a, NewV(x))
+			a = append(a, x)
 		case astSTRING:
 			s, err := strconv.Unquote(tok.Text)
 			if err != nil {

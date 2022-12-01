@@ -6,9 +6,10 @@ func enum(x V) V {
 	if x.IsErr() {
 		return errf("!x : %v", x)
 	}
+	if x.IsInt() {
+		return rangeI(x.Int())
+	}
 	switch xv := x.Value.(type) {
-	case I:
-		return rangeI(xv)
 	case AI:
 		return rangeArray(xv)
 	default:
@@ -56,22 +57,23 @@ func rangeArray(x AI) V {
 
 // where returns &x.
 func where(x V) V {
-	switch x := x.Value.(type) {
-	case I:
+	if x.IsInt() {
 		switch {
-		case x < 0:
-			return errf("&x : x negative (%d)", x)
-		case x == 0:
+		case x.Int() < 0:
+			return errf("&x : x negative (%d)", x.Int())
+		case x.Int() == 0:
 			return NewV(AI{})
 		default:
-			r := make(AI, x)
+			r := make(AI, x.Int())
 			return NewV(r)
 		}
+	}
+	switch x := x.Value.(type) {
 	case F:
 		if !isI(x) {
 			return errf("&x : x non-integer (%g)", x)
 		}
-		n := I(x)
+		n := int(x)
 		switch {
 		case n < 0:
 			return errf("&x : x negative (%d)", n)
@@ -131,30 +133,29 @@ func where(x V) V {
 		case tB, tF, tI:
 			n := 0
 			for _, xi := range x {
-				switch xi := xi.Value.(type) {
-				case F:
-					if !isI(xi) {
-						return errf("&x : not an integer (%g)", xi)
+				if xi.IsInt() {
+					if xi.Int() < 0 {
+						return errf("&x : negative integer (%d)", xi.Int())
 					}
-					if xi < 0 {
-						return errf("&x : negative integer (%d)", int(xi))
+					n += int(xi.Int())
+				} else {
+					xif := xi.F()
+					if !isI(xif) {
+						return errf("&x : not an integer (%g)", xif)
 					}
-					n += int(xi)
-				case I:
-					if xi < 0 {
-						return errf("&x : negative integer (%d)", xi)
+					if xif < 0 {
+						return errf("&x : negative integer (%d)", int(xif))
 					}
-					n += int(xi)
+					n += int(xif)
 				}
 			}
 			r := make(AI, 0, n)
 			for i, xi := range x {
-				var max I
-				switch xi := xi.Value.(type) {
-				case I:
-					max = xi
-				case F:
-					max = I(xi)
+				var max int
+				if xi.IsInt() {
+					max = xi.Int()
+				} else {
+					max = int(xi.F())
 				}
 				for j := 0; j < int(max); j++ {
 					r = append(r, i)
@@ -171,14 +172,15 @@ func where(x V) V {
 
 // replicate returns {x}#y.
 func replicate(x, y V) V {
-	switch x := x.Value.(type) {
-	case I:
+	if x.IsInt() {
 		switch {
-		case x < 0:
-			return errf("f#y : f[y] negative integer (%d)", x)
+		case x.Int() < 0:
+			return errf("f#y : f[y] negative integer (%d)", x.Int())
 		default:
-			return repeat(y, int(x))
+			return repeat(y, x.Int())
 		}
+	}
+	switch x := x.Value.(type) {
 	case F:
 		if !isI(x) {
 			return errf("f#y : f[y] not an integer (%g)", x)
@@ -216,24 +218,25 @@ func replicate(x, y V) V {
 }
 
 func repeat(x V, n int) V {
-	switch xv := x.Value.(type) {
-	case F:
-		r := make(AF, n)
-		for i := range r {
-			r[i] = float64(xv)
-		}
-		return NewV(r)
-	case I:
-		if isBI(xv) {
+	if x.IsInt() {
+		if isBI(x.Int()) {
 			r := make(AB, n)
 			for i := range r {
-				r[i] = xv == 1
+				r[i] = x.Int() == 1
 			}
 			return NewV(r)
 		}
 		r := make(AI, n)
 		for i := range r {
-			r[i] = int(xv)
+			r[i] = x.Int()
+		}
+		return NewV(r)
+	}
+	switch xv := x.Value.(type) {
+	case F:
+		r := make(AF, n)
+		for i := range r {
+			r[i] = float64(xv)
 		}
 		return NewV(r)
 	case S:
@@ -358,12 +361,13 @@ func repeatAI(x AI, y V) V {
 
 // weedOut implements {x}_y
 func weedOut(x, y V) V {
-	switch x := x.Value.(type) {
-	case I:
-		if x != 0 {
+	if x.IsInt() {
+		if x.Int() != 0 {
 			return NewV(AV{})
 		}
 		return y
+	}
+	switch x := x.Value.(type) {
 	case F:
 		if x != 0 {
 			return NewV(AV{})

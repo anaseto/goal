@@ -2,11 +2,12 @@ package goal
 
 // joinTo returns x,y.
 func joinTo(x, y V) V {
+	if x.IsInt() {
+		return joinToI(x.Int(), y, true)
+	}
 	switch xv := x.Value.(type) {
 	case F:
 		return joinToF(xv, y, true)
-	case I:
-		return joinToI(xv, y, true)
 	case S:
 		return joinToS(xv, y, true)
 	case AB:
@@ -30,45 +31,47 @@ func joinTo(x, y V) V {
 }
 
 func joinToI(x int, y V, left bool) V {
+	if y.IsInt() {
+		if left {
+			return NewV(AI{int(x), y.Int()})
+		}
+		return NewV(AI{y.Int(), int(x)})
+	}
 	switch yv := y.Value.(type) {
 	case F:
 		if left {
 			return NewV(AF{float64(x), float64(yv)})
 		}
 		return NewV(AF{float64(yv), float64(x)})
-	case I:
-		if left {
-			return NewV(AI{int(x), int(yv)})
-		}
-		return NewV(AI{int(yv), int(x)})
 	case S:
 		if left {
-			return NewV(AV{NewV(x), y})
+			return NewV(AV{NewI(x), y})
 		}
-		return NewV(AV{y, NewV(x)})
+		return NewV(AV{y, NewI(x)})
 	case AB:
-		return joinToAB(NewV(x), yv, left)
+		return joinToAB(NewI(x), yv, left)
 	case AF:
-		return joinToAF(NewV(x), yv, left)
+		return joinToAF(NewI(x), yv, left)
 	case AI:
-		return joinToAI(NewV(x), yv, left)
+		return joinToAI(NewI(x), yv, left)
 	case AS:
-		return joinToAS(NewV(x), yv, left)
+		return joinToAS(NewI(x), yv, left)
 	case AV:
-		return joinToAV(NewV(x), yv, left)
+		return joinToAV(NewI(x), yv, left)
 	default:
-		return NewV(AV{NewV(x), y})
+		return NewV(AV{NewI(x), y})
 	}
 }
 
 func joinToF(x F, y V, left bool) V {
+	if y.IsInt() {
+		if left {
+			return NewV(AF{float64(x), float64(y.Int())})
+		}
+		return NewV(AF{float64(y.Int()), float64(x)})
+	}
 	switch yv := y.Value.(type) {
 	case F:
-		if left {
-			return NewV(AF{float64(x), float64(yv)})
-		}
-		return NewV(AF{float64(yv), float64(x)})
-	case I:
 		if left {
 			return NewV(AF{float64(x), float64(yv)})
 		}
@@ -94,13 +97,14 @@ func joinToF(x F, y V, left bool) V {
 }
 
 func joinToS(x S, y V, left bool) V {
-	switch yv := y.Value.(type) {
-	case F:
+	if y.IsInt() {
 		if left {
 			return NewV(AV{NewV(x), y})
 		}
 		return NewV(AV{y, NewV(x)})
-	case I:
+	}
+	switch yv := y.Value.(type) {
+	case F:
 		if left {
 			return NewV(AV{NewV(x), y})
 		}
@@ -205,6 +209,33 @@ func joinToAS(x V, y AS, left bool) V {
 }
 
 func joinToAB(x V, y AB, left bool) V {
+	if x.IsInt() {
+		if isBI(x.Int()) {
+			r := make(AB, len(y)+1)
+			if left {
+				r[0] = x.Int() == 1
+				copy(r[1:], y)
+			} else {
+				r[len(r)-1] = x.Int() == 1
+				copy(r[:len(r)-1], y)
+			}
+			return NewV(r)
+		}
+		r := make(AI, len(y)+1)
+		if left {
+			r[0] = int(x.Int())
+			for i := 1; i < len(r); i++ {
+				r[i] = int(B2I(y[i-1]))
+			}
+		} else {
+			r[len(r)-1] = int(x.Int())
+			for i := 0; i < len(r); i++ {
+				r[i] = int(B2I(y[i]))
+			}
+		}
+		return NewV(r)
+
+	}
 	switch xv := x.Value.(type) {
 	case F:
 		r := make(AF, len(y)+1)
@@ -217,31 +248,6 @@ func joinToAB(x V, y AB, left bool) V {
 			r[len(r)-1] = float64(xv)
 			for i := 0; i < len(r); i++ {
 				r[i] = float64(B2F(y[i]))
-			}
-		}
-		return NewV(r)
-	case I:
-		if isBI(xv) {
-			r := make(AB, len(y)+1)
-			if left {
-				r[0] = xv == 1
-				copy(r[1:], y)
-			} else {
-				r[len(r)-1] = xv == 1
-				copy(r[:len(r)-1], y)
-			}
-			return NewV(r)
-		}
-		r := make(AI, len(y)+1)
-		if left {
-			r[0] = int(xv)
-			for i := 1; i < len(r); i++ {
-				r[i] = int(B2I(y[i-1]))
-			}
-		} else {
-			r[len(r)-1] = int(xv)
-			for i := 0; i < len(r); i++ {
-				r[i] = int(B2I(y[i]))
 			}
 		}
 		return NewV(r)
@@ -271,6 +277,18 @@ func joinToAB(x V, y AB, left bool) V {
 }
 
 func joinToAI(x V, y AI, left bool) V {
+	if x.IsInt() {
+		r := make(AI, len(y)+1)
+		if left {
+			r[0] = x.Int()
+			copy(r[1:], y)
+		} else {
+			r[len(r)-1] = x.Int()
+			copy(r[:len(r)-1], y)
+		}
+		return NewV(r)
+
+	}
 	switch xv := x.Value.(type) {
 	case F:
 		r := make(AF, len(y)+1)
@@ -284,16 +302,6 @@ func joinToAI(x V, y AI, left bool) V {
 			for i := 0; i < len(r)-1; i++ {
 				r[i] = float64(y[i])
 			}
-		}
-		return NewV(r)
-	case I:
-		r := make(AI, len(y)+1)
-		if left {
-			r[0] = int(xv)
-			copy(r[1:], y)
-		} else {
-			r[len(r)-1] = int(xv)
-			copy(r[:len(r)-1], y)
 		}
 		return NewV(r)
 	case AB:
@@ -322,18 +330,19 @@ func joinToAI(x V, y AI, left bool) V {
 }
 
 func joinToAF(x V, y AF, left bool) V {
-	switch xv := x.Value.(type) {
-	case F:
+	if x.IsInt() {
 		r := make(AF, len(y)+1)
 		if left {
-			r[0] = float64(xv)
+			r[0] = float64(x.Int())
 			copy(r[1:], y)
 		} else {
-			r[len(r)-1] = float64(xv)
+			r[len(r)-1] = float64(x.Int())
 			copy(r[:len(r)-1], y)
 		}
 		return NewV(r)
-	case I:
+	}
+	switch xv := x.Value.(type) {
+	case F:
 		r := make(AF, len(y)+1)
 		if left {
 			r[0] = float64(xv)
@@ -445,14 +454,15 @@ func joinAFAI(x AF, y AI) AF {
 
 // enlist returns ,x.
 func enlist(x V) V {
+	if x.IsInt() {
+		if isBI(x.Int()) {
+			return NewV(AB{x.Int() == 1})
+		}
+		return NewV(AI{int(x.Int())})
+	}
 	switch xv := x.Value.(type) {
 	case F:
 		return NewV(AF{float64(xv)})
-	case I:
-		if isBI(xv) {
-			return NewV(AB{xv == 1})
-		}
-		return NewV(AI{int(xv)})
 	case S:
 		return NewV(AS{string(xv)})
 	default:

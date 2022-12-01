@@ -62,8 +62,23 @@ func (v V) Int() int {
 }
 
 // F retrieves the float64 value. It assumes Value type is F.
-func (v V) F() float64 {
+func (v V) F() F {
 	return v.Value.(F)
+}
+
+// AB retrieves the AB value. It assumes Value type is AB.
+func (v V) AB() AB {
+	return v.Value.(AB)
+}
+
+// AI retrieves the AI value. It assumes Value type is AI.
+func (v V) AI() AI {
+	return v.Value.(AI)
+}
+
+// AF retrieves the AF value. It assumes Value type is AF.
+func (v V) AF() AF {
+	return v.Value.(AF)
 }
 
 // Type returns the name of the value's type.

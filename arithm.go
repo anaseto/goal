@@ -7,9 +7,10 @@ import (
 
 // negate returns -x.
 func negate(x V) V {
+	if x.IsInt() {
+		return NewI(-x.Int())
+	}
 	switch x := x.Value.(type) {
-	case I:
-		return NewV(-x)
 	case F:
 		return NewV(-x)
 	case AB:
@@ -65,17 +66,18 @@ func signI(x int) int {
 
 // sign returns sign x.
 func sign(x V) V {
+	if x.IsInt() {
+		return NewI(signI(x.Int()))
+	}
 	switch xv := x.Value.(type) {
-	case I:
-		return NewV(signI(xv))
 	case F:
-		return NewV(signF(xv))
+		return NewI(signF(xv))
 	case AB:
 		return x
 	case AI:
 		r := make(AI, xv.Len())
 		for i := range r {
-			r[i] = int(signI(I(xv[i])))
+			r[i] = int(signI(xv[i]))
 		}
 		return NewV(r)
 	case AF:
@@ -97,9 +99,10 @@ func sign(x V) V {
 
 // floor returns _x.
 func floor(x V) V {
-	switch xv := x.Value.(type) {
-	case I:
+	if x.IsInt() {
 		return x
+	}
+	switch xv := x.Value.(type) {
 	case F:
 		return NewF(math.Floor(float64(xv)))
 	case S:
@@ -135,9 +138,10 @@ func floor(x V) V {
 
 // ceil returns ⌈x. XXX unused for now
 func ceil(x V) V {
-	switch xv := x.Value.(type) {
-	case I:
+	if x.IsInt() {
 		return x
+	}
+	switch xv := x.Value.(type) {
 	case F:
 		return NewF(math.Ceil(float64(xv)))
 	case S:
@@ -171,13 +175,14 @@ func ceil(x V) V {
 
 // not returns ~x.
 func not(x V) V {
+	if x.IsInt() {
+		return NewI(B2I(x.Int() == 0))
+	}
 	switch xv := x.Value.(type) {
-	case I:
-		return NewV(B2I(xv == 0))
 	case F:
-		return NewV(B2I(xv == 0))
+		return NewI(B2I(xv == 0))
 	case S:
-		return NewV(B2I(xv == ""))
+		return NewI(B2I(xv == ""))
 	case AB:
 		r := make(AB, xv.Len())
 		for i := range r {
@@ -203,15 +208,16 @@ func not(x V) V {
 		}
 		return NewV(r)
 	default:
-		return NewV(B2I(!isTrue(x)))
+		return NewI(B2I(!isTrue(x)))
 	}
 }
 
 // abs returns abs[x].
 func abs(x V) V {
+	if x.IsInt() {
+		return NewI(absI(x.Int()))
+	}
 	switch xv := x.Value.(type) {
-	case I:
-		return NewV(absI(xv))
 	case F:
 		return NewF(math.Abs(float64(xv)))
 	case AB:
@@ -219,7 +225,7 @@ func abs(x V) V {
 	case AI:
 		r := make(AI, xv.Len())
 		for i := range r {
-			r[i] = int(absI(I(xv[i])))
+			r[i] = int(absI(xv[i]))
 		}
 		return NewV(r)
 	case AF:
