@@ -8,8 +8,8 @@ func group(x V) V {
 	switch x := x.Value.(type) {
 	case AB:
 		n := sumAB(x)
-		r := make(AV, int(B2I(n > 0)+1))
-		ai := make(AI, x.Len())
+		r := make([]V, int(B2I(n > 0)+1))
+		ai := make([]int, x.Len())
 		if n == 0 {
 			for i := range ai {
 				ai[i] = i
@@ -37,8 +37,8 @@ func group(x V) V {
 		if max < 0 {
 			max = -1
 		}
-		r := make(AV, max+1)
-		counta := make(AI, 2*(max+1))
+		r := make([]V, max+1)
+		counta := make([]int, 2*(max+1))
 		counts := counta[:max+1]
 		countn := 0
 		for _, j := range x {
@@ -55,7 +55,7 @@ func group(x V) V {
 			scounts[i] = sn
 		}
 		pj := 0
-		ai := make(AI, x.Len()-countn)
+		ai := make([]int, x.Len()-countn)
 		for i := range r {
 			r[i] = NewV(ai[pj:scounts[i]])
 			pj = scounts[i]
@@ -96,7 +96,7 @@ func icount(x V) V {
 		if max < 0 {
 			max = -1
 		}
-		counts := make(AI, max+1)
+		counts := make([]int, max+1)
 		for _, j := range x {
 			if j >= 0 {
 				counts[j]++
@@ -130,7 +130,7 @@ func groupBy(x, y V) V {
 	avx := x.Value.(AV) // group should always return AV or errV
 	switch y := y.Value.(type) {
 	case array:
-		r := make(AV, avx.Len())
+		r := make([]V, avx.Len())
 		for i, xi := range avx {
 			r[i] = y.atIndices(xi.Value.(AI))
 		}

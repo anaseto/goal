@@ -517,7 +517,7 @@ func (c *compiler) doDerivedVerb(dv *astDerivedVerb, n int) error {
 }
 
 func (c *compiler) doStrand(st *astStrand, n int) error {
-	a := make(AV, 0, len(st.Lits))
+	a := make([]V, 0, len(st.Lits))
 	for _, tok := range st.Lits {
 		switch tok.Type {
 		case astNUMBER:

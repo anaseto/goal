@@ -148,7 +148,7 @@ func fold2Decode(f V, x V) V {
 			}
 			return fold2Decode(f, aix)
 		case AV:
-			r := make(AV, x.Len())
+			r := make([]V, x.Len())
 			for i, xi := range x {
 				r[i] = fold2Decode(f, xi)
 				if r[i].IsErr() {
@@ -205,7 +205,7 @@ func fold2Decode(f V, x V) V {
 			}
 			return fold2Decode(f, aix)
 		case AV:
-			r := make(AV, x.Len())
+			r := make([]V, x.Len())
 			for i, xi := range x {
 				r[i] = fold2Decode(f, xi)
 				if r[i].IsErr() {
@@ -353,7 +353,7 @@ func scan2Split(sep S, x V) V {
 	case S:
 		return NewV(AS(strings.Split(string(x), string(sep))))
 	case AS:
-		r := make(AV, len(x))
+		r := make([]V, len(x))
 		for i := range r {
 			r[i] = NewV(AS(strings.Split(x[i], string(sep))))
 		}
@@ -388,7 +388,7 @@ func scan2Encode(f V, x V) V {
 		}
 		if x.IsInt() {
 			n := encodeBaseDigits(int(f.Int()), int(x.Int()))
-			r := make(AI, n)
+			r := make([]int, n)
 			for i := n - 1; i >= 0; i-- {
 				r[i] = int(x.Int() % f.Int())
 				x.N /= f.Int()
@@ -405,7 +405,7 @@ func scan2Encode(f V, x V) V {
 			min, max := minMax(x)
 			max = maxI(absI(min), absI(max))
 			n := encodeBaseDigits(f.Int(), max)
-			ai := make(AI, n*len(x))
+			ai := make([]int, n*len(x))
 			copy(ai[(n-1)*len(x):], x)
 			for i := n - 1; i >= 0; i-- {
 				for j := 0; j < len(x); j++ {
@@ -416,7 +416,7 @@ func scan2Encode(f V, x V) V {
 					}
 				}
 			}
-			r := make(AV, n)
+			r := make([]V, n)
 			for i := range r {
 				r[i] = NewV(ai[i*len(x) : (i+1)*len(x)])
 			}
@@ -430,7 +430,7 @@ func scan2Encode(f V, x V) V {
 			}
 			return scan2Encode(f, aix)
 		case AV:
-			r := make(AV, x.Len())
+			r := make([]V, x.Len())
 			for i, xi := range x {
 				r[i] = scan2Encode(f, xi)
 				if r[i].IsErr() {
@@ -455,7 +455,7 @@ func scan2Encode(f V, x V) V {
 		if x.IsInt() {
 			// TODO: check for zero division
 			n := fv.Len()
-			r := make(AI, n)
+			r := make([]int, n)
 			for i := n - 1; i >= 0 && x.Int() > 0; i-- {
 				r[i] = int(x.Int()) % fv[i]
 				x.N /= fv[i]
@@ -471,7 +471,7 @@ func scan2Encode(f V, x V) V {
 			return scan2Encode(f, NewI(int(x)))
 		case AI:
 			n := fv.Len()
-			ai := make(AI, n*len(x))
+			ai := make([]int, n*len(x))
 			copy(ai[(n-1)*len(x):], x)
 			for i := n - 1; i >= 0; i-- {
 				for j := 0; j < len(x); j++ {
@@ -482,7 +482,7 @@ func scan2Encode(f V, x V) V {
 					}
 				}
 			}
-			r := make(AV, n)
+			r := make([]V, n)
 			for i := range r {
 				r[i] = NewV(ai[i*len(x) : (i+1)*len(x)])
 			}
@@ -496,7 +496,7 @@ func scan2Encode(f V, x V) V {
 			}
 			return scan2Encode(f, aix)
 		case AV:
-			r := make(AV, x.Len())
+			r := make([]V, x.Len())
 			for i, xi := range x {
 				r[i] = scan2Encode(f, xi)
 				if r[i].IsErr() {
@@ -616,7 +616,7 @@ func each2(ctx *Context, args []V) V {
 	x := toArray(args[0])
 	switch x := x.Value.(type) {
 	case array:
-		r := make(AV, 0, x.Len())
+		r := make([]V, 0, x.Len())
 		for i := 0; i < x.Len(); i++ {
 			ctx.push(x.at(i))
 			next := ctx.applyN(f, 1)
@@ -644,7 +644,7 @@ func each3(ctx *Context, args []V) V {
 	}
 	if !okax {
 		ylen := y.Len()
-		r := make(AV, 0, ylen)
+		r := make([]V, 0, ylen)
 		for i := 0; i < ylen; i++ {
 			ctx.push(y.at(i))
 			ctx.push(args[2])
@@ -658,7 +658,7 @@ func each3(ctx *Context, args []V) V {
 	}
 	if !okay {
 		xlen := x.Len()
-		r := make(AV, 0, xlen)
+		r := make([]V, 0, xlen)
 		for i := 0; i < xlen; i++ {
 			ctx.push(args[0])
 			ctx.push(x.at(i))
@@ -674,7 +674,7 @@ func each3(ctx *Context, args []V) V {
 	if xlen != y.Len() {
 		return errf("x f'y : length mismatch: %d (#x) vs %d (#y)", x.Len(), y.Len())
 	}
-	r := make(AV, 0, xlen)
+	r := make([]V, 0, xlen)
 	for i := 0; i < xlen; i++ {
 		ctx.push(y.at(i))
 		ctx.push(x.at(i))

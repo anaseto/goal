@@ -91,23 +91,23 @@ func maxS(x, y S) S {
 func clone(x V) V {
 	switch xv := x.Value.(type) {
 	case AB:
-		r := make(AB, xv.Len())
+		r := make([]bool, xv.Len())
 		copy(r, xv)
 		return NewV(r)
 	case AF:
-		r := make(AF, xv.Len())
+		r := make([]float64, xv.Len())
 		copy(r, xv)
 		return NewV(r)
 	case AI:
-		r := make(AI, xv.Len())
+		r := make([]int, xv.Len())
 		copy(r, xv)
 		return NewV(r)
 	case AS:
-		r := make(AS, xv.Len())
+		r := make([]string, xv.Len())
 		copy(r, xv)
 		return NewV(r)
 	case AV:
-		r := make(AV, xv.Len())
+		r := make([]V, xv.Len())
 		for i := range r {
 			r[i] = clone(xv[i])
 		}
@@ -120,23 +120,23 @@ func clone(x V) V {
 func cloneShallow(x V) V {
 	switch xv := x.Value.(type) {
 	case AB:
-		r := make(AB, xv.Len())
+		r := make([]bool, xv.Len())
 		copy(r, xv)
 		return NewV(r)
 	case AF:
-		r := make(AF, xv.Len())
+		r := make([]float64, xv.Len())
 		copy(r, xv)
 		return NewV(r)
 	case AI:
-		r := make(AI, xv.Len())
+		r := make([]int, xv.Len())
 		copy(r, xv)
 		return NewV(r)
 	case AS:
-		r := make(AS, xv.Len())
+		r := make([]string, xv.Len())
 		copy(r, xv)
 		return NewV(r)
 	case AV:
-		r := make(AV, xv.Len())
+		r := make([]V, xv.Len())
 		copy(r, xv)
 		return NewV(r)
 	default:
@@ -147,23 +147,23 @@ func cloneShallow(x V) V {
 func cloneShallowArray(x array) array {
 	switch xv := x.(type) {
 	case AB:
-		r := make(AB, xv.Len())
+		r := make([]bool, xv.Len())
 		copy(r, xv)
 		return r
 	case AF:
-		r := make(AF, xv.Len())
+		r := make([]float64, xv.Len())
 		copy(r, xv)
 		return r
 	case AI:
-		r := make(AI, xv.Len())
+		r := make([]int, xv.Len())
 		copy(r, xv)
 		return r
 	case AS:
-		r := make(AS, xv.Len())
+		r := make([]string, xv.Len())
 		copy(r, xv)
 		return r
 	case AV:
-		r := make(AV, xv.Len())
+		r := make([]V, xv.Len())
 		copy(r, xv)
 		return r
 	default:
@@ -215,7 +215,7 @@ func toIndicesRec(x V) V {
 	case AF:
 		return toAI(xv)
 	case AV:
-		r := make(AV, xv.Len())
+		r := make([]V, xv.Len())
 		for i, z := range xv {
 			r[i] = toIndicesRec(z)
 			if r[i].IsErr() {
@@ -252,7 +252,7 @@ func toArray(x V) V {
 
 // toAI converts AF into AI if possible.
 func toAI(x AF) V {
-	r := make(AI, x.Len())
+	r := make([]int, x.Len())
 	for i, xi := range x {
 		if !isI(F(xi)) {
 			return errf("contains non-integer (%g)", xi)
@@ -265,7 +265,7 @@ func toAI(x AF) V {
 // fromABtoAI converts AB into AI (for simplifying code, used only for
 // unfrequent code).
 func fromABtoAI(x AB) V {
-	r := make(AI, x.Len())
+	r := make([]int, x.Len())
 	for i := range r {
 		r[i] = int(B2I(x[i]))
 	}
@@ -575,19 +575,19 @@ func normalize(x AV) (Value, bool) {
 	t := aType(x)
 	switch t {
 	case tB:
-		r := make(AB, x.Len())
+		r := make([]bool, x.Len())
 		for i, xi := range x {
 			r[i] = xi.Int() != 0
 		}
 		return r, true
 	case tI:
-		r := make(AI, x.Len())
+		r := make([]int, x.Len())
 		for i, xi := range x {
 			r[i] = int(xi.Int())
 		}
 		return r, true
 	case tF:
-		r := make(AF, x.Len())
+		r := make([]float64, x.Len())
 		for i, xi := range x {
 			if xi.IsInt() {
 				r[i] = float64(xi.Int())
@@ -597,7 +597,7 @@ func normalize(x AV) (Value, bool) {
 		}
 		return r, true
 	case tS:
-		r := make(AS, x.Len())
+		r := make([]string, x.Len())
 		for i, xi := range x {
 			r[i] = string(xi.Value.(S))
 		}

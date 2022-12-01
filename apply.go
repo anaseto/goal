@@ -119,7 +119,7 @@ func (ctx *Context) applyArray(x V, y V) V {
 		}
 		return xv.at(i)
 	case AV:
-		r := make(AV, yv.Len())
+		r := make([]V, yv.Len())
 		for i, yi := range yv {
 			r[i] = ctx.applyArray(x, yi)
 			if r[i].IsErr() {
@@ -146,7 +146,7 @@ func (ctx *Context) applyArrayArgs(x V, arg V, args []V) V {
 		return ctx.applyArray(x, arg)
 	}
 	if arg == (V{}) {
-		r := make(AV, xv.Len())
+		r := make([]V, xv.Len())
 		for i := 0; i < len(r); i++ {
 			r[i] = ctx.ApplyN(xv.at(i), args)
 			if r[i].IsErr() {
@@ -157,7 +157,7 @@ func (ctx *Context) applyArrayArgs(x V, arg V, args []V) V {
 	}
 	switch argv := arg.Value.(type) {
 	case array:
-		r := make(AV, argv.Len())
+		r := make([]V, argv.Len())
 		for i := 0; i < argv.Len(); i++ {
 			r[i] = ctx.applyArrayArgs(x, argv.at(i), args)
 			if r[i].IsErr() {
@@ -305,7 +305,7 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 }
 
 func (x AV) atIndices(y AI) V {
-	r := make(AV, len(y))
+	r := make([]V, len(y))
 	xlen := x.Len()
 	for i, yi := range y {
 		if yi < 0 {
@@ -320,7 +320,7 @@ func (x AV) atIndices(y AI) V {
 }
 
 func (x AB) atIndices(y AI) V {
-	r := make(AB, len(y))
+	r := make([]bool, len(y))
 	xlen := x.Len()
 	for i, yi := range y {
 		if yi < 0 {
@@ -335,7 +335,7 @@ func (x AB) atIndices(y AI) V {
 }
 
 func (x AI) atIndices(y AI) V {
-	r := make(AI, len(y))
+	r := make([]int, len(y))
 	xlen := x.Len()
 	for i, yi := range y {
 		if yi < 0 {
@@ -350,7 +350,7 @@ func (x AI) atIndices(y AI) V {
 }
 
 func (x AF) atIndices(y AI) V {
-	r := make(AF, len(y))
+	r := make([]float64, len(y))
 	xlen := x.Len()
 	for i, yi := range y {
 		if yi < 0 {
@@ -365,7 +365,7 @@ func (x AF) atIndices(y AI) V {
 }
 
 func (x AS) atIndices(y AI) V {
-	r := make(AS, len(y))
+	r := make([]string, len(y))
 	xlen := x.Len()
 	for i, yi := range y {
 		if yi < 0 {

@@ -29,7 +29,7 @@ func (ctx *Context) amend3arrayI(x array, y int, f V) V {
 		x.set(int(y), repl)
 		return NewV(x)
 	}
-	a := make(AV, x.Len())
+	a := make([]V, x.Len())
 	for i := range a {
 		a[i] = x.at(i)
 	}
@@ -92,7 +92,7 @@ func (ctx *Context) amend4arrayI(x array, y int, f, z V) V {
 		x.set(int(y), repl)
 		return NewV(x)
 	}
-	a := make(AV, x.Len())
+	a := make([]V, x.Len())
 	for i := range a {
 		a[i] = x.at(i)
 	}

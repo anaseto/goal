@@ -14,25 +14,25 @@ func negate(x V) V {
 	case F:
 		return NewV(-x)
 	case AB:
-		r := make(AI, len(x))
+		r := make([]int, len(x))
 		for i := range r {
 			r[i] = int(-B2I(x[i]))
 		}
 		return NewV(r)
 	case AI:
-		r := make(AI, len(x))
+		r := make([]int, len(x))
 		for i := range r {
 			r[i] = -x[i]
 		}
 		return NewV(r)
 	case AF:
-		r := make(AF, len(x))
+		r := make([]float64, len(x))
 		for i := range r {
 			r[i] = -x[i]
 		}
 		return NewV(r)
 	case AV:
-		r := make(AV, len(x))
+		r := make([]V, len(x))
 		for i := range r {
 			r[i] = negate(x[i])
 		}
@@ -75,19 +75,19 @@ func sign(x V) V {
 	case AB:
 		return x
 	case AI:
-		r := make(AI, xv.Len())
+		r := make([]int, xv.Len())
 		for i := range r {
 			r[i] = int(signI(xv[i]))
 		}
 		return NewV(r)
 	case AF:
-		r := make(AI, xv.Len())
+		r := make([]int, xv.Len())
 		for i := range r {
 			r[i] = int(signF(F(xv[i])))
 		}
 		return NewV(r)
 	case AV:
-		r := make(AV, xv.Len())
+		r := make([]V, xv.Len())
 		for i := range r {
 			r[i] = sign(xv[i])
 		}
@@ -112,7 +112,7 @@ func floor(x V) V {
 	case AI:
 		return x
 	case AF:
-		r := make(AI, xv.Len())
+		r := make([]int, xv.Len())
 		for i := range r {
 			// NOTE: we assume conversion is possible, leaving
 			// handling NaN, INF or big floats to the program.
@@ -120,13 +120,13 @@ func floor(x V) V {
 		}
 		return NewV(r)
 	case AS:
-		r := make(AS, xv.Len())
+		r := make([]string, xv.Len())
 		for i := range r {
 			r[i] = strings.ToLower(xv[i])
 		}
 		return NewV(r)
 	case AV:
-		r := make(AV, xv.Len())
+		r := make([]V, xv.Len())
 		for i := range r {
 			r[i] = floor(xv[i])
 		}
@@ -151,19 +151,19 @@ func ceil(x V) V {
 	case AI:
 		return x
 	case AF:
-		r := make(AI, xv.Len())
+		r := make([]int, xv.Len())
 		for i := range r {
 			r[i] = int(math.Ceil(xv[i]))
 		}
 		return NewV(r)
 	case AS:
-		r := make(AS, xv.Len())
+		r := make([]string, xv.Len())
 		for i := range r {
 			r[i] = strings.ToUpper(xv[i])
 		}
 		return NewV(r)
 	case AV:
-		r := make(AV, xv.Len())
+		r := make([]V, xv.Len())
 		for i := range r {
 			r[i] = ceil(xv[i])
 		}
@@ -184,25 +184,25 @@ func not(x V) V {
 	case S:
 		return NewI(B2I(xv == ""))
 	case AB:
-		r := make(AB, xv.Len())
+		r := make([]bool, xv.Len())
 		for i := range r {
 			r[i] = !xv[i]
 		}
 		return NewV(r)
 	case AI:
-		r := make(AB, xv.Len())
+		r := make([]bool, xv.Len())
 		for i := range r {
 			r[i] = xv[i] == 0
 		}
 		return NewV(r)
 	case AF:
-		r := make(AB, xv.Len())
+		r := make([]bool, xv.Len())
 		for i := range r {
 			r[i] = xv[i] == 0
 		}
 		return NewV(r)
 	case AV:
-		r := make(AV, xv.Len())
+		r := make([]V, xv.Len())
 		for i := range r {
 			r[i] = not(xv[i])
 		}
@@ -223,19 +223,19 @@ func abs(x V) V {
 	case AB:
 		return x
 	case AI:
-		r := make(AI, xv.Len())
+		r := make([]int, xv.Len())
 		for i := range r {
 			r[i] = int(absI(xv[i]))
 		}
 		return NewV(r)
 	case AF:
-		r := make(AF, xv.Len())
+		r := make([]float64, xv.Len())
 		for i := range r {
 			r[i] = math.Abs(xv[i])
 		}
 		return NewV(r)
 	case AV:
-		r := make(AV, xv.Len())
+		r := make([]V, xv.Len())
 		for i := range r {
 			r[i] = abs(xv[i])
 		}

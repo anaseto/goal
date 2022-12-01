@@ -137,7 +137,7 @@ func joinToAV(x V, y AV, left bool) V {
 		}
 		return NewV(joinArrays(y, xv))
 	default:
-		r := make(AV, len(y)+1)
+		r := make([]V, len(y)+1)
 		if left {
 			r[0] = x
 			copy(r[1:], y)
@@ -150,7 +150,7 @@ func joinToAV(x V, y AV, left bool) V {
 }
 
 func joinArrays(x, y array) AV {
-	r := make(AV, y.Len()+x.Len())
+	r := make([]V, y.Len()+x.Len())
 	for i := 0; i < x.Len(); i++ {
 		r[i] = x.at(i)
 	}
@@ -161,7 +161,7 @@ func joinArrays(x, y array) AV {
 }
 
 func joinAtomToArray(x V, y array, left bool) AV {
-	r := make(AV, y.Len()+1)
+	r := make([]V, y.Len()+1)
 	if left {
 		r[0] = x
 		for i := 1; i < len(r); i++ {
@@ -179,7 +179,7 @@ func joinAtomToArray(x V, y array, left bool) AV {
 func joinToAS(x V, y AS, left bool) V {
 	switch xv := x.Value.(type) {
 	case S:
-		r := make(AS, len(y)+1)
+		r := make([]string, len(y)+1)
 		if left {
 			r[0] = string(xv)
 			copy(r[1:], y)
@@ -189,7 +189,7 @@ func joinToAS(x V, y AS, left bool) V {
 		}
 		return NewV(r)
 	case AS:
-		r := make(AS, len(y)+xv.Len())
+		r := make([]string, len(y)+xv.Len())
 		if left {
 			copy(r[:xv.Len()], xv)
 			copy(r[xv.Len():], y)
@@ -211,7 +211,7 @@ func joinToAS(x V, y AS, left bool) V {
 func joinToAB(x V, y AB, left bool) V {
 	if x.IsInt() {
 		if isBI(x.Int()) {
-			r := make(AB, len(y)+1)
+			r := make([]bool, len(y)+1)
 			if left {
 				r[0] = x.Int() == 1
 				copy(r[1:], y)
@@ -221,7 +221,7 @@ func joinToAB(x V, y AB, left bool) V {
 			}
 			return NewV(r)
 		}
-		r := make(AI, len(y)+1)
+		r := make([]int, len(y)+1)
 		if left {
 			r[0] = int(x.Int())
 			for i := 1; i < len(r); i++ {
@@ -238,7 +238,7 @@ func joinToAB(x V, y AB, left bool) V {
 	}
 	switch xv := x.Value.(type) {
 	case F:
-		r := make(AF, len(y)+1)
+		r := make([]float64, len(y)+1)
 		if left {
 			r[0] = float64(xv)
 			for i := 1; i < len(r); i++ {
@@ -278,7 +278,7 @@ func joinToAB(x V, y AB, left bool) V {
 
 func joinToAI(x V, y AI, left bool) V {
 	if x.IsInt() {
-		r := make(AI, len(y)+1)
+		r := make([]int, len(y)+1)
 		if left {
 			r[0] = x.Int()
 			copy(r[1:], y)
@@ -291,7 +291,7 @@ func joinToAI(x V, y AI, left bool) V {
 	}
 	switch xv := x.Value.(type) {
 	case F:
-		r := make(AF, len(y)+1)
+		r := make([]float64, len(y)+1)
 		if left {
 			r[0] = float64(xv)
 			for i := 1; i < len(r); i++ {
@@ -331,7 +331,7 @@ func joinToAI(x V, y AI, left bool) V {
 
 func joinToAF(x V, y AF, left bool) V {
 	if x.IsInt() {
-		r := make(AF, len(y)+1)
+		r := make([]float64, len(y)+1)
 		if left {
 			r[0] = float64(x.Int())
 			copy(r[1:], y)
@@ -343,7 +343,7 @@ func joinToAF(x V, y AF, left bool) V {
 	}
 	switch xv := x.Value.(type) {
 	case F:
-		r := make(AF, len(y)+1)
+		r := make([]float64, len(y)+1)
 		if left {
 			r[0] = float64(xv)
 			copy(r[1:], y)
@@ -378,28 +378,28 @@ func joinToAF(x V, y AF, left bool) V {
 }
 
 func joinABAB(x AB, y AB) AB {
-	r := make(AB, len(y)+len(x))
+	r := make([]bool, len(y)+len(x))
 	copy(r[:len(x)], x)
 	copy(r[len(x):], y)
 	return r
 }
 
 func joinAIAI(x AI, y AI) AI {
-	r := make(AI, len(y)+len(x))
+	r := make([]int, len(y)+len(x))
 	copy(r[:len(x)], x)
 	copy(r[len(x):], y)
 	return r
 }
 
 func joinAFAF(x AF, y AF) AF {
-	r := make(AF, len(y)+len(x))
+	r := make([]float64, len(y)+len(x))
 	copy(r[:len(x)], x)
 	copy(r[len(x):], y)
 	return r
 }
 
 func joinABAI(x AB, y AI) AI {
-	r := make(AI, len(x)+len(y))
+	r := make([]int, len(x)+len(y))
 	for i := 0; i < len(x); i++ {
 		r[i] = int(B2I(x[i]))
 	}
@@ -408,7 +408,7 @@ func joinABAI(x AB, y AI) AI {
 }
 
 func joinAIAB(x AI, y AB) AI {
-	r := make(AI, len(x)+len(y))
+	r := make([]int, len(x)+len(y))
 	copy(r[:len(x)], x)
 	for i := len(x); i < len(r); i++ {
 		r[i] = int(B2I(y[i-len(x)]))
@@ -417,7 +417,7 @@ func joinAIAB(x AI, y AB) AI {
 }
 
 func joinABAF(x AB, y AF) AF {
-	r := make(AF, len(x)+len(y))
+	r := make([]float64, len(x)+len(y))
 	for i := 0; i < len(x); i++ {
 		r[i] = float64(B2F(x[i]))
 	}
@@ -426,7 +426,7 @@ func joinABAF(x AB, y AF) AF {
 }
 
 func joinAFAB(x AF, y AB) AF {
-	r := make(AF, len(x)+len(y))
+	r := make([]float64, len(x)+len(y))
 	copy(r[:len(x)], x)
 	for i := len(x); i < len(r); i++ {
 		r[i] = float64(B2F(y[i-len(x)]))
@@ -435,7 +435,7 @@ func joinAFAB(x AF, y AB) AF {
 }
 
 func joinAIAF(x AI, y AF) AF {
-	r := make(AF, len(x)+len(y))
+	r := make([]float64, len(x)+len(y))
 	for i := 0; i < len(x); i++ {
 		r[i] = float64(x[i])
 	}
@@ -444,7 +444,7 @@ func joinAIAF(x AI, y AF) AF {
 }
 
 func joinAFAI(x AF, y AI) AF {
-	r := make(AF, len(x)+len(y))
+	r := make([]float64, len(x)+len(y))
 	copy(r[:len(x)], x)
 	for i := len(x); i < len(r); i++ {
 		r[i] = float64(y[i-len(x)])

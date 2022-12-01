@@ -156,7 +156,7 @@ func classify(x V) V {
 		}
 		return not(x)
 	case AF:
-		r := make(AI, xv.Len())
+		r := make([]int, xv.Len())
 		m := map[float64]int{}
 		n := 0
 		for i, xi := range xv {
@@ -171,7 +171,7 @@ func classify(x V) V {
 		}
 		return NewV(r)
 	case AI:
-		r := make(AI, xv.Len())
+		r := make([]int, xv.Len())
 		m := map[int]int{}
 		n := 0
 		for i, xi := range xv {
@@ -186,7 +186,7 @@ func classify(x V) V {
 		}
 		return NewV(r)
 	case AS:
-		r := make(AI, xv.Len())
+		r := make([]int, xv.Len())
 		m := map[string]int{}
 		n := 0
 		for i, xi := range xv {
@@ -203,7 +203,7 @@ func classify(x V) V {
 	case AV:
 		// NOTE: quadratic algorithm, worst case complexity could be
 		// improved by sorting or string hashing.
-		r := make(AI, xv.Len())
+		r := make([]int, xv.Len())
 		n := 0
 	loop:
 		for i, xi := range xv {
@@ -278,7 +278,7 @@ func uniq(x V) V {
 	case AV:
 		// NOTE: quadratic algorithm, worst case complexity could be
 		// improved by sorting or string hashing.
-		r := make(AV, x.Len())
+		r := make([]V, x.Len())
 	loop:
 		for i, xi := range x {
 			for j := range x[:i] {
@@ -303,7 +303,7 @@ func markFirsts(x V) V {
 	//assertCanonical(x)
 	switch x := x.Value.(type) {
 	case AB:
-		r := make(AB, x.Len())
+		r := make([]bool, x.Len())
 		r[0] = true
 		x0 := x[0]
 		for i := 1; i < x.Len(); i++ {
@@ -314,7 +314,7 @@ func markFirsts(x V) V {
 		}
 		return NewV(r)
 	case AF:
-		r := make(AB, x.Len())
+		r := make([]bool, x.Len())
 		m := map[float64]struct{}{}
 		for i, xi := range x {
 			_, ok := m[xi]
@@ -326,7 +326,7 @@ func markFirsts(x V) V {
 		}
 		return NewV(r)
 	case AI:
-		r := make(AB, x.Len())
+		r := make([]bool, x.Len())
 		m := map[int]struct{}{}
 		for i, xi := range x {
 			_, ok := m[xi]
@@ -338,7 +338,7 @@ func markFirsts(x V) V {
 		}
 		return NewV(r)
 	case AS:
-		r := make(AB, x.Len())
+		r := make([]bool, x.Len())
 		m := map[string]struct{}{}
 		for i, xi := range x {
 			_, ok := m[xi]
@@ -352,7 +352,7 @@ func markFirsts(x V) V {
 	case AV:
 		// NOTE: quadratic algorithm, worst case complexity could be
 		// improved by sorting or string hashing.
-		r := make(AB, x.Len())
+		r := make([]bool, x.Len())
 	loop:
 		for i, xi := range x {
 			for j := range x[:i] {
@@ -373,7 +373,7 @@ func memberOf(x, y V) V {
 	if Length(y) == 0 {
 		switch x := x.Value.(type) {
 		case array:
-			r := make(AB, x.Len())
+			r := make([]bool, x.Len())
 			return NewV(r)
 		default:
 			return NewI(B2I(false))
@@ -411,7 +411,7 @@ func memberOfAB(x V, y AB) V {
 	if t && f {
 		switch x := x.Value.(type) {
 		case array:
-			r := make(AB, x.Len())
+			r := make([]bool, x.Len())
 			for i := range r {
 				r[i] = true
 			}
@@ -444,19 +444,19 @@ func memberOfAF(x V, y AF) V {
 		_, ok := m[x]
 		return NewI(B2I(ok))
 	case AB:
-		r := make(AB, x.Len())
+		r := make([]bool, x.Len())
 		for i, xi := range x {
 			_, r[i] = m[B2F(xi)]
 		}
 		return NewV(r)
 	case AI:
-		r := make(AB, x.Len())
+		r := make([]bool, x.Len())
 		for i, xi := range x {
 			_, r[i] = m[F(xi)]
 		}
 		return NewV(r)
 	case AF:
-		r := make(AB, x.Len())
+		r := make([]bool, x.Len())
 		for i, xi := range x {
 			_, r[i] = m[F(xi)]
 		}
@@ -489,19 +489,19 @@ func memberOfAI(x V, y AI) V {
 		_, ok := m[int(x)]
 		return NewI(B2I(ok))
 	case AB:
-		r := make(AB, x.Len())
+		r := make([]bool, x.Len())
 		for i, xi := range x {
 			_, r[i] = m[int(B2I(xi))]
 		}
 		return NewV(r)
 	case AI:
-		r := make(AB, x.Len())
+		r := make([]bool, x.Len())
 		for i, xi := range x {
 			_, r[i] = m[xi]
 		}
 		return NewV(r)
 	case AF:
-		r := make(AB, x.Len())
+		r := make([]bool, x.Len())
 		for i, xi := range x {
 			if !isI(F(xi)) {
 				continue
@@ -530,7 +530,7 @@ func memberOfAS(x V, y AS) V {
 		_, ok := m[string(x)]
 		return NewI(B2I(ok))
 	case AS:
-		r := make(AB, x.Len())
+		r := make([]bool, x.Len())
 		for i, xi := range x {
 			_, r[i] = m[xi]
 		}
@@ -559,7 +559,7 @@ func memberOfAV(x V, y AV) V {
 func memberOfArray(x, y array) V {
 	// NOTE: quadratic algorithm, worst case complexity could be
 	// improved by sorting or string hashing.
-	r := make(AB, x.Len())
+	r := make([]bool, x.Len())
 	for i := 0; i < x.Len(); i++ {
 		for j := 0; j < y.Len(); j++ {
 			if Match(x.at(i), y.at(j)) {
@@ -579,7 +579,7 @@ func occurrenceCount(x V) V {
 	//assertCanonical(x)
 	switch xv := x.Value.(type) {
 	case AB:
-		r := make(AI, xv.Len())
+		r := make([]int, xv.Len())
 		var f, t int
 		for i, xi := range xv {
 			if xi {
@@ -592,7 +592,7 @@ func occurrenceCount(x V) V {
 		}
 		return NewV(r)
 	case AF:
-		r := make(AI, xv.Len())
+		r := make([]int, xv.Len())
 		m := map[float64]int{}
 		for i, xi := range xv {
 			c, ok := m[xi]
@@ -605,7 +605,7 @@ func occurrenceCount(x V) V {
 		}
 		return NewV(r)
 	case AI:
-		r := make(AI, xv.Len())
+		r := make([]int, xv.Len())
 		m := map[int]int{}
 		for i, xi := range xv {
 			c, ok := m[xi]
@@ -618,7 +618,7 @@ func occurrenceCount(x V) V {
 		}
 		return NewV(r)
 	case AS:
-		r := make(AI, xv.Len())
+		r := make([]int, xv.Len())
 		m := map[string]int{}
 		for i, xi := range xv {
 			c, ok := m[xi]
@@ -633,7 +633,7 @@ func occurrenceCount(x V) V {
 	case AV:
 		// NOTE: quadratic algorithm, worst case complexity could be
 		// improved by sorting or string hashing.
-		r := make(AI, xv.Len())
+		r := make([]int, xv.Len())
 	loop:
 		for i, xi := range xv {
 			for j := i - 1; j >= 0; j-- {
@@ -708,13 +708,13 @@ func findS(s S, y V) V {
 	case S:
 		return NewI(strings.Index(string(s), string(y)))
 	case AS:
-		r := make(AI, y.Len())
+		r := make([]int, y.Len())
 		for i, ss := range y {
 			r[i] = strings.Index(string(s), string(ss))
 		}
 		return NewV(r)
 	case AV:
-		r := make(AV, y.Len())
+		r := make([]V, y.Len())
 		for i, yi := range y {
 			r[i] = findS(s, yi)
 			if r[i].IsErr() {
@@ -796,14 +796,14 @@ func findAB(x AB, y V) V {
 		return findAB(x, NewI(int(y)))
 	case AB:
 		m := imapAB(x)
-		r := make(AI, y.Len())
+		r := make([]int, y.Len())
 		for i, yi := range y {
 			r[i] = m[B2I(yi)]
 		}
 		return NewV(r)
 	case AI:
 		m := imapAB(x)
-		r := make(AI, y.Len())
+		r := make([]int, y.Len())
 		for i, yi := range y {
 			if yi != 0 && yi != 1 {
 				r[i] = x.Len()
@@ -814,7 +814,7 @@ func findAB(x AB, y V) V {
 		return NewV(r)
 	case AF:
 		m := imapAB(x)
-		r := make(AI, y.Len())
+		r := make([]int, y.Len())
 		for i, yi := range y {
 			if yi != 0 && yi != 1 {
 				r[i] = x.Len()
@@ -851,7 +851,7 @@ func findAF(x AF, y V) V {
 		return NewI(x.Len())
 	case AB:
 		m := imapAF(x)
-		r := make(AI, y.Len())
+		r := make([]int, y.Len())
 		for i, yi := range y {
 			j, ok := m[float64(B2F(yi))]
 			if ok {
@@ -863,7 +863,7 @@ func findAF(x AF, y V) V {
 		return NewV(r)
 	case AI:
 		m := imapAF(x)
-		r := make(AI, y.Len())
+		r := make([]int, y.Len())
 		for i, yi := range y {
 			j, ok := m[float64(yi)]
 			if ok {
@@ -875,7 +875,7 @@ func findAF(x AF, y V) V {
 		return NewV(r)
 	case AF:
 		m := imapAF(x)
-		r := make(AI, y.Len())
+		r := make([]int, y.Len())
 		for i, yi := range y {
 			j, ok := m[yi]
 			if ok {
@@ -912,7 +912,7 @@ func findAI(x AI, y V) V {
 		return NewI(x.Len())
 	case AB:
 		m := imapAI(x)
-		r := make(AI, y.Len())
+		r := make([]int, y.Len())
 		for i, yi := range y {
 			j, ok := m[int(B2I(yi))]
 			if ok {
@@ -924,7 +924,7 @@ func findAI(x AI, y V) V {
 		return NewV(r)
 	case AI:
 		m := imapAI(x)
-		r := make(AI, y.Len())
+		r := make([]int, y.Len())
 		for i, yi := range y {
 			j, ok := m[yi]
 			if ok {
@@ -936,7 +936,7 @@ func findAI(x AI, y V) V {
 		return NewV(r)
 	case AF:
 		m := imapAI(x)
-		r := make(AI, y.Len())
+		r := make([]int, y.Len())
 		for i, yi := range y {
 			if !isI(F(yi)) {
 				r[i] = x.Len()
@@ -968,7 +968,7 @@ func findAS(x AS, y V) V {
 		return NewI(x.Len())
 	case AS:
 		m := imapAS(x)
-		r := make(AI, y.Len())
+		r := make([]int, y.Len())
 		for i, yi := range y {
 			j, ok := m[yi]
 			if ok {
@@ -988,7 +988,7 @@ func findAS(x AS, y V) V {
 func findArray(x, y array) V {
 	// NOTE: quadratic algorithm, worst case complexity could be
 	// improved by sorting or string hashing.
-	r := make(AI, y.Len())
+	r := make([]int, y.Len())
 	for i := range r {
 		r[i] = x.Len()
 	}

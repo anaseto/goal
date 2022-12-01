@@ -21,7 +21,7 @@ func rangeI(n int) V {
 	if n < 0 {
 		return errs("!x : x negative")
 	}
-	r := make(AI, n)
+	r := make([]int, n)
 	for i := range r {
 		r[i] = i
 	}
@@ -36,10 +36,10 @@ func rangeArray(x AI) V {
 		}
 		cols *= n
 	}
-	r := make(AV, x.Len())
+	r := make([]V, x.Len())
 	reps := cols
 	for i := range r {
-		a := make(AI, cols)
+		a := make([]int, cols)
 		reps /= x[i]
 		clen := reps * x[i]
 		for c := 0; c < cols/clen; c++ {
@@ -64,7 +64,7 @@ func where(x V) V {
 		case x.Int() == 0:
 			return NewV(AI{})
 		default:
-			r := make(AI, x.Int())
+			r := make([]int, x.Int())
 			return NewV(r)
 		}
 	}
@@ -80,7 +80,7 @@ func where(x V) V {
 		case n == 0:
 			return NewV(AI{})
 		default:
-			r := make(AI, n)
+			r := make([]int, n)
 			return NewV(r)
 		}
 	case AB:
@@ -88,7 +88,7 @@ func where(x V) V {
 		for _, xi := range x {
 			n += int(B2I(xi))
 		}
-		r := make(AI, 0, n)
+		r := make([]int, 0, n)
 		for i, xi := range x {
 			if xi {
 				r = append(r, i)
@@ -103,7 +103,7 @@ func where(x V) V {
 			}
 			n += xi
 		}
-		r := make(AI, 0, n)
+		r := make([]int, 0, n)
 		for i, xi := range x {
 			for j := 0; j < xi; j++ {
 				r = append(r, i)
@@ -121,7 +121,7 @@ func where(x V) V {
 			}
 			n += int(xi)
 		}
-		r := make(AI, 0, n)
+		r := make([]int, 0, n)
 		for i, xi := range x {
 			for j := 0; j < int(xi); j++ {
 				r = append(r, i)
@@ -149,7 +149,7 @@ func where(x V) V {
 					n += int(xif)
 				}
 			}
-			r := make(AI, 0, n)
+			r := make([]int, 0, n)
 			for i, xi := range x {
 				var max int
 				if xi.IsInt() {
@@ -220,13 +220,13 @@ func replicate(x, y V) V {
 func repeat(x V, n int) V {
 	if x.IsInt() {
 		if isBI(x.Int()) {
-			r := make(AB, n)
+			r := make([]bool, n)
 			for i := range r {
 				r[i] = x.Int() == 1
 			}
 			return NewV(r)
 		}
-		r := make(AI, n)
+		r := make([]int, n)
 		for i := range r {
 			r[i] = x.Int()
 		}
@@ -234,19 +234,19 @@ func repeat(x V, n int) V {
 	}
 	switch xv := x.Value.(type) {
 	case F:
-		r := make(AF, n)
+		r := make([]float64, n)
 		for i := range r {
 			r[i] = float64(xv)
 		}
 		return NewV(r)
 	case S:
-		r := make(AS, n)
+		r := make([]string, n)
 		for i := range r {
 			r[i] = string(xv)
 		}
 		return NewV(r)
 	default:
-		r := make(AV, n)
+		r := make([]V, n)
 		for i := range r {
 			r[i] = x
 		}
@@ -261,7 +261,7 @@ func repeatAB(x AB, y V) V {
 	}
 	switch y := y.Value.(type) {
 	case AB:
-		r := make(AB, 0, n)
+		r := make([]bool, 0, n)
 		for i, xi := range x {
 			if xi {
 				r = append(r, y[i])
@@ -269,7 +269,7 @@ func repeatAB(x AB, y V) V {
 		}
 		return NewV(r)
 	case AF:
-		r := make(AF, 0, n)
+		r := make([]float64, 0, n)
 		for i, xi := range x {
 			if xi {
 				r = append(r, y[i])
@@ -277,7 +277,7 @@ func repeatAB(x AB, y V) V {
 		}
 		return NewV(r)
 	case AI:
-		r := make(AI, 0, n)
+		r := make([]int, 0, n)
 		for i, xi := range x {
 			if xi {
 				r = append(r, y[i])
@@ -285,7 +285,7 @@ func repeatAB(x AB, y V) V {
 		}
 		return NewV(r)
 	case AS:
-		r := make(AS, 0, n)
+		r := make([]string, 0, n)
 		for i, xi := range x {
 			if xi {
 				r = append(r, y[i])
@@ -293,7 +293,7 @@ func repeatAB(x AB, y V) V {
 		}
 		return NewV(r)
 	case AV:
-		r := make(AV, 0, n)
+		r := make([]V, 0, n)
 		for i, xi := range x {
 			if xi {
 				r = append(r, y.at(i))
@@ -315,7 +315,7 @@ func repeatAI(x AI, y V) V {
 	}
 	switch y := y.Value.(type) {
 	case AB:
-		r := make(AB, 0, n)
+		r := make([]bool, 0, n)
 		for i, xi := range x {
 			for j := 0; j < xi; j++ {
 				r = append(r, y[i])
@@ -323,7 +323,7 @@ func repeatAI(x AI, y V) V {
 		}
 		return NewV(r)
 	case AF:
-		r := make(AF, 0, n)
+		r := make([]float64, 0, n)
 		for i, xi := range x {
 			for j := 0; j < xi; j++ {
 				r = append(r, y[i])
@@ -331,7 +331,7 @@ func repeatAI(x AI, y V) V {
 		}
 		return NewV(r)
 	case AI:
-		r := make(AI, 0, n)
+		r := make([]int, 0, n)
 		for i, xi := range x {
 			for j := 0; j < xi; j++ {
 				r = append(r, y[i])
@@ -339,7 +339,7 @@ func repeatAI(x AI, y V) V {
 		}
 		return NewV(r)
 	case AS:
-		r := make(AS, 0, n)
+		r := make([]string, 0, n)
 		for i, xi := range x {
 			for j := 0; j < xi; j++ {
 				r = append(r, y[i])
@@ -347,7 +347,7 @@ func repeatAI(x AI, y V) V {
 		}
 		return NewV(r)
 	case AV:
-		r := make(AV, 0, n)
+		r := make([]V, 0, n)
 		for i, xi := range x {
 			for j := 0; j < xi; j++ {
 				r = append(r, y[i])
@@ -398,7 +398,7 @@ func weedOutAB(x AB, y V) V {
 	}
 	switch y := y.Value.(type) {
 	case AB:
-		r := make(AB, 0, n)
+		r := make([]bool, 0, n)
 		for i, xi := range x {
 			if !xi {
 				r = append(r, y[i])
@@ -406,7 +406,7 @@ func weedOutAB(x AB, y V) V {
 		}
 		return NewV(r)
 	case AF:
-		r := make(AF, 0, n)
+		r := make([]float64, 0, n)
 		for i, xi := range x {
 			if !xi {
 				r = append(r, y[i])
@@ -414,7 +414,7 @@ func weedOutAB(x AB, y V) V {
 		}
 		return NewV(r)
 	case AI:
-		r := make(AI, 0, n)
+		r := make([]int, 0, n)
 		for i, xi := range x {
 			if !xi {
 				r = append(r, y[i])
@@ -422,7 +422,7 @@ func weedOutAB(x AB, y V) V {
 		}
 		return NewV(r)
 	case AS:
-		r := make(AS, 0, n)
+		r := make([]string, 0, n)
 		for i, xi := range x {
 			if !xi {
 				r = append(r, y[i])
@@ -430,7 +430,7 @@ func weedOutAB(x AB, y V) V {
 		}
 		return NewV(r)
 	case AV:
-		r := make(AV, 0, n)
+		r := make([]V, 0, n)
 		for i, xi := range x {
 			if !xi {
 				r = append(r, y.at(i))
@@ -449,7 +449,7 @@ func weedOutAI(x AI, y V) V {
 	}
 	switch y := y.Value.(type) {
 	case AB:
-		r := make(AB, 0, n)
+		r := make([]bool, 0, n)
 		for i, xi := range x {
 			if xi == 0 {
 				r = append(r, y[i])
@@ -457,7 +457,7 @@ func weedOutAI(x AI, y V) V {
 		}
 		return NewV(r)
 	case AF:
-		r := make(AF, 0, n)
+		r := make([]float64, 0, n)
 		for i, xi := range x {
 			if xi == 0 {
 				r = append(r, y[i])
@@ -465,7 +465,7 @@ func weedOutAI(x AI, y V) V {
 		}
 		return NewV(r)
 	case AI:
-		r := make(AI, 0, n)
+		r := make([]int, 0, n)
 		for i, xi := range x {
 			if xi == 0 {
 				r = append(r, y[i])
@@ -473,7 +473,7 @@ func weedOutAI(x AI, y V) V {
 		}
 		return NewV(r)
 	case AS:
-		r := make(AS, 0, n)
+		r := make([]string, 0, n)
 		for i, xi := range x {
 			if xi == 0 {
 				r = append(r, y[i])
@@ -481,7 +481,7 @@ func weedOutAI(x AI, y V) V {
 		}
 		return NewV(r)
 	case AV:
-		r := make(AV, 0, n)
+		r := make([]V, 0, n)
 		for i, xi := range x {
 			if xi == 0 {
 				r = append(r, y[i])

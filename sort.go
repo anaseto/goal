@@ -458,7 +458,7 @@ func (p *permutationAS) Less(i, j int) bool {
 }
 
 func permRange(n int) AI {
-	r := make(AI, n)
+	r := make([]int, n)
 	for i := range r {
 		r[i] = i
 	}
@@ -565,25 +565,25 @@ func searchAI(x AI, y V) V {
 	case F:
 		return NewI(searchAIF(x, y))
 	case AB:
-		r := make(AI, y.Len())
+		r := make([]int, y.Len())
 		for i, yi := range y {
 			r[i] = searchAII(x, B2I(yi))
 		}
 		return NewV(r)
 	case AI:
-		r := make(AI, y.Len())
+		r := make([]int, y.Len())
 		for i, yi := range y {
 			r[i] = searchAII(x, yi)
 		}
 		return NewV(r)
 	case AF:
-		r := make(AI, y.Len())
+		r := make([]int, y.Len())
 		for i, yi := range y {
 			r[i] = searchAIF(x, F(yi))
 		}
 		return NewV(r)
 	case array:
-		r := make(AI, y.Len())
+		r := make([]int, y.Len())
 		for i := 0; i < y.Len(); i++ {
 			r[i] = sort.Search(len(x),
 				func(i int) bool { return less(y.at(i), NewI(x[i])) })
@@ -602,25 +602,25 @@ func searchAF(x AF, y V) V {
 	case F:
 		return NewI(searchAFF(x, y))
 	case AB:
-		r := make(AI, y.Len())
+		r := make([]int, y.Len())
 		for i, yi := range y {
 			r[i] = searchAFI(x, B2I(yi))
 		}
 		return NewV(r)
 	case AI:
-		r := make(AI, y.Len())
+		r := make([]int, y.Len())
 		for i, yi := range y {
 			r[i] = searchAFI(x, yi)
 		}
 		return NewV(r)
 	case AF:
-		r := make(AI, y.Len())
+		r := make([]int, y.Len())
 		for i, yi := range y {
 			r[i] = searchAFF(x, F(yi))
 		}
 		return NewV(r)
 	case array:
-		r := make(AI, y.Len())
+		r := make([]int, y.Len())
 		for i := 0; i < y.Len(); i++ {
 			r[i] = sort.Search(len(x),
 				func(i int) bool { return less(y.at(i), NewF(x[i])) })
@@ -636,13 +636,13 @@ func searchAS(x AS, y V) V {
 	case S:
 		return NewI(searchASS(x, y))
 	case AS:
-		r := make(AI, y.Len())
+		r := make([]int, y.Len())
 		for i, yi := range y {
 			r[i] = searchASS(x, S(yi))
 		}
 		return NewV(r)
 	case array:
-		r := make(AI, y.Len())
+		r := make([]int, y.Len())
 		for i := 0; i < y.Len(); i++ {
 			r[i] = sort.Search(len(x),
 				func(i int) bool { return less(y.at(i), NewS(x[i])) })
@@ -656,7 +656,7 @@ func searchAS(x AS, y V) V {
 func searchAV(x AV, y V) V {
 	switch yv := y.Value.(type) {
 	case array:
-		r := make(AI, yv.Len())
+		r := make([]int, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
 			r[i] = sort.Search(len(x),
 				func(i int) bool { return less(yv.at(i), x[i]) })

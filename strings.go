@@ -22,7 +22,7 @@ func applyS(s S, x V) V {
 	case AB:
 		return applyS(s, fromABtoAI(xv))
 	case AI:
-		r := make(AS, xv.Len())
+		r := make([]string, xv.Len())
 		for i, n := range xv {
 			if n < 0 {
 				n += len(s)
@@ -40,7 +40,7 @@ func applyS(s S, x V) V {
 		}
 		return applyS(s, z)
 	case AV:
-		r := make(AV, xv.Len())
+		r := make([]V, xv.Len())
 		for i, xi := range xv {
 			r[i] = applyS(s, xi)
 			if r[i].IsErr() {
@@ -108,7 +108,7 @@ func applyS2(s S, x V, y V) V {
 	case AB:
 		return applyS2(s, fromABtoAI(xv), y)
 	case AI:
-		r := make(AS, xv.Len())
+		r := make([]string, xv.Len())
 		if z, ok := y.Value.(AI); ok {
 			if z.Len() != xv.Len() {
 				return errf("s[x;y] : length mismatch: %d (#x) %d (#y)",
@@ -150,7 +150,7 @@ func applyS2(s S, x V, y V) V {
 		}
 		return applyS2(s, z, y)
 	case AV:
-		r := make(AV, xv.Len())
+		r := make([]V, xv.Len())
 		for i, xi := range xv {
 			r[i] = applyS2(s, xi, y)
 			if r[i].IsErr() {
@@ -168,13 +168,13 @@ func bytes(x V) V {
 	case S:
 		return NewI(len(x))
 	case AS:
-		r := make(AI, x.Len())
+		r := make([]int, x.Len())
 		for i, s := range x {
 			r[i] = len(s)
 		}
 		return NewV(r)
 	case AV:
-		r := make(AV, x.Len())
+		r := make([]V, x.Len())
 		for i, xi := range x {
 			r[i] = bytes(xi)
 			if r[i].IsErr() {
@@ -214,7 +214,7 @@ func casti(y V) V {
 		return NewI(int(yv))
 	case S:
 		runes := []rune(yv)
-		r := make(AI, len(runes))
+		r := make([]int, len(runes))
 		for i, rc := range runes {
 			r[i] = int(rc)
 		}
@@ -224,7 +224,7 @@ func casti(y V) V {
 	case AI:
 		return y
 	case AS:
-		r := make(AV, yv.Len())
+		r := make([]V, yv.Len())
 		for i, s := range yv {
 			r[i] = casti(NewS(s))
 		}
@@ -232,7 +232,7 @@ func casti(y V) V {
 	case AF:
 		return toAI(yv)
 	case AV:
-		r := make(AV, yv.Len())
+		r := make([]V, yv.Len())
 		for i := range r {
 			r[i] = casti(yv[i])
 			if r[i].IsErr() {
@@ -263,7 +263,7 @@ func castn(y V) V {
 	case AI:
 		return y
 	case AS:
-		r := make(AV, yv.Len())
+		r := make([]V, yv.Len())
 		for i, s := range yv {
 			n, err := parseNumber(s)
 			if err != nil {
@@ -275,7 +275,7 @@ func castn(y V) V {
 	case AF:
 		return y
 	case AV:
-		r := make(AV, yv.Len())
+		r := make([]V, yv.Len())
 		for i := range r {
 			r[i] = castn(yv[i])
 			if r[i].IsErr() {
@@ -306,7 +306,7 @@ func casts(y V) V {
 	case AF:
 		return casts(toAI(yv))
 	case AV:
-		r := make(AV, yv.Len())
+		r := make([]V, yv.Len())
 		for i := range r {
 			r[i] = casts(yv[i])
 			if r[i].IsErr() {
@@ -324,13 +324,13 @@ func drops(s S, y V) V {
 	case S:
 		return NewS(strings.TrimPrefix(string(y), string(s)))
 	case AS:
-		r := make(AS, y.Len())
+		r := make([]string, y.Len())
 		for i, yi := range y {
 			r[i] = strings.TrimPrefix(string(yi), string(s))
 		}
 		return NewV(r)
 	case AV:
-		r := make(AV, y.Len())
+		r := make([]V, y.Len())
 		for i, yi := range y {
 			r[i] = drops(s, yi)
 			if r[i].IsErr() {
@@ -349,13 +349,13 @@ func trim(s S, y V) V {
 	case S:
 		return NewS(strings.Trim(string(y), string(s)))
 	case AS:
-		r := make(AS, y.Len())
+		r := make([]string, y.Len())
 		for i, yi := range y {
 			r[i] = strings.Trim(string(yi), string(s))
 		}
 		return NewV(r)
 	case AV:
-		r := make(AV, y.Len())
+		r := make([]V, y.Len())
 		for i, yi := range y {
 			r[i] = trim(s, yi)
 			if r[i].IsErr() {
