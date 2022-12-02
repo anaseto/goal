@@ -17,29 +17,34 @@ func Length(x V) int {
 }
 
 func reverseMut(x V) {
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case *AB:
-		for i := 0; i < len(x)/2; i++ {
-			x[i], x[len(x)-i-1] = x[len(x)-i-1], x[i]
+		xs := xv.Slice
+		for i := 0; i < len(xs)/2; i++ {
+			xs[i], xs[len(xs)-i-1] = xs[len(xs)-i-1], xs[i]
 		}
 	case *AF:
-		for i := 0; i < len(x)/2; i++ {
-			x[i], x[len(x)-i-1] = x[len(x)-i-1], x[i]
+		xs := xv.Slice
+		for i := 0; i < len(xs)/2; i++ {
+			xs[i], xs[len(xs)-i-1] = xs[len(xs)-i-1], xs[i]
 		}
 	case *AI:
-		for i := 0; i < len(x)/2; i++ {
-			x[i], x[len(x)-i-1] = x[len(x)-i-1], x[i]
+		xs := xv.Slice
+		for i := 0; i < len(xs)/2; i++ {
+			xs[i], xs[len(xs)-i-1] = xs[len(xs)-i-1], xs[i]
 		}
 	case *AS:
-		for i := 0; i < len(x)/2; i++ {
-			x[i], x[len(x)-i-1] = x[len(x)-i-1], x[i]
+		xs := xv.Slice
+		for i := 0; i < len(xs)/2; i++ {
+			xs[i], xs[len(xs)-i-1] = xs[len(xs)-i-1], xs[i]
 		}
 	case *AV:
-		for i := 0; i < len(x)/2; i++ {
-			x[i], x[len(x)-i-1] = x[len(x)-i-1], x[i]
+		xs := xv.Slice
+		for i := 0; i < len(xs)/2; i++ {
+			xs[i], xs[len(xs)-i-1] = xs[len(xs)-i-1], xs[i]
 		}
 	case sort.Interface:
-		sort.Reverse(x)
+		sort.Reverse(xv)
 	}
 }
 
@@ -83,33 +88,33 @@ func rotate(x, y V) V {
 	case *AB:
 		r := make([]bool, lenx)
 		for j := 0; j < lenx; j++ {
-			r[j] = y[(j+i)%lenx]
+			r[j] = y.At((j + i) % lenx)
 		}
-		return NewV(r)
+		return NewAB(r)
 	case *AF:
 		r := make([]float64, lenx)
 		for j := 0; j < lenx; j++ {
-			r[j] = y[(j+i)%lenx]
+			r[j] = y.At((j + i) % lenx)
 		}
-		return NewV(r)
+		return NewAF(r)
 	case *AI:
 		r := make([]int, lenx)
 		for j := 0; j < lenx; j++ {
-			r[j] = y[(j+i)%lenx]
+			r[j] = y.At((j + i) % lenx)
 		}
-		return NewV(r)
+		return NewAI(r)
 	case *AS:
 		r := make([]string, lenx)
 		for j := 0; j < lenx; j++ {
-			r[j] = y[(j+i)%lenx]
+			r[j] = y.At((j + i) % lenx)
 		}
-		return NewV(r)
+		return NewAS(r)
 	case *AV:
 		r := make([]V, lenx)
 		for j := 0; j < lenx; j++ {
-			r[j] = y[(j+i)%lenx]
+			r[j] = y.At((j + i) % lenx)
 		}
-		return NewV(r)
+		return NewAV(r)
 	default:
 		return errType("f|y", "y", y)
 	}
@@ -193,68 +198,68 @@ func dropi(i int, y V) V {
 	}
 }
 
-func cutAI(x AI, y V) V {
-	if !sort.IsSorted(sort.IntSlice(x)) {
+func cutAI(x *AI, y V) V {
+	if !sort.IsSorted(sort.IntSlice(x.Slice)) {
 		return errs("x_y : x is not ascending")
 	}
 	ylen := Length(y)
-	for _, i := range x {
+	for _, i := range x.Slice {
 		if i < 0 || i > ylen {
 			return errf("x_y : x contains out of bound index (%d)", i)
 		}
 	}
 	if x.Len() == 0 {
-		return NewV(AV{})
+		return NewAV([]V{})
 	}
 	switch yv := y.Value.(type) {
 	case *AB:
 		r := make([]V, x.Len())
-		for i, from := range x {
-			to := len(yv)
+		for i, from := range x.Slice {
+			to := yv.Len()
 			if i+1 < x.Len() {
-				to = x[i+1]
+				to = x.At(i + 1)
 			}
-			r[i] = NewV(yv[from:to])
+			r[i] = NewAB(yv.Slice[from:to])
 		}
-		return NewV(r)
+		return NewAV(r)
 	case *AI:
 		r := make([]V, x.Len())
-		for i, from := range x {
-			to := len(yv)
+		for i, from := range x.Slice {
+			to := yv.Len()
 			if i+1 < x.Len() {
-				to = x[i+1]
+				to = x.At(i + 1)
 			}
-			r[i] = NewV(yv[from:to])
+			r[i] = NewAI(yv.Slice[from:to])
 		}
-		return NewV(r)
+		return NewAV(r)
 	case *AF:
 		r := make([]V, x.Len())
-		for i, from := range x {
-			to := len(yv)
+		for i, from := range x.Slice {
+			to := yv.Len()
 			if i+1 < x.Len() {
-				to = x[i+1]
+				to = x.At(i + 1)
 			}
-			r[i] = NewV(yv[from:to])
+			r[i] = NewAF(yv.Slice[from:to])
 		}
-		return NewV(r)
+		return NewAV(r)
 	case *AS:
 		r := make([]V, x.Len())
-		for i, from := range x {
-			to := len(yv)
+		for i, from := range x.Slice {
+			to := yv.Len()
 			if i+1 < x.Len() {
-				to = x[i+1]
+				to = x.At(i + 1)
 			}
-			r[i] = NewV(yv[from:to])
+			r[i] = NewAS(yv.Slice[from:to])
 		}
-		return NewV(r)
+		return NewAV(r)
 	case *AV:
 		r := make([]V, x.Len())
-		for i, from := range x {
-			to := len(yv)
+		for i, from := range x.Slice {
+			to := yv.Len()
 			if i+1 < x.Len() {
-				to = x[i+1]
+				to = x.At(i + 1)
 			}
-			r[i] = NewV(yv[from:to])
+			r[i] = NewAV(yv.Slice[from:to])
 		}
 		return canonicalV(NewAV(r))
 	default:
@@ -302,67 +307,72 @@ func takeCyclic(y array, n int) V {
 	}
 	i := 0
 	step := y.Len()
-	switch y := y.(type) {
+	switch yv := y.(type) {
 	case *AB:
+		ys := yv.Slice
 		r := make([]bool, n)
 		for i+step < n {
-			copy(r[i:i+step], y)
+			copy(r[i:i+step], ys)
 			i += step
 		}
 		if neg {
-			copy(r[i:n], y[len(y)-n+i:])
+			copy(r[i:n], ys[len(ys)-n+i:])
 		} else {
-			copy(r[i:n], y[:n-i])
+			copy(r[i:n], ys[:n-i])
 		}
-		return NewV(r)
-	case *AF:
-		r := make([]float64, n)
-		for i+step < n {
-			copy(r[i:i+step], y)
-			i += step
-		}
-		if neg {
-			copy(r[i:n], y[len(y)-n+i:])
-		} else {
-			copy(r[i:n], y[:n-i])
-		}
-		return NewV(r)
+		return NewAB(r)
 	case *AI:
+		ys := yv.Slice
 		r := make([]int, n)
 		for i+step < n {
-			copy(r[i:i+step], y)
+			copy(r[i:i+step], ys)
 			i += step
 		}
 		if neg {
-			copy(r[i:n], y[len(y)-n+i:])
+			copy(r[i:n], ys[len(ys)-n+i:])
 		} else {
-			copy(r[i:n], y[:n-i])
+			copy(r[i:n], ys[:n-i])
 		}
-		return NewV(r)
+		return NewAI(r)
+	case *AF:
+		ys := yv.Slice
+		r := make([]float64, n)
+		for i+step < n {
+			copy(r[i:i+step], ys)
+			i += step
+		}
+		if neg {
+			copy(r[i:n], ys[len(ys)-n+i:])
+		} else {
+			copy(r[i:n], ys[:n-i])
+		}
+		return NewAF(r)
 	case *AS:
+		ys := yv.Slice
 		r := make([]string, n)
 		for i+step < n {
-			copy(r[i:i+step], y)
+			copy(r[i:i+step], ys)
 			i += step
 		}
 		if neg {
-			copy(r[i:n], y[len(y)-n+i:])
+			copy(r[i:n], ys[len(ys)-n+i:])
 		} else {
-			copy(r[i:n], y[:n-i])
+			copy(r[i:n], ys[:n-i])
 		}
-		return NewV(r)
+		return NewAS(r)
 	case *AV:
+		ys := yv.Slice
 		r := make([]V, n)
 		for i+step < n {
-			copy(r[i:i+step], y)
+			copy(r[i:i+step], ys)
 			i += step
 		}
 		if neg {
-			copy(r[i:n], y[len(y)-n+i:])
+			copy(r[i:n], ys[len(ys)-n+i:])
 		} else {
-			copy(r[i:n], y[:n-i])
+			copy(r[i:n], ys[:n-i])
 		}
-		return NewV(r)
+		return NewAV(r)
 	default:
 		return NewV(y)
 	}
@@ -377,112 +387,117 @@ func shiftBefore(x, y V) V {
 	}
 	switch y := y.Value.(type) {
 	case *AB:
+		ys := y.Slice
 		switch x := x.Value.(type) {
 		case *AB:
-			r := make([]bool, len(y))
+			r := make([]bool, len(ys))
 			for i := 0; i < max; i++ {
-				r[i] = x[i]
+				r[i] = x.At(i)
 			}
-			copy(r[max:], y[:len(y)-max])
-			return NewV(r)
+			copy(r[max:], ys[:len(ys)-max])
+			return NewAB(r)
 		case *AF:
-			r := make([]float64, len(y))
+			r := make([]float64, len(ys))
 			for i := 0; i < max; i++ {
-				r[i] = x[i]
+				r[i] = x.At(i)
 			}
-			for i := max; i < len(y); i++ {
-				r[i] = float64(B2F(y[i-max]))
+			for i := max; i < len(ys); i++ {
+				r[i] = float64(B2F(ys[i-max]))
 			}
-			return NewV(r)
+			return NewAF(r)
 		case *AI:
-			r := make([]int, len(y))
+			r := make([]int, len(ys))
 			for i := 0; i < max; i++ {
-				r[i] = x[i]
+				r[i] = x.At(i)
 			}
-			for i := max; i < len(y); i++ {
-				r[i] = int(B2I(y[i-max]))
+			for i := max; i < len(ys); i++ {
+				r[i] = int(B2I(ys[i-max]))
 			}
-			return NewV(r)
+			return NewAI(r)
 		default:
-			return errType("x»y", "y", y)
+			return errType("x»y", "x", x)
 		}
 	case *AF:
+		ys := y.Slice
 		switch x := x.Value.(type) {
 		case *AB:
-			r := make([]float64, len(y))
+			r := make([]float64, len(ys))
 			for i := 0; i < max; i++ {
-				r[i] = float64(B2F(x[i]))
+				r[i] = float64(B2F(x.At(i)))
 			}
-			copy(r[max:], y[:len(y)-max])
-			return NewV(r)
+			copy(r[max:], ys[:len(ys)-max])
+			return NewAF(r)
 		case *AF:
-			r := make([]float64, len(y))
+			r := make([]float64, len(ys))
 			for i := 0; i < max; i++ {
-				r[i] = x[i]
+				r[i] = x.At(i)
 			}
-			copy(r[max:], y[:len(y)-max])
-			return NewV(r)
+			copy(r[max:], ys[:len(ys)-max])
+			return NewAF(r)
 		case *AI:
-			r := make([]float64, len(y))
+			r := make([]float64, len(ys))
 			for i := 0; i < max; i++ {
-				r[i] = float64(x[i])
+				r[i] = float64(x.At(i))
 			}
-			copy(r[max:], y[:len(y)-max])
-			return NewV(r)
+			copy(r[max:], ys[:len(ys)-max])
+			return NewAF(r)
 		default:
-			return errType("x»y", "y", y)
+			return errType("x»y", "x", x)
 		}
 	case *AI:
+		ys := y.Slice
 		switch x := x.Value.(type) {
 		case *AB:
-			r := make([]int, len(y))
+			r := make([]int, len(ys))
 			for i := 0; i < max; i++ {
-				r[i] = int(B2I(x[i]))
+				r[i] = int(B2I(x.At(i)))
 			}
-			copy(r[max:], y[:len(y)-max])
-			return NewV(r)
+			copy(r[max:], ys[:len(ys)-max])
+			return NewAI(r)
 		case *AF:
-			r := make([]float64, len(y))
+			r := make([]float64, len(ys))
 			for i := 0; i < max; i++ {
-				r[i] = x[i]
+				r[i] = x.At(i)
 			}
-			for i := max; i < len(y); i++ {
-				r[i] = float64(y[i-max])
+			for i := max; i < len(ys); i++ {
+				r[i] = float64(ys[i-max])
 			}
-			return NewV(r)
+			return NewAF(r)
 		case *AI:
-			r := make([]int, len(y))
+			r := make([]int, len(ys))
 			for i := 0; i < max; i++ {
-				r[i] = x[i]
+				r[i] = x.At(i)
 			}
-			copy(r[max:], y[:len(y)-max])
-			return NewV(r)
+			copy(r[max:], ys[:len(ys)-max])
+			return NewAI(r)
 		default:
-			return errType("x»y", "y", y)
+			return errType("x»y", "x", x)
 		}
 	case *AS:
+		ys := y.Slice
 		switch x := x.Value.(type) {
 		case *AS:
-			r := make([]string, len(y))
+			r := make([]string, len(ys))
 			for i := 0; i < max; i++ {
-				r[i] = x[i]
+				r[i] = x.At(i)
 			}
-			copy(r[max:], y[:len(y)-max])
-			return NewV(r)
+			copy(r[max:], ys[:len(ys)-max])
+			return NewAS(r)
 		default:
-			return errType("x»y", "y", y)
+			return errType("x»y", "x", x)
 		}
 	case *AV:
+		ys := y.Slice
 		switch x := x.Value.(type) {
 		case array:
-			r := make([]V, len(y))
+			r := make([]V, len(ys))
 			for i := 0; i < max; i++ {
 				r[i] = x.at(i)
 			}
-			copy(r[max:], y[:len(y)-max])
+			copy(r[max:], ys[:len(ys)-max])
 			return canonicalV(NewAV(r))
 		default:
-			return errType("x»y", "y", y)
+			return errType("x»y", "x", x)
 		}
 	default:
 		return errs("x»y: y not an array")
@@ -494,23 +509,23 @@ func nudge(x V) V {
 	switch x := x.Value.(type) {
 	case *AB:
 		r := make([]bool, x.Len())
-		copy(r[1:], x[0:x.Len()-1])
-		return NewV(r)
+		copy(r[1:], x.Slice[0:x.Len()-1])
+		return NewAB(r)
 	case *AI:
 		r := make([]int, x.Len())
-		copy(r[1:], x[0:x.Len()-1])
-		return NewV(r)
+		copy(r[1:], x.Slice[0:x.Len()-1])
+		return NewAI(r)
 	case *AF:
 		r := make([]float64, x.Len())
-		copy(r[1:], x[0:x.Len()-1])
-		return NewV(r)
+		copy(r[1:], x.Slice[0:x.Len()-1])
+		return NewAF(r)
 	case *AS:
 		r := make([]string, x.Len())
-		copy(r[1:], x[0:x.Len()-1])
-		return NewV(r)
+		copy(r[1:], x.Slice[0:x.Len()-1])
+		return NewAS(r)
 	case *AV:
 		r := make([]V, x.Len())
-		copy(r[1:], x[0:x.Len()-1])
+		copy(r[1:], x.Slice[0:x.Len()-1])
 		return canonicalV(NewAV(r))
 	default:
 		return errs("»x : not an array")
@@ -526,112 +541,117 @@ func shiftAfter(x, y V) V {
 	}
 	switch y := y.Value.(type) {
 	case *AB:
+		ys := y.Slice
 		switch x := x.Value.(type) {
 		case *AB:
-			r := make([]bool, len(y))
+			r := make([]bool, len(ys))
 			for i := 0; i < max; i++ {
-				r[len(y)-1-i] = x[i]
+				r[len(ys)-1-i] = x.At(i)
 			}
-			copy(r[:len(y)-max], y[max:])
-			return NewV(r)
+			copy(r[:len(ys)-max], ys[max:])
+			return NewAB(r)
 		case *AF:
-			r := make([]float64, len(y))
+			r := make([]float64, len(ys))
 			for i := 0; i < max; i++ {
-				r[len(y)-1-i] = x[i]
+				r[len(ys)-1-i] = x.At(i)
 			}
-			for i := max; i < len(y); i++ {
-				r[i-max] = float64(B2F(y[i]))
+			for i := max; i < len(ys); i++ {
+				r[i-max] = float64(B2F(ys[i]))
 			}
-			return NewV(r)
+			return NewAF(r)
 		case *AI:
-			r := make([]int, len(y))
+			r := make([]int, len(ys))
 			for i := 0; i < max; i++ {
-				r[len(y)-1-i] = x[i]
+				r[len(ys)-1-i] = x.At(i)
 			}
-			for i := max; i < len(y); i++ {
-				r[i-max] = int(B2I(y[i]))
+			for i := max; i < len(ys); i++ {
+				r[i-max] = int(B2I(ys[i]))
 			}
-			return NewV(r)
+			return NewAI(r)
 		default:
-			return errType("x«y", "y", y)
+			return errType("x«y", "x", x)
 		}
 	case *AF:
+		ys := y.Slice
 		switch x := x.Value.(type) {
 		case *AB:
-			r := make([]float64, len(y))
+			r := make([]float64, len(ys))
 			for i := 0; i < max; i++ {
-				r[len(y)-1-i] = float64(B2F(x[i]))
+				r[len(ys)-1-i] = float64(B2F(x.At(i)))
 			}
-			copy(r[:len(y)-max], y[max:])
-			return NewV(r)
+			copy(r[:len(ys)-max], ys[max:])
+			return NewAF(r)
 		case *AF:
-			r := make([]float64, len(y))
+			r := make([]float64, len(ys))
 			for i := 0; i < max; i++ {
-				r[len(y)-1-i] = x[i]
+				r[len(ys)-1-i] = x.At(i)
 			}
-			copy(r[:len(y)-max], y[max:])
-			return NewV(r)
+			copy(r[:len(ys)-max], ys[max:])
+			return NewAF(r)
 		case *AI:
-			r := make([]float64, len(y))
+			r := make([]float64, len(ys))
 			for i := 0; i < max; i++ {
-				r[len(y)-1-i] = float64(x[i])
+				r[len(ys)-1-i] = float64(x.At(i))
 			}
-			copy(r[:len(y)-max], y[max:])
-			return NewV(r)
+			copy(r[:len(ys)-max], ys[max:])
+			return NewAF(r)
 		default:
-			return errType("x«y", "y", y)
+			return errType("x«y", "x", x)
 		}
 	case *AI:
+		ys := y.Slice
 		switch x := x.Value.(type) {
 		case *AB:
-			r := make([]int, len(y))
+			r := make([]int, len(ys))
 			for i := 0; i < max; i++ {
-				r[len(y)-1-i] = int(B2I(x[i]))
+				r[len(ys)-1-i] = int(B2I(x.At(i)))
 			}
-			copy(r[:len(y)-max], y[max:])
-			return NewV(r)
+			copy(r[:len(ys)-max], ys[max:])
+			return NewAI(r)
 		case *AF:
-			r := make([]float64, len(y))
+			r := make([]float64, len(ys))
 			for i := 0; i < max; i++ {
-				r[len(y)-1-i] = x[i]
+				r[len(ys)-1-i] = x.At(i)
 			}
-			for i := max; i < len(y); i++ {
-				r[i-max] = float64(y[max])
+			for i := max; i < len(ys); i++ {
+				r[i-max] = float64(ys[max])
 			}
-			return NewV(r)
+			return NewAF(r)
 		case *AI:
-			r := make([]int, len(y))
+			r := make([]int, len(ys))
 			for i := 0; i < max; i++ {
-				r[len(y)-1-i] = x[i]
+				r[len(ys)-1-i] = x.At(i)
 			}
-			copy(r[:len(y)-max], y[max:])
-			return NewV(r)
+			copy(r[:len(ys)-max], ys[max:])
+			return NewAI(r)
 		default:
-			return errType("x«y", "y", y)
+			return errType("x«y", "x", x)
 		}
 	case *AS:
+		ys := y.Slice
 		switch x := x.Value.(type) {
 		case *AS:
-			r := make([]string, len(y))
+			r := make([]string, len(ys))
 			for i := 0; i < max; i++ {
-				r[len(y)-1-i] = x[i]
+				r[len(ys)-1-i] = x.At(i)
 			}
-			copy(r[:len(y)-max], y[max:])
-			return NewV(r)
+			copy(r[:len(ys)-max], ys[max:])
+			return NewAS(r)
 		default:
-			return errType("x«y", "y", y)
+			return errType("x«y", "x", x)
 		}
 	case *AV:
+		ys := y.Slice
 		switch x := x.Value.(type) {
 		case array:
-			r := make([]V, len(y))
+			r := make([]V, len(ys))
 			for i := 0; i < max; i++ {
-				r[len(y)-1-i] = x.at(i)
+				r[len(ys)-1-i] = x.at(i)
 			}
-			copy(r[:len(y)-max], y[max:])
+			copy(r[:len(ys)-max], ys[max:])
 			return canonicalV(NewAV(r))
 		default:
-			return errType("x«y", "y", y)
+			return errType("x«y", "x", x)
 		}
 	default:
 		return errs("x«y: y not an array")
@@ -646,23 +666,23 @@ func nudgeBack(x V) V {
 	switch x := x.Value.(type) {
 	case *AB:
 		r := make([]bool, x.Len())
-		copy(r[0:x.Len()-1], x[1:])
-		return NewV(r)
+		copy(r[0:x.Len()-1], x.Slice[1:])
+		return NewAB(r)
 	case *AI:
 		r := make([]int, x.Len())
-		copy(r[0:x.Len()-1], x[1:])
-		return NewV(r)
+		copy(r[0:x.Len()-1], x.Slice[1:])
+		return NewAI(r)
 	case *AF:
 		r := make([]float64, x.Len())
-		copy(r[0:x.Len()-1], x[1:])
-		return NewV(r)
+		copy(r[0:x.Len()-1], x.Slice[1:])
+		return NewAF(r)
 	case *AS:
 		r := make([]string, x.Len())
-		copy(r[0:x.Len()-1], x[1:])
-		return NewV(r)
+		copy(r[0:x.Len()-1], x.Slice[1:])
+		return NewAS(r)
 	case *AV:
 		r := make([]V, x.Len())
-		copy(r[0:x.Len()-1], x[1:])
+		copy(r[0:x.Len()-1], x.Slice[1:])
 		return canonicalV(NewAV(r))
 	default:
 		return errs("«x : x not an array")

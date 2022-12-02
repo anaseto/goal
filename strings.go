@@ -32,7 +32,7 @@ func applyS(s S, x V) V {
 			}
 			r[i] = string(s[n:])
 		}
-		return NewV(r)
+		return NewAS(r)
 	case *AF:
 		z := toAI(xv)
 		if z.IsErr() {
@@ -121,13 +121,13 @@ func applyS2(s S, x V, y V) V {
 				if n < 0 || n > len(s) {
 					return errf("s[i;y] : i out of bounds index (%d)", n)
 				}
-				l := z[i]
+				l := z.At(i)
 				if n+l > len(s) {
 					l = len(s) - n
 				}
 				r[i] = string(s[n : n+l])
 			}
-			return NewV(r)
+			return NewAS(r)
 		}
 		for i, n := range xv.Slice {
 			if n < 0 {
@@ -142,7 +142,7 @@ func applyS2(s S, x V, y V) V {
 			}
 			r[i] = string(s[n : n+l])
 		}
-		return NewV(r)
+		return NewAS(r)
 	case *AF:
 		z := toAI(xv)
 		if z.IsErr() {

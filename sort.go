@@ -19,17 +19,17 @@ func (bs sortAB) Swap(i, j int) {
 	bs[i], bs[j] = bs[j], bs[i]
 }
 
-type sortAV []V
+type sortVSlice []V
 
-func (bs sortAV) Len() int {
+func (bs sortVSlice) Len() int {
 	return len(bs)
 }
 
-func (bs sortAV) Less(i, j int) bool {
+func (bs sortVSlice) Less(i, j int) bool {
 	return less(bs[i], bs[j])
 }
 
-func (bs sortAV) Swap(i, j int) {
+func (bs sortVSlice) Swap(i, j int) {
 	bs[i], bs[j] = bs[j], bs[i]
 }
 
@@ -43,27 +43,27 @@ func less(x, y V) bool {
 	case S:
 		return lessS(x, y)
 	case *AB:
-		if len(xv) == 0 {
+		if xv.Len() == 0 {
 			return Length(y) > 0
 		}
 		return lessAB(x, y)
 	case *AF:
-		if len(xv) == 0 {
+		if xv.Len() == 0 {
 			return Length(y) > 0
 		}
 		return lessAF(x, y)
 	case *AI:
-		if len(xv) == 0 {
+		if xv.Len() == 0 {
 			return Length(y) > 0
 		}
 		return lessAI(x, y)
 	case *AS:
-		if len(xv) == 0 {
+		if xv.Len() == 0 {
 			return Length(y) > 0
 		}
 		return lessAS(x, y)
 	case *AV:
-		if len(xv) == 0 {
+		if xv.Len() == 0 {
 			return Length(y) > 0
 		}
 		return lessAV(x, y)
@@ -77,29 +77,29 @@ func lessF(x V, y V) bool {
 	if y.IsInt() {
 		return xv < F(y.Int())
 	}
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 	case F:
-		return xv < y
+		return xv < yv
 	case *AB:
-		if len(y) == 0 {
+		if yv.Len() == 0 {
 			return false
 		}
-		return xv < B2F(y[0]) || xv == B2F(y[0]) && len(y) > 1
+		return xv < B2F(yv.At(0)) || xv == B2F(yv.At(0)) && yv.Len() > 1
 	case *AF:
-		if len(y) == 0 {
+		if yv.Len() == 0 {
 			return false
 		}
-		return xv < F(y[0]) || xv == F(y[0]) && len(y) > 1
+		return xv < F(yv.At(0)) || xv == F(yv.At(0)) && yv.Len() > 1
 	case *AI:
-		if len(y) == 0 {
+		if yv.Len() == 0 {
 			return false
 		}
-		return xv < F(y[0]) || xv == F(y[0]) && len(y) > 1
+		return xv < F(yv.At(0)) || xv == F(yv.At(0)) && yv.Len() > 1
 	case *AV:
-		if len(y) == 0 {
+		if yv.Len() == 0 {
 			return false
 		}
-		return lessF(x, y[0]) || !less(y[0], x) && len(y) > 1
+		return lessF(x, yv.At(0)) || !less(yv.At(0), x) && yv.Len() > 1
 	default:
 		return false
 	}
@@ -110,29 +110,29 @@ func lessI(x V, y V) bool {
 	if y.IsInt() {
 		return xv < y.Int()
 	}
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 	case F:
-		return F(xv) < y
+		return F(xv) < yv
 	case *AB:
-		if len(y) == 0 {
+		if yv.Len() == 0 {
 			return false
 		}
-		return xv < B2I(y[0]) || xv == B2I(y[0]) && len(y) > 1
+		return xv < B2I(yv.At(0)) || xv == B2I(yv.At(0)) && yv.Len() > 1
 	case *AF:
-		if len(y) == 0 {
+		if yv.Len() == 0 {
 			return false
 		}
-		return float64(xv) < y[0] || float64(xv) == y[0] && len(y) > 1
+		return float64(xv) < yv.At(0) || float64(xv) == yv.At(0) && yv.Len() > 1
 	case *AI:
-		if len(y) == 0 {
+		if yv.Len() == 0 {
 			return false
 		}
-		return xv < y[0] || xv == y[0] && len(y) > 1
+		return xv < yv.At(0) || xv == yv.At(0) && yv.Len() > 1
 	case *AV:
-		if len(y) == 0 {
+		if yv.Len() == 0 {
 			return false
 		}
-		return lessI(x, y[0]) || !less(y[0], x) && len(y) > 1
+		return lessI(x, yv.At(0)) || !less(yv.At(0), x) && yv.Len() > 1
 	default:
 		return false
 	}
@@ -140,19 +140,19 @@ func lessI(x V, y V) bool {
 
 func lessS(x V, y V) bool {
 	xv := x.Value.(S)
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 	case S:
-		return xv < y
+		return xv < yv
 	case *AS:
-		if len(y) == 0 {
+		if yv.Len() == 0 {
 			return false
 		}
-		return string(xv) < y[0] || string(xv) == y[0] && len(y) > 1
+		return string(xv) < yv.At(0) || string(xv) == yv.At(0) && yv.Len() > 1
 	case *AV:
-		if len(y) == 0 {
+		if yv.Len() == 0 {
 			return false
 		}
-		return lessS(x, y[0]) || !less(y[0], x) && len(y) > 1
+		return lessS(x, yv.At(0)) || !less(yv.At(0), x) && yv.Len() > 1
 	default:
 		return false
 	}
@@ -167,33 +167,33 @@ func lessAB(x V, y V) bool {
 	case F:
 		return !lessF(y, x)
 	case *AB:
-		for i := 0; i < len(xv) && i < len(yv); i++ {
+		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if xv.At(i) && !yv.At(i) {
 				return false
 			}
 		}
-		return len(xv) < len(yv)
+		return xv.Len() < yv.Len()
 	case *AF:
-		for i := 0; i < len(xv) && i < len(yv); i++ {
+		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if B2F(xv.At(i)) > F(yv.At(i)) {
 				return false
 			}
 		}
-		return len(xv) < len(yv)
+		return xv.Len() < yv.Len()
 	case *AI:
-		for i := 0; i < len(xv) && i < len(yv); i++ {
+		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if B2I(xv.At(i)) > yv.At(i) {
 				return false
 			}
 		}
-		return len(xv) < len(yv)
+		return xv.Len() < yv.Len()
 	case *AV:
-		for i := 0; i < len(xv) && i < len(yv); i++ {
+		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if less(yv.At(i), NewI(B2I(xv.At(i)))) {
 				return false
 			}
 		}
-		return len(xv) < len(yv)
+		return xv.Len() < yv.Len()
 	default:
 		return false
 	}
@@ -208,33 +208,33 @@ func lessAI(x V, y V) bool {
 	case F:
 		return !lessF(y, x)
 	case *AB:
-		for i := 0; i < len(xv) && i < len(yv); i++ {
+		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if xv.At(i) > B2I(yv.At(i)) {
 				return false
 			}
 		}
-		return len(xv) < len(yv)
+		return xv.Len() < yv.Len()
 	case *AF:
-		for i := 0; i < len(xv) && i < len(yv); i++ {
+		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if F(xv.At(i)) > F(yv.At(i)) {
 				return false
 			}
 		}
-		return len(xv) < len(yv)
+		return xv.Len() < yv.Len()
 	case *AI:
-		for i := 0; i < len(xv) && i < len(yv); i++ {
+		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if xv.At(i) > yv.At(i) {
 				return false
 			}
 		}
-		return len(xv) < len(yv)
+		return xv.Len() < yv.Len()
 	case *AV:
-		for i := 0; i < len(xv) && i < len(yv); i++ {
+		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if less(yv.At(i), NewI(xv.At(i))) {
 				return false
 			}
 		}
-		return len(xv) < len(yv)
+		return xv.Len() < yv.Len()
 	default:
 		return false
 	}
@@ -249,33 +249,33 @@ func lessAF(x V, y V) bool {
 	case F:
 		return !lessF(y, x)
 	case *AB:
-		for i := 0; i < len(xv) && i < len(yv); i++ {
+		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if F(xv.At(i)) > B2F(yv.At(i)) {
 				return false
 			}
 		}
-		return len(xv) < len(yv)
+		return xv.Len() < yv.Len()
 	case *AF:
-		for i := 0; i < len(xv) && i < len(yv); i++ {
+		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if xv.At(i) > yv.At(i) {
 				return false
 			}
 		}
-		return len(xv) < len(yv)
+		return xv.Len() < yv.Len()
 	case *AI:
-		for i := 0; i < len(xv) && i < len(yv); i++ {
+		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if xv.At(i) > float64(yv.At(i)) {
 				return false
 			}
 		}
-		return len(xv) < len(yv)
+		return xv.Len() < yv.Len()
 	case *AV:
-		for i := 0; i < len(xv) && i < len(yv); i++ {
+		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if less(yv.At(i), NewF(xv.At(i))) {
 				return false
 			}
 		}
-		return len(xv) < len(yv)
+		return xv.Len() < yv.Len()
 	default:
 		return false
 	}
@@ -287,19 +287,19 @@ func lessAS(x V, y V) bool {
 	case S:
 		return !lessS(y, x)
 	case *AS:
-		for i := 0; i < len(xv) && i < len(yv); i++ {
+		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if xv.At(i) > yv.At(i) {
 				return false
 			}
 		}
-		return len(xv) < len(yv)
+		return xv.Len() < yv.Len()
 	case *AV:
-		for i := 0; i < len(xv) && i < len(yv); i++ {
+		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if less(yv.At(i), NewS(xv.At(i))) {
 				return false
 			}
 		}
-		return len(xv) < len(yv)
+		return xv.Len() < yv.Len()
 	default:
 		return false
 	}
@@ -314,33 +314,33 @@ func lessAV(x V, y V) bool {
 	case F:
 		return less(xv.At(0), y)
 	case *AB:
-		for i := 0; i < len(xv) && i < len(yv); i++ {
+		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if less(NewI(B2I(yv.At(i))), xv.At(i)) {
 				return false
 			}
 		}
-		return len(xv) < len(yv)
+		return xv.Len() < yv.Len()
 	case *AF:
-		for i := 0; i < len(xv) && i < len(yv); i++ {
+		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if less(NewF(yv.At(i)), xv.At(i)) {
 				return false
 			}
 		}
-		return len(xv) < len(yv)
+		return xv.Len() < yv.Len()
 	case *AI:
-		for i := 0; i < len(xv) && i < len(yv); i++ {
+		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if less(NewI(yv.At(i)), xv.At(i)) {
 				return false
 			}
 		}
-		return len(xv) < len(yv)
+		return xv.Len() < yv.Len()
 	case *AV:
-		for i := 0; i < len(xv) && i < len(yv); i++ {
+		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if less(yv.At(i), xv.At(i)) {
 				return false
 			}
 		}
-		return len(xv) < len(yv)
+		return xv.Len() < yv.Len()
 	default:
 		return false
 	}
@@ -353,19 +353,19 @@ func sortUp(x V) V {
 	x = cloneShallow(x)
 	switch x := x.Value.(type) {
 	case *AB:
-		sort.Stable(sortAB(x))
+		sort.Stable(sortAB(x.Slice))
 		return NewV(x)
 	case *AF:
-		sort.Stable(sort.Float64Slice(x))
+		sort.Stable(sort.Float64Slice(x.Slice))
 		return NewV(x)
 	case *AI:
-		sort.Stable(sort.IntSlice(x))
+		sort.Stable(sort.IntSlice(x.Slice))
 		return NewV(x)
 	case *AS:
-		sort.Stable(sort.StringSlice(x))
+		sort.Stable(sort.StringSlice(x.Slice))
 		return NewV(x)
 	case *AV:
-		sort.Stable(sortAV(x))
+		sort.Stable(sortVSlice(x.Slice))
 		return NewV(x)
 	default:
 		return errf("^x : x not an array (%s)", x.Type())
@@ -373,8 +373,8 @@ func sortUp(x V) V {
 }
 
 type permutationAV struct {
-	Perm AI
-	X    sortAV
+	Perm []int
+	X    sortVSlice
 }
 
 func (p *permutationAV) Len() int {
@@ -390,7 +390,7 @@ func (p *permutationAV) Less(i, j int) bool {
 }
 
 type permutationAB struct {
-	Perm AI
+	Perm []int
 	X    sortAB
 }
 
@@ -407,7 +407,7 @@ func (p *permutationAB) Less(i, j int) bool {
 }
 
 type permutationAI struct {
-	Perm AI
+	Perm []int
 	X    sort.IntSlice
 }
 
@@ -424,7 +424,7 @@ func (p *permutationAI) Less(i, j int) bool {
 }
 
 type permutationAF struct {
-	Perm AI
+	Perm []int
 	X    sort.Float64Slice
 }
 
@@ -441,7 +441,7 @@ func (p *permutationAF) Less(i, j int) bool {
 }
 
 type permutationAS struct {
-	Perm AI
+	Perm []int
 	X    sort.StringSlice
 }
 
@@ -457,7 +457,7 @@ func (p *permutationAS) Less(i, j int) bool {
 	return p.X.Less(p.Perm[i], p.Perm[j])
 }
 
-func permRange(n int) AI {
+func permRange(n int) []int {
 	r := make([]int, n)
 	for i := range r {
 		r[i] = i
@@ -469,25 +469,25 @@ func permRange(n int) AI {
 func ascend(x V) V {
 	switch x := x.Value.(type) {
 	case *AB:
-		p := &permutationAB{Perm: permRange(len(x)), X: sortAB(x)}
+		p := &permutationAB{Perm: permRange(x.Len()), X: sortAB(x.Slice)}
 		sort.Stable(p)
-		return NewV(p.Perm)
+		return NewAI(p.Perm)
 	case *AF:
-		p := &permutationAF{Perm: permRange(len(x)), X: sort.Float64Slice(x)}
+		p := &permutationAF{Perm: permRange(x.Len()), X: sort.Float64Slice(x.Slice)}
 		sort.Stable(p)
-		return NewV(p.Perm)
+		return NewAI(p.Perm)
 	case *AI:
-		p := &permutationAI{Perm: permRange(len(x)), X: sort.IntSlice(x)}
+		p := &permutationAI{Perm: permRange(x.Len()), X: sort.IntSlice(x.Slice)}
 		sort.Stable(p)
-		return NewV(p.Perm)
+		return NewAI(p.Perm)
 	case *AS:
-		p := &permutationAS{Perm: permRange(len(x)), X: sort.StringSlice(x)}
+		p := &permutationAS{Perm: permRange(x.Len()), X: sort.StringSlice(x.Slice)}
 		sort.Stable(p)
-		return NewV(p.Perm)
+		return NewAI(p.Perm)
 	case *AV:
-		p := &permutationAV{Perm: permRange(len(x)), X: sortAV(x)}
+		p := &permutationAV{Perm: permRange(x.Len()), X: sortVSlice(x.Slice)}
 		sort.Stable(p)
-		return NewV(p.Perm)
+		return NewAI(p.Perm)
 	default:
 		return errf("<x : x not an array (%s)", x.Type())
 	}
@@ -507,27 +507,27 @@ func descend(x V) V {
 func search(x V, y V) V {
 	switch x := x.Value.(type) {
 	case *AB:
-		if !sort.IsSorted(sortAB(x)) {
+		if !sort.IsSorted(sortAB(x.Slice)) {
 			return errDomain("x$y", "x is not ascending")
 		}
 		return searchAI(fromABtoAI(x).Value.(*AI), y)
 	case *AI:
-		if !sort.IsSorted(sort.IntSlice(x)) {
+		if !sort.IsSorted(sort.IntSlice(x.Slice)) {
 			return errDomain("x$y", "x is not ascending")
 		}
 		return searchAI(x, y)
 	case *AF:
-		if !sort.IsSorted(sort.Float64Slice(x)) {
+		if !sort.IsSorted(sort.Float64Slice(x.Slice)) {
 			return errDomain("x$y", "x is not ascending")
 		}
 		return searchAF(x, y)
 	case *AS:
-		if !sort.IsSorted(sort.StringSlice(x)) {
+		if !sort.IsSorted(sort.StringSlice(x.Slice)) {
 			return errDomain("x$y", "x is not ascending")
 		}
 		return searchAS(x, y)
 	case *AV:
-		if !sort.IsSorted(sortAV(x)) {
+		if !sort.IsSorted(sortVSlice(x.Slice)) {
 			return errDomain("x$y", "x is not ascending")
 		}
 		return searchAV(x, y)
@@ -537,27 +537,27 @@ func search(x V, y V) V {
 	}
 }
 
-func searchAII(x AI, y int) int {
-	return sort.Search(len(x), func(i int) bool { return x[i] > y })
+func searchAII(x *AI, y int) int {
+	return sort.Search(x.Len(), func(i int) bool { return x.At(i) > y })
 }
 
-func searchAIF(x AI, y F) int {
-	return sort.Search(len(x), func(i int) bool { return F(x[i]) > y })
+func searchAIF(x *AI, y F) int {
+	return sort.Search(x.Len(), func(i int) bool { return F(x.At(i)) > y })
 }
 
-func searchAFI(x AF, y int) int {
-	return sort.Search(len(x), func(i int) bool { return x[i] > float64(y) })
+func searchAFI(x *AF, y int) int {
+	return sort.Search(x.Len(), func(i int) bool { return x.At(i) > float64(y) })
 }
 
-func searchAFF(x AF, y F) int {
-	return sort.Search(len(x), func(i int) bool { return F(x[i]) > y })
+func searchAFF(x *AF, y F) int {
+	return sort.Search(x.Len(), func(i int) bool { return F(x.At(i)) > y })
 }
 
-func searchASS(x AS, y S) int {
-	return sort.Search(len(x), func(i int) bool { return S(x[i]) > y })
+func searchASS(x *AS, y S) int {
+	return sort.Search(x.Len(), func(i int) bool { return S(x.At(i)) > y })
 }
 
-func searchAI(x AI, y V) V {
+func searchAI(x *AI, y V) V {
 	if y.IsInt() {
 		return NewI(searchAII(x, y.Int()))
 	}
@@ -569,32 +569,32 @@ func searchAI(x AI, y V) V {
 		for i, yi := range y.Slice {
 			r[i] = searchAII(x, B2I(yi))
 		}
-		return NewV(r)
+		return NewAI(r)
 	case *AI:
 		r := make([]int, y.Len())
 		for i, yi := range y.Slice {
 			r[i] = searchAII(x, yi)
 		}
-		return NewV(r)
+		return NewAI(r)
 	case *AF:
 		r := make([]int, y.Len())
 		for i, yi := range y.Slice {
 			r[i] = searchAIF(x, F(yi))
 		}
-		return NewV(r)
+		return NewAI(r)
 	case array:
 		r := make([]int, y.Len())
 		for i := 0; i < y.Len(); i++ {
-			r[i] = sort.Search(len(x),
-				func(i int) bool { return less(y.at(i), NewI(x[i])) })
+			r[i] = sort.Search(x.Len(),
+				func(i int) bool { return less(y.at(i), NewI(x.At(i))) })
 		}
-		return NewV(r)
+		return NewAI(r)
 	default:
 		return NewI(x.Len())
 	}
 }
 
-func searchAF(x AF, y V) V {
+func searchAF(x *AF, y V) V {
 	if y.IsInt() {
 		return NewI(searchAFI(x, y.Int()))
 	}
@@ -606,32 +606,32 @@ func searchAF(x AF, y V) V {
 		for i, yi := range y.Slice {
 			r[i] = searchAFI(x, B2I(yi))
 		}
-		return NewV(r)
+		return NewAI(r)
 	case *AI:
 		r := make([]int, y.Len())
 		for i, yi := range y.Slice {
 			r[i] = searchAFI(x, yi)
 		}
-		return NewV(r)
+		return NewAI(r)
 	case *AF:
 		r := make([]int, y.Len())
 		for i, yi := range y.Slice {
 			r[i] = searchAFF(x, F(yi))
 		}
-		return NewV(r)
+		return NewAI(r)
 	case array:
 		r := make([]int, y.Len())
 		for i := 0; i < y.Len(); i++ {
-			r[i] = sort.Search(len(x),
-				func(i int) bool { return less(y.at(i), NewF(x[i])) })
+			r[i] = sort.Search(x.Len(),
+				func(i int) bool { return less(y.at(i), NewF(x.At(i))) })
 		}
-		return NewV(r)
+		return NewAI(r)
 	default:
 		return NewI(x.Len())
 	}
 }
 
-func searchAS(x AS, y V) V {
+func searchAS(x *AS, y V) V {
 	switch y := y.Value.(type) {
 	case S:
 		return NewI(searchASS(x, y))
@@ -640,31 +640,31 @@ func searchAS(x AS, y V) V {
 		for i, yi := range y.Slice {
 			r[i] = searchASS(x, S(yi))
 		}
-		return NewV(r)
+		return NewAI(r)
 	case array:
 		r := make([]int, y.Len())
 		for i := 0; i < y.Len(); i++ {
-			r[i] = sort.Search(len(x),
-				func(i int) bool { return less(y.at(i), NewS(x[i])) })
+			r[i] = sort.Search(x.Len(),
+				func(i int) bool { return less(y.at(i), NewS(x.At(i))) })
 		}
-		return NewV(r)
+		return NewAI(r)
 	default:
 		return NewI(x.Len())
 	}
 }
 
-func searchAV(x AV, y V) V {
+func searchAV(x *AV, y V) V {
 	switch yv := y.Value.(type) {
 	case array:
 		r := make([]int, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
-			r[i] = sort.Search(len(x),
-				func(i int) bool { return less(yv.at(i), x[i]) })
+			r[i] = sort.Search(x.Len(),
+				func(i int) bool { return less(yv.at(i), x.At(i)) })
 		}
-		return NewV(r)
+		return NewAI(r)
 	default:
-		return NewI(sort.Search(len(x),
-			func(i int) bool { return less(y, x[i]) }))
+		return NewI(sort.Search(x.Len(),
+			func(i int) bool { return less(y, x.At(i)) }))
 
 	}
 }
