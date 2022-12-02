@@ -1,6 +1,9 @@
 package goal
 
-import "strings"
+import (
+	//"fmt"
+	"strings"
+)
 
 func fold2(ctx *Context, args []V) V {
 	f := args[1]
@@ -266,7 +269,9 @@ func fold3While(ctx *Context, args []V) V {
 	if x.IsFunction() {
 		for {
 			ctx.push(y)
+			y.rcincr()
 			cond := ctx.applyN(x, 1)
+			y.rcdecr()
 			if cond.IsErr() {
 				return cond
 			}
@@ -536,15 +541,20 @@ func scan3(ctx *Context, args []V) V {
 		}
 		ctx.push(yv.at(0))
 		ctx.push(x)
+		x.rcincr()
 		first := ctx.applyN(f, 2)
+		x.rcdecr()
 		if first.IsErr() {
 			return first
 		}
 		r := []V{first}
 		for i := 1; i < yv.Len(); i++ {
 			ctx.push(yv.at(i))
-			ctx.push(r[len(r)-1])
+			last := r[len(r)-1]
+			ctx.push(last)
+			last.rcincr()
 			next := ctx.applyN(f, 2)
+			last.rcdecr()
 			if next.IsErr() {
 				return next
 			}
@@ -566,7 +576,9 @@ func scan3While(ctx *Context, args []V) V {
 		r := []V{y}
 		for {
 			ctx.push(y)
+			y.rcincr()
 			cond := ctx.applyN(x, 1)
+			y.rcdecr()
 			if cond.IsErr() {
 				return cond
 			}

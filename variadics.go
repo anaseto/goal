@@ -260,7 +260,9 @@ func VMax(ctx *Context, args []V) V {
 		x, y := args[1], args[0]
 		if x.IsFunction() {
 			ctx.push(y)
+			y.rcincr()
 			r := ctx.applyN(x, 1)
+			y.rcdecr()
 			if r.IsErr() {
 				return r
 			}
@@ -304,8 +306,10 @@ func VEqual(ctx *Context, args []V) V {
 	case 2:
 		x, y := args[1], args[0]
 		if x.IsFunction() {
-			ctx.push(args[0])
+			ctx.push(y)
+			y.rcincr()
 			r := ctx.applyN(x, 1)
+			y.rcdecr()
 			if r.IsErr() {
 				return r
 			}
@@ -362,7 +366,9 @@ func VTake(ctx *Context, args []V) V {
 		x, y := args[1], args[0]
 		if x.IsFunction() {
 			ctx.push(y)
+			y.rcincr()
 			r := ctx.applyN(x, 1)
+			y.rcdecr()
 			if r.IsErr() {
 				return r
 			}
@@ -383,7 +389,9 @@ func VDrop(ctx *Context, args []V) V {
 		x, y := args[1], args[0]
 		if x.IsFunction() {
 			ctx.push(y)
+			y.rcincr()
 			r := ctx.applyN(x, 1)
+			y.rcdecr()
 			if r.IsErr() {
 				return r
 			}

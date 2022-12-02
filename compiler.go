@@ -583,6 +583,7 @@ func (c *compiler) doLambda(b *astLambda, n int) error {
 	lc.Source = c.ctx.sources[c.ctx.fname][lc.StartPos:lc.EndPos]
 	lc.Filename = c.ctx.fname
 	c.ctx.resolveLambda(lc)
+	c.ctx.analyzeLambdaLiveness(lc)
 	c.push2(opLambda, opcode(id))
 	c.applyAtN(b.EndPos, n)
 	return nil
@@ -602,6 +603,30 @@ func (c *compiler) doLambdaArgs(args []string) error {
 		}
 	}
 	return nil
+}
+
+func (ctx *Context) analyzeLambdaLiveness(lc *lambdaCode) {
+	// We do a very simple and fast analysis for now, to optimize common
+	// cases.
+	lastUses := make([]int, len(lc.Names))
+	for i := range lastUses {
+		lastUses[i] = -1
+	}
+	for ip := 0; ip < len(lc.Body); {
+		op := lc.Body[ip]
+		ip++
+		switch op {
+		case opLocal:
+			lastUses[lc.Body[ip]] = ip - 1
+		}
+		ip += op.argc()
+	}
+	for i := range lastUses {
+		if lastUses[i] < 0 {
+			continue
+		}
+		lc.Body[lastUses[i]] = opLocalLast
+	}
 }
 
 func (ctx *Context) resolveLambda(lc *lambdaCode) {

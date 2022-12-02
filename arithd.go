@@ -31,25 +31,25 @@ func equal(x, y V) V {
 			if y.Len() != x.Len() {
 				return errf("x=y : length mismatch: %d vs %d", x.Len(), y.Len())
 			}
-			r := make([]V, x.Len())
-			for i := range r {
-				ri := equal(x.At(i), y.at(i))
+			r := x.reuse()
+			for i, xi := range x.Slice {
+				ri := equal(xi, y.at(i))
 				if ri.IsErr() {
 					return ri
 				}
-				r[i] = ri
+				r.Slice[i] = ri
 			}
-			return NewAV(r)
+			return NewV(r)
 		}
-		r := make([]V, x.Len())
-		for i := range r {
-			ri := equal(x.At(i), y)
+		r := x.reuse()
+		for i, xi := range x.Slice {
+			ri := equal(xi, y)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x=y", "x", x)
 	}
@@ -63,11 +63,11 @@ func equalFV(x F, y V) V {
 	case F:
 		return NewI(int(B2I(x == y)))
 	case *AB:
-		r := make([]bool, y.Len())
-		for i := range r {
-			r[i] = bool(F(x) == B2F(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(F(x) == B2F(y.At(i)))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AF:
 		r := make([]bool, y.Len())
 		for i := range r {
@@ -81,15 +81,15 @@ func equalFV(x F, y V) V {
 		}
 		return NewAB(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := equalFV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := equalFV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x=y", "y", y)
 	}
@@ -103,11 +103,11 @@ func equalIV(x int, y V) V {
 	case F:
 		return NewI(int(B2I(F(x) == y)))
 	case *AB:
-		r := make([]bool, y.Len())
-		for i := range r {
-			r[i] = bool(x == B2I(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(x == B2I(y.At(i)))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AF:
 		r := make([]bool, y.Len())
 		for i := range r {
@@ -121,15 +121,15 @@ func equalIV(x int, y V) V {
 		}
 		return NewAB(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := equalIV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := equalIV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x=y", "y", y)
 	}
@@ -146,15 +146,15 @@ func equalSV(x S, y V) V {
 		}
 		return NewAB(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := equalSV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := equalSV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x=y", "y", y)
 	}
@@ -162,59 +162,60 @@ func equalSV(x S, y V) V {
 
 func equalABV(x *AB, y V) V {
 	if y.IsInt() {
-		r := make([]bool, x.Len())
-		for i := range r {
-			r[i] = bool(B2I(x.At(i)) == int(y.Int()))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(B2I(x.At(i)) == int(y.Int()))
 		}
-		return NewAB(r)
+		return NewV(r)
 	}
 	switch y := y.Value.(type) {
 	case F:
-		r := make([]bool, x.Len())
-		for i := range r {
-			r[i] = bool(B2F(x.At(i)) == F(y))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(B2F(x.At(i)) == F(y))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AB:
 		if x.Len() != y.Len() {
 			return errf("x=y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]bool, y.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) == y.At(i))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(x.At(i) == y.At(i))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x=y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]bool, y.Len())
-		for i := range r {
-			r[i] = bool(B2F(x.At(i)) == F(y.At(i)))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(B2F(x.At(i)) == F(y.At(i)))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x=y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]bool, y.Len())
-		for i := range r {
-			r[i] = bool(B2I(x.At(i)) == y.At(i))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(B2I(x.At(i)) == y.At(i))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x=y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := equalIV(B2I(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x=y", "y", y)
 	}
@@ -239,11 +240,11 @@ func equalAFV(x *AF, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x=y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]bool, y.Len())
-		for i := range r {
-			r[i] = bool(F(x.At(i)) == B2F(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(F(x.At(i)) == B2F(y.At(i)))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x=y : length mismatch: %d vs %d", x.Len(), y.Len())
@@ -266,15 +267,16 @@ func equalAFV(x *AF, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x=y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := equalFV(F(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x=y", "y", y)
 	}
@@ -299,11 +301,11 @@ func equalAIV(x *AI, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x=y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]bool, y.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) == B2I(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(x.At(i) == B2I(y.At(i)))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x=y : length mismatch: %d vs %d", x.Len(), y.Len())
@@ -326,15 +328,16 @@ func equalAIV(x *AI, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x=y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := equalIV(int(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x=y", "y", y)
 	}
@@ -361,15 +364,16 @@ func equalASV(x *AS, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x=y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := equalSV(S(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x=y", "y", y)
 	}
@@ -399,25 +403,25 @@ func lesser(x, y V) V {
 			if y.Len() != x.Len() {
 				return errf("x<y : length mismatch: %d vs %d", x.Len(), y.Len())
 			}
-			r := make([]V, x.Len())
-			for i := range r {
-				ri := lesser(x.At(i), y.at(i))
+			r := x.reuse()
+			for i, xi := range x.Slice {
+				ri := lesser(xi, y.at(i))
 				if ri.IsErr() {
 					return ri
 				}
-				r[i] = ri
+				r.Slice[i] = ri
 			}
-			return NewAV(r)
+			return NewV(r)
 		}
-		r := make([]V, x.Len())
-		for i := range r {
-			ri := lesser(x.At(i), y)
+		r := x.reuse()
+		for i, xi := range x.Slice {
+			ri := lesser(xi, y)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x<y", "x", x)
 	}
@@ -431,11 +435,11 @@ func lesserFV(x F, y V) V {
 	case F:
 		return NewI(int(B2I(x < y)))
 	case *AB:
-		r := make([]bool, y.Len())
-		for i := range r {
-			r[i] = bool(F(x) < B2F(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(F(x) < B2F(y.At(i)))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AF:
 		r := make([]bool, y.Len())
 		for i := range r {
@@ -449,15 +453,15 @@ func lesserFV(x F, y V) V {
 		}
 		return NewAB(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := lesserFV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := lesserFV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x<y", "y", y)
 	}
@@ -471,11 +475,11 @@ func lesserIV(x int, y V) V {
 	case F:
 		return NewI(int(B2I(F(x) < y)))
 	case *AB:
-		r := make([]bool, y.Len())
-		for i := range r {
-			r[i] = bool(x < B2I(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(x < B2I(y.At(i)))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AF:
 		r := make([]bool, y.Len())
 		for i := range r {
@@ -489,15 +493,15 @@ func lesserIV(x int, y V) V {
 		}
 		return NewAB(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := lesserIV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := lesserIV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x<y", "y", y)
 	}
@@ -514,15 +518,15 @@ func lesserSV(x S, y V) V {
 		}
 		return NewAB(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := lesserSV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := lesserSV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x<y", "y", y)
 	}
@@ -530,59 +534,60 @@ func lesserSV(x S, y V) V {
 
 func lesserABV(x *AB, y V) V {
 	if y.IsInt() {
-		r := make([]bool, x.Len())
-		for i := range r {
-			r[i] = bool(B2I(x.At(i)) < int(y.Int()))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(B2I(x.At(i)) < int(y.Int()))
 		}
-		return NewAB(r)
+		return NewV(r)
 	}
 	switch y := y.Value.(type) {
 	case F:
-		r := make([]bool, x.Len())
-		for i := range r {
-			r[i] = bool(B2F(x.At(i)) < F(y))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(B2F(x.At(i)) < F(y))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AB:
 		if x.Len() != y.Len() {
 			return errf("x<y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]bool, y.Len())
-		for i := range r {
-			r[i] = bool(!x.At(i) && y.At(i))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(!x.At(i) && y.At(i))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x<y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]bool, y.Len())
-		for i := range r {
-			r[i] = bool(B2F(x.At(i)) < F(y.At(i)))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(B2F(x.At(i)) < F(y.At(i)))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x<y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]bool, y.Len())
-		for i := range r {
-			r[i] = bool(B2I(x.At(i)) < y.At(i))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(B2I(x.At(i)) < y.At(i))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x<y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := lesserIV(B2I(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x<y", "y", y)
 	}
@@ -607,11 +612,11 @@ func lesserAFV(x *AF, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x<y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]bool, y.Len())
-		for i := range r {
-			r[i] = bool(F(x.At(i)) < B2F(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(F(x.At(i)) < B2F(y.At(i)))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x<y : length mismatch: %d vs %d", x.Len(), y.Len())
@@ -634,15 +639,16 @@ func lesserAFV(x *AF, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x<y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := lesserFV(F(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x<y", "y", y)
 	}
@@ -667,11 +673,11 @@ func lesserAIV(x *AI, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x<y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]bool, y.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) < B2I(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(x.At(i) < B2I(y.At(i)))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x<y : length mismatch: %d vs %d", x.Len(), y.Len())
@@ -694,15 +700,16 @@ func lesserAIV(x *AI, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x<y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := lesserIV(int(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x<y", "y", y)
 	}
@@ -729,15 +736,16 @@ func lesserASV(x *AS, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x<y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := lesserSV(S(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x<y", "y", y)
 	}
@@ -767,25 +775,25 @@ func greater(x, y V) V {
 			if y.Len() != x.Len() {
 				return errf("x>y : length mismatch: %d vs %d", x.Len(), y.Len())
 			}
-			r := make([]V, x.Len())
-			for i := range r {
-				ri := greater(x.At(i), y.at(i))
+			r := x.reuse()
+			for i, xi := range x.Slice {
+				ri := greater(xi, y.at(i))
 				if ri.IsErr() {
 					return ri
 				}
-				r[i] = ri
+				r.Slice[i] = ri
 			}
-			return NewAV(r)
+			return NewV(r)
 		}
-		r := make([]V, x.Len())
-		for i := range r {
-			ri := greater(x.At(i), y)
+		r := x.reuse()
+		for i, xi := range x.Slice {
+			ri := greater(xi, y)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x>y", "x", x)
 	}
@@ -799,11 +807,11 @@ func greaterFV(x F, y V) V {
 	case F:
 		return NewI(int(B2I(x > y)))
 	case *AB:
-		r := make([]bool, y.Len())
-		for i := range r {
-			r[i] = bool(F(x) > B2F(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(F(x) > B2F(y.At(i)))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AF:
 		r := make([]bool, y.Len())
 		for i := range r {
@@ -817,15 +825,15 @@ func greaterFV(x F, y V) V {
 		}
 		return NewAB(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := greaterFV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := greaterFV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x>y", "y", y)
 	}
@@ -839,11 +847,11 @@ func greaterIV(x int, y V) V {
 	case F:
 		return NewI(int(B2I(F(x) > y)))
 	case *AB:
-		r := make([]bool, y.Len())
-		for i := range r {
-			r[i] = bool(x > B2I(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(x > B2I(y.At(i)))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AF:
 		r := make([]bool, y.Len())
 		for i := range r {
@@ -857,15 +865,15 @@ func greaterIV(x int, y V) V {
 		}
 		return NewAB(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := greaterIV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := greaterIV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x>y", "y", y)
 	}
@@ -882,15 +890,15 @@ func greaterSV(x S, y V) V {
 		}
 		return NewAB(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := greaterSV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := greaterSV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x>y", "y", y)
 	}
@@ -898,59 +906,60 @@ func greaterSV(x S, y V) V {
 
 func greaterABV(x *AB, y V) V {
 	if y.IsInt() {
-		r := make([]bool, x.Len())
-		for i := range r {
-			r[i] = bool(B2I(x.At(i)) > int(y.Int()))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(B2I(x.At(i)) > int(y.Int()))
 		}
-		return NewAB(r)
+		return NewV(r)
 	}
 	switch y := y.Value.(type) {
 	case F:
-		r := make([]bool, x.Len())
-		for i := range r {
-			r[i] = bool(B2F(x.At(i)) > F(y))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(B2F(x.At(i)) > F(y))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AB:
 		if x.Len() != y.Len() {
 			return errf("x>y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]bool, y.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) && !y.At(i))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(x.At(i) && !y.At(i))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x>y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]bool, y.Len())
-		for i := range r {
-			r[i] = bool(B2F(x.At(i)) > F(y.At(i)))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(B2F(x.At(i)) > F(y.At(i)))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x>y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]bool, y.Len())
-		for i := range r {
-			r[i] = bool(B2I(x.At(i)) > y.At(i))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(B2I(x.At(i)) > y.At(i))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x>y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := greaterIV(B2I(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x>y", "y", y)
 	}
@@ -975,11 +984,11 @@ func greaterAFV(x *AF, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x>y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]bool, y.Len())
-		for i := range r {
-			r[i] = bool(F(x.At(i)) > B2F(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(F(x.At(i)) > B2F(y.At(i)))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x>y : length mismatch: %d vs %d", x.Len(), y.Len())
@@ -1002,15 +1011,16 @@ func greaterAFV(x *AF, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x>y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := greaterFV(F(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x>y", "y", y)
 	}
@@ -1035,11 +1045,11 @@ func greaterAIV(x *AI, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x>y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]bool, y.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) > B2I(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(x.At(i) > B2I(y.At(i)))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x>y : length mismatch: %d vs %d", x.Len(), y.Len())
@@ -1062,15 +1072,16 @@ func greaterAIV(x *AI, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x>y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := greaterIV(int(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x>y", "y", y)
 	}
@@ -1097,15 +1108,16 @@ func greaterASV(x *AS, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x>y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := greaterSV(S(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x>y", "y", y)
 	}
@@ -1135,25 +1147,25 @@ func add(x, y V) V {
 			if y.Len() != x.Len() {
 				return errf("x+y : length mismatch: %d vs %d", x.Len(), y.Len())
 			}
-			r := make([]V, x.Len())
-			for i := range r {
-				ri := add(x.At(i), y.at(i))
+			r := x.reuse()
+			for i, xi := range x.Slice {
+				ri := add(xi, y.at(i))
 				if ri.IsErr() {
 					return ri
 				}
-				r[i] = ri
+				r.Slice[i] = ri
 			}
-			return NewAV(r)
+			return NewV(r)
 		}
-		r := make([]V, x.Len())
-		for i := range r {
-			ri := add(x.At(i), y)
+		r := x.reuse()
+		for i, xi := range x.Slice {
+			ri := add(xi, y)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x+y", "x", x)
 	}
@@ -1173,11 +1185,11 @@ func addFV(x F, y V) V {
 		}
 		return NewAF(r)
 	case *AF:
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(x) + F(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(x) + F(y.At(i)))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		r := make([]float64, y.Len())
 		for i := range r {
@@ -1185,15 +1197,15 @@ func addFV(x F, y V) V {
 		}
 		return NewAF(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := addFV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := addFV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x+y", "y", y)
 	}
@@ -1213,27 +1225,27 @@ func addIV(x int, y V) V {
 		}
 		return NewAI(r)
 	case *AF:
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(x) + F(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(x) + F(y.At(i)))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
-		r := make([]int, y.Len())
-		for i := range r {
-			r[i] = int(x + y.At(i))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(x + y.At(i))
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := addIV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := addIV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x+y", "y", y)
 	}
@@ -1244,21 +1256,21 @@ func addSV(x S, y V) V {
 	case S:
 		return NewV(S(x + y))
 	case *AS:
-		r := make([]string, y.Len())
-		for i := range r {
-			r[i] = string(S(x) + S(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = string(S(x) + S(y.At(i)))
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := addSV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := addSV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x+y", "y", y)
 	}
@@ -1292,33 +1304,34 @@ func addABV(x *AB, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x+y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(B2F(x.At(i)) + F(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(B2F(x.At(i)) + F(y.At(i)))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x+y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]int, y.Len())
-		for i := range r {
-			r[i] = int(B2I(x.At(i)) + y.At(i))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(B2I(x.At(i)) + y.At(i))
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x+y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := addIV(B2I(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x+y", "y", y)
 	}
@@ -1326,59 +1339,60 @@ func addABV(x *AB, y V) V {
 
 func addAFV(x *AF, y V) V {
 	if y.IsInt() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(F(x.At(i)) + F(int(y.Int())))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(x.At(i)) + F(int(y.Int())))
 		}
-		return NewAF(r)
+		return NewV(r)
 	}
 	switch y := y.Value.(type) {
 	case F:
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(F(x.At(i)) + F(y))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(x.At(i)) + F(y))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AB:
 		if x.Len() != y.Len() {
 			return errf("x+y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(x.At(i)) + B2F(y.At(i)))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(x.At(i)) + B2F(y.At(i)))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x+y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(x.At(i)) + F(y.At(i)))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(x.At(i)) + F(y.At(i)))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x+y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(x.At(i)) + F(y.At(i)))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(x.At(i)) + F(y.At(i)))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x+y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := addFV(F(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x+y", "y", y)
 	}
@@ -1386,11 +1400,11 @@ func addAFV(x *AF, y V) V {
 
 func addAIV(x *AI, y V) V {
 	if y.IsInt() {
-		r := make([]int, x.Len())
-		for i := range r {
-			r[i] = int(x.At(i) + int(y.Int()))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(x.At(i) + int(y.Int()))
 		}
-		return NewAI(r)
+		return NewV(r)
 	}
 	switch y := y.Value.(type) {
 	case F:
@@ -1403,42 +1417,43 @@ func addAIV(x *AI, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x+y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]int, y.Len())
-		for i := range r {
-			r[i] = int(x.At(i) + B2I(y.At(i)))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(x.At(i) + B2I(y.At(i)))
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x+y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(x.At(i)) + F(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(x.At(i)) + F(y.At(i)))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x+y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]int, y.Len())
-		for i := range r {
-			r[i] = int(x.At(i) + y.At(i))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(x.At(i) + y.At(i))
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x+y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := addIV(int(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x+y", "y", y)
 	}
@@ -1447,33 +1462,34 @@ func addAIV(x *AI, y V) V {
 func addASV(x *AS, y V) V {
 	switch y := y.Value.(type) {
 	case S:
-		r := make([]string, x.Len())
-		for i := range r {
-			r[i] = string(S(x.At(i)) + S(y))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = string(S(x.At(i)) + S(y))
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AS:
 		if x.Len() != y.Len() {
 			return errf("x+y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]string, y.Len())
-		for i := range r {
-			r[i] = string(S(x.At(i)) + S(y.At(i)))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = string(S(x.At(i)) + S(y.At(i)))
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x+y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := addSV(S(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x+y", "y", y)
 	}
@@ -1503,25 +1519,25 @@ func subtract(x, y V) V {
 			if y.Len() != x.Len() {
 				return errf("x-y : length mismatch: %d vs %d", x.Len(), y.Len())
 			}
-			r := make([]V, x.Len())
-			for i := range r {
-				ri := subtract(x.At(i), y.at(i))
+			r := x.reuse()
+			for i, xi := range x.Slice {
+				ri := subtract(xi, y.at(i))
 				if ri.IsErr() {
 					return ri
 				}
-				r[i] = ri
+				r.Slice[i] = ri
 			}
-			return NewAV(r)
+			return NewV(r)
 		}
-		r := make([]V, x.Len())
-		for i := range r {
-			ri := subtract(x.At(i), y)
+		r := x.reuse()
+		for i, xi := range x.Slice {
+			ri := subtract(xi, y)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x-y", "x", x)
 	}
@@ -1541,11 +1557,11 @@ func subtractFV(x F, y V) V {
 		}
 		return NewAF(r)
 	case *AF:
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(x) - F(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(x) - F(y.At(i)))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		r := make([]float64, y.Len())
 		for i := range r {
@@ -1553,15 +1569,15 @@ func subtractFV(x F, y V) V {
 		}
 		return NewAF(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := subtractFV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := subtractFV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x-y", "y", y)
 	}
@@ -1581,27 +1597,27 @@ func subtractIV(x int, y V) V {
 		}
 		return NewAI(r)
 	case *AF:
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(x) - F(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(x) - F(y.At(i)))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
-		r := make([]int, y.Len())
-		for i := range r {
-			r[i] = int(x - y.At(i))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(x - y.At(i))
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := subtractIV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := subtractIV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x-y", "y", y)
 	}
@@ -1612,21 +1628,21 @@ func subtractSV(x S, y V) V {
 	case S:
 		return NewV(S(strings.TrimSuffix(string(x), string(y))))
 	case *AS:
-		r := make([]string, y.Len())
-		for i := range r {
-			r[i] = string(strings.TrimSuffix(string(S(x)), string(S(y.At(i)))))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = string(strings.TrimSuffix(string(S(x)), string(S(y.At(i)))))
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := subtractSV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := subtractSV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x-y", "y", y)
 	}
@@ -1660,33 +1676,34 @@ func subtractABV(x *AB, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x-y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(B2F(x.At(i)) - F(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(B2F(x.At(i)) - F(y.At(i)))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x-y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]int, y.Len())
-		for i := range r {
-			r[i] = int(B2I(x.At(i)) - y.At(i))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(B2I(x.At(i)) - y.At(i))
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x-y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := subtractIV(B2I(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x-y", "y", y)
 	}
@@ -1694,59 +1711,60 @@ func subtractABV(x *AB, y V) V {
 
 func subtractAFV(x *AF, y V) V {
 	if y.IsInt() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(F(x.At(i)) - F(int(y.Int())))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(x.At(i)) - F(int(y.Int())))
 		}
-		return NewAF(r)
+		return NewV(r)
 	}
 	switch y := y.Value.(type) {
 	case F:
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(F(x.At(i)) - F(y))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(x.At(i)) - F(y))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AB:
 		if x.Len() != y.Len() {
 			return errf("x-y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(x.At(i)) - B2F(y.At(i)))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(x.At(i)) - B2F(y.At(i)))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x-y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(x.At(i)) - F(y.At(i)))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(x.At(i)) - F(y.At(i)))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x-y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(x.At(i)) - F(y.At(i)))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(x.At(i)) - F(y.At(i)))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x-y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := subtractFV(F(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x-y", "y", y)
 	}
@@ -1754,11 +1772,11 @@ func subtractAFV(x *AF, y V) V {
 
 func subtractAIV(x *AI, y V) V {
 	if y.IsInt() {
-		r := make([]int, x.Len())
-		for i := range r {
-			r[i] = int(x.At(i) - int(y.Int()))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(x.At(i) - int(y.Int()))
 		}
-		return NewAI(r)
+		return NewV(r)
 	}
 	switch y := y.Value.(type) {
 	case F:
@@ -1771,42 +1789,43 @@ func subtractAIV(x *AI, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x-y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]int, y.Len())
-		for i := range r {
-			r[i] = int(x.At(i) - B2I(y.At(i)))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(x.At(i) - B2I(y.At(i)))
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x-y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(x.At(i)) - F(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(x.At(i)) - F(y.At(i)))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x-y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]int, y.Len())
-		for i := range r {
-			r[i] = int(x.At(i) - y.At(i))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(x.At(i) - y.At(i))
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x-y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := subtractIV(int(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x-y", "y", y)
 	}
@@ -1815,33 +1834,34 @@ func subtractAIV(x *AI, y V) V {
 func subtractASV(x *AS, y V) V {
 	switch y := y.Value.(type) {
 	case S:
-		r := make([]string, x.Len())
-		for i := range r {
-			r[i] = string(strings.TrimSuffix(string(S(x.At(i))), string(S(y))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = string(strings.TrimSuffix(string(S(x.At(i))), string(S(y))))
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AS:
 		if x.Len() != y.Len() {
 			return errf("x-y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]string, y.Len())
-		for i := range r {
-			r[i] = string(strings.TrimSuffix(string(S(x.At(i))), string(S(y.At(i)))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = string(strings.TrimSuffix(string(S(x.At(i))), string(S(y.At(i)))))
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x-y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := subtractSV(S(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x-y", "y", y)
 	}
@@ -1871,25 +1891,25 @@ func multiply(x, y V) V {
 			if y.Len() != x.Len() {
 				return errf("x*y : length mismatch: %d vs %d", x.Len(), y.Len())
 			}
-			r := make([]V, x.Len())
-			for i := range r {
-				ri := multiply(x.At(i), y.at(i))
+			r := x.reuse()
+			for i, xi := range x.Slice {
+				ri := multiply(xi, y.at(i))
 				if ri.IsErr() {
 					return ri
 				}
-				r[i] = ri
+				r.Slice[i] = ri
 			}
-			return NewAV(r)
+			return NewV(r)
 		}
-		r := make([]V, x.Len())
-		for i := range r {
-			ri := multiply(x.At(i), y)
+		r := x.reuse()
+		for i, xi := range x.Slice {
+			ri := multiply(xi, y)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x*y", "x", x)
 	}
@@ -1911,11 +1931,11 @@ func multiplyFV(x F, y V) V {
 		}
 		return NewAF(r)
 	case *AF:
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(x) * F(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(x) * F(y.At(i)))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		r := make([]float64, y.Len())
 		for i := range r {
@@ -1923,21 +1943,21 @@ func multiplyFV(x F, y V) V {
 		}
 		return NewAF(r)
 	case *AS:
-		r := make([]string, y.Len())
-		for i := range r {
-			r[i] = string(strings.Repeat(string(S(y.At(i))), int(float64(F(x)))))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = string(strings.Repeat(string(S(y.At(i))), int(float64(F(x)))))
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := multiplyFV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := multiplyFV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x*y", "y", y)
 	}
@@ -1959,33 +1979,33 @@ func multiplyIV(x int, y V) V {
 		}
 		return NewAI(r)
 	case *AF:
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(x) * F(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(x) * F(y.At(i)))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
-		r := make([]int, y.Len())
-		for i := range r {
-			r[i] = int(x * y.At(i))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(x * y.At(i))
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AS:
-		r := make([]string, y.Len())
-		for i := range r {
-			r[i] = string(strings.Repeat(string(S(y.At(i))), int(x)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = string(strings.Repeat(string(S(y.At(i))), int(x)))
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := multiplyIV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := multiplyIV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x*y", "y", y)
 	}
@@ -2017,15 +2037,15 @@ func multiplySV(x S, y V) V {
 		}
 		return NewAS(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := multiplySV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := multiplySV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x*y", "y", y)
 	}
@@ -2056,51 +2076,52 @@ func multiplyABV(x *AB, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x*y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]bool, y.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) && y.At(i))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(x.At(i) && y.At(i))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x*y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(B2F(x.At(i)) * F(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(B2F(x.At(i)) * F(y.At(i)))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x*y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]int, y.Len())
-		for i := range r {
-			r[i] = int(B2I(x.At(i)) * y.At(i))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(B2I(x.At(i)) * y.At(i))
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AS:
 		if x.Len() != y.Len() {
 			return errf("x*y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]string, y.Len())
-		for i := range r {
-			r[i] = string(strings.Repeat(string(S(y.At(i))), int(B2I(x.At(i)))))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = string(strings.Repeat(string(S(y.At(i))), int(B2I(x.At(i)))))
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x*y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := multiplyIV(B2I(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x*y", "y", y)
 	}
@@ -2108,19 +2129,19 @@ func multiplyABV(x *AB, y V) V {
 
 func multiplyAFV(x *AF, y V) V {
 	if y.IsInt() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(F(x.At(i)) * F(int(y.Int())))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(x.At(i)) * F(int(y.Int())))
 		}
-		return NewAF(r)
+		return NewV(r)
 	}
 	switch y := y.Value.(type) {
 	case F:
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(F(x.At(i)) * F(y))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(x.At(i)) * F(y))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case S:
 		r := make([]string, x.Len())
 		for i := range r {
@@ -2131,51 +2152,52 @@ func multiplyAFV(x *AF, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x*y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(x.At(i)) * B2F(y.At(i)))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(x.At(i)) * B2F(y.At(i)))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x*y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(x.At(i)) * F(y.At(i)))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(x.At(i)) * F(y.At(i)))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x*y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(x.At(i)) * F(y.At(i)))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(x.At(i)) * F(y.At(i)))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AS:
 		if x.Len() != y.Len() {
 			return errf("x*y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]string, y.Len())
-		for i := range r {
-			r[i] = string(strings.Repeat(string(S(y.At(i))), int(float64(F(x.At(i))))))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = string(strings.Repeat(string(S(y.At(i))), int(float64(F(x.At(i))))))
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x*y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := multiplyFV(F(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x*y", "y", y)
 	}
@@ -2183,11 +2205,11 @@ func multiplyAFV(x *AF, y V) V {
 
 func multiplyAIV(x *AI, y V) V {
 	if y.IsInt() {
-		r := make([]int, x.Len())
-		for i := range r {
-			r[i] = int(x.At(i) * int(y.Int()))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(x.At(i) * int(y.Int()))
 		}
-		return NewAI(r)
+		return NewV(r)
 	}
 	switch y := y.Value.(type) {
 	case F:
@@ -2206,51 +2228,52 @@ func multiplyAIV(x *AI, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x*y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]int, y.Len())
-		for i := range r {
-			r[i] = int(x.At(i) * B2I(y.At(i)))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(x.At(i) * B2I(y.At(i)))
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x*y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(x.At(i)) * F(y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(x.At(i)) * F(y.At(i)))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x*y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]int, y.Len())
-		for i := range r {
-			r[i] = int(x.At(i) * y.At(i))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(x.At(i) * y.At(i))
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AS:
 		if x.Len() != y.Len() {
 			return errf("x*y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]string, y.Len())
-		for i := range r {
-			r[i] = string(strings.Repeat(string(S(y.At(i))), int(x.At(i))))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = string(strings.Repeat(string(S(y.At(i))), int(x.At(i))))
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x*y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := multiplyIV(int(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x*y", "y", y)
 	}
@@ -2258,59 +2281,60 @@ func multiplyAIV(x *AI, y V) V {
 
 func multiplyASV(x *AS, y V) V {
 	if y.IsInt() {
-		r := make([]string, x.Len())
-		for i := range r {
-			r[i] = string(strings.Repeat(string(S(x.At(i))), int(int(y.Int()))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = string(strings.Repeat(string(S(x.At(i))), int(int(y.Int()))))
 		}
-		return NewAS(r)
+		return NewV(r)
 	}
 	switch y := y.Value.(type) {
 	case F:
-		r := make([]string, x.Len())
-		for i := range r {
-			r[i] = string(strings.Repeat(string(S(x.At(i))), int(float64(F(y)))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = string(strings.Repeat(string(S(x.At(i))), int(float64(F(y)))))
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AB:
 		if x.Len() != y.Len() {
 			return errf("x*y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]string, y.Len())
-		for i := range r {
-			r[i] = string(strings.Repeat(string(S(x.At(i))), int(B2I(y.At(i)))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = string(strings.Repeat(string(S(x.At(i))), int(B2I(y.At(i)))))
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x*y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]string, y.Len())
-		for i := range r {
-			r[i] = string(strings.Repeat(string(S(x.At(i))), int(float64(F(y.At(i))))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = string(strings.Repeat(string(S(x.At(i))), int(float64(F(y.At(i))))))
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x*y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]string, y.Len())
-		for i := range r {
-			r[i] = string(strings.Repeat(string(S(x.At(i))), int(y.At(i))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = string(strings.Repeat(string(S(x.At(i))), int(y.At(i))))
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x*y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := multiplySV(S(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x*y", "y", y)
 	}
@@ -2336,25 +2360,25 @@ func divide(x, y V) V {
 			if y.Len() != x.Len() {
 				return errf("x%%y : length mismatch: %d vs %d", x.Len(), y.Len())
 			}
-			r := make([]V, x.Len())
-			for i := range r {
-				ri := divide(x.At(i), y.at(i))
+			r := x.reuse()
+			for i, xi := range x.Slice {
+				ri := divide(xi, y.at(i))
 				if ri.IsErr() {
 					return ri
 				}
-				r[i] = ri
+				r.Slice[i] = ri
 			}
-			return NewAV(r)
+			return NewV(r)
 		}
-		r := make([]V, x.Len())
-		for i := range r {
-			ri := divide(x.At(i), y)
+		r := x.reuse()
+		for i, xi := range x.Slice {
+			ri := divide(xi, y)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x%%y", "x", x)
 	}
@@ -2374,11 +2398,11 @@ func divideFV(x F, y V) V {
 		}
 		return NewAF(r)
 	case *AF:
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(divideF(F(x), F(y.At(i))))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(divideF(F(x), F(y.At(i))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		r := make([]float64, y.Len())
 		for i := range r {
@@ -2386,15 +2410,15 @@ func divideFV(x F, y V) V {
 		}
 		return NewAF(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := divideFV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := divideFV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x%%y", "y", y)
 	}
@@ -2414,11 +2438,11 @@ func divideIV(x int, y V) V {
 		}
 		return NewAF(r)
 	case *AF:
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(divideF(F(x), F(y.At(i))))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(divideF(F(x), F(y.At(i))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		r := make([]float64, y.Len())
 		for i := range r {
@@ -2426,15 +2450,15 @@ func divideIV(x int, y V) V {
 		}
 		return NewAF(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := divideIV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := divideIV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x%%y", "y", y)
 	}
@@ -2468,11 +2492,11 @@ func divideABV(x *AB, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x%%y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(divideF(B2F(x.At(i)), F(y.At(i))))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(divideF(B2F(x.At(i)), F(y.At(i))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x%%y : length mismatch: %d vs %d", x.Len(), y.Len())
@@ -2486,15 +2510,16 @@ func divideABV(x *AB, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x%%y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := divideIV(B2I(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x%%y", "y", y)
 	}
@@ -2502,59 +2527,60 @@ func divideABV(x *AB, y V) V {
 
 func divideAFV(x *AF, y V) V {
 	if y.IsInt() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(divideF(F(x.At(i)), F(int(y.Int()))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(divideF(F(x.At(i)), F(int(y.Int()))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	}
 	switch y := y.Value.(type) {
 	case F:
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(divideF(F(x.At(i)), F(y)))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(divideF(F(x.At(i)), F(y)))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AB:
 		if x.Len() != y.Len() {
 			return errf("x%%y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(divideF(F(x.At(i)), B2F(y.At(i))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(divideF(F(x.At(i)), B2F(y.At(i))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x%%y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(divideF(F(x.At(i)), F(y.At(i))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(divideF(F(x.At(i)), F(y.At(i))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x%%y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(divideF(F(x.At(i)), F(y.At(i))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(divideF(F(x.At(i)), F(y.At(i))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x%%y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := divideFV(F(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x%%y", "y", y)
 	}
@@ -2588,11 +2614,11 @@ func divideAIV(x *AI, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x%%y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(divideF(F(x.At(i)), F(y.At(i))))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(divideF(F(x.At(i)), F(y.At(i))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x%%y : length mismatch: %d vs %d", x.Len(), y.Len())
@@ -2606,15 +2632,16 @@ func divideAIV(x *AI, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x%%y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := divideIV(int(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x%%y", "y", y)
 	}
@@ -2644,25 +2671,25 @@ func minimum(x, y V) V {
 			if y.Len() != x.Len() {
 				return errf("x&y : length mismatch: %d vs %d", x.Len(), y.Len())
 			}
-			r := make([]V, x.Len())
-			for i := range r {
-				ri := minimum(x.At(i), y.at(i))
+			r := x.reuse()
+			for i, xi := range x.Slice {
+				ri := minimum(xi, y.at(i))
 				if ri.IsErr() {
 					return ri
 				}
-				r[i] = ri
+				r.Slice[i] = ri
 			}
-			return NewAV(r)
+			return NewV(r)
 		}
-		r := make([]V, x.Len())
-		for i := range r {
-			ri := minimum(x.At(i), y)
+		r := x.reuse()
+		for i, xi := range x.Slice {
+			ri := minimum(xi, y)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x&y", "x", x)
 	}
@@ -2682,11 +2709,11 @@ func minimumFV(x F, y V) V {
 		}
 		return NewAF(r)
 	case *AF:
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(math.Min(float64(F(x)), float64(F(y.At(i))))))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(math.Min(float64(F(x)), float64(F(y.At(i))))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		r := make([]float64, y.Len())
 		for i := range r {
@@ -2694,15 +2721,15 @@ func minimumFV(x F, y V) V {
 		}
 		return NewAF(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := minimumFV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := minimumFV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x&y", "y", y)
 	}
@@ -2722,27 +2749,27 @@ func minimumIV(x int, y V) V {
 		}
 		return NewAI(r)
 	case *AF:
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(math.Min(float64(x), float64(F(y.At(i))))))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(math.Min(float64(x), float64(F(y.At(i))))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
-		r := make([]int, y.Len())
-		for i := range r {
-			r[i] = int(minI(x, y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(minI(x, y.At(i)))
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := minimumIV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := minimumIV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x&y", "y", y)
 	}
@@ -2753,21 +2780,21 @@ func minimumSV(x S, y V) V {
 	case S:
 		return NewV(S(minS(x, y)))
 	case *AS:
-		r := make([]string, y.Len())
-		for i := range r {
-			r[i] = string(minS(S(x), S(y.At(i))))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = string(minS(S(x), S(y.At(i))))
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := minimumSV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := minimumSV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x&y", "y", y)
 	}
@@ -2792,42 +2819,43 @@ func minimumABV(x *AB, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x&y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]bool, y.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) && y.At(i))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(x.At(i) && y.At(i))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x&y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(math.Min(float64(B2F(x.At(i))), float64(F(y.At(i))))))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(math.Min(float64(B2F(x.At(i))), float64(F(y.At(i))))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x&y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]int, y.Len())
-		for i := range r {
-			r[i] = int(minI(B2I(x.At(i)), y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(minI(B2I(x.At(i)), y.At(i)))
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x&y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := minimumIV(B2I(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x&y", "y", y)
 	}
@@ -2835,59 +2863,60 @@ func minimumABV(x *AB, y V) V {
 
 func minimumAFV(x *AF, y V) V {
 	if y.IsInt() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(F(math.Min(float64(F(x.At(i))), float64(int(y.Int())))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(math.Min(float64(F(x.At(i))), float64(int(y.Int())))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	}
 	switch y := y.Value.(type) {
 	case F:
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(F(math.Min(float64(F(x.At(i))), float64(F(y)))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(math.Min(float64(F(x.At(i))), float64(F(y)))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AB:
 		if x.Len() != y.Len() {
 			return errf("x&y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(math.Min(float64(F(x.At(i))), float64(B2F(y.At(i))))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(math.Min(float64(F(x.At(i))), float64(B2F(y.At(i))))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x&y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(math.Min(float64(F(x.At(i))), float64(F(y.At(i))))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(math.Min(float64(F(x.At(i))), float64(F(y.At(i))))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x&y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(math.Min(float64(F(x.At(i))), float64(y.At(i)))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(math.Min(float64(F(x.At(i))), float64(y.At(i)))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x&y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := minimumFV(F(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x&y", "y", y)
 	}
@@ -2895,11 +2924,11 @@ func minimumAFV(x *AF, y V) V {
 
 func minimumAIV(x *AI, y V) V {
 	if y.IsInt() {
-		r := make([]int, x.Len())
-		for i := range r {
-			r[i] = int(minI(x.At(i), int(y.Int())))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(minI(x.At(i), int(y.Int())))
 		}
-		return NewAI(r)
+		return NewV(r)
 	}
 	switch y := y.Value.(type) {
 	case F:
@@ -2912,42 +2941,43 @@ func minimumAIV(x *AI, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x&y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]int, y.Len())
-		for i := range r {
-			r[i] = int(minI(x.At(i), B2I(y.At(i))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(minI(x.At(i), B2I(y.At(i))))
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x&y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(math.Min(float64(x.At(i)), float64(F(y.At(i))))))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(math.Min(float64(x.At(i)), float64(F(y.At(i))))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x&y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]int, y.Len())
-		for i := range r {
-			r[i] = int(minI(x.At(i), y.At(i)))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(minI(x.At(i), y.At(i)))
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x&y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := minimumIV(int(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x&y", "y", y)
 	}
@@ -2956,33 +2986,34 @@ func minimumAIV(x *AI, y V) V {
 func minimumASV(x *AS, y V) V {
 	switch y := y.Value.(type) {
 	case S:
-		r := make([]string, x.Len())
-		for i := range r {
-			r[i] = string(minS(S(x.At(i)), S(y)))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = string(minS(S(x.At(i)), S(y)))
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AS:
 		if x.Len() != y.Len() {
 			return errf("x&y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]string, y.Len())
-		for i := range r {
-			r[i] = string(minS(S(x.At(i)), S(y.At(i))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = string(minS(S(x.At(i)), S(y.At(i))))
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x&y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := minimumSV(S(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x&y", "y", y)
 	}
@@ -3012,25 +3043,25 @@ func maximum(x, y V) V {
 			if y.Len() != x.Len() {
 				return errf("x|y : length mismatch: %d vs %d", x.Len(), y.Len())
 			}
-			r := make([]V, x.Len())
-			for i := range r {
-				ri := maximum(x.At(i), y.at(i))
+			r := x.reuse()
+			for i, xi := range x.Slice {
+				ri := maximum(xi, y.at(i))
 				if ri.IsErr() {
 					return ri
 				}
-				r[i] = ri
+				r.Slice[i] = ri
 			}
-			return NewAV(r)
+			return NewV(r)
 		}
-		r := make([]V, x.Len())
-		for i := range r {
-			ri := maximum(x.At(i), y)
+		r := x.reuse()
+		for i, xi := range x.Slice {
+			ri := maximum(xi, y)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x|y", "x", x)
 	}
@@ -3050,11 +3081,11 @@ func maximumFV(x F, y V) V {
 		}
 		return NewAF(r)
 	case *AF:
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(math.Max(float64(F(x)), float64(F(y.At(i))))))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(math.Max(float64(F(x)), float64(F(y.At(i))))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		r := make([]float64, y.Len())
 		for i := range r {
@@ -3062,15 +3093,15 @@ func maximumFV(x F, y V) V {
 		}
 		return NewAF(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := maximumFV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := maximumFV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x|y", "y", y)
 	}
@@ -3090,27 +3121,27 @@ func maximumIV(x int, y V) V {
 		}
 		return NewAI(r)
 	case *AF:
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(math.Max(float64(x), float64(F(y.At(i))))))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(math.Max(float64(x), float64(F(y.At(i))))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
-		r := make([]int, y.Len())
-		for i := range r {
-			r[i] = int(maxI(x, y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(maxI(x, y.At(i)))
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := maximumIV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := maximumIV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x|y", "y", y)
 	}
@@ -3121,21 +3152,21 @@ func maximumSV(x S, y V) V {
 	case S:
 		return NewV(S(maxS(x, y)))
 	case *AS:
-		r := make([]string, y.Len())
-		for i := range r {
-			r[i] = string(maxS(S(x), S(y.At(i))))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = string(maxS(S(x), S(y.At(i))))
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := maximumSV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := maximumSV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x|y", "y", y)
 	}
@@ -3160,42 +3191,43 @@ func maximumABV(x *AB, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x|y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]bool, y.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) || y.At(i))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = bool(x.At(i) || y.At(i))
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x|y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(math.Max(float64(B2F(x.At(i))), float64(F(y.At(i))))))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(math.Max(float64(B2F(x.At(i))), float64(F(y.At(i))))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x|y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]int, y.Len())
-		for i := range r {
-			r[i] = int(maxI(B2I(x.At(i)), y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(maxI(B2I(x.At(i)), y.At(i)))
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x|y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := maximumIV(B2I(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x|y", "y", y)
 	}
@@ -3203,59 +3235,60 @@ func maximumABV(x *AB, y V) V {
 
 func maximumAFV(x *AF, y V) V {
 	if y.IsInt() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(F(math.Max(float64(F(x.At(i))), float64(int(y.Int())))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(math.Max(float64(F(x.At(i))), float64(int(y.Int())))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	}
 	switch y := y.Value.(type) {
 	case F:
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(F(math.Max(float64(F(x.At(i))), float64(F(y)))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(math.Max(float64(F(x.At(i))), float64(F(y)))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AB:
 		if x.Len() != y.Len() {
 			return errf("x|y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(math.Max(float64(F(x.At(i))), float64(B2F(y.At(i))))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(math.Max(float64(F(x.At(i))), float64(B2F(y.At(i))))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x|y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(math.Max(float64(F(x.At(i))), float64(F(y.At(i))))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(math.Max(float64(F(x.At(i))), float64(F(y.At(i))))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x|y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(math.Max(float64(F(x.At(i))), float64(y.At(i)))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(math.Max(float64(F(x.At(i))), float64(y.At(i)))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x|y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := maximumFV(F(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x|y", "y", y)
 	}
@@ -3263,11 +3296,11 @@ func maximumAFV(x *AF, y V) V {
 
 func maximumAIV(x *AI, y V) V {
 	if y.IsInt() {
-		r := make([]int, x.Len())
-		for i := range r {
-			r[i] = int(maxI(x.At(i), int(y.Int())))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(maxI(x.At(i), int(y.Int())))
 		}
-		return NewAI(r)
+		return NewV(r)
 	}
 	switch y := y.Value.(type) {
 	case F:
@@ -3280,42 +3313,43 @@ func maximumAIV(x *AI, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x|y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]int, y.Len())
-		for i := range r {
-			r[i] = int(maxI(x.At(i), B2I(y.At(i))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(maxI(x.At(i), B2I(y.At(i))))
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x|y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(F(math.Max(float64(x.At(i)), float64(F(y.At(i))))))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(F(math.Max(float64(x.At(i)), float64(F(y.At(i))))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x|y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]int, y.Len())
-		for i := range r {
-			r[i] = int(maxI(x.At(i), y.At(i)))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(maxI(x.At(i), y.At(i)))
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x|y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := maximumIV(int(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x|y", "y", y)
 	}
@@ -3324,33 +3358,34 @@ func maximumAIV(x *AI, y V) V {
 func maximumASV(x *AS, y V) V {
 	switch y := y.Value.(type) {
 	case S:
-		r := make([]string, x.Len())
-		for i := range r {
-			r[i] = string(maxS(S(x.At(i)), S(y)))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = string(maxS(S(x.At(i)), S(y)))
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AS:
 		if x.Len() != y.Len() {
 			return errf("x|y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]string, y.Len())
-		for i := range r {
-			r[i] = string(maxS(S(x.At(i)), S(y.At(i))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = string(maxS(S(x.At(i)), S(y.At(i))))
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x|y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := maximumSV(S(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x|y", "y", y)
 	}
@@ -3376,25 +3411,25 @@ func modulus(x, y V) V {
 			if y.Len() != x.Len() {
 				return errf("x mod y : length mismatch: %d vs %d", x.Len(), y.Len())
 			}
-			r := make([]V, x.Len())
-			for i := range r {
-				ri := modulus(x.At(i), y.at(i))
+			r := x.reuse()
+			for i, xi := range x.Slice {
+				ri := modulus(xi, y.at(i))
 				if ri.IsErr() {
 					return ri
 				}
-				r[i] = ri
+				r.Slice[i] = ri
 			}
-			return NewAV(r)
+			return NewV(r)
 		}
-		r := make([]V, x.Len())
-		for i := range r {
-			ri := modulus(x.At(i), y)
+		r := x.reuse()
+		for i, xi := range x.Slice {
+			ri := modulus(xi, y)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x mod y", "x", x)
 	}
@@ -3414,11 +3449,11 @@ func modulusFV(x F, y V) V {
 		}
 		return NewAF(r)
 	case *AF:
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(modF(F(x), F(y.At(i))))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(modF(F(x), F(y.At(i))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		r := make([]float64, y.Len())
 		for i := range r {
@@ -3426,15 +3461,15 @@ func modulusFV(x F, y V) V {
 		}
 		return NewAF(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := modulusFV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := modulusFV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x mod y", "y", y)
 	}
@@ -3454,27 +3489,27 @@ func modulusIV(x int, y V) V {
 		}
 		return NewAI(r)
 	case *AF:
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(modF(F(x), F(y.At(i))))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(modF(F(x), F(y.At(i))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
-		r := make([]int, y.Len())
-		for i := range r {
-			r[i] = int(modI(x, y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(modI(x, y.At(i)))
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i := range r {
-			ri := modulusIV(x, y.At(i))
+		r := y.reuse()
+		for i, yi := range y.Slice {
+			ri := modulusIV(x, yi)
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x mod y", "y", y)
 	}
@@ -3508,33 +3543,34 @@ func modulusABV(x *AB, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x mod y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(modF(F(B2I(x.At(i))), F(y.At(i))))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(modF(F(B2I(x.At(i))), F(y.At(i))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x mod y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]int, y.Len())
-		for i := range r {
-			r[i] = int(modI(B2I(x.At(i)), y.At(i)))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(modI(B2I(x.At(i)), y.At(i)))
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x mod y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := modulusIV(B2I(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x mod y", "y", y)
 	}
@@ -3542,59 +3578,60 @@ func modulusABV(x *AB, y V) V {
 
 func modulusAFV(x *AF, y V) V {
 	if y.IsInt() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(modF(F(x.At(i)), F(int(y.Int()))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(modF(F(x.At(i)), F(int(y.Int()))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	}
 	switch y := y.Value.(type) {
 	case F:
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(modF(F(x.At(i)), F(y)))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(modF(F(x.At(i)), F(y)))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AB:
 		if x.Len() != y.Len() {
 			return errf("x mod y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(modF(F(x.At(i)), F(B2I(y.At(i)))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(modF(F(x.At(i)), F(B2I(y.At(i)))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x mod y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(modF(F(x.At(i)), F(y.At(i))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(modF(F(x.At(i)), F(y.At(i))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x mod y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(modF(F(x.At(i)), F(y.At(i))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(modF(F(x.At(i)), F(y.At(i))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x mod y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := modulusFV(F(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x mod y", "y", y)
 	}
@@ -3602,11 +3639,11 @@ func modulusAFV(x *AF, y V) V {
 
 func modulusAIV(x *AI, y V) V {
 	if y.IsInt() {
-		r := make([]int, x.Len())
-		for i := range r {
-			r[i] = int(modI(x.At(i), int(y.Int())))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(modI(x.At(i), int(y.Int())))
 		}
-		return NewAI(r)
+		return NewV(r)
 	}
 	switch y := y.Value.(type) {
 	case F:
@@ -3619,42 +3656,43 @@ func modulusAIV(x *AI, y V) V {
 		if x.Len() != y.Len() {
 			return errf("x mod y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]int, y.Len())
-		for i := range r {
-			r[i] = int(modI(x.At(i), B2I(y.At(i))))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(modI(x.At(i), B2I(y.At(i))))
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AF:
 		if x.Len() != y.Len() {
 			return errf("x mod y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]float64, y.Len())
-		for i := range r {
-			r[i] = float64(modF(F(x.At(i)), F(y.At(i))))
+		r := y.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = float64(modF(F(x.At(i)), F(y.At(i))))
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AI:
 		if x.Len() != y.Len() {
 			return errf("x mod y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]int, y.Len())
-		for i := range r {
-			r[i] = int(modI(x.At(i), y.At(i)))
+		r := x.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = int(modI(x.At(i), y.At(i)))
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AV:
 		if x.Len() != y.Len() {
 			return errf("x mod y : length mismatch: %d vs %d", x.Len(), y.Len())
 		}
-		r := make([]V, y.Len())
-		for i := range r {
+		r := y.reuse()
+
+		for i := range r.Slice {
 			ri := modulusIV(int(x.At(i)), y.At(i))
 			if ri.IsErr() {
 				return ri
 			}
-			r[i] = ri
+			r.Slice[i] = ri
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("x mod y", "y", y)
 	}
