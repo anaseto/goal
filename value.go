@@ -308,100 +308,11 @@ func NewAV(x []V) V {
 	return NewV(&AV{Slice: x})
 }
 
-// DerivedVerb represents values modified by an adverb. This kind value is not
-// manipulable within the program, as it is only produced as an intermediary
-// value in adverb trains and only appears as an adverb argument.
-type DerivedVerb struct {
-	Fun variadic
-	Arg V
-}
-
-// Projection represents a partial application of a function. Because variadic
-// verbs do not have a fixed arity, it is possible to produce a projection of
-// arbitrary arity.
-type Projection struct {
-	Fun  V
-	Args []V
-}
-
-// ProjectionFirst represents a monadic projection fixing the first argument of
-// a function with rank greater than 2.
-type ProjectionFirst struct {
-	Fun V // function with rank >= 2
-	Arg V // first argument x
-}
-
-// ProjectionMonad represents a monadic projection of a function of any rank.
-type ProjectionMonad struct {
-	Fun V
-}
-
-func (p Projection) Type() string      { return "p" }
-func (p ProjectionFirst) Type() string { return "p" }
-func (p ProjectionMonad) Type() string { return "p" }
-func (r DerivedVerb) Type() string     { return "r" }
-
-func (p Projection) Sprint(ctx *Context) string {
-	sb := &strings.Builder{}
-	fmt.Fprintf(sb, "%s", p.Fun.Sprint(ctx))
-	sb.WriteRune('[')
-	for i := len(p.Args) - 1; i >= 0; i-- {
-		arg := p.Args[i]
-		if arg != (V{}) {
-			fmt.Fprintf(sb, "%s", arg.Sprint(ctx))
-		}
-		if i > 0 {
-			sb.WriteRune(';')
-		}
-	}
-	sb.WriteRune(']')
-	return sb.String()
-}
-
-func (p ProjectionFirst) Sprint(ctx *Context) string {
-	return fmt.Sprintf("%s[%s;]", p.Fun.Sprint(ctx), p.Arg.Sprint(ctx))
-}
-
-func (p ProjectionMonad) Sprint(ctx *Context) string {
-	return fmt.Sprintf("%s[]", p.Fun.Sprint(ctx))
-}
-
-func (r DerivedVerb) Sprint(ctx *Context) string {
-	return fmt.Sprintf("%s%s", r.Arg.Sprint(ctx), r.Fun.String())
-}
-
-// array interface is satisfied by the different kind of supported arrays.
-// Typical implementation is given in comments.
-type array interface {
-	Value
-	Len() int
-	at(i int) V           // x[i]
-	slice(i, j int) array // x[i:j]
-	atIndices(y []int) V  // x[y] (goal code)
-	set(i int, y V)
-	//setIndices(y AI, z V) error
-}
-
 func (x *AB) Matches(y Value) bool { return matchArray(x, y) }
 func (x *AI) Matches(y Value) bool { return matchArray(x, y) }
 func (x *AF) Matches(y Value) bool { return matchArray(x, y) }
 func (x *AS) Matches(y Value) bool { return matchArray(x, y) }
 func (x *AV) Matches(y Value) bool { return matchArray(x, y) }
-
-// Len returns the length of the array.
-func (x *AB) Len() int { return len(x.Slice) }
-
-// Len returns the length of the array.
-func (x *AI) Len() int { return len(x.Slice) }
-
-// Len returns the length of the array.
-func (x *AF) Len() int { return len(x.Slice) }
-
-// Len returns the length of the array.
-func (x *AS) Len() int { return len(x.Slice) }
-
-// Len returns the length of the array.
-func (x *AV) Len() int { return len(x.Slice) }
 
 // Type returns a string representation of the array's type.
 func (x *AB) Type() string { return "B" }
@@ -417,33 +328,6 @@ func (x *AS) Type() string { return "S" }
 
 // Type returns a string representation of the array's type.
 func (x *AV) Type() string { return "A" }
-
-func (x *AB) at(i int) V { return NewI(B2I(x.Slice[i])) }
-func (x *AI) at(i int) V { return NewI(x.Slice[i]) }
-func (x *AF) at(i int) V { return NewF(x.Slice[i]) }
-func (x *AS) at(i int) V { return NewS(x.Slice[i]) }
-func (x *AV) at(i int) V { return x.Slice[i] }
-
-// At returns array value at the given index.
-func (x *AB) At(i int) bool { return x.Slice[i] }
-
-// At returns array value at the given index.
-func (x *AI) At(i int) int { return x.Slice[i] }
-
-// At returns array value at the given index.
-func (x *AF) At(i int) float64 { return x.Slice[i] }
-
-// At returns array value at the given index.
-func (x *AS) At(i int) string { return x.Slice[i] }
-
-// At returns array value at the given index.
-func (x *AV) At(i int) V { return x.Slice[i] }
-
-func (x *AB) slice(i, j int) array { return &AB{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
-func (x *AI) slice(i, j int) array { return &AI{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
-func (x *AF) slice(i, j int) array { return &AF{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
-func (x *AS) slice(i, j int) array { return &AS{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
-func (x *AV) slice(i, j int) array { return &AV{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
 
 func (x *AB) Sprint(ctx *Context) string {
 	if x.Len() == 0 {
@@ -568,6 +452,122 @@ func (x *AV) sprint(ctx *Context, deep bool) string {
 	return sb.String()
 }
 
+// array interface is satisfied by the different kind of supported arrays.
+// Typical implementation is given in comments.
+type array interface {
+	Value
+	Len() int
+	at(i int) V           // x[i]
+	slice(i, j int) array // x[i:j]
+	atIndices(y []int) V  // x[y] (goal code)
+	set(i int, y V)
+	//setIndices(y AI, z V) error
+}
+
+// Len returns the length of the array.
+func (x *AB) Len() int { return len(x.Slice) }
+
+// Len returns the length of the array.
+func (x *AI) Len() int { return len(x.Slice) }
+
+// Len returns the length of the array.
+func (x *AF) Len() int { return len(x.Slice) }
+
+// Len returns the length of the array.
+func (x *AS) Len() int { return len(x.Slice) }
+
+// Len returns the length of the array.
+func (x *AV) Len() int { return len(x.Slice) }
+
+func (x *AB) at(i int) V { return NewI(B2I(x.Slice[i])) }
+func (x *AI) at(i int) V { return NewI(x.Slice[i]) }
+func (x *AF) at(i int) V { return NewF(x.Slice[i]) }
+func (x *AS) at(i int) V { return NewS(x.Slice[i]) }
+func (x *AV) at(i int) V { return x.Slice[i] }
+
+// At returns array value at the given index.
+func (x *AB) At(i int) bool { return x.Slice[i] }
+
+// At returns array value at the given index.
+func (x *AI) At(i int) int { return x.Slice[i] }
+
+// At returns array value at the given index.
+func (x *AF) At(i int) float64 { return x.Slice[i] }
+
+// At returns array value at the given index.
+func (x *AS) At(i int) string { return x.Slice[i] }
+
+// At returns array value at the given index.
+func (x *AV) At(i int) V { return x.Slice[i] }
+
+func (x *AB) slice(i, j int) array { return &AB{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
+func (x *AI) slice(i, j int) array { return &AI{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
+func (x *AF) slice(i, j int) array { return &AF{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
+func (x *AS) slice(i, j int) array { return &AS{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
+func (x *AV) slice(i, j int) array { return &AV{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
+
+// DerivedVerb represents values modified by an adverb. This kind value is not
+// manipulable within the program, as it is only produced as an intermediary
+// value in adverb trains and only appears as an adverb argument.
+type DerivedVerb struct {
+	Fun variadic
+	Arg V
+}
+
+// Projection represents a partial application of a function. Because variadic
+// verbs do not have a fixed arity, it is possible to produce a projection of
+// arbitrary arity.
+type Projection struct {
+	Fun  V
+	Args []V
+}
+
+// ProjectionFirst represents a monadic projection fixing the first argument of
+// a function with rank greater than 2.
+type ProjectionFirst struct {
+	Fun V // function with rank >= 2
+	Arg V // first argument x
+}
+
+// ProjectionMonad represents a monadic projection of a function of any rank.
+type ProjectionMonad struct {
+	Fun V
+}
+
+func (p Projection) Type() string      { return "p" }
+func (p ProjectionFirst) Type() string { return "p" }
+func (p ProjectionMonad) Type() string { return "p" }
+func (r DerivedVerb) Type() string     { return "r" }
+
+func (p Projection) Sprint(ctx *Context) string {
+	sb := &strings.Builder{}
+	fmt.Fprintf(sb, "%s", p.Fun.Sprint(ctx))
+	sb.WriteRune('[')
+	for i := len(p.Args) - 1; i >= 0; i-- {
+		arg := p.Args[i]
+		if arg != (V{}) {
+			fmt.Fprintf(sb, "%s", arg.Sprint(ctx))
+		}
+		if i > 0 {
+			sb.WriteRune(';')
+		}
+	}
+	sb.WriteRune(']')
+	return sb.String()
+}
+
+func (p ProjectionFirst) Sprint(ctx *Context) string {
+	return fmt.Sprintf("%s[%s;]", p.Fun.Sprint(ctx), p.Arg.Sprint(ctx))
+}
+
+func (p ProjectionMonad) Sprint(ctx *Context) string {
+	return fmt.Sprintf("%s[]", p.Fun.Sprint(ctx))
+}
+
+func (r DerivedVerb) Sprint(ctx *Context) string {
+	return fmt.Sprintf("%s%s", r.Arg.Sprint(ctx), r.Fun.String())
+}
+
 // function interface is satisfied by the different kind of functions. A
 // function is a value thas has a default rank. The default rank is used in
 // situations where an adverb or function has different meanings depending on
@@ -644,12 +644,34 @@ func (x *AV) rcincr() {
 	}
 }
 
-func (x *AB) rcdecr() { x.rc-- }
-func (x *AI) rcdecr() { x.rc-- }
-func (x *AF) rcdecr() { x.rc-- }
-func (x *AS) rcdecr() { x.rc-- }
+func (x *AB) rcdecr() {
+	if x.rc > 0 {
+		x.rc--
+	}
+}
+
+func (x *AI) rcdecr() {
+	if x.rc > 0 {
+		x.rc--
+	}
+}
+
+func (x *AF) rcdecr() {
+	if x.rc > 0 {
+		x.rc--
+	}
+}
+
+func (x *AS) rcdecr() {
+	if x.rc > 0 {
+		x.rc--
+	}
+}
+
 func (x *AV) rcdecr() {
-	x.rc--
+	if x.rc > 0 {
+		x.rc--
+	}
 	for _, xi := range x.Slice {
 		xi.rcdecr()
 	}
