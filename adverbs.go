@@ -340,8 +340,11 @@ func scan2(ctx *Context, f, x V) V {
 		r := []V{xv.at(0)}
 		for i := 1; i < xv.Len(); i++ {
 			ctx.push(xv.at(i))
-			ctx.push(r[len(r)-1])
+			last := r[len(r)-1]
+			ctx.push(last)
+			last.rcincr()
 			next := ctx.applyN(f, 2)
+			last.rcdecr()
 			if next.IsErr() {
 				return next
 			}

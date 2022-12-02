@@ -417,3 +417,10 @@ func BenchmarkNewContext(b *testing.B) {
 		NewContext()
 	}
 }
+
+func BenchmarkWhileN(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		ctx := NewContext()
+		ctx.Eval("100 {x+1}/!10000")
+	}
+}

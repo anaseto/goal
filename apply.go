@@ -5,14 +5,22 @@ package goal
 // Apply calls a value with a single argument.
 func (ctx *Context) Apply(x, y V) V {
 	ctx.push(y)
-	return ctx.applyN(x, 1)
+	y.rcincr()
+	r := ctx.applyN(x, 1)
+	y.rcdecr()
+	return r
 }
 
 // Apply2 calls a value with a two arguments.
 func (ctx *Context) Apply2(x, y, z V) V {
 	ctx.push(z)
+	z.rcincr()
 	ctx.push(y)
-	return ctx.applyN(x, 2)
+	y.rcincr()
+	r := ctx.applyN(x, 2)
+	y.rcdecr()
+	z.rcdecr()
+	return r
 }
 
 // ApplyN calls a value with one or more arguments. The arguments should be
@@ -23,7 +31,14 @@ func (ctx *Context) ApplyN(x V, args []V) V {
 		panic("ApplyArgs: len(args) should be > 0")
 	}
 	ctx.pushArgs(args)
-	return ctx.applyN(x, len(args))
+	for _, v := range args {
+		v.rcincr()
+	}
+	r := ctx.applyN(x, len(args))
+	for _, v := range args {
+		v.rcdecr()
+	}
+	return r
 }
 
 // applyN applies x with the top n arguments in the stack. It consumes the
