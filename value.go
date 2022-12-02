@@ -130,6 +130,20 @@ func (v V) Rank(ctx *Context) int {
 	}
 }
 
+func (v V) rcincr() {
+	vrc, ok := v.Value.(refCounter)
+	if ok {
+		vrc.rcincr()
+	}
+}
+
+func (v V) rcdecr() {
+	vrc, ok := v.Value.(refCounter)
+	if ok {
+		vrc.rcdecr()
+	}
+}
+
 // NewV returns a new boxed value.
 func NewV(bv Value) V {
 	return V{Kind: Boxed, Value: bv}
@@ -604,4 +618,33 @@ func (p ProjectionMonad) Matches(x Value) bool {
 func (r DerivedVerb) Matches(x Value) bool {
 	xr, ok := x.(DerivedVerb)
 	return ok && r.Fun == xr.Fun && Match(r.Arg, xr.Arg)
+}
+
+// refCounter is implemented by values that use a reference count, allowing for
+// memory reuse.
+type refCounter interface {
+	rcincr()
+	rcdecr()
+}
+
+func (x *AB) rcincr() { x.rc++ }
+func (x *AI) rcincr() { x.rc++ }
+func (x *AF) rcincr() { x.rc++ }
+func (x *AS) rcincr() { x.rc++ }
+func (x *AV) rcincr() {
+	x.rc++
+	for _, xi := range x.Slice {
+		xi.rcincr()
+	}
+}
+
+func (x *AB) rcdecr() { x.rc-- }
+func (x *AI) rcdecr() { x.rc-- }
+func (x *AF) rcdecr() { x.rc-- }
+func (x *AS) rcdecr() { x.rc-- }
+func (x *AV) rcdecr() {
+	x.rc--
+	for _, xi := range x.Slice {
+		xi.rcdecr()
+	}
 }

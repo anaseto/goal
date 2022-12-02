@@ -31,10 +31,14 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ctx.push(x)
 			ip++
 		case opAssignGlobal:
-			ctx.globals[ops[ip]] = ctx.top()
+			x := ctx.top()
+			x.rcincr()
+			ctx.globals[ops[ip]] = x
 			ip++
 		case opAssignLocal:
-			ctx.stack[ctx.frameIdx-int32(ops[ip])] = ctx.top()
+			x := ctx.top()
+			x.rcincr()
+			ctx.stack[ctx.frameIdx-int32(ops[ip])] = x
 			ip++
 		case opVariadic:
 			ctx.push(NewVariadic(variadic(ops[ip])))

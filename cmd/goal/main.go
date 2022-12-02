@@ -49,7 +49,7 @@ func main() {
 		return
 	}
 	fname := args[0]
-	ctx.AssignGlobal("ARGS", goal.NewV(goal.AS(args[1:])))
+	ctx.AssignGlobal("ARGS", goal.NewAS(args[1:]))
 	bs, err := os.ReadFile(fname)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "goal: %v", err)
