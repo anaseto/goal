@@ -131,6 +131,9 @@ func (v V) Rank(ctx *Context) int {
 }
 
 func (v V) rcincr() {
+	if v.Kind != Boxed {
+		return
+	}
 	vrc, ok := v.Value.(refCounter)
 	if ok {
 		vrc.rcincr()
@@ -138,6 +141,9 @@ func (v V) rcincr() {
 }
 
 func (v V) rcdecr() {
+	if v.Kind != Boxed {
+		return
+	}
 	vrc, ok := v.Value.(refCounter)
 	if ok {
 		vrc.rcdecr()
