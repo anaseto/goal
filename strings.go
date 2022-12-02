@@ -169,10 +169,10 @@ func bytes(x V) V {
 		return NewI(len(x))
 	case *AS:
 		r := make([]int, x.Len())
-		for i, s := range x {
+		for i, s := range x.Slice {
 			r[i] = len(s)
 		}
-		return NewV(r)
+		return NewAI(r)
 	case *AV:
 		r := make([]V, x.Len())
 		for i, xi := range x.Slice {
@@ -218,7 +218,7 @@ func casti(y V) V {
 		for i, rc := range runes {
 			r[i] = int(rc)
 		}
-		return NewV(r)
+		return NewAI(r)
 	case *AB:
 		return y
 	case *AI:
@@ -228,7 +228,7 @@ func casti(y V) V {
 		for i, s := range yv.Slice {
 			r[i] = casti(NewS(s))
 		}
-		return NewV(r)
+		return NewAV(r)
 	case *AF:
 		return toAI(yv)
 	case *AV:
@@ -239,7 +239,7 @@ func casti(y V) V {
 				return r[i]
 			}
 		}
-		return NewV(r)
+		return NewAV(r)
 	default:
 		return errs("\"i\"$y : non-numeric y")
 	}
@@ -282,7 +282,7 @@ func castn(y V) V {
 				return r[i]
 			}
 		}
-		return NewV(r)
+		return canonicalV(NewAV(r))
 	default:
 		return errs("\"i\"$y : non-numeric y")
 	}
@@ -313,7 +313,7 @@ func casts(y V) V {
 				return r[i]
 			}
 		}
-		return NewV(r)
+		return canonicalV(NewAV(r))
 	default:
 		return errs("\"i\"$y : non-numeric y")
 	}
@@ -328,7 +328,7 @@ func drops(s S, y V) V {
 		for i, yi := range y.Slice {
 			r[i] = strings.TrimPrefix(string(yi), string(s))
 		}
-		return NewV(r)
+		return NewAS(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i, yi := range y.Slice {
@@ -337,7 +337,7 @@ func drops(s S, y V) V {
 				return r[i]
 			}
 		}
-		return NewV(r)
+		return NewAV(r)
 	default:
 		return errType("s_y", "y", y)
 	}
@@ -353,7 +353,7 @@ func trim(s S, y V) V {
 		for i, yi := range y.Slice {
 			r[i] = strings.Trim(string(yi), string(s))
 		}
-		return NewV(r)
+		return NewAS(r)
 	case *AV:
 		r := make([]V, y.Len())
 		for i, yi := range y.Slice {
@@ -362,7 +362,7 @@ func trim(s S, y V) V {
 				return r[i]
 			}
 		}
-		return NewV(r)
+		return NewAV(r)
 	default:
 		return errType("s^y", "y", y)
 	}

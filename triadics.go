@@ -33,8 +33,8 @@ func (ctx *Context) amend3arrayI(x array, y int, f V) V {
 	for i := range a {
 		a[i] = x.at(i)
 	}
-	a.set(int(y), repl)
-	return NewV(a)
+	a[y] = repl
+	return NewAV(a)
 }
 
 func (ctx *Context) amend3array(x array, y, f V) V {
@@ -96,8 +96,8 @@ func (ctx *Context) amend4arrayI(x array, y int, f, z V) V {
 	for i := range a {
 		a[i] = x.at(i)
 	}
-	a.set(int(y), repl)
-	return NewV(a)
+	a[y] = repl
+	return NewAV(a)
 }
 
 func (ctx *Context) amend4array(x array, y, f, z V) V {
@@ -112,7 +112,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 	case *AI:
 		az, ok := z.Value.(array)
 		if !ok {
-			for _, xi := range y {
+			for _, xi := range y.Slice {
 				ax := ctx.amend4arrayI(x, xi, f, z)
 				if ax.IsErr() {
 					return ax
@@ -125,7 +125,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 			return errf("@[x;y;f;z] : length mismatch between x and y (%d vs %d)",
 				y.Len(), az.Len())
 		}
-		for i, xi := range y {
+		for i, xi := range y.Slice {
 			ax := ctx.amend4arrayI(x, xi, f, az.at(i))
 			if ax.IsErr() {
 				return ax
@@ -136,7 +136,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 	case *AV:
 		az, ok := z.Value.(array)
 		if !ok {
-			for _, xi := range y {
+			for _, xi := range y.Slice {
 				ax := ctx.amend4array(x, xi, f, z)
 				if ax.IsErr() {
 					return ax
@@ -149,7 +149,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 			return errf("@[x;y;f;z] : length mismatch between x and y (%d vs %d)",
 				y.Len(), az.Len())
 		}
-		for i, xi := range y {
+		for i, xi := range y.Slice {
 			ax := ctx.amend4array(x, xi, f, az.at(i))
 			if ax.IsErr() {
 				return ax

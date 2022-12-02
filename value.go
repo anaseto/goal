@@ -237,7 +237,7 @@ type AB struct {
 
 // NewAB returns a new boolean array.
 func NewAB(x []bool) V {
-	return &AB{Slice: x}
+	return NewV(&AB{Slice: x})
 }
 
 // AI represents an array of integers.
@@ -249,7 +249,7 @@ type AI struct {
 
 // NewAI returns a new int array.
 func NewAI(x []int) V {
-	return &AI{Slice: x}
+	return NewV(&AI{Slice: x})
 }
 
 // AF represents an array of reals.
@@ -261,7 +261,7 @@ type AF struct {
 
 // NewAF returns a new array of reals.
 func NewAF(x []float64) V {
-	return &AF{Slice: x}
+	return NewV(&AF{Slice: x})
 }
 
 // AS represents an array of strings.
@@ -273,7 +273,7 @@ type AS struct {
 
 // NewAS returns a new array of strings.
 func NewAS(x []string) V {
-	return &AS{Slice: x}
+	return NewV(&AS{Slice: x})
 }
 
 // AV represents a generic array.
@@ -285,7 +285,7 @@ type AV struct {
 
 // NewAV returns a new generic array.
 func NewAV(x []V) V {
-	return &AV{Slice: x}
+	return NewV(&AV{Slice: x})
 }
 
 // DerivedVerb represents values modified by an adverb. This kind value is not
@@ -437,7 +437,7 @@ func (x *AB) Sprint(ctx *Context) string {
 	}
 	for i, xi := range x.Slice {
 		fmt.Fprintf(sb, "%d", B2I(xi))
-		if i < len(x)-1 {
+		if i < x.Len()-1 {
 			sb.WriteRune(' ')
 		}
 	}
@@ -445,18 +445,18 @@ func (x *AB) Sprint(ctx *Context) string {
 }
 
 func (x *AI) Sprint(ctx *Context) string {
-	if len(x) == 0 {
+	if x.Len() == 0 {
 		return `!0`
 	}
 	sb := &strings.Builder{}
-	if len(x) == 1 {
+	if x.Len() == 1 {
 		sb.WriteRune(',')
 		fmt.Fprintf(sb, "%d", x.At(0))
 		return sb.String()
 	}
 	for i, xi := range x.Slice {
 		fmt.Fprintf(sb, "%d", xi)
-		if i < len(x)-1 {
+		if i < x.Len()-1 {
 			sb.WriteRune(' ')
 		}
 	}
@@ -464,18 +464,18 @@ func (x *AI) Sprint(ctx *Context) string {
 }
 
 func (x *AF) Sprint(ctx *Context) string {
-	if len(x) == 0 {
+	if x.Len() == 0 {
 		return `!0`
 	}
 	sb := &strings.Builder{}
-	if len(x) == 1 {
+	if x.Len() == 1 {
 		sb.WriteRune(',')
 		fmt.Fprintf(sb, "%g", x.At(0))
 		return sb.String()
 	}
 	for i, xi := range x.Slice {
 		fmt.Fprintf(sb, "%g", xi)
-		if i < len(x)-1 {
+		if i < x.Len()-1 {
 			sb.WriteRune(' ')
 		}
 	}
@@ -483,18 +483,18 @@ func (x *AF) Sprint(ctx *Context) string {
 }
 
 func (x *AS) Sprint(ctx *Context) string {
-	if len(x) == 0 {
+	if x.Len() == 0 {
 		return `0#""`
 	}
 	sb := &strings.Builder{}
-	if len(x) == 1 {
+	if x.Len() == 1 {
 		sb.WriteRune(',')
 		fmt.Fprintf(sb, "%q", x.At(0))
 		return sb.String()
 	}
 	for i, xi := range x.Slice {
 		fmt.Fprintf(sb, "%q", xi)
-		if i < len(x)-1 {
+		if i < x.Len()-1 {
 			sb.WriteRune(' ')
 		}
 	}
@@ -510,16 +510,16 @@ func sprintV(ctx *Context, x V) string {
 	return x.Sprint(ctx)
 }
 
-func (x AV) Sprint(ctx *Context) string {
+func (x *AV) Sprint(ctx *Context) string {
 	return x.sprint(ctx, false)
 }
 
-func (x AV) sprint(ctx *Context, deep bool) string {
-	if len(x) == 0 {
+func (x *AV) sprint(ctx *Context, deep bool) string {
+	if x.Len() == 0 {
 		return `!0`
 	}
 	sb := &strings.Builder{}
-	if len(x) == 1 {
+	if x.Len() == 1 {
 		sb.WriteRune(',')
 		fmt.Fprintf(sb, "%s", x.At(0).Sprint(ctx))
 		return sb.String()
@@ -540,7 +540,7 @@ func (x AV) sprint(ctx *Context, deep bool) string {
 		if xi != (V{}) {
 			fmt.Fprintf(sb, "%s", sprintV(ctx, xi))
 		}
-		if i < len(x)-1 {
+		if i < x.Len()-1 {
 			sb.WriteString(sep)
 		}
 	}
@@ -577,7 +577,18 @@ type zeroFun interface {
 
 func (p Projection) Matches(x Value) bool {
 	xp, ok := x.(Projection)
-	return ok && Match(p.Fun, xp.Fun) && p.Args.Matches(xp.Args)
+	if !ok || !Match(p.Fun, xp.Fun) {
+		return false
+	}
+	if len(p.Args) != len(xp.Args) {
+		return false
+	}
+	for i, arg := range p.Args {
+		if !Match(arg, xp.Args[i]) {
+			return false
+		}
+	}
+	return true
 }
 
 func (p ProjectionFirst) Matches(x Value) bool {

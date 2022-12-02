@@ -92,26 +92,26 @@ func clone(x V) V {
 	switch xv := x.Value.(type) {
 	case *AB:
 		r := make([]bool, xv.Len())
-		copy(r, xv)
-		return NewV(r)
+		copy(r, xv.Slice)
+		return NewAB(r)
 	case *AF:
 		r := make([]float64, xv.Len())
-		copy(r, xv)
-		return NewV(r)
+		copy(r, xv.Slice)
+		return NewAF(r)
 	case *AI:
 		r := make([]int, xv.Len())
-		copy(r, xv)
-		return NewV(r)
+		copy(r, xv.Slice)
+		return NewAI(r)
 	case *AS:
 		r := make([]string, xv.Len())
-		copy(r, xv)
-		return NewV(r)
+		copy(r, xv.Slice)
+		return NewAS(r)
 	case *AV:
 		r := make([]V, xv.Len())
 		for i := range r {
 			r[i] = clone(xv.At(i))
 		}
-		return NewV(r)
+		return NewAV(r)
 	default:
 		return x
 	}
@@ -121,24 +121,24 @@ func cloneShallow(x V) V {
 	switch xv := x.Value.(type) {
 	case *AB:
 		r := make([]bool, xv.Len())
-		copy(r, xv)
-		return NewV(r)
+		copy(r, xv.Slice)
+		return NewAB(r)
 	case *AF:
 		r := make([]float64, xv.Len())
-		copy(r, xv)
-		return NewV(r)
+		copy(r, xv.Slice)
+		return NewAF(r)
 	case *AI:
 		r := make([]int, xv.Len())
-		copy(r, xv)
-		return NewV(r)
+		copy(r, xv.Slice)
+		return NewAI(r)
 	case *AS:
 		r := make([]string, xv.Len())
-		copy(r, xv)
-		return NewV(r)
+		copy(r, xv.Slice)
+		return NewAS(r)
 	case *AV:
 		r := make([]V, xv.Len())
-		copy(r, xv)
-		return NewV(r)
+		copy(r, xv.Slice)
+		return NewAV(r)
 	default:
 		return x
 	}
@@ -148,24 +148,24 @@ func cloneShallowArray(x array) array {
 	switch xv := x.(type) {
 	case *AB:
 		r := make([]bool, xv.Len())
-		copy(r, xv)
-		return r
+		copy(r, xv.Slice)
+		return &AB{Slice: r}
 	case *AF:
 		r := make([]float64, xv.Len())
-		copy(r, xv)
-		return r
+		copy(r, xv.Slice)
+		return &AF{Slice: r}
 	case *AI:
 		r := make([]int, xv.Len())
-		copy(r, xv)
-		return r
+		copy(r, xv.Slice)
+		return &AI{Slice: r}
 	case *AS:
 		r := make([]string, xv.Len())
-		copy(r, xv)
-		return r
+		copy(r, xv.Slice)
+		return &AS{Slice: r}
 	case *AV:
 		r := make([]V, xv.Len())
-		copy(r, xv)
-		return r
+		copy(r, xv.Slice)
+		return &AV{Slice: r}
 	default:
 		return x
 	}
@@ -244,7 +244,7 @@ func toArray(x V) V {
 	case S:
 		return NewAS([]string{string(xv)})
 	case array:
-		return NewV(xv)
+		return x
 	default:
 		return NewAV([]V{x})
 	}
@@ -267,7 +267,7 @@ func toAI(x *AF) V {
 func fromABtoAI(x *AB) V {
 	r := make([]int, x.Len())
 	for i := range r {
-		r[i] = int(B2I(x[i]))
+		r[i] = int(B2I(x.At(i)))
 	}
 	return NewAI(r)
 }
@@ -384,13 +384,13 @@ func cType(x V) eltype {
 	}
 }
 
-func cTypeAO(x AV) eltype {
+func cTypeAO(x *AV) eltype {
 	if x.Len() == 0 {
 		return tAO
 	}
-	t := eType(x[0])
-	for i := 1; i < len(x); i++ {
-		t = mergeTypes(t, eType(x[i]))
+	t := eType(x.At(0))
+	for _, xi := range x.Slice[1:] {
+		t = mergeTypes(t, eType(xi))
 	}
 	switch t {
 	case tB:
@@ -482,7 +482,7 @@ func minMax(x *AI) (min, max int) {
 	if x.Len() == 0 {
 		return
 	}
-	min = x[0]
+	min = x.At(0)
 	max = min
 	for _, xi := range x.Slice[1:] {
 		switch {
@@ -508,8 +508,8 @@ func maxAI(x *AI) int {
 	return max
 }
 
-func minMaxB(x AB) (int, int) {
-	if len(x) == 0 {
+func minMaxB(x *AB) (int, int) {
+	if x.Len() == 0 {
 		return 0, 0
 	}
 	min := true
@@ -545,7 +545,7 @@ func isCanonicalV(x V) bool {
 // isCanonical returns true if the array is in canonical form, that is, it uses
 // the most specialized representation. For example AV{I(2), I(3)} is not
 // canonical, but AI{2, 3} is.
-func isCanonical(x AV) (eltype, bool) {
+func isCanonical(x *AV) (eltype, bool) {
 	t := aType(x)
 	switch t {
 	case tB, tI, tF, tS:
@@ -562,7 +562,7 @@ func isCanonical(x AV) (eltype, bool) {
 	}
 }
 
-func assertCanonical(x AV) {
+func assertCanonical(x *AV) {
 	_, ok := isCanonical(x)
 	if !ok {
 		panic(fmt.Sprintf("not canonical: %#v", x))
@@ -579,13 +579,13 @@ func normalize(x *AV) (array, bool) {
 		for i, xi := range x.Slice {
 			r[i] = xi.Int() != 0
 		}
-		return r, true
+		return &AB{Slice: r}, true
 	case tI:
 		r := make([]int, x.Len())
 		for i, xi := range x.Slice {
 			r[i] = int(xi.Int())
 		}
-		return r, true
+		return &AI{Slice: r}, true
 	case tF:
 		r := make([]float64, x.Len())
 		for i, xi := range x.Slice {
@@ -595,16 +595,16 @@ func normalize(x *AV) (array, bool) {
 				r[i] = float64(xi.F())
 			}
 		}
-		return r, true
+		return &AF{Slice: r}, true
 	case tS:
 		r := make([]string, x.Len())
 		for i, xi := range x.Slice {
 			r[i] = string(xi.Value.(S))
 		}
-		return r, true
+		return &AS{Slice: r}, true
 	case tV:
 		for i, xi := range x.Slice {
-			x[i] = canonicalV(xi)
+			x.Slice[i] = canonicalV(xi)
 		}
 		return x, false
 	default:
@@ -617,7 +617,7 @@ func normalize(x *AV) (array, bool) {
 func canonicalV(x V) V {
 	switch xv := x.Value.(type) {
 	case *AV:
-		r, b := normalize(xv.Slice)
+		r, b := normalize(xv)
 		if b {
 			return NewV(r)
 		}

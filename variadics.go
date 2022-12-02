@@ -536,7 +536,7 @@ func VOr(ctx *Context, args []V) V {
 
 // VList implements (x;y;...) array constructor variadic verb.
 func VList(ctx *Context, args []V) V {
-	xv, cloned := normalize(AV(args))
+	xv, cloned := normalize(&AV{Slice: args})
 	if cloned {
 		r := NewV(xv)
 		reverseMut(r)
@@ -544,7 +544,7 @@ func VList(ctx *Context, args []V) V {
 	}
 	r := cloneArgs(args)
 	reverseArgs(r)
-	return NewV(AV(r))
+	return NewAV(r)
 }
 
 // VEach implements the ' variadic adverb.
