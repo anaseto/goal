@@ -266,6 +266,9 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 		}
 		return NewV(Projection{Fun: NewLambda(id), Args: ctx.popN(n)})
 	}
+	for _, arg := range args {
+		arg.rcincr()
+	}
 	nVars := len(lc.Names) - lc.Rank
 	olen := len(ctx.stack)
 	for i := 0; i < nVars; i++ {
