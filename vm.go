@@ -22,12 +22,30 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			}
 			ctx.push(x)
 			ip++
+		case opGlobalLast:
+			x := ctx.globals[ops[ip]]
+			if x == (V{}) {
+				return ip - 1, fmt.Errorf("undefined global: %s",
+					ctx.gNames[ops[ip]])
+			}
+			x.rcdecr()
+			ctx.push(x)
+			ip++
 		case opLocal:
 			x := ctx.stack[ctx.frameIdx-int32(ops[ip])]
 			if x == (V{}) {
 				return ip - 1, fmt.Errorf("undefined local: %s",
 					ctx.lambdas[ctx.lambda].Names[int32(ops[ip])])
 			}
+			ctx.push(x)
+			ip++
+		case opLocalLast:
+			x := ctx.stack[ctx.frameIdx-int32(ops[ip])]
+			if x == (V{}) {
+				return ip - 1, fmt.Errorf("undefined local: %s",
+					ctx.lambdas[ctx.lambda].Names[int32(ops[ip])])
+			}
+			x.rcdecr()
 			ctx.push(x)
 			ip++
 		case opAssignGlobal:

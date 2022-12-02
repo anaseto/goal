@@ -47,11 +47,12 @@ func _() {
 	_ = x[astMONAD-3]
 	_ = x[astDYAD-4]
 	_ = x[astADVERB-5]
+	_ = x[astEMPTYLIST-6]
 }
 
-const _astTokenType_name = "astNUMBERastSTRINGastIDENTastMONADastDYADastADVERB"
+const _astTokenType_name = "astNUMBERastSTRINGastIDENTastMONADastDYADastADVERBastEMPTYLIST"
 
-var _astTokenType_index = [...]uint8{0, 9, 18, 26, 34, 41, 50}
+var _astTokenType_index = [...]uint8{0, 9, 18, 26, 34, 41, 50, 62}
 
 func (i astTokenType) String() string {
 	if i < 0 || i >= astTokenType(len(_astTokenType_index)-1) {
@@ -67,28 +68,30 @@ func _() {
 	_ = x[opConst-1]
 	_ = x[opNil-2]
 	_ = x[opGlobal-3]
-	_ = x[opLocal-4]
-	_ = x[opAssignGlobal-5]
-	_ = x[opAssignLocal-6]
-	_ = x[opAdverb-7]
-	_ = x[opVariadic-8]
-	_ = x[opLambda-9]
-	_ = x[opApply-10]
-	_ = x[opApplyV-11]
-	_ = x[opApply2-12]
-	_ = x[opApply2V-13]
-	_ = x[opApplyN-14]
-	_ = x[opApplyNV-15]
-	_ = x[opDrop-16]
-	_ = x[opJump-17]
-	_ = x[opJumpFalse-18]
-	_ = x[opJumpTrue-19]
-	_ = x[opReturn-20]
+	_ = x[opGlobalLast-4]
+	_ = x[opLocal-5]
+	_ = x[opLocalLast-6]
+	_ = x[opAssignGlobal-7]
+	_ = x[opAssignLocal-8]
+	_ = x[opAdverb-9]
+	_ = x[opVariadic-10]
+	_ = x[opLambda-11]
+	_ = x[opApply-12]
+	_ = x[opApplyV-13]
+	_ = x[opApply2-14]
+	_ = x[opApply2V-15]
+	_ = x[opApplyN-16]
+	_ = x[opApplyNV-17]
+	_ = x[opDrop-18]
+	_ = x[opJump-19]
+	_ = x[opJumpFalse-20]
+	_ = x[opJumpTrue-21]
+	_ = x[opReturn-22]
 }
 
-const _opcode_name = "opNopopConstopNilopGlobalopLocalopAssignGlobalopAssignLocalopAdverbopVariadicopLambdaopApplyopApplyVopApply2opApply2VopApplyNopApplyNVopDropopJumpopJumpFalseopJumpTrueopReturn"
+const _opcode_name = "opNopopConstopNilopGlobalopGlobalLastopLocalopLocalLastopAssignGlobalopAssignLocalopAdverbopVariadicopLambdaopApplyopApplyVopApply2opApply2VopApplyNopApplyNVopDropopJumpopJumpFalseopJumpTrueopReturn"
 
-var _opcode_index = [...]uint8{0, 5, 12, 17, 25, 32, 46, 59, 67, 77, 85, 92, 100, 108, 117, 125, 134, 140, 146, 157, 167, 175}
+var _opcode_index = [...]uint8{0, 5, 12, 17, 25, 37, 44, 55, 69, 82, 90, 100, 108, 115, 123, 131, 140, 148, 157, 163, 169, 180, 190, 198}
 
 func (i opcode) String() string {
 	if i < 0 || i >= opcode(len(_opcode_index)-1) {

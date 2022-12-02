@@ -12,7 +12,9 @@ const (
 	opConst
 	opNil
 	opGlobal
+	opGlobalLast
 	opLocal
+	opLocalLast
 	opAssignGlobal
 	opAssignLocal
 	opAdverb
@@ -56,33 +58,17 @@ func (ctx *Context) opcodesString(ops []opcode, lc *lambdaCode) string {
 		}
 		fmt.Fprintf(sb, "%3d %3d %s\t", i, pos, op)
 		switch op {
-		case opConst:
+		case opConst, opLambda, opApplyN:
 			fmt.Fprintf(sb, "%d", ops[i+1])
-		case opGlobal:
+		case opGlobal, opGlobalLast, opAssignGlobal:
 			fmt.Fprintf(sb, "%d (%s)", ops[i+1], ctx.gNames[int(ops[i+1])])
-		case opLocal:
+		case opLocal, opLocalLast, opAssignLocal:
 			fmt.Fprintf(sb, "%d (%s)", ops[i+1], lc.Names[int(ops[i+1])])
-		case opAssignGlobal:
-			fmt.Fprintf(sb, "%d (%s)", ops[i+1], ctx.gNames[int(ops[i+1])])
-		case opAssignLocal:
-			fmt.Fprintf(sb, "%d (%s)", ops[i+1], lc.Names[ops[i+1]])
-		case opVariadic:
+		case opVariadic, opApplyV, opApply2V:
 			fmt.Fprintf(sb, "%s", ctx.variadicsNames[ops[i+1]])
-		case opLambda:
-			fmt.Fprintf(sb, "%d", ops[i+1])
-		case opApplyV:
-			fmt.Fprintf(sb, "%s", ctx.variadicsNames[ops[i+1]])
-		case opApply2V:
-			fmt.Fprintf(sb, "%s", ctx.variadicsNames[ops[i+1]])
-		case opApplyN:
-			fmt.Fprintf(sb, "%d", ops[i+1])
 		case opApplyNV:
 			fmt.Fprintf(sb, "%s\t%d", ctx.variadicsNames[ops[i+1]], ops[i+2])
-		case opJump:
-			fmt.Fprintf(sb, "%d", int(ops[i+1])+1+i)
-		case opJumpFalse:
-			fmt.Fprintf(sb, "%d", int(ops[i+1])+1+i)
-		case opJumpTrue:
+		case opJump, opJumpFalse, opJumpTrue:
 			fmt.Fprintf(sb, "%d", int(ops[i+1])+1+i)
 		}
 		fmt.Fprint(sb, "\n")
