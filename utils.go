@@ -88,6 +88,8 @@ func maxS(x, y S) S {
 	return x
 }
 
+// clone creates an identical deep copy of a value, or the value itself if it
+// is reusable.
 func clone(x V) V {
 	x = cloneShallow(x)
 	if xv, ok := x.Value.(*AV); ok {
@@ -98,6 +100,8 @@ func clone(x V) V {
 	return x
 }
 
+// clone creates an identical shallow copy of a value, or the value itself if
+// it is reusable.
 func cloneShallow(x V) V {
 	if xv, ok := x.Value.(array); ok {
 		x.Value = cloneShallowArray(xv)
@@ -105,43 +109,33 @@ func cloneShallow(x V) V {
 	return x
 }
 
+// clone creates an identical shallow copy of an array, or the value itself if
+// it is reusable.
 func cloneShallowArray(x array) array {
+	if x.reusable() {
+		return x
+	}
 	switch xv := x.(type) {
 	case *AB:
-		if !xv.reusable() {
-			r := &AB{Slice: make([]bool, x.Len())}
-			copy(r.Slice, xv.Slice)
-			return r
-		}
-		return x
+		r := &AB{Slice: make([]bool, xv.Len())}
+		copy(r.Slice, xv.Slice)
+		return r
 	case *AI:
-		if !xv.reusable() {
-			r := &AI{Slice: make([]int, x.Len())}
-			copy(r.Slice, xv.Slice)
-			return r
-		}
-		return x
+		r := &AI{Slice: make([]int, xv.Len())}
+		copy(r.Slice, xv.Slice)
+		return r
 	case *AF:
-		if !xv.reusable() {
-			r := &AF{Slice: make([]float64, x.Len())}
-			copy(r.Slice, xv.Slice)
-			return r
-		}
-		return x
+		r := &AF{Slice: make([]float64, xv.Len())}
+		copy(r.Slice, xv.Slice)
+		return r
 	case *AS:
-		if !xv.reusable() {
-			r := &AS{Slice: make([]string, x.Len())}
-			copy(r.Slice, xv.Slice)
-			return r
-		}
-		return x
+		r := &AS{Slice: make([]string, xv.Len())}
+		copy(r.Slice, xv.Slice)
+		return r
 	case *AV:
-		if !xv.reusable() {
-			r := &AV{Slice: make([]V, x.Len())}
-			copy(r.Slice, xv.Slice)
-			return r
-		}
-		return x
+		r := &AV{Slice: make([]V, xv.Len())}
+		copy(r.Slice, xv.Slice)
+		return r
 	default:
 		// should not happen
 		panic("cloneShallowArray: x not a clonable array")
