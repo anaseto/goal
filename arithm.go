@@ -15,28 +15,28 @@ func negate(x V) V {
 		return NewV(-xv)
 	case *AB:
 		r := make([]int, xv.Len())
-		for i := range r {
-			r[i] = int(-B2I(xv.At(i)))
+		for i, xi := range xv.Slice {
+			r[i] = -B2I(xi)
 		}
 		return NewAI(r)
 	case *AI:
-		r := make([]int, xv.Len())
-		for i := range r {
-			r[i] = -xv.At(i)
+		r := xv.reuse()
+		for i, xi := range xv.Slice {
+			r.Slice[i] = -xi
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AF:
-		r := make([]float64, xv.Len())
-		for i := range r {
-			r[i] = -xv.At(i)
+		r := xv.reuse()
+		for i, xi := range xv.Slice {
+			r.Slice[i] = -xi
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AV:
-		r := make([]V, xv.Len())
-		for i := range r {
-			r[i] = negate(xv.At(i))
+		r := xv.reuse()
+		for i, xi := range xv.Slice {
+			r.Slice[i] = negate(xi)
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("-x", "x", x)
 	}
@@ -75,23 +75,23 @@ func sign(x V) V {
 	case *AB:
 		return x
 	case *AI:
-		r := make([]int, xv.Len())
-		for i := range r {
-			r[i] = int(signI(xv.At(i)))
+		r := xv.reuse()
+		for i, xi := range xv.Slice {
+			r.Slice[i] = signI(xi)
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AF:
 		r := make([]int, xv.Len())
-		for i := range r {
-			r[i] = int(signF(F(xv.At(i))))
+		for i, xi := range xv.Slice {
+			r[i] = signF(F(xi))
 		}
 		return NewAI(r)
 	case *AV:
-		r := make([]V, xv.Len())
-		for i := range r {
-			r[i] = sign(xv.At(i))
+		r := xv.reuse()
+		for i, xi := range xv.Slice {
+			r.Slice[i] = sign(xi)
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("sign x", "x", x)
 	}
@@ -112,25 +112,25 @@ func floor(x V) V {
 	case *AI:
 		return x
 	case *AF:
-		r := make([]int, xv.Len())
-		for i := range r {
+		r := xv.reuse()
+		for i, xi := range xv.Slice {
 			// NOTE: we assume conversion is possible, leaving
 			// handling NaN, INF or big floats to the program.
-			r[i] = int(math.Floor(xv.At(i)))
+			r.Slice[i] = math.Floor(xi)
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AS:
-		r := make([]string, xv.Len())
-		for i := range r {
-			r[i] = strings.ToLower(xv.At(i))
+		r := xv.reuse()
+		for i, xi := range xv.Slice {
+			r.Slice[i] = strings.ToLower(xi)
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AV:
-		r := make([]V, xv.Len())
-		for i := range r {
-			r[i] = floor(xv.At(i))
+		r := xv.reuse()
+		for i, xi := range xv.Slice {
+			r.Slice[i] = floor(xi)
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("_N", "N", x)
 	}
@@ -151,23 +151,23 @@ func ceil(x V) V {
 	case *AI:
 		return x
 	case *AF:
-		r := make([]int, xv.Len())
-		for i := range r {
-			r[i] = int(math.Ceil(xv.At(i)))
+		r := xv.reuse()
+		for i, xi := range xv.Slice {
+			r.Slice[i] = math.Ceil(xi)
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AS:
-		r := make([]string, xv.Len())
-		for i := range r {
-			r[i] = strings.ToUpper(xv.At(i))
+		r := xv.reuse()
+		for i, xi := range xv.Slice {
+			r.Slice[i] = strings.ToUpper(xi)
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AV:
-		r := make([]V, xv.Len())
-		for i := range r {
-			r[i] = ceil(xv.At(i))
+		r := xv.reuse()
+		for i, xi := range xv.Slice {
+			r.Slice[i] = ceil(xi)
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("ceil x", "x", x)
 	}
@@ -184,29 +184,29 @@ func not(x V) V {
 	case S:
 		return NewI(B2I(xv == ""))
 	case *AB:
-		r := make([]bool, xv.Len())
-		for i := range r {
-			r[i] = !xv.At(i)
+		r := xv.reuse()
+		for i, xi := range xv.Slice {
+			r.Slice[i] = !xi
 		}
-		return NewAB(r)
+		return NewV(r)
 	case *AI:
 		r := make([]bool, xv.Len())
-		for i := range r {
-			r[i] = xv.At(i) == 0
+		for i, xi := range xv.Slice {
+			r[i] = xi == 0
 		}
 		return NewAB(r)
 	case *AF:
 		r := make([]bool, xv.Len())
-		for i := range r {
-			r[i] = xv.At(i) == 0
+		for i, xi := range xv.Slice {
+			r[i] = xi == 0
 		}
 		return NewAB(r)
 	case *AV:
-		r := make([]V, xv.Len())
-		for i := range r {
-			r[i] = not(xv.At(i))
+		r := xv.reuse()
+		for i, xi := range xv.Slice {
+			r.Slice[i] = not(xi)
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return NewI(B2I(!isTrue(x)))
 	}
