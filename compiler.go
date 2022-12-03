@@ -429,12 +429,6 @@ func (c *compiler) pushVariadic(v variadic, n int) {
 	}
 }
 
-func getIdent(e expr) (*astToken, bool) {
-	tok, ok := e.(*astToken)
-	return tok, ok && tok.Type == astIDENT
-
-}
-
 func isLeftArg(e expr) bool {
 	switch e := e.(type) {
 	case *astToken:
