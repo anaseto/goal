@@ -89,85 +89,62 @@ func maxS(x, y S) S {
 }
 
 func clone(x V) V {
-	switch xv := x.Value.(type) {
-	case *AB:
-		r := make([]bool, xv.Len())
-		copy(r, xv.Slice)
-		return NewAB(r)
-	case *AF:
-		r := make([]float64, xv.Len())
-		copy(r, xv.Slice)
-		return NewAF(r)
-	case *AI:
-		r := make([]int, xv.Len())
-		copy(r, xv.Slice)
-		return NewAI(r)
-	case *AS:
-		r := make([]string, xv.Len())
-		copy(r, xv.Slice)
-		return NewAS(r)
-	case *AV:
-		r := make([]V, xv.Len())
-		for i := range r {
-			r[i] = clone(xv.At(i))
+	x = cloneShallow(x)
+	if xv, ok := x.Value.(*AV); ok {
+		for i, xi := range xv.Slice {
+			xv.Slice[i] = clone(xi)
 		}
-		return NewAV(r)
-	default:
-		return x
 	}
+	return x
 }
 
 func cloneShallow(x V) V {
-	switch xv := x.Value.(type) {
-	case *AB:
-		r := make([]bool, xv.Len())
-		copy(r, xv.Slice)
-		return NewAB(r)
-	case *AF:
-		r := make([]float64, xv.Len())
-		copy(r, xv.Slice)
-		return NewAF(r)
-	case *AI:
-		r := make([]int, xv.Len())
-		copy(r, xv.Slice)
-		return NewAI(r)
-	case *AS:
-		r := make([]string, xv.Len())
-		copy(r, xv.Slice)
-		return NewAS(r)
-	case *AV:
-		r := make([]V, xv.Len())
-		copy(r, xv.Slice)
-		return NewAV(r)
-	default:
-		return x
+	if xv, ok := x.Value.(array); ok {
+		x.Value = cloneShallowArray(xv)
 	}
+	return x
 }
 
 func cloneShallowArray(x array) array {
 	switch xv := x.(type) {
 	case *AB:
-		r := make([]bool, xv.Len())
-		copy(r, xv.Slice)
-		return &AB{Slice: r}
-	case *AF:
-		r := make([]float64, xv.Len())
-		copy(r, xv.Slice)
-		return &AF{Slice: r}
-	case *AI:
-		r := make([]int, xv.Len())
-		copy(r, xv.Slice)
-		return &AI{Slice: r}
-	case *AS:
-		r := make([]string, xv.Len())
-		copy(r, xv.Slice)
-		return &AS{Slice: r}
-	case *AV:
-		r := make([]V, xv.Len())
-		copy(r, xv.Slice)
-		return &AV{Slice: r}
-	default:
+		if !xv.reusable() {
+			r := &AB{Slice: make([]bool, x.Len())}
+			copy(r.Slice, xv.Slice)
+			return r
+		}
 		return x
+	case *AI:
+		if !xv.reusable() {
+			r := &AI{Slice: make([]int, x.Len())}
+			copy(r.Slice, xv.Slice)
+			return r
+		}
+		return x
+	case *AF:
+		if !xv.reusable() {
+			r := &AF{Slice: make([]float64, x.Len())}
+			copy(r.Slice, xv.Slice)
+			return r
+		}
+		return x
+	case *AS:
+		if !xv.reusable() {
+			r := &AS{Slice: make([]string, x.Len())}
+			copy(r.Slice, xv.Slice)
+			return r
+		}
+		return x
+	case *AV:
+		if !xv.reusable() {
+			r := &AV{Slice: make([]V, x.Len())}
+			copy(r.Slice, xv.Slice)
+			return r
+		}
+		return x
+	default:
+		// should not happen
+		panic("cloneShallowArray: x not a clonable array")
 	}
 }
 
