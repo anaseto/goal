@@ -137,14 +137,19 @@ func joinToAV(x V, y *AV, left bool) V {
 		}
 		return joinArrays(y, xv)
 	default:
-		r := make([]V, y.Len()+1)
 		if left {
+			r := make([]V, y.Len()+1)
 			r[0] = x
 			copy(r[1:], y.Slice)
-		} else {
-			r[len(r)-1] = x
-			copy(r[:len(r)-1], y.Slice)
+			return NewAV(r)
 		}
+		if y.reusable() {
+			y.Slice = append(y.Slice, x)
+			return NewV(y)
+		}
+		r := make([]V, y.Len()+1)
+		r[len(r)-1] = x
+		copy(r[:len(r)-1], y.Slice)
 		return NewAV(r)
 	}
 }
@@ -179,24 +184,34 @@ func joinAtomToArray(x V, y array, left bool) V {
 func joinToAS(x V, y *AS, left bool) V {
 	switch xv := x.Value.(type) {
 	case S:
-		r := make([]string, y.Len()+1)
 		if left {
+			r := make([]string, y.Len()+1)
 			r[0] = string(xv)
 			copy(r[1:], y.Slice)
-		} else {
-			r[len(r)-1] = string(xv)
-			copy(r[:len(r)-1], y.Slice)
+			return NewAS(r)
 		}
+		if y.reusable() {
+			y.Slice = append(y.Slice, string(xv))
+			return NewV(y)
+		}
+		r := make([]string, y.Len()+1)
+		r[len(r)-1] = string(xv)
+		copy(r[:len(r)-1], y.Slice)
 		return NewAS(r)
 	case *AS:
-		r := make([]string, y.Len()+xv.Len())
 		if left {
+			r := make([]string, y.Len()+xv.Len())
 			copy(r[:xv.Len()], xv.Slice)
 			copy(r[xv.Len():], y.Slice)
-		} else {
-			copy(r[:y.Len()], y.Slice)
-			copy(r[y.Len():], xv.Slice)
+			return NewAS(r)
 		}
+		if y.reusable() {
+			y.Slice = append(y.Slice, xv.Slice...)
+			return NewV(y)
+		}
+		r := make([]string, y.Len()+xv.Len())
+		copy(r[:y.Len()], y.Slice)
+		copy(r[y.Len():], xv.Slice)
 		return NewAS(r)
 	case array:
 		if left {
@@ -211,14 +226,19 @@ func joinToAS(x V, y *AS, left bool) V {
 func joinToAB(x V, y *AB, left bool) V {
 	if x.IsInt() {
 		if isBI(x.Int()) {
-			r := make([]bool, y.Len()+1)
 			if left {
+				r := make([]bool, y.Len()+1)
 				r[0] = x.Int() == 1
 				copy(r[1:], y.Slice)
-			} else {
-				r[len(r)-1] = x.Int() == 1
-				copy(r[:len(r)-1], y.Slice)
+				return NewAB(r)
 			}
+			if y.reusable() {
+				y.Slice = append(y.Slice, x.Int() == 1)
+				return NewV(y)
+			}
+			r := make([]bool, y.Len()+1)
+			r[len(r)-1] = x.Int() == 1
+			copy(r[:len(r)-1], y.Slice)
 			return NewAB(r)
 		}
 		r := make([]int, y.Len()+1)
@@ -278,14 +298,19 @@ func joinToAB(x V, y *AB, left bool) V {
 
 func joinToAI(x V, y *AI, left bool) V {
 	if x.IsInt() {
-		r := make([]int, y.Len()+1)
 		if left {
+			r := make([]int, y.Len()+1)
 			r[0] = x.Int()
 			copy(r[1:], y.Slice)
-		} else {
-			r[len(r)-1] = x.Int()
-			copy(r[:len(r)-1], y.Slice)
+			return NewAI(r)
 		}
+		if y.reusable() {
+			y.Slice = append(y.Slice, x.Int())
+			return NewV(y)
+		}
+		r := make([]int, y.Len()+1)
+		r[len(r)-1] = x.Int()
+		copy(r[:len(r)-1], y.Slice)
 		return NewAI(r)
 
 	}
@@ -331,26 +356,36 @@ func joinToAI(x V, y *AI, left bool) V {
 
 func joinToAF(x V, y *AF, left bool) V {
 	if x.IsInt() {
-		r := make([]float64, y.Len()+1)
 		if left {
+			r := make([]float64, y.Len()+1)
 			r[0] = float64(x.Int())
 			copy(r[1:], y.Slice)
-		} else {
-			r[len(r)-1] = float64(x.Int())
-			copy(r[:len(r)-1], y.Slice)
+			return NewAF(r)
 		}
+		if y.reusable() {
+			y.Slice = append(y.Slice, float64(x.Int()))
+			return NewV(y)
+		}
+		r := make([]float64, y.Len()+1)
+		r[len(r)-1] = float64(x.Int())
+		copy(r[:len(r)-1], y.Slice)
 		return NewAF(r)
 	}
 	switch xv := x.Value.(type) {
 	case F:
-		r := make([]float64, y.Len()+1)
 		if left {
+			r := make([]float64, y.Len()+1)
 			r[0] = float64(xv)
 			copy(r[1:], y.Slice)
-		} else {
-			r[len(r)-1] = float64(xv)
-			copy(r[:len(r)-1], y.Slice)
+			return NewAF(r)
 		}
+		if y.reusable() {
+			y.Slice = append(y.Slice, float64(xv))
+			return NewV(y)
+		}
+		r := make([]float64, y.Len()+1)
+		r[len(r)-1] = float64(xv)
+		copy(r[:len(r)-1], y.Slice)
 		return NewAF(r)
 	case *AB:
 		if left {
@@ -378,6 +413,10 @@ func joinToAF(x V, y *AF, left bool) V {
 }
 
 func joinABAB(x *AB, y *AB) V {
+	if x.reusable() {
+		x.Slice = append(x.Slice, y.Slice...)
+		return NewV(x)
+	}
 	r := make([]bool, y.Len()+x.Len())
 	copy(r[:x.Len()], x.Slice)
 	copy(r[x.Len():], y.Slice)
@@ -385,6 +424,10 @@ func joinABAB(x *AB, y *AB) V {
 }
 
 func joinAIAI(x *AI, y *AI) V {
+	if x.reusable() {
+		x.Slice = append(x.Slice, y.Slice...)
+		return NewV(x)
+	}
 	r := make([]int, y.Len()+x.Len())
 	copy(r[:x.Len()], x.Slice)
 	copy(r[x.Len():], y.Slice)
@@ -392,6 +435,10 @@ func joinAIAI(x *AI, y *AI) V {
 }
 
 func joinAFAF(x *AF, y *AF) V {
+	if x.reusable() {
+		x.Slice = append(x.Slice, y.Slice...)
+		return NewV(x)
+	}
 	r := make([]float64, y.Len()+x.Len())
 	copy(r[:x.Len()], x.Slice)
 	copy(r[x.Len():], y.Slice)
