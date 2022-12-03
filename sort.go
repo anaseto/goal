@@ -168,6 +168,9 @@ func lessAB(x V, y V) bool {
 		return !lessF(y, x)
 	case *AB:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
+			if !xv.At(i) && yv.At(i) {
+				return true
+			}
 			if xv.At(i) && !yv.At(i) {
 				return false
 			}
@@ -175,6 +178,9 @@ func lessAB(x V, y V) bool {
 		return xv.Len() < yv.Len()
 	case *AF:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
+			if B2F(xv.At(i)) < F(yv.At(i)) {
+				return true
+			}
 			if B2F(xv.At(i)) > F(yv.At(i)) {
 				return false
 			}
@@ -182,6 +188,9 @@ func lessAB(x V, y V) bool {
 		return xv.Len() < yv.Len()
 	case *AI:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
+			if B2I(xv.At(i)) < yv.At(i) {
+				return true
+			}
 			if B2I(xv.At(i)) > yv.At(i) {
 				return false
 			}
@@ -189,6 +198,9 @@ func lessAB(x V, y V) bool {
 		return xv.Len() < yv.Len()
 	case *AV:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
+			if less(NewI(B2I(xv.At(i))), yv.At(i)) {
+				return true
+			}
 			if less(yv.At(i), NewI(B2I(xv.At(i)))) {
 				return false
 			}
@@ -209,6 +221,9 @@ func lessAI(x V, y V) bool {
 		return !lessF(y, x)
 	case *AB:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
+			if xv.At(i) < B2I(yv.At(i)) {
+				return true
+			}
 			if xv.At(i) > B2I(yv.At(i)) {
 				return false
 			}
@@ -216,6 +231,9 @@ func lessAI(x V, y V) bool {
 		return xv.Len() < yv.Len()
 	case *AF:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
+			if F(xv.At(i)) < F(yv.At(i)) {
+				return true
+			}
 			if F(xv.At(i)) > F(yv.At(i)) {
 				return false
 			}
@@ -223,6 +241,9 @@ func lessAI(x V, y V) bool {
 		return xv.Len() < yv.Len()
 	case *AI:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
+			if xv.At(i) < yv.At(i) {
+				return true
+			}
 			if xv.At(i) > yv.At(i) {
 				return false
 			}
@@ -230,6 +251,9 @@ func lessAI(x V, y V) bool {
 		return xv.Len() < yv.Len()
 	case *AV:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
+			if less(NewI(xv.At(i)), yv.At(i)) {
+				return true
+			}
 			if less(yv.At(i), NewI(xv.At(i))) {
 				return false
 			}
@@ -250,6 +274,9 @@ func lessAF(x V, y V) bool {
 		return !lessF(y, x)
 	case *AB:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
+			if F(xv.At(i)) < B2F(yv.At(i)) {
+				return true
+			}
 			if F(xv.At(i)) > B2F(yv.At(i)) {
 				return false
 			}
@@ -257,6 +284,9 @@ func lessAF(x V, y V) bool {
 		return xv.Len() < yv.Len()
 	case *AF:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
+			if xv.At(i) < yv.At(i) {
+				return true
+			}
 			if xv.At(i) > yv.At(i) {
 				return false
 			}
@@ -264,6 +294,9 @@ func lessAF(x V, y V) bool {
 		return xv.Len() < yv.Len()
 	case *AI:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
+			if xv.At(i) < float64(yv.At(i)) {
+				return true
+			}
 			if xv.At(i) > float64(yv.At(i)) {
 				return false
 			}
@@ -271,6 +304,9 @@ func lessAF(x V, y V) bool {
 		return xv.Len() < yv.Len()
 	case *AV:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
+			if less(NewF(xv.At(i)), yv.At(i)) {
+				return true
+			}
 			if less(yv.At(i), NewF(xv.At(i))) {
 				return false
 			}
@@ -288,6 +324,9 @@ func lessAS(x V, y V) bool {
 		return !lessS(y, x)
 	case *AS:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
+			if xv.At(i) < yv.At(i) {
+				return true
+			}
 			if xv.At(i) > yv.At(i) {
 				return false
 			}
@@ -295,6 +334,9 @@ func lessAS(x V, y V) bool {
 		return xv.Len() < yv.Len()
 	case *AV:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
+			if less(NewS(xv.At(i)), yv.At(i)) {
+				return true
+			}
 			if less(yv.At(i), NewS(xv.At(i))) {
 				return false
 			}
@@ -315,6 +357,9 @@ func lessAV(x V, y V) bool {
 		return less(xv.At(0), y)
 	case *AB:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
+			if less(xv.At(i), NewI(B2I(yv.At(i)))) {
+				return true
+			}
 			if less(NewI(B2I(yv.At(i))), xv.At(i)) {
 				return false
 			}
@@ -322,6 +367,9 @@ func lessAV(x V, y V) bool {
 		return xv.Len() < yv.Len()
 	case *AF:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
+			if less(xv.At(i), NewF(yv.At(i))) {
+				return true
+			}
 			if less(NewF(yv.At(i)), xv.At(i)) {
 				return false
 			}
@@ -329,6 +377,9 @@ func lessAV(x V, y V) bool {
 		return xv.Len() < yv.Len()
 	case *AI:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
+			if less(xv.At(i), NewI(yv.At(i))) {
+				return true
+			}
 			if less(NewI(yv.At(i)), xv.At(i)) {
 				return false
 			}
@@ -336,6 +387,9 @@ func lessAV(x V, y V) bool {
 		return xv.Len() < yv.Len()
 	case *AV:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
+			if less(xv.At(i), yv.At(i)) {
+				return true
+			}
 			if less(yv.At(i), xv.At(i)) {
 				return false
 			}
