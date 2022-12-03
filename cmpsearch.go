@@ -41,33 +41,33 @@ func matchArray(x array, y Value) bool {
 	if l != ya.Len() {
 		return false
 	}
-	switch x := x.(type) {
+	switch xv := x.(type) {
 	case *AB:
 		switch yv := y.(type) {
 		case *AB:
-			return matchAB(x, yv)
+			return matchAB(xv, yv)
 		case *AI:
-			return matchABAI(x, yv)
+			return matchABAI(xv, yv)
 		case *AF:
-			return matchABAF(x, yv)
+			return matchABAF(xv, yv)
 		}
 	case *AI:
 		switch yv := y.(type) {
 		case *AB:
-			return matchABAI(yv, x)
+			return matchABAI(yv, xv)
 		case *AI:
-			return matchAI(x, yv)
+			return matchAI(xv, yv)
 		case *AF:
-			return matchAIAF(x, yv)
+			return matchAIAF(xv, yv)
 		}
 	case *AF:
 		switch yv := y.(type) {
 		case *AB:
-			return matchABAF(yv, x)
+			return matchABAF(yv, xv)
 		case *AI:
-			return matchAIAF(yv, x)
+			return matchAIAF(yv, xv)
 		case *AF:
-			return matchAF(x, yv)
+			return matchAF(xv, yv)
 		}
 	case *AS:
 		yv, ok := y.(*AS)
@@ -75,7 +75,7 @@ func matchArray(x array, y Value) bool {
 			break
 		}
 		for i, yi := range yv.Slice {
-			if yi != x.At(i) {
+			if yi != xv.At(i) {
 				return false
 			}
 		}
@@ -227,23 +227,23 @@ func uniq(x V) V {
 	if Length(x) == 0 {
 		return x
 	}
-	//assertCanonical(x)
-	switch x := x.Value.(type) {
+	//assertCanonical(xv)
+	switch xv := x.Value.(type) {
 	case *AB:
-		if x.Len() == 0 {
-			return NewV(x)
+		if xv.Len() == 0 {
+			return NewV(xv)
 		}
-		b := x.At(0)
-		for i := 1; i < x.Len(); i++ {
-			if x.At(i) != b {
-				return NewAB([]bool{b, x.At(i)})
+		b := xv.At(0)
+		for i := 1; i < xv.Len(); i++ {
+			if xv.At(i) != b {
+				return NewAB([]bool{b, xv.At(i)})
 			}
 		}
 		return NewAB([]bool{b})
 	case *AF:
 		r := []float64{}
 		m := map[float64]struct{}{}
-		for _, xi := range x.Slice {
+		for _, xi := range xv.Slice {
 			_, ok := m[xi]
 			if !ok {
 				r = append(r, xi)
@@ -254,7 +254,7 @@ func uniq(x V) V {
 	case *AI:
 		r := []int{}
 		m := map[int]struct{}{}
-		for _, xi := range x.Slice {
+		for _, xi := range xv.Slice {
 			_, ok := m[xi]
 			if !ok {
 				r = append(r, xi)
@@ -266,7 +266,7 @@ func uniq(x V) V {
 	case *AS:
 		r := []string{}
 		m := map[string]struct{}{}
-		for _, xi := range x.Slice {
+		for _, xi := range xv.Slice {
 			_, ok := m[xi]
 			if !ok {
 				r = append(r, xi)
@@ -278,11 +278,11 @@ func uniq(x V) V {
 	case *AV:
 		// NOTE: quadratic algorithm, worst case complexity could be
 		// improved by sorting or string hashing.
-		r := make([]V, x.Len())
+		r := make([]V, xv.Len())
 	loop:
-		for i, xi := range x.Slice {
-			for j := range x.Slice[:i] {
-				if Match(xi, x.At(j)) {
+		for i, xi := range xv.Slice {
+			for j := range xv.Slice[:i] {
+				if Match(xi, xv.At(j)) {
 					continue loop
 				}
 			}
@@ -300,23 +300,23 @@ func markFirsts(x V) V {
 	if Length(x) == 0 {
 		return NewAB([]bool{})
 	}
-	//assertCanonical(x)
-	switch x := x.Value.(type) {
+	//assertCanonical(xv)
+	switch xv := x.Value.(type) {
 	case *AB:
-		r := make([]bool, x.Len())
+		r := make([]bool, xv.Len())
 		r[0] = true
-		x0 := x.At(0)
-		for i := 1; i < x.Len(); i++ {
-			if x.At(i) != x0 {
+		x0 := xv.At(0)
+		for i := 1; i < xv.Len(); i++ {
+			if xv.At(i) != x0 {
 				r[i] = true
 				break
 			}
 		}
 		return NewAB(r)
 	case *AF:
-		r := make([]bool, x.Len())
+		r := make([]bool, xv.Len())
 		m := map[float64]struct{}{}
-		for i, xi := range x.Slice {
+		for i, xi := range xv.Slice {
 			_, ok := m[xi]
 			if !ok {
 				r[i] = true
@@ -326,9 +326,9 @@ func markFirsts(x V) V {
 		}
 		return NewAB(r)
 	case *AI:
-		r := make([]bool, x.Len())
+		r := make([]bool, xv.Len())
 		m := map[int]struct{}{}
-		for i, xi := range x.Slice {
+		for i, xi := range xv.Slice {
 			_, ok := m[xi]
 			if !ok {
 				r[i] = true
@@ -338,9 +338,9 @@ func markFirsts(x V) V {
 		}
 		return NewAB(r)
 	case *AS:
-		r := make([]bool, x.Len())
+		r := make([]bool, xv.Len())
 		m := map[string]struct{}{}
-		for i, xi := range x.Slice {
+		for i, xi := range xv.Slice {
 			_, ok := m[xi]
 			if !ok {
 				r[i] = true
@@ -352,11 +352,11 @@ func markFirsts(x V) V {
 	case *AV:
 		// NOTE: quadratic algorithm, worst case complexity could be
 		// improved by sorting or string hashing.
-		r := make([]bool, x.Len())
+		r := make([]bool, xv.Len())
 	loop:
-		for i, xi := range x.Slice {
-			for j := range x.Slice[:i] {
-				if Match(xi, x.At(j)) {
+		for i, xi := range xv.Slice {
+			for j := range xv.Slice[:i] {
+				if Match(xi, xv.At(j)) {
 					continue loop
 				}
 			}
@@ -371,9 +371,9 @@ func markFirsts(x V) V {
 // memberOf returns x in y.
 func memberOf(x, y V) V {
 	if Length(y) == 0 {
-		switch x := x.Value.(type) {
+		switch xv := x.Value.(type) {
 		case array:
-			r := make([]bool, x.Len())
+			r := make([]bool, xv.Len())
 			return NewAB(r)
 		default:
 			return NewI(B2I(false))
@@ -383,18 +383,18 @@ func memberOf(x, y V) V {
 		return NewAB([]bool{})
 	}
 	//assertCanonical(x)
-	//assertCanonical(y)
-	switch y := y.Value.(type) {
+	//assertCanonical(yv)
+	switch yv := y.Value.(type) {
 	case *AB:
-		return memberOfAB(x, y)
+		return memberOfAB(x, yv)
 	case *AF:
-		return memberOfAF(x, y)
+		return memberOfAF(x, yv)
 	case *AI:
-		return memberOfAI(x, y)
+		return memberOfAI(x, yv)
 	case *AS:
-		return memberOfAS(x, y)
+		return memberOfAS(x, yv)
 	case *AV:
-		return memberOfAV(x, y)
+		return memberOfAV(x, yv)
 	default:
 		return errf("x in y : y not an array (%s)", y.Type())
 	}
@@ -409,9 +409,9 @@ func memberOfAB(x V, y *AB) V {
 		t, f = t || yi, f || !yi
 	}
 	if t && f {
-		switch x := x.Value.(type) {
+		switch xv := x.Value.(type) {
 		case array:
-			r := make([]bool, x.Len())
+			r := make([]bool, xv.Len())
 			for i := range r {
 				r[i] = true
 			}
@@ -439,30 +439,30 @@ func memberOfAF(x V, y *AF) V {
 		_, ok := m[F(x.Int())]
 		return NewI(B2I(ok))
 	}
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case F:
-		_, ok := m[x]
+		_, ok := m[xv]
 		return NewI(B2I(ok))
 	case *AB:
-		r := make([]bool, x.Len())
-		for i, xi := range x.Slice {
+		r := make([]bool, xv.Len())
+		for i, xi := range xv.Slice {
 			_, r[i] = m[B2F(xi)]
 		}
 		return NewAB(r)
 	case *AI:
-		r := make([]bool, x.Len())
-		for i, xi := range x.Slice {
+		r := make([]bool, xv.Len())
+		for i, xi := range xv.Slice {
 			_, r[i] = m[F(xi)]
 		}
 		return NewAB(r)
 	case *AF:
-		r := make([]bool, x.Len())
-		for i, xi := range x.Slice {
+		r := make([]bool, xv.Len())
+		for i, xi := range xv.Slice {
 			_, r[i] = m[F(xi)]
 		}
 		return NewAB(r)
 	case array:
-		return memberOfArray(x, y)
+		return memberOfArray(xv, y)
 	default:
 		return NewI(0)
 	}
@@ -481,28 +481,28 @@ func memberOfAI(x V, y *AI) V {
 		_, ok := m[x.Int()]
 		return NewI(B2I(ok))
 	}
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case F:
-		if !isI(x) {
+		if !isI(xv) {
 			return NewI(B2I(false))
 		}
-		_, ok := m[int(x)]
+		_, ok := m[int(xv)]
 		return NewI(B2I(ok))
 	case *AB:
-		r := make([]bool, x.Len())
-		for i, xi := range x.Slice {
+		r := make([]bool, xv.Len())
+		for i, xi := range xv.Slice {
 			_, r[i] = m[int(B2I(xi))]
 		}
 		return NewAB(r)
 	case *AI:
-		r := make([]bool, x.Len())
-		for i, xi := range x.Slice {
+		r := make([]bool, xv.Len())
+		for i, xi := range xv.Slice {
 			_, r[i] = m[xi]
 		}
 		return NewAB(r)
 	case *AF:
-		r := make([]bool, x.Len())
-		for i, xi := range x.Slice {
+		r := make([]bool, xv.Len())
+		for i, xi := range xv.Slice {
 			if !isI(F(xi)) {
 				continue
 			}
@@ -510,7 +510,7 @@ func memberOfAI(x V, y *AI) V {
 		}
 		return NewAB(r)
 	case array:
-		return memberOfArray(x, y)
+		return memberOfArray(xv, y)
 	default:
 		return NewI(0)
 	}
@@ -525,18 +525,18 @@ func memberOfAS(x V, y *AS) V {
 			continue
 		}
 	}
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case S:
-		_, ok := m[string(x)]
+		_, ok := m[string(xv)]
 		return NewI(B2I(ok))
 	case *AS:
-		r := make([]bool, x.Len())
-		for i, xi := range x.Slice {
+		r := make([]bool, xv.Len())
+		for i, xi := range xv.Slice {
 			_, r[i] = m[xi]
 		}
 		return NewAB(r)
 	case array:
-		return memberOfArray(x, y)
+		return memberOfArray(xv, y)
 	default:
 		return NewI(0)
 	}
@@ -684,20 +684,20 @@ func without(x, y V) V {
 // find returns x?y.
 func find(x, y V) V {
 	//assertCanonical(y)
-	//assertCanonical(x)
-	switch x := x.Value.(type) {
+	//assertCanonical(xv)
+	switch xv := x.Value.(type) {
 	case S:
-		return findS(x, y)
+		return findS(xv, y)
 	case *AB:
-		return findAB(x, y)
+		return findAB(xv, y)
 	case *AF:
-		return findAF(x, y)
+		return findAF(xv, y)
 	case *AI:
-		return findAI(x, y)
+		return findAI(xv, y)
 	case *AS:
-		return findAS(x, y)
+		return findAS(xv, y)
 	case *AV:
-		return findAV(x, y)
+		return findAV(xv, y)
 	default:
 		return errf("x?y : x not an array (%s)", x.Type())
 	}
@@ -788,23 +788,23 @@ func findAB(x *AB, y V) V {
 		}
 		return NewI(x.Len())
 	}
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 	case F:
-		if !isI(y) {
+		if !isI(yv) {
 			return NewI(x.Len())
 		}
-		return findAB(x, NewI(int(y)))
+		return findAB(x, NewI(int(yv)))
 	case *AB:
 		m := imapAB(x)
-		r := make([]int, y.Len())
-		for i, yi := range y.Slice {
+		r := make([]int, yv.Len())
+		for i, yi := range yv.Slice {
 			r[i] = m[B2I(yi)]
 		}
 		return NewAI(r)
 	case *AI:
 		m := imapAB(x)
-		r := make([]int, y.Len())
-		for i, yi := range y.Slice {
+		r := make([]int, yv.Len())
+		for i, yi := range yv.Slice {
 			if yi != 0 && yi != 1 {
 				r[i] = x.Len()
 			} else {
@@ -814,8 +814,8 @@ func findAB(x *AB, y V) V {
 		return NewAI(r)
 	case *AF:
 		m := imapAB(x)
-		r := make([]int, y.Len())
-		for i, yi := range y.Slice {
+		r := make([]int, yv.Len())
+		for i, yi := range yv.Slice {
 			if yi != 0 && yi != 1 {
 				r[i] = x.Len()
 			} else {
@@ -824,8 +824,7 @@ func findAB(x *AB, y V) V {
 		}
 		return NewAI(r)
 	case array:
-		// TODO: findArray may be redundant (canonical values)
-		return findArray(x, y)
+		return findArray(x, yv)
 	default:
 		return NewI(x.Len())
 	}
@@ -841,18 +840,18 @@ func findAF(x *AF, y V) V {
 		return NewI(x.Len())
 
 	}
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 	case F:
 		for i, xi := range x.Slice {
-			if F(xi) == y {
+			if F(xi) == yv {
 				return NewI(i)
 			}
 		}
 		return NewI(x.Len())
 	case *AB:
 		m := imapAF(x)
-		r := make([]int, y.Len())
-		for i, yi := range y.Slice {
+		r := make([]int, yv.Len())
+		for i, yi := range yv.Slice {
 			j, ok := m[float64(B2F(yi))]
 			if ok {
 				r[i] = j
@@ -863,8 +862,8 @@ func findAF(x *AF, y V) V {
 		return NewAI(r)
 	case *AI:
 		m := imapAF(x)
-		r := make([]int, y.Len())
-		for i, yi := range y.Slice {
+		r := make([]int, yv.Len())
+		for i, yi := range yv.Slice {
 			j, ok := m[float64(yi)]
 			if ok {
 				r[i] = j
@@ -875,8 +874,8 @@ func findAF(x *AF, y V) V {
 		return NewAI(r)
 	case *AF:
 		m := imapAF(x)
-		r := make([]int, y.Len())
-		for i, yi := range y.Slice {
+		r := make([]int, yv.Len())
+		for i, yi := range yv.Slice {
 			j, ok := m[yi]
 			if ok {
 				r[i] = j
@@ -886,7 +885,7 @@ func findAF(x *AF, y V) V {
 		}
 		return NewAI(r)
 	case array:
-		return findArray(x, y)
+		return findArray(x, yv)
 	default:
 		return NewI(x.Len())
 	}
@@ -902,18 +901,18 @@ func findAI(x *AI, y V) V {
 		return NewI(x.Len())
 
 	}
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 	case F:
 		for i, xi := range x.Slice {
-			if F(xi) == y {
+			if F(xi) == yv {
 				return NewI(i)
 			}
 		}
 		return NewI(x.Len())
 	case *AB:
 		m := imapAI(x)
-		r := make([]int, y.Len())
-		for i, yi := range y.Slice {
+		r := make([]int, yv.Len())
+		for i, yi := range yv.Slice {
 			j, ok := m[int(B2I(yi))]
 			if ok {
 				r[i] = j
@@ -924,8 +923,8 @@ func findAI(x *AI, y V) V {
 		return NewAI(r)
 	case *AI:
 		m := imapAI(x)
-		r := make([]int, y.Len())
-		for i, yi := range y.Slice {
+		r := make([]int, yv.Len())
+		for i, yi := range yv.Slice {
 			j, ok := m[yi]
 			if ok {
 				r[i] = j
@@ -936,8 +935,8 @@ func findAI(x *AI, y V) V {
 		return NewAI(r)
 	case *AF:
 		m := imapAI(x)
-		r := make([]int, y.Len())
-		for i, yi := range y.Slice {
+		r := make([]int, yv.Len())
+		for i, yi := range yv.Slice {
 			if !isI(F(yi)) {
 				r[i] = x.Len()
 				continue
@@ -951,25 +950,25 @@ func findAI(x *AI, y V) V {
 		}
 		return NewAI(r)
 	case array:
-		return findArray(x, y)
+		return findArray(x, yv)
 	default:
 		return NewI(x.Len())
 	}
 }
 
 func findAS(x *AS, y V) V {
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 	case S:
 		for i, xi := range x.Slice {
-			if S(xi) == y {
+			if S(xi) == yv {
 				return NewI(i)
 			}
 		}
 		return NewI(x.Len())
 	case *AS:
 		m := imapAS(x)
-		r := make([]int, y.Len())
-		for i, yi := range y.Slice {
+		r := make([]int, yv.Len())
+		for i, yi := range yv.Slice {
 			j, ok := m[yi]
 			if ok {
 				r[i] = j
@@ -979,7 +978,7 @@ func findAS(x *AS, y V) V {
 		}
 		return NewAI(r)
 	case array:
-		return findArray(x, y)
+		return findArray(x, yv)
 	default:
 		return NewI(x.Len())
 	}

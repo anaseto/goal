@@ -68,12 +68,12 @@ func where(x V) V {
 			return NewAI(r)
 		}
 	}
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case F:
-		if !isI(x) {
-			return errf("&x : x non-integer (%g)", x)
+		if !isI(xv) {
+			return errf("&x : x non-integer (%g)", xv)
 		}
-		n := int(x)
+		n := int(xv)
 		switch {
 		case n < 0:
 			return errf("&x : x negative (%d)", n)
@@ -85,11 +85,11 @@ func where(x V) V {
 		}
 	case *AB:
 		n := 0
-		for _, xi := range x.Slice {
+		for _, xi := range xv.Slice {
 			n += int(B2I(xi))
 		}
 		r := make([]int, 0, n)
-		for i, xi := range x.Slice {
+		for i, xi := range xv.Slice {
 			if xi {
 				r = append(r, i)
 			}
@@ -97,14 +97,14 @@ func where(x V) V {
 		return NewAI(r)
 	case *AI:
 		n := 0
-		for _, xi := range x.Slice {
+		for _, xi := range xv.Slice {
 			if xi < 0 {
-				return errf("&x : x contains negative integer (%d)", x)
+				return errf("&x : x contains negative integer (%d)", xv)
 			}
 			n += xi
 		}
 		r := make([]int, 0, n)
-		for i, xi := range x.Slice {
+		for i, xi := range xv.Slice {
 			for j := 0; j < xi; j++ {
 				r = append(r, i)
 			}
@@ -112,7 +112,7 @@ func where(x V) V {
 		return NewAI(r)
 	case *AF:
 		n := 0
-		for _, xi := range x.Slice {
+		for _, xi := range xv.Slice {
 			if !isI(F(xi)) {
 				return errf("&x : x contains non-integer (%g)", xi)
 			}
@@ -122,17 +122,17 @@ func where(x V) V {
 			n += int(xi)
 		}
 		r := make([]int, 0, n)
-		for i, xi := range x.Slice {
+		for i, xi := range xv.Slice {
 			for j := 0; j < int(xi); j++ {
 				r = append(r, i)
 			}
 		}
 		return NewAI(r)
 	case *AV:
-		switch aType(x) {
+		switch aType(xv) {
 		case tB, tF, tI:
 			n := 0
-			for _, xi := range x.Slice {
+			for _, xi := range xv.Slice {
 				if xi.IsInt() {
 					if xi.Int() < 0 {
 						return errf("&x : negative integer (%d)", xi.Int())
@@ -150,7 +150,7 @@ func where(x V) V {
 				}
 			}
 			r := make([]int, 0, n)
-			for i, xi := range x.Slice {
+			for i, xi := range xv.Slice {
 				var max int
 				if xi.IsInt() {
 					max = xi.Int()
@@ -163,10 +163,10 @@ func where(x V) V {
 			}
 			return NewAI(r)
 		default:
-			return errs("&x : x non-integer")
+			return errs("&x : x non-integer array")
 		}
 	default:
-		return errs("&x : x non-integer")
+		return errf("&x : x non-integer (type %s)", x.Type())
 	}
 }
 
@@ -180,12 +180,12 @@ func replicate(x, y V) V {
 			return repeat(y, x.Int())
 		}
 	}
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case F:
-		if !isI(x) {
-			return errf("f#y : f[y] not an integer (%g)", x)
+		if !isI(xv) {
+			return errf("f#y : f[y] not an integer (%g)", xv)
 		}
-		n := int(x)
+		n := int(xv)
 		switch {
 		case n < 0:
 			return errf("f#y : f[y] negative (%d)", n)
@@ -193,17 +193,17 @@ func replicate(x, y V) V {
 			return repeat(y, n)
 		}
 	case *AB:
-		if x.Len() != Length(y) {
-			return errf("f#y : length mismatch: %d (f[y]) vs %d (y)", x.Len(), Length(y))
+		if xv.Len() != Length(y) {
+			return errf("f#y : length mismatch: %d (f[y]) vs %d (y)", xv.Len(), Length(y))
 		}
-		return repeatAB(x, y)
+		return repeatAB(xv, y)
 	case *AI:
-		if x.Len() != Length(y) {
-			return errf("f#y : length mismatch: %d (f[y]) vs %d (y)", x.Len(), Length(y))
+		if xv.Len() != Length(y) {
+			return errf("f#y : length mismatch: %d (f[y]) vs %d (y)", xv.Len(), Length(y))
 		}
-		return repeatAI(x, y)
+		return repeatAI(xv, y)
 	case *AF:
-		ix := toAI(x)
+		ix := toAI(xv)
 		if ix.IsErr() {
 			return errf("f#y : x %v", ix)
 		}
@@ -211,9 +211,9 @@ func replicate(x, y V) V {
 	case *AV:
 		// should be canonical
 		//assertCanonical(x)
-		return errs("f#y : f[y] non-integer")
+		return errf("f#y : f[y] non-integer (%s)", x.Type())
 	default:
-		return errs("f#y : f[y] non-integer")
+		return errf("f#y : f[y] non-integer (%s)", x.Type())
 	}
 }
 
@@ -259,12 +259,12 @@ func repeatAB(x *AB, y V) V {
 	for _, xi := range x.Slice {
 		n += int(B2I(xi))
 	}
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 	case *AB:
 		r := make([]bool, 0, n)
 		for i, xi := range x.Slice {
 			if xi {
-				r = append(r, y.At(i))
+				r = append(r, yv.At(i))
 			}
 		}
 		return NewAB(r)
@@ -272,7 +272,7 @@ func repeatAB(x *AB, y V) V {
 		r := make([]float64, 0, n)
 		for i, xi := range x.Slice {
 			if xi {
-				r = append(r, y.At(i))
+				r = append(r, yv.At(i))
 			}
 		}
 		return NewAF(r)
@@ -280,7 +280,7 @@ func repeatAB(x *AB, y V) V {
 		r := make([]int, 0, n)
 		for i, xi := range x.Slice {
 			if xi {
-				r = append(r, y.At(i))
+				r = append(r, yv.At(i))
 			}
 		}
 		return NewAI(r)
@@ -288,7 +288,7 @@ func repeatAB(x *AB, y V) V {
 		r := make([]string, 0, n)
 		for i, xi := range x.Slice {
 			if xi {
-				r = append(r, y.At(i))
+				r = append(r, yv.At(i))
 			}
 		}
 		return NewAS(r)
@@ -296,12 +296,12 @@ func repeatAB(x *AB, y V) V {
 		r := make([]V, 0, n)
 		for i, xi := range x.Slice {
 			if xi {
-				r = append(r, y.at(i))
+				r = append(r, yv.at(i))
 			}
 		}
 		return canonicalV(NewAV(r))
 	default:
-		return errs("f#y : y not an array")
+		return errf("f#y : y not an array (%s)", y.Type())
 	}
 }
 
@@ -313,12 +313,12 @@ func repeatAI(x *AI, y V) V {
 		}
 		n += xi
 	}
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 	case *AB:
 		r := make([]bool, 0, n)
 		for i, xi := range x.Slice {
 			for j := 0; j < xi; j++ {
-				r = append(r, y.At(i))
+				r = append(r, yv.At(i))
 			}
 		}
 		return NewAB(r)
@@ -326,7 +326,7 @@ func repeatAI(x *AI, y V) V {
 		r := make([]float64, 0, n)
 		for i, xi := range x.Slice {
 			for j := 0; j < xi; j++ {
-				r = append(r, y.At(i))
+				r = append(r, yv.At(i))
 			}
 		}
 		return NewAF(r)
@@ -334,7 +334,7 @@ func repeatAI(x *AI, y V) V {
 		r := make([]int, 0, n)
 		for i, xi := range x.Slice {
 			for j := 0; j < xi; j++ {
-				r = append(r, y.At(i))
+				r = append(r, yv.At(i))
 			}
 		}
 		return NewAI(r)
@@ -342,7 +342,7 @@ func repeatAI(x *AI, y V) V {
 		r := make([]string, 0, n)
 		for i, xi := range x.Slice {
 			for j := 0; j < xi; j++ {
-				r = append(r, y.At(i))
+				r = append(r, yv.At(i))
 			}
 		}
 		return NewAS(r)
@@ -350,12 +350,12 @@ func repeatAI(x *AI, y V) V {
 		r := make([]V, 0, n)
 		for i, xi := range x.Slice {
 			for j := 0; j < xi; j++ {
-				r = append(r, y.At(i))
+				r = append(r, yv.At(i))
 			}
 		}
 		return canonicalV(NewAV(r))
 	default:
-		return errs("f#y : y not an array")
+		return errf("f#y : y not an array (%s)", y.Type())
 	}
 }
 
@@ -367,27 +367,27 @@ func weedOut(x, y V) V {
 		}
 		return y
 	}
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case F:
-		if x != 0 {
+		if xv != 0 {
 			return NewAV([]V{})
 		}
 		return y
 	case *AB:
-		return weedOutAB(x, y)
+		return weedOutAB(xv, y)
 	case *AI:
-		return weedOutAI(x, y)
+		return weedOutAI(xv, y)
 	case *AF:
-		ix := toAI(x)
+		ix := toAI(xv)
 		if ix.IsErr() {
 			return errf("f#y : x %v", ix)
 		}
 		return weedOut(ix, y)
 	case *AV:
 		//assertCanonical(x)
-		return errs("f#y : f[y] non-integer")
+		return errf("f#y : f[y] non-integer (%s)", x.Type())
 	default:
-		return errs("f_y : f[y] non-integer")
+		return errf("f_y : f[y] non-integer (%s)", x.Type())
 	}
 }
 
@@ -396,12 +396,12 @@ func weedOutAB(x *AB, y V) V {
 	for _, xi := range x.Slice {
 		n += 1 - int(B2I(xi))
 	}
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 	case *AB:
 		r := make([]bool, 0, n)
 		for i, xi := range x.Slice {
 			if !xi {
-				r = append(r, y.At(i))
+				r = append(r, yv.At(i))
 			}
 		}
 		return NewAB(r)
@@ -409,7 +409,7 @@ func weedOutAB(x *AB, y V) V {
 		r := make([]float64, 0, n)
 		for i, xi := range x.Slice {
 			if !xi {
-				r = append(r, y.At(i))
+				r = append(r, yv.At(i))
 			}
 		}
 		return NewAF(r)
@@ -417,7 +417,7 @@ func weedOutAB(x *AB, y V) V {
 		r := make([]int, 0, n)
 		for i, xi := range x.Slice {
 			if !xi {
-				r = append(r, y.At(i))
+				r = append(r, yv.At(i))
 			}
 		}
 		return NewAI(r)
@@ -425,7 +425,7 @@ func weedOutAB(x *AB, y V) V {
 		r := make([]string, 0, n)
 		for i, xi := range x.Slice {
 			if !xi {
-				r = append(r, y.At(i))
+				r = append(r, yv.At(i))
 			}
 		}
 		return NewAS(r)
@@ -433,12 +433,12 @@ func weedOutAB(x *AB, y V) V {
 		r := make([]V, 0, n)
 		for i, xi := range x.Slice {
 			if !xi {
-				r = append(r, y.at(i))
+				r = append(r, yv.at(i))
 			}
 		}
 		return canonicalV(NewAV(r))
 	default:
-		return errs("f_y : y not an array")
+		return errf("f_y : y not an array (%s)", y.Type())
 	}
 }
 
@@ -447,12 +447,12 @@ func weedOutAI(x *AI, y V) V {
 	for _, xi := range x.Slice {
 		n += int(B2I(xi == 0))
 	}
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 	case *AB:
 		r := make([]bool, 0, n)
 		for i, xi := range x.Slice {
 			if xi == 0 {
-				r = append(r, y.At(i))
+				r = append(r, yv.At(i))
 			}
 		}
 		return NewAB(r)
@@ -460,7 +460,7 @@ func weedOutAI(x *AI, y V) V {
 		r := make([]float64, 0, n)
 		for i, xi := range x.Slice {
 			if xi == 0 {
-				r = append(r, y.At(i))
+				r = append(r, yv.At(i))
 			}
 		}
 		return NewAF(r)
@@ -468,7 +468,7 @@ func weedOutAI(x *AI, y V) V {
 		r := make([]int, 0, n)
 		for i, xi := range x.Slice {
 			if xi == 0 {
-				r = append(r, y.At(i))
+				r = append(r, yv.At(i))
 			}
 		}
 		return NewAI(r)
@@ -476,7 +476,7 @@ func weedOutAI(x *AI, y V) V {
 		r := make([]string, 0, n)
 		for i, xi := range x.Slice {
 			if xi == 0 {
-				r = append(r, y.At(i))
+				r = append(r, yv.At(i))
 			}
 		}
 		return NewAS(r)
@@ -484,12 +484,12 @@ func weedOutAI(x *AI, y V) V {
 		r := make([]V, 0, n)
 		for i, xi := range x.Slice {
 			if xi == 0 {
-				r = append(r, y.At(i))
+				r = append(r, yv.At(i))
 			}
 		}
 		return canonicalV(NewAV(r))
 	default:
-		return errs("f_y : y not an array")
+		return errf("f_y : y not an array (%s)", y.Type())
 	}
 }
 

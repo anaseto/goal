@@ -561,32 +561,32 @@ func searchAI(x *AI, y V) V {
 	if y.IsInt() {
 		return NewI(searchAII(x, y.Int()))
 	}
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 	case F:
-		return NewI(searchAIF(x, y))
+		return NewI(searchAIF(x, yv))
 	case *AB:
-		r := make([]int, y.Len())
-		for i, yi := range y.Slice {
+		r := make([]int, yv.Len())
+		for i, yi := range yv.Slice {
 			r[i] = searchAII(x, B2I(yi))
 		}
 		return NewAI(r)
 	case *AI:
-		r := make([]int, y.Len())
-		for i, yi := range y.Slice {
+		r := make([]int, yv.Len())
+		for i, yi := range yv.Slice {
 			r[i] = searchAII(x, yi)
 		}
 		return NewAI(r)
 	case *AF:
-		r := make([]int, y.Len())
-		for i, yi := range y.Slice {
+		r := make([]int, yv.Len())
+		for i, yi := range yv.Slice {
 			r[i] = searchAIF(x, F(yi))
 		}
 		return NewAI(r)
 	case array:
-		r := make([]int, y.Len())
-		for i := 0; i < y.Len(); i++ {
+		r := make([]int, yv.Len())
+		for i := 0; i < yv.Len(); i++ {
 			r[i] = sort.Search(x.Len(),
-				func(i int) bool { return less(y.at(i), NewI(x.At(i))) })
+				func(i int) bool { return less(yv.at(i), NewI(x.At(i))) })
 		}
 		return NewAI(r)
 	default:
@@ -598,32 +598,32 @@ func searchAF(x *AF, y V) V {
 	if y.IsInt() {
 		return NewI(searchAFI(x, y.Int()))
 	}
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 	case F:
-		return NewI(searchAFF(x, y))
+		return NewI(searchAFF(x, yv))
 	case *AB:
-		r := make([]int, y.Len())
-		for i, yi := range y.Slice {
+		r := make([]int, yv.Len())
+		for i, yi := range yv.Slice {
 			r[i] = searchAFI(x, B2I(yi))
 		}
 		return NewAI(r)
 	case *AI:
-		r := make([]int, y.Len())
-		for i, yi := range y.Slice {
+		r := make([]int, yv.Len())
+		for i, yi := range yv.Slice {
 			r[i] = searchAFI(x, yi)
 		}
 		return NewAI(r)
 	case *AF:
-		r := make([]int, y.Len())
-		for i, yi := range y.Slice {
+		r := make([]int, yv.Len())
+		for i, yi := range yv.Slice {
 			r[i] = searchAFF(x, F(yi))
 		}
 		return NewAI(r)
 	case array:
-		r := make([]int, y.Len())
-		for i := 0; i < y.Len(); i++ {
+		r := make([]int, yv.Len())
+		for i := 0; i < yv.Len(); i++ {
 			r[i] = sort.Search(x.Len(),
-				func(i int) bool { return less(y.at(i), NewF(x.At(i))) })
+				func(i int) bool { return less(yv.at(i), NewF(x.At(i))) })
 		}
 		return NewAI(r)
 	default:
@@ -632,20 +632,20 @@ func searchAF(x *AF, y V) V {
 }
 
 func searchAS(x *AS, y V) V {
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 	case S:
-		return NewI(searchASS(x, y))
+		return NewI(searchASS(x, yv))
 	case *AS:
-		r := make([]int, y.Len())
-		for i, yi := range y.Slice {
+		r := make([]int, yv.Len())
+		for i, yi := range yv.Slice {
 			r[i] = searchASS(x, S(yi))
 		}
 		return NewAI(r)
 	case array:
-		r := make([]int, y.Len())
-		for i := 0; i < y.Len(); i++ {
+		r := make([]int, yv.Len())
+		for i := 0; i < yv.Len(); i++ {
 			r[i] = sort.Search(x.Len(),
-				func(i int) bool { return less(y.at(i), NewS(x.At(i))) })
+				func(i int) bool { return less(yv.at(i), NewS(x.At(i))) })
 		}
 		return NewAI(r)
 	default:

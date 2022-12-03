@@ -122,10 +122,10 @@ func rotate(x, y V) V {
 
 // first returns *x.
 func first(x V) V {
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case array:
-		if x.Len() == 0 {
-			switch x.(type) {
+		if xv.Len() == 0 {
+			switch xv.(type) {
 			case *AB:
 				return NewI(0)
 			case *AF:
@@ -138,9 +138,9 @@ func first(x V) V {
 				return V{}
 			}
 		}
-		return x.at(0)
+		return xv.at(0)
 	default:
-		return NewV(x)
+		return x
 	}
 }
 

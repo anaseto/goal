@@ -5,11 +5,11 @@ func group(x V) V {
 	if Length(x) == 0 {
 		return NewAV([]V{})
 	}
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case *AB:
-		n := sumAB(x)
+		n := sumAB(xv)
 		r := make([]V, int(B2I(n > 0)+1))
-		ai := make([]int, x.Len())
+		ai := make([]int, xv.Len())
 		if n == 0 {
 			for i := range ai {
 				ai[i] = i
@@ -20,7 +20,7 @@ func group(x V) V {
 		aif := ai[:len(ai)-n]
 		ait := ai[len(ai)-n:]
 		iTrue, iFalse := 0, 0
-		for i, xi := range x.Slice {
+		for i, xi := range xv.Slice {
 			if xi {
 				ait[iTrue] = i
 				iTrue++
@@ -33,7 +33,7 @@ func group(x V) V {
 		r[1] = NewAI(ait)
 		return NewAV(r)
 	case *AI:
-		max := maxAI(x)
+		max := maxAI(xv)
 		if max < 0 {
 			max = -1
 		}
@@ -41,7 +41,7 @@ func group(x V) V {
 		counta := make([]int, 2*(max+1))
 		counts := counta[:max+1]
 		countn := 0
-		for _, j := range x.Slice {
+		for _, j := range xv.Slice {
 			if j < 0 {
 				countn++
 				continue
@@ -55,12 +55,12 @@ func group(x V) V {
 			scounts[i] = sn
 		}
 		pj := 0
-		ai := make([]int, x.Len()-countn)
+		ai := make([]int, xv.Len()-countn)
 		for i := range r {
 			r[i] = NewAI(ai[pj:scounts[i]])
 			pj = scounts[i]
 		}
-		for i, j := range x.Slice {
+		for i, j := range xv.Slice {
 			if j < 0 {
 				continue
 			}
@@ -69,16 +69,16 @@ func group(x V) V {
 		}
 		return NewAV(r)
 	case *AF:
-		z := toAI(x)
+		z := toAI(xv)
 		if z.IsErr() {
 			return z
 		}
 		return group(z)
 	case *AV:
 		//assertCanonical(x)
-		return errs("=x : x non-integer array")
+		return errf("=x : x not an integer array (%s)", x.Type())
 	default:
-		return errs("=x : x not an integer array")
+		return errf("=x : x not an integer array (%s)", x.Type())
 	}
 }
 
@@ -87,24 +87,24 @@ func icount(x V) V {
 	if Length(x) == 0 {
 		return NewAI([]int{})
 	}
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case *AB:
-		n := sumAB(x)
-		return NewAI([]int{x.Len() - n, n})
+		n := sumAB(xv)
+		return NewAI([]int{xv.Len() - n, n})
 	case *AI:
-		max := maxAI(x)
+		max := maxAI(xv)
 		if max < 0 {
 			max = -1
 		}
 		counts := make([]int, max+1)
-		for _, j := range x.Slice {
+		for _, j := range xv.Slice {
 			if j >= 0 {
 				counts[j]++
 			}
 		}
 		return NewAI(counts)
 	case *AF:
-		z := toAI(x)
+		z := toAI(xv)
 		if z.IsErr() {
 			return z
 		}
@@ -128,11 +128,11 @@ func groupBy(x, y V) V {
 		return errs("f=y : f[y] not an integer array")
 	}
 	avx := x.Value.(*AV) // group should always return AV or errV
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 	case array:
 		r := make([]V, avx.Len())
 		for i, xi := range avx.Slice {
-			r[i] = y.atIndices(xi.Value.(*AI).Slice)
+			r[i] = yv.atIndices(xi.Value.(*AI).Slice)
 		}
 		return NewAV(r)
 	default:

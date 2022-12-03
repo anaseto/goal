@@ -273,14 +273,14 @@ EOS
     }
     print $out <<EOS;
 	case *AV:
-                switch y := y.Value.(type) {
+                switch yv := y.Value.(type) {
                 case array:
-                        if y.Len() != xv.Len() {
-                                return errf("x${errOp}y : length mismatch: %d vs %d", xv.Len(), y.Len())
+                        if yv.Len() != xv.Len() {
+                                return errf("x${errOp}y : length mismatch: %d vs %d", xv.Len(), yv.Len())
                         }
                         r := xv.reuse()
                         for i, xi := range xv.Slice {
-                                ri := ${name}(xi, y.at(i))
+                                ri := ${name}(xi, yv.at(i))
                                 if ri.IsErr() {
                                         return ri
                                 }

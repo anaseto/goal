@@ -211,18 +211,18 @@ func (x V) IsFunction() bool {
 }
 
 func (f F) Matches(y Value) bool {
-	switch y := y.(type) {
+	switch yv := y.(type) {
 	case F:
-		return f == y
+		return f == yv
 	default:
 		return false
 	}
 }
 
 func (s S) Matches(y Value) bool {
-	switch y := y.(type) {
+	switch yv := y.(type) {
 	case S:
-		return s == y
+		return s == yv
 	default:
 		return false
 	}

@@ -26,14 +26,14 @@ func equal(x, y V) V {
 	case *AS:
 		return equalASV(xv, y)
 	case *AV:
-		switch y := y.Value.(type) {
+		switch yv := y.Value.(type) {
 		case array:
-			if y.Len() != xv.Len() {
-				return errf("x=y : length mismatch: %d vs %d", xv.Len(), y.Len())
+			if yv.Len() != xv.Len() {
+				return errf("x=y : length mismatch: %d vs %d", xv.Len(), yv.Len())
 			}
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
-				ri := equal(xi, y.at(i))
+				ri := equal(xi, yv.at(i))
 				if ri.IsErr() {
 					return ri
 				}
@@ -398,14 +398,14 @@ func lesser(x, y V) V {
 	case *AS:
 		return lesserASV(xv, y)
 	case *AV:
-		switch y := y.Value.(type) {
+		switch yv := y.Value.(type) {
 		case array:
-			if y.Len() != xv.Len() {
-				return errf("x<y : length mismatch: %d vs %d", xv.Len(), y.Len())
+			if yv.Len() != xv.Len() {
+				return errf("x<y : length mismatch: %d vs %d", xv.Len(), yv.Len())
 			}
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
-				ri := lesser(xi, y.at(i))
+				ri := lesser(xi, yv.at(i))
 				if ri.IsErr() {
 					return ri
 				}
@@ -770,14 +770,14 @@ func greater(x, y V) V {
 	case *AS:
 		return greaterASV(xv, y)
 	case *AV:
-		switch y := y.Value.(type) {
+		switch yv := y.Value.(type) {
 		case array:
-			if y.Len() != xv.Len() {
-				return errf("x>y : length mismatch: %d vs %d", xv.Len(), y.Len())
+			if yv.Len() != xv.Len() {
+				return errf("x>y : length mismatch: %d vs %d", xv.Len(), yv.Len())
 			}
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
-				ri := greater(xi, y.at(i))
+				ri := greater(xi, yv.at(i))
 				if ri.IsErr() {
 					return ri
 				}
@@ -1142,14 +1142,14 @@ func add(x, y V) V {
 	case *AS:
 		return addASV(xv, y)
 	case *AV:
-		switch y := y.Value.(type) {
+		switch yv := y.Value.(type) {
 		case array:
-			if y.Len() != xv.Len() {
-				return errf("x+y : length mismatch: %d vs %d", xv.Len(), y.Len())
+			if yv.Len() != xv.Len() {
+				return errf("x+y : length mismatch: %d vs %d", xv.Len(), yv.Len())
 			}
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
-				ri := add(xi, y.at(i))
+				ri := add(xi, yv.at(i))
 				if ri.IsErr() {
 					return ri
 				}
@@ -1514,14 +1514,14 @@ func subtract(x, y V) V {
 	case *AS:
 		return subtractASV(xv, y)
 	case *AV:
-		switch y := y.Value.(type) {
+		switch yv := y.Value.(type) {
 		case array:
-			if y.Len() != xv.Len() {
-				return errf("x-y : length mismatch: %d vs %d", xv.Len(), y.Len())
+			if yv.Len() != xv.Len() {
+				return errf("x-y : length mismatch: %d vs %d", xv.Len(), yv.Len())
 			}
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
-				ri := subtract(xi, y.at(i))
+				ri := subtract(xi, yv.at(i))
 				if ri.IsErr() {
 					return ri
 				}
@@ -1886,14 +1886,14 @@ func multiply(x, y V) V {
 	case *AS:
 		return multiplyASV(xv, y)
 	case *AV:
-		switch y := y.Value.(type) {
+		switch yv := y.Value.(type) {
 		case array:
-			if y.Len() != xv.Len() {
-				return errf("x*y : length mismatch: %d vs %d", xv.Len(), y.Len())
+			if yv.Len() != xv.Len() {
+				return errf("x*y : length mismatch: %d vs %d", xv.Len(), yv.Len())
 			}
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
-				ri := multiply(xi, y.at(i))
+				ri := multiply(xi, yv.at(i))
 				if ri.IsErr() {
 					return ri
 				}
@@ -2355,14 +2355,14 @@ func divide(x, y V) V {
 	case *AI:
 		return divideAIV(xv, y)
 	case *AV:
-		switch y := y.Value.(type) {
+		switch yv := y.Value.(type) {
 		case array:
-			if y.Len() != xv.Len() {
-				return errf("x%%y : length mismatch: %d vs %d", xv.Len(), y.Len())
+			if yv.Len() != xv.Len() {
+				return errf("x%%y : length mismatch: %d vs %d", xv.Len(), yv.Len())
 			}
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
-				ri := divide(xi, y.at(i))
+				ri := divide(xi, yv.at(i))
 				if ri.IsErr() {
 					return ri
 				}
@@ -2666,14 +2666,14 @@ func minimum(x, y V) V {
 	case *AS:
 		return minimumASV(xv, y)
 	case *AV:
-		switch y := y.Value.(type) {
+		switch yv := y.Value.(type) {
 		case array:
-			if y.Len() != xv.Len() {
-				return errf("x&y : length mismatch: %d vs %d", xv.Len(), y.Len())
+			if yv.Len() != xv.Len() {
+				return errf("x&y : length mismatch: %d vs %d", xv.Len(), yv.Len())
 			}
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
-				ri := minimum(xi, y.at(i))
+				ri := minimum(xi, yv.at(i))
 				if ri.IsErr() {
 					return ri
 				}
@@ -3038,14 +3038,14 @@ func maximum(x, y V) V {
 	case *AS:
 		return maximumASV(xv, y)
 	case *AV:
-		switch y := y.Value.(type) {
+		switch yv := y.Value.(type) {
 		case array:
-			if y.Len() != xv.Len() {
-				return errf("x|y : length mismatch: %d vs %d", xv.Len(), y.Len())
+			if yv.Len() != xv.Len() {
+				return errf("x|y : length mismatch: %d vs %d", xv.Len(), yv.Len())
 			}
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
-				ri := maximum(xi, y.at(i))
+				ri := maximum(xi, yv.at(i))
 				if ri.IsErr() {
 					return ri
 				}
@@ -3406,14 +3406,14 @@ func modulus(x, y V) V {
 	case *AI:
 		return modulusAIV(xv, y)
 	case *AV:
-		switch y := y.Value.(type) {
+		switch yv := y.Value.(type) {
 		case array:
-			if y.Len() != xv.Len() {
-				return errf("x mod y : length mismatch: %d vs %d", xv.Len(), y.Len())
+			if yv.Len() != xv.Len() {
+				return errf("x mod y : length mismatch: %d vs %d", xv.Len(), yv.Len())
 			}
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
-				ri := modulus(xi, y.at(i))
+				ri := modulus(xi, yv.at(i))
 				if ri.IsErr() {
 					return ri
 				}

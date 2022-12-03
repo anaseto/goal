@@ -23,9 +23,9 @@ func num2I(x V) (n int) {
 	if x.IsInt() {
 		return x.Int()
 	}
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case F:
-		n = int(x)
+		n = int(xv)
 	}
 	// x is assumed to be a number.
 	return n
@@ -364,7 +364,7 @@ func cType(x V) eltype {
 			return tI
 		}
 	}
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case *AB:
 		return tAB
 	case F:
@@ -378,7 +378,7 @@ func cType(x V) eltype {
 	case *AS:
 		return tAS
 	case *AV:
-		return cTypeAO(x)
+		return cTypeAO(xv)
 	default:
 		return tV
 	}
