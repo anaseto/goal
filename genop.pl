@@ -256,30 +256,30 @@ EOS
 EOS
     }
         print $out <<EOS;
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 EOS
     for my $t (sort keys %types) {
         next if $t eq "B" or $t eq "I";
         print $out <<EOS;
 	case $t:
-		return ${namelc}${t}V(x, y)
+		return ${namelc}${t}V(xv, y)
 EOS
     }
     for my $t (sort keys %types) {
         print $out <<EOS;
 	case *A$t:
-		return ${namelc}A${t}V(x, y)
+		return ${namelc}A${t}V(xv, y)
 EOS
     }
     print $out <<EOS;
 	case *AV:
                 switch y := y.Value.(type) {
                 case array:
-                        if y.Len() != x.Len() {
-                                return errf("x${errOp}y : length mismatch: %d vs %d", x.Len(), y.Len())
+                        if y.Len() != xv.Len() {
+                                return errf("x${errOp}y : length mismatch: %d vs %d", xv.Len(), y.Len())
                         }
-                        r := x.reuse()
-                        for i, xi := range x.Slice {
+                        r := xv.reuse()
+                        for i, xi := range xv.Slice {
                                 ri := ${name}(xi, y.at(i))
                                 if ri.IsErr() {
                                         return ri
@@ -288,8 +288,8 @@ EOS
                         }
                         return NewV(r) 
                 }
-                r := x.reuse()
-                for i, xi := range x.Slice {
+                r := xv.reuse()
+                for i, xi := range xv.Slice {
                         ri := ${name}(xi, y)
                         if ri.IsErr() {
                                 return ri
@@ -341,7 +341,7 @@ EOS
 EOS
     }
     print $out <<EOS;
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 EOS
     for my $tt (sort keys %types) {
         next if $tt eq "B" or $tt eq "I";
@@ -350,23 +350,24 @@ EOS
         my $nt = "V";
         $nt = "I" if $type eq "B" or $type eq "I";
         $expr = "B2I($expr)" if $type eq "B";
+        my $iexpr = subst($expr, $t, $tt, "x", "yv");
         $type = "int" if $type eq "B" or $type eq "I";
-        #$type = "int" if $type eq "B";
+        $type = "int" if $type eq "B";
 		#return New${nt}($type($expr))
         print $out <<EOS;
 	case $tt:
-		return New${nt}($type($expr))
+		return New${nt}($type($iexpr))
 EOS
     }
     for my $tt (sort keys %types) {
         my $expr = $cases->{"${t}_$tt"}->[0];
         my $type = $cases->{"${t}_$tt"}->[1];
-        my $iexpr = subst($expr, $t, $tt, "x", "y.At(i)");
+        my $iexpr = subst($expr, $t, $tt, "x", "yv.At(i)");
         my $rtype = $atypes{$type};
         if ($tt eq $type) {
             print $out <<EOS;
 	case *A$tt:
-		r := y.reuse()
+		r := yv.reuse()
 		for i := range r.Slice {
 			r.Slice[i] = $rtype($iexpr)
 		}
@@ -375,7 +376,7 @@ EOS
         } else {
             print $out <<EOS;
 	case *A$tt:
-		r := make([]$rtype, y.Len())
+		r := make([]$rtype, yv.Len())
 		for i := range r {
 			r[i] = $rtype($iexpr)
 		}
@@ -385,8 +386,8 @@ EOS
     }
     print $out <<EOS if $t !~ /^A/;
 	case *AV:
-		r := y.reuse()
-		for i, yi := range y.Slice {
+		r := yv.reuse()
+		for i, yi := range yv.Slice {
 			ri := ${name}${t}V(x, yi)
                         if ri.IsErr() {
 				return ri
@@ -438,13 +439,13 @@ EOS
         }
     }
     print $out <<EOS;
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 EOS
     for my $tt (sort keys %types) {
         next if $tt eq "B" or $tt eq "I";
         my $expr = $cases->{"${t}_$tt"}->[0];
         my $type = $cases->{"${t}_$tt"}->[1];
-        my $iexpr = subst($expr, $t, $tt, "x.At(i)", "y");
+        my $iexpr = subst($expr, $t, $tt, "x.At(i)", "yv");
         my $rtype = $atypes{$type};
         if ($t eq $type) {
             print $out <<EOS;
@@ -469,13 +470,13 @@ EOS
     for my $tt (sort keys %types) {
         my $expr = $cases->{"${t}_$tt"}->[0];
         my $type = $cases->{"${t}_$tt"}->[1];
-        my $iexpr = subst($expr, $t, $tt, "x.At(i)", "y.At(i)");
+        my $iexpr = subst($expr, $t, $tt, "x.At(i)", "yv.At(i)");
         my $rtype = $atypes{$type};
         if ($t eq $type) {
             print $out <<EOS;
 	case *A$tt:
-                if x.Len() != y.Len() {
-                        return errf("x${errOp}y : length mismatch: %d vs %d", x.Len(), y.Len())
+                if x.Len() != yv.Len() {
+                        return errf("x${errOp}y : length mismatch: %d vs %d", x.Len(), yv.Len())
                 }
                 r := x.reuse()
 		for i := range r.Slice {
@@ -486,10 +487,10 @@ EOS
         } elsif ($tt eq $type) {
             print $out <<EOS;
 	case *A$tt:
-                if x.Len() != y.Len() {
-                        return errf("x${errOp}y : length mismatch: %d vs %d", x.Len(), y.Len())
+                if x.Len() != yv.Len() {
+                        return errf("x${errOp}y : length mismatch: %d vs %d", x.Len(), yv.Len())
                 }
-                r := y.reuse()
+                r := yv.reuse()
 		for i := range r.Slice {
 			r.Slice[i] = $rtype($iexpr)
 		}
@@ -498,10 +499,10 @@ EOS
         } else {
             print $out <<EOS;
 	case *A$tt:
-                if x.Len() != y.Len() {
-                        return errf("x${errOp}y : length mismatch: %d vs %d", x.Len(), y.Len())
+                if x.Len() != yv.Len() {
+                        return errf("x${errOp}y : length mismatch: %d vs %d", x.Len(), yv.Len())
                 }
-		r := make([]$rtype, y.Len())
+		r := make([]$rtype, yv.Len())
 		for i := range r {
 			r[i] = $rtype($iexpr)
 		}
@@ -523,22 +524,22 @@ EOS
                 if x.reusable() {
                     r = x.reuse()
                 } else {
-                    r = y.reuse()
+                    r = yv.reuse()
                 }
 EOS
     } else {
         $reuse = <<EOS;
-                r := y.reuse()
+                r := yv.reuse()
 EOS
     }
     print $out <<EOS if $t !~ /^A/;
 	case *AV:
-                if x.Len() != y.Len() {
-                        return errf("x${errOp}y : length mismatch: %d vs %d", x.Len(), y.Len())
+                if x.Len() != yv.Len() {
+                        return errf("x${errOp}y : length mismatch: %d vs %d", x.Len(), yv.Len())
                 }
                 $reuse
 		for i := range r.Slice {
-			ri := ${name}${t}V($tt(x.At(i)), y.At(i))
+			ri := ${name}${t}V($tt(x.At(i)), yv.At(i))
                         if ri.IsErr() {
 				return ri
 			}

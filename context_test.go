@@ -247,6 +247,17 @@ var matchTests = [...]matchTest{
 	{`2\6 9`, `(0 1;1 0;1 0;0 1)`},
 	{`2\(6 9;6)`, `((0 1;1 0;1 0;0 1);1 1 0)`},
 	{`#()`, `0`},
+	// immutability tests
+	{`a:3;1+a;a`, `3`},
+	{`a:3 5;1-a;a`, `3 5`},
+	{`a:3 5;1 2-a;a`, `3 5`},
+	{`a:3 5;1 2-a;a`, `3 5`},
+	{`a:(1 2;3 4);2 3=a;a`, `(1 2;3 4)`},
+	{`{a:3;1+a;a}0`, `3`},
+	{`{a:3 5;1-a;a}0`, `3 5`},
+	{`{a:3 5;1 2-a;a}0`, `3 5`},
+	{`{a:3 5;1 2-a;a}0`, `3 5`},
+	{`{a:(1 2;3 4);2 3=a;a}0`, `(1 2;3 4)`},
 }
 
 func TestEval(t *testing.T) {
@@ -318,6 +329,9 @@ var matchErrors = [...]matchTest{
 	{"{}", "empty lambda"},
 	{"[]", "empty sequence"},
 	{"(;)", "empty slot in list"},
+	{`a:3 "a";1 2=a`, `bad type`},
+	{`a:3 "a";"c" 2=a`, `bad type`},
+	{`a:"d" "a";"c" "d"=a`, `bad type`},
 }
 
 func TestErrors(t *testing.T) {
