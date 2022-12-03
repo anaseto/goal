@@ -78,43 +78,43 @@ func rotate(x, y V) V {
 			return errf("f|y : non-integer f[y] (%s)", x.Type())
 		}
 	}
-	lenx := Length(y)
-	if lenx == 0 {
+	ylen := Length(y)
+	if ylen == 0 {
 		return y
 	}
-	i %= lenx
+	i %= ylen
 	if i < 0 {
-		i += lenx
+		i += ylen
 	}
 	switch yv := y.Value.(type) {
 	case *AB:
-		r := make([]bool, lenx)
-		for j := 0; j < lenx; j++ {
-			r[j] = yv.At((j + i) % lenx)
+		r := make([]bool, ylen)
+		for j := 0; j < ylen; j++ {
+			r[j] = yv.At((j + i) % ylen)
 		}
 		return NewAB(r)
 	case *AF:
-		r := make([]float64, lenx)
-		for j := 0; j < lenx; j++ {
-			r[j] = yv.At((j + i) % lenx)
+		r := make([]float64, ylen)
+		for j := 0; j < ylen; j++ {
+			r[j] = yv.At((j + i) % ylen)
 		}
 		return NewAF(r)
 	case *AI:
-		r := make([]int, lenx)
-		for j := 0; j < lenx; j++ {
-			r[j] = yv.At((j + i) % lenx)
+		r := make([]int, ylen)
+		for j := 0; j < ylen; j++ {
+			r[j] = yv.At((j + i) % ylen)
 		}
 		return NewAI(r)
 	case *AS:
-		r := make([]string, lenx)
-		for j := 0; j < lenx; j++ {
-			r[j] = yv.At((j + i) % lenx)
+		r := make([]string, ylen)
+		for j := 0; j < ylen; j++ {
+			r[j] = yv.At((j + i) % ylen)
 		}
 		return NewAS(r)
 	case *AV:
-		r := make([]V, lenx)
-		for j := 0; j < lenx; j++ {
-			r[j] = yv.At((j + i) % lenx)
+		r := make([]V, ylen)
+		for j := 0; j < ylen; j++ {
+			r[j] = yv.At((j + i) % ylen)
 		}
 		return NewAV(r)
 	default:
