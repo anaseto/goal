@@ -32,32 +32,32 @@ func fold2(ctx *Context, args []V) V {
 		return errf("F/x : F rank is %d (expected 2)", f.Rank(ctx))
 	}
 	x := args[0]
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case array:
-		if x.Len() == 0 {
+		if xv.Len() == 0 {
 			f, ok := f.Value.(zeroFun)
 			if ok {
 				return f.zero()
 			}
 			return NewI(0)
 		}
-		r := x.at(0)
-		for i := 1; i < x.Len(); i++ {
-			ctx.push(x.at(i))
+		r := xv.at(0)
+		for i := 1; i < xv.Len(); i++ {
+			ctx.push(xv.at(i))
 			ctx.push(r)
 			r = ctx.applyN(f, 2)
 		}
 		return r
 	default:
-		return NewV(x)
+		return x
 	}
 }
 
 func fold2vAdd(x V) V {
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case *AB:
 		n := 0
-		for _, b := range x.Slice {
+		for _, b := range xv.Slice {
 			if b {
 				n++
 			}
@@ -65,41 +65,41 @@ func fold2vAdd(x V) V {
 		return NewI(n)
 	case *AI:
 		n := 0
-		for _, xi := range x.Slice {
+		for _, xi := range xv.Slice {
 			n += xi
 		}
 		return NewI(n)
 	case *AF:
 		n := 0.0
-		for _, xi := range x.Slice {
+		for _, xi := range xv.Slice {
 			n += xi
 		}
 		return NewF(n)
 	case *AS:
-		if x.Len() == 0 {
+		if xv.Len() == 0 {
 			return NewS("")
 		}
 		n := 0
-		for _, s := range x.Slice {
+		for _, s := range xv.Slice {
 			n += len(s)
 		}
 		var b strings.Builder
 		b.Grow(n)
-		for _, s := range x.Slice {
+		for _, s := range xv.Slice {
 			b.WriteString(s)
 		}
 		return NewS(b.String())
 	case *AV:
-		if x.Len() == 0 {
+		if xv.Len() == 0 {
 			return NewI(0)
 		}
-		r := x.At(0)
-		for _, xi := range x.Slice[1:] {
+		r := xv.At(0)
+		for _, xi := range xv.Slice[1:] {
 			r = add(r, xi)
 		}
 		return r
 	default:
-		return NewV(x)
+		return x
 	}
 }
 
@@ -111,9 +111,9 @@ func fold2Join(sep S, x V) V {
 		return NewS(strings.Join([]string(xv.Slice), string(sep)))
 	case *AV:
 		//assertCanonical(xv)
-		return errf("s/x : x not a string array (%s)", xv.Type())
+		return errf("s/x : x not a string array (%s)", x.Type())
 	default:
-		return errf("s/x : x not a string array (%s)", xv.Type())
+		return errf("s/x : x not a string array (%s)", x.Type())
 	}
 }
 
@@ -357,18 +357,18 @@ func scan2(ctx *Context, f, x V) V {
 }
 
 func scan2Split(sep S, x V) V {
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case S:
-		return NewAS(strings.Split(string(x), string(sep)))
+		return NewAS(strings.Split(string(xv), string(sep)))
 	case *AS:
-		r := make([]V, x.Len())
+		r := make([]V, xv.Len())
 		for i := range r {
-			r[i] = NewAS(strings.Split(x.At(i), string(sep)))
+			r[i] = NewAS(strings.Split(xv.At(i), string(sep)))
 		}
 		return NewAV(r)
 	case *AV:
 		//assertCanonical(x)
-		return errf("s/x : x not a string atom or array (%s)", x.Type())
+		return errf("s/x : x not a string atom or array (%s)", xv.Type())
 	default:
 		return errf("s/x : x not a string atom or array (%s)", x.Type())
 	}
@@ -629,11 +629,11 @@ func each2(ctx *Context, args []V) V {
 		return errf("f'x : f not a function (%s)", f.Type())
 	}
 	x := toArray(args[0])
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case array:
-		r := make([]V, 0, x.Len())
-		for i := 0; i < x.Len(); i++ {
-			ctx.push(x.at(i))
+		r := make([]V, 0, xv.Len())
+		for i := 0; i < xv.Len(); i++ {
+			ctx.push(xv.at(i))
 			next := ctx.applyN(f, 1)
 			if next.IsErr() {
 				return next

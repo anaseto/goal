@@ -49,7 +49,7 @@ func applyS(s S, x V) V {
 		}
 		return canonicalV(NewAV(r))
 	default:
-		return errf("s[x] : x non-integer (%s)", xv.Type())
+		return errf("s[x] : x non-integer (%s)", x.Type())
 	}
 }
 
@@ -159,7 +159,7 @@ func applyS2(s S, x V, y V) V {
 		}
 		return canonicalV(NewAV(r))
 	default:
-		return errf("s[x;y] : x non-integer (%s)", xv.Type())
+		return errf("s[x;y] : x non-integer (%s)", x.Type())
 	}
 }
 

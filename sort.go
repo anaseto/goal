@@ -351,22 +351,22 @@ func sortUp(x V) V {
 	// TODO: avoid cases of double clone
 	//assertCanonical(x)
 	x = cloneShallow(x)
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case *AB:
-		sort.Stable(sortAB(x.Slice))
-		return NewV(x)
+		sort.Stable(sortAB(xv.Slice))
+		return NewV(xv)
 	case *AF:
-		sort.Stable(sort.Float64Slice(x.Slice))
-		return NewV(x)
+		sort.Stable(sort.Float64Slice(xv.Slice))
+		return NewV(xv)
 	case *AI:
-		sort.Stable(sort.IntSlice(x.Slice))
-		return NewV(x)
+		sort.Stable(sort.IntSlice(xv.Slice))
+		return NewV(xv)
 	case *AS:
-		sort.Stable(sort.StringSlice(x.Slice))
-		return NewV(x)
+		sort.Stable(sort.StringSlice(xv.Slice))
+		return NewV(xv)
 	case *AV:
-		sort.Stable(sortVSlice(x.Slice))
-		return NewV(x)
+		sort.Stable(sortVSlice(xv.Slice))
+		return NewV(xv)
 	default:
 		return errf("^x : x not an array (%s)", x.Type())
 	}
@@ -467,25 +467,25 @@ func permRange(n int) []int {
 
 // ascend returns <x.
 func ascend(x V) V {
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case *AB:
-		p := &permutationAB{Perm: permRange(x.Len()), X: sortAB(x.Slice)}
+		p := &permutationAB{Perm: permRange(xv.Len()), X: sortAB(xv.Slice)}
 		sort.Stable(p)
 		return NewAI(p.Perm)
 	case *AF:
-		p := &permutationAF{Perm: permRange(x.Len()), X: sort.Float64Slice(x.Slice)}
+		p := &permutationAF{Perm: permRange(xv.Len()), X: sort.Float64Slice(xv.Slice)}
 		sort.Stable(p)
 		return NewAI(p.Perm)
 	case *AI:
-		p := &permutationAI{Perm: permRange(x.Len()), X: sort.IntSlice(x.Slice)}
+		p := &permutationAI{Perm: permRange(xv.Len()), X: sort.IntSlice(xv.Slice)}
 		sort.Stable(p)
 		return NewAI(p.Perm)
 	case *AS:
-		p := &permutationAS{Perm: permRange(x.Len()), X: sort.StringSlice(x.Slice)}
+		p := &permutationAS{Perm: permRange(xv.Len()), X: sort.StringSlice(xv.Slice)}
 		sort.Stable(p)
 		return NewAI(p.Perm)
 	case *AV:
-		p := &permutationAV{Perm: permRange(x.Len()), X: sortVSlice(x.Slice)}
+		p := &permutationAV{Perm: permRange(xv.Len()), X: sortVSlice(xv.Slice)}
 		sort.Stable(p)
 		return NewAI(p.Perm)
 	default:

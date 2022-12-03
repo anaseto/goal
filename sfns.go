@@ -8,9 +8,9 @@ import (
 
 // Length returns the length of a value like in #x.
 func Length(x V) int {
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case array:
-		return x.Len()
+		return xv.Len()
 	default:
 		return 1
 	}
@@ -66,12 +66,12 @@ func rotate(x, y V) V {
 	if x.IsInt() {
 		i = x.Int()
 	} else {
-		switch x := x.Value.(type) {
+		switch xv := x.Value.(type) {
 		case F:
-			if !isI(x) {
-				return errf("f|y : non-integer f[y] (%s)", x.Type())
+			if !isI(xv) {
+				return errf("f|y : non-integer f[y] (%s)", xv.Type())
 			}
-			i = int(x)
+			i = int(xv)
 		default:
 			return errf("f|y : non-integer f[y] (%s)", x.Type())
 		}
@@ -149,20 +149,20 @@ func drop(x, y V) V {
 	if x.IsInt() {
 		return dropi(x.Int(), y)
 	}
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case F:
-		if !isI(x) {
-			return errf("i_y : non-integer i (%s)", x.Type())
+		if !isI(xv) {
+			return errf("i_y : non-integer i (%s)", xv.Type())
 		}
-		return dropi(int(x), y)
+		return dropi(int(xv), y)
 	case S:
-		return drops(x, y)
+		return drops(xv, y)
 	case *AB:
-		return drop(fromABtoAI(x), y)
+		return drop(fromABtoAI(xv), y)
 	case *AI:
-		return cutAI(x, y)
+		return cutAI(xv, y)
 	case *AF:
-		z := toAI(x)
+		z := toAI(xv)
 		if z.IsErr() {
 			return z
 		}
@@ -263,7 +263,7 @@ func cutAI(x *AI, y V) V {
 		}
 		return canonicalV(NewAV(r))
 	default:
-		return errf("x_y : y not an array (%s)", yv.Type())
+		return errf("x_y : y not an array (%s)", y.Type())
 	}
 }
 
@@ -273,12 +273,12 @@ func take(x, y V) V {
 	if x.IsInt() {
 		i = x.Int()
 	} else {
-		switch x := x.Value.(type) {
+		switch xv := x.Value.(type) {
 		case F:
-			if !isI(x) {
-				return errf("i#y : non-integer i (%s)", x.Type())
+			if !isI(xv) {
+				return errf("i#y : non-integer i (%s)", xv.Type())
 			}
-			i = int(x)
+			i = int(xv)
 		default:
 			return errf("i#y : non-integer i (%s)", x.Type())
 		}
@@ -506,26 +506,26 @@ func shiftBefore(x, y V) V {
 
 // nudge returns »x. XXX unused for now
 func nudge(x V) V {
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case *AB:
-		r := make([]bool, x.Len())
-		copy(r[1:], x.Slice[0:x.Len()-1])
+		r := make([]bool, xv.Len())
+		copy(r[1:], xv.Slice[0:xv.Len()-1])
 		return NewAB(r)
 	case *AI:
-		r := make([]int, x.Len())
-		copy(r[1:], x.Slice[0:x.Len()-1])
+		r := make([]int, xv.Len())
+		copy(r[1:], xv.Slice[0:xv.Len()-1])
 		return NewAI(r)
 	case *AF:
-		r := make([]float64, x.Len())
-		copy(r[1:], x.Slice[0:x.Len()-1])
+		r := make([]float64, xv.Len())
+		copy(r[1:], xv.Slice[0:xv.Len()-1])
 		return NewAF(r)
 	case *AS:
-		r := make([]string, x.Len())
-		copy(r[1:], x.Slice[0:x.Len()-1])
+		r := make([]string, xv.Len())
+		copy(r[1:], xv.Slice[0:xv.Len()-1])
 		return NewAS(r)
 	case *AV:
-		r := make([]V, x.Len())
-		copy(r[1:], x.Slice[0:x.Len()-1])
+		r := make([]V, xv.Len())
+		copy(r[1:], xv.Slice[0:xv.Len()-1])
 		return canonicalV(NewAV(r))
 	default:
 		return errs("»x : not an array")
@@ -539,9 +539,9 @@ func shiftAfter(x, y V) V {
 	if max == 0 {
 		return y
 	}
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 	case *AB:
-		ys := y.Slice
+		ys := yv.Slice
 		switch xv := x.Value.(type) {
 		case *AB:
 			r := make([]bool, len(ys))
@@ -572,7 +572,7 @@ func shiftAfter(x, y V) V {
 			return errType("x«y", "x", x)
 		}
 	case *AF:
-		ys := y.Slice
+		ys := yv.Slice
 		switch xv := x.Value.(type) {
 		case *AB:
 			r := make([]float64, len(ys))
@@ -599,7 +599,7 @@ func shiftAfter(x, y V) V {
 			return errType("x«y", "x", x)
 		}
 	case *AI:
-		ys := y.Slice
+		ys := yv.Slice
 		switch xv := x.Value.(type) {
 		case *AB:
 			r := make([]int, len(ys))
@@ -628,7 +628,7 @@ func shiftAfter(x, y V) V {
 			return errType("x«y", "x", x)
 		}
 	case *AS:
-		ys := y.Slice
+		ys := yv.Slice
 		switch xv := x.Value.(type) {
 		case *AS:
 			r := make([]string, len(ys))
@@ -641,7 +641,7 @@ func shiftAfter(x, y V) V {
 			return errType("x«y", "x", x)
 		}
 	case *AV:
-		ys := y.Slice
+		ys := yv.Slice
 		switch xv := x.Value.(type) {
 		case array:
 			r := make([]V, len(ys))
@@ -663,26 +663,26 @@ func nudgeBack(x V) V {
 	if Length(x) == 0 {
 		return x
 	}
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case *AB:
-		r := make([]bool, x.Len())
-		copy(r[0:x.Len()-1], x.Slice[1:])
+		r := make([]bool, xv.Len())
+		copy(r[0:xv.Len()-1], xv.Slice[1:])
 		return NewAB(r)
 	case *AI:
-		r := make([]int, x.Len())
-		copy(r[0:x.Len()-1], x.Slice[1:])
+		r := make([]int, xv.Len())
+		copy(r[0:xv.Len()-1], xv.Slice[1:])
 		return NewAI(r)
 	case *AF:
-		r := make([]float64, x.Len())
-		copy(r[0:x.Len()-1], x.Slice[1:])
+		r := make([]float64, xv.Len())
+		copy(r[0:xv.Len()-1], xv.Slice[1:])
 		return NewAF(r)
 	case *AS:
-		r := make([]string, x.Len())
-		copy(r[0:x.Len()-1], x.Slice[1:])
+		r := make([]string, xv.Len())
+		copy(r[0:xv.Len()-1], xv.Slice[1:])
 		return NewAS(r)
 	case *AV:
-		r := make([]V, x.Len())
-		copy(r[0:x.Len()-1], x.Slice[1:])
+		r := make([]V, xv.Len())
+		copy(r[0:xv.Len()-1], xv.Slice[1:])
 		return canonicalV(NewAV(r))
 	default:
 		return errs("«x : x not an array")
