@@ -10,31 +10,31 @@ func negate(x V) V {
 	if x.IsInt() {
 		return NewI(-x.Int())
 	}
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case F:
-		return NewV(-x)
+		return NewV(-xv)
 	case *AB:
-		r := make([]int, x.Len())
+		r := make([]int, xv.Len())
 		for i := range r {
-			r[i] = int(-B2I(x.At(i)))
+			r[i] = int(-B2I(xv.At(i)))
 		}
 		return NewAI(r)
 	case *AI:
-		r := make([]int, x.Len())
+		r := make([]int, xv.Len())
 		for i := range r {
-			r[i] = -x.At(i)
+			r[i] = -xv.At(i)
 		}
 		return NewAI(r)
 	case *AF:
-		r := make([]float64, x.Len())
+		r := make([]float64, xv.Len())
 		for i := range r {
-			r[i] = -x.At(i)
+			r[i] = -xv.At(i)
 		}
 		return NewAF(r)
 	case *AV:
-		r := make([]V, x.Len())
+		r := make([]V, xv.Len())
 		for i := range r {
-			r[i] = negate(x.At(i))
+			r[i] = negate(xv.At(i))
 		}
 		return NewAV(r)
 	default:
@@ -93,7 +93,7 @@ func sign(x V) V {
 		}
 		return NewAV(r)
 	default:
-		return errType("sign x", "x", xv)
+		return errType("sign x", "x", x)
 	}
 }
 
@@ -132,7 +132,7 @@ func floor(x V) V {
 		}
 		return NewAV(r)
 	default:
-		return errType("_N", "N", xv)
+		return errType("_N", "N", x)
 	}
 }
 
@@ -169,7 +169,7 @@ func ceil(x V) V {
 		}
 		return NewAV(r)
 	default:
-		return errType("ceil x", "x", xv)
+		return errType("ceil x", "x", x)
 	}
 }
 
@@ -241,7 +241,7 @@ func abs(x V) V {
 		}
 		return NewAV(r)
 	default:
-		return errType("abs x", "x", xv)
+		return errType("abs x", "x", x)
 	}
 }
 

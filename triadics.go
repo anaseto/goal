@@ -4,13 +4,13 @@ package goal
 
 // amend3 implements @[x;y;f].
 func (ctx *Context) amend3(x, y, f V) V {
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case array:
 		y = toIndices(y)
 		if y.IsErr() {
 			return y
 		}
-		return canonicalV(ctx.amend3array(cloneShallowArray(x), y, f))
+		return canonicalV(ctx.amend3array(cloneShallowArray(xv), y, f))
 	default:
 		return errType("@[x;y;f]", "x", x)
 	}
@@ -41,9 +41,9 @@ func (ctx *Context) amend3array(x array, y, f V) V {
 	if y.IsInt() {
 		return ctx.amend3arrayI(x, y.Int(), f)
 	}
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 	case *AI:
-		for _, yi := range y.Slice {
+		for _, yi := range yv.Slice {
 			ax := ctx.amend3arrayI(x, yi, f)
 			if ax.IsErr() {
 				return ax
@@ -52,7 +52,7 @@ func (ctx *Context) amend3array(x array, y, f V) V {
 		}
 		return NewV(x)
 	case *AV:
-		for _, yi := range y.Slice {
+		for _, yi := range yv.Slice {
 			ax := ctx.amend3array(x, yi, f)
 			if ax.IsErr() {
 				return ax
@@ -67,13 +67,13 @@ func (ctx *Context) amend3array(x array, y, f V) V {
 
 // amend4 implements @[x;y;f;z].
 func (ctx *Context) amend4(x, y, f, z V) V {
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case array:
 		y = toIndices(y)
 		if y.IsErr() {
 			return y
 		}
-		return canonicalV(ctx.amend4array(cloneShallowArray(x), y, f, z))
+		return canonicalV(ctx.amend4array(cloneShallowArray(xv), y, f, z))
 	default:
 		return errType("@[x;y;f;z]", "x", x)
 	}
@@ -108,11 +108,11 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 		}
 		return ctx.amend4arrayI(x, y.Int(), f, z)
 	}
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 	case *AI:
 		az, ok := z.Value.(array)
 		if !ok {
-			for _, xi := range y.Slice {
+			for _, xi := range yv.Slice {
 				ax := ctx.amend4arrayI(x, xi, f, z)
 				if ax.IsErr() {
 					return ax
@@ -121,11 +121,11 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 			}
 			return NewV(x)
 		}
-		if az.Len() != y.Len() {
+		if az.Len() != yv.Len() {
 			return errf("@[x;y;f;z] : length mismatch between x and y (%d vs %d)",
-				y.Len(), az.Len())
+				yv.Len(), az.Len())
 		}
-		for i, xi := range y.Slice {
+		for i, xi := range yv.Slice {
 			ax := ctx.amend4arrayI(x, xi, f, az.at(i))
 			if ax.IsErr() {
 				return ax
@@ -136,7 +136,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 	case *AV:
 		az, ok := z.Value.(array)
 		if !ok {
-			for _, xi := range y.Slice {
+			for _, xi := range yv.Slice {
 				ax := ctx.amend4array(x, xi, f, z)
 				if ax.IsErr() {
 					return ax
@@ -145,11 +145,11 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 			}
 			return NewV(x)
 		}
-		if az.Len() != y.Len() {
+		if az.Len() != yv.Len() {
 			return errf("@[x;y;f;z] : length mismatch between x and y (%d vs %d)",
-				y.Len(), az.Len())
+				yv.Len(), az.Len())
 		}
-		for i, xi := range y.Slice {
+		for i, xi := range yv.Slice {
 			ax := ctx.amend4array(x, xi, f, az.at(i))
 			if ax.IsErr() {
 				return ax

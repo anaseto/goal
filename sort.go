@@ -505,32 +505,32 @@ func descend(x V) V {
 
 // search implements x$y.
 func search(x V, y V) V {
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case *AB:
-		if !sort.IsSorted(sortAB(x.Slice)) {
+		if !sort.IsSorted(sortAB(xv.Slice)) {
 			return errDomain("x$y", "x is not ascending")
 		}
-		return searchAI(fromABtoAI(x).Value.(*AI), y)
+		return searchAI(fromABtoAI(xv).Value.(*AI), y)
 	case *AI:
-		if !sort.IsSorted(sort.IntSlice(x.Slice)) {
+		if !sort.IsSorted(sort.IntSlice(xv.Slice)) {
 			return errDomain("x$y", "x is not ascending")
 		}
-		return searchAI(x, y)
+		return searchAI(xv, y)
 	case *AF:
-		if !sort.IsSorted(sort.Float64Slice(x.Slice)) {
+		if !sort.IsSorted(sort.Float64Slice(xv.Slice)) {
 			return errDomain("x$y", "x is not ascending")
 		}
-		return searchAF(x, y)
+		return searchAF(xv, y)
 	case *AS:
-		if !sort.IsSorted(sort.StringSlice(x.Slice)) {
+		if !sort.IsSorted(sort.StringSlice(xv.Slice)) {
 			return errDomain("x$y", "x is not ascending")
 		}
-		return searchAS(x, y)
+		return searchAS(xv, y)
 	case *AV:
-		if !sort.IsSorted(sortVSlice(x.Slice)) {
+		if !sort.IsSorted(sortVSlice(xv.Slice)) {
 			return errDomain("x$y", "x is not ascending")
 		}
-		return searchAV(x, y)
+		return searchAV(xv, y)
 	default:
 		// should not happen
 		return errType("x$y", "x", x)

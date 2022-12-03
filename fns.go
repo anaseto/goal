@@ -497,9 +497,9 @@ func weedOutAI(x *AI, y V) V {
 func eval(ctx *Context, x V) V {
 	//assertCanonical(x)
 	nctx := ctx.derive()
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case S:
-		r, err := nctx.Eval(string(x))
+		r, err := nctx.Eval(string(xv))
 		if err != nil {
 			return errf(".s : %v", err)
 		}

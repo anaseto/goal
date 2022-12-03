@@ -61,19 +61,19 @@ func applyS2(s S, x V, y V) V {
 		}
 		l = y.Int()
 	} else {
-		switch y := y.Value.(type) {
+		switch yv := y.Value.(type) {
 		case F:
-			if !isI(y) {
-				return errf("s[x;y] : y non-integer (%g)", y)
+			if !isI(yv) {
+				return errf("s[x;y] : y non-integer (%g)", yv)
 			}
-			l = int(y)
+			l = int(yv)
 		case *AI:
 		case *AB:
-			if Length(x) != y.Len() {
+			if Length(x) != yv.Len() {
 			}
-			return applyS2(s, x, fromABtoAI(y))
+			return applyS2(s, x, fromABtoAI(yv))
 		case *AF:
-			z := toAI(y)
+			z := toAI(yv)
 			if z.IsErr() {
 				return z
 			}
@@ -164,18 +164,18 @@ func applyS2(s S, x V, y V) V {
 }
 
 func bytes(x V) V {
-	switch x := x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case S:
-		return NewI(len(x))
+		return NewI(len(xv))
 	case *AS:
-		r := make([]int, x.Len())
-		for i, s := range x.Slice {
+		r := make([]int, xv.Len())
+		for i, s := range xv.Slice {
 			r[i] = len(s)
 		}
 		return NewAI(r)
 	case *AV:
-		r := make([]V, x.Len())
-		for i, xi := range x.Slice {
+		r := make([]V, xv.Len())
+		for i, xi := range xv.Slice {
 			r[i] = bytes(xi)
 			if r[i].IsErr() {
 				return r[i]
@@ -320,18 +320,18 @@ func casts(y V) V {
 }
 
 func drops(s S, y V) V {
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 	case S:
-		return NewS(strings.TrimPrefix(string(y), string(s)))
+		return NewS(strings.TrimPrefix(string(yv), string(s)))
 	case *AS:
-		r := make([]string, y.Len())
-		for i, yi := range y.Slice {
+		r := make([]string, yv.Len())
+		for i, yi := range yv.Slice {
 			r[i] = strings.TrimPrefix(string(yi), string(s))
 		}
 		return NewAS(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i, yi := range y.Slice {
+		r := make([]V, yv.Len())
+		for i, yi := range yv.Slice {
 			r[i] = drops(s, yi)
 			if r[i].IsErr() {
 				return r[i]
@@ -345,18 +345,18 @@ func drops(s S, y V) V {
 
 // trim returns s^y.
 func trim(s S, y V) V {
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 	case S:
-		return NewS(strings.Trim(string(y), string(s)))
+		return NewS(strings.Trim(string(yv), string(s)))
 	case *AS:
-		r := make([]string, y.Len())
-		for i, yi := range y.Slice {
+		r := make([]string, yv.Len())
+		for i, yi := range yv.Slice {
 			r[i] = strings.Trim(string(yi), string(s))
 		}
 		return NewAS(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i, yi := range y.Slice {
+		r := make([]V, yv.Len())
+		for i, yi := range yv.Slice {
 			r[i] = trim(s, yi)
 			if r[i].IsErr() {
 				return r[i]

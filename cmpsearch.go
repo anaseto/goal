@@ -677,7 +677,7 @@ func without(x, y V) V {
 		r = replicate(r, y)
 		return r
 	default:
-		return errType("x^y", "x", xv)
+		return errType("x^y", "x", x)
 	}
 }
 
@@ -704,18 +704,18 @@ func find(x, y V) V {
 }
 
 func findS(s S, y V) V {
-	switch y := y.Value.(type) {
+	switch yv := y.Value.(type) {
 	case S:
-		return NewI(strings.Index(string(s), string(y)))
+		return NewI(strings.Index(string(s), string(yv)))
 	case *AS:
-		r := make([]int, y.Len())
-		for i, ss := range y.Slice {
+		r := make([]int, yv.Len())
+		for i, ss := range yv.Slice {
 			r[i] = strings.Index(string(s), string(ss))
 		}
 		return NewAI(r)
 	case *AV:
-		r := make([]V, y.Len())
-		for i, yi := range y.Slice {
+		r := make([]V, yv.Len())
+		for i, yi := range yv.Slice {
 			r[i] = findS(s, yi)
 			if r[i].IsErr() {
 				return r[i]
