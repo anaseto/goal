@@ -223,23 +223,23 @@ func abs(x V) V {
 	case *AB:
 		return x
 	case *AI:
-		r := make([]int, xv.Len())
-		for i := range r {
-			r[i] = int(absI(xv.At(i)))
+		r := xv.reuse()
+		for i, xi := range xv.Slice {
+			r.Slice[i] = absI(xi)
 		}
-		return NewAI(r)
+		return NewV(r)
 	case *AF:
-		r := make([]float64, xv.Len())
-		for i := range r {
-			r[i] = math.Abs(xv.At(i))
+		r := xv.reuse()
+		for i, xi := range xv.Slice {
+			r.Slice[i] = math.Abs(xi)
 		}
-		return NewAF(r)
+		return NewV(r)
 	case *AV:
-		r := make([]V, xv.Len())
-		for i := range r {
-			r[i] = abs(xv.At(i))
+		r := xv.reuse()
+		for i, xi := range xv.Slice {
+			r.Slice[i] = abs(xi)
 		}
-		return NewAV(r)
+		return NewV(r)
 	default:
 		return errType("abs x", "x", x)
 	}
