@@ -74,9 +74,6 @@ func group(x V) V {
 			return z
 		}
 		return group(z)
-	case *AV:
-		//assertCanonical(x)
-		return errf("=x : x not an integer array (%s)", x.Type())
 	default:
 		return errf("=x : x not an integer array (%s)", x.Type())
 	}
@@ -109,9 +106,6 @@ func icount(x V) V {
 			return z
 		}
 		return icount(z)
-	case *AV:
-		//assertCanonical(x)
-		return errs("icount x : x non-integer array")
 	default:
 		return errf("icount x : x not an integer array (%s)", x.Type())
 	}
@@ -136,6 +130,6 @@ func groupBy(x, y V) V {
 		}
 		return NewAV(r)
 	default:
-		return errs("f=y : y not array")
+		return errf("f=y : y not array (%s)", y.Type())
 	}
 }
