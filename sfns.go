@@ -50,11 +50,13 @@ func reverseMut(x V) {
 
 // reverse returns |x.
 func reverse(x V) V {
-	switch x.Value.(type) {
+	switch xv := x.Value.(type) {
 	case array:
-		r := cloneShallow(x)
-		reverseMut(r)
-		return r
+		if !xv.reusable() {
+			x = cloneShallow(x)
+		}
+		reverseMut(x)
+		return x
 	default:
 		return errType("|x", "x", x)
 	}

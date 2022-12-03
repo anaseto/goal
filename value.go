@@ -456,6 +456,7 @@ func (x *AV) sprint(ctx *Context, deep bool) string {
 // Typical implementation is given in comments.
 type array interface {
 	Value
+	refCounter
 	Len() int
 	at(i int) V           // x[i]
 	slice(i, j int) array // x[i:j]
@@ -631,6 +632,7 @@ func (r DerivedVerb) Matches(x Value) bool {
 type refCounter interface {
 	rcincr()
 	rcdecr()
+	reusable() bool
 }
 
 func (x *AB) reusable() bool { return x.rc == 0 }

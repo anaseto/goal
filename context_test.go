@@ -273,6 +273,7 @@ var matchTests = [...]matchTest{
 	{`a:0 1 2.5;-a;a`, `0 1 2.5`},
 	{`a:0 1 -2;sign a;a`, `0 1 -2`},
 	{`a:0 1 2.5;_a;a`, `0 1 2.5`},
+	{`a:!10;|a;a`, `!10`},
 }
 
 func TestEval(t *testing.T) {
@@ -450,5 +451,12 @@ func BenchmarkWhileN(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		ctx := NewContext()
 		ctx.Eval("100 {x+1}/!10000")
+	}
+}
+
+func BenchmarkReverse(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		ctx := NewContext()
+		ctx.Eval("100 {|x}/!10000")
 	}
 }
