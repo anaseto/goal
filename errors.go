@@ -117,6 +117,10 @@ func errType(op, sym string, x V) V {
 	return errf("%s : bad type for %s (%s)", op, sym, x.Type())
 }
 
+func errTypeElt(op, sym string, x V) V {
+	return errf("%s : bad type in %s (%s)", op, sym, x.Type())
+}
+
 func errDomain(op, s string) V {
 	return errs(op + " : " + s)
 }

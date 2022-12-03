@@ -298,7 +298,7 @@ EOS
                 }
                 return NewV(r)
 	default:
-		return errType("x${errOp}y", "x", x)
+		return errTypeElt("x${errOp}y", "x", x)
 	}
 }\n
 EOS
@@ -396,7 +396,7 @@ EOS
 		}
 		return NewV(r)
 	default:
-		return errType("x${errOp}y", "y", y)
+		return errTypeElt("x${errOp}y", "y", y)
 	}
 }\n
 EOS
@@ -547,7 +547,7 @@ EOS
 		}
 		return NewV(r)
 	default:
-		return errType("x${errOp}y", "y", y)
+		return errTypeElt("x${errOp}y", "y", y)
 	}
 }\n
 EOS
