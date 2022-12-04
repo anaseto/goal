@@ -155,6 +155,7 @@ func joinToAV(x V, y *AV, left bool) V {
 }
 
 func joinArrays(x, y array) V {
+	// TODO: joinArrays can use reusable.
 	r := make([]V, y.Len()+x.Len())
 	for i := 0; i < x.Len(); i++ {
 		r[i] = x.at(i)
