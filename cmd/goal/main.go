@@ -178,9 +178,9 @@ func registerVariadics(ctx *goal.Context) {
 	say := ctx.RegisterMonad("say", goal.VariadicFun{
 		Func: func(ctx *goal.Context, args []goal.V) goal.V {
 			for _, arg := range args {
-				switch arg := arg.Value.(type) {
+				switch argv := arg.Value.(type) {
 				case goal.S:
-					fmt.Println(string(arg))
+					fmt.Println(string(argv))
 					return goal.V{}
 				default:
 					fmt.Println(arg.Sprint(ctx))
