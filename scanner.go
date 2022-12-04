@@ -50,6 +50,7 @@ const (
 	ERROR
 	ADVERB
 	DYAD
+	DYADASSIGN
 	IDENT
 	LEFTBRACE
 	LEFTBRACKET
@@ -243,6 +244,14 @@ func scanAny(s *Scanner) stateFn {
 		if !s.exprEnd {
 			return scanMinus
 		}
+		r := s.peek()
+		if r == ':' {
+			s.next()
+			if s.peek() == ':' {
+				s.next()
+			}
+			return s.emitOp(DYADASSIGN)
+		}
 		return s.emitOp(DYAD)
 	case ':':
 		r := s.peek()
@@ -252,11 +261,19 @@ func scanAny(s *Scanner) stateFn {
 		return s.emitOp(DYAD)
 	case '+', '*', '%', '!', '&', '|', '<', '>',
 		'=', '~', ',', '^', '#', '_', '$', '?', '@', '.':
+		r := s.peek()
+		if r == ':' {
+			s.next()
+			if s.peek() == ':' {
+				s.next()
+			}
+			return s.emitOp(DYADASSIGN)
+		}
 		return s.emitOp(DYAD)
 	case '"':
 		return scanString
 	case '`':
-		return scanSymbolString
+		return scanRawString
 	}
 	switch {
 	case isDigit(r):
@@ -358,7 +375,7 @@ func scanString(s *Scanner) stateFn {
 	}
 }
 
-func scanSymbolString(s *Scanner) stateFn {
+func scanRawString(s *Scanner) stateFn {
 	for {
 		r := s.next()
 		switch r {

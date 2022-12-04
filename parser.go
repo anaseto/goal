@@ -2,6 +2,7 @@ package goal
 
 import (
 	"fmt"
+	"strings"
 )
 
 // parser builds an expr non-resolved AST.
@@ -106,8 +107,24 @@ func (p *parser) expr(es exprs) (exprs, error) {
 		// We handle adverb at start of expression.
 		e = p.derivedVerb(nil)
 	case IDENT:
-		// TODO: handle here different kinds of assignments/changes
-		e = &astToken{Type: astIDENT, Pos: tok.Pos, Text: tok.Text}
+		switch ntok := p.peek(); ntok.Type {
+		case DYAD:
+			if ntok.Text != ":" && ntok.Text != "::" {
+				e = &astToken{Type: astIDENT, Pos: tok.Pos, Text: tok.Text}
+				break
+			}
+			p.next()
+			e, err = p.assign(tok, strings.HasSuffix(ntok.Text, "::"))
+			return append(es, e), err
+		case DYADASSIGN:
+			p.next()
+			e, err = p.assignOp(tok,
+				strings.TrimRight(ntok.Text, ":"),
+				strings.HasSuffix(ntok.Text, "::"))
+			return append(es, e), err
+		default:
+			e = &astToken{Type: astIDENT, Pos: tok.Pos, Text: tok.Text}
+		}
 	case LEFTBRACE:
 		e, err = p.lambda()
 	case LEFTBRACKET:
@@ -152,6 +169,8 @@ func (p *parser) expr(es exprs) (exprs, error) {
 		return es, err
 	case DYAD:
 		e = &astToken{Type: astDYAD, Pos: tok.Pos, Text: tok.Text}
+	case DYADASSIGN:
+		err = p.errorf("assignment operation %s without identifier left", tok.Text)
 	case MONAD:
 		e = &astToken{Type: astMONAD, Pos: tok.Pos, Text: tok.Text}
 	default:
@@ -346,6 +365,59 @@ func (p *parser) apply2(verb, left expr) (expr, error) {
 	}
 	pDoExprs(es)
 	a.Right = es
+	return a, err
+}
+
+func (p *parser) assign(tok Token, global bool) (expr, error) {
+	a := &astAssign{
+		Name:   tok.Text,
+		Global: global,
+		Pos:    tok.Pos,
+	}
+	es, err := p.expr(exprs{})
+	if err != nil {
+		switch err.(type) {
+		case parseCLOSE:
+			pDoExprs(es)
+			a.Right = es
+			if len(es) == 0 {
+				return a, p.errorf("assignment without expression right")
+			}
+		}
+		return a, err
+	}
+	pDoExprs(es)
+	a.Right = es
+	if len(es) == 0 {
+		return a, p.errorf("assignment without expression right")
+	}
+	return a, err
+}
+
+func (p *parser) assignOp(tok Token, dyad string, global bool) (expr, error) {
+	a := &astAssignOp{
+		Name:   tok.Text,
+		Global: global,
+		Dyad:   dyad,
+		Pos:    tok.Pos,
+	}
+	es, err := p.expr(exprs{})
+	if err != nil {
+		switch err.(type) {
+		case parseCLOSE:
+			pDoExprs(es)
+			a.Right = es
+			if len(es) == 0 {
+				return a, p.errorf("assignment operation without expression right")
+			}
+		}
+		return a, err
+	}
+	pDoExprs(es)
+	a.Right = es
+	if len(es) == 0 {
+		return a, p.errorf("assignment operation without expression right")
+	}
 	return a, err
 }
 

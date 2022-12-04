@@ -52,6 +52,24 @@ const (
 	astEMPTYLIST
 )
 
+// astAssign represents an assignment x:y.
+type astAssign struct {
+	Name   string
+	Global bool
+	Right  expr
+	Pos    int
+}
+
+// astAssignOp represents a variable assignment with a built-in operator, of
+// the form x op: y, semantically equivalent to x: x op y.
+type astAssignOp struct {
+	Name   string
+	Global bool
+	Dyad   string
+	Right  expr
+	Pos    int
+}
+
 // astStrand represents a stranding of literals, like 1 23 456
 type astStrand struct {
 	Lits []astToken
@@ -159,6 +177,8 @@ func (b *astLambda) String() (s string) {
 
 func (es exprs) node()           {}
 func (t *astToken) node()        {}
+func (a *astAssign) node()       {}
+func (a *astAssignOp) node()     {}
 func (st *astStrand) node()      {}
 func (dv *astDerivedVerb) node() {}
 func (p *astParen) node()        {}

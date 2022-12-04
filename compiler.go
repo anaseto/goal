@@ -269,6 +269,16 @@ func (c *compiler) doExpr(e expr, n int) error {
 		if err != nil {
 			return err
 		}
+	case *astAssign:
+		err := c.doAssign(e, n)
+		if err != nil {
+			return err
+		}
+	case *astAssignOp:
+		err := c.doAssignOp(e, n)
+		if err != nil {
+			return err
+		}
 	case *astDerivedVerb:
 		err := c.doDerivedVerb(e, n)
 		if err != nil {
@@ -409,10 +419,14 @@ func (c *compiler) doLocal(tok *astToken, n int) {
 }
 
 func (c *compiler) doVariadic(tok *astToken, n int) error {
+	return c.doVariadicAt(tok.Text, tok.Pos, n)
+}
+
+func (c *compiler) doVariadicAt(s string, pos, n int) error {
 	// tok.Type either MONAD, DYAD or ADVERB
-	v := c.parseBuiltin(tok.Text)
+	v := c.parseVariadic(s)
 	opos := c.pos
-	c.pos = tok.Pos
+	c.pos = pos
 	c.pushVariadic(v, n)
 	c.pos = opos
 	return nil
@@ -446,43 +460,75 @@ func isLeftArg(e expr) bool {
 	return true
 }
 
-func (c *compiler) doAssign(verbTok *astToken, left, right expr, n int) (bool, error) {
-	var identTok *astToken
-	switch left := left.(type) {
-	case *astToken:
-		if left.Type != astIDENT {
-			return false, nil
-		}
-		identTok = left
-	default:
-		return false, nil
-	}
-	err := c.doExpr(right, 0)
+func (c *compiler) doAssign(e *astAssign, n int) error {
+	err := c.doExpr(e.Right, 0)
 	if err != nil {
-		return false, err
+		return err
 	}
 	lc := c.scope()
-	if lc == nil || verbTok.Text == "::" {
-		id := c.ctx.global(identTok.Text)
+	if lc == nil || e.Global {
+		id := c.ctx.global(e.Name)
 		c.push2(opAssignGlobal, opcode(id))
-		return true, nil
+		c.applyN(n)
+		return nil
 	}
-	local, ok := lc.local(identTok.Text)
+	local, ok := lc.local(e.Name)
 	if ok {
 		c.push2(opAssignLocal, opArg)
 		lc.opIdxLocal[len(lc.Body)-1] = local
-		return true, nil
+		c.applyN(n)
+		return nil
 	}
 	local = lambdaLocal{Type: localVar, ID: lc.nVars}
-	lc.locals[identTok.Text] = local
+	lc.locals[e.Name] = local
 	c.push2(opAssignLocal, opArg)
 	lc.opIdxLocal[len(lc.Body)-1] = local
 	lc.nVars++
 	c.applyN(n)
-	return true, nil
+	return nil
 }
 
-func (c *compiler) parseBuiltin(s string) variadic {
+func (c *compiler) doAssignOp(e *astAssignOp, n int) error {
+	err := c.doExpr(e.Right, 0)
+	if err != nil {
+		return err
+	}
+	lc := c.scope()
+	if lc == nil || e.Global {
+		id, ok := c.ctx.gIDs[e.Name]
+		if !ok {
+			return c.perrorf(e.Pos,
+				"undefined global in assignement operation: %s", e.Name)
+		}
+		c.push2(opGlobalLast, opcode(id))
+		c.doVariadicAt(e.Dyad, e.Pos-1, 2)
+		c.push2(opAssignGlobal, opcode(id))
+		c.applyN(n)
+		return nil
+	}
+	local, ok := lc.local(e.Name)
+	if ok {
+		c.push2(opLocalLast, opArg)
+		lc.opIdxLocal[len(lc.Body)-1] = local
+		c.doVariadicAt(e.Dyad, e.Pos-1, 2)
+		c.push2(opAssignLocal, opArg)
+		lc.opIdxLocal[len(lc.Body)-1] = local
+		c.applyN(n)
+		return nil
+	}
+	local = lambdaLocal{Type: localVar, ID: lc.nVars}
+	lc.locals[e.Name] = local
+	c.push2(opLocalLast, opArg)
+	lc.opIdxLocal[len(lc.Body)-1] = local
+	c.doVariadicAt(e.Dyad, e.Pos-1, 2)
+	c.push2(opAssignLocal, opArg)
+	lc.opIdxLocal[len(lc.Body)-1] = local
+	lc.nVars++
+	c.applyN(n)
+	return nil
+}
+
+func (c *compiler) parseVariadic(s string) variadic {
 	v, ok := c.ctx.vNames[s]
 	if !ok {
 		panic("unknown variadic op: " + s)
@@ -636,7 +682,7 @@ func (ctx *Context) resolveLambda(lc *lambdaCode) {
 		op := lc.Body[ip]
 		ip++
 		switch op {
-		case opLocal:
+		case opLocal, opLocalLast:
 			lc.Body[ip] = opcode(getID(lc.opIdxLocal[ip]))
 		case opAssignLocal:
 			lc.Body[ip] = opcode(getID(lc.opIdxLocal[ip]))
@@ -691,7 +737,7 @@ func (ctx *Context) analyzeLambdaLiveness(lc *lambdaCode) {
 			}
 			lc.jumpPoints[ip] = true
 			lc.jumpPoints[len(lc.Body)] = true
-		case opLocal:
+		case opLocal, opLocalLast:
 			lc.lastUses[lc.Body[ip]] = lastUse{opIdx: ip - 1, bn: bn}
 		case opAssignLocal:
 			i := lc.Body[ip]
@@ -741,11 +787,6 @@ func (c *compiler) doApply2(a *astApply2, n int) error {
 				return err
 			}
 			return nil
-		case ":", "::":
-			done, err := c.doAssign(v, a.Left, a.Right, n)
-			if err != nil || done {
-				return err
-			}
 		}
 	}
 	err := c.doExpr(a.Right, 0)
@@ -805,8 +846,7 @@ func (c *compiler) doApplyN(a *astApplyN, n int) error {
 			}
 			return nil
 		case ":", "::":
-			switch len(a.Args) {
-			case 1:
+			if len(a.Args) == 1 {
 				// TODO: :[arg] when n > 0 ?
 				if n == 0 && v.Text == ":" {
 					err := c.doExpr(a.Args[0], 0)
@@ -815,11 +855,6 @@ func (c *compiler) doApplyN(a *astApplyN, n int) error {
 					}
 					c.push(opReturn)
 					return nil
-				}
-			case 2:
-				done, err := c.doAssign(v, a.Args[0], a.Args[1], n)
-				if err != nil || done {
-					return err
 				}
 			}
 		}
