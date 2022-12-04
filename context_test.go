@@ -546,13 +546,13 @@ func BenchmarkReverse(b *testing.B) {
 func BenchmarkAppend(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		ctx := NewContext()
-		ctx.Eval("100 {x,1}/!10000")
+		ctx.Eval("500 {x,1}/!10000")
 	}
 }
 
 func BenchmarkAppend2(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		ctx := NewContext()
-		ctx.Eval("100 {x:x,1;x,1}/!10000")
+		ctx.Eval("500 {x:x,1;x,1}/!10000")
 	}
 }
