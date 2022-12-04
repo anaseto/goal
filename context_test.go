@@ -156,6 +156,7 @@ var matchTests = [...]matchTest{
 	{`"a",1`, `"a" 1`},
 	{`1,"a"`, `1 "a"`},
 	{`1.5,"a"`, `1.5 "a"`},
+	{`{x:x,1;x,1}0 1`, `0 1 1 1`},
 	{`("a" "b";0 1),"c" "d"`, `("a" "b";0 1;"c";"d")`},
 	{`("a" "b";0 1),,"c" "d"`, `("a" "b";0 1;"c" "d")`},
 	{`(,("a" "b";0 1)),"c" "d"`, `(("a" "b";0 1);"c";"d")`},
@@ -354,6 +355,7 @@ var matchTests = [...]matchTest{
 	{`{a:0 1 0;a,1;a}0`, `0 1 0`},
 	{`{a:"a" "b";a,"c";a}0`, `"a" "b"`},
 	{`{a:("name1";"name2");a+".suffix";a}0`, `"name1" "name2"`},
+	{`{x:x,1;x,1;x}0 1`, `0 1 1`},
 }
 
 func TestEval(t *testing.T) {
@@ -545,5 +547,12 @@ func BenchmarkAppend(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		ctx := NewContext()
 		ctx.Eval("100 {x,1}/!10000")
+	}
+}
+
+func BenchmarkAppend2(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		ctx := NewContext()
+		ctx.Eval("100 {x:x,1;x,1}/!10000")
 	}
 }

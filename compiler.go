@@ -27,9 +27,11 @@ type lambdaCode struct {
 	EndPos   int
 
 	namedArgs  bool
+	lastUses   []lastUse              // opcode index and block number of variable last use
+	jumpPoints []bool                 // opcode points corresponding to a branchement
 	locals     map[string]lambdaLocal // arguments and variables
 	opIdxLocal map[int]lambdaLocal    // opcode index -> local variable
-	nVars      int
+	nVars      int                    // number of non-argument variables
 }
 
 // lambdaLocal represents either an argument or a local variable. IDs are
@@ -599,30 +601,6 @@ func (c *compiler) doLambdaArgs(args []string) error {
 	return nil
 }
 
-func (ctx *Context) analyzeLambdaLiveness(lc *lambdaCode) {
-	// We do a very simple and fast analysis for now, to optimize common
-	// cases.
-	lastUses := make([]int, len(lc.Names))
-	for i := range lastUses {
-		lastUses[i] = -1
-	}
-	for ip := 0; ip < len(lc.Body); {
-		op := lc.Body[ip]
-		ip++
-		switch op {
-		case opLocal:
-			lastUses[lc.Body[ip]] = ip - 1
-		}
-		ip += op.argc()
-	}
-	for i := range lastUses {
-		if lastUses[i] < 0 {
-			continue
-		}
-		lc.Body[lastUses[i]] = opLocalLast
-	}
-}
-
 func (ctx *Context) resolveLambda(lc *lambdaCode) {
 	nargs := 0
 	nlocals := 0
@@ -666,6 +644,74 @@ func (ctx *Context) resolveLambda(lc *lambdaCode) {
 		ip += op.argc()
 	}
 	lc.opIdxLocal = nil
+}
+
+type lastUse struct {
+	opIdx int // opcode index of last use
+	bn    int // block number of last use
+}
+
+func (ctx *Context) analyzeLambdaLiveness(lc *lambdaCode) {
+	// We do a very simple and fast analysis for now, to optimize common
+	// cases, handling only def-use in the same basic block (and the first
+	// and last which are guaranteed to be run).
+	//
+	// This could be improved without too much effort, as branching in goal
+	// is limited. There are four kinds of cases, all going forward (no
+	// loops):
+	// ?[if;then;else] gives ...jumpFalse #then; ...jump #else;
+	// and[x;y;z] gives ...jumpFalse #y+#z; jumpFalse #z
+	// or[x;y;z] gives ...jumpTrue #y+#z; jumpTrue #z
+	// :x gives opReturn
+	//
+	// As a result, just by recording depth, we could obtain more
+	// information without ressorting to slower generic data-flow
+	// algorithms.
+	lc.lastUses = make([]lastUse, len(lc.Names))
+	for i := range lc.lastUses {
+		lc.lastUses[i].bn = -1
+	}
+	bn := 0 // basic-block number
+	for ip := 0; ip < len(lc.Body); {
+		op := lc.Body[ip]
+		if lc.jumpPoints != nil && lc.jumpPoints[ip] {
+			bn++
+		}
+		ip++
+		switch op {
+		case opJumpFalse, opJumpTrue, opJump:
+			if lc.jumpPoints == nil {
+				lc.jumpPoints = make([]bool, len(lc.Body)+1)
+			}
+			lc.jumpPoints[ip+1] = true
+			lc.jumpPoints[ip+int(lc.Body[ip])] = true
+		case opReturn:
+			if lc.jumpPoints == nil {
+				lc.jumpPoints = make([]bool, len(lc.Body)+1)
+			}
+			lc.jumpPoints[ip] = true
+			lc.jumpPoints[len(lc.Body)] = true
+		case opLocal:
+			lc.lastUses[lc.Body[ip]] = lastUse{opIdx: ip - 1, bn: bn}
+		case opAssignLocal:
+			i := lc.Body[ip]
+			lu := lc.lastUses[i]
+			if lu.bn != bn {
+				break
+			}
+			lc.Body[lu.opIdx] = opLocalLast
+		}
+		ip += op.argc()
+	}
+	if lc.jumpPoints != nil && lc.jumpPoints[len(lc.Body)] {
+		bn++ // extra number in case of jump beyond the end (like return)
+	}
+	for _, lu := range lc.lastUses {
+		if lu.bn != 0 && lu.bn != bn {
+			continue
+		}
+		lc.Body[lu.opIdx] = opLocalLast
+	}
 }
 
 func (c *compiler) doApply2(a *astApply2, n int) error {
