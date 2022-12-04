@@ -374,10 +374,6 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 		c.doLocal(tok, n)
 		return nil
 	case astDYAD:
-		if n == 1 && tok.Text == ":" {
-			c.push(opReturn)
-			return nil
-		}
 		return c.doVariadic(tok, n)
 	case astMONAD:
 		return c.doVariadic(tok, n)
