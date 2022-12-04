@@ -84,7 +84,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			}
 		case opApply2V:
 			v := variadic(ops[ip])
-			r := ctx.applyNVariadic(v, 2)
+			r := ctx.apply2Variadic(v)
 			if r.IsErr() {
 				return ip - 1, r.Value.(error)
 			}
@@ -179,8 +179,14 @@ func (ctx *Context) peekN(n int) []V {
 }
 
 func (ctx *Context) drop() {
-	ctx.stack[len(ctx.stack)-1] = V{}
+	//ctx.stack[len(ctx.stack)-1] = V{}
 	ctx.stack = ctx.stack[:len(ctx.stack)-1]
+}
+
+func (ctx *Context) drop2() {
+	//ctx.stack[len(ctx.stack)-2] = V{}
+	ctx.stack[len(ctx.stack)-1] = V{}
+	ctx.stack = ctx.stack[:len(ctx.stack)-2]
 }
 
 func (ctx *Context) dropN(n int) {

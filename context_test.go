@@ -568,3 +568,21 @@ func BenchmarkAppend2(b *testing.B) {
 		ctx.Eval("500 {x:x,1;x,1}/!10000")
 	}
 }
+
+func BenchmarkDrop2(b *testing.B) {
+	ctx := NewContext()
+	for n := 0; n < b.N; n++ {
+		ctx.push(V{})
+		ctx.push(V{})
+		ctx.drop2()
+	}
+}
+
+func BenchmarkDropN2(b *testing.B) {
+	ctx := NewContext()
+	for n := 0; n < b.N; n++ {
+		ctx.push(V{})
+		ctx.push(V{})
+		ctx.dropN(2)
+	}
+}

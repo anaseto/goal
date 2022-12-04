@@ -48,10 +48,14 @@ func (ctx *Context) applyN(x V, n int) V {
 	case Lambda:
 		return ctx.applyLambda(x.lambda(), n)
 	case Variadic:
-		if n == 1 {
+		switch n {
+		case 1:
 			return ctx.applyVariadic(x.variadic())
+		case 2:
+			return ctx.apply2Variadic(x.variadic())
+		default:
+			return ctx.applyNVariadic(x.variadic(), n)
 		}
-		return ctx.applyNVariadic(x.variadic(), n)
 	}
 	switch xv := x.Value.(type) {
 	case DerivedVerb:
@@ -220,16 +224,30 @@ func (ctx *Context) applyVariadic(v variadic) V {
 	return r
 }
 
+func (ctx *Context) apply2Variadic(v variadic) V {
+	args := ctx.peekN(2)
+	if args[0] == (V{}) {
+		if args[1] != (V{}) {
+			arg := args[1]
+			ctx.drop2()
+			return NewV(ProjectionFirst{Fun: NewVariadic(v), Arg: arg})
+		}
+		return NewV(Projection{Fun: NewVariadic(v), Args: ctx.popN(2)})
+	} else if args[1] == (V{}) {
+		return NewV(Projection{Fun: NewVariadic(v), Args: ctx.popN(2)})
+	}
+	args[0].rcincr()
+	args[1].rcincr()
+	r := ctx.variadics[v].Func(ctx, args)
+	args[0].rcdecr()
+	args[1].rcdecr()
+	ctx.drop2()
+	return r
+}
+
 func (ctx *Context) applyNVariadic(v variadic, n int) V {
 	args := ctx.peekN(n)
 	if hasNil(args) {
-		if n == 2 {
-			if args[1] != (V{}) {
-				arg := args[1]
-				ctx.dropN(n)
-				return NewV(ProjectionFirst{Fun: NewVariadic(v), Arg: arg})
-			}
-		}
 		return NewV(Projection{Fun: NewVariadic(v), Args: ctx.popN(n)})
 	}
 	rcincr(args)
