@@ -628,18 +628,21 @@ func (r DerivedVerb) Matches(x Value) bool {
 }
 
 // refCounter is implemented by values that use a reference count, allowing for
-// memory reuse.
+// memory reuse. Refcount is increased by each assignement, and each use in an
+// operation. It is reduced after each operation, and for each last use of a
+// variable (as approximated conservatively). If refcount is less than one,
+// then the variable can be reused.
 type refCounter interface {
 	rcincr()
 	rcdecr()
 	reusable() bool
 }
 
-func (x *AB) reusable() bool { return x.rc == 0 }
-func (x *AI) reusable() bool { return x.rc == 0 }
-func (x *AF) reusable() bool { return x.rc == 0 }
-func (x *AS) reusable() bool { return x.rc == 0 }
-func (x *AV) reusable() bool { return x.rc == 0 }
+func (x *AB) reusable() bool { return x.rc <= 1 }
+func (x *AI) reusable() bool { return x.rc <= 1 }
+func (x *AF) reusable() bool { return x.rc <= 1 }
+func (x *AS) reusable() bool { return x.rc <= 1 }
+func (x *AV) reusable() bool { return x.rc <= 1 }
 
 func (x *AB) rcincr() { x.rc++ }
 func (x *AI) rcincr() { x.rc++ }
@@ -686,35 +689,35 @@ func (x *AV) rcdecr() {
 }
 
 func (x *AB) reuse() *AB {
-	if x.rc == 0 {
+	if x.rc <= 1 {
 		return x
 	}
 	return &AB{Slice: make([]bool, x.Len())}
 }
 
 func (x *AI) reuse() *AI {
-	if x.rc == 0 {
+	if x.rc <= 1 {
 		return x
 	}
 	return &AI{Slice: make([]int, x.Len())}
 }
 
 func (x *AF) reuse() *AF {
-	if x.rc == 0 {
+	if x.rc <= 1 {
 		return x
 	}
 	return &AF{Slice: make([]float64, x.Len())}
 }
 
 func (x *AS) reuse() *AS {
-	if x.rc == 0 {
+	if x.rc <= 1 {
 		return x
 	}
 	return &AS{Slice: make([]string, x.Len())}
 }
 
 func (x *AV) reuse() *AV {
-	if x.rc == 0 {
+	if x.rc <= 1 {
 		return x
 	}
 	return &AV{Slice: make([]V, x.Len())}

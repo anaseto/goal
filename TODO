@@ -11,7 +11,6 @@ Features:
 
 Tests:
 - improve test coverage and fix any remaining bugs in corner cases
-- fix refcount in some remaining aliasing cases 
 
 Optimizations:
 - more special code for common op/ and op\

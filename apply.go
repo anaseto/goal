@@ -5,21 +5,15 @@ package goal
 // Apply calls a value with a single argument.
 func (ctx *Context) Apply(x, y V) V {
 	ctx.push(y)
-	y.rcincr()
 	r := ctx.applyN(x, 1)
-	y.rcdecr()
 	return r
 }
 
 // Apply2 calls a value with a two arguments.
 func (ctx *Context) Apply2(x, y, z V) V {
 	ctx.push(z)
-	z.rcincr()
 	ctx.push(y)
-	y.rcincr()
 	r := ctx.applyN(x, 2)
-	y.rcdecr()
-	z.rcdecr()
 	return r
 }
 
@@ -31,14 +25,20 @@ func (ctx *Context) ApplyN(x V, args []V) V {
 		panic("ApplyArgs: len(args) should be > 0")
 	}
 	ctx.pushArgs(args)
+	r := ctx.applyN(x, len(args))
+	return r
+}
+
+func rcincr(args []V) {
 	for _, v := range args {
 		v.rcincr()
 	}
-	r := ctx.applyN(x, len(args))
+}
+
+func rcdecr(args []V) {
 	for _, v := range args {
 		v.rcdecr()
 	}
-	return r
 }
 
 // applyN applies x with the top n arguments in the stack. It consumes the
@@ -60,7 +60,9 @@ func (ctx *Context) applyN(x V, n int) V {
 		if hasNil(args) {
 			return NewV(Projection{Fun: x, Args: ctx.popN(n + 1)})
 		}
+		rcincr(args)
 		r := ctx.variadics[xv.Fun].Func(ctx, args)
+		rcdecr(args)
 		ctx.dropN(n + 1)
 		return r
 	case ProjectionFirst:
@@ -68,7 +70,10 @@ func (ctx *Context) applyN(x V, n int) V {
 			return errf("too many arguments: got %d, expected 1", n)
 		}
 		ctx.push(xv.Arg)
-		return ctx.applyN(xv.Fun, 2)
+		xv.Arg.rcincr()
+		r := ctx.applyN(xv.Fun, 2)
+		xv.Arg.rcdecr()
+		return r
 	case ProjectionMonad:
 		if n > 1 {
 			return errf("too many arguments: got %d, expected 1", n)
@@ -79,10 +84,16 @@ func (ctx *Context) applyN(x V, n int) V {
 	case S:
 		switch n {
 		case 1:
-			return applyS(xv, ctx.pop())
+			y := ctx.pop()
+			y.rcincr()
+			r := applyS(xv, y)
+			y.rcdecr()
+			return r
 		case 2:
 			args := ctx.peekN(n)
+			rcincr(args)
 			r := applyS2(xv, args[1], args[0])
+			rcdecr(args)
 			ctx.dropN(n)
 			return r
 		default:
@@ -94,7 +105,9 @@ func (ctx *Context) applyN(x V, n int) V {
 			return ctx.applyArray(x, ctx.pop())
 		default:
 			args := ctx.peekN(n)
+			rcincr(args)
 			r := ctx.applyArrayArgs(x, args[len(args)-1], args[:len(args)-1])
+			rcdecr(args)
 			ctx.dropN(n)
 			return r
 		}
@@ -200,7 +213,9 @@ func (ctx *Context) applyVariadic(v variadic) V {
 		ctx.drop()
 		return NewV(DerivedVerb{Fun: v, Arg: x})
 	}
+	x.rcincr()
 	r := ctx.variadics[v].Func(ctx, args)
+	x.rcdecr()
 	ctx.drop()
 	return r
 }
@@ -217,7 +232,9 @@ func (ctx *Context) applyNVariadic(v variadic, n int) V {
 		}
 		return NewV(Projection{Fun: NewVariadic(v), Args: ctx.popN(n)})
 	}
+	rcincr(args)
 	r := ctx.variadics[v].Func(ctx, args)
+	rcdecr(args)
 	ctx.dropN(n)
 	return r
 }
