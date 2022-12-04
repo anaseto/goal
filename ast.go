@@ -52,6 +52,11 @@ const (
 	astEMPTYLIST
 )
 
+// astReturn represents an early return :x.
+type astReturn struct {
+	Expr expr
+}
+
 // astAssign represents an assignment x:y.
 type astAssign struct {
 	Name   string
@@ -177,6 +182,7 @@ func (b *astLambda) String() (s string) {
 
 func (es exprs) node()           {}
 func (t *astToken) node()        {}
+func (a *astReturn) node()       {}
 func (a *astAssign) node()       {}
 func (a *astAssignOp) node()     {}
 func (st *astStrand) node()      {}

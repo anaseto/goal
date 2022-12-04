@@ -168,6 +168,16 @@ func (p *parser) expr(es exprs) (exprs, error) {
 		err = parseCLOSE{tok.Pos}
 		return es, err
 	case DYAD:
+		if tok.Text == ":" {
+			switch p.peek().Type {
+			case EOF, NEWLINE, SEMICOLON,
+				RIGHTBRACE, RIGHTBRACKET, RIGHTPAREN,
+				LEFTBRACKET, ADVERB:
+			default:
+				e, err := p.earlyReturn()
+				return append(es, e), err
+			}
+		}
 		e = &astToken{Type: astDYAD, Pos: tok.Pos, Text: tok.Text}
 	case DYADASSIGN:
 		err = p.errorf("assignment operation %s without identifier left", tok.Text)
@@ -354,18 +364,23 @@ func (p *parser) apply2(verb, left expr) (expr, error) {
 		Verb: verb,
 		Left: left,
 	}
-	es, err := p.expr(exprs{})
-	if err != nil {
-		switch err.(type) {
-		case parseCLOSE:
-			pDoExprs(es)
-			a.Right = es
-		}
-		return a, err
-	}
-	pDoExprs(es)
+	es, err := p.subExpr()
 	a.Right = es
 	return a, err
+}
+
+func (p *parser) earlyReturn() (expr, error) {
+	a := &astReturn{}
+	es, err := p.subExpr()
+	a.Expr = es
+	if err != nil {
+		return a, err
+	}
+	if len(es) == 0 {
+		// should not happen
+		return a, p.errorf("return without expression right")
+	}
+	return a, nil
 }
 
 func (p *parser) assign(tok Token, global bool) (expr, error) {
@@ -374,24 +389,15 @@ func (p *parser) assign(tok Token, global bool) (expr, error) {
 		Global: global,
 		Pos:    tok.Pos,
 	}
-	es, err := p.expr(exprs{})
+	es, err := p.subExpr()
+	a.Right = es
 	if err != nil {
-		switch err.(type) {
-		case parseCLOSE:
-			pDoExprs(es)
-			a.Right = es
-			if len(es) == 0 {
-				return a, p.errorf("assignment without expression right")
-			}
-		}
 		return a, err
 	}
-	pDoExprs(es)
-	a.Right = es
 	if len(es) == 0 {
 		return a, p.errorf("assignment without expression right")
 	}
-	return a, err
+	return a, nil
 }
 
 func (p *parser) assignOp(tok Token, dyad string, global bool) (expr, error) {
@@ -401,24 +407,21 @@ func (p *parser) assignOp(tok Token, dyad string, global bool) (expr, error) {
 		Dyad:   dyad,
 		Pos:    tok.Pos,
 	}
-	es, err := p.expr(exprs{})
+	es, err := p.subExpr()
+	a.Right = es
 	if err != nil {
-		switch err.(type) {
-		case parseCLOSE:
-			pDoExprs(es)
-			a.Right = es
-			if len(es) == 0 {
-				return a, p.errorf("assignment operation without expression right")
-			}
-		}
 		return a, err
 	}
-	pDoExprs(es)
-	a.Right = es
 	if len(es) == 0 {
 		return a, p.errorf("assignment operation without expression right")
 	}
-	return a, err
+	return a, nil
+}
+
+func (p *parser) subExpr() (exprs, error) {
+	es, err := p.expr(exprs{})
+	pDoExprs(es)
+	return es, err
 }
 
 func (p *parser) list() (expr, error) {

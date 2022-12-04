@@ -269,6 +269,17 @@ func (c *compiler) doExpr(e expr, n int) error {
 		if err != nil {
 			return err
 		}
+	case *astReturn:
+		// n == 0 is normally ensured by construction for returns.
+		if n > 0 {
+			panic(c.errorf("doExpr: astReturn: n > 0 (%d)", n))
+		}
+		err := c.doExpr(e.Expr, 0)
+		if err != nil {
+			return err
+		}
+		c.push(opReturn)
+		return nil
 	case *astAssign:
 		err := c.doAssign(e, n)
 		if err != nil {
@@ -845,18 +856,6 @@ func (c *compiler) doApplyN(a *astApplyN, n int) error {
 				return err
 			}
 			return nil
-		case ":", "::":
-			if len(a.Args) == 1 {
-				// TODO: :[arg] when n > 0 ?
-				if n == 0 && v.Text == ":" {
-					err := c.doExpr(a.Args[0], 0)
-					if err != nil {
-						return err
-					}
-					c.push(opReturn)
-					return nil
-				}
-			}
 		}
 	}
 	for i := len(a.Args) - 1; i >= 0; i-- {
