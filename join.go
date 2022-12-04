@@ -455,6 +455,12 @@ func joinABAI(x *AB, y *AI) V {
 }
 
 func joinAIAB(x *AI, y *AB) V {
+	if x.reusable() {
+		for _, yi := range y.Slice {
+			x.Slice = append(x.Slice, B2I(yi))
+		}
+		return NewV(x)
+	}
 	r := make([]int, x.Len()+y.Len())
 	copy(r[:x.Len()], x.Slice)
 	for i := x.Len(); i < len(r); i++ {
@@ -473,6 +479,12 @@ func joinABAF(x *AB, y *AF) V {
 }
 
 func joinAFAB(x *AF, y *AB) V {
+	if x.reusable() {
+		for _, yi := range y.Slice {
+			x.Slice = append(x.Slice, float64(B2I(yi)))
+		}
+		return NewV(x)
+	}
 	r := make([]float64, x.Len()+y.Len())
 	copy(r[:x.Len()], x.Slice)
 	for i := x.Len(); i < len(r); i++ {
@@ -491,6 +503,12 @@ func joinAIAF(x *AI, y *AF) V {
 }
 
 func joinAFAI(x *AF, y *AI) V {
+	if x.reusable() {
+		for _, yi := range y.Slice {
+			x.Slice = append(x.Slice, float64(yi))
+		}
+		return NewV(x)
+	}
 	r := make([]float64, x.Len()+y.Len())
 	copy(r[:x.Len()], x.Slice)
 	for i := x.Len(); i < len(r); i++ {
