@@ -14,6 +14,5 @@ Tests:
 
 Optimizations:
 - more special code for common op/ and op\
-- make float64 (F) unboxed via unsafe to reinterpret integer field
 - improve some special and general cases in self-search functions
 - maybe improve liveness analysis (though simple, already good enough)
