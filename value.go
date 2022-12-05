@@ -89,9 +89,9 @@ func (v V) Type() string {
 	case Float:
 		return "n"
 	case Variadic:
-		return "v"
+		return "f"
 	case Lambda:
-		return "l"
+		return "f"
 	case Boxed:
 		return v.Value.Type()
 	default:
@@ -532,10 +532,10 @@ type ProjectionMonad struct {
 	Fun V
 }
 
-func (p Projection) Type() string      { return "p" }
-func (p ProjectionFirst) Type() string { return "p" }
-func (p ProjectionMonad) Type() string { return "p" }
-func (r DerivedVerb) Type() string     { return "r" }
+func (p Projection) Type() string      { return "f" }
+func (p ProjectionFirst) Type() string { return "f" }
+func (p ProjectionMonad) Type() string { return "f" }
+func (r DerivedVerb) Type() string     { return "f" }
 
 func (p Projection) Sprint(ctx *Context) string {
 	sb := &strings.Builder{}
