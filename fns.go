@@ -17,19 +17,19 @@ func enum(x V) V {
 	}
 }
 
-func rangeI(n int) V {
+func rangeI(n int64) V {
 	if n < 0 {
 		return errs("!x : x negative")
 	}
-	r := make([]int, n)
+	r := make([]int64, n)
 	for i := range r {
-		r[i] = i
+		r[i] = int64(i)
 	}
 	return NewAI(r)
 }
 
 func rangeArray(x *AI) V {
-	cols := 1
+	cols := int64(1)
 	for _, n := range x.Slice {
 		if n == 0 {
 			return NewAV([]V{})
@@ -39,13 +39,13 @@ func rangeArray(x *AI) V {
 	r := make([]V, x.Len())
 	reps := cols
 	for i := range r {
-		a := make([]int, cols)
+		a := make([]int64, cols)
 		reps /= x.At(i)
 		clen := reps * x.At(i)
-		for c := 0; c < cols/clen; c++ {
+		for c := int64(0); c < cols/clen; c++ {
 			col := c * clen
-			for j := 0; j < x.At(i); j++ {
-				for k := 0; k < reps; k++ {
+			for j := int64(0); j < x.At(i); j++ {
+				for k := int64(0); k < reps; k++ {
 					a[col+j*reps+k] = j
 				}
 			}
@@ -62,9 +62,9 @@ func where(x V) V {
 		case x.Int() < 0:
 			return errf("&x : x negative (%d)", x.Int())
 		case x.Int() == 0:
-			return NewAI([]int{})
+			return NewAI([]int64{})
 		default:
-			r := make([]int, x.Int())
+			r := make([]int64, x.Int())
 			return NewAI(r)
 		}
 	}
@@ -73,92 +73,92 @@ func where(x V) V {
 		if !isI(xv) {
 			return errf("&x : x non-integer (%g)", xv)
 		}
-		n := int(xv)
+		n := int64(xv)
 		switch {
 		case n < 0:
 			return errf("&x : x negative (%d)", n)
 		case n == 0:
-			return NewAI([]int{})
+			return NewAI([]int64{})
 		default:
-			r := make([]int, n)
+			r := make([]int64, n)
 			return NewAI(r)
 		}
 	case *AB:
-		n := 0
+		n := int64(0)
 		for _, xi := range xv.Slice {
-			n += int(B2I(xi))
+			n += B2I(xi)
 		}
-		r := make([]int, 0, n)
+		r := make([]int64, 0, n)
 		for i, xi := range xv.Slice {
 			if xi {
-				r = append(r, i)
+				r = append(r, int64(i))
 			}
 		}
 		return NewAI(r)
 	case *AI:
-		n := 0
+		n := int64(0)
 		for _, xi := range xv.Slice {
 			if xi < 0 {
 				return errf("&x : x contains negative integer (%d)", xv)
 			}
 			n += xi
 		}
-		r := make([]int, 0, n)
+		r := make([]int64, 0, n)
 		for i, xi := range xv.Slice {
-			for j := 0; j < xi; j++ {
-				r = append(r, i)
+			for j := int64(0); j < xi; j++ {
+				r = append(r, int64(i))
 			}
 		}
 		return NewAI(r)
 	case *AF:
-		n := 0
+		n := int64(0)
 		for _, xi := range xv.Slice {
 			if !isI(F(xi)) {
 				return errf("&x : x contains non-integer (%g)", xi)
 			}
 			if xi < 0 {
-				return errf("&x : x contains negative (%d)", int(xi))
+				return errf("&x : x contains negative (%d)", int64(xi))
 			}
-			n += int(xi)
+			n += int64(xi)
 		}
-		r := make([]int, 0, n)
+		r := make([]int64, 0, n)
 		for i, xi := range xv.Slice {
-			for j := 0; j < int(xi); j++ {
-				r = append(r, i)
+			for j := int64(0); j < int64(xi); j++ {
+				r = append(r, int64(i))
 			}
 		}
 		return NewAI(r)
 	case *AV:
 		switch aType(xv) {
 		case tB, tF, tI:
-			n := 0
+			n := int64(0)
 			for _, xi := range xv.Slice {
 				if xi.IsInt() {
 					if xi.Int() < 0 {
 						return errf("&x : negative integer (%d)", xi.Int())
 					}
-					n += int(xi.Int())
+					n += xi.Int()
 				} else {
 					xif := xi.F()
 					if !isI(xif) {
 						return errf("&x : not an integer (%g)", xif)
 					}
 					if xif < 0 {
-						return errf("&x : negative integer (%d)", int(xif))
+						return errf("&x : negative integer (%d)", int64(xif))
 					}
-					n += int(xif)
+					n += int64(xif)
 				}
 			}
-			r := make([]int, 0, n)
+			r := make([]int64, 0, n)
 			for i, xi := range xv.Slice {
-				var max int
+				var max int64
 				if xi.IsInt() {
 					max = xi.Int()
 				} else {
-					max = int(xi.F())
+					max = int64(xi.F())
 				}
-				for j := 0; j < int(max); j++ {
-					r = append(r, i)
+				for j := int64(0); j < max; j++ {
+					r = append(r, int64(i))
 				}
 			}
 			return NewAI(r)
@@ -185,7 +185,7 @@ func replicate(x, y V) V {
 		if !isI(xv) {
 			return errf("f#y : f[y] not an integer (%g)", xv)
 		}
-		n := int(xv)
+		n := int64(xv)
 		switch {
 		case n < 0:
 			return errf("f#y : f[y] negative (%d)", n)
@@ -217,7 +217,7 @@ func replicate(x, y V) V {
 	}
 }
 
-func repeat(x V, n int) V {
+func repeat(x V, n int64) V {
 	if x.IsInt() {
 		if isBI(x.Int()) {
 			r := make([]bool, n)
@@ -226,7 +226,7 @@ func repeat(x V, n int) V {
 			}
 			return NewAB(r)
 		}
-		r := make([]int, n)
+		r := make([]int64, n)
 		for i := range r {
 			r[i] = x.Int()
 		}
@@ -255,9 +255,9 @@ func repeat(x V, n int) V {
 }
 
 func repeatAB(x *AB, y V) V {
-	n := 0
+	n := int64(0)
 	for _, xi := range x.Slice {
-		n += int(B2I(xi))
+		n += B2I(xi)
 	}
 	switch yv := y.Value.(type) {
 	case *AB:
@@ -277,7 +277,7 @@ func repeatAB(x *AB, y V) V {
 		}
 		return NewAF(r)
 	case *AI:
-		r := make([]int, 0, n)
+		r := make([]int64, 0, n)
 		for i, xi := range x.Slice {
 			if xi {
 				r = append(r, yv.At(i))
@@ -306,7 +306,7 @@ func repeatAB(x *AB, y V) V {
 }
 
 func repeatAI(x *AI, y V) V {
-	n := 0
+	n := int64(0)
 	for _, xi := range x.Slice {
 		if xi < 0 {
 			return errf("f#y : f[y] contains negative integer (%d)", xi)
@@ -317,7 +317,7 @@ func repeatAI(x *AI, y V) V {
 	case *AB:
 		r := make([]bool, 0, n)
 		for i, xi := range x.Slice {
-			for j := 0; j < xi; j++ {
+			for j := int64(0); j < xi; j++ {
 				r = append(r, yv.At(i))
 			}
 		}
@@ -325,15 +325,15 @@ func repeatAI(x *AI, y V) V {
 	case *AF:
 		r := make([]float64, 0, n)
 		for i, xi := range x.Slice {
-			for j := 0; j < xi; j++ {
+			for j := int64(0); j < xi; j++ {
 				r = append(r, yv.At(i))
 			}
 		}
 		return NewAF(r)
 	case *AI:
-		r := make([]int, 0, n)
+		r := make([]int64, 0, n)
 		for i, xi := range x.Slice {
-			for j := 0; j < xi; j++ {
+			for j := int64(0); j < xi; j++ {
 				r = append(r, yv.At(i))
 			}
 		}
@@ -341,7 +341,7 @@ func repeatAI(x *AI, y V) V {
 	case *AS:
 		r := make([]string, 0, n)
 		for i, xi := range x.Slice {
-			for j := 0; j < xi; j++ {
+			for j := int64(0); j < xi; j++ {
 				r = append(r, yv.At(i))
 			}
 		}
@@ -349,7 +349,7 @@ func repeatAI(x *AI, y V) V {
 	case *AV:
 		r := make([]V, 0, n)
 		for i, xi := range x.Slice {
-			for j := 0; j < xi; j++ {
+			for j := int64(0); j < xi; j++ {
 				r = append(r, yv.At(i))
 			}
 		}
@@ -392,9 +392,9 @@ func weedOut(x, y V) V {
 }
 
 func weedOutAB(x *AB, y V) V {
-	n := 0
+	n := int64(0)
 	for _, xi := range x.Slice {
-		n += 1 - int(B2I(xi))
+		n += 1 - B2I(xi)
 	}
 	switch yv := y.Value.(type) {
 	case *AB:
@@ -414,7 +414,7 @@ func weedOutAB(x *AB, y V) V {
 		}
 		return NewAF(r)
 	case *AI:
-		r := make([]int, 0, n)
+		r := make([]int64, 0, n)
 		for i, xi := range x.Slice {
 			if !xi {
 				r = append(r, yv.At(i))
@@ -443,9 +443,9 @@ func weedOutAB(x *AB, y V) V {
 }
 
 func weedOutAI(x *AI, y V) V {
-	n := 0
+	n := int64(0)
 	for _, xi := range x.Slice {
-		n += int(B2I(xi == 0))
+		n += B2I(xi == 0)
 	}
 	switch yv := y.Value.(type) {
 	case *AB:
@@ -465,7 +465,7 @@ func weedOutAI(x *AI, y V) V {
 		}
 		return NewAF(r)
 	case *AI:
-		r := make([]int, 0, n)
+		r := make([]int64, 0, n)
 		for i, xi := range x.Slice {
 			if xi == 0 {
 				r = append(r, yv.At(i))

@@ -6,9 +6,9 @@ func applyS(s S, x V) V {
 	if x.IsInt() {
 		xv := x.Int()
 		if xv < 0 {
-			xv += len(s)
+			xv += int64(len(s))
 		}
-		if xv < 0 || xv > len(s) {
+		if xv < 0 || xv > int64(len(s)) {
 			return errf("s[i] : i out of bounds index (%d)", xv)
 		}
 		return NewV(s[xv:])
@@ -25,9 +25,9 @@ func applyS(s S, x V) V {
 		r := make([]string, xv.Len())
 		for i, n := range xv.Slice {
 			if n < 0 {
-				n += len(s)
+				n += int64(len(s))
 			}
-			if n < 0 || n > len(s) {
+			if n < 0 || n > int64(len(s)) {
 				return errf("s[i] : i out of bounds index (%d)", n)
 			}
 			r[i] = string(s[n:])
@@ -54,7 +54,7 @@ func applyS(s S, x V) V {
 }
 
 func applyS2(s S, x V, y V) V {
-	var l int
+	var l int64
 	if y.IsInt() {
 		if y.Int() < 0 {
 			return errf("s[x;y] : y negative (%d)", y.Int())
@@ -66,7 +66,7 @@ func applyS2(s S, x V, y V) V {
 			if !isI(yv) {
 				return errf("s[x;y] : y non-integer (%g)", yv)
 			}
-			l = int(yv)
+			l = int64(yv)
 		case *AI:
 		case *AB:
 			if Length(x) != yv.Len() {
@@ -85,18 +85,18 @@ func applyS2(s S, x V, y V) V {
 	if x.IsInt() {
 		xv := x.Int()
 		if xv < 0 {
-			xv += len(s)
+			xv += int64(len(s))
 		}
-		if xv < 0 || xv > len(s) {
+		if xv < 0 || xv > int64(len(s)) {
 			return errf("s[i;y] : i out of bounds index (%d)", xv)
 		}
 		if _, ok := y.Value.(*AI); ok {
 			return errf("s[x;y] : x is an atom but y is an array")
 		}
-		if int(xv)+l > len(s) {
-			l = len(s) - int(xv)
+		if xv+l > int64(len(s)) {
+			l = int64(len(s)) - xv
 		}
-		return NewV(s[xv : int(xv)+l])
+		return NewV(s[xv : xv+l])
 
 	}
 	switch xv := x.Value.(type) {
@@ -116,14 +116,14 @@ func applyS2(s S, x V, y V) V {
 			}
 			for i, n := range xv.Slice {
 				if n < 0 {
-					n += len(s)
+					n += int64(len(s))
 				}
-				if n < 0 || n > len(s) {
+				if n < 0 || n > int64(len(s)) {
 					return errf("s[i;y] : i out of bounds index (%d)", n)
 				}
 				l := z.At(i)
-				if n+l > len(s) {
-					l = len(s) - n
+				if n+l > int64(len(s)) {
+					l = int64(len(s)) - n
 				}
 				r[i] = string(s[n : n+l])
 			}
@@ -131,14 +131,14 @@ func applyS2(s S, x V, y V) V {
 		}
 		for i, n := range xv.Slice {
 			if n < 0 {
-				n += len(s)
+				n += int64(len(s))
 			}
-			if n < 0 || n > len(s) {
+			if n < 0 || n > int64(len(s)) {
 				return errf("s[i;y] : i out of bounds index (%d)", n)
 			}
 			l := l
-			if n+l > len(s) {
-				l = len(s) - n
+			if n+l > int64(len(s)) {
+				l = int64(len(s)) - n
 			}
 			r[i] = string(s[n : n+l])
 		}
@@ -166,11 +166,11 @@ func applyS2(s S, x V, y V) V {
 func bytes(x V) V {
 	switch xv := x.Value.(type) {
 	case S:
-		return NewI(len(xv))
+		return NewI(int64(len(xv)))
 	case *AS:
-		r := make([]int, xv.Len())
+		r := make([]int64, xv.Len())
 		for i, s := range xv.Slice {
-			r[i] = len(s)
+			r[i] = int64(len(s))
 		}
 		return NewAI(r)
 	case *AV:
@@ -211,12 +211,12 @@ func casti(y V) V {
 	}
 	switch yv := y.Value.(type) {
 	case F:
-		return NewI(int(yv))
+		return NewI(int64(yv))
 	case S:
 		runes := []rune(yv)
-		r := make([]int, len(runes))
+		r := make([]int64, len(runes))
 		for i, rc := range runes {
-			r[i] = int(rc)
+			r[i] = int64(rc)
 		}
 		return NewAI(r)
 	case *AB:
@@ -294,7 +294,7 @@ func casts(y V) V {
 	}
 	switch yv := y.Value.(type) {
 	case F:
-		return casts(NewI(int(yv)))
+		return casts(NewI(int64(yv)))
 	case *AB:
 		return casts(fromABtoAI(yv))
 	case *AI:

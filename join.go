@@ -30,12 +30,12 @@ func joinTo(x, y V) V {
 	}
 }
 
-func joinToI(x int, y V, left bool) V {
+func joinToI(x int64, y V, left bool) V {
 	if y.IsInt() {
 		if left {
-			return NewAI([]int{int(x), y.Int()})
+			return NewAI([]int64{int64(x), y.Int()})
 		}
-		return NewAI([]int{y.Int(), int(x)})
+		return NewAI([]int64{y.Int(), x})
 	}
 	switch yv := y.Value.(type) {
 	case F:
@@ -242,14 +242,14 @@ func joinToAB(x V, y *AB, left bool) V {
 			copy(r[:len(r)-1], y.Slice)
 			return NewAB(r)
 		}
-		r := make([]int, y.Len()+1)
+		r := make([]int64, y.Len()+1)
 		if left {
-			r[0] = int(x.Int())
+			r[0] = x.Int()
 			for i := 1; i < len(r); i++ {
 				r[i] = B2I(y.At(i - 1))
 			}
 		} else {
-			r[len(r)-1] = int(x.Int())
+			r[len(r)-1] = x.Int()
 			for i := 0; i < len(r); i++ {
 				r[i] = B2I(y.At(i))
 			}
@@ -300,7 +300,7 @@ func joinToAB(x V, y *AB, left bool) V {
 func joinToAI(x V, y *AI, left bool) V {
 	if x.IsInt() {
 		if left {
-			r := make([]int, y.Len()+1)
+			r := make([]int64, y.Len()+1)
 			r[0] = x.Int()
 			copy(r[1:], y.Slice)
 			return NewAI(r)
@@ -309,7 +309,7 @@ func joinToAI(x V, y *AI, left bool) V {
 			y.Slice = append(y.Slice, x.Int())
 			return NewV(y)
 		}
-		r := make([]int, y.Len()+1)
+		r := make([]int64, y.Len()+1)
 		r[len(r)-1] = x.Int()
 		copy(r[:len(r)-1], y.Slice)
 		return NewAI(r)
@@ -429,7 +429,7 @@ func joinAIAI(x *AI, y *AI) V {
 		x.Slice = append(x.Slice, y.Slice...)
 		return NewV(x)
 	}
-	r := make([]int, y.Len()+x.Len())
+	r := make([]int64, y.Len()+x.Len())
 	copy(r[:x.Len()], x.Slice)
 	copy(r[x.Len():], y.Slice)
 	return NewAI(r)
@@ -447,7 +447,7 @@ func joinAFAF(x *AF, y *AF) V {
 }
 
 func joinABAI(x *AB, y *AI) V {
-	r := make([]int, x.Len()+y.Len())
+	r := make([]int64, x.Len()+y.Len())
 	for i := 0; i < x.Len(); i++ {
 		r[i] = B2I(x.At(i))
 	}
@@ -462,7 +462,7 @@ func joinAIAB(x *AI, y *AB) V {
 		}
 		return NewV(x)
 	}
-	r := make([]int, x.Len()+y.Len())
+	r := make([]int64, x.Len()+y.Len())
 	copy(r[:x.Len()], x.Slice)
 	for i := x.Len(); i < len(r); i++ {
 		r[i] = B2I(y.At(i - x.Len()))
@@ -524,7 +524,7 @@ func enlist(x V) V {
 		if isBI(x.Int()) {
 			return NewAB([]bool{x.Int() == 1})
 		}
-		return NewAI([]int{int(x.Int())})
+		return NewAI([]int64{x.Int()})
 	}
 	switch xv := x.Value.(type) {
 	case F:

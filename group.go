@@ -7,12 +7,12 @@ func group(x V) V {
 	}
 	switch xv := x.Value.(type) {
 	case *AB:
-		n := sumAB(xv)
+		n := int(sumAB(xv))
 		r := make([]V, int(B2I(n > 0)+1))
-		ai := make([]int, xv.Len())
+		ai := make([]int64, xv.Len())
 		if n == 0 {
 			for i := range ai {
-				ai[i] = i
+				ai[i] = int64(i)
 			}
 			r[0] = NewAI(ai)
 			return NewAV(r)
@@ -22,10 +22,10 @@ func group(x V) V {
 		iTrue, iFalse := 0, 0
 		for i, xi := range xv.Slice {
 			if xi {
-				ait[iTrue] = i
+				ait[iTrue] = int64(i)
 				iTrue++
 			} else {
-				aif[iFalse] = i
+				aif[iFalse] = int64(i)
 				iFalse++
 			}
 		}
@@ -38,7 +38,7 @@ func group(x V) V {
 			max = -1
 		}
 		r := make([]V, max+1)
-		counta := make([]int, 2*(max+1))
+		counta := make([]int64, 2*(max+1))
 		counts := counta[:max+1]
 		countn := 0
 		for _, j := range xv.Slice {
@@ -49,13 +49,13 @@ func group(x V) V {
 			counts[j]++
 		}
 		scounts := counta[max+1:]
-		sn := 0
+		sn := int64(0)
 		for i, n := range counts {
 			sn += n
 			scounts[i] = sn
 		}
-		pj := 0
-		ai := make([]int, xv.Len()-countn)
+		pj := int64(0)
+		ai := make([]int64, xv.Len()-countn)
 		for i := range r {
 			r[i] = NewAI(ai[pj:scounts[i]])
 			pj = scounts[i]
@@ -64,7 +64,7 @@ func group(x V) V {
 			if j < 0 {
 				continue
 			}
-			ai[scounts[j]-counts[j]] = i
+			ai[scounts[j]-counts[j]] = int64(i)
 			counts[j]--
 		}
 		return NewAV(r)
@@ -82,18 +82,18 @@ func group(x V) V {
 // icount efficiently returns #'=x.
 func icount(x V) V {
 	if Length(x) == 0 {
-		return NewAI([]int{})
+		return NewAI([]int64{})
 	}
 	switch xv := x.Value.(type) {
 	case *AB:
 		n := sumAB(xv)
-		return NewAI([]int{xv.Len() - n, n})
+		return NewAI([]int64{int64(xv.Len()) - n, n})
 	case *AI:
 		max := maxAI(xv)
 		if max < 0 {
 			max = -1
 		}
-		counts := make([]int, max+1)
+		counts := make([]int64, max+1)
 		for _, j := range xv.Slice {
 			if j >= 0 {
 				counts[j]++

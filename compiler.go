@@ -397,7 +397,7 @@ func parseNumber(s string) (V, error) {
 	}
 	i, errI := strconv.ParseInt(s, 0, 0)
 	if errI == nil {
-		return NewI(int(i)), nil
+		return NewI(i), nil
 	}
 	f, errF := strconv.ParseFloat(s, 64)
 	if errF == nil {

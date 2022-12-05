@@ -11,7 +11,7 @@ import (
 // V represents a boxed or unboxed value.
 type V struct {
 	Kind  ValueKind // int, boxed
-	N     int       // refcount or unboxed integer value
+	N     int64     // refcount or unboxed integer value
 	Value Value     // boxed value
 }
 
@@ -20,9 +20,10 @@ type ValueKind int8
 
 const (
 	Nil      ValueKind = iota
-	Int                // unboxed int
-	Variadic           // unboxed
-	Lambda             // unboxed
+	Int                // unboxed int64 (N field)
+	Float              // unboxed float64 (N field)
+	Variadic           // unboxed int32 (N field)
+	Lambda             // unboxed int32 (N field)
 	Boxed              // boxed value (Value field)
 )
 
@@ -53,7 +54,7 @@ func (v V) lambda() lambda {
 }
 
 // Int retrieves the int value from N field. It assumes Kind is Int.
-func (v V) Int() int {
+func (v V) Int() int64 {
 	return v.N
 }
 
@@ -101,7 +102,7 @@ func (v V) Sprint(ctx *Context) string {
 	case Variadic:
 		return variadic(v.N).String()
 	case Lambda:
-		if v.N < 0 || v.N >= len(ctx.lambdas) {
+		if v.N < 0 || v.N >= int64(len(ctx.lambdas)) {
 			return fmt.Sprintf("{Lambda %d}", v.N)
 		}
 		return ctx.lambdas[v.N].Source
@@ -157,16 +158,16 @@ func NewV(bv Value) V {
 
 // NewVariadic returns a new int value.
 func NewVariadic(v variadic) V {
-	return V{Kind: Variadic, N: int(v)}
+	return V{Kind: Variadic, N: int64(v)}
 }
 
 // NewLambda returns a new int value.
 func NewLambda(v lambda) V {
-	return V{Kind: Lambda, N: int(v)}
+	return V{Kind: Lambda, N: int64(v)}
 }
 
-// NewI returns a new int value.
-func NewI(i int) V {
+// NewI returns a new int64 value.
+func NewI(i int64) V {
 	return V{Kind: Int, N: i}
 }
 
@@ -264,11 +265,11 @@ func NewAB(x []bool) V {
 type AI struct {
 	rc    int16
 	flags Flags
-	Slice []int
+	Slice []int64
 }
 
 // NewAI returns a new int array.
-func NewAI(x []int) V {
+func NewAI(x []int64) V {
 	return NewV(&AI{Slice: x})
 }
 
@@ -458,9 +459,9 @@ type array interface {
 	Value
 	refCounter
 	Len() int
-	at(i int) V           // x[i]
-	slice(i, j int) array // x[i:j]
-	atIndices(y []int) V  // x[y] (goal code)
+	at(i int) V            // x[i]
+	slice(i, j int) array  // x[i:j]
+	atIndices(y []int64) V // x[y] (goal code)
 	set(i int, y V)
 	//setIndices(y AI, z V) error
 }
@@ -490,7 +491,7 @@ func (x *AV) at(i int) V { return x.Slice[i] }
 func (x *AB) At(i int) bool { return x.Slice[i] }
 
 // At returns array value at the given index.
-func (x *AI) At(i int) int { return x.Slice[i] }
+func (x *AI) At(i int) int64 { return x.Slice[i] }
 
 // At returns array value at the given index.
 func (x *AF) At(i int) float64 { return x.Slice[i] }
@@ -699,7 +700,7 @@ func (x *AI) reuse() *AI {
 	if x.rc <= 1 {
 		return x
 	}
-	return &AI{Slice: make([]int, x.Len())}
+	return &AI{Slice: make([]int64, x.Len())}
 }
 
 func (x *AF) reuse() *AF {

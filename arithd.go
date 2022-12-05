@@ -61,7 +61,7 @@ func equalFV(x F, y V) V {
 	}
 	switch yv := y.Value.(type) {
 	case F:
-		return NewI(int(B2I(F(x) == F(yv))))
+		return NewI(int64(B2I(F(x) == F(yv))))
 	case *AB:
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -95,13 +95,13 @@ func equalFV(x F, y V) V {
 	}
 }
 
-func equalIV(x int, y V) V {
+func equalIV(x int64, y V) V {
 	if y.IsInt() {
 		return NewI(B2I(x == y.Int()))
 	}
 	switch yv := y.Value.(type) {
 	case F:
-		return NewI(int(B2I(F(x) == F(yv))))
+		return NewI(int64(B2I(F(x) == F(yv))))
 	case *AB:
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -138,7 +138,7 @@ func equalIV(x int, y V) V {
 func equalSV(x S, y V) V {
 	switch yv := y.Value.(type) {
 	case S:
-		return NewI(int(B2I(S(x) == S(yv))))
+		return NewI(int64(B2I(S(x) == S(yv))))
 	case *AS:
 		r := make([]bool, yv.Len())
 		for i := range r {
@@ -164,7 +164,7 @@ func equalABV(x *AB, y V) V {
 	if y.IsInt() {
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = bool(B2I(x.At(i)) == int(y.Int()))
+			r.Slice[i] = bool(B2I(x.At(i)) == int64(y.Int()))
 		}
 		return NewV(r)
 	}
@@ -225,7 +225,7 @@ func equalAFV(x *AF, y V) V {
 	if y.IsInt() {
 		r := make([]bool, x.Len())
 		for i := range r {
-			r[i] = bool(F(x.At(i)) == F(int(y.Int())))
+			r[i] = bool(F(x.At(i)) == F(int64(y.Int())))
 		}
 		return NewAB(r)
 	}
@@ -286,7 +286,7 @@ func equalAIV(x *AI, y V) V {
 	if y.IsInt() {
 		r := make([]bool, x.Len())
 		for i := range r {
-			r[i] = bool(x.At(i) == int(y.Int()))
+			r[i] = bool(x.At(i) == int64(y.Int()))
 		}
 		return NewAB(r)
 	}
@@ -331,7 +331,7 @@ func equalAIV(x *AI, y V) V {
 		r := yv.reuse()
 
 		for i := range r.Slice {
-			ri := equalIV(int(x.At(i)), yv.At(i))
+			ri := equalIV(int64(x.At(i)), yv.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -433,7 +433,7 @@ func lesserFV(x F, y V) V {
 	}
 	switch yv := y.Value.(type) {
 	case F:
-		return NewI(int(B2I(F(x) < F(yv))))
+		return NewI(int64(B2I(F(x) < F(yv))))
 	case *AB:
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -467,13 +467,13 @@ func lesserFV(x F, y V) V {
 	}
 }
 
-func lesserIV(x int, y V) V {
+func lesserIV(x int64, y V) V {
 	if y.IsInt() {
 		return NewI(B2I(x < y.Int()))
 	}
 	switch yv := y.Value.(type) {
 	case F:
-		return NewI(int(B2I(F(x) < F(yv))))
+		return NewI(int64(B2I(F(x) < F(yv))))
 	case *AB:
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -510,7 +510,7 @@ func lesserIV(x int, y V) V {
 func lesserSV(x S, y V) V {
 	switch yv := y.Value.(type) {
 	case S:
-		return NewI(int(B2I(S(x) < S(yv))))
+		return NewI(int64(B2I(S(x) < S(yv))))
 	case *AS:
 		r := make([]bool, yv.Len())
 		for i := range r {
@@ -536,7 +536,7 @@ func lesserABV(x *AB, y V) V {
 	if y.IsInt() {
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = bool(B2I(x.At(i)) < int(y.Int()))
+			r.Slice[i] = bool(B2I(x.At(i)) < int64(y.Int()))
 		}
 		return NewV(r)
 	}
@@ -597,7 +597,7 @@ func lesserAFV(x *AF, y V) V {
 	if y.IsInt() {
 		r := make([]bool, x.Len())
 		for i := range r {
-			r[i] = bool(F(x.At(i)) < F(int(y.Int())))
+			r[i] = bool(F(x.At(i)) < F(int64(y.Int())))
 		}
 		return NewAB(r)
 	}
@@ -658,7 +658,7 @@ func lesserAIV(x *AI, y V) V {
 	if y.IsInt() {
 		r := make([]bool, x.Len())
 		for i := range r {
-			r[i] = bool(x.At(i) < int(y.Int()))
+			r[i] = bool(x.At(i) < int64(y.Int()))
 		}
 		return NewAB(r)
 	}
@@ -703,7 +703,7 @@ func lesserAIV(x *AI, y V) V {
 		r := yv.reuse()
 
 		for i := range r.Slice {
-			ri := lesserIV(int(x.At(i)), yv.At(i))
+			ri := lesserIV(int64(x.At(i)), yv.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -805,7 +805,7 @@ func greaterFV(x F, y V) V {
 	}
 	switch yv := y.Value.(type) {
 	case F:
-		return NewI(int(B2I(F(x) > F(yv))))
+		return NewI(int64(B2I(F(x) > F(yv))))
 	case *AB:
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -839,13 +839,13 @@ func greaterFV(x F, y V) V {
 	}
 }
 
-func greaterIV(x int, y V) V {
+func greaterIV(x int64, y V) V {
 	if y.IsInt() {
 		return NewI(B2I(x > y.Int()))
 	}
 	switch yv := y.Value.(type) {
 	case F:
-		return NewI(int(B2I(F(x) > F(yv))))
+		return NewI(int64(B2I(F(x) > F(yv))))
 	case *AB:
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -882,7 +882,7 @@ func greaterIV(x int, y V) V {
 func greaterSV(x S, y V) V {
 	switch yv := y.Value.(type) {
 	case S:
-		return NewI(int(B2I(S(x) > S(yv))))
+		return NewI(int64(B2I(S(x) > S(yv))))
 	case *AS:
 		r := make([]bool, yv.Len())
 		for i := range r {
@@ -908,7 +908,7 @@ func greaterABV(x *AB, y V) V {
 	if y.IsInt() {
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = bool(B2I(x.At(i)) > int(y.Int()))
+			r.Slice[i] = bool(B2I(x.At(i)) > int64(y.Int()))
 		}
 		return NewV(r)
 	}
@@ -969,7 +969,7 @@ func greaterAFV(x *AF, y V) V {
 	if y.IsInt() {
 		r := make([]bool, x.Len())
 		for i := range r {
-			r[i] = bool(F(x.At(i)) > F(int(y.Int())))
+			r[i] = bool(F(x.At(i)) > F(int64(y.Int())))
 		}
 		return NewAB(r)
 	}
@@ -1030,7 +1030,7 @@ func greaterAIV(x *AI, y V) V {
 	if y.IsInt() {
 		r := make([]bool, x.Len())
 		for i := range r {
-			r[i] = bool(x.At(i) > int(y.Int()))
+			r[i] = bool(x.At(i) > int64(y.Int()))
 		}
 		return NewAB(r)
 	}
@@ -1075,7 +1075,7 @@ func greaterAIV(x *AI, y V) V {
 		r := yv.reuse()
 
 		for i := range r.Slice {
-			ri := greaterIV(int(x.At(i)), yv.At(i))
+			ri := greaterIV(int64(x.At(i)), yv.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -1211,7 +1211,7 @@ func addFV(x F, y V) V {
 	}
 }
 
-func addIV(x int, y V) V {
+func addIV(x int64, y V) V {
 	if y.IsInt() {
 		return NewI(x + y.Int())
 	}
@@ -1219,9 +1219,9 @@ func addIV(x int, y V) V {
 	case F:
 		return NewV(F(F(x) + F(yv)))
 	case *AB:
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i := range r {
-			r[i] = int(x + B2I(yv.At(i)))
+			r[i] = int64(x + B2I(yv.At(i)))
 		}
 		return NewAI(r)
 	case *AF:
@@ -1233,7 +1233,7 @@ func addIV(x int, y V) V {
 	case *AI:
 		r := yv.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(x + yv.At(i))
+			r.Slice[i] = int64(x + yv.At(i))
 		}
 		return NewV(r)
 	case *AV:
@@ -1278,9 +1278,9 @@ func addSV(x S, y V) V {
 
 func addABV(x *AB, y V) V {
 	if y.IsInt() {
-		r := make([]int, x.Len())
+		r := make([]int64, x.Len())
 		for i := range r {
-			r[i] = int(B2I(x.At(i)) + int(y.Int()))
+			r[i] = int64(B2I(x.At(i)) + int64(y.Int()))
 		}
 		return NewAI(r)
 	}
@@ -1295,9 +1295,9 @@ func addABV(x *AB, y V) V {
 		if x.Len() != yv.Len() {
 			return errf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i := range r {
-			r[i] = int(B2I(x.At(i)) + B2I(yv.At(i)))
+			r[i] = int64(B2I(x.At(i)) + B2I(yv.At(i)))
 		}
 		return NewAI(r)
 	case *AF:
@@ -1315,7 +1315,7 @@ func addABV(x *AB, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(B2I(x.At(i)) + yv.At(i))
+			r.Slice[i] = int64(B2I(x.At(i)) + yv.At(i))
 		}
 		return NewV(r)
 	case *AV:
@@ -1341,7 +1341,7 @@ func addAFV(x *AF, y V) V {
 	if y.IsInt() {
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = float64(F(x.At(i)) + F(int(y.Int())))
+			r.Slice[i] = float64(F(x.At(i)) + F(int64(y.Int())))
 		}
 		return NewV(r)
 	}
@@ -1402,7 +1402,7 @@ func addAIV(x *AI, y V) V {
 	if y.IsInt() {
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(x.At(i) + int(y.Int()))
+			r.Slice[i] = int64(x.At(i) + int64(y.Int()))
 		}
 		return NewV(r)
 	}
@@ -1419,7 +1419,7 @@ func addAIV(x *AI, y V) V {
 		}
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(x.At(i) + B2I(yv.At(i)))
+			r.Slice[i] = int64(x.At(i) + B2I(yv.At(i)))
 		}
 		return NewV(r)
 	case *AF:
@@ -1437,7 +1437,7 @@ func addAIV(x *AI, y V) V {
 		}
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(x.At(i) + yv.At(i))
+			r.Slice[i] = int64(x.At(i) + yv.At(i))
 		}
 		return NewV(r)
 	case *AV:
@@ -1447,7 +1447,7 @@ func addAIV(x *AI, y V) V {
 		r := yv.reuse()
 
 		for i := range r.Slice {
-			ri := addIV(int(x.At(i)), yv.At(i))
+			ri := addIV(int64(x.At(i)), yv.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -1583,7 +1583,7 @@ func subtractFV(x F, y V) V {
 	}
 }
 
-func subtractIV(x int, y V) V {
+func subtractIV(x int64, y V) V {
 	if y.IsInt() {
 		return NewI(x - y.Int())
 	}
@@ -1591,9 +1591,9 @@ func subtractIV(x int, y V) V {
 	case F:
 		return NewV(F(F(x) - F(yv)))
 	case *AB:
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i := range r {
-			r[i] = int(x - B2I(yv.At(i)))
+			r[i] = int64(x - B2I(yv.At(i)))
 		}
 		return NewAI(r)
 	case *AF:
@@ -1605,7 +1605,7 @@ func subtractIV(x int, y V) V {
 	case *AI:
 		r := yv.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(x - yv.At(i))
+			r.Slice[i] = int64(x - yv.At(i))
 		}
 		return NewV(r)
 	case *AV:
@@ -1650,9 +1650,9 @@ func subtractSV(x S, y V) V {
 
 func subtractABV(x *AB, y V) V {
 	if y.IsInt() {
-		r := make([]int, x.Len())
+		r := make([]int64, x.Len())
 		for i := range r {
-			r[i] = int(B2I(x.At(i)) - int(y.Int()))
+			r[i] = int64(B2I(x.At(i)) - int64(y.Int()))
 		}
 		return NewAI(r)
 	}
@@ -1667,9 +1667,9 @@ func subtractABV(x *AB, y V) V {
 		if x.Len() != yv.Len() {
 			return errf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i := range r {
-			r[i] = int(B2I(x.At(i)) - B2I(yv.At(i)))
+			r[i] = int64(B2I(x.At(i)) - B2I(yv.At(i)))
 		}
 		return NewAI(r)
 	case *AF:
@@ -1687,7 +1687,7 @@ func subtractABV(x *AB, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(B2I(x.At(i)) - yv.At(i))
+			r.Slice[i] = int64(B2I(x.At(i)) - yv.At(i))
 		}
 		return NewV(r)
 	case *AV:
@@ -1713,7 +1713,7 @@ func subtractAFV(x *AF, y V) V {
 	if y.IsInt() {
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = float64(F(x.At(i)) - F(int(y.Int())))
+			r.Slice[i] = float64(F(x.At(i)) - F(int64(y.Int())))
 		}
 		return NewV(r)
 	}
@@ -1774,7 +1774,7 @@ func subtractAIV(x *AI, y V) V {
 	if y.IsInt() {
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(x.At(i) - int(y.Int()))
+			r.Slice[i] = int64(x.At(i) - int64(y.Int()))
 		}
 		return NewV(r)
 	}
@@ -1791,7 +1791,7 @@ func subtractAIV(x *AI, y V) V {
 		}
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(x.At(i) - B2I(yv.At(i)))
+			r.Slice[i] = int64(x.At(i) - B2I(yv.At(i)))
 		}
 		return NewV(r)
 	case *AF:
@@ -1809,7 +1809,7 @@ func subtractAIV(x *AI, y V) V {
 		}
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(x.At(i) - yv.At(i))
+			r.Slice[i] = int64(x.At(i) - yv.At(i))
 		}
 		return NewV(r)
 	case *AV:
@@ -1819,7 +1819,7 @@ func subtractAIV(x *AI, y V) V {
 		r := yv.reuse()
 
 		for i := range r.Slice {
-			ri := subtractIV(int(x.At(i)), yv.At(i))
+			ri := subtractIV(int64(x.At(i)), yv.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -1963,7 +1963,7 @@ func multiplyFV(x F, y V) V {
 	}
 }
 
-func multiplyIV(x int, y V) V {
+func multiplyIV(x int64, y V) V {
 	if y.IsInt() {
 		return NewI(x * y.Int())
 	}
@@ -1973,9 +1973,9 @@ func multiplyIV(x int, y V) V {
 	case S:
 		return NewV(S(strings.Repeat(string(S(yv)), int(x))))
 	case *AB:
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i := range r {
-			r[i] = int(x * B2I(yv.At(i)))
+			r[i] = int64(x * B2I(yv.At(i)))
 		}
 		return NewAI(r)
 	case *AF:
@@ -1987,7 +1987,7 @@ func multiplyIV(x int, y V) V {
 	case *AI:
 		r := yv.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(x * yv.At(i))
+			r.Slice[i] = int64(x * yv.At(i))
 		}
 		return NewV(r)
 	case *AS:
@@ -2053,9 +2053,9 @@ func multiplySV(x S, y V) V {
 
 func multiplyABV(x *AB, y V) V {
 	if y.IsInt() {
-		r := make([]int, x.Len())
+		r := make([]int64, x.Len())
 		for i := range r {
-			r[i] = int(B2I(x.At(i)) * int(y.Int()))
+			r[i] = int64(B2I(x.At(i)) * int64(y.Int()))
 		}
 		return NewAI(r)
 	}
@@ -2096,7 +2096,7 @@ func multiplyABV(x *AB, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(B2I(x.At(i)) * yv.At(i))
+			r.Slice[i] = int64(B2I(x.At(i)) * yv.At(i))
 		}
 		return NewV(r)
 	case *AS:
@@ -2131,7 +2131,7 @@ func multiplyAFV(x *AF, y V) V {
 	if y.IsInt() {
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = float64(F(x.At(i)) * F(int(y.Int())))
+			r.Slice[i] = float64(F(x.At(i)) * F(int64(y.Int())))
 		}
 		return NewV(r)
 	}
@@ -2207,7 +2207,7 @@ func multiplyAIV(x *AI, y V) V {
 	if y.IsInt() {
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(x.At(i) * int(y.Int()))
+			r.Slice[i] = int64(x.At(i) * int64(y.Int()))
 		}
 		return NewV(r)
 	}
@@ -2230,7 +2230,7 @@ func multiplyAIV(x *AI, y V) V {
 		}
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(x.At(i) * B2I(yv.At(i)))
+			r.Slice[i] = int64(x.At(i) * B2I(yv.At(i)))
 		}
 		return NewV(r)
 	case *AF:
@@ -2248,7 +2248,7 @@ func multiplyAIV(x *AI, y V) V {
 		}
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(x.At(i) * yv.At(i))
+			r.Slice[i] = int64(x.At(i) * yv.At(i))
 		}
 		return NewV(r)
 	case *AS:
@@ -2267,7 +2267,7 @@ func multiplyAIV(x *AI, y V) V {
 		r := yv.reuse()
 
 		for i := range r.Slice {
-			ri := multiplyIV(int(x.At(i)), yv.At(i))
+			ri := multiplyIV(int64(x.At(i)), yv.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -2283,7 +2283,7 @@ func multiplyASV(x *AS, y V) V {
 	if y.IsInt() {
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = string(strings.Repeat(string(S(x.At(i))), int(int(y.Int()))))
+			r.Slice[i] = string(strings.Repeat(string(S(x.At(i))), int(int64(y.Int()))))
 		}
 		return NewV(r)
 	}
@@ -2424,7 +2424,7 @@ func divideFV(x F, y V) V {
 	}
 }
 
-func divideIV(x int, y V) V {
+func divideIV(x int64, y V) V {
 	if y.IsInt() {
 		return NewV(F(divideF(F(x), F(y.Int()))))
 	}
@@ -2468,7 +2468,7 @@ func divideABV(x *AB, y V) V {
 	if y.IsInt() {
 		r := make([]float64, x.Len())
 		for i := range r {
-			r[i] = float64(divideF(B2F(x.At(i)), F(int(y.Int()))))
+			r[i] = float64(divideF(B2F(x.At(i)), F(int64(y.Int()))))
 		}
 		return NewAF(r)
 	}
@@ -2529,7 +2529,7 @@ func divideAFV(x *AF, y V) V {
 	if y.IsInt() {
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = float64(divideF(F(x.At(i)), F(int(y.Int()))))
+			r.Slice[i] = float64(divideF(F(x.At(i)), F(int64(y.Int()))))
 		}
 		return NewV(r)
 	}
@@ -2590,7 +2590,7 @@ func divideAIV(x *AI, y V) V {
 	if y.IsInt() {
 		r := make([]float64, x.Len())
 		for i := range r {
-			r[i] = float64(divideF(F(x.At(i)), F(int(y.Int()))))
+			r[i] = float64(divideF(F(x.At(i)), F(int64(y.Int()))))
 		}
 		return NewAF(r)
 	}
@@ -2635,7 +2635,7 @@ func divideAIV(x *AI, y V) V {
 		r := yv.reuse()
 
 		for i := range r.Slice {
-			ri := divideIV(int(x.At(i)), yv.At(i))
+			ri := divideIV(int64(x.At(i)), yv.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -2735,7 +2735,7 @@ func minimumFV(x F, y V) V {
 	}
 }
 
-func minimumIV(x int, y V) V {
+func minimumIV(x int64, y V) V {
 	if y.IsInt() {
 		return NewI(minI(x, y.Int()))
 	}
@@ -2743,9 +2743,9 @@ func minimumIV(x int, y V) V {
 	case F:
 		return NewV(F(F(math.Min(float64(x), float64(F(yv))))))
 	case *AB:
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i := range r {
-			r[i] = int(minI(x, B2I(yv.At(i))))
+			r[i] = int64(minI(x, B2I(yv.At(i))))
 		}
 		return NewAI(r)
 	case *AF:
@@ -2757,7 +2757,7 @@ func minimumIV(x int, y V) V {
 	case *AI:
 		r := yv.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(minI(x, yv.At(i)))
+			r.Slice[i] = int64(minI(x, yv.At(i)))
 		}
 		return NewV(r)
 	case *AV:
@@ -2802,9 +2802,9 @@ func minimumSV(x S, y V) V {
 
 func minimumABV(x *AB, y V) V {
 	if y.IsInt() {
-		r := make([]int, x.Len())
+		r := make([]int64, x.Len())
 		for i := range r {
-			r[i] = int(minI(B2I(x.At(i)), int(y.Int())))
+			r[i] = int64(minI(B2I(x.At(i)), int64(y.Int())))
 		}
 		return NewAI(r)
 	}
@@ -2839,7 +2839,7 @@ func minimumABV(x *AB, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(minI(B2I(x.At(i)), yv.At(i)))
+			r.Slice[i] = int64(minI(B2I(x.At(i)), yv.At(i)))
 		}
 		return NewV(r)
 	case *AV:
@@ -2865,7 +2865,7 @@ func minimumAFV(x *AF, y V) V {
 	if y.IsInt() {
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = float64(F(math.Min(float64(F(x.At(i))), float64(int(y.Int())))))
+			r.Slice[i] = float64(F(math.Min(float64(F(x.At(i))), float64(int64(y.Int())))))
 		}
 		return NewV(r)
 	}
@@ -2926,7 +2926,7 @@ func minimumAIV(x *AI, y V) V {
 	if y.IsInt() {
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(minI(x.At(i), int(y.Int())))
+			r.Slice[i] = int64(minI(x.At(i), int64(y.Int())))
 		}
 		return NewV(r)
 	}
@@ -2943,7 +2943,7 @@ func minimumAIV(x *AI, y V) V {
 		}
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(minI(x.At(i), B2I(yv.At(i))))
+			r.Slice[i] = int64(minI(x.At(i), B2I(yv.At(i))))
 		}
 		return NewV(r)
 	case *AF:
@@ -2961,7 +2961,7 @@ func minimumAIV(x *AI, y V) V {
 		}
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(minI(x.At(i), yv.At(i)))
+			r.Slice[i] = int64(minI(x.At(i), yv.At(i)))
 		}
 		return NewV(r)
 	case *AV:
@@ -2971,7 +2971,7 @@ func minimumAIV(x *AI, y V) V {
 		r := yv.reuse()
 
 		for i := range r.Slice {
-			ri := minimumIV(int(x.At(i)), yv.At(i))
+			ri := minimumIV(int64(x.At(i)), yv.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -3107,7 +3107,7 @@ func maximumFV(x F, y V) V {
 	}
 }
 
-func maximumIV(x int, y V) V {
+func maximumIV(x int64, y V) V {
 	if y.IsInt() {
 		return NewI(maxI(x, y.Int()))
 	}
@@ -3115,9 +3115,9 @@ func maximumIV(x int, y V) V {
 	case F:
 		return NewV(F(F(math.Max(float64(x), float64(F(yv))))))
 	case *AB:
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i := range r {
-			r[i] = int(maxI(x, B2I(yv.At(i))))
+			r[i] = int64(maxI(x, B2I(yv.At(i))))
 		}
 		return NewAI(r)
 	case *AF:
@@ -3129,7 +3129,7 @@ func maximumIV(x int, y V) V {
 	case *AI:
 		r := yv.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(maxI(x, yv.At(i)))
+			r.Slice[i] = int64(maxI(x, yv.At(i)))
 		}
 		return NewV(r)
 	case *AV:
@@ -3174,9 +3174,9 @@ func maximumSV(x S, y V) V {
 
 func maximumABV(x *AB, y V) V {
 	if y.IsInt() {
-		r := make([]int, x.Len())
+		r := make([]int64, x.Len())
 		for i := range r {
-			r[i] = int(maxI(B2I(x.At(i)), int(y.Int())))
+			r[i] = int64(maxI(B2I(x.At(i)), int64(y.Int())))
 		}
 		return NewAI(r)
 	}
@@ -3211,7 +3211,7 @@ func maximumABV(x *AB, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(maxI(B2I(x.At(i)), yv.At(i)))
+			r.Slice[i] = int64(maxI(B2I(x.At(i)), yv.At(i)))
 		}
 		return NewV(r)
 	case *AV:
@@ -3237,7 +3237,7 @@ func maximumAFV(x *AF, y V) V {
 	if y.IsInt() {
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = float64(F(math.Max(float64(F(x.At(i))), float64(int(y.Int())))))
+			r.Slice[i] = float64(F(math.Max(float64(F(x.At(i))), float64(int64(y.Int())))))
 		}
 		return NewV(r)
 	}
@@ -3298,7 +3298,7 @@ func maximumAIV(x *AI, y V) V {
 	if y.IsInt() {
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(maxI(x.At(i), int(y.Int())))
+			r.Slice[i] = int64(maxI(x.At(i), int64(y.Int())))
 		}
 		return NewV(r)
 	}
@@ -3315,7 +3315,7 @@ func maximumAIV(x *AI, y V) V {
 		}
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(maxI(x.At(i), B2I(yv.At(i))))
+			r.Slice[i] = int64(maxI(x.At(i), B2I(yv.At(i))))
 		}
 		return NewV(r)
 	case *AF:
@@ -3333,7 +3333,7 @@ func maximumAIV(x *AI, y V) V {
 		}
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(maxI(x.At(i), yv.At(i)))
+			r.Slice[i] = int64(maxI(x.At(i), yv.At(i)))
 		}
 		return NewV(r)
 	case *AV:
@@ -3343,7 +3343,7 @@ func maximumAIV(x *AI, y V) V {
 		r := yv.reuse()
 
 		for i := range r.Slice {
-			ri := maximumIV(int(x.At(i)), yv.At(i))
+			ri := maximumIV(int64(x.At(i)), yv.At(i))
 			if ri.IsErr() {
 				return ri
 			}
@@ -3475,7 +3475,7 @@ func modulusFV(x F, y V) V {
 	}
 }
 
-func modulusIV(x int, y V) V {
+func modulusIV(x int64, y V) V {
 	if y.IsInt() {
 		return NewI(modI(x, y.Int()))
 	}
@@ -3483,9 +3483,9 @@ func modulusIV(x int, y V) V {
 	case F:
 		return NewV(F(modF(F(x), F(yv))))
 	case *AB:
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i := range r {
-			r[i] = int(modI(x, B2I(yv.At(i))))
+			r[i] = int64(modI(x, B2I(yv.At(i))))
 		}
 		return NewAI(r)
 	case *AF:
@@ -3497,7 +3497,7 @@ func modulusIV(x int, y V) V {
 	case *AI:
 		r := yv.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(modI(x, yv.At(i)))
+			r.Slice[i] = int64(modI(x, yv.At(i)))
 		}
 		return NewV(r)
 	case *AV:
@@ -3517,9 +3517,9 @@ func modulusIV(x int, y V) V {
 
 func modulusABV(x *AB, y V) V {
 	if y.IsInt() {
-		r := make([]int, x.Len())
+		r := make([]int64, x.Len())
 		for i := range r {
-			r[i] = int(modI(B2I(x.At(i)), int(y.Int())))
+			r[i] = int64(modI(B2I(x.At(i)), int64(y.Int())))
 		}
 		return NewAI(r)
 	}
@@ -3534,9 +3534,9 @@ func modulusABV(x *AB, y V) V {
 		if x.Len() != yv.Len() {
 			return errf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i := range r {
-			r[i] = int(modI(B2I(x.At(i)), B2I(yv.At(i))))
+			r[i] = int64(modI(B2I(x.At(i)), B2I(yv.At(i))))
 		}
 		return NewAI(r)
 	case *AF:
@@ -3554,7 +3554,7 @@ func modulusABV(x *AB, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(modI(B2I(x.At(i)), yv.At(i)))
+			r.Slice[i] = int64(modI(B2I(x.At(i)), yv.At(i)))
 		}
 		return NewV(r)
 	case *AV:
@@ -3580,7 +3580,7 @@ func modulusAFV(x *AF, y V) V {
 	if y.IsInt() {
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = float64(modF(F(x.At(i)), F(int(y.Int()))))
+			r.Slice[i] = float64(modF(F(x.At(i)), F(int64(y.Int()))))
 		}
 		return NewV(r)
 	}
@@ -3641,7 +3641,7 @@ func modulusAIV(x *AI, y V) V {
 	if y.IsInt() {
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(modI(x.At(i), int(y.Int())))
+			r.Slice[i] = int64(modI(x.At(i), int64(y.Int())))
 		}
 		return NewV(r)
 	}
@@ -3658,7 +3658,7 @@ func modulusAIV(x *AI, y V) V {
 		}
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(modI(x.At(i), B2I(yv.At(i))))
+			r.Slice[i] = int64(modI(x.At(i), B2I(yv.At(i))))
 		}
 		return NewV(r)
 	case *AF:
@@ -3676,7 +3676,7 @@ func modulusAIV(x *AI, y V) V {
 		}
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = int(modI(x.At(i), yv.At(i)))
+			r.Slice[i] = int64(modI(x.At(i), yv.At(i)))
 		}
 		return NewV(r)
 	case *AV:
@@ -3686,7 +3686,7 @@ func modulusAIV(x *AI, y V) V {
 		r := yv.reuse()
 
 		for i := range r.Slice {
-			ri := modulusIV(int(x.At(i)), yv.At(i))
+			ri := modulusIV(int64(x.At(i)), yv.At(i))
 			if ri.IsErr() {
 				return ri
 			}

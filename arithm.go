@@ -14,7 +14,7 @@ func negate(x V) V {
 	case F:
 		return NewV(-xv)
 	case *AB:
-		r := make([]int, xv.Len())
+		r := make([]int64, xv.Len())
 		for i, xi := range xv.Slice {
 			r[i] = -B2I(xi)
 		}
@@ -53,7 +53,7 @@ func signF(x F) int {
 	}
 }
 
-func signI(x int) int {
+func signI(x int64) int64 {
 	switch {
 	case x > 0:
 		return 1
@@ -71,7 +71,7 @@ func sign(x V) V {
 	}
 	switch xv := x.Value.(type) {
 	case F:
-		return NewI(signF(xv))
+		return NewI(int64(signF(xv)))
 	case *AB:
 		return x
 	case *AI:
@@ -81,9 +81,9 @@ func sign(x V) V {
 		}
 		return NewV(r)
 	case *AF:
-		r := make([]int, xv.Len())
+		r := make([]int64, xv.Len())
 		for i, xi := range xv.Slice {
-			r[i] = signF(F(xi))
+			r[i] = int64(signF(F(xi)))
 		}
 		return NewAI(r)
 	case *AV:
@@ -245,7 +245,7 @@ func abs(x V) V {
 	}
 }
 
-func absI(x int) int {
+func absI(x int64) int64 {
 	if x < 0 {
 		return -x
 	}

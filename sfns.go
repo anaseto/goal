@@ -62,7 +62,7 @@ func reverse(x V) V {
 
 // Rotate returns f|y.
 func rotate(x, y V) V {
-	i := 0
+	i := int64(0)
 	if x.IsInt() {
 		i = x.Int()
 	} else {
@@ -71,12 +71,12 @@ func rotate(x, y V) V {
 			if !isI(xv) {
 				return errf("f|y : non-integer f[y] (%s)", xv.Type())
 			}
-			i = int(xv)
+			i = int64(xv)
 		default:
 			return errf("f|y : non-integer f[y] (%s)", x.Type())
 		}
 	}
-	ylen := Length(y)
+	ylen := int64(Length(y))
 	if ylen == 0 {
 		return y
 	}
@@ -87,32 +87,32 @@ func rotate(x, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		r := make([]bool, ylen)
-		for j := 0; j < ylen; j++ {
-			r[j] = yv.At((j + i) % ylen)
+		for j := int64(0); j < ylen; j++ {
+			r[j] = yv.At(int((j + i) % ylen))
 		}
 		return NewAB(r)
 	case *AF:
 		r := make([]float64, ylen)
-		for j := 0; j < ylen; j++ {
-			r[j] = yv.At((j + i) % ylen)
+		for j := int64(0); j < ylen; j++ {
+			r[j] = yv.At(int((j + i) % ylen))
 		}
 		return NewAF(r)
 	case *AI:
-		r := make([]int, ylen)
-		for j := 0; j < ylen; j++ {
-			r[j] = yv.At((j + i) % ylen)
+		r := make([]int64, ylen)
+		for j := int64(0); j < ylen; j++ {
+			r[j] = yv.At(int((j + i) % ylen))
 		}
 		return NewAI(r)
 	case *AS:
 		r := make([]string, ylen)
-		for j := 0; j < ylen; j++ {
-			r[j] = yv.At((j + i) % ylen)
+		for j := int64(0); j < ylen; j++ {
+			r[j] = yv.At(int((j + i) % ylen))
 		}
 		return NewAS(r)
 	case *AV:
 		r := make([]V, ylen)
-		for j := 0; j < ylen; j++ {
-			r[j] = yv.At((j + i) % ylen)
+		for j := int64(0); j < ylen; j++ {
+			r[j] = yv.At(int((j + i) % ylen))
 		}
 		return NewAV(r)
 	default:
@@ -154,7 +154,7 @@ func drop(x, y V) V {
 		if !isI(xv) {
 			return errf("i_y : non-integer i (%s)", xv.Type())
 		}
-		return dropi(int(xv), y)
+		return dropi(int64(xv), y)
 	case S:
 		return drops(xv, y)
 	case *AB:
@@ -175,22 +175,22 @@ func drop(x, y V) V {
 	}
 }
 
-func dropi(i int, y V) V {
+func dropi(i int64, y V) V {
 	switch yv := y.Value.(type) {
 	case array:
 		switch {
 		case i >= 0:
-			if i > yv.Len() {
-				i = yv.Len()
+			if i > int64(yv.Len()) {
+				i = int64(yv.Len())
 			}
-			y.Value = yv.slice(i, yv.Len())
+			y.Value = yv.slice(int(i), yv.Len())
 			return canonicalV(y)
 		default:
-			i = yv.Len() + i
+			i = int64(yv.Len()) + i
 			if i < 0 {
 				i = 0
 			}
-			y.Value = yv.slice(0, i)
+			y.Value = yv.slice(0, int(i))
 			return canonicalV(y)
 		}
 	default:
@@ -199,10 +199,10 @@ func dropi(i int, y V) V {
 }
 
 func cutAI(x *AI, y V) V {
-	if !sort.IsSorted(sort.IntSlice(x.Slice)) {
+	if !sort.IsSorted(sortAI(x.Slice)) {
 		return errs("x_y : x is not ascending")
 	}
-	ylen := Length(y)
+	ylen := int64(Length(y))
 	for _, i := range x.Slice {
 		if i < 0 || i > ylen {
 			return errf("x_y : x contains out of bound index (%d)", i)
@@ -215,7 +215,7 @@ func cutAI(x *AI, y V) V {
 	case *AB:
 		r := make([]V, x.Len())
 		for i, from := range x.Slice {
-			to := yv.Len()
+			to := int64(yv.Len())
 			if i+1 < x.Len() {
 				to = x.At(i + 1)
 			}
@@ -225,7 +225,7 @@ func cutAI(x *AI, y V) V {
 	case *AI:
 		r := make([]V, x.Len())
 		for i, from := range x.Slice {
-			to := yv.Len()
+			to := int64(yv.Len())
 			if i+1 < x.Len() {
 				to = x.At(i + 1)
 			}
@@ -235,7 +235,7 @@ func cutAI(x *AI, y V) V {
 	case *AF:
 		r := make([]V, x.Len())
 		for i, from := range x.Slice {
-			to := yv.Len()
+			to := int64(yv.Len())
 			if i+1 < x.Len() {
 				to = x.At(i + 1)
 			}
@@ -245,7 +245,7 @@ func cutAI(x *AI, y V) V {
 	case *AS:
 		r := make([]V, x.Len())
 		for i, from := range x.Slice {
-			to := yv.Len()
+			to := int64(yv.Len())
 			if i+1 < x.Len() {
 				to = x.At(i + 1)
 			}
@@ -255,7 +255,7 @@ func cutAI(x *AI, y V) V {
 	case *AV:
 		r := make([]V, x.Len())
 		for i, from := range x.Slice {
-			to := yv.Len()
+			to := int64(yv.Len())
 			if i+1 < x.Len() {
 				to = x.At(i + 1)
 			}
@@ -271,7 +271,7 @@ func cutAI(x *AI, y V) V {
 func take(x, y V) V {
 	i := 0
 	if x.IsInt() {
-		i = x.Int()
+		i = int(x.Int())
 	} else {
 		switch xv := x.Value.(type) {
 		case F:
@@ -323,7 +323,7 @@ func takeCyclic(y array, n int) V {
 		return NewAB(r)
 	case *AI:
 		ys := yv.Slice
-		r := make([]int, n)
+		r := make([]int64, n)
 		for i+step < n {
 			copy(r[i:i+step], ys)
 			i += step
@@ -381,7 +381,7 @@ func takeCyclic(y array, n int) V {
 // ShiftBefore returns x»y. XXX: unused for now.
 func shiftBefore(x, y V) V {
 	x = toArray(x)
-	max := minI(Length(x), Length(y))
+	max := minInt(Length(x), Length(y))
 	if max == 0 {
 		return y
 	}
@@ -406,12 +406,12 @@ func shiftBefore(x, y V) V {
 			}
 			return NewAF(r)
 		case *AI:
-			r := make([]int, len(ys))
+			r := make([]int64, len(ys))
 			for i := 0; i < max; i++ {
 				r[i] = xv.At(i)
 			}
 			for i := max; i < len(ys); i++ {
-				r[i] = int(B2I(ys[i-max]))
+				r[i] = B2I(ys[i-max])
 			}
 			return NewAI(r)
 		default:
@@ -448,9 +448,9 @@ func shiftBefore(x, y V) V {
 		ys := yv.Slice
 		switch xv := x.Value.(type) {
 		case *AB:
-			r := make([]int, len(ys))
+			r := make([]int64, len(ys))
 			for i := 0; i < max; i++ {
-				r[i] = int(B2I(xv.At(i)))
+				r[i] = B2I(xv.At(i))
 			}
 			copy(r[max:], ys[:len(ys)-max])
 			return NewAI(r)
@@ -464,7 +464,7 @@ func shiftBefore(x, y V) V {
 			}
 			return NewAF(r)
 		case *AI:
-			r := make([]int, len(ys))
+			r := make([]int64, len(ys))
 			for i := 0; i < max; i++ {
 				r[i] = xv.At(i)
 			}
@@ -512,7 +512,7 @@ func nudge(x V) V {
 		copy(r[1:], xv.Slice[0:xv.Len()-1])
 		return NewAB(r)
 	case *AI:
-		r := make([]int, xv.Len())
+		r := make([]int64, xv.Len())
 		copy(r[1:], xv.Slice[0:xv.Len()-1])
 		return NewAI(r)
 	case *AF:
@@ -535,7 +535,7 @@ func nudge(x V) V {
 // ShiftAfter returns x«y. XXX: unused for now.
 func shiftAfter(x, y V) V {
 	x = toArray(x)
-	max := minI(Length(x), Length(y))
+	max := minInt(Length(x), Length(y))
 	if max == 0 {
 		return y
 	}
@@ -560,12 +560,12 @@ func shiftAfter(x, y V) V {
 			}
 			return NewAF(r)
 		case *AI:
-			r := make([]int, len(ys))
+			r := make([]int64, len(ys))
 			for i := 0; i < max; i++ {
 				r[len(ys)-1-i] = xv.At(i)
 			}
 			for i := max; i < len(ys); i++ {
-				r[i-max] = int(B2I(ys[i]))
+				r[i-max] = B2I(ys[i])
 			}
 			return NewAI(r)
 		default:
@@ -602,9 +602,9 @@ func shiftAfter(x, y V) V {
 		ys := yv.Slice
 		switch xv := x.Value.(type) {
 		case *AB:
-			r := make([]int, len(ys))
+			r := make([]int64, len(ys))
 			for i := 0; i < max; i++ {
-				r[len(ys)-1-i] = int(B2I(xv.At(i)))
+				r[len(ys)-1-i] = B2I(xv.At(i))
 			}
 			copy(r[:len(ys)-max], ys[max:])
 			return NewAI(r)
@@ -618,7 +618,7 @@ func shiftAfter(x, y V) V {
 			}
 			return NewAF(r)
 		case *AI:
-			r := make([]int, len(ys))
+			r := make([]int64, len(ys))
 			for i := 0; i < max; i++ {
 				r[len(ys)-1-i] = xv.At(i)
 			}
@@ -669,7 +669,7 @@ func nudgeBack(x V) V {
 		copy(r[0:xv.Len()-1], xv.Slice[1:])
 		return NewAB(r)
 	case *AI:
-		r := make([]int, xv.Len())
+		r := make([]int64, xv.Len())
 		copy(r[0:xv.Len()-1], xv.Slice[1:])
 		return NewAI(r)
 	case *AF:
@@ -690,16 +690,16 @@ func nudgeBack(x V) V {
 }
 
 // windows returns i^y.
-func windows(i int, y V) V {
+func windows(i int64, y V) V {
 	switch yv := y.Value.(type) {
 	case array:
-		if i <= 0 || i >= yv.Len()+1 {
+		if i <= 0 || i >= int64(yv.Len()+1) {
 			return errf("i^y : i out of range !%d (%d)", yv.Len()+1, i)
 		}
-		r := make([]V, 1+yv.Len()-i)
+		r := make([]V, 1+yv.Len()-int(i))
 		for j := range r {
 			yc := y
-			yc.Value = yv.slice(j, j+i)
+			yc.Value = yv.slice(j, j+int(i))
 			r[j] = canonicalV(yc)
 		}
 		return canonicalV(NewAV(r))

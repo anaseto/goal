@@ -5,6 +5,20 @@ import (
 	"strings"
 )
 
+type sortAI []int64
+
+func (bs sortAI) Len() int {
+	return len(bs)
+}
+
+func (bs sortAI) Less(i, j int) bool {
+	return bs[i] < bs[j]
+}
+
+func (bs sortAI) Swap(i, j int) {
+	bs[i], bs[j] = bs[j], bs[i]
+}
+
 type sortAB []bool
 
 func (bs sortAB) Len() int {
@@ -411,7 +425,7 @@ func sortUp(x V) V {
 		sort.Stable(sort.Float64Slice(xv.Slice))
 		return NewV(xv)
 	case *AI:
-		sort.Stable(sort.IntSlice(xv.Slice))
+		sort.Stable(sortAI(xv.Slice))
 		return NewV(xv)
 	case *AS:
 		sort.Stable(sort.StringSlice(xv.Slice))
@@ -425,7 +439,7 @@ func sortUp(x V) V {
 }
 
 type permutationAV struct {
-	Perm []int
+	Perm []int64
 	X    sortVSlice
 }
 
@@ -438,11 +452,11 @@ func (p *permutationAV) Swap(i, j int) {
 }
 
 func (p *permutationAV) Less(i, j int) bool {
-	return p.X.Less(p.Perm[i], p.Perm[j])
+	return p.X.Less(int(p.Perm[i]), int(p.Perm[j]))
 }
 
 type permutationAB struct {
-	Perm []int
+	Perm []int64
 	X    sortAB
 }
 
@@ -455,12 +469,12 @@ func (p *permutationAB) Swap(i, j int) {
 }
 
 func (p *permutationAB) Less(i, j int) bool {
-	return p.X.Less(p.Perm[i], p.Perm[j])
+	return p.X.Less(int(p.Perm[i]), int(p.Perm[j]))
 }
 
 type permutationAI struct {
-	Perm []int
-	X    sort.IntSlice
+	Perm []int64
+	X    sortAI
 }
 
 func (p *permutationAI) Len() int {
@@ -472,11 +486,11 @@ func (p *permutationAI) Swap(i, j int) {
 }
 
 func (p *permutationAI) Less(i, j int) bool {
-	return p.X.Less(p.Perm[i], p.Perm[j])
+	return p.X.Less(int(p.Perm[i]), int(p.Perm[j]))
 }
 
 type permutationAF struct {
-	Perm []int
+	Perm []int64
 	X    sort.Float64Slice
 }
 
@@ -489,11 +503,11 @@ func (p *permutationAF) Swap(i, j int) {
 }
 
 func (p *permutationAF) Less(i, j int) bool {
-	return p.X.Less(p.Perm[i], p.Perm[j])
+	return p.X.Less(int(p.Perm[i]), int(p.Perm[j]))
 }
 
 type permutationAS struct {
-	Perm []int
+	Perm []int64
 	X    sort.StringSlice
 }
 
@@ -506,13 +520,13 @@ func (p *permutationAS) Swap(i, j int) {
 }
 
 func (p *permutationAS) Less(i, j int) bool {
-	return p.X.Less(p.Perm[i], p.Perm[j])
+	return p.X.Less(int(p.Perm[i]), int(p.Perm[j]))
 }
 
-func permRange(n int) []int {
-	r := make([]int, n)
+func permRange(n int) []int64 {
+	r := make([]int64, n)
 	for i := range r {
-		r[i] = i
+		r[i] = int64(i)
 	}
 	return r
 }
@@ -529,7 +543,7 @@ func ascend(x V) V {
 		sort.Stable(p)
 		return NewAI(p.Perm)
 	case *AI:
-		p := &permutationAI{Perm: permRange(xv.Len()), X: sort.IntSlice(xv.Slice)}
+		p := &permutationAI{Perm: permRange(xv.Len()), X: sortAI(xv.Slice)}
 		sort.Stable(p)
 		return NewAI(p.Perm)
 	case *AS:
@@ -564,7 +578,7 @@ func search(x V, y V) V {
 		}
 		return searchAI(fromABtoAI(xv).Value.(*AI), y)
 	case *AI:
-		if !sort.IsSorted(sort.IntSlice(xv.Slice)) {
+		if !sort.IsSorted(sortAI(xv.Slice)) {
 			return errDomain("x$y", "x is not ascending")
 		}
 		return searchAI(xv, y)
@@ -589,24 +603,24 @@ func search(x V, y V) V {
 	}
 }
 
-func searchAII(x *AI, y int) int {
-	return sort.Search(x.Len(), func(i int) bool { return x.At(i) > y })
+func searchAII(x *AI, y int64) int64 {
+	return int64(sort.Search(x.Len(), func(i int) bool { return x.At(i) > y }))
 }
 
-func searchAIF(x *AI, y F) int {
-	return sort.Search(x.Len(), func(i int) bool { return F(x.At(i)) > y })
+func searchAIF(x *AI, y F) int64 {
+	return int64(sort.Search(x.Len(), func(i int) bool { return F(x.At(i)) > y }))
 }
 
-func searchAFI(x *AF, y int) int {
-	return sort.Search(x.Len(), func(i int) bool { return x.At(i) > float64(y) })
+func searchAFI(x *AF, y int64) int64 {
+	return int64(sort.Search(x.Len(), func(i int) bool { return x.At(i) > float64(y) }))
 }
 
-func searchAFF(x *AF, y F) int {
-	return sort.Search(x.Len(), func(i int) bool { return F(x.At(i)) > y })
+func searchAFF(x *AF, y F) int64 {
+	return int64(sort.Search(x.Len(), func(i int) bool { return F(x.At(i)) > y }))
 }
 
-func searchASS(x *AS, y S) int {
-	return sort.Search(x.Len(), func(i int) bool { return S(x.At(i)) > y })
+func searchASS(x *AS, y S) int64 {
+	return int64(sort.Search(x.Len(), func(i int) bool { return S(x.At(i)) > y }))
 }
 
 func searchAI(x *AI, y V) V {
@@ -617,32 +631,32 @@ func searchAI(x *AI, y V) V {
 	case F:
 		return NewI(searchAIF(x, yv))
 	case *AB:
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
 			r[i] = searchAII(x, B2I(yi))
 		}
 		return NewAI(r)
 	case *AI:
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
 			r[i] = searchAII(x, yi)
 		}
 		return NewAI(r)
 	case *AF:
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
 			r[i] = searchAIF(x, F(yi))
 		}
 		return NewAI(r)
 	case array:
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
-			r[i] = sort.Search(x.Len(),
-				func(i int) bool { return less(yv.at(i), NewI(x.At(i))) })
+			r[i] = int64(sort.Search(x.Len(),
+				func(i int) bool { return less(yv.at(i), NewI(x.At(i))) }))
 		}
 		return NewAI(r)
 	default:
-		return NewI(x.Len())
+		return NewI(int64(x.Len()))
 	}
 }
 
@@ -654,32 +668,32 @@ func searchAF(x *AF, y V) V {
 	case F:
 		return NewI(searchAFF(x, yv))
 	case *AB:
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
 			r[i] = searchAFI(x, B2I(yi))
 		}
 		return NewAI(r)
 	case *AI:
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
 			r[i] = searchAFI(x, yi)
 		}
 		return NewAI(r)
 	case *AF:
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
 			r[i] = searchAFF(x, F(yi))
 		}
 		return NewAI(r)
 	case array:
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
-			r[i] = sort.Search(x.Len(),
-				func(i int) bool { return less(yv.at(i), NewF(x.At(i))) })
+			r[i] = int64(sort.Search(x.Len(),
+				func(i int) bool { return less(yv.at(i), NewF(x.At(i))) }))
 		}
 		return NewAI(r)
 	default:
-		return NewI(x.Len())
+		return NewI(int64(x.Len()))
 	}
 }
 
@@ -688,35 +702,35 @@ func searchAS(x *AS, y V) V {
 	case S:
 		return NewI(searchASS(x, yv))
 	case *AS:
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
 			r[i] = searchASS(x, S(yi))
 		}
 		return NewAI(r)
 	case array:
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
-			r[i] = sort.Search(x.Len(),
-				func(i int) bool { return less(yv.at(i), NewS(x.At(i))) })
+			r[i] = int64(sort.Search(x.Len(),
+				func(i int) bool { return less(yv.at(i), NewS(x.At(i))) }))
 		}
 		return NewAI(r)
 	default:
-		return NewI(x.Len())
+		return NewI(int64(x.Len()))
 	}
 }
 
 func searchAV(x *AV, y V) V {
 	switch yv := y.Value.(type) {
 	case array:
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
-			r[i] = sort.Search(x.Len(),
-				func(i int) bool { return less(yv.at(i), x.At(i)) })
+			r[i] = int64(sort.Search(x.Len(),
+				func(i int) bool { return less(yv.at(i), x.At(i)) }))
 		}
 		return NewAI(r)
 	default:
-		return NewI(sort.Search(x.Len(),
-			func(i int) bool { return less(y, x.At(i)) }))
+		return NewI(int64(sort.Search(x.Len(),
+			func(i int) bool { return less(y, x.At(i)) })))
 
 	}
 }

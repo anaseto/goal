@@ -56,7 +56,7 @@ func fold2(ctx *Context, args []V) V {
 func fold2vAdd(x V) V {
 	switch xv := x.Value.(type) {
 	case *AB:
-		n := 0
+		n := int64(0)
 		for _, b := range xv.Slice {
 			if b {
 				n++
@@ -64,7 +64,7 @@ func fold2vAdd(x V) V {
 		}
 		return NewI(n)
 	case *AI:
-		n := 0
+		n := int64(0)
 		for _, xi := range xv.Slice {
 			n += xi
 		}
@@ -127,21 +127,19 @@ func fold2Decode(f V, x V) V {
 			if !isI(xv) {
 				return errf("i/x : x non-integer (%g)", xv)
 			}
-			return NewI(int(xv))
+			return NewI(int64(xv))
 		case *AI:
-			r := 0
-			n := 1
+			var r, n int64 = 0, 1
 			for i := xv.Len() - 1; i >= 0; i-- {
 				r += xv.At(i) * n
-				n *= int(f.Int())
+				n *= f.Int()
 			}
 			return NewI(r)
 		case *AB:
-			r := 0
-			n := 1
+			var r, n int64 = 0, 1
 			for i := xv.Len() - 1; i >= 0; i-- {
-				r += int(B2I(xv.At(i))) * n
-				n *= int(f.Int())
+				r += B2I(xv.At(i)) * n
+				n *= f.Int()
 			}
 			return NewI(r)
 		case *AF:
@@ -169,15 +167,14 @@ func fold2Decode(f V, x V) V {
 		if !isI(fv) {
 			return errf("i/x : i non-integer (%g)", fv)
 		}
-		return fold2Decode(NewI(int(fv)), x)
+		return fold2Decode(NewI(int64(fv)), x)
 	case *AB:
 		return fold2Decode(fromABtoAI(fv), x)
 	case *AI:
 		if x.IsInt() {
-			r := 0
-			n := 1
+			var r, n int64 = 0, 1
 			for i := fv.Len() - 1; i >= 0; i-- {
-				r += int(x.Int()) * n
+				r += x.Int() * n
 				n *= fv.At(i)
 			}
 			return NewI(r)
@@ -187,13 +184,12 @@ func fold2Decode(f V, x V) V {
 			if !isI(xv) {
 				return errf("I/x : x non-integer (%g)", xv)
 			}
-			return fold2Decode(f, NewI(int(xv)))
+			return fold2Decode(f, NewI(int64(xv)))
 		case *AI:
 			if fv.Len() != xv.Len() {
 				return errf("I/x : length mismatch: %d (#I) %d (#x)", fv.Len(), xv.Len())
 			}
-			r := 0
-			n := 1
+			var r, n int64 = 0, 1
 			for i := xv.Len() - 1; i >= 0; i-- {
 				r += xv.At(i) * n
 				n *= fv.At(i)
@@ -293,14 +289,14 @@ func fold3While(ctx *Context, args []V) V {
 		if !isI(xv) {
 			return errf("n f/y : non-integer n (%g)", xv)
 		}
-		return fold3doTimes(ctx, int(xv), f, y)
+		return fold3doTimes(ctx, int64(xv), f, y)
 	default:
 		return errType("x f/y", "x", x)
 	}
 }
 
-func fold3doTimes(ctx *Context, n int, f, y V) V {
-	for i := 0; i < n; i++ {
+func fold3doTimes(ctx *Context, n int64, f, y V) V {
+	for i := int64(0); i < n; i++ {
 		ctx.push(y)
 		y = ctx.applyN(f, 1)
 		if y.IsErr() {
@@ -374,7 +370,7 @@ func scan2Split(sep S, x V) V {
 	}
 }
 
-func encodeBaseDigits(b int, x int) int {
+func encodeBaseDigits(b int64, x int64) int {
 	if b < 0 {
 		b = -b
 	}
@@ -395,10 +391,10 @@ func scan2Encode(f V, x V) V {
 			return errs("i\\x : base i is zero")
 		}
 		if x.IsInt() {
-			n := encodeBaseDigits(int(f.Int()), int(x.Int()))
-			r := make([]int, n)
+			n := encodeBaseDigits(f.Int(), x.Int())
+			r := make([]int64, n)
 			for i := n - 1; i >= 0; i-- {
-				r[i] = int(x.Int() % f.Int())
+				r[i] = x.Int() % f.Int()
 				x.N /= f.Int()
 			}
 			return NewAI(r)
@@ -408,19 +404,19 @@ func scan2Encode(f V, x V) V {
 			if !isI(xv) {
 				return errf("i\\x : x non-integer (%g)", xv)
 			}
-			return scan2Encode(f, NewI(int(xv)))
+			return scan2Encode(f, NewI(int64(xv)))
 		case *AI:
 			min, max := minMax(xv)
 			max = maxI(absI(min), absI(max))
 			n := encodeBaseDigits(f.Int(), max)
-			ai := make([]int, n*xv.Len())
+			ai := make([]int64, n*xv.Len())
 			copy(ai[(n-1)*xv.Len():], xv.Slice)
 			for i := n - 1; i >= 0; i-- {
 				for j := 0; j < xv.Len(); j++ {
 					ox := ai[i*xv.Len()+j]
-					ai[i*xv.Len()+j] = ox % int(f.Int())
+					ai[i*xv.Len()+j] = ox % f.Int()
 					if i > 0 {
-						ai[(i-1)*xv.Len()+j] = ox / int(f.Int())
+						ai[(i-1)*xv.Len()+j] = ox / f.Int()
 					}
 				}
 			}
@@ -456,16 +452,16 @@ func scan2Encode(f V, x V) V {
 		if !isI(fv) {
 			return errf("i\\x : i non-integer (%g)", fv)
 		}
-		return scan2Encode(NewI(int(fv)), x)
+		return scan2Encode(NewI(int64(fv)), x)
 	case *AB:
 		return scan2Encode(fromABtoAI(fv), x)
 	case *AI:
 		if x.IsInt() {
 			// TODO: check for zero division
 			n := fv.Len()
-			r := make([]int, n)
+			r := make([]int64, n)
 			for i := n - 1; i >= 0 && x.Int() > 0; i-- {
-				r[i] = int(x.Int()) % fv.At(i)
+				r[i] = x.Int() % fv.At(i)
 				x.N /= fv.At(i)
 			}
 			return NewAI(r)
@@ -476,10 +472,10 @@ func scan2Encode(f V, x V) V {
 			if !isI(xv) {
 				return errf("I/x : x non-integer (%g)", xv)
 			}
-			return scan2Encode(f, NewI(int(xv)))
+			return scan2Encode(f, NewI(int64(xv)))
 		case *AI:
 			n := fv.Len()
-			ai := make([]int, n*xv.Len())
+			ai := make([]int64, n*xv.Len())
 			copy(ai[(n-1)*xv.Len():], xv.Slice)
 			for i := n - 1; i >= 0; i-- {
 				for j := 0; j < xv.Len(); j++ {
@@ -604,15 +600,15 @@ func scan3While(ctx *Context, args []V) V {
 		if !isI(xv) {
 			return errf("n f\\y : non-integer n (%g)", xv)
 		}
-		return scan3doTimes(ctx, int(xv), f, y)
+		return scan3doTimes(ctx, int64(xv), f, y)
 	default:
 		return errType("x f\\y", "x", x)
 	}
 }
 
-func scan3doTimes(ctx *Context, n int, f, y V) V {
+func scan3doTimes(ctx *Context, n int64, f, y V) V {
 	r := []V{y}
-	for i := 0; i < n; i++ {
+	for i := int64(0); i < n; i++ {
 		ctx.push(y)
 		y = ctx.applyN(f, 1)
 		if y.IsErr() {

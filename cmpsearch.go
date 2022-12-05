@@ -100,7 +100,7 @@ func matchAB(x, y *AB) bool {
 
 func matchABAI(x *AB, y *AI) bool {
 	for i, yi := range y.Slice {
-		if yi != int(B2I(x.At(i))) {
+		if yi != B2I(x.At(i)) {
 			return false
 		}
 	}
@@ -156,9 +156,9 @@ func classify(x V) V {
 		}
 		return not(x)
 	case *AF:
-		r := make([]int, xv.Len())
-		m := map[float64]int{}
-		n := 0
+		r := make([]int64, xv.Len())
+		m := map[float64]int64{}
+		n := int64(0)
 		for i, xi := range xv.Slice {
 			c, ok := m[xi]
 			if !ok {
@@ -171,9 +171,9 @@ func classify(x V) V {
 		}
 		return NewAI(r)
 	case *AI:
-		r := make([]int, xv.Len())
-		m := map[int]int{}
-		n := 0
+		r := make([]int64, xv.Len())
+		m := map[int64]int64{}
+		n := int64(0)
 		for i, xi := range xv.Slice {
 			c, ok := m[xi]
 			if !ok {
@@ -186,9 +186,9 @@ func classify(x V) V {
 		}
 		return NewAI(r)
 	case *AS:
-		r := make([]int, xv.Len())
-		m := map[string]int{}
-		n := 0
+		r := make([]int64, xv.Len())
+		m := map[string]int64{}
+		n := int64(0)
 		for i, xi := range xv.Slice {
 			c, ok := m[xi]
 			if !ok {
@@ -203,8 +203,8 @@ func classify(x V) V {
 	case *AV:
 		// NOTE: quadratic algorithm, worst case complexity could be
 		// improved by sorting or string hashing.
-		r := make([]int, xv.Len())
-		n := 0
+		r := make([]int64, xv.Len())
+		n := int64(0)
 	loop:
 		for i, xi := range xv.Slice {
 			for j := range xv.Slice[:i] {
@@ -252,8 +252,8 @@ func uniq(x V) V {
 		}
 		return NewAF(r)
 	case *AI:
-		r := []int{}
-		m := map[int]struct{}{}
+		r := []int64{}
+		m := map[int64]struct{}{}
 		for _, xi := range xv.Slice {
 			_, ok := m[xi]
 			if !ok {
@@ -327,7 +327,7 @@ func markFirsts(x V) V {
 		return NewAB(r)
 	case *AI:
 		r := make([]bool, xv.Len())
-		m := map[int]struct{}{}
+		m := map[int64]struct{}{}
 		for i, xi := range xv.Slice {
 			_, ok := m[xi]
 			if !ok {
@@ -469,7 +469,7 @@ func memberOfAF(x V, y *AF) V {
 }
 
 func memberOfAI(x V, y *AI) V {
-	m := map[int]struct{}{}
+	m := map[int64]struct{}{}
 	for _, yi := range y.Slice {
 		_, ok := m[yi]
 		if !ok {
@@ -486,12 +486,12 @@ func memberOfAI(x V, y *AI) V {
 		if !isI(xv) {
 			return NewI(B2I(false))
 		}
-		_, ok := m[int(xv)]
+		_, ok := m[int64(xv)]
 		return NewI(B2I(ok))
 	case *AB:
 		r := make([]bool, xv.Len())
 		for i, xi := range xv.Slice {
-			_, r[i] = m[int(B2I(xi))]
+			_, r[i] = m[B2I(xi)]
 		}
 		return NewAB(r)
 	case *AI:
@@ -506,7 +506,7 @@ func memberOfAI(x V, y *AI) V {
 			if !isI(F(xi)) {
 				continue
 			}
-			_, r[i] = m[int(xi)]
+			_, r[i] = m[int64(xi)]
 		}
 		return NewAB(r)
 	case array:
@@ -579,8 +579,8 @@ func occurrenceCount(x V) V {
 	//assertCanonical(x)
 	switch xv := x.Value.(type) {
 	case *AB:
-		r := make([]int, xv.Len())
-		var f, t int
+		r := make([]int64, xv.Len())
+		var f, t int64
 		for i, xi := range xv.Slice {
 			if xi {
 				r[i] = t
@@ -592,8 +592,8 @@ func occurrenceCount(x V) V {
 		}
 		return NewAI(r)
 	case *AF:
-		r := make([]int, xv.Len())
-		m := map[float64]int{}
+		r := make([]int64, xv.Len())
+		m := map[float64]int64{}
 		for i, xi := range xv.Slice {
 			c, ok := m[xi]
 			if !ok {
@@ -605,8 +605,8 @@ func occurrenceCount(x V) V {
 		}
 		return NewAI(r)
 	case *AI:
-		r := make([]int, xv.Len())
-		m := map[int]int{}
+		r := make([]int64, xv.Len())
+		m := map[int64]int64{}
 		for i, xi := range xv.Slice {
 			c, ok := m[xi]
 			if !ok {
@@ -618,8 +618,8 @@ func occurrenceCount(x V) V {
 		}
 		return NewAI(r)
 	case *AS:
-		r := make([]int, xv.Len())
-		m := map[string]int{}
+		r := make([]int64, xv.Len())
+		m := map[string]int64{}
 		for i, xi := range xv.Slice {
 			c, ok := m[xi]
 			if !ok {
@@ -633,7 +633,7 @@ func occurrenceCount(x V) V {
 	case *AV:
 		// NOTE: quadratic algorithm, worst case complexity could be
 		// improved by sorting or string hashing.
-		r := make([]int, xv.Len())
+		r := make([]int64, xv.Len())
 	loop:
 		for i, xi := range xv.Slice {
 			for j := i - 1; j >= 0; j-- {
@@ -659,7 +659,7 @@ func without(x, y V) V {
 		if !isI(xv) {
 			return errf("i^y : i non-integer (%g)", xv)
 		}
-		return windows(int(xv), y)
+		return windows(int64(xv), y)
 	case S:
 		return trim(xv, y)
 	case array:
@@ -706,11 +706,11 @@ func find(x, y V) V {
 func findS(s S, y V) V {
 	switch yv := y.Value.(type) {
 	case S:
-		return NewI(strings.Index(string(s), string(yv)))
+		return NewI(int64(strings.Index(string(s), string(yv))))
 	case *AS:
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i, ss := range yv.Slice {
-			r[i] = strings.Index(string(s), string(ss))
+			r[i] = int64(strings.Index(string(s), string(ss)))
 		}
 		return NewAI(r)
 	case *AV:
@@ -727,40 +727,40 @@ func findS(s S, y V) V {
 	}
 }
 
-func imapAB(x *AB) (m [2]int) {
-	m[0] = x.Len()
-	m[1] = x.Len()
+func imapAB(x *AB) (m [2]int64) {
+	m[0] = int64(x.Len())
+	m[1] = int64(x.Len())
 	if x.Len() == 0 {
 		return m
 	}
-	m[int(B2I(x.At(0)))] = 0
+	m[B2I(x.At(0))] = 0
 	for i, xi := range x.Slice[1:] {
 		if xi != x.At(0) {
-			m[int(B2I(xi))] = i + 1
+			m[B2I(xi)] = int64(i) + 1
 			break
 		}
 	}
 	return m
 }
 
-func imapAI(x *AI) map[int]int {
-	m := map[int]int{}
+func imapAI(x *AI) map[int64]int64 {
+	m := map[int64]int64{}
 	for i, xi := range x.Slice {
 		_, ok := m[xi]
 		if !ok {
-			m[xi] = i
+			m[xi] = int64(i)
 			continue
 		}
 	}
 	return m
 }
 
-func imapAF(x *AF) map[float64]int {
-	m := map[float64]int{}
+func imapAF(x *AF) map[float64]int64 {
+	m := map[float64]int64{}
 	for i, xi := range x.Slice {
 		_, ok := m[xi]
 		if !ok {
-			m[xi] = i
+			m[xi] = int64(i)
 			continue
 		}
 	}
@@ -783,30 +783,30 @@ func findAB(x *AB, y V) V {
 	if y.IsInt() {
 		for i, xi := range x.Slice {
 			if B2I(xi) == y.Int() {
-				return NewI(i)
+				return NewI(int64(i))
 			}
 		}
-		return NewI(x.Len())
+		return NewI(int64(x.Len()))
 	}
 	switch yv := y.Value.(type) {
 	case F:
 		if !isI(yv) {
-			return NewI(x.Len())
+			return NewI(int64(x.Len()))
 		}
-		return findAB(x, NewI(int(yv)))
+		return findAB(x, NewI(int64(yv)))
 	case *AB:
 		m := imapAB(x)
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
 			r[i] = m[B2I(yi)]
 		}
 		return NewAI(r)
 	case *AI:
 		m := imapAB(x)
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
 			if yi != 0 && yi != 1 {
-				r[i] = x.Len()
+				r[i] = int64(x.Len())
 			} else {
 				r[i] = m[yi]
 			}
@@ -814,10 +814,10 @@ func findAB(x *AB, y V) V {
 		return NewAI(r)
 	case *AF:
 		m := imapAB(x)
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
 			if yi != 0 && yi != 1 {
-				r[i] = x.Len()
+				r[i] = int64(x.Len())
 			} else {
 				r[i] = m[int(yi)]
 			}
@@ -826,7 +826,7 @@ func findAB(x *AB, y V) V {
 	case array:
 		return findArray(x, yv)
 	default:
-		return NewI(x.Len())
+		return NewI(int64(x.Len()))
 	}
 }
 
@@ -834,60 +834,60 @@ func findAF(x *AF, y V) V {
 	if y.IsInt() {
 		for i, xi := range x.Slice {
 			if xi == float64(y.Int()) {
-				return NewI(i)
+				return NewI(int64(i))
 			}
 		}
-		return NewI(x.Len())
+		return NewI(int64(x.Len()))
 
 	}
 	switch yv := y.Value.(type) {
 	case F:
 		for i, xi := range x.Slice {
 			if F(xi) == yv {
-				return NewI(i)
+				return NewI(int64(i))
 			}
 		}
-		return NewI(x.Len())
+		return NewI(int64(x.Len()))
 	case *AB:
 		m := imapAF(x)
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
 			j, ok := m[float64(B2F(yi))]
 			if ok {
 				r[i] = j
 			} else {
-				r[i] = x.Len()
+				r[i] = int64(x.Len())
 			}
 		}
 		return NewAI(r)
 	case *AI:
 		m := imapAF(x)
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
 			j, ok := m[float64(yi)]
 			if ok {
 				r[i] = j
 			} else {
-				r[i] = x.Len()
+				r[i] = int64(x.Len())
 			}
 		}
 		return NewAI(r)
 	case *AF:
 		m := imapAF(x)
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
 			j, ok := m[yi]
 			if ok {
 				r[i] = j
 			} else {
-				r[i] = x.Len()
+				r[i] = int64(x.Len())
 			}
 		}
 		return NewAI(r)
 	case array:
 		return findArray(x, yv)
 	default:
-		return NewI(x.Len())
+		return NewI(int64(x.Len()))
 	}
 }
 
@@ -895,64 +895,64 @@ func findAI(x *AI, y V) V {
 	if y.IsInt() {
 		for i, xi := range x.Slice {
 			if xi == y.Int() {
-				return NewI(i)
+				return NewI(int64(i))
 			}
 		}
-		return NewI(x.Len())
+		return NewI(int64(x.Len()))
 
 	}
 	switch yv := y.Value.(type) {
 	case F:
 		for i, xi := range x.Slice {
 			if F(xi) == yv {
-				return NewI(i)
+				return NewI(int64(i))
 			}
 		}
-		return NewI(x.Len())
+		return NewI(int64(x.Len()))
 	case *AB:
 		m := imapAI(x)
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
-			j, ok := m[int(B2I(yi))]
+			j, ok := m[B2I(yi)]
 			if ok {
 				r[i] = j
 			} else {
-				r[i] = x.Len()
+				r[i] = int64(x.Len())
 			}
 		}
 		return NewAI(r)
 	case *AI:
 		m := imapAI(x)
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
 			j, ok := m[yi]
 			if ok {
 				r[i] = j
 			} else {
-				r[i] = x.Len()
+				r[i] = int64(x.Len())
 			}
 		}
 		return NewAI(r)
 	case *AF:
 		m := imapAI(x)
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
 			if !isI(F(yi)) {
-				r[i] = x.Len()
+				r[i] = int64(x.Len())
 				continue
 			}
-			j, ok := m[int(yi)]
+			j, ok := m[int64(yi)]
 			if ok {
 				r[i] = j
 			} else {
-				r[i] = x.Len()
+				r[i] = int64(x.Len())
 			}
 		}
 		return NewAI(r)
 	case array:
 		return findArray(x, yv)
 	default:
-		return NewI(x.Len())
+		return NewI(int64(x.Len()))
 	}
 }
 
@@ -961,40 +961,40 @@ func findAS(x *AS, y V) V {
 	case S:
 		for i, xi := range x.Slice {
 			if S(xi) == yv {
-				return NewI(i)
+				return NewI(int64(i))
 			}
 		}
-		return NewI(x.Len())
+		return NewI(int64(x.Len()))
 	case *AS:
 		m := imapAS(x)
-		r := make([]int, yv.Len())
+		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
 			j, ok := m[yi]
 			if ok {
-				r[i] = j
+				r[i] = int64(j)
 			} else {
-				r[i] = x.Len()
+				r[i] = int64(x.Len())
 			}
 		}
 		return NewAI(r)
 	case array:
 		return findArray(x, yv)
 	default:
-		return NewI(x.Len())
+		return NewI(int64(x.Len()))
 	}
 }
 
 func findArray(x, y array) V {
 	// NOTE: quadratic algorithm, worst case complexity could be
 	// improved by sorting or string hashing.
-	r := make([]int, y.Len())
+	r := make([]int64, y.Len())
 	for i := range r {
-		r[i] = x.Len()
+		r[i] = int64(x.Len())
 	}
 	for i := 0; i < y.Len(); i++ {
 		for j := 0; j < x.Len(); j++ {
 			if Match(y.at(i), x.at(j)) {
-				r[i] = j
+				r[i] = int64(j)
 				break
 			}
 		}
@@ -1009,9 +1009,9 @@ func findAV(x *AV, y V) V {
 	default:
 		for i, xi := range x.Slice {
 			if Match(y, xi) {
-				return NewI(i)
+				return NewI(int64(i))
 			}
 		}
-		return NewI(x.Len())
+		return NewI(int64(x.Len()))
 	}
 }

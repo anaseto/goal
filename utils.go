@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-func B2I(b bool) (i int) {
+func B2I(b bool) (i int64) {
 	if b {
 		i = 1
 	}
@@ -19,13 +19,13 @@ func B2F(b bool) (f F) {
 	return
 }
 
-func num2I(x V) (n int) {
+func num2I(x V) (n int64) {
 	if x.IsInt() {
 		return x.Int()
 	}
 	switch xv := x.Value.(type) {
 	case F:
-		n = int(xv)
+		n = int64(xv)
 	}
 	// x is assumed to be a number.
 	return n
@@ -41,12 +41,12 @@ func isNum(x V) bool {
 
 func divideF(x, y F) F {
 	if y == 0 {
-		return F(math.Inf(int(signF(x))))
+		return F(math.Inf(signF(x)))
 	}
 	return x / y
 }
 
-func modI(x, y int) int {
+func modI(x, y int64) int64 {
 	if y == 0 {
 		return y
 	}
@@ -60,14 +60,21 @@ func modF(x, y F) F {
 	return F(math.Mod(float64(y), float64(x)))
 }
 
-func minI(x, y int) int {
+func minI(x, y int64) int64 {
 	if x < y {
 		return x
 	}
 	return y
 }
 
-func maxI(x, y int) int {
+func minInt(x, y int) int {
+	if x < y {
+		return x
+	}
+	return y
+}
+
+func maxI(x, y int64) int64 {
 	if x < y {
 		return y
 	}
@@ -121,7 +128,7 @@ func cloneShallowArray(x array) array {
 		copy(r.Slice, xv.Slice)
 		return r
 	case *AI:
-		r := &AI{Slice: make([]int, xv.Len())}
+		r := &AI{Slice: make([]int64, xv.Len())}
 		copy(r.Slice, xv.Slice)
 		return r
 	case *AF:
@@ -180,7 +187,7 @@ func toIndicesRec(x V) V {
 		if !isI(xv) {
 			return errf("non-integer index (%g)", xv)
 		}
-		return NewI(int(xv))
+		return NewI(int64(xv))
 	case *AB:
 		return fromABtoAI(xv)
 	case *AF:
@@ -206,7 +213,7 @@ func toArray(x V) V {
 		case 0, 1:
 			return NewAB([]bool{x.Int() == 1})
 		default:
-			return NewAI([]int{int(x.Int())})
+			return NewAI([]int64{x.Int()})
 		}
 	}
 	switch xv := x.Value.(type) {
@@ -223,12 +230,12 @@ func toArray(x V) V {
 
 // toAI converts AF into AI if possible.
 func toAI(x *AF) V {
-	r := make([]int, x.Len())
+	r := make([]int64, x.Len())
 	for i, xi := range x.Slice {
 		if !isI(F(xi)) {
 			return errf("contains non-integer (%g)", xi)
 		}
-		r[i] = int(xi)
+		r[i] = int64(xi)
 	}
 	return NewAI(r)
 }
@@ -236,9 +243,9 @@ func toAI(x *AF) V {
 // fromABtoAI converts AB into AI (for simplifying code, used only for
 // unfrequent code).
 func fromABtoAI(x *AB) V {
-	r := make([]int, x.Len())
+	r := make([]int64, x.Len())
 	for i := range r {
-		r[i] = int(B2I(x.At(i)))
+		r[i] = B2I(x.At(i))
 	}
 	return NewAI(r)
 }
@@ -441,7 +448,7 @@ func isI(x F) bool {
 	return math.Floor(float64(x)) == float64(x)
 }
 
-func isBI(x int) bool {
+func isBI(x int64) bool {
 	return x == 0 || x == 1
 }
 
@@ -449,7 +456,7 @@ func isBF(x F) bool {
 	return x == 0 || x == 1
 }
 
-func minMax(x *AI) (min, max int) {
+func minMax(x *AI) (min, max int64) {
 	if x.Len() == 0 {
 		return
 	}
@@ -466,8 +473,8 @@ func minMax(x *AI) (min, max int) {
 	return
 }
 
-func maxAI(x *AI) int {
-	max := math.MinInt
+func maxAI(x *AI) int64 {
+	max := int64(math.MinInt64)
 	if x.Len() == 0 {
 		return max
 	}
@@ -479,7 +486,7 @@ func maxAI(x *AI) int {
 	return max
 }
 
-func minMaxB(x *AB) (int, int) {
+func minMaxB(x *AB) (int64, int64) {
 	if x.Len() == 0 {
 		return 0, 0
 	}
@@ -552,9 +559,9 @@ func normalize(x *AV) (array, bool) {
 		}
 		return &AB{Slice: r}, true
 	case tI:
-		r := make([]int, x.Len())
+		r := make([]int64, x.Len())
 		for i, xi := range x.Slice {
-			r[i] = int(xi.Int())
+			r[i] = xi.Int()
 		}
 		return &AI{Slice: r}, true
 	case tF:
@@ -637,8 +644,8 @@ func cloneArgs(a []V) []V {
 	return args
 }
 
-func sumAB(x *AB) int {
-	n := 0
+func sumAB(x *AB) int64 {
+	n := int64(0)
 	for _, xi := range x.Slice {
 		if xi {
 			n++

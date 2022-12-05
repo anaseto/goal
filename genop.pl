@@ -201,7 +201,7 @@ my %dyads = (
 
 my %atypes = (
     B => "bool",
-    I => "int",
+    I => "int64",
     F => "float64",
     S => "string",
 );
@@ -319,7 +319,7 @@ sub genLeftExpanded {
     open my $out, '>', \$s;
     my $xt = $t;
     if ($xt eq "I") {
-        $xt = "int"
+        $xt = "int64"
     }
     print $out <<EOS;
 func ${name}${t}V(x $xt, y V) V {
@@ -351,8 +351,8 @@ EOS
         $nt = "I" if $type eq "B" or $type eq "I";
         $expr = "B2I($expr)" if $type eq "B";
         my $iexpr = subst($expr, $t, $tt, "x", "yv");
-        $type = "int" if $type eq "B" or $type eq "I";
-        $type = "int" if $type eq "B";
+        $type = "int64" if $type eq "B" or $type eq "I";
+        $type = "int64" if $type eq "B";
 		#return New${nt}($type($expr))
         print $out <<EOS;
 	case $tt:
@@ -414,7 +414,7 @@ EOS
     if ($types{"I"}) {
         my $expr = $cases->{"${t}_I"}->[0];
         my $type = $cases->{"${t}_I"}->[1];
-        my $iexpr = subst($expr, $t, "int", "x.At(i)", "y.Int()");
+        my $iexpr = subst($expr, $t, "int64", "x.At(i)", "y.Int()");
         my $rtype = $atypes{$type};
         if ($t eq $type) {
             print $out <<EOS;
@@ -515,7 +515,7 @@ EOS
         $t = "I";
         $tt = "B2I";
     } elsif ($t eq "I") {
-        $tt = "int";
+        $tt = "int64";
     }
     my $reuse;
     if ($t eq "V") {

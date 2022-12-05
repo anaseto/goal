@@ -12,7 +12,7 @@ func flip(x V) V {
 		}
 		lines := -1
 		for _, o := range xv.Slice {
-			nl := Length(o)
+			nl := int(Length(o))
 			if _, ok := o.Value.(array); !ok {
 				continue
 			}
@@ -136,7 +136,7 @@ func flipAVAF(x *AV, lines int) V {
 }
 
 func flipAI(x *AV) V {
-	r := make([]int, x.Len())
+	r := make([]int64, x.Len())
 	for i, xi := range x.Slice {
 		if xi.IsInt() {
 			r[i] = xi.Int()
@@ -144,7 +144,7 @@ func flipAI(x *AV) V {
 		}
 		switch z := xi.Value.(type) {
 		case *AB:
-			r[i] = int(B2I(z.At(0)))
+			r[i] = B2I(z.At(0))
 		case *AI:
 			r[i] = z.At(0)
 		}
@@ -154,7 +154,7 @@ func flipAI(x *AV) V {
 
 func flipAVAI(x *AV, lines int) V {
 	r := make([]V, lines)
-	a := make([]int, lines*x.Len())
+	a := make([]int64, lines*x.Len())
 	for j := range r {
 		q := a[j*x.Len() : (j+1)*x.Len()]
 		for i, xi := range x.Slice {
@@ -164,7 +164,7 @@ func flipAVAI(x *AV, lines int) V {
 			}
 			switch z := xi.Value.(type) {
 			case *AB:
-				q[i] = int(B2I(z.At(j)))
+				q[i] = B2I(z.At(j))
 			case *AI:
 				q[i] = z.At(j)
 			}

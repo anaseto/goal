@@ -361,7 +361,7 @@ func VWithout(ctx *Context, args []V) V {
 func VTake(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return NewI(Length(args[0]))
+		return NewI(int64(Length(args[0])))
 	case 2:
 		x, y := args[1], args[0]
 		if x.IsFunction() {
