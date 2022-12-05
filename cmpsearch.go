@@ -14,20 +14,16 @@ func Match(x, y V) bool {
 	case Nil:
 		return y.Kind == Nil
 	case Int:
-		if y.Kind == Int {
-			return x.N == y.N
-		}
-		yf, ok := y.Value.(F)
-		return ok && F(x.N) == yf
+		return y.Kind == Int && x.N == y.N ||
+			y.Kind == Float && float64(x.N) == y.F()
+	case Float:
+		return y.Kind == Int && x.F() == float64(y.N) ||
+			y.Kind == Float && x.F() == y.F()
 	case Variadic:
 		return y.Kind == Variadic && x.N == y.N
 	case Lambda:
 		return y.Kind == Lambda && x.N == y.N
 	default:
-		if y.Kind == Int {
-			xf, ok := x.Value.(F)
-			return ok && F(y.N) == xf
-		}
 		return y.Kind == Boxed && x.Value.Matches(y.Value)
 	}
 }

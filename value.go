@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"unsafe"
 )
 
 // V represents a boxed or unboxed value.
@@ -53,14 +54,16 @@ func (v V) lambda() lambda {
 	return lambda(v.N)
 }
 
-// I retrieves the integer value from N field. It assumes Kind is I.
+// I retrieves the integer value from N field. It assumes Kind is Int.
 func (v V) I() int64 {
 	return v.N
 }
 
-// F retrieves the float64 value. It assumes Value type is F.
-func (v V) F() F {
-	return v.Value.(F)
+// F retrieves the float64 value. It assumes Kind is Float.
+func (v V) F() float64 {
+	i := v.N
+	f := *(*float64)(unsafe.Pointer(&i))
+	return f
 }
 
 // AB retrieves the AB value. It assumes Value type is AB.
@@ -83,6 +86,8 @@ func (v V) Type() string {
 	switch v.Kind {
 	case Int:
 		return "n"
+	case Float:
+		return "n"
 	case Variadic:
 		return "v"
 	case Lambda:
@@ -99,6 +104,8 @@ func (v V) Sprint(ctx *Context) string {
 	switch v.Kind {
 	case Int:
 		return fmt.Sprintf("%d", v.N)
+	case Float:
+		return fmt.Sprintf("%g", v.F())
 	case Variadic:
 		return variadic(v.N).String()
 	case Lambda:
@@ -173,16 +180,14 @@ func NewI(i int64) V {
 
 // NewF returns a new float64 value.
 func NewF(f float64) V {
-	return V{Kind: Boxed, Value: F(f)}
+	i := *(*int64)(unsafe.Pointer(&f))
+	return V{Kind: Boxed, N: i}
 }
 
 // NewS returns a new string value.
 func NewS(s string) V {
 	return V{Kind: Boxed, Value: S(s)}
 }
-
-// F represents real numbers.
-type F float64
 
 // S represents (immutable) strings of bytes.
 type S string
@@ -192,6 +197,10 @@ type errV string
 
 func (x V) IsInt() bool {
 	return x.Kind == Int
+}
+
+func (x V) IsF() bool {
+	return x.Kind == Float
 }
 
 func (x V) IsErr() bool {
@@ -211,15 +220,6 @@ func (x V) IsFunction() bool {
 	}
 }
 
-func (f F) Matches(y Value) bool {
-	switch yv := y.(type) {
-	case F:
-		return f == yv
-	default:
-		return false
-	}
-}
-
 func (s S) Matches(y Value) bool {
 	switch yv := y.(type) {
 	case S:
@@ -229,13 +229,9 @@ func (s S) Matches(y Value) bool {
 	}
 }
 
-// Type retuns "n" for numeric atoms.
-func (f F) Type() string { return "n" }
-
 // Type retuns "s" for string atoms.
 func (s S) Type() string { return "s" }
 
-func (f F) Sprint(ctx *Context) string { return fmt.Sprintf("%g", f) }
 func (s S) Sprint(ctx *Context) string { return strconv.Quote(string(s)) }
 
 func (e errV) Matches(y Value) bool {
@@ -316,13 +312,13 @@ func (x *AS) Matches(y Value) bool { return matchArray(x, y) }
 func (x *AV) Matches(y Value) bool { return matchArray(x, y) }
 
 // Type returns a string representation of the array's type.
-func (x *AB) Type() string { return "B" }
+func (x *AB) Type() string { return "N" }
 
 // Type returns a string representation of the array's type.
-func (x *AI) Type() string { return "I" }
+func (x *AI) Type() string { return "N" }
 
 // Type returns a string representation of the array's type.
-func (x *AF) Type() string { return "F" }
+func (x *AF) Type() string { return "N" }
 
 // Type returns a string representation of the array's type.
 func (x *AS) Type() string { return "S" }

@@ -18,10 +18,13 @@ func fold2(ctx *Context, args []V) V {
 		if f.IsInt() {
 			return fold2Decode(f, args[0])
 		}
+		if f.IsF() {
+			return fold2Decode(f, args[0])
+		}
 		switch fv := f.Value.(type) {
 		case S:
 			return fold2Join(fv, args[0])
-		case F, *AB, *AI, *AF:
+		case *AB, *AI, *AF:
 			return fold2Decode(f, args[0])
 		default:
 			return errType("F/x", "F", f)
@@ -122,12 +125,13 @@ func fold2Decode(f V, x V) V {
 		if x.IsInt() {
 			return x
 		}
-		switch xv := x.Value.(type) {
-		case F:
-			if !isI(xv) {
-				return errf("i/x : x non-integer (%g)", xv)
+		if x.IsF() {
+			if !isI(x.F()) {
+				return errf("i/x : x non-integer (%g)", x.F())
 			}
-			return NewI(int64(xv))
+			return NewI(int64(x.F()))
+		}
+		switch xv := x.Value.(type) {
 		case *AI:
 			var r, n int64 = 0, 1
 			for i := xv.Len() - 1; i >= 0; i-- {
@@ -162,12 +166,13 @@ func fold2Decode(f V, x V) V {
 		}
 
 	}
-	switch fv := f.Value.(type) {
-	case F:
-		if !isI(fv) {
-			return errf("i/x : i non-integer (%g)", fv)
+	if f.IsF() {
+		if !isI(f.F()) {
+			return errf("i/x : i non-integer (%g)", f.F())
 		}
-		return fold2Decode(NewI(int64(fv)), x)
+		return fold2Decode(NewI(int64(f.F())), x)
+	}
+	switch fv := f.Value.(type) {
 	case *AB:
 		return fold2Decode(fromABtoAI(fv), x)
 	case *AI:
@@ -179,12 +184,13 @@ func fold2Decode(f V, x V) V {
 			}
 			return NewI(r)
 		}
-		switch xv := x.Value.(type) {
-		case F:
-			if !isI(xv) {
-				return errf("I/x : x non-integer (%g)", xv)
+		if x.IsF() {
+			if !isI(x.F()) {
+				return errf("I/x : x non-integer (%g)", x.F())
 			}
-			return fold2Decode(f, NewI(int64(xv)))
+			return fold2Decode(f, NewI(int64(x.F())))
+		}
+		switch xv := x.Value.(type) {
 		case *AI:
 			if fv.Len() != xv.Len() {
 				return errf("I/x : length mismatch: %d (#I) %d (#x)", fv.Len(), xv.Len())
@@ -262,6 +268,15 @@ func fold3While(ctx *Context, args []V) V {
 	f := args[1]
 	x := args[2]
 	y := args[0]
+	if x.IsInt() {
+		return fold3doTimes(ctx, x.I(), f, y)
+	}
+	if x.IsF() {
+		if !isI(x.F()) {
+			return errf("n f/y : non-integer n (%g)", x.F())
+		}
+		return fold3doTimes(ctx, int64(x.F()), f, y)
+	}
 	if x.IsFunction() {
 		for {
 			ctx.push(y)
@@ -281,18 +296,7 @@ func fold3While(ctx *Context, args []V) V {
 			}
 		}
 	}
-	if x.IsInt() {
-		return fold3doTimes(ctx, x.I(), f, y)
-	}
-	switch xv := x.Value.(type) {
-	case F:
-		if !isI(xv) {
-			return errf("n f/y : non-integer n (%g)", xv)
-		}
-		return fold3doTimes(ctx, int64(xv), f, y)
-	default:
-		return errType("x f/y", "x", x)
-	}
+	return errType("x f/y", "x", x)
 }
 
 func fold3doTimes(ctx *Context, n int64, f, y V) V {
@@ -311,10 +315,13 @@ func scan2(ctx *Context, f, x V) V {
 		if f.IsInt() {
 			return scan2Encode(f, x)
 		}
+		if f.IsF() {
+			return scan2Encode(f, x)
+		}
 		switch fv := f.Value.(type) {
 		case S:
 			return scan2Split(fv, x)
-		case F, *AB, *AI, *AF:
+		case *AB, *AI, *AF:
 			return scan2Encode(f, x)
 		default:
 			return errType("f\\x", "f", f)
@@ -399,12 +406,13 @@ func scan2Encode(f V, x V) V {
 			}
 			return NewAI(r)
 		}
-		switch xv := x.Value.(type) {
-		case F:
-			if !isI(xv) {
-				return errf("i\\x : x non-integer (%g)", xv)
+		if x.IsF() {
+			if !isI(x.F()) {
+				return errf("i\\x : x non-integer (%g)", x.F())
 			}
-			return scan2Encode(f, NewI(int64(xv)))
+			return scan2Encode(f, NewI(int64(x.F())))
+		}
+		switch xv := x.Value.(type) {
 		case *AI:
 			min, max := minMax(xv)
 			max = maxI(absI(min), absI(max))
@@ -447,12 +455,13 @@ func scan2Encode(f V, x V) V {
 		}
 
 	}
-	switch fv := f.Value.(type) {
-	case F:
-		if !isI(fv) {
-			return errf("i\\x : i non-integer (%g)", fv)
+	if f.IsF() {
+		if !isI(f.F()) {
+			return errf("i\\x : i non-integer (%g)", f.F())
 		}
-		return scan2Encode(NewI(int64(fv)), x)
+		return scan2Encode(NewI(int64(f.F())), x)
+	}
+	switch fv := f.Value.(type) {
 	case *AB:
 		return scan2Encode(fromABtoAI(fv), x)
 	case *AI:
@@ -467,12 +476,13 @@ func scan2Encode(f V, x V) V {
 			return NewAI(r)
 
 		}
-		switch xv := x.Value.(type) {
-		case F:
-			if !isI(xv) {
-				return errf("I/x : x non-integer (%g)", xv)
+		if x.IsF() {
+			if !isI(x.F()) {
+				return errf("I/x : x non-integer (%g)", x.F())
 			}
-			return scan2Encode(f, NewI(int64(xv)))
+			return scan2Encode(f, NewI(int64(x.F())))
+		}
+		switch xv := x.Value.(type) {
 		case *AI:
 			n := fv.Len()
 			ai := make([]int64, n*xv.Len())
@@ -571,6 +581,15 @@ func scan3While(ctx *Context, args []V) V {
 	f := args[1]
 	x := args[2]
 	y := args[0]
+	if x.IsInt() {
+		return scan3doTimes(ctx, x.I(), f, y)
+	}
+	if x.IsF() {
+		if !isI(x.F()) {
+			return errf("n f\\y : non-integer n (%g)", x.F())
+		}
+		return scan3doTimes(ctx, int64(x.F()), f, y)
+	}
 	if x.IsFunction() {
 		r := []V{y}
 		for {
@@ -592,18 +611,7 @@ func scan3While(ctx *Context, args []V) V {
 			r = append(r, y)
 		}
 	}
-	if x.IsInt() {
-		return scan3doTimes(ctx, x.I(), f, y)
-	}
-	switch xv := x.Value.(type) {
-	case F:
-		if !isI(xv) {
-			return errf("n f\\y : non-integer n (%g)", xv)
-		}
-		return scan3doTimes(ctx, int64(xv), f, y)
-	default:
-		return errType("x f\\y", "x", x)
-	}
+	return errType("x f\\y", "x", x)
 }
 
 func scan3doTimes(ctx *Context, n int64, f, y V) V {

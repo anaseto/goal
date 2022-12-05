@@ -607,7 +607,7 @@ func searchAII(x *AI, y int64) int64 {
 	return int64(sort.Search(x.Len(), func(i int) bool { return x.At(i) > y }))
 }
 
-func searchAIF(x *AI, y F) int64 {
+func searchAIF(x *AI, y float64) int64 {
 	return int64(sort.Search(x.Len(), func(i int) bool { return F(x.At(i)) > y }))
 }
 
@@ -615,7 +615,7 @@ func searchAFI(x *AF, y int64) int64 {
 	return int64(sort.Search(x.Len(), func(i int) bool { return x.At(i) > float64(y) }))
 }
 
-func searchAFF(x *AF, y F) int64 {
+func searchAFF(x *AF, y float64) int64 {
 	return int64(sort.Search(x.Len(), func(i int) bool { return F(x.At(i)) > y }))
 }
 

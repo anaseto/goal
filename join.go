@@ -63,7 +63,7 @@ func joinToI(x int64, y V, left bool) V {
 	}
 }
 
-func joinToF(x F, y V, left bool) V {
+func joinToF(x float64, y V, left bool) V {
 	if y.IsInt() {
 		if left {
 			return NewAF([]float64{float64(x), float64(y.I())})

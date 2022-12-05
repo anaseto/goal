@@ -12,7 +12,7 @@ func B2I(b bool) (i int64) {
 	return
 }
 
-func B2F(b bool) (f F) {
+func B2F(b bool) (f float64) {
 	if b {
 		f = 1
 	}
@@ -39,9 +39,9 @@ func isNum(x V) bool {
 	return ok
 }
 
-func divideF(x, y F) F {
+func divideF(x, y float64) float64 {
 	if y == 0 {
-		return F(math.Inf(signF(x)))
+		return math.Inf(signF(x))
 	}
 	return x / y
 }
@@ -53,11 +53,11 @@ func modI(x, y int64) int64 {
 	return y % x
 }
 
-func modF(x, y F) F {
+func modF(x, y float64) float64 {
 	if y == 0 {
 		return y
 	}
-	return F(math.Mod(float64(y), float64(x)))
+	return math.Mod(float64(y), float64(x))
 }
 
 func minI(x, y int64) int64 {
@@ -442,7 +442,7 @@ func compatEltType(x array, y V) bool {
 	}
 }
 
-func isI(x F) bool {
+func isI(x float64) bool {
 	// NOTE: We assume no NaN or Inf: handling those special cases is left
 	// to the program.
 	return math.Floor(float64(x)) == float64(x)
@@ -452,7 +452,7 @@ func isBI(x int64) bool {
 	return x == 0 || x == 1
 }
 
-func isBF(x F) bool {
+func isBF(x float64) bool {
 	return x == 0 || x == 1
 }
 

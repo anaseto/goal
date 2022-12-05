@@ -10,9 +10,10 @@ func negate(x V) V {
 	if x.IsInt() {
 		return NewI(-x.I())
 	}
+	if x.IsF() {
+		return NewF(-x.F())
+	}
 	switch xv := x.Value.(type) {
-	case F:
-		return NewV(-xv)
 	case *AB:
 		r := make([]int64, xv.Len())
 		for i, xi := range xv.Slice {
@@ -42,7 +43,7 @@ func negate(x V) V {
 	}
 }
 
-func signF(x F) int {
+func signF(x float64) int {
 	switch {
 	case x > 0:
 		return 1
@@ -69,9 +70,10 @@ func sign(x V) V {
 	if x.IsInt() {
 		return NewI(signI(x.I()))
 	}
+	if x.IsF() {
+		return NewI(int64(signF(x.F())))
+	}
 	switch xv := x.Value.(type) {
-	case F:
-		return NewI(int64(signF(xv)))
 	case *AB:
 		return x
 	case *AI:
@@ -83,7 +85,7 @@ func sign(x V) V {
 	case *AF:
 		r := make([]int64, xv.Len())
 		for i, xi := range xv.Slice {
-			r[i] = int64(signF(F(xi)))
+			r[i] = int64(signF(xi))
 		}
 		return NewAI(r)
 	case *AV:
@@ -102,9 +104,10 @@ func floor(x V) V {
 	if x.IsInt() {
 		return x
 	}
+	if x.IsF() {
+		return NewF(math.Floor(float64(x.F())))
+	}
 	switch xv := x.Value.(type) {
-	case F:
-		return NewF(math.Floor(float64(xv)))
 	case S:
 		return NewS(strings.ToLower(string(xv)))
 	case *AB:
@@ -141,9 +144,10 @@ func ceil(x V) V {
 	if x.IsInt() {
 		return x
 	}
+	if x.IsF() {
+		return NewF(math.Ceil(float64(x.F())))
+	}
 	switch xv := x.Value.(type) {
-	case F:
-		return NewF(math.Ceil(float64(xv)))
 	case S:
 		return NewS(strings.ToUpper(string(xv)))
 	case *AB:
@@ -178,9 +182,10 @@ func not(x V) V {
 	if x.IsInt() {
 		return NewI(B2I(x.I() == 0))
 	}
+	if x.IsF() {
+		return NewI(B2I(x.F() == 0))
+	}
 	switch xv := x.Value.(type) {
-	case F:
-		return NewI(B2I(xv == 0))
 	case S:
 		return NewI(B2I(xv == ""))
 	case *AB:
@@ -217,9 +222,10 @@ func abs(x V) V {
 	if x.IsInt() {
 		return NewI(absI(x.I()))
 	}
+	if x.IsF() {
+		return NewF(math.Abs(float64(x.F())))
+	}
 	switch xv := x.Value.(type) {
-	case F:
-		return NewF(math.Abs(float64(xv)))
 	case *AB:
 		return x
 	case *AI:
