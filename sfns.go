@@ -65,16 +65,13 @@ func rotate(x, y V) V {
 	i := int64(0)
 	if x.IsInt() {
 		i = x.I()
-	} else {
-		switch xv := x.Value.(type) {
-		case F:
-			if !isI(xv) {
-				return errf("f|y : non-integer f[y] (%s)", xv.Type())
-			}
-			i = int64(xv)
-		default:
-			return errf("f|y : non-integer f[y] (%s)", x.Type())
+	} else if x.IsF() {
+		if !isI(x.F()) {
+			return errf("f|y : non-integer f[y] (%g)", x.F())
 		}
+		i = int64(x.F())
+	} else {
+		return errf("f|y : non-integer f[y] (%s)", x.Type())
 	}
 	ylen := int64(Length(y))
 	if ylen == 0 {
@@ -149,12 +146,13 @@ func drop(x, y V) V {
 	if x.IsInt() {
 		return dropi(x.I(), y)
 	}
-	switch xv := x.Value.(type) {
-	case F:
-		if !isI(xv) {
-			return errf("i_y : non-integer i (%s)", xv.Type())
+	if x.IsF() {
+		if !isI(x.F()) {
+			return errf("i_y : non-integer i (%g)", x.F())
 		}
-		return dropi(int64(xv), y)
+		return dropi(int64(x.F()), y)
+	}
+	switch xv := x.Value.(type) {
 	case S:
 		return drops(xv, y)
 	case *AB:
@@ -269,44 +267,41 @@ func cutAI(x *AI, y V) V {
 
 // take returns i#x.
 func take(x, y V) V {
-	i := 0
+	i := int64(0)
 	if x.IsInt() {
-		i = int(x.I())
-	} else {
-		switch xv := x.Value.(type) {
-		case F:
-			if !isI(xv) {
-				return errf("i#y : non-integer i (%s)", xv.Type())
-			}
-			i = int(xv)
-		default:
-			return errf("i#y : non-integer i (%s)", x.Type())
+		i = x.I()
+	} else if x.IsF() {
+		if !isI(x.F()) {
+			return errf("i#y : non-integer i (%g)", x.F())
 		}
+		i = int64(x.F())
+	} else {
+		return errf("i#y : non-integer i (%s)", x.Type())
 	}
 	yv := toArray(y).Value.(array)
 	switch {
 	case i >= 0:
-		if i > yv.Len() {
+		if i > int64(yv.Len()) {
 			return takeCyclic(yv, i)
 		}
-		y.Value = yv.slice(0, i)
+		y.Value = yv.slice(0, int(i))
 		return canonicalV(y)
 	default:
-		if i < -yv.Len() {
+		if i < int64(-yv.Len()) {
 			return takeCyclic(yv, i)
 		}
-		y.Value = yv.slice(yv.Len()+i, yv.Len())
+		y.Value = yv.slice(yv.Len()+int(i), yv.Len())
 		return canonicalV(y)
 	}
 }
 
-func takeCyclic(y array, n int) V {
+func takeCyclic(y array, n int64) V {
 	neg := n < 0
 	if neg {
 		n = -n
 	}
-	i := 0
-	step := y.Len()
+	i := int64(0)
+	step := int64(y.Len())
 	switch yv := y.(type) {
 	case *AB:
 		ys := yv.Slice
@@ -316,7 +311,7 @@ func takeCyclic(y array, n int) V {
 			i += step
 		}
 		if neg {
-			copy(r[i:n], ys[len(ys)-n+i:])
+			copy(r[i:n], ys[int64(len(ys))-n+i:])
 		} else {
 			copy(r[i:n], ys[:n-i])
 		}
@@ -329,7 +324,7 @@ func takeCyclic(y array, n int) V {
 			i += step
 		}
 		if neg {
-			copy(r[i:n], ys[len(ys)-n+i:])
+			copy(r[i:n], ys[int64(len(ys))-n+i:])
 		} else {
 			copy(r[i:n], ys[:n-i])
 		}
@@ -342,7 +337,7 @@ func takeCyclic(y array, n int) V {
 			i += step
 		}
 		if neg {
-			copy(r[i:n], ys[len(ys)-n+i:])
+			copy(r[i:n], ys[int64(len(ys))-n+i:])
 		} else {
 			copy(r[i:n], ys[:n-i])
 		}
@@ -355,7 +350,7 @@ func takeCyclic(y array, n int) V {
 			i += step
 		}
 		if neg {
-			copy(r[i:n], ys[len(ys)-n+i:])
+			copy(r[i:n], ys[int64(len(ys))-n+i:])
 		} else {
 			copy(r[i:n], ys[:n-i])
 		}
@@ -368,7 +363,7 @@ func takeCyclic(y array, n int) V {
 			i += step
 		}
 		if neg {
-			copy(r[i:n], ys[len(ys)-n+i:])
+			copy(r[i:n], ys[int64(len(ys))-n+i:])
 		} else {
 			copy(r[i:n], ys[:n-i])
 		}

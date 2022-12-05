@@ -5,9 +5,10 @@ func joinTo(x, y V) V {
 	if x.IsInt() {
 		return joinToI(x.I(), y, true)
 	}
+	if x.IsF() {
+		return joinToF(x.F(), y, true)
+	}
 	switch xv := x.Value.(type) {
-	case F:
-		return joinToF(xv, y, true)
 	case S:
 		return joinToS(xv, y, true)
 	case *AB:
@@ -37,12 +38,13 @@ func joinToI(x int64, y V, left bool) V {
 		}
 		return NewAI([]int64{y.I(), x})
 	}
-	switch yv := y.Value.(type) {
-	case F:
+	if y.IsF() {
 		if left {
-			return NewAF([]float64{float64(x), float64(yv)})
+			return NewAF([]float64{float64(x), float64(y.F())})
 		}
-		return NewAF([]float64{float64(yv), float64(x)})
+		return NewAF([]float64{float64(y.F()), float64(x)})
+	}
+	switch yv := y.Value.(type) {
 	case S:
 		if left {
 			return NewAV([]V{NewI(x), y})
@@ -70,29 +72,30 @@ func joinToF(x float64, y V, left bool) V {
 		}
 		return NewAF([]float64{float64(y.I()), float64(x)})
 	}
-	switch yv := y.Value.(type) {
-	case F:
+	if y.IsF() {
 		if left {
-			return NewAF([]float64{float64(x), float64(yv)})
+			return NewAF([]float64{float64(x), float64(y.F())})
 		}
-		return NewAF([]float64{float64(yv), float64(x)})
+		return NewAF([]float64{float64(y.F()), float64(x)})
+	}
+	switch yv := y.Value.(type) {
 	case S:
 		if left {
-			return NewAV([]V{NewV(x), y})
+			return NewAV([]V{NewF(x), y})
 		}
-		return NewAV([]V{y, NewV(x)})
+		return NewAV([]V{y, NewF(x)})
 	case *AB:
-		return joinToAB(NewV(x), yv, left)
+		return joinToAB(NewF(x), yv, left)
 	case *AF:
-		return joinToAF(NewV(x), yv, left)
+		return joinToAF(NewF(x), yv, left)
 	case *AI:
-		return joinToAI(NewV(x), yv, left)
+		return joinToAI(NewF(x), yv, left)
 	case *AS:
-		return joinToAS(NewV(x), yv, left)
+		return joinToAS(NewF(x), yv, left)
 	case *AV:
-		return joinToAV(NewV(x), yv, left)
+		return joinToAV(NewF(x), yv, left)
 	default:
-		return NewAV([]V{NewV(x), y})
+		return NewAV([]V{NewF(x), y})
 	}
 }
 
@@ -103,12 +106,13 @@ func joinToS(x S, y V, left bool) V {
 		}
 		return NewAV([]V{y, NewV(x)})
 	}
-	switch yv := y.Value.(type) {
-	case F:
+	if y.IsF() {
 		if left {
 			return NewAV([]V{NewV(x), y})
 		}
 		return NewAV([]V{y, NewV(x)})
+	}
+	switch yv := y.Value.(type) {
 	case S:
 		if left {
 			return NewAS([]string{string(x), string(yv)})
@@ -257,21 +261,22 @@ func joinToAB(x V, y *AB, left bool) V {
 		return NewAI(r)
 
 	}
-	switch xv := x.Value.(type) {
-	case F:
+	if x.IsF() {
 		r := make([]float64, y.Len()+1)
 		if left {
-			r[0] = float64(xv)
+			r[0] = x.F()
 			for i := 1; i < len(r); i++ {
-				r[i] = float64(B2F(y.At(i - 1)))
+				r[i] = B2F(y.At(i - 1))
 			}
 		} else {
-			r[len(r)-1] = float64(xv)
+			r[len(r)-1] = x.F()
 			for i := 0; i < len(r); i++ {
-				r[i] = float64(B2F(y.At(i)))
+				r[i] = B2F(y.At(i))
 			}
 		}
 		return NewAF(r)
+	}
+	switch xv := x.Value.(type) {
 	case *AB:
 		if left {
 			return joinABAB(xv, y)
@@ -315,21 +320,22 @@ func joinToAI(x V, y *AI, left bool) V {
 		return NewAI(r)
 
 	}
-	switch xv := x.Value.(type) {
-	case F:
+	if x.IsF() {
 		r := make([]float64, y.Len()+1)
 		if left {
-			r[0] = float64(xv)
+			r[0] = x.F()
 			for i := 1; i < len(r); i++ {
 				r[i] = float64(y.At(i - 1))
 			}
 		} else {
-			r[len(r)-1] = float64(xv)
+			r[len(r)-1] = x.F()
 			for i := 0; i < len(r)-1; i++ {
 				r[i] = float64(y.At(i))
 			}
 		}
 		return NewAF(r)
+	}
+	switch xv := x.Value.(type) {
 	case *AB:
 		if left {
 			return joinABAI(xv, y)
@@ -372,22 +378,23 @@ func joinToAF(x V, y *AF, left bool) V {
 		copy(r[:len(r)-1], y.Slice)
 		return NewAF(r)
 	}
-	switch xv := x.Value.(type) {
-	case F:
+	if x.IsF() {
 		if left {
 			r := make([]float64, y.Len()+1)
-			r[0] = float64(xv)
+			r[0] = x.F()
 			copy(r[1:], y.Slice)
 			return NewAF(r)
 		}
 		if y.reusable() {
-			y.Slice = append(y.Slice, float64(xv))
+			y.Slice = append(y.Slice, x.F())
 			return NewV(y)
 		}
 		r := make([]float64, y.Len()+1)
-		r[len(r)-1] = float64(xv)
+		r[len(r)-1] = x.F()
 		copy(r[:len(r)-1], y.Slice)
 		return NewAF(r)
+	}
+	switch xv := x.Value.(type) {
 	case *AB:
 		if left {
 			return joinABAF(xv, y)
@@ -526,9 +533,10 @@ func enlist(x V) V {
 		}
 		return NewAI([]int64{x.I()})
 	}
+	if x.IsF() {
+		return NewAF([]float64{x.F()})
+	}
 	switch xv := x.Value.(type) {
-	case F:
-		return NewAF([]float64{float64(xv)})
 	case S:
 		return NewAS([]string{string(xv)})
 	default:

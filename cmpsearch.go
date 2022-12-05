@@ -105,7 +105,7 @@ func matchABAI(x *AB, y *AI) bool {
 
 func matchABAF(x *AB, y *AF) bool {
 	for i, yi := range y.Slice {
-		if F(yi) != B2F(x.At(i)) {
+		if yi != B2F(x.At(i)) {
 			return false
 		}
 	}
@@ -123,7 +123,7 @@ func matchAI(x, y *AI) bool {
 
 func matchAIAF(x *AI, y *AF) bool {
 	for i, yi := range y.Slice {
-		if F(yi) != F(x.At(i)) {
+		if yi != float64(x.At(i)) {
 			return false
 		}
 	}
@@ -423,22 +423,23 @@ func memberOfAB(x V, y *AB) V {
 }
 
 func memberOfAF(x V, y *AF) V {
-	m := map[F]struct{}{}
+	m := map[float64]struct{}{}
 	for _, yi := range y.Slice {
-		_, ok := m[F(yi)]
+		_, ok := m[yi]
 		if !ok {
-			m[F(yi)] = struct{}{}
+			m[yi] = struct{}{}
 			continue
 		}
 	}
 	if x.IsInt() {
-		_, ok := m[F(x.I())]
+		_, ok := m[float64(x.I())]
+		return NewI(B2I(ok))
+	}
+	if x.IsF() {
+		_, ok := m[x.F()]
 		return NewI(B2I(ok))
 	}
 	switch xv := x.Value.(type) {
-	case F:
-		_, ok := m[xv]
-		return NewI(B2I(ok))
 	case *AB:
 		r := make([]bool, xv.Len())
 		for i, xi := range xv.Slice {
@@ -448,13 +449,13 @@ func memberOfAF(x V, y *AF) V {
 	case *AI:
 		r := make([]bool, xv.Len())
 		for i, xi := range xv.Slice {
-			_, r[i] = m[F(xi)]
+			_, r[i] = m[float64(xi)]
 		}
 		return NewAB(r)
 	case *AF:
 		r := make([]bool, xv.Len())
 		for i, xi := range xv.Slice {
-			_, r[i] = m[F(xi)]
+			_, r[i] = m[xi]
 		}
 		return NewAB(r)
 	case array:
@@ -477,13 +478,14 @@ func memberOfAI(x V, y *AI) V {
 		_, ok := m[x.I()]
 		return NewI(B2I(ok))
 	}
-	switch xv := x.Value.(type) {
-	case F:
-		if !isI(xv) {
+	if x.IsF() {
+		if !isI(x.F()) {
 			return NewI(B2I(false))
 		}
-		_, ok := m[int64(xv)]
+		_, ok := m[int64(x.F())]
 		return NewI(B2I(ok))
+	}
+	switch xv := x.Value.(type) {
 	case *AB:
 		r := make([]bool, xv.Len())
 		for i, xi := range xv.Slice {
@@ -499,7 +501,7 @@ func memberOfAI(x V, y *AI) V {
 	case *AF:
 		r := make([]bool, xv.Len())
 		for i, xi := range xv.Slice {
-			if !isI(F(xi)) {
+			if !isI(xi) {
 				continue
 			}
 			_, r[i] = m[int64(xi)]
@@ -650,12 +652,13 @@ func without(x, y V) V {
 	if x.IsInt() {
 		return windows(x.I(), y)
 	}
-	switch xv := x.Value.(type) {
-	case F:
-		if !isI(xv) {
-			return errf("i^y : i non-integer (%g)", xv)
+	if x.IsF() {
+		if !isI(x.F()) {
+			return errf("i^y : i non-integer (%g)", x.F())
 		}
-		return windows(int64(xv), y)
+		return windows(int64(x.F()), y)
+	}
+	switch xv := x.Value.(type) {
 	case S:
 		return trim(xv, y)
 	case array:
@@ -784,12 +787,13 @@ func findAB(x *AB, y V) V {
 		}
 		return NewI(int64(x.Len()))
 	}
-	switch yv := y.Value.(type) {
-	case F:
-		if !isI(yv) {
+	if y.IsF() {
+		if !isI(y.F()) {
 			return NewI(int64(x.Len()))
 		}
-		return findAB(x, NewI(int64(yv)))
+		return findAB(x, NewI(int64(y.F())))
+	}
+	switch yv := y.Value.(type) {
 	case *AB:
 		m := imapAB(x)
 		r := make([]int64, yv.Len())
@@ -836,14 +840,15 @@ func findAF(x *AF, y V) V {
 		return NewI(int64(x.Len()))
 
 	}
-	switch yv := y.Value.(type) {
-	case F:
+	if y.IsF() {
 		for i, xi := range x.Slice {
-			if F(xi) == yv {
+			if float64(xi) == y.F() {
 				return NewI(int64(i))
 			}
 		}
 		return NewI(int64(x.Len()))
+	}
+	switch yv := y.Value.(type) {
 	case *AB:
 		m := imapAF(x)
 		r := make([]int64, yv.Len())
@@ -897,14 +902,15 @@ func findAI(x *AI, y V) V {
 		return NewI(int64(x.Len()))
 
 	}
-	switch yv := y.Value.(type) {
-	case F:
+	if y.IsF() {
 		for i, xi := range x.Slice {
-			if F(xi) == yv {
+			if float64(xi) == y.F() {
 				return NewI(int64(i))
 			}
 		}
 		return NewI(int64(x.Len()))
+	}
+	switch yv := y.Value.(type) {
 	case *AB:
 		m := imapAI(x)
 		r := make([]int64, yv.Len())
@@ -933,7 +939,7 @@ func findAI(x *AI, y V) V {
 		m := imapAI(x)
 		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
-			if !isI(F(yi)) {
+			if !isI(yi) {
 				r[i] = int64(x.Len())
 				continue
 			}

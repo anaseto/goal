@@ -13,12 +13,13 @@ func applyS(s S, x V) V {
 		}
 		return NewV(s[xv:])
 	}
-	switch xv := x.Value.(type) {
-	case F:
-		if !isI(xv) {
-			return errf("s[x] : x non-integer (%g)", xv)
+	if x.IsF() {
+		if !isI(x.F()) {
+			return errf("s[x] : x non-integer (%g)", x.F())
 		}
-		return applyS(s, x)
+		return applyS(s, NewI(int64(x.F())))
+	}
+	switch xv := x.Value.(type) {
 	case *AB:
 		return applyS(s, fromABtoAI(xv))
 	case *AI:
@@ -60,13 +61,13 @@ func applyS2(s S, x V, y V) V {
 			return errf("s[x;y] : y negative (%d)", y.I())
 		}
 		l = y.I()
+	} else if y.IsF() {
+		if !isI(y.F()) {
+			return errf("s[x;y] : y non-integer (%g)", y.F())
+		}
+		l = int64(y.F())
 	} else {
 		switch yv := y.Value.(type) {
-		case F:
-			if !isI(yv) {
-				return errf("s[x;y] : y non-integer (%g)", yv)
-			}
-			l = int64(yv)
 		case *AI:
 		case *AB:
 			if Length(x) != yv.Len() {
@@ -99,12 +100,13 @@ func applyS2(s S, x V, y V) V {
 		return NewV(s[xv : xv+l])
 
 	}
-	switch xv := x.Value.(type) {
-	case F:
-		if !isI(xv) {
-			return errf("s[x;y] : x non-integer (%g)", xv)
+	if x.IsF() {
+		if !isI(x.F()) {
+			return errf("s[x;y] : x non-integer (%g)", x.F())
 		}
-		return applyS2(s, x, y)
+		return applyS2(s, NewI(int64(x.F())), y)
+	}
+	switch xv := x.Value.(type) {
 	case *AB:
 		return applyS2(s, fromABtoAI(xv), y)
 	case *AI:
@@ -209,9 +211,10 @@ func casti(y V) V {
 	if y.IsInt() {
 		return y
 	}
+	if y.IsF() {
+		return NewI(int64(y.F()))
+	}
 	switch yv := y.Value.(type) {
-	case F:
-		return NewI(int64(yv))
 	case S:
 		runes := []rune(yv)
 		r := make([]int64, len(runes))
@@ -246,12 +249,10 @@ func casti(y V) V {
 }
 
 func castn(y V) V {
-	if y.IsInt() {
+	if y.IsInt() || y.IsF() {
 		return y
 	}
 	switch yv := y.Value.(type) {
-	case F:
-		return y
 	case S:
 		xi, err := parseNumber(string(yv))
 		if err != nil {
@@ -292,9 +293,10 @@ func casts(y V) V {
 	if y.IsInt() {
 		return NewS(string(rune(y.I())))
 	}
+	if y.IsF() {
+		return casts(NewI(int64(y.F())))
+	}
 	switch yv := y.Value.(type) {
-	case F:
-		return casts(NewI(int64(yv)))
 	case *AB:
 		return casts(fromABtoAI(yv))
 	case *AI:

@@ -95,11 +95,13 @@ func flipAF(x *AV) V {
 			r[i] = float64(xi.I())
 			continue
 		}
+		if xi.IsF() {
+			r[i] = float64(xi.F())
+			continue
+		}
 		switch z := xi.Value.(type) {
 		case *AB:
 			r[i] = float64(B2F(z.At(0)))
-		case F:
-			r[i] = float64(z)
 		case *AF:
 			r[i] = z.At(0)
 		case *AI:
@@ -119,11 +121,13 @@ func flipAVAF(x *AV, lines int) V {
 				q[i] = float64(xi.I())
 				continue
 			}
+			if xi.IsF() {
+				q[i] = float64(xi.F())
+				continue
+			}
 			switch z := xi.Value.(type) {
 			case *AB:
 				q[i] = float64(B2F(z.At(j)))
-			case F:
-				q[i] = float64(z)
 			case *AF:
 				q[i] = z.At(j)
 			case *AI:

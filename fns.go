@@ -68,12 +68,11 @@ func where(x V) V {
 			return NewAI(r)
 		}
 	}
-	switch xv := x.Value.(type) {
-	case F:
-		if !isI(xv) {
-			return errf("&x : x non-integer (%g)", xv)
+	if x.IsF() {
+		if !isI(x.F()) {
+			return errf("&x : x non-integer (%g)", x.F())
 		}
-		n := int64(xv)
+		n := int64(x.F())
 		switch {
 		case n < 0:
 			return errf("&x : x negative (%d)", n)
@@ -83,6 +82,9 @@ func where(x V) V {
 			r := make([]int64, n)
 			return NewAI(r)
 		}
+
+	}
+	switch xv := x.Value.(type) {
 	case *AB:
 		n := int64(0)
 		for _, xi := range xv.Slice {
@@ -113,7 +115,7 @@ func where(x V) V {
 	case *AF:
 		n := int64(0)
 		for _, xi := range xv.Slice {
-			if !isI(F(xi)) {
+			if !isI(xi) {
 				return errf("&x : x contains non-integer (%g)", xi)
 			}
 			if xi < 0 {
@@ -180,18 +182,13 @@ func replicate(x, y V) V {
 			return repeat(y, x.I())
 		}
 	}
+	if x.IsF() {
+		if !isI(x.F()) {
+			return errf("f#y : f[y] not an integer (%g)", x.F())
+		}
+		return replicate(NewI(int64(x.F())), y)
+	}
 	switch xv := x.Value.(type) {
-	case F:
-		if !isI(xv) {
-			return errf("f#y : f[y] not an integer (%g)", xv)
-		}
-		n := int64(xv)
-		switch {
-		case n < 0:
-			return errf("f#y : f[y] negative (%d)", n)
-		default:
-			return repeat(y, n)
-		}
 	case *AB:
 		if xv.Len() != Length(y) {
 			return errf("f#y : length mismatch: %d (f[y]) vs %d (y)", xv.Len(), Length(y))
@@ -232,13 +229,14 @@ func repeat(x V, n int64) V {
 		}
 		return NewAI(r)
 	}
-	switch xv := x.Value.(type) {
-	case F:
+	if x.IsF() {
 		r := make([]float64, n)
 		for i := range r {
-			r[i] = float64(xv)
+			r[i] = float64(x.F())
 		}
 		return NewAF(r)
+	}
+	switch xv := x.Value.(type) {
 	case S:
 		r := make([]string, n)
 		for i := range r {
@@ -367,12 +365,13 @@ func weedOut(x, y V) V {
 		}
 		return y
 	}
-	switch xv := x.Value.(type) {
-	case F:
-		if xv != 0 {
+	if x.IsF() {
+		if x.F() != 0 {
 			return NewAV([]V{})
 		}
 		return y
+	}
+	switch xv := x.Value.(type) {
 	case *AB:
 		return weedOutAB(xv, y)
 	case *AI:

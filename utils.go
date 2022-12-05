@@ -19,24 +19,8 @@ func B2F(b bool) (f float64) {
 	return
 }
 
-func num2I(x V) (n int64) {
-	if x.IsInt() {
-		return x.I()
-	}
-	switch xv := x.Value.(type) {
-	case F:
-		n = int64(xv)
-	}
-	// x is assumed to be a number.
-	return n
-}
-
 func isNum(x V) bool {
-	if x.IsInt() {
-		return true
-	}
-	_, ok := x.Value.(F)
-	return ok
+	return x.IsInt() || x.IsF()
 }
 
 func divideF(x, y float64) float64 {
@@ -182,12 +166,13 @@ func toIndicesRec(x V) V {
 	if x.IsInt() {
 		return x
 	}
-	switch xv := x.Value.(type) {
-	case F:
-		if !isI(xv) {
-			return errf("non-integer index (%g)", xv)
+	if x.IsF() {
+		if !isI(x.F()) {
+			return errf("non-integer index (%g)", x.F())
 		}
-		return NewI(int64(xv))
+		return NewI(int64(x.F()))
+	}
+	switch xv := x.Value.(type) {
 	case *AB:
 		return fromABtoAI(xv)
 	case *AF:
@@ -216,9 +201,10 @@ func toArray(x V) V {
 			return NewAI([]int64{x.I()})
 		}
 	}
+	if x.IsF() {
+		return NewAF([]float64{float64(x.F())})
+	}
 	switch xv := x.Value.(type) {
-	case F:
-		return NewAF([]float64{float64(xv)})
 	case S:
 		return NewAS([]string{string(xv)})
 	case array:
@@ -232,7 +218,7 @@ func toArray(x V) V {
 func toAI(x *AF) V {
 	r := make([]int64, x.Len())
 	for i, xi := range x.Slice {
-		if !isI(F(xi)) {
+		if !isI(xi) {
 			return errf("contains non-integer (%g)", xi)
 		}
 		r[i] = int64(xi)
@@ -254,13 +240,14 @@ func isFalse(x V) bool {
 	if x.IsInt() {
 		return x.I() == 0
 	}
+	if x.IsF() {
+		return x.F() == 0
+	}
 	switch xv := x.Value.(type) {
-	case F:
-		return xv == 0
 	case S:
 		return xv == ""
 	default:
-		return x == V{} || Length(x) == 0
+		return x.Kind == Nil || Length(x) == 0
 	}
 }
 
@@ -268,13 +255,14 @@ func isTrue(x V) bool {
 	if x.IsInt() {
 		return x.I() != 0
 	}
+	if x.IsF() {
+		return x.F() != 0
+	}
 	switch xv := x.Value.(type) {
-	case F:
-		return xv != 0
 	case S:
 		return xv != ""
 	default:
-		return x != V{} && Length(x) > 0
+		return x.Kind != Nil && Length(x) > 0
 	}
 }
 
@@ -312,9 +300,10 @@ func eType(x V) eltype {
 			return tI
 		}
 	}
-	switch x.Value.(type) {
-	case F:
+	if x.IsF() {
 		return tF
+	}
+	switch x.Value.(type) {
 	case S:
 		return tS
 	case *AB:
@@ -342,11 +331,12 @@ func cType(x V) eltype {
 			return tI
 		}
 	}
+	if x.IsF() {
+		return tF
+	}
 	switch xv := x.Value.(type) {
 	case *AB:
 		return tAB
-	case F:
-		return tF
 	case *AF:
 		return tAF
 	case *AI:
@@ -400,10 +390,10 @@ func sameType(x, y V) bool {
 	if x.IsInt() {
 		return y.IsInt()
 	}
+	if x.IsF() {
+		return y.IsF()
+	}
 	switch x.Value.(type) {
-	case F:
-		_, ok := y.Value.(F)
-		return ok
 	case *AB:
 		_, ok := y.Value.(*AB)
 		return ok
@@ -430,8 +420,7 @@ func compatEltType(x array, y V) bool {
 	case *AI:
 		return y.IsInt()
 	case *AF:
-		_, ok := y.Value.(F)
-		return ok
+		return y.IsF()
 	case *AS:
 		_, ok := y.Value.(S)
 		return ok

@@ -181,7 +181,7 @@ func NewI(i int64) V {
 // NewF returns a new float64 value.
 func NewF(f float64) V {
 	i := *(*int64)(unsafe.Pointer(&f))
-	return V{Kind: Boxed, N: i}
+	return V{Kind: Float, N: i}
 }
 
 // NewS returns a new string value.

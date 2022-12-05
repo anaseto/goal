@@ -51,9 +51,10 @@ func less(x, y V) bool {
 	if x.IsInt() {
 		return lessI(x, y)
 	}
-	switch xv := x.Value.(type) {
-	case F:
+	if x.IsF() {
 		return lessF(x, y)
+	}
+	switch xv := x.Value.(type) {
 	case S:
 		return lessS(x, y)
 	case *AB:
@@ -87,13 +88,14 @@ func less(x, y V) bool {
 }
 
 func lessF(x V, y V) bool {
-	xv := x.Value.(F)
+	xv := x.F()
 	if y.IsInt() {
-		return xv < F(y.I())
+		return xv < float64(y.I())
+	}
+	if y.IsF() {
+		return xv < y.F()
 	}
 	switch yv := y.Value.(type) {
-	case F:
-		return xv < yv
 	case *AB:
 		if yv.Len() == 0 {
 			return false
@@ -103,12 +105,12 @@ func lessF(x V, y V) bool {
 		if yv.Len() == 0 {
 			return false
 		}
-		return xv < F(yv.At(0)) || xv == F(yv.At(0)) && yv.Len() > 1
+		return xv < yv.At(0) || xv == yv.At(0) && yv.Len() > 1
 	case *AI:
 		if yv.Len() == 0 {
 			return false
 		}
-		return xv < F(yv.At(0)) || xv == F(yv.At(0)) && yv.Len() > 1
+		return xv < float64(yv.At(0)) || xv == float64(yv.At(0)) && yv.Len() > 1
 	case *AV:
 		if yv.Len() == 0 {
 			return false
@@ -124,9 +126,10 @@ func lessI(x V, y V) bool {
 	if y.IsInt() {
 		return xv < y.I()
 	}
+	if y.IsF() {
+		return float64(xv) < y.F()
+	}
 	switch yv := y.Value.(type) {
-	case F:
-		return F(xv) < yv
 	case *AB:
 		if yv.Len() == 0 {
 			return false
@@ -177,9 +180,10 @@ func lessAB(x V, y V) bool {
 	if y.IsInt() {
 		return !lessI(y, x)
 	}
-	switch yv := y.Value.(type) {
-	case F:
+	if y.IsF() {
 		return !lessF(y, x)
+	}
+	switch yv := y.Value.(type) {
 	case *AB:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if !xv.At(i) && yv.At(i) {
@@ -192,10 +196,10 @@ func lessAB(x V, y V) bool {
 		return xv.Len() < yv.Len()
 	case *AF:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if B2F(xv.At(i)) < F(yv.At(i)) {
+			if B2F(xv.At(i)) < yv.At(i) {
 				return true
 			}
-			if B2F(xv.At(i)) > F(yv.At(i)) {
+			if B2F(xv.At(i)) > yv.At(i) {
 				return false
 			}
 		}
@@ -230,9 +234,10 @@ func lessAI(x V, y V) bool {
 	if y.IsInt() {
 		return !lessI(y, x)
 	}
-	switch yv := y.Value.(type) {
-	case F:
+	if y.IsF() {
 		return !lessF(y, x)
+	}
+	switch yv := y.Value.(type) {
 	case *AB:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if xv.At(i) < B2I(yv.At(i)) {
@@ -245,10 +250,10 @@ func lessAI(x V, y V) bool {
 		return xv.Len() < yv.Len()
 	case *AF:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if F(xv.At(i)) < F(yv.At(i)) {
+			if float64(xv.At(i)) < yv.At(i) {
 				return true
 			}
-			if F(xv.At(i)) > F(yv.At(i)) {
+			if float64(xv.At(i)) > yv.At(i) {
 				return false
 			}
 		}
@@ -283,15 +288,16 @@ func lessAF(x V, y V) bool {
 	if y.IsInt() {
 		return !lessI(y, x)
 	}
-	switch yv := y.Value.(type) {
-	case F:
+	if y.IsF() {
 		return !lessF(y, x)
+	}
+	switch yv := y.Value.(type) {
 	case *AB:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if F(xv.At(i)) < B2F(yv.At(i)) {
+			if xv.At(i) < B2F(yv.At(i)) {
 				return true
 			}
-			if F(xv.At(i)) > B2F(yv.At(i)) {
+			if xv.At(i) > B2F(yv.At(i)) {
 				return false
 			}
 		}
@@ -366,9 +372,10 @@ func lessAV(x V, y V) bool {
 	if y.IsInt() {
 		return less(xv.At(0), y)
 	}
-	switch yv := y.Value.(type) {
-	case F:
+	if y.IsF() {
 		return less(xv.At(0), y)
+	}
+	switch yv := y.Value.(type) {
 	case *AB:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if less(xv.At(i), NewI(B2I(yv.At(i)))) {
@@ -608,7 +615,7 @@ func searchAII(x *AI, y int64) int64 {
 }
 
 func searchAIF(x *AI, y float64) int64 {
-	return int64(sort.Search(x.Len(), func(i int) bool { return F(x.At(i)) > y }))
+	return int64(sort.Search(x.Len(), func(i int) bool { return float64(x.At(i)) > y }))
 }
 
 func searchAFI(x *AF, y int64) int64 {
@@ -616,7 +623,7 @@ func searchAFI(x *AF, y int64) int64 {
 }
 
 func searchAFF(x *AF, y float64) int64 {
-	return int64(sort.Search(x.Len(), func(i int) bool { return F(x.At(i)) > y }))
+	return int64(sort.Search(x.Len(), func(i int) bool { return x.At(i) > y }))
 }
 
 func searchASS(x *AS, y S) int64 {
@@ -627,9 +634,10 @@ func searchAI(x *AI, y V) V {
 	if y.IsInt() {
 		return NewI(searchAII(x, y.I()))
 	}
+	if y.IsF() {
+		return NewI(searchAIF(x, y.F()))
+	}
 	switch yv := y.Value.(type) {
-	case F:
-		return NewI(searchAIF(x, yv))
 	case *AB:
 		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
@@ -645,7 +653,7 @@ func searchAI(x *AI, y V) V {
 	case *AF:
 		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
-			r[i] = searchAIF(x, F(yi))
+			r[i] = searchAIF(x, yi)
 		}
 		return NewAI(r)
 	case array:
@@ -664,9 +672,10 @@ func searchAF(x *AF, y V) V {
 	if y.IsInt() {
 		return NewI(searchAFI(x, y.I()))
 	}
+	if y.IsF() {
+		return NewI(searchAFF(x, y.F()))
+	}
 	switch yv := y.Value.(type) {
-	case F:
-		return NewI(searchAFF(x, yv))
 	case *AB:
 		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
@@ -682,7 +691,7 @@ func searchAF(x *AF, y V) V {
 	case *AF:
 		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
-			r[i] = searchAFF(x, F(yi))
+			r[i] = searchAFF(x, yi)
 		}
 		return NewAI(r)
 	case array:
