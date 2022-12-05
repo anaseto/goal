@@ -89,7 +89,7 @@ func less(x, y V) bool {
 func lessF(x V, y V) bool {
 	xv := x.Value.(F)
 	if y.IsInt() {
-		return xv < F(y.Int())
+		return xv < F(y.I())
 	}
 	switch yv := y.Value.(type) {
 	case F:
@@ -120,9 +120,9 @@ func lessF(x V, y V) bool {
 }
 
 func lessI(x V, y V) bool {
-	xv := x.Int()
+	xv := x.I()
 	if y.IsInt() {
-		return xv < y.Int()
+		return xv < y.I()
 	}
 	switch yv := y.Value.(type) {
 	case F:
@@ -625,7 +625,7 @@ func searchASS(x *AS, y S) int64 {
 
 func searchAI(x *AI, y V) V {
 	if y.IsInt() {
-		return NewI(searchAII(x, y.Int()))
+		return NewI(searchAII(x, y.I()))
 	}
 	switch yv := y.Value.(type) {
 	case F:
@@ -662,7 +662,7 @@ func searchAI(x *AI, y V) V {
 
 func searchAF(x *AF, y V) V {
 	if y.IsInt() {
-		return NewI(searchAFI(x, y.Int()))
+		return NewI(searchAFI(x, y.I()))
 	}
 	switch yv := y.Value.(type) {
 	case F:

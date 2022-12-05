@@ -127,7 +127,7 @@ func (ctx *Context) applyArray(x V, y V) V {
 		return x
 	}
 	if y.IsInt() {
-		i := y.Int()
+		i := y.I()
 		if i < 0 {
 			i = int64(xv.Len()) + i
 		}

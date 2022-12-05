@@ -4,7 +4,7 @@ import "strings"
 
 func applyS(s S, x V) V {
 	if x.IsInt() {
-		xv := x.Int()
+		xv := x.I()
 		if xv < 0 {
 			xv += int64(len(s))
 		}
@@ -56,10 +56,10 @@ func applyS(s S, x V) V {
 func applyS2(s S, x V, y V) V {
 	var l int64
 	if y.IsInt() {
-		if y.Int() < 0 {
-			return errf("s[x;y] : y negative (%d)", y.Int())
+		if y.I() < 0 {
+			return errf("s[x;y] : y negative (%d)", y.I())
 		}
-		l = y.Int()
+		l = y.I()
 	} else {
 		switch yv := y.Value.(type) {
 		case F:
@@ -83,7 +83,7 @@ func applyS2(s S, x V, y V) V {
 		}
 	}
 	if x.IsInt() {
-		xv := x.Int()
+		xv := x.I()
 		if xv < 0 {
 			xv += int64(len(s))
 		}
@@ -290,7 +290,7 @@ func castn(y V) V {
 
 func casts(y V) V {
 	if y.IsInt() {
-		return NewS(string(rune(y.Int())))
+		return NewS(string(rune(y.I())))
 	}
 	switch yv := y.Value.(type) {
 	case F:

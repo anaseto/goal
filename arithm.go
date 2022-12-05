@@ -8,7 +8,7 @@ import (
 // negate returns -x.
 func negate(x V) V {
 	if x.IsInt() {
-		return NewI(-x.Int())
+		return NewI(-x.I())
 	}
 	switch xv := x.Value.(type) {
 	case F:
@@ -67,7 +67,7 @@ func signI(x int64) int64 {
 // sign returns sign x.
 func sign(x V) V {
 	if x.IsInt() {
-		return NewI(signI(x.Int()))
+		return NewI(signI(x.I()))
 	}
 	switch xv := x.Value.(type) {
 	case F:
@@ -176,7 +176,7 @@ func ceil(x V) V {
 // not returns ~x.
 func not(x V) V {
 	if x.IsInt() {
-		return NewI(B2I(x.Int() == 0))
+		return NewI(B2I(x.I() == 0))
 	}
 	switch xv := x.Value.(type) {
 	case F:
@@ -215,7 +215,7 @@ func not(x V) V {
 // abs returns abs[x].
 func abs(x V) V {
 	if x.IsInt() {
-		return NewI(absI(x.Int()))
+		return NewI(absI(x.I()))
 	}
 	switch xv := x.Value.(type) {
 	case F:

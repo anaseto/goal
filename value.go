@@ -53,8 +53,8 @@ func (v V) lambda() lambda {
 	return lambda(v.N)
 }
 
-// Int retrieves the int value from N field. It assumes Kind is Int.
-func (v V) Int() int64 {
+// I retrieves the integer value from N field. It assumes Kind is I.
+func (v V) I() int64 {
 	return v.N
 }
 

@@ -63,7 +63,7 @@ func flipAB(x *AV) V {
 	r := make([]bool, x.Len())
 	for i, xi := range x.Slice {
 		if xi.IsInt() {
-			r[i] = xi.Int() == 1
+			r[i] = xi.I() == 1
 		} else {
 			r[i] = xi.AB().At(0)
 		}
@@ -78,7 +78,7 @@ func flipAVAB(x *AV, lines int) V {
 		q := a[j*x.Len() : (j+1)*x.Len()]
 		for i, xi := range x.Slice {
 			if xi.IsInt() {
-				q[i] = xi.Int() == 1
+				q[i] = xi.I() == 1
 			} else {
 				q[i] = xi.AB().At(j)
 			}
@@ -92,7 +92,7 @@ func flipAF(x *AV) V {
 	r := make([]float64, x.Len())
 	for i, xi := range x.Slice {
 		if xi.IsInt() {
-			r[i] = float64(xi.Int())
+			r[i] = float64(xi.I())
 			continue
 		}
 		switch z := xi.Value.(type) {
@@ -116,7 +116,7 @@ func flipAVAF(x *AV, lines int) V {
 		q := a[j*x.Len() : (j+1)*x.Len()]
 		for i, xi := range x.Slice {
 			if xi.IsInt() {
-				q[i] = float64(xi.Int())
+				q[i] = float64(xi.I())
 				continue
 			}
 			switch z := xi.Value.(type) {
@@ -139,7 +139,7 @@ func flipAI(x *AV) V {
 	r := make([]int64, x.Len())
 	for i, xi := range x.Slice {
 		if xi.IsInt() {
-			r[i] = xi.Int()
+			r[i] = xi.I()
 			continue
 		}
 		switch z := xi.Value.(type) {
@@ -159,7 +159,7 @@ func flipAVAI(x *AV, lines int) V {
 		q := a[j*x.Len() : (j+1)*x.Len()]
 		for i, xi := range x.Slice {
 			if xi.IsInt() {
-				q[i] = xi.Int()
+				q[i] = xi.I()
 				continue
 			}
 			switch z := xi.Value.(type) {

@@ -132,14 +132,14 @@ func fold2Decode(f V, x V) V {
 			var r, n int64 = 0, 1
 			for i := xv.Len() - 1; i >= 0; i-- {
 				r += xv.At(i) * n
-				n *= f.Int()
+				n *= f.I()
 			}
 			return NewI(r)
 		case *AB:
 			var r, n int64 = 0, 1
 			for i := xv.Len() - 1; i >= 0; i-- {
 				r += B2I(xv.At(i)) * n
-				n *= f.Int()
+				n *= f.I()
 			}
 			return NewI(r)
 		case *AF:
@@ -174,7 +174,7 @@ func fold2Decode(f V, x V) V {
 		if x.IsInt() {
 			var r, n int64 = 0, 1
 			for i := fv.Len() - 1; i >= 0; i-- {
-				r += x.Int() * n
+				r += x.I() * n
 				n *= fv.At(i)
 			}
 			return NewI(r)
@@ -282,7 +282,7 @@ func fold3While(ctx *Context, args []V) V {
 		}
 	}
 	if x.IsInt() {
-		return fold3doTimes(ctx, x.Int(), f, y)
+		return fold3doTimes(ctx, x.I(), f, y)
 	}
 	switch xv := x.Value.(type) {
 	case F:
@@ -387,15 +387,15 @@ func encodeBaseDigits(b int64, x int64) int {
 
 func scan2Encode(f V, x V) V {
 	if f.IsInt() {
-		if f.Int() == 0 {
+		if f.I() == 0 {
 			return errs("i\\x : base i is zero")
 		}
 		if x.IsInt() {
-			n := encodeBaseDigits(f.Int(), x.Int())
+			n := encodeBaseDigits(f.I(), x.I())
 			r := make([]int64, n)
 			for i := n - 1; i >= 0; i-- {
-				r[i] = x.Int() % f.Int()
-				x.N /= f.Int()
+				r[i] = x.I() % f.I()
+				x.N /= f.I()
 			}
 			return NewAI(r)
 		}
@@ -408,15 +408,15 @@ func scan2Encode(f V, x V) V {
 		case *AI:
 			min, max := minMax(xv)
 			max = maxI(absI(min), absI(max))
-			n := encodeBaseDigits(f.Int(), max)
+			n := encodeBaseDigits(f.I(), max)
 			ai := make([]int64, n*xv.Len())
 			copy(ai[(n-1)*xv.Len():], xv.Slice)
 			for i := n - 1; i >= 0; i-- {
 				for j := 0; j < xv.Len(); j++ {
 					ox := ai[i*xv.Len()+j]
-					ai[i*xv.Len()+j] = ox % f.Int()
+					ai[i*xv.Len()+j] = ox % f.I()
 					if i > 0 {
-						ai[(i-1)*xv.Len()+j] = ox / f.Int()
+						ai[(i-1)*xv.Len()+j] = ox / f.I()
 					}
 				}
 			}
@@ -460,8 +460,8 @@ func scan2Encode(f V, x V) V {
 			// TODO: check for zero division
 			n := fv.Len()
 			r := make([]int64, n)
-			for i := n - 1; i >= 0 && x.Int() > 0; i-- {
-				r[i] = x.Int() % fv.At(i)
+			for i := n - 1; i >= 0 && x.I() > 0; i-- {
+				r[i] = x.I() % fv.At(i)
 				x.N /= fv.At(i)
 			}
 			return NewAI(r)
@@ -593,7 +593,7 @@ func scan3While(ctx *Context, args []V) V {
 		}
 	}
 	if x.IsInt() {
-		return scan3doTimes(ctx, x.Int(), f, y)
+		return scan3doTimes(ctx, x.I(), f, y)
 	}
 	switch xv := x.Value.(type) {
 	case F:

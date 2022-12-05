@@ -7,7 +7,7 @@ func enum(x V) V {
 		return errf("!x : %v", x)
 	}
 	if x.IsInt() {
-		return rangeI(x.Int())
+		return rangeI(x.I())
 	}
 	switch xv := x.Value.(type) {
 	case *AI:
@@ -59,12 +59,12 @@ func rangeArray(x *AI) V {
 func where(x V) V {
 	if x.IsInt() {
 		switch {
-		case x.Int() < 0:
-			return errf("&x : x negative (%d)", x.Int())
-		case x.Int() == 0:
+		case x.I() < 0:
+			return errf("&x : x negative (%d)", x.I())
+		case x.I() == 0:
 			return NewAI([]int64{})
 		default:
-			r := make([]int64, x.Int())
+			r := make([]int64, x.I())
 			return NewAI(r)
 		}
 	}
@@ -134,10 +134,10 @@ func where(x V) V {
 			n := int64(0)
 			for _, xi := range xv.Slice {
 				if xi.IsInt() {
-					if xi.Int() < 0 {
-						return errf("&x : negative integer (%d)", xi.Int())
+					if xi.I() < 0 {
+						return errf("&x : negative integer (%d)", xi.I())
 					}
-					n += xi.Int()
+					n += xi.I()
 				} else {
 					xif := xi.F()
 					if !isI(xif) {
@@ -153,7 +153,7 @@ func where(x V) V {
 			for i, xi := range xv.Slice {
 				var max int64
 				if xi.IsInt() {
-					max = xi.Int()
+					max = xi.I()
 				} else {
 					max = int64(xi.F())
 				}
@@ -174,10 +174,10 @@ func where(x V) V {
 func replicate(x, y V) V {
 	if x.IsInt() {
 		switch {
-		case x.Int() < 0:
-			return errf("f#y : f[y] negative integer (%d)", x.Int())
+		case x.I() < 0:
+			return errf("f#y : f[y] negative integer (%d)", x.I())
 		default:
-			return repeat(y, x.Int())
+			return repeat(y, x.I())
 		}
 	}
 	switch xv := x.Value.(type) {
@@ -219,16 +219,16 @@ func replicate(x, y V) V {
 
 func repeat(x V, n int64) V {
 	if x.IsInt() {
-		if isBI(x.Int()) {
+		if isBI(x.I()) {
 			r := make([]bool, n)
 			for i := range r {
-				r[i] = x.Int() == 1
+				r[i] = x.I() == 1
 			}
 			return NewAB(r)
 		}
 		r := make([]int64, n)
 		for i := range r {
-			r[i] = x.Int()
+			r[i] = x.I()
 		}
 		return NewAI(r)
 	}
@@ -362,7 +362,7 @@ func repeatAI(x *AI, y V) V {
 // weedOut implements {x}_y
 func weedOut(x, y V) V {
 	if x.IsInt() {
-		if x.Int() != 0 {
+		if x.I() != 0 {
 			return NewAV([]V{})
 		}
 		return y

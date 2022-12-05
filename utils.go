@@ -21,7 +21,7 @@ func B2F(b bool) (f F) {
 
 func num2I(x V) (n int64) {
 	if x.IsInt() {
-		return x.Int()
+		return x.I()
 	}
 	switch xv := x.Value.(type) {
 	case F:
@@ -209,11 +209,11 @@ func toIndicesRec(x V) V {
 // toArray converts atoms into 1-length arrays. It returns arrays as-is.
 func toArray(x V) V {
 	if x.IsInt() {
-		switch x.Int() {
+		switch x.I() {
 		case 0, 1:
-			return NewAB([]bool{x.Int() == 1})
+			return NewAB([]bool{x.I() == 1})
 		default:
-			return NewAI([]int64{x.Int()})
+			return NewAI([]int64{x.I()})
 		}
 	}
 	switch xv := x.Value.(type) {
@@ -252,7 +252,7 @@ func fromABtoAI(x *AB) V {
 
 func isFalse(x V) bool {
 	if x.IsInt() {
-		return x.Int() == 0
+		return x.I() == 0
 	}
 	switch xv := x.Value.(type) {
 	case F:
@@ -266,7 +266,7 @@ func isFalse(x V) bool {
 
 func isTrue(x V) bool {
 	if x.IsInt() {
-		return x.Int() != 0
+		return x.I() != 0
 	}
 	switch xv := x.Value.(type) {
 	case F:
@@ -305,7 +305,7 @@ func mergeTypes(t, s eltype) eltype {
 // eType returns the eltype of x.
 func eType(x V) eltype {
 	if x.IsInt() {
-		switch x.Int() {
+		switch x.I() {
 		case 0, 1:
 			return tB
 		default:
@@ -335,7 +335,7 @@ func eType(x V) eltype {
 // cType returns the canonical eltype of x. XXX: unused.
 func cType(x V) eltype {
 	if x.IsInt() {
-		switch x.Int() {
+		switch x.I() {
 		case 0, 1:
 			return tB
 		default:
@@ -555,20 +555,20 @@ func normalize(x *AV) (array, bool) {
 	case tB:
 		r := make([]bool, x.Len())
 		for i, xi := range x.Slice {
-			r[i] = xi.Int() != 0
+			r[i] = xi.I() != 0
 		}
 		return &AB{Slice: r}, true
 	case tI:
 		r := make([]int64, x.Len())
 		for i, xi := range x.Slice {
-			r[i] = xi.Int()
+			r[i] = xi.I()
 		}
 		return &AI{Slice: r}, true
 	case tF:
 		r := make([]float64, x.Len())
 		for i, xi := range x.Slice {
 			if xi.IsInt() {
-				r[i] = float64(xi.Int())
+				r[i] = float64(xi.I())
 			} else {
 				r[i] = float64(xi.F())
 			}

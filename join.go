@@ -3,7 +3,7 @@ package goal
 // joinTo returns x,y.
 func joinTo(x, y V) V {
 	if x.IsInt() {
-		return joinToI(x.Int(), y, true)
+		return joinToI(x.I(), y, true)
 	}
 	switch xv := x.Value.(type) {
 	case F:
@@ -33,9 +33,9 @@ func joinTo(x, y V) V {
 func joinToI(x int64, y V, left bool) V {
 	if y.IsInt() {
 		if left {
-			return NewAI([]int64{int64(x), y.Int()})
+			return NewAI([]int64{int64(x), y.I()})
 		}
-		return NewAI([]int64{y.Int(), x})
+		return NewAI([]int64{y.I(), x})
 	}
 	switch yv := y.Value.(type) {
 	case F:
@@ -66,9 +66,9 @@ func joinToI(x int64, y V, left bool) V {
 func joinToF(x F, y V, left bool) V {
 	if y.IsInt() {
 		if left {
-			return NewAF([]float64{float64(x), float64(y.Int())})
+			return NewAF([]float64{float64(x), float64(y.I())})
 		}
-		return NewAF([]float64{float64(y.Int()), float64(x)})
+		return NewAF([]float64{float64(y.I()), float64(x)})
 	}
 	switch yv := y.Value.(type) {
 	case F:
@@ -226,30 +226,30 @@ func joinToAS(x V, y *AS, left bool) V {
 
 func joinToAB(x V, y *AB, left bool) V {
 	if x.IsInt() {
-		if isBI(x.Int()) {
+		if isBI(x.I()) {
 			if left {
 				r := make([]bool, y.Len()+1)
-				r[0] = x.Int() == 1
+				r[0] = x.I() == 1
 				copy(r[1:], y.Slice)
 				return NewAB(r)
 			}
 			if y.reusable() {
-				y.Slice = append(y.Slice, x.Int() == 1)
+				y.Slice = append(y.Slice, x.I() == 1)
 				return NewV(y)
 			}
 			r := make([]bool, y.Len()+1)
-			r[len(r)-1] = x.Int() == 1
+			r[len(r)-1] = x.I() == 1
 			copy(r[:len(r)-1], y.Slice)
 			return NewAB(r)
 		}
 		r := make([]int64, y.Len()+1)
 		if left {
-			r[0] = x.Int()
+			r[0] = x.I()
 			for i := 1; i < len(r); i++ {
 				r[i] = B2I(y.At(i - 1))
 			}
 		} else {
-			r[len(r)-1] = x.Int()
+			r[len(r)-1] = x.I()
 			for i := 0; i < len(r); i++ {
 				r[i] = B2I(y.At(i))
 			}
@@ -301,16 +301,16 @@ func joinToAI(x V, y *AI, left bool) V {
 	if x.IsInt() {
 		if left {
 			r := make([]int64, y.Len()+1)
-			r[0] = x.Int()
+			r[0] = x.I()
 			copy(r[1:], y.Slice)
 			return NewAI(r)
 		}
 		if y.reusable() {
-			y.Slice = append(y.Slice, x.Int())
+			y.Slice = append(y.Slice, x.I())
 			return NewV(y)
 		}
 		r := make([]int64, y.Len()+1)
-		r[len(r)-1] = x.Int()
+		r[len(r)-1] = x.I()
 		copy(r[:len(r)-1], y.Slice)
 		return NewAI(r)
 
@@ -359,16 +359,16 @@ func joinToAF(x V, y *AF, left bool) V {
 	if x.IsInt() {
 		if left {
 			r := make([]float64, y.Len()+1)
-			r[0] = float64(x.Int())
+			r[0] = float64(x.I())
 			copy(r[1:], y.Slice)
 			return NewAF(r)
 		}
 		if y.reusable() {
-			y.Slice = append(y.Slice, float64(x.Int()))
+			y.Slice = append(y.Slice, float64(x.I()))
 			return NewV(y)
 		}
 		r := make([]float64, y.Len()+1)
-		r[len(r)-1] = float64(x.Int())
+		r[len(r)-1] = float64(x.I())
 		copy(r[:len(r)-1], y.Slice)
 		return NewAF(r)
 	}
@@ -521,10 +521,10 @@ func joinAFAI(x *AF, y *AI) V {
 // enlist returns ,x.
 func enlist(x V) V {
 	if x.IsInt() {
-		if isBI(x.Int()) {
-			return NewAB([]bool{x.Int() == 1})
+		if isBI(x.I()) {
+			return NewAB([]bool{x.I() == 1})
 		}
-		return NewAI([]int64{x.Int()})
+		return NewAI([]int64{x.I()})
 	}
 	switch xv := x.Value.(type) {
 	case F:

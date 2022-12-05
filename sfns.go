@@ -64,7 +64,7 @@ func reverse(x V) V {
 func rotate(x, y V) V {
 	i := int64(0)
 	if x.IsInt() {
-		i = x.Int()
+		i = x.I()
 	} else {
 		switch xv := x.Value.(type) {
 		case F:
@@ -147,7 +147,7 @@ func first(x V) V {
 // drop returns i_x and s_x.
 func drop(x, y V) V {
 	if x.IsInt() {
-		return dropi(x.Int(), y)
+		return dropi(x.I(), y)
 	}
 	switch xv := x.Value.(type) {
 	case F:
@@ -271,7 +271,7 @@ func cutAI(x *AI, y V) V {
 func take(x, y V) V {
 	i := 0
 	if x.IsInt() {
-		i = int(x.Int())
+		i = int(x.I())
 	} else {
 		switch xv := x.Value.(type) {
 		case F:
