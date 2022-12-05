@@ -473,23 +473,42 @@ func TestErrors(t *testing.T) {
 }
 
 func BenchmarkFoldMinus(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:!1000")
 	for n := 0; n < b.N; n++ {
-		ctx := NewContext()
-		ctx.Eval("-/!1000")
+		ctx.Eval("-/a")
 	}
 }
 
 func BenchmarkFoldPlus(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:!1000")
 	for n := 0; n < b.N; n++ {
-		ctx := NewContext()
-		ctx.Eval("+/!1000")
+		ctx.Eval("+/a")
+	}
+}
+
+func BenchmarkFoldPlusFloat(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:0.1+!1000")
+	for n := 0; n < b.N; n++ {
+		ctx.Eval("+/a")
 	}
 }
 
 func BenchmarkFoldLambdaPlus(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:!1000")
 	for n := 0; n < b.N; n++ {
-		ctx := NewContext()
-		ctx.Eval("{x+y}/!1000")
+		ctx.Eval("{x+y}/a")
+	}
+}
+
+func BenchmarkFoldLambdaPlusFloat(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:0.1+!1000")
+	for n := 0; n < b.N; n++ {
+		ctx.Eval("{x+y}/a")
 	}
 }
 
@@ -549,23 +568,26 @@ func BenchmarkReverse(b *testing.B) {
 }
 
 func BenchmarkAppend(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:!10000")
 	for n := 0; n < b.N; n++ {
-		ctx := NewContext()
-		ctx.Eval("500 {x,1}/!10000")
+		ctx.Eval("500 {x,1}/a")
 	}
 }
 
 func BenchmarkAppendGlobal(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:!10000")
 	for n := 0; n < b.N; n++ {
-		ctx := NewContext()
-		ctx.Eval("a:!10000;500 {a,::1}/0")
+		ctx.Eval("b:a;500 {b,::1}/a")
 	}
 }
 
 func BenchmarkAppend2(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:!10000")
 	for n := 0; n < b.N; n++ {
-		ctx := NewContext()
-		ctx.Eval("500 {x:x,1;x,1}/!10000")
+		ctx.Eval("500 {x:x,1;x,1}/a")
 	}
 }
 
