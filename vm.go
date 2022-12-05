@@ -73,7 +73,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			v := variadic(ops[ip])
 			r := ctx.applyVariadic(v)
 			if r.IsErr() {
-				return ip - 1, r.Value.(error)
+				return ip - 1, newErr(r)
 			}
 			ctx.push(r)
 			ip++
@@ -86,7 +86,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			v := variadic(ops[ip])
 			r := ctx.apply2Variadic(v)
 			if r.IsErr() {
-				return ip - 1, r.Value.(error)
+				return ip - 1, newErr(r)
 			}
 			ctx.push(r)
 			ip++
@@ -101,7 +101,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ip++
 			r := ctx.applyNVariadic(v, int(ops[ip]))
 			if r.IsErr() {
-				return ip - 2, r.Value.(error)
+				return ip - 2, newErr(r)
 			}
 			ctx.push(r)
 			ip++
@@ -133,7 +133,7 @@ func (ctx *Context) popApplyN(n int) error {
 	x := ctx.pop()
 	r := ctx.applyN(x, n)
 	if r.IsErr() {
-		return r.Value.(error)
+		return newErr(r)
 	}
 	ctx.push(r)
 	return nil

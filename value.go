@@ -20,12 +20,13 @@ type V struct {
 type ValueKind int8
 
 const (
-	Nil      ValueKind = iota
-	Int                // unboxed int64 (N field)
-	Float              // unboxed float64 (N field)
-	Variadic           // unboxed int32 (N field)
-	Lambda             // unboxed int32 (N field)
-	Boxed              // boxed value (Value field)
+	Nil        ValueKind = iota
+	Int                  // unboxed int64 (N field)
+	Float                // unboxed float64 (N field)
+	Variadic             // unboxed int32 (N field)
+	Lambda               // unboxed int32 (N field)
+	Boxed                // boxed value (Value field)
+	BoxedError           // boxed value (Value field)
 )
 
 // lambda represents an user defined function by ID.
@@ -192,9 +193,6 @@ func NewS(s string) V {
 // S represents (immutable) strings of bytes.
 type S string
 
-// errV represents errors
-type errV string
-
 func (x V) IsI() bool {
 	return x.Kind == Int
 }
@@ -204,8 +202,7 @@ func (x V) IsF() bool {
 }
 
 func (x V) IsErr() bool {
-	_, ok := x.Value.(errV)
-	return ok
+	return x.Kind == BoxedError
 }
 
 func (x V) IsFunction() bool {
@@ -233,15 +230,6 @@ func (s S) Matches(y Value) bool {
 func (s S) Type() string { return "s" }
 
 func (s S) Sprint(ctx *Context) string { return strconv.Quote(string(s)) }
-
-func (e errV) Matches(y Value) bool {
-	err, ok := y.(errV)
-	return ok && e == err
-}
-
-func (e errV) Type() string               { return "e" }
-func (e errV) Sprint(ctx *Context) string { return fmt.Sprintf("'ERROR %s", e) }
-func (e errV) Error() string              { return string(e) }
 
 type Flags int16
 

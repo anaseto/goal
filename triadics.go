@@ -169,8 +169,9 @@ func try(ctx *Context, f1, x, f2 V) V {
 		ctx.push(av.at(i))
 	}
 	r := ctx.applyN(f1, av.Len())
-	if err, ok := r.Value.(errV); ok {
-		ctx.push(NewS(string(err)))
+	if r.IsErr() {
+		r.Kind = Boxed // we used the boxed value
+		ctx.push(r)
 		r = ctx.applyN(f2, 1)
 		if r.IsErr() {
 			return errf("f2 call in .[f1;x;f2] : %v", r)

@@ -12,6 +12,24 @@ type position struct {
 	lambda   *lambdaCode
 }
 
+type errV struct {
+	V V
+}
+
+func newErr(v V) error {
+	return &errV{V: v}
+}
+
+func (e *errV) Error() string {
+	switch v := e.V.Value.(type) {
+	case S:
+		return string(v)
+	default:
+		// NOTE: we could add other kinds of errors.
+		return ""
+	}
+}
+
 // Error represents an error returned by any Context method.
 type Error struct {
 	Msg string // error message (without location)
@@ -96,7 +114,7 @@ func errNYI(s string) V {
 }
 
 func errs(s string) V {
-	return NewV(errV(s))
+	return V{Kind: BoxedError, Value: S(s)}
 }
 
 func errf(format string, a ...interface{}) V {
