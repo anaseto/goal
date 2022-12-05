@@ -3,7 +3,7 @@ package goal
 import "strings"
 
 func applyS(s S, x V) V {
-	if x.IsInt() {
+	if x.IsI() {
 		xv := x.I()
 		if xv < 0 {
 			xv += int64(len(s))
@@ -56,7 +56,7 @@ func applyS(s S, x V) V {
 
 func applyS2(s S, x V, y V) V {
 	var l int64
-	if y.IsInt() {
+	if y.IsI() {
 		if y.I() < 0 {
 			return errf("s[x;y] : y negative (%d)", y.I())
 		}
@@ -83,7 +83,7 @@ func applyS2(s S, x V, y V) V {
 			return errType("s[x;y]", "y", y)
 		}
 	}
-	if x.IsInt() {
+	if x.IsI() {
 		xv := x.I()
 		if xv < 0 {
 			xv += int64(len(s))
@@ -208,7 +208,7 @@ func cast(x, y V) V {
 }
 
 func casti(y V) V {
-	if y.IsInt() {
+	if y.IsI() {
 		return y
 	}
 	if y.IsF() {
@@ -249,7 +249,7 @@ func casti(y V) V {
 }
 
 func castn(y V) V {
-	if y.IsInt() || y.IsF() {
+	if y.IsI() || y.IsF() {
 		return y
 	}
 	switch yv := y.Value.(type) {
@@ -290,7 +290,7 @@ func castn(y V) V {
 }
 
 func casts(y V) V {
-	if y.IsInt() {
+	if y.IsI() {
 		return NewS(string(rune(y.I())))
 	}
 	if y.IsF() {

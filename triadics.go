@@ -38,7 +38,7 @@ func (ctx *Context) amend3arrayI(x array, y int64, f V) V {
 }
 
 func (ctx *Context) amend3array(x array, y, f V) V {
-	if y.IsInt() {
+	if y.IsI() {
 		return ctx.amend3arrayI(x, y.I(), f)
 	}
 	switch yv := y.Value.(type) {
@@ -101,7 +101,7 @@ func (ctx *Context) amend4arrayI(x array, y int64, f, z V) V {
 }
 
 func (ctx *Context) amend4array(x array, y, f, z V) V {
-	if y.IsInt() {
+	if y.IsI() {
 		switch z.Value.(type) {
 		case array:
 			return errs("@[x;y;f;z] : shape mismatch between x and y")

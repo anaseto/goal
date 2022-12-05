@@ -20,7 +20,7 @@ func B2F(b bool) (f float64) {
 }
 
 func isNum(x V) bool {
-	return x.IsInt() || x.IsF()
+	return x.IsI() || x.IsF()
 }
 
 func divideF(x, y float64) float64 {
@@ -136,7 +136,7 @@ func cloneShallowArray(x array) array {
 // isIndices returns true if we have indices in canonical form, that is,
 // using types I, AI and AV of thoses.
 func isIndices(x V) bool {
-	if x.IsInt() {
+	if x.IsI() {
 		return true
 	}
 	switch xv := x.Value.(type) {
@@ -163,7 +163,7 @@ func toIndices(x V) V {
 
 func toIndicesRec(x V) V {
 	//assertCanonical(x)
-	if x.IsInt() {
+	if x.IsI() {
 		return x
 	}
 	if x.IsF() {
@@ -193,7 +193,7 @@ func toIndicesRec(x V) V {
 
 // toArray converts atoms into 1-length arrays. It returns arrays as-is.
 func toArray(x V) V {
-	if x.IsInt() {
+	if x.IsI() {
 		switch x.I() {
 		case 0, 1:
 			return NewAB([]bool{x.I() == 1})
@@ -237,7 +237,7 @@ func fromABtoAI(x *AB) V {
 }
 
 func isFalse(x V) bool {
-	if x.IsInt() {
+	if x.IsI() {
 		return x.I() == 0
 	}
 	if x.IsF() {
@@ -252,7 +252,7 @@ func isFalse(x V) bool {
 }
 
 func isTrue(x V) bool {
-	if x.IsInt() {
+	if x.IsI() {
 		return x.I() != 0
 	}
 	if x.IsF() {
@@ -292,7 +292,7 @@ func mergeTypes(t, s eltype) eltype {
 
 // eType returns the eltype of x.
 func eType(x V) eltype {
-	if x.IsInt() {
+	if x.IsI() {
 		switch x.I() {
 		case 0, 1:
 			return tB
@@ -323,7 +323,7 @@ func eType(x V) eltype {
 
 // cType returns the canonical eltype of x. XXX: unused.
 func cType(x V) eltype {
-	if x.IsInt() {
+	if x.IsI() {
 		switch x.I() {
 		case 0, 1:
 			return tB
@@ -387,8 +387,8 @@ func aType(x *AV) eltype {
 }
 
 func sameType(x, y V) bool {
-	if x.IsInt() {
-		return y.IsInt()
+	if x.IsI() {
+		return y.IsI()
 	}
 	if x.IsF() {
 		return y.IsF()
@@ -418,7 +418,7 @@ func sameType(x, y V) bool {
 func compatEltType(x array, y V) bool {
 	switch x.(type) {
 	case *AI:
-		return y.IsInt()
+		return y.IsI()
 	case *AF:
 		return y.IsF()
 	case *AS:
@@ -556,7 +556,7 @@ func normalize(x *AV) (array, bool) {
 	case tF:
 		r := make([]float64, x.Len())
 		for i, xi := range x.Slice {
-			if xi.IsInt() {
+			if xi.IsI() {
 				r[i] = float64(xi.I())
 			} else {
 				r[i] = float64(xi.F())
@@ -603,7 +603,7 @@ func canonical(x *AV) Value {
 // hasNil returns true if there is a nil value in the given array.
 func hasNil(a []V) bool {
 	for _, x := range a {
-		if x == (V{}) {
+		if x.Kind == Nil {
 			return true
 		}
 	}
@@ -614,7 +614,7 @@ func hasNil(a []V) bool {
 func countNils(a []V) int {
 	n := 0
 	for _, ai := range a {
-		if ai == (V{}) {
+		if ai.Kind == Nil {
 			n++
 		}
 	}

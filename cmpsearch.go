@@ -431,7 +431,7 @@ func memberOfAF(x V, y *AF) V {
 			continue
 		}
 	}
-	if x.IsInt() {
+	if x.IsI() {
 		_, ok := m[float64(x.I())]
 		return NewI(B2I(ok))
 	}
@@ -474,7 +474,7 @@ func memberOfAI(x V, y *AI) V {
 			continue
 		}
 	}
-	if x.IsInt() {
+	if x.IsI() {
 		_, ok := m[x.I()]
 		return NewI(B2I(ok))
 	}
@@ -649,7 +649,7 @@ func occurrenceCount(x V) V {
 
 // without returns x^y.
 func without(x, y V) V {
-	if x.IsInt() {
+	if x.IsI() {
 		return windows(x.I(), y)
 	}
 	if x.IsF() {
@@ -664,7 +664,7 @@ func without(x, y V) V {
 	case array:
 		y = toArray(y)
 		r := memberOf(y, x)
-		if r.IsInt() {
+		if r.IsI() {
 			r = NewI(1 - r.I())
 		}
 		switch bres := r.Value.(type) {
@@ -779,7 +779,7 @@ func imapAS(x *AS) map[string]int {
 }
 
 func findAB(x *AB, y V) V {
-	if y.IsInt() {
+	if y.IsI() {
 		for i, xi := range x.Slice {
 			if B2I(xi) == y.I() {
 				return NewI(int64(i))
@@ -831,7 +831,7 @@ func findAB(x *AB, y V) V {
 }
 
 func findAF(x *AF, y V) V {
-	if y.IsInt() {
+	if y.IsI() {
 		for i, xi := range x.Slice {
 			if xi == float64(y.I()) {
 				return NewI(int64(i))
@@ -893,7 +893,7 @@ func findAF(x *AF, y V) V {
 }
 
 func findAI(x *AI, y V) V {
-	if y.IsInt() {
+	if y.IsI() {
 		for i, xi := range x.Slice {
 			if xi == y.I() {
 				return NewI(int64(i))

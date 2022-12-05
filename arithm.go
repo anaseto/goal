@@ -7,7 +7,7 @@ import (
 
 // negate returns -x.
 func negate(x V) V {
-	if x.IsInt() {
+	if x.IsI() {
 		return NewI(-x.I())
 	}
 	if x.IsF() {
@@ -67,7 +67,7 @@ func signI(x int64) int64 {
 
 // sign returns sign x.
 func sign(x V) V {
-	if x.IsInt() {
+	if x.IsI() {
 		return NewI(signI(x.I()))
 	}
 	if x.IsF() {
@@ -101,7 +101,7 @@ func sign(x V) V {
 
 // floor returns _x.
 func floor(x V) V {
-	if x.IsInt() {
+	if x.IsI() {
 		return x
 	}
 	if x.IsF() {
@@ -141,7 +141,7 @@ func floor(x V) V {
 
 // ceil returns ⌈x. XXX unused for now
 func ceil(x V) V {
-	if x.IsInt() {
+	if x.IsI() {
 		return x
 	}
 	if x.IsF() {
@@ -179,7 +179,7 @@ func ceil(x V) V {
 
 // not returns ~x.
 func not(x V) V {
-	if x.IsInt() {
+	if x.IsI() {
 		return NewI(B2I(x.I() == 0))
 	}
 	if x.IsF() {
@@ -219,7 +219,7 @@ func not(x V) V {
 
 // abs returns abs[x].
 func abs(x V) V {
-	if x.IsInt() {
+	if x.IsI() {
 		return NewI(absI(x.I()))
 	}
 	if x.IsF() {

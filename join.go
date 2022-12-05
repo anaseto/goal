@@ -2,7 +2,7 @@ package goal
 
 // joinTo returns x,y.
 func joinTo(x, y V) V {
-	if x.IsInt() {
+	if x.IsI() {
 		return joinToI(x.I(), y, true)
 	}
 	if x.IsF() {
@@ -32,7 +32,7 @@ func joinTo(x, y V) V {
 }
 
 func joinToI(x int64, y V, left bool) V {
-	if y.IsInt() {
+	if y.IsI() {
 		if left {
 			return NewAI([]int64{int64(x), y.I()})
 		}
@@ -66,7 +66,7 @@ func joinToI(x int64, y V, left bool) V {
 }
 
 func joinToF(x float64, y V, left bool) V {
-	if y.IsInt() {
+	if y.IsI() {
 		if left {
 			return NewAF([]float64{float64(x), float64(y.I())})
 		}
@@ -100,7 +100,7 @@ func joinToF(x float64, y V, left bool) V {
 }
 
 func joinToS(x S, y V, left bool) V {
-	if y.IsInt() {
+	if y.IsI() {
 		if left {
 			return NewAV([]V{NewV(x), y})
 		}
@@ -229,7 +229,7 @@ func joinToAS(x V, y *AS, left bool) V {
 }
 
 func joinToAB(x V, y *AB, left bool) V {
-	if x.IsInt() {
+	if x.IsI() {
 		if isBI(x.I()) {
 			if left {
 				r := make([]bool, y.Len()+1)
@@ -303,7 +303,7 @@ func joinToAB(x V, y *AB, left bool) V {
 }
 
 func joinToAI(x V, y *AI, left bool) V {
-	if x.IsInt() {
+	if x.IsI() {
 		if left {
 			r := make([]int64, y.Len()+1)
 			r[0] = x.I()
@@ -362,7 +362,7 @@ func joinToAI(x V, y *AI, left bool) V {
 }
 
 func joinToAF(x V, y *AF, left bool) V {
-	if x.IsInt() {
+	if x.IsI() {
 		if left {
 			r := make([]float64, y.Len()+1)
 			r[0] = float64(x.I())
@@ -527,7 +527,7 @@ func joinAFAI(x *AF, y *AI) V {
 
 // enlist returns ,x.
 func enlist(x V) V {
-	if x.IsInt() {
+	if x.IsI() {
 		if isBI(x.I()) {
 			return NewAB([]bool{x.I() == 1})
 		}

@@ -15,7 +15,7 @@ func fold2(ctx *Context, args []V) V {
 		}
 	}
 	if !f.IsFunction() {
-		if f.IsInt() {
+		if f.IsI() {
 			return fold2Decode(f, args[0])
 		}
 		if f.IsF() {
@@ -121,8 +121,8 @@ func fold2Join(sep S, x V) V {
 }
 
 func fold2Decode(f V, x V) V {
-	if f.IsInt() {
-		if x.IsInt() {
+	if f.IsI() {
+		if x.IsI() {
 			return x
 		}
 		if x.IsF() {
@@ -176,7 +176,7 @@ func fold2Decode(f V, x V) V {
 	case *AB:
 		return fold2Decode(fromABtoAI(fv), x)
 	case *AI:
-		if x.IsInt() {
+		if x.IsI() {
 			var r, n int64 = 0, 1
 			for i := fv.Len() - 1; i >= 0; i-- {
 				r += x.I() * n
@@ -268,7 +268,7 @@ func fold3While(ctx *Context, args []V) V {
 	f := args[1]
 	x := args[2]
 	y := args[0]
-	if x.IsInt() {
+	if x.IsI() {
 		return fold3doTimes(ctx, x.I(), f, y)
 	}
 	if x.IsF() {
@@ -312,7 +312,7 @@ func fold3doTimes(ctx *Context, n int64, f, y V) V {
 
 func scan2(ctx *Context, f, x V) V {
 	if !f.IsFunction() {
-		if f.IsInt() {
+		if f.IsI() {
 			return scan2Encode(f, x)
 		}
 		if f.IsF() {
@@ -393,11 +393,11 @@ func encodeBaseDigits(b int64, x int64) int {
 }
 
 func scan2Encode(f V, x V) V {
-	if f.IsInt() {
+	if f.IsI() {
 		if f.I() == 0 {
 			return errs("i\\x : base i is zero")
 		}
-		if x.IsInt() {
+		if x.IsI() {
 			n := encodeBaseDigits(f.I(), x.I())
 			r := make([]int64, n)
 			for i := n - 1; i >= 0; i-- {
@@ -465,7 +465,7 @@ func scan2Encode(f V, x V) V {
 	case *AB:
 		return scan2Encode(fromABtoAI(fv), x)
 	case *AI:
-		if x.IsInt() {
+		if x.IsI() {
 			// TODO: check for zero division
 			n := fv.Len()
 			r := make([]int64, n)
@@ -581,7 +581,7 @@ func scan3While(ctx *Context, args []V) V {
 	f := args[1]
 	x := args[2]
 	y := args[0]
-	if x.IsInt() {
+	if x.IsI() {
 		return scan3doTimes(ctx, x.I(), f, y)
 	}
 	if x.IsF() {

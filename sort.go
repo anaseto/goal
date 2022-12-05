@@ -48,7 +48,7 @@ func (bs sortVSlice) Swap(i, j int) {
 }
 
 func less(x, y V) bool {
-	if x.IsInt() {
+	if x.IsI() {
 		return lessI(x, y)
 	}
 	if x.IsF() {
@@ -89,7 +89,7 @@ func less(x, y V) bool {
 
 func lessF(x V, y V) bool {
 	xv := x.F()
-	if y.IsInt() {
+	if y.IsI() {
 		return xv < float64(y.I())
 	}
 	if y.IsF() {
@@ -123,7 +123,7 @@ func lessF(x V, y V) bool {
 
 func lessI(x V, y V) bool {
 	xv := x.I()
-	if y.IsInt() {
+	if y.IsI() {
 		return xv < y.I()
 	}
 	if y.IsF() {
@@ -177,7 +177,7 @@ func lessS(x V, y V) bool {
 
 func lessAB(x V, y V) bool {
 	xv := x.Value.(*AB)
-	if y.IsInt() {
+	if y.IsI() {
 		return !lessI(y, x)
 	}
 	if y.IsF() {
@@ -231,7 +231,7 @@ func lessAB(x V, y V) bool {
 
 func lessAI(x V, y V) bool {
 	xv := x.Value.(*AI)
-	if y.IsInt() {
+	if y.IsI() {
 		return !lessI(y, x)
 	}
 	if y.IsF() {
@@ -285,7 +285,7 @@ func lessAI(x V, y V) bool {
 
 func lessAF(x V, y V) bool {
 	xv := x.Value.(*AF)
-	if y.IsInt() {
+	if y.IsI() {
 		return !lessI(y, x)
 	}
 	if y.IsF() {
@@ -369,7 +369,7 @@ func lessAS(x V, y V) bool {
 
 func lessAV(x V, y V) bool {
 	xv := x.Value.(*AV)
-	if y.IsInt() {
+	if y.IsI() {
 		return less(xv.At(0), y)
 	}
 	if y.IsF() {
@@ -631,7 +631,7 @@ func searchASS(x *AS, y S) int64 {
 }
 
 func searchAI(x *AI, y V) V {
-	if y.IsInt() {
+	if y.IsI() {
 		return NewI(searchAII(x, y.I()))
 	}
 	if y.IsF() {
@@ -669,7 +669,7 @@ func searchAI(x *AI, y V) V {
 }
 
 func searchAF(x *AF, y V) V {
-	if y.IsInt() {
+	if y.IsI() {
 		return NewI(searchAFI(x, y.I()))
 	}
 	if y.IsF() {

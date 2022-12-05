@@ -195,7 +195,7 @@ type S string
 // errV represents errors
 type errV string
 
-func (x V) IsInt() bool {
+func (x V) IsI() bool {
 	return x.Kind == Int
 }
 
@@ -438,7 +438,7 @@ func (x *AV) sprint(ctx *Context, deep bool) string {
 		sep = " "
 	}
 	for i, xi := range x.Slice {
-		if xi != (V{}) {
+		if xi.Kind != Nil {
 			fmt.Fprintf(sb, "%s", sprintV(ctx, xi))
 		}
 		if i < x.Len()-1 {
@@ -543,7 +543,7 @@ func (p Projection) Sprint(ctx *Context) string {
 	sb.WriteRune('[')
 	for i := len(p.Args) - 1; i >= 0; i-- {
 		arg := p.Args[i]
-		if arg != (V{}) {
+		if arg.Kind != Nil {
 			fmt.Fprintf(sb, "%s", arg.Sprint(ctx))
 		}
 		if i > 0 {

@@ -6,7 +6,7 @@ func enum(x V) V {
 	if x.IsErr() {
 		return errf("!x : %v", x)
 	}
-	if x.IsInt() {
+	if x.IsI() {
 		return rangeI(x.I())
 	}
 	switch xv := x.Value.(type) {
@@ -57,7 +57,7 @@ func rangeArray(x *AI) V {
 
 // where returns &x.
 func where(x V) V {
-	if x.IsInt() {
+	if x.IsI() {
 		switch {
 		case x.I() < 0:
 			return errf("&x : x negative (%d)", x.I())
@@ -135,7 +135,7 @@ func where(x V) V {
 		case tB, tF, tI:
 			n := int64(0)
 			for _, xi := range xv.Slice {
-				if xi.IsInt() {
+				if xi.IsI() {
 					if xi.I() < 0 {
 						return errf("&x : negative integer (%d)", xi.I())
 					}
@@ -154,7 +154,7 @@ func where(x V) V {
 			r := make([]int64, 0, n)
 			for i, xi := range xv.Slice {
 				var max int64
-				if xi.IsInt() {
+				if xi.IsI() {
 					max = xi.I()
 				} else {
 					max = int64(xi.F())
@@ -174,7 +174,7 @@ func where(x V) V {
 
 // replicate returns {x}#y.
 func replicate(x, y V) V {
-	if x.IsInt() {
+	if x.IsI() {
 		switch {
 		case x.I() < 0:
 			return errf("f#y : f[y] negative integer (%d)", x.I())
@@ -215,7 +215,7 @@ func replicate(x, y V) V {
 }
 
 func repeat(x V, n int64) V {
-	if x.IsInt() {
+	if x.IsI() {
 		if isBI(x.I()) {
 			r := make([]bool, n)
 			for i := range r {
@@ -359,7 +359,7 @@ func repeatAI(x *AI, y V) V {
 
 // weedOut implements {x}_y
 func weedOut(x, y V) V {
-	if x.IsInt() {
+	if x.IsI() {
 		if x.I() != 0 {
 			return NewAV([]V{})
 		}

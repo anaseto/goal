@@ -123,10 +123,10 @@ func (ctx *Context) applyN(x V, n int) V {
 // applyArray applies an array to a value.
 func (ctx *Context) applyArray(x V, y V) V {
 	xv := x.Value.(array)
-	if y == (V{}) {
+	if y.Kind == Nil {
 		return x
 	}
-	if y.IsInt() {
+	if y.IsI() {
 		i := y.I()
 		if i < 0 {
 			i = int64(xv.Len()) + i
@@ -178,7 +178,7 @@ func (ctx *Context) applyArrayArgs(x V, arg V, args []V) V {
 	if len(args) == 0 {
 		return ctx.applyArray(x, arg)
 	}
-	if arg == (V{}) {
+	if arg.Kind == Nil {
 		r := make([]V, xv.Len())
 		for i := 0; i < len(r); i++ {
 			r[i] = ctx.ApplyN(xv.at(i), args)
@@ -210,7 +210,7 @@ func (ctx *Context) applyArrayArgs(x V, arg V, args []V) V {
 func (ctx *Context) applyVariadic(v variadic) V {
 	args := ctx.peek()
 	x := args[0]
-	if x == (V{}) {
+	if x.Kind == Nil {
 		ctx.drop()
 		return NewV(ProjectionMonad{Fun: NewVariadic(v)})
 	}
@@ -227,14 +227,14 @@ func (ctx *Context) applyVariadic(v variadic) V {
 
 func (ctx *Context) apply2Variadic(v variadic) V {
 	args := ctx.peekN(2)
-	if args[0] == (V{}) {
-		if args[1] != (V{}) {
+	if args[0].Kind == Nil {
+		if args[1].Kind != Nil {
 			arg := args[1]
 			ctx.drop2()
 			return NewV(ProjectionFirst{Fun: NewVariadic(v), Arg: arg})
 		}
 		return NewV(Projection{Fun: NewVariadic(v), Args: ctx.popN(2)})
-	} else if args[1] == (V{}) {
+	} else if args[1].Kind == Nil {
 		return NewV(Projection{Fun: NewVariadic(v), Args: ctx.popN(2)})
 	}
 	args[0].rcincr()
@@ -268,7 +268,7 @@ func (ctx *Context) applyProjection(p Projection, n int) V {
 		nilc := 0
 		for _, arg := range p.Args {
 			switch {
-			case arg != (V{}):
+			case arg.Kind != Nil:
 				ctx.push(arg)
 			default:
 				ctx.push(args[nilc])
@@ -282,7 +282,7 @@ func (ctx *Context) applyProjection(p Projection, n int) V {
 		vargs := cloneArgs(p.Args)
 		nilc := 1
 		for i := len(vargs) - 1; i >= 0; i-- {
-			if vargs[i] == (V{}) {
+			if vargs[i].Kind == Nil {
 				if nilc > len(args) {
 					break
 				}
@@ -306,13 +306,13 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 	args := ctx.peekN(n)
 	if lc.Rank > n || hasNil(args) {
 		if n == 1 {
-			if args[0] == (V{}) {
+			if args[0].Kind == Nil {
 				ctx.drop() // drop nil
 				return NewV(ProjectionMonad{Fun: NewLambda(id)})
 			}
 			return NewV(ProjectionFirst{Fun: NewLambda(id), Arg: ctx.pop()})
 		}
-		if n == 2 && args[1] == (V{}) && args[0] != (V{}) {
+		if n == 2 && args[1].Kind == Nil && args[0].Kind != Nil {
 			return NewV(ProjectionFirst{Fun: NewLambda(id), Arg: ctx.pop()})
 		}
 		return NewV(Projection{Fun: NewLambda(id), Args: ctx.popN(n)})
