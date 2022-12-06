@@ -763,6 +763,8 @@ func (ctx *Context) analyzeLambdaLiveness(lc *lambdaCode) {
 			}
 			lc.Body[lu.opIdx] = opLocalLast
 			lc.lastUses[i].redef = true
+			// conservative over-approximation
+			lc.lastUses[i].rcdone = true
 		}
 		ip += op.argc()
 	}
@@ -772,11 +774,9 @@ func (ctx *Context) analyzeLambdaLiveness(lc *lambdaCode) {
 		bn++
 	}
 	for i, lu := range lc.lastUses {
-		// Last uses in first and last block.
+		// We handle last uses in first and last block only.
 		if lu.bn != 1 && lu.bn != bn {
 			if lu.redef {
-				// conservative over-approximation
-				lc.lastUses[i].rcdone = true
 				continue
 			}
 			if lu.bn > 0 {
