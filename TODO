@@ -6,7 +6,6 @@ Features:
 - date and time
 - array shift primitives (maybe bitwise operations too)
 - use general x#y array case for something
-- use i$y for simple shape-splitting?
 - maybe triadic amend with .
 
 Tests:
