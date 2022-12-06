@@ -188,7 +188,7 @@ func (ctx *Context) drop() {
 
 func (ctx *Context) drop2() {
 	//ctx.stack[len(ctx.stack)-2] = V{}
-	ctx.stack[len(ctx.stack)-1] = V{}
+	ctx.stack[len(ctx.stack)-1].Value = nil
 	ctx.stack = ctx.stack[:len(ctx.stack)-2]
 }
 
