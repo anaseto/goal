@@ -10,6 +10,7 @@ type opcode int32
 const (
 	opNop opcode = iota
 	opConst
+	opInt
 	opNil
 	opGlobal
 	opGlobalLast
@@ -58,7 +59,7 @@ func (ctx *Context) opcodesString(ops []opcode, lc *lambdaCode) string {
 		}
 		fmt.Fprintf(sb, "%3d %3d %s\t", i, pos, op)
 		switch op {
-		case opConst, opLambda, opApplyN:
+		case opConst, opInt, opLambda, opApplyN:
 			fmt.Fprintf(sb, "%d", ops[i+1])
 		case opGlobal, opGlobalLast, opAssignGlobal:
 			fmt.Fprintf(sb, "%d (%s)", ops[i+1], ctx.gNames[int(ops[i+1])])

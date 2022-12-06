@@ -67,32 +67,33 @@ func _() {
 	var x [1]struct{}
 	_ = x[opNop-0]
 	_ = x[opConst-1]
-	_ = x[opNil-2]
-	_ = x[opGlobal-3]
-	_ = x[opGlobalLast-4]
-	_ = x[opLocal-5]
-	_ = x[opLocalLast-6]
-	_ = x[opAssignGlobal-7]
-	_ = x[opAssignLocal-8]
-	_ = x[opAdverb-9]
-	_ = x[opVariadic-10]
-	_ = x[opLambda-11]
-	_ = x[opApply-12]
-	_ = x[opApplyV-13]
-	_ = x[opApply2-14]
-	_ = x[opApply2V-15]
-	_ = x[opApplyN-16]
-	_ = x[opApplyNV-17]
-	_ = x[opDrop-18]
-	_ = x[opJump-19]
-	_ = x[opJumpFalse-20]
-	_ = x[opJumpTrue-21]
-	_ = x[opReturn-22]
+	_ = x[opInt-2]
+	_ = x[opNil-3]
+	_ = x[opGlobal-4]
+	_ = x[opGlobalLast-5]
+	_ = x[opLocal-6]
+	_ = x[opLocalLast-7]
+	_ = x[opAssignGlobal-8]
+	_ = x[opAssignLocal-9]
+	_ = x[opAdverb-10]
+	_ = x[opVariadic-11]
+	_ = x[opLambda-12]
+	_ = x[opApply-13]
+	_ = x[opApplyV-14]
+	_ = x[opApply2-15]
+	_ = x[opApply2V-16]
+	_ = x[opApplyN-17]
+	_ = x[opApplyNV-18]
+	_ = x[opDrop-19]
+	_ = x[opJump-20]
+	_ = x[opJumpFalse-21]
+	_ = x[opJumpTrue-22]
+	_ = x[opReturn-23]
 }
 
-const _opcode_name = "opNopopConstopNilopGlobalopGlobalLastopLocalopLocalLastopAssignGlobalopAssignLocalopAdverbopVariadicopLambdaopApplyopApplyVopApply2opApply2VopApplyNopApplyNVopDropopJumpopJumpFalseopJumpTrueopReturn"
+const _opcode_name = "opNopopConstopIntopNilopGlobalopGlobalLastopLocalopLocalLastopAssignGlobalopAssignLocalopAdverbopVariadicopLambdaopApplyopApplyVopApply2opApply2VopApplyNopApplyNVopDropopJumpopJumpFalseopJumpTrueopReturn"
 
-var _opcode_index = [...]uint8{0, 5, 12, 17, 25, 37, 44, 55, 69, 82, 90, 100, 108, 115, 123, 131, 140, 148, 157, 163, 169, 180, 190, 198}
+var _opcode_index = [...]uint8{0, 5, 12, 17, 22, 30, 42, 49, 60, 74, 87, 95, 105, 113, 120, 128, 136, 145, 153, 162, 168, 174, 185, 195, 203}
 
 func (i opcode) String() string {
 	if i < 0 || i >= opcode(len(_opcode_index)-1) {

@@ -2,6 +2,7 @@ package goal
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -350,8 +351,12 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 		if n > 0 {
 			return c.errorf("type n cannot be applied")
 		}
-		id := c.ctx.storeConst(x)
-		c.push2(opConst, opcode(id))
+		if x.Kind == Int && x.N <= math.MaxInt32 && x.N >= math.MinInt32 {
+			c.push2(opInt, opcode(int32(x.N)))
+		} else {
+			id := c.ctx.storeConst(x)
+			c.push2(opConst, opcode(id))
+		}
 		return nil
 	case astSTRING:
 		s, err := strconv.Unquote(tok.Text)

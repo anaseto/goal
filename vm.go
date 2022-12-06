@@ -12,6 +12,9 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 		case opConst:
 			ctx.push(ctx.constants[ops[ip]])
 			ip++
+		case opInt:
+			ctx.push(NewI(int64(ops[ip])))
+			ip++
 		case opNil:
 			ctx.push(V{})
 		case opGlobal:
