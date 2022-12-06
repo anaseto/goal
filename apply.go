@@ -355,13 +355,6 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 	if nVars > 0 {
 		ctx.dropN(nVars)
 	}
-	if lc.needsDecr {
-		for i, arg := range args {
-			if !lc.lastUses[i].rcdone {
-				arg.rcdecr()
-			}
-		}
-	}
 	ctx.dropN(n)
 	ctx.frameIdx = oframeIdx
 	return r

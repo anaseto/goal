@@ -17,19 +17,17 @@ type globalCode struct {
 
 // lambdaCode represents a compiled user defined function.
 type lambdaCode struct {
-	Body     []opcode // object code of the function
-	Pos      []int    // position associated to opcode of same index
-	Names    []string // local arguments and variables names
-	Rank     int      // number of arguments
-	Source   string   // source code of the function
-	Filename string   // filename of the file containing the source (if any)
-	StartPos int      // starting position in the source
-	EndPos   int      // end position in the source
-
+	Body       []opcode               // object code of the function
+	Pos        []int                  // position associated to opcode of same index
+	Names      []string               // local arguments and variables names
+	Rank       int                    // number of arguments
+	Source     string                 // source code of the function
+	Filename   string                 // filename of the file containing the source (if any)
+	StartPos   int                    // starting position in the source
+	EndPos     int                    // end position in the source
 	namedArgs  bool                   // uses named parameters like {[a;b;c]....}
 	lastUses   []lastUse              // opcode index and block number of variable last use
-	needsDecr  bool                   // needs to decrement refcounts at the end
-	jumpPoints []bool                 // opcode points corresponding to a branchement
+	joinPoints []int32                // number of jumps ending at a given opcode index
 	locals     map[string]lambdaLocal // arguments and variables
 	opIdxLocal map[int]lambdaLocal    // opcode index -> local variable
 	nVars      int                    // number of non-argument variables
@@ -697,21 +695,24 @@ func (ctx *Context) resolveLambda(lc *lambdaCode) {
 		}
 		ip += op.argc()
 	}
+	// free unused data after this resolving pass
+	lc.locals = nil
 	lc.opIdxLocal = nil
 }
 
 type lastUse struct {
-	rcdone bool  // rcdecr always done before end (except when throwing errors)
-	redef  bool  // variable is used and redefined in some block
-	bn     int16 // block number of last use
+	branch int32 // branch number
+	bn     int32 // block number of last use
 	opIdx  int32 // opcode index of last use
 }
 
 func (ctx *Context) analyzeLambdaLiveness(lc *lambdaCode) {
-	// We do a simple and fast analysis for now, to optimize common cases,
-	// handling only def-use in the same basic block, and also handling
-	// last uses in the last block, which is guaranteed to not be on a
-	// branch (it might be empty to ensure that).
+	// We do a simple and fast one-pass analysis for now, to optimize
+	// common cases, handling only def-use in the same basic block.
+	// Branches with uneven use of variables might lead to some refcounts
+	// not being decreased as much as possible in all paths, leading to
+	// some extra cloning. The analysis still gives quite some good results
+	// for little complexity.
 	//
 	// Branching in goal is limited. There are five kinds of cases, all
 	// going forward (no loops):
@@ -726,66 +727,62 @@ func (ctx *Context) analyzeLambdaLiveness(lc *lambdaCode) {
 	// decreased in case of errors, but this only means some more cloning
 	// might happen, it does not leak memory (as this is handled by Go's
 	// GC).
-	//
-	// NOTE: By recording branching depth, we could obtain more information
-	// without ressorting to slower generic data-flow algorithms,
-	// determining that some blocks are always run when no return is used
-	// (in addition to the first and last).
 	lc.lastUses = make([]lastUse, len(lc.Names))
-	var bn int16 = 1 // basic-block number
+	// bn is the basic-block number, starting from 1.
+	var bn int32 = 1
+	// The branch number is similar to the basic-block number, but starts
+	// from zero and it gets reduced on join points by the number of jumps
+	// pointing to them.  In particular, this means that the branch number
+	// is zero when we are not in a branch, and positive otherwise.
+	var branch int32
 	for ip := 0; ip < len(lc.Body); {
 		op := lc.Body[ip]
-		if lc.jumpPoints != nil && lc.jumpPoints[ip] {
+		if lc.joinPoints != nil && lc.joinPoints[ip] > 0 {
+			branch -= lc.joinPoints[ip]
 			bn++
 		}
 		ip++
 		switch op {
 		case opJumpFalse, opJumpTrue, opJump:
-			if lc.jumpPoints == nil {
-				lc.jumpPoints = make([]bool, len(lc.Body)+1)
+			if lc.joinPoints == nil {
+				lc.joinPoints = make([]int32, len(lc.Body)+1)
 			}
-			lc.jumpPoints[ip+1] = true
-			lc.jumpPoints[ip+int(lc.Body[ip])] = true
+			branch++
+			bn++
+			lc.joinPoints[ip+int(lc.Body[ip])]++
 		case opReturn:
-			if lc.jumpPoints == nil {
-				lc.jumpPoints = make([]bool, len(lc.Body)+1)
+			if lc.joinPoints == nil {
+				lc.joinPoints = make([]int32, len(lc.Body)+1)
 			}
-			lc.jumpPoints[ip] = true
-			lc.jumpPoints[len(lc.Body)] = true
+			// All code after a return is considered to be on a
+			// branch.
+			branch++
+			bn++
+			//lc.joinPoints[len(lc.Body)]++
 		case opLocal, opLocalLast:
-			lc.lastUses[lc.Body[ip]].opIdx = int32(ip) - 1
-			lc.lastUses[lc.Body[ip]].bn = bn
+			i := lc.Body[ip]
+			lc.lastUses[i].opIdx = int32(ip) - 1
+			lc.lastUses[i].bn = bn
+			lc.lastUses[i].branch = branch
 		case opAssignLocal:
 			i := lc.Body[ip]
 			lu := lc.lastUses[i]
-			if lu.bn != bn {
+			if branch > 0 && lu.bn != bn || lu.bn == 0 {
 				break
 			}
 			lc.Body[lu.opIdx] = opLocalLast
-			lc.lastUses[i].redef = true
-			// conservative over-approximation
-			lc.lastUses[i].rcdone = true
 		}
 		ip += op.argc()
 	}
-	if lc.jumpPoints != nil && lc.jumpPoints[len(lc.Body)] {
-		// extra number in case of jump beyond the end (like return),
-		// to ensure last block is not in a branch.
-		bn++
+	if lc.joinPoints != nil {
+		lc.joinPoints = nil // unused after this pass
 	}
-	for i, lu := range lc.lastUses {
-		// We handle last uses in first and last block only.
-		if lu.bn != 1 && lu.bn != bn {
-			if lu.redef {
-				continue
-			}
-			if lu.bn > 0 {
-				lc.needsDecr = true
-			}
+	for _, lu := range lc.lastUses {
+		if lu.bn == 0 {
+			// unused variable
 			continue
 		}
 		lc.Body[lu.opIdx] = opLocalLast
-		lc.lastUses[i].rcdone = true
 	}
 }
 
