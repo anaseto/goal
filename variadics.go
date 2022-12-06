@@ -49,11 +49,12 @@ func (v variadic) zero() V {
 	case vMultiply:
 		return NewI(1)
 	case vMin:
-		return NewI(math.MinInt)
+		return NewI(math.MinInt64)
 	case vMax:
-		return NewI(math.MaxInt)
+		return NewI(math.MaxInt64)
+	default:
+		return NewI(0)
 	}
-	return V{}
 }
 
 var vStrings = [...]string{
@@ -410,11 +411,16 @@ func VCast(ctx *Context, args []V) V {
 		return NewS(args[0].Sprint(ctx))
 	case 2:
 		x, y := args[1], args[0]
-		switch x.Value.(type) {
+		if x.IsI() || x.IsF() {
+			return shapeSplit(x, y)
+		}
+		switch xv := x.Value.(type) {
 		case array:
 			return search(x, y)
+		case S:
+			return cast(xv, y)
 		default:
-			return cast(x, y)
+			return errType("x$y", "x", x)
 		}
 	default:
 		return errRank("$")

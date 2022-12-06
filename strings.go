@@ -190,11 +190,7 @@ func bytes(x V) V {
 }
 
 // cast implements s$y.
-func cast(x, y V) V {
-	s, ok := x.Value.(S)
-	if !ok {
-		return errf("s$y : s not a string (%s)", x.Type())
-	}
+func cast(s S, y V) V {
 	switch s {
 	case "i":
 		return casti(y)

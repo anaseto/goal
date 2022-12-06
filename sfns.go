@@ -697,8 +697,48 @@ func windows(i int64, y V) V {
 			yc.Value = yv.slice(j, j+int(i))
 			r[j] = canonicalV(yc)
 		}
-		return canonicalV(NewAV(r))
+		return NewAV(r)
 	default:
 		return errs("i^y : y not an array")
+	}
+}
+
+// shapeSplit returns i$y.
+func shapeSplit(x V, y V) V {
+	var i int64
+	if x.IsI() {
+		i = x.I()
+	} else {
+		// x.IsF() should be true
+		f := x.F()
+		if !isI(f) {
+			return errf("i$y : i non-integer (%g)", f)
+		}
+		i = int64(f)
+	}
+	switch yv := y.Value.(type) {
+	case array:
+		ylen := yv.Len()
+		if i <= 0 {
+			return errf("i$y : i not positive (%d)", i)
+		}
+		if i >= int64(ylen) {
+			return NewAV([]V{y})
+		}
+		n := ylen / int(i)
+		if ylen%int(i) != 0 {
+			n++
+		}
+		r := make([]V, n)
+		for j := 0; j < n; j++ {
+			yc := y
+			from := j * int(i)
+			to := minInt(from+int(i), ylen)
+			yc.Value = yv.slice(from, to)
+			r[j] = canonicalV(yc)
+		}
+		return NewAV(r)
+	default:
+		return errs("i$y : y not an array")
 	}
 }
