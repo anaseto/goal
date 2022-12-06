@@ -188,14 +188,19 @@ func (ctx *Context) drop() {
 
 func (ctx *Context) drop2() {
 	//ctx.stack[len(ctx.stack)-2] = V{}
-	ctx.stack[len(ctx.stack)-1].Value = nil
+	last := len(ctx.stack) - 1
+	if ctx.stack[last].Kind == Boxed {
+		ctx.stack[last].Value = nil
+	}
 	ctx.stack = ctx.stack[:len(ctx.stack)-2]
 }
 
 func (ctx *Context) dropN(n int) {
 	topN := ctx.stack[len(ctx.stack)-n:]
-	for i := range topN {
-		topN[i] = V{}
+	for i, v := range topN {
+		if v.Kind == Boxed {
+			topN[i].Value = nil
+		}
 	}
 	ctx.stack = ctx.stack[:len(ctx.stack)-n]
 }
