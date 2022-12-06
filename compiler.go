@@ -17,17 +17,18 @@ type globalCode struct {
 
 // lambdaCode represents a compiled user defined function.
 type lambdaCode struct {
-	Body     []opcode
-	Pos      []int
-	Names    []string
-	Rank     int
-	Source   string
-	Filename string
-	StartPos int
-	EndPos   int
+	Body     []opcode // object code of the function
+	Pos      []int    // position associated to opcode of same index
+	Names    []string // local arguments and variables names
+	Rank     int      // number of arguments
+	Source   string   // source code of the function
+	Filename string   // filename of the file containing the source (if any)
+	StartPos int      // starting position in the source
+	EndPos   int      // end position in the source
 
-	namedArgs  bool
+	namedArgs  bool                   // uses named parameters like {[a;b;c]....}
 	lastUses   []lastUse              // opcode index and block number of variable last use
+	needsDecr  bool                   // needs to decrement refcounts at the end
 	jumpPoints []bool                 // opcode points corresponding to a branchement
 	locals     map[string]lambdaLocal // arguments and variables
 	opIdxLocal map[int]lambdaLocal    // opcode index -> local variable
@@ -700,31 +701,38 @@ func (ctx *Context) resolveLambda(lc *lambdaCode) {
 }
 
 type lastUse struct {
-	opIdx int // opcode index of last use
-	bn    int // block number of last use
+	rcdone bool  // rcdecr always done before end (except when throwing errors)
+	redef  bool  // variable is used and redefined in some block
+	bn     int16 // block number of last use
+	opIdx  int32 // opcode index of last use
 }
 
 func (ctx *Context) analyzeLambdaLiveness(lc *lambdaCode) {
-	// We do a very simple and fast analysis for now, to optimize common
-	// cases, handling only def-use in the same basic block (and the first
-	// and last which are guaranteed to be run).
+	// We do a simple and fast analysis for now, to optimize common cases,
+	// handling only def-use in the same basic block, and also handling
+	// last uses in the last block, which is guaranteed to not be on a
+	// branch (it might be empty to ensure that).
 	//
-	// This could be improved without too much effort, as branching in goal
-	// is limited. There are four kinds of cases, all going forward (no
-	// loops):
+	// Branching in goal is limited. There are five kinds of cases, all
+	// going forward (no loops):
+	//
 	// ?[if;then;else] gives ...jumpFalse #then; ...jump #else;
 	// and[x;y;z] gives ...jumpFalse #y+#z; jumpFalse #z
 	// or[x;y;z] gives ...jumpTrue #y+#z; jumpTrue #z
 	// :x gives opReturn
 	//
-	// As a result, just by recording depth, we could obtain more
-	// information without ressorting to slower generic data-flow
-	// algorithms.
+	// Errors act kinda like return, but they are not handled to avoid a
+	// big performance impact. This means some refcounts might not be
+	// decreased in case of errors, but this only means some more cloning
+	// might happen, it does not leak memory (as this is handled by Go's
+	// GC).
+	//
+	// NOTE: By recording branching depth, we could obtain more information
+	// without ressorting to slower generic data-flow algorithms,
+	// determining that some blocks are always run when no return is used
+	// (in addition to the first and last).
 	lc.lastUses = make([]lastUse, len(lc.Names))
-	for i := range lc.lastUses {
-		lc.lastUses[i].bn = -1
-	}
-	bn := 0 // basic-block number
+	var bn int16 = 1 // basic-block number
 	for ip := 0; ip < len(lc.Body); {
 		op := lc.Body[ip]
 		if lc.jumpPoints != nil && lc.jumpPoints[ip] {
@@ -745,7 +753,8 @@ func (ctx *Context) analyzeLambdaLiveness(lc *lambdaCode) {
 			lc.jumpPoints[ip] = true
 			lc.jumpPoints[len(lc.Body)] = true
 		case opLocal, opLocalLast:
-			lc.lastUses[lc.Body[ip]] = lastUse{opIdx: ip - 1, bn: bn}
+			lc.lastUses[lc.Body[ip]].opIdx = int32(ip) - 1
+			lc.lastUses[lc.Body[ip]].bn = bn
 		case opAssignLocal:
 			i := lc.Body[ip]
 			lu := lc.lastUses[i]
@@ -753,17 +762,30 @@ func (ctx *Context) analyzeLambdaLiveness(lc *lambdaCode) {
 				break
 			}
 			lc.Body[lu.opIdx] = opLocalLast
+			lc.lastUses[i].redef = true
 		}
 		ip += op.argc()
 	}
 	if lc.jumpPoints != nil && lc.jumpPoints[len(lc.Body)] {
-		bn++ // extra number in case of jump beyond the end (like return)
+		// extra number in case of jump beyond the end (like return),
+		// to ensure last block is not in a branch.
+		bn++
 	}
-	for _, lu := range lc.lastUses {
-		if lu.bn != 0 && lu.bn != bn {
+	for i, lu := range lc.lastUses {
+		// Last uses in first and last block.
+		if lu.bn != 1 && lu.bn != bn {
+			if lu.redef {
+				// conservative over-approximation
+				lc.lastUses[i].rcdone = true
+				continue
+			}
+			if lu.bn > 0 {
+				lc.needsDecr = true
+			}
 			continue
 		}
 		lc.Body[lu.opIdx] = opLocalLast
+		lc.lastUses[i].rcdone = true
 	}
 }
 

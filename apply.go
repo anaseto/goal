@@ -318,7 +318,7 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 		return NewV(Projection{Fun: NewLambda(id), Args: ctx.popN(n)})
 	}
 	for i, arg := range args {
-		if lc.lastUses[i].bn >= 0 {
+		if lc.lastUses[i].bn >= 1 {
 			arg.rcincr()
 		}
 	}
@@ -354,6 +354,13 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 	}
 	if nVars > 0 {
 		ctx.dropN(nVars)
+	}
+	if lc.needsDecr {
+		for i, arg := range args {
+			if !lc.lastUses[i].rcdone {
+				arg.rcdecr()
+			}
+		}
 	}
 	ctx.dropN(n)
 	ctx.frameIdx = oframeIdx
