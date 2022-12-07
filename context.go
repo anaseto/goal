@@ -40,7 +40,6 @@ type Context struct {
 }
 
 // NewContext returns a new context for compiling and interpreting code.
-// SetSource should be called to set a source, and
 func NewContext() *Context {
 	ctx := &Context{}
 	ctx.gCode = &globalCode{}

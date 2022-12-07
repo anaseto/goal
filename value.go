@@ -7,7 +7,7 @@ import (
 	"unsafe"
 )
 
-// V represents a boxed or unboxed value.
+// V contains a boxed or unboxed value.
 type V struct {
 	kind  valueKind // int, boxed
 	n     int64     // unboxed integer or float value
@@ -27,7 +27,7 @@ const (
 	valPanic              // boxed value (Value field)
 )
 
-// Value represents any kind of boxed value.
+// Value is the interface satisfied by all boxed values.
 type Value interface {
 	fmt.Stringer
 	// Matches returns true if the value matches another (in the sense of
@@ -95,50 +95,36 @@ func (x V) Error() V {
 	return x.value.(errV).V
 }
 
-// I retrieves the integer value from N field. It assumes IsI(v).
+// I retrieves the unboxed integer value from N field. It assumes IsI(v).
 func (x V) I() int64 {
 	return x.n
 }
 
-// F retrieves the float64 value. It assumes Kind isF(v).
+// F retrieves the unboxed float64 value. It assumes isF(v).
 func (x V) F() float64 {
 	i := x.n
 	f := *(*float64)(unsafe.Pointer(&i))
 	return f
 }
 
-// S retrieves the S value. It assumes Value type is S.
-func (x V) S() S {
-	return x.value.(S)
-}
-
-// AB retrieves the *AB value. It assumes Value type is *AB.
-func (x V) AB() *AB {
+// getAB retrieves the *getAB value. It assumes Value type is *getAB.
+func (x V) getAB() *AB {
 	return x.value.(*AB)
 }
 
-// AI retrieves the *AI value. It assumes Value type is *AI.
-func (x V) AI() *AI {
+// getAI retrieves the *getAI value. It assumes Value type is *getAI.
+func (x V) getAI() *AI {
 	return x.value.(*AI)
 }
 
-// AF retrieves the *AF value. It assumes Value type is *AF.
-func (x V) AF() *AF {
+// getAF retrieves the *getAF value. It assumes Value type is *getAF.
+func (x V) getAF() *AF {
 	return x.value.(*AF)
 }
 
-// AS retrieves the *AS value. It assumes Value type is *AS.
-func (x V) AS() *AS {
-	return x.value.(*AS)
-}
-
-// AV retrieves the *AV value. It assumes Value type is *AV.
-func (x V) AV() *AV {
-	return x.value.(*AV)
-}
-
-// GetValue retrieves the boxed value. It assumes IsValue(v).
-func (x V) GetValue() Value {
+// Value retrieves the boxed value, or nil if the value is not boxed. You can
+// check whether the value is boxed with IsValue(v).
+func (x V) Value() Value {
 	return x.value
 }
 
@@ -187,7 +173,7 @@ func (x V) IsError() bool {
 }
 
 // IsValue returns true if the value is a boxed value satisfying the Value
-// interface.
+// interface. You can then get the value with the Value method.
 func (x V) IsValue() bool {
 	return x.kind == valBoxed
 }

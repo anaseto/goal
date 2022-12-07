@@ -65,7 +65,7 @@ func flipAB(x *AV) V {
 		if xi.IsI() {
 			r[i] = xi.I() == 1
 		} else {
-			r[i] = xi.AB().At(0)
+			r[i] = xi.getAB().At(0)
 		}
 	}
 	return NewAB(r)
@@ -80,7 +80,7 @@ func flipAVAB(x *AV, lines int) V {
 			if xi.IsI() {
 				q[i] = xi.I() == 1
 			} else {
-				q[i] = xi.AB().At(j)
+				q[i] = xi.getAB().At(j)
 			}
 		}
 		r[j] = NewAB(q)

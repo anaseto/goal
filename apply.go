@@ -9,7 +9,7 @@ func (ctx *Context) Apply(x, y V) V {
 	return r
 }
 
-// Apply2 calls a value with a two arguments.
+// Apply2 calls a value with two arguments.
 func (ctx *Context) Apply2(x, y, z V) V {
 	ctx.push(z)
 	ctx.push(y)
