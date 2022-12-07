@@ -8,7 +8,7 @@ import (
 
 // Length returns the length of a value like in #x.
 func Length(x V) int {
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case array:
 		return xv.Len()
 	default:
@@ -17,7 +17,7 @@ func Length(x V) int {
 }
 
 func reverseMut(x V) {
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		xs := xv.Slice
 		for i := 0; i < len(xs)/2; i++ {
@@ -50,9 +50,9 @@ func reverseMut(x V) {
 
 // reverse returns |x.
 func reverse(x V) V {
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case array:
-		x.Value = cloneShallowArray(xv)
+		x.value = cloneShallowArray(xv)
 		reverseMut(x)
 		return x
 	default:
@@ -81,7 +81,7 @@ func rotate(x, y V) V {
 	if i < 0 {
 		i += ylen
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case *AB:
 		r := make([]bool, ylen)
 		for j := int64(0); j < ylen; j++ {
@@ -119,7 +119,7 @@ func rotate(x, y V) V {
 
 // first returns *x.
 func first(x V) V {
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *errV:
 		return xv.V
 	case array:
@@ -154,7 +154,7 @@ func drop(x, y V) V {
 		}
 		return dropi(int64(x.F()), y)
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case S:
 		return drops(xv, y)
 	case *AB:
@@ -176,21 +176,21 @@ func drop(x, y V) V {
 }
 
 func dropi(i int64, y V) V {
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case array:
 		switch {
 		case i >= 0:
 			if i > int64(yv.Len()) {
 				i = int64(yv.Len())
 			}
-			y.Value = yv.slice(int(i), yv.Len())
+			y.value = yv.slice(int(i), yv.Len())
 			return canonicalV(y)
 		default:
 			i = int64(yv.Len()) + i
 			if i < 0 {
 				i = 0
 			}
-			y.Value = yv.slice(0, int(i))
+			y.value = yv.slice(0, int(i))
 			return canonicalV(y)
 		}
 	default:
@@ -211,7 +211,7 @@ func cutAI(x *AI, y V) V {
 	if x.Len() == 0 {
 		return NewAV([]V{})
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case *AB:
 		r := make([]V, x.Len())
 		for i, from := range x.Slice {
@@ -280,19 +280,19 @@ func take(x, y V) V {
 	} else {
 		return panicf("i#y : non-integer i (%s)", x.Type())
 	}
-	yv := toArray(y).Value.(array)
+	yv := toArray(y).value.(array)
 	switch {
 	case i >= 0:
 		if i > int64(yv.Len()) {
 			return takeCyclic(yv, i)
 		}
-		y.Value = yv.slice(0, int(i))
+		y.value = yv.slice(0, int(i))
 		return canonicalV(y)
 	default:
 		if i < int64(-yv.Len()) {
 			return takeCyclic(yv, i)
 		}
-		y.Value = yv.slice(yv.Len()+int(i), yv.Len())
+		y.value = yv.slice(yv.Len()+int(i), yv.Len())
 		return canonicalV(y)
 	}
 }
@@ -382,10 +382,10 @@ func shiftBefore(x, y V) V {
 	if max == 0 {
 		return y
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case *AB:
 		ys := yv.Slice
-		switch xv := x.Value.(type) {
+		switch xv := x.value.(type) {
 		case *AB:
 			r := make([]bool, len(ys))
 			for i := 0; i < max; i++ {
@@ -416,7 +416,7 @@ func shiftBefore(x, y V) V {
 		}
 	case *AF:
 		ys := yv.Slice
-		switch xv := x.Value.(type) {
+		switch xv := x.value.(type) {
 		case *AB:
 			r := make([]float64, len(ys))
 			for i := 0; i < max; i++ {
@@ -443,7 +443,7 @@ func shiftBefore(x, y V) V {
 		}
 	case *AI:
 		ys := yv.Slice
-		switch xv := x.Value.(type) {
+		switch xv := x.value.(type) {
 		case *AB:
 			r := make([]int64, len(ys))
 			for i := 0; i < max; i++ {
@@ -472,7 +472,7 @@ func shiftBefore(x, y V) V {
 		}
 	case *AS:
 		ys := yv.Slice
-		switch xv := x.Value.(type) {
+		switch xv := x.value.(type) {
 		case *AS:
 			r := make([]string, len(ys))
 			for i := 0; i < max; i++ {
@@ -485,7 +485,7 @@ func shiftBefore(x, y V) V {
 		}
 	case *AV:
 		ys := yv.Slice
-		switch xv := x.Value.(type) {
+		switch xv := x.value.(type) {
 		case array:
 			r := make([]V, len(ys))
 			for i := 0; i < max; i++ {
@@ -503,7 +503,7 @@ func shiftBefore(x, y V) V {
 
 // nudge returns »x. XXX unused for now
 func nudge(x V) V {
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		r := make([]bool, xv.Len())
 		copy(r[1:], xv.Slice[0:xv.Len()-1])
@@ -536,10 +536,10 @@ func shiftAfter(x, y V) V {
 	if max == 0 {
 		return y
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case *AB:
 		ys := yv.Slice
-		switch xv := x.Value.(type) {
+		switch xv := x.value.(type) {
 		case *AB:
 			r := make([]bool, len(ys))
 			for i := 0; i < max; i++ {
@@ -570,7 +570,7 @@ func shiftAfter(x, y V) V {
 		}
 	case *AF:
 		ys := yv.Slice
-		switch xv := x.Value.(type) {
+		switch xv := x.value.(type) {
 		case *AB:
 			r := make([]float64, len(ys))
 			for i := 0; i < max; i++ {
@@ -597,7 +597,7 @@ func shiftAfter(x, y V) V {
 		}
 	case *AI:
 		ys := yv.Slice
-		switch xv := x.Value.(type) {
+		switch xv := x.value.(type) {
 		case *AB:
 			r := make([]int64, len(ys))
 			for i := 0; i < max; i++ {
@@ -626,7 +626,7 @@ func shiftAfter(x, y V) V {
 		}
 	case *AS:
 		ys := yv.Slice
-		switch xv := x.Value.(type) {
+		switch xv := x.value.(type) {
 		case *AS:
 			r := make([]string, len(ys))
 			for i := 0; i < max; i++ {
@@ -639,7 +639,7 @@ func shiftAfter(x, y V) V {
 		}
 	case *AV:
 		ys := yv.Slice
-		switch xv := x.Value.(type) {
+		switch xv := x.value.(type) {
 		case array:
 			r := make([]V, len(ys))
 			for i := 0; i < max; i++ {
@@ -660,7 +660,7 @@ func nudgeBack(x V) V {
 	if Length(x) == 0 {
 		return x
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		r := make([]bool, xv.Len())
 		copy(r[0:xv.Len()-1], xv.Slice[1:])
@@ -688,7 +688,7 @@ func nudgeBack(x V) V {
 
 // windows returns i^y.
 func windows(i int64, y V) V {
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case array:
 		if i <= 0 || i >= int64(yv.Len()+1) {
 			return panicf("i^y : i out of range !%d (%d)", yv.Len()+1, i)
@@ -696,7 +696,7 @@ func windows(i int64, y V) V {
 		r := make([]V, 1+yv.Len()-int(i))
 		for j := range r {
 			yc := y
-			yc.Value = yv.slice(j, j+int(i))
+			yc.value = yv.slice(j, j+int(i))
 			r[j] = canonicalV(yc)
 		}
 		return NewAV(r)
@@ -718,7 +718,7 @@ func shapeSplit(x V, y V) V {
 		}
 		i = int64(f)
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case array:
 		ylen := yv.Len()
 		if i <= 0 {
@@ -736,7 +736,7 @@ func shapeSplit(x V, y V) V {
 			yc := y
 			from := j * int(i)
 			to := minInt(from+int(i), ylen)
-			yc.Value = yv.slice(from, to)
+			yc.value = yv.slice(from, to)
 			r[j] = canonicalV(yc)
 		}
 		return NewAV(r)

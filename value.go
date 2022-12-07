@@ -9,22 +9,22 @@ import (
 
 // V represents a boxed or unboxed value.
 type V struct {
-	Kind  ValueKind // int, boxed
-	N     int64     // refcount or unboxed integer value
-	Value Value     // boxed value
+	kind  valueKind // int, boxed
+	n     int64     // unboxed integer or float value
+	value Value     // boxed value
 }
 
-// ValueKind represents the kinds of values.
-type ValueKind int8
+// valueKind represents the kinds of values.
+type valueKind int8
 
 const (
-	Nil      ValueKind = iota
-	Int                // unboxed int64 (N field)
-	Float              // unboxed float64 (N field)
-	Variadic           // unboxed int32 (N field)
-	Lambda             // unboxed int32 (N field)
-	Boxed              // boxed value (Value field)
-	Panic              // boxed value (Value field)
+	valNil      valueKind = iota
+	valInt                // unboxed int64 (N field)
+	valFloat              // unboxed float64 (N field)
+	valVariadic           // unboxed int32 (N field)
+	valLambda             // unboxed int32 (N field)
+	valBoxed              // boxed value (Value field)
+	valPanic              // boxed value (Value field)
 )
 
 // Value represents any kind of boxed value.
@@ -41,7 +41,7 @@ type Value interface {
 
 // newVariadic returns a new variadic value.
 func newVariadic(v variadic) V {
-	return V{Kind: Variadic, N: int64(v)}
+	return V{kind: valVariadic, n: int64(v)}
 }
 
 // lambda represents an user defined function by ID.
@@ -49,109 +49,114 @@ type lambda int32
 
 // newLambda returns a new lambda value.
 func newLambda(v lambda) V {
-	return V{Kind: Lambda, N: int64(v)}
+	return V{kind: valLambda, n: int64(v)}
 }
 
 // NewError returns a new recoverable error value.
 func NewError(x V) V {
-	return V{Kind: Boxed, Value: &errV{V: x}}
+	return V{kind: valBoxed, value: &errV{V: x}}
 }
 
 // NewI returns a new int64 value.
 func NewI(i int64) V {
-	return V{Kind: Int, N: i}
+	return V{kind: valInt, n: i}
 }
 
 // NewF returns a new float64 value.
 func NewF(f float64) V {
 	i := *(*int64)(unsafe.Pointer(&f))
-	return V{Kind: Float, N: i}
+	return V{kind: valFloat, n: i}
 }
 
 // NewS returns a new string value.
 func NewS(s string) V {
-	return V{Kind: Boxed, Value: S(s)}
+	return V{kind: valBoxed, value: S(s)}
 }
 
 // NewV returns a new boxed value.
 func NewV(bv Value) V {
-	return V{Kind: Boxed, Value: bv}
+	return V{kind: valBoxed, value: bv}
 }
 
 // variadic retrieves the variadic value from N field. It assumes Kind is
 // IntVariadic.
-func (v V) variadic() variadic {
-	return variadic(v.N)
+func (x V) variadic() variadic {
+	return variadic(x.n)
 }
 
 // Variadic retrieves the lambda value from N field. It assumes Kind is
 // IntLambda.
-func (v V) lambda() lambda {
-	return lambda(v.N)
+func (x V) lambda() lambda {
+	return lambda(x.n)
 }
 
 // Error retrieves the error value. It assumes IsError(v).
-func (v V) Error() V {
-	return v.Value.(errV).V
+func (x V) Error() V {
+	return x.value.(errV).V
 }
 
 // I retrieves the integer value from N field. It assumes IsI(v).
-func (v V) I() int64 {
-	return v.N
+func (x V) I() int64 {
+	return x.n
 }
 
 // F retrieves the float64 value. It assumes Kind isF(v).
-func (v V) F() float64 {
-	i := v.N
+func (x V) F() float64 {
+	i := x.n
 	f := *(*float64)(unsafe.Pointer(&i))
 	return f
 }
 
 // S retrieves the S value. It assumes Value type is S.
-func (v V) S() S {
-	return v.Value.(S)
+func (x V) S() S {
+	return x.value.(S)
 }
 
 // AB retrieves the *AB value. It assumes Value type is *AB.
-func (v V) AB() *AB {
-	return v.Value.(*AB)
+func (x V) AB() *AB {
+	return x.value.(*AB)
 }
 
 // AI retrieves the *AI value. It assumes Value type is *AI.
-func (v V) AI() *AI {
-	return v.Value.(*AI)
+func (x V) AI() *AI {
+	return x.value.(*AI)
 }
 
 // AF retrieves the *AF value. It assumes Value type is *AF.
-func (v V) AF() *AF {
-	return v.Value.(*AF)
+func (x V) AF() *AF {
+	return x.value.(*AF)
 }
 
 // AS retrieves the *AS value. It assumes Value type is *AS.
-func (v V) AS() *AS {
-	return v.Value.(*AS)
+func (x V) AS() *AS {
+	return x.value.(*AS)
 }
 
 // AV retrieves the *AV value. It assumes Value type is *AV.
-func (v V) AV() *AV {
-	return v.Value.(*AV)
+func (x V) AV() *AV {
+	return x.value.(*AV)
+}
+
+// GetValue retrieves the boxed value. It assumes IsValue(v).
+func (x V) GetValue() Value {
+	return x.value
 }
 
 // Type returns the name of the value's type.
-func (v V) Type() string {
-	switch v.Kind {
-	case Nil:
+func (x V) Type() string {
+	switch x.kind {
+	case valNil:
 		return "nil"
-	case Int:
+	case valInt:
 		return "n"
-	case Float:
+	case valFloat:
 		return "n"
-	case Variadic:
+	case valVariadic:
 		return "f"
-	case Lambda:
+	case valLambda:
 		return "f"
-	case Boxed:
-		return v.Value.Type()
+	case valBoxed:
+		return x.value.Type()
 	default:
 		return ""
 	}
@@ -159,35 +164,41 @@ func (v V) Type() string {
 
 // IsI returns true if the value is an integer.
 func (x V) IsI() bool {
-	return x.Kind == Int
+	return x.kind == valInt
 }
 
 // IsF returns true if the value is a float.
 func (x V) IsF() bool {
-	return x.Kind == Float
+	return x.kind == valFloat
 }
 
 // IsPanic returns true if the value is a fatal error.
 func (x V) IsPanic() bool {
-	return x.Kind == Panic
+	return x.kind == valPanic
 }
 
 // IsError returns true if the value is a recoverable error.
 func (x V) IsError() bool {
-	if x.Kind != Boxed {
+	if x.kind != valBoxed {
 		return false
 	}
-	_, ok := x.Value.(errV)
+	_, ok := x.value.(errV)
 	return ok
+}
+
+// IsValue returns true if the value is a boxed value satisfying the Value
+// interface.
+func (x V) IsValue() bool {
+	return x.kind == valBoxed
 }
 
 // IsFunction returns true if the value is some kind of function.
 func (x V) IsFunction() bool {
-	switch x.Kind {
-	case Variadic, Lambda:
+	switch x.kind {
+	case valVariadic, valLambda:
 		return true
-	case Boxed:
-		_, ok := x.Value.(function)
+	case valBoxed:
+		_, ok := x.value.(function)
 		return ok
 	default:
 		return false
@@ -196,15 +207,15 @@ func (x V) IsFunction() bool {
 
 // Rank returns the default rank of the value, that is the number of arguments
 // it normally takes. It returns 0 for non-function values.
-func (v V) Rank(ctx *Context) int {
-	switch v.Kind {
-	case Variadic:
+func (x V) Rank(ctx *Context) int {
+	switch x.kind {
+	case valVariadic:
 		return 2
-	case Lambda:
-		return ctx.lambdas[v.N].Rank
-	case Boxed:
-		if vf, ok := v.Value.(function); ok {
-			return vf.rank(ctx)
+	case valLambda:
+		return ctx.lambdas[x.n].Rank
+	case valBoxed:
+		if xf, ok := x.value.(function); ok {
+			return xf.rank(ctx)
 		}
 		return 0
 	default:
@@ -212,23 +223,23 @@ func (v V) Rank(ctx *Context) int {
 	}
 }
 
-func (v V) rcincr() {
-	if v.Kind != Boxed {
+func (x V) rcincr() {
+	if x.kind != valBoxed {
 		return
 	}
-	vrc, ok := v.Value.(refCounter)
+	xrc, ok := x.value.(refCounter)
 	if ok {
-		vrc.rcincr()
+		xrc.rcincr()
 	}
 }
 
-func (v V) rcdecr() {
-	if v.Kind != Boxed {
+func (x V) rcdecr() {
+	if x.kind != valBoxed {
 		return
 	}
-	vrc, ok := v.Value.(refCounter)
+	xrc, ok := x.value.(refCounter)
 	if ok {
-		vrc.rcdecr()
+		xrc.rcdecr()
 	}
 }
 
@@ -502,11 +513,12 @@ func (r derivedVerb) Matches(x Value) bool {
 	return ok && r.Fun == xr.Fun && Match(r.Arg, xr.Arg)
 }
 
-// refCounter is implemented by values that use a reference count, allowing for
-// memory reuse. Refcount is increased by each assignement, and each use in an
-// operation. It is reduced after each operation, and for each last use of a
-// variable (as approximated conservatively). If refcount is less than one,
-// then the variable can be reused.
+// refCounter is implemented by values that use a reference count. In goal the
+// refcount is not use for memory management, but only for optimization of
+// memory allocations.  Refcount is increased by each assignement, and each use
+// in an operation. It is reduced after each operation, and for each last use
+// of a variable (as approximated conservatively). If refcount is equal or less
+// than one, then the value is reusable.
 type refCounter interface {
 	rcincr()
 	rcdecr()

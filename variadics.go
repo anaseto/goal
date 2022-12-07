@@ -428,7 +428,7 @@ func VCast(ctx *Context, args []V) V {
 		if x.IsI() || x.IsF() {
 			return shapeSplit(x, y)
 		}
-		switch xv := x.Value.(type) {
+		switch xv := x.value.(type) {
 		case array:
 			return search(x, y)
 		case S:
@@ -478,7 +478,7 @@ func VApplyN(ctx *Context, args []V) V {
 		return eval(ctx, args[0])
 	case 2:
 		x := args[1]
-		av := toArray(args[0]).Value.(array)
+		av := toArray(args[0]).value.(array)
 		for i := av.Len() - 1; i >= 0; i-- {
 			ctx.push(av.at(i))
 		}

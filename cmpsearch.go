@@ -10,23 +10,23 @@ type Matcher interface {
 
 // Match returns true if the two values match like in x~y.
 func Match(x, y V) bool {
-	switch x.Kind {
-	case Nil:
-		return y.Kind == Nil
-	case Int:
-		return y.Kind == Int && x.N == y.N ||
-			y.Kind == Float && float64(x.N) == y.F()
-	case Float:
-		return y.Kind == Int && x.F() == float64(y.N) ||
-			y.Kind == Float && x.F() == y.F()
-	case Variadic:
-		return y.Kind == Variadic && x.N == y.N
-	case Lambda:
-		return y.Kind == Lambda && x.N == y.N
-	case Panic:
-		return y.Kind == Panic && x.Value.Matches(y.Value)
+	switch x.kind {
+	case valNil:
+		return y.kind == valNil
+	case valInt:
+		return y.kind == valInt && x.n == y.n ||
+			y.kind == valFloat && float64(x.n) == y.F()
+	case valFloat:
+		return y.kind == valInt && x.F() == float64(y.n) ||
+			y.kind == valFloat && x.F() == y.F()
+	case valVariadic:
+		return y.kind == valVariadic && x.n == y.n
+	case valLambda:
+		return y.kind == valLambda && x.n == y.n
+	case valPanic:
+		return y.kind == valPanic && x.value.Matches(y.value)
 	default:
-		return y.Kind == Boxed && x.Value.Matches(y.Value)
+		return y.kind == valBoxed && x.value.Matches(y.value)
 	}
 }
 
@@ -147,7 +147,7 @@ func classify(x V) V {
 		return NewAB([]bool{})
 	}
 	//assertCanonical(x)
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		if !xv.At(0) {
 			return NewV(xv)
@@ -226,7 +226,7 @@ func uniq(x V) V {
 		return x
 	}
 	//assertCanonical(xv)
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		if xv.Len() == 0 {
 			return NewV(xv)
@@ -299,7 +299,7 @@ func markFirsts(x V) V {
 		return NewAB([]bool{})
 	}
 	//assertCanonical(xv)
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		r := make([]bool, xv.Len())
 		r[0] = true
@@ -369,7 +369,7 @@ func markFirsts(x V) V {
 // memberOf returns x in y.
 func memberOf(x, y V) V {
 	if Length(y) == 0 {
-		switch xv := x.Value.(type) {
+		switch xv := x.value.(type) {
 		case array:
 			r := make([]bool, xv.Len())
 			return NewAB(r)
@@ -382,7 +382,7 @@ func memberOf(x, y V) V {
 	}
 	//assertCanonical(x)
 	//assertCanonical(yv)
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case *AB:
 		return memberOfAB(x, yv)
 	case *AF:
@@ -407,7 +407,7 @@ func memberOfAB(x V, y *AB) V {
 		t, f = t || yi, f || !yi
 	}
 	if t && f {
-		switch xv := x.Value.(type) {
+		switch xv := x.value.(type) {
 		case array:
 			r := make([]bool, xv.Len())
 			for i := range r {
@@ -441,7 +441,7 @@ func memberOfAF(x V, y *AF) V {
 		_, ok := m[x.F()]
 		return NewI(b2i(ok))
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		r := make([]bool, xv.Len())
 		for i, xi := range xv.Slice {
@@ -487,7 +487,7 @@ func memberOfAI(x V, y *AI) V {
 		_, ok := m[int64(x.F())]
 		return NewI(b2i(ok))
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		r := make([]bool, xv.Len())
 		for i, xi := range xv.Slice {
@@ -525,7 +525,7 @@ func memberOfAS(x V, y *AS) V {
 			continue
 		}
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case S:
 		_, ok := m[string(xv)]
 		return NewI(b2i(ok))
@@ -543,7 +543,7 @@ func memberOfAS(x V, y *AS) V {
 }
 
 func memberOfAV(x V, y *AV) V {
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case array:
 		return memberOfArray(xv, y)
 	default:
@@ -577,7 +577,7 @@ func occurrenceCount(x V) V {
 		return NewAB([]bool{})
 	}
 	//assertCanonical(x)
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		r := make([]int64, xv.Len())
 		var f, t int64
@@ -660,7 +660,7 @@ func without(x, y V) V {
 		}
 		return windows(int64(x.F()), y)
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case S:
 		return trim(xv, y)
 	case array:
@@ -669,7 +669,7 @@ func without(x, y V) V {
 		if r.IsI() {
 			r = NewI(1 - r.I())
 		}
-		switch bres := r.Value.(type) {
+		switch bres := r.value.(type) {
 		case *AB:
 			for i, b := range bres.Slice {
 				bres.Slice[i] = !b
@@ -686,7 +686,7 @@ func without(x, y V) V {
 func find(x, y V) V {
 	//assertCanonical(y)
 	//assertCanonical(xv)
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case S:
 		return findS(xv, y)
 	case *AB:
@@ -705,7 +705,7 @@ func find(x, y V) V {
 }
 
 func findS(s S, y V) V {
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case S:
 		return NewI(int64(strings.Index(string(s), string(yv))))
 	case *AS:
@@ -795,7 +795,7 @@ func findAB(x *AB, y V) V {
 		}
 		return findAB(x, NewI(int64(y.F())))
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case *AB:
 		m := imapAB(x)
 		r := make([]int64, yv.Len())
@@ -850,7 +850,7 @@ func findAF(x *AF, y V) V {
 		}
 		return NewI(int64(x.Len()))
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case *AB:
 		m := imapAF(x)
 		r := make([]int64, yv.Len())
@@ -912,7 +912,7 @@ func findAI(x *AI, y V) V {
 		}
 		return NewI(int64(x.Len()))
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case *AB:
 		m := imapAI(x)
 		r := make([]int64, yv.Len())
@@ -961,7 +961,7 @@ func findAI(x *AI, y V) V {
 }
 
 func findAS(x *AS, y V) V {
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case S:
 		for i, xi := range x.Slice {
 			if S(xi) == yv {
@@ -1007,7 +1007,7 @@ func findArray(x, y array) V {
 }
 
 func findAV(x *AV, y V) V {
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case array:
 		return findArray(x, yv)
 	default:

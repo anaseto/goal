@@ -178,7 +178,7 @@ func registerVariadics(ctx *goal.Context) {
 	say := ctx.RegisterMonad("say", goal.VariadicFun{
 		Func: func(ctx *goal.Context, args []goal.V) goal.V {
 			for _, arg := range args {
-				switch argv := arg.Value.(type) {
+				switch argv := arg.GetValue().(type) {
 				case goal.S:
 					fmt.Println(string(argv))
 					return goal.V{}
@@ -194,7 +194,7 @@ func registerVariadics(ctx *goal.Context) {
 		Func: func(ctx *goal.Context, args []goal.V) goal.V {
 			switch len(args) {
 			case 1:
-				switch x := args[0].Value.(type) {
+				switch x := args[0].GetValue().(type) {
 				case goal.S:
 					bytes, err := os.ReadFile(string(x))
 					if err != nil {

@@ -19,7 +19,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ctx.push(V{})
 		case opGlobal:
 			x := ctx.globals[ops[ip]]
-			if x.Kind == Nil {
+			if x.kind == valNil {
 				return ip - 1, fmt.Errorf("undefined global: %s",
 					ctx.gNames[ops[ip]])
 			}
@@ -27,7 +27,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ip++
 		case opGlobalLast:
 			x := ctx.globals[ops[ip]]
-			if x.Kind == Nil {
+			if x.kind == valNil {
 				return ip - 1, fmt.Errorf("undefined global: %s",
 					ctx.gNames[ops[ip]])
 			}
@@ -36,7 +36,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ip++
 		case opLocal:
 			x := ctx.stack[ctx.frameIdx-int32(ops[ip])]
-			if x.Kind == Nil {
+			if x.kind == valNil {
 				return ip - 1, fmt.Errorf("undefined local: %s",
 					ctx.lambdas[ctx.lambda].Names[int32(ops[ip])])
 			}
@@ -44,7 +44,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ip++
 		case opLocalLast:
 			x := ctx.stack[ctx.frameIdx-int32(ops[ip])]
-			if x.Kind == Nil {
+			if x.kind == valNil {
 				return ip - 1, fmt.Errorf("undefined local: %s",
 					ctx.lambdas[ctx.lambda].Names[int32(ops[ip])])
 			}
@@ -189,8 +189,8 @@ func (ctx *Context) drop() {
 func (ctx *Context) drop2() {
 	//ctx.stack[len(ctx.stack)-2] = V{}
 	last := len(ctx.stack) - 1
-	if ctx.stack[last].Kind == Boxed {
-		ctx.stack[last].Value = nil
+	if ctx.stack[last].kind == valBoxed {
+		ctx.stack[last].value = nil
 	}
 	ctx.stack = ctx.stack[:len(ctx.stack)-2]
 }
@@ -198,8 +198,8 @@ func (ctx *Context) drop2() {
 func (ctx *Context) dropN(n int) {
 	topN := ctx.stack[len(ctx.stack)-n:]
 	for i, v := range topN {
-		if v.Kind == Boxed {
-			topN[i].Value = nil
+		if v.kind == valBoxed {
+			topN[i].value = nil
 		}
 	}
 	ctx.stack = ctx.stack[:len(ctx.stack)-n]

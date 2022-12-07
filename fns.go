@@ -9,7 +9,7 @@ func enum(x V) V {
 	if x.IsI() {
 		return rangeI(x.I())
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AI:
 		return rangeArray(xv)
 	default:
@@ -84,7 +84,7 @@ func where(x V) V {
 		}
 
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		n := int64(0)
 		for _, xi := range xv.Slice {
@@ -188,7 +188,7 @@ func replicate(x, y V) V {
 		}
 		return replicate(NewI(int64(x.F())), y)
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		if xv.Len() != Length(y) {
 			return panicf("f#y : length mismatch: %d (f[y]) vs %d (y)", xv.Len(), Length(y))
@@ -236,7 +236,7 @@ func repeat(x V, n int64) V {
 		}
 		return NewAF(r)
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case S:
 		r := make([]string, n)
 		for i := range r {
@@ -257,7 +257,7 @@ func repeatAB(x *AB, y V) V {
 	for _, xi := range x.Slice {
 		n += b2i(xi)
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case *AB:
 		r := make([]bool, 0, n)
 		for i, xi := range x.Slice {
@@ -311,7 +311,7 @@ func repeatAI(x *AI, y V) V {
 		}
 		n += xi
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case *AB:
 		r := make([]bool, 0, n)
 		for i, xi := range x.Slice {
@@ -371,7 +371,7 @@ func weedOut(x, y V) V {
 		}
 		return y
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		return weedOutAB(xv, y)
 	case *AI:
@@ -395,7 +395,7 @@ func weedOutAB(x *AB, y V) V {
 	for _, xi := range x.Slice {
 		n += 1 - b2i(xi)
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case *AB:
 		r := make([]bool, 0, n)
 		for i, xi := range x.Slice {
@@ -446,7 +446,7 @@ func weedOutAI(x *AI, y V) V {
 	for _, xi := range x.Slice {
 		n += b2i(xi == 0)
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case *AB:
 		r := make([]bool, 0, n)
 		for i, xi := range x.Slice {
@@ -496,7 +496,7 @@ func weedOutAI(x *AI, y V) V {
 func eval(ctx *Context, x V) V {
 	//assertCanonical(x)
 	nctx := ctx.derive()
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case S:
 		r, err := nctx.Eval(string(xv))
 		if err != nil {

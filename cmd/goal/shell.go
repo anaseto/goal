@@ -14,7 +14,7 @@ func vShell(ctx *goal.Context, args []goal.V) goal.V {
 		return goal.Panicf("shell[cmd] : too many arguments (%d)", len(args))
 	}
 	var cmds string
-	switch arg := args[len(args)-1].Value.(type) {
+	switch arg := args[len(args)-1].GetValue().(type) {
 	case goal.S:
 		cmds = string(arg)
 	default:

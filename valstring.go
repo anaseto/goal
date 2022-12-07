@@ -8,20 +8,20 @@ import (
 
 // Sprint returns a prettified string representation of the value.
 func (v V) Sprint(ctx *Context) string {
-	switch v.Kind {
-	case Int:
-		return fmt.Sprintf("%d", v.N)
-	case Float:
+	switch v.kind {
+	case valInt:
+		return fmt.Sprintf("%d", v.n)
+	case valFloat:
 		return fmt.Sprintf("%g", v.F())
-	case Variadic:
-		return variadic(v.N).String()
-	case Lambda:
-		if v.N < 0 || v.N >= int64(len(ctx.lambdas)) {
-			return fmt.Sprintf("{Lambda %d}", v.N)
+	case valVariadic:
+		return variadic(v.n).String()
+	case valLambda:
+		if v.n < 0 || v.n >= int64(len(ctx.lambdas)) {
+			return fmt.Sprintf("{Lambda %d}", v.n)
 		}
-		return ctx.lambdas[v.N].Source
-	case Boxed:
-		return v.Value.Sprint(ctx)
+		return ctx.lambdas[v.n].Source
+	case valBoxed:
+		return v.value.Sprint(ctx)
 	default:
 		return ""
 	}
@@ -29,17 +29,17 @@ func (v V) Sprint(ctx *Context) string {
 
 // String returns a prettified string representation of the value.
 func (v V) String() string {
-	switch v.Kind {
-	case Int:
-		return fmt.Sprintf("%d", v.N)
-	case Float:
+	switch v.kind {
+	case valInt:
+		return fmt.Sprintf("%d", v.n)
+	case valFloat:
 		return fmt.Sprintf("%g", v.F())
-	case Variadic:
-		return variadic(v.N).String()
-	case Lambda:
-		return fmt.Sprintf("{Lambda %d}", v.N)
-	case Boxed:
-		return v.Value.String()
+	case valVariadic:
+		return variadic(v.n).String()
+	case valLambda:
+		return fmt.Sprintf("{Lambda %d}", v.n)
+	case valBoxed:
+		return v.value.String()
 	default:
 		return ""
 	}
@@ -149,7 +149,7 @@ func (x *AS) String() string {
 
 // sprintV returns a string for a V deep in an AV.
 func sprintV(ctx *Context, x V) string {
-	avx, ok := x.Value.(*AV)
+	avx, ok := x.value.(*AV)
 	if ok {
 		return avx.sprint(ctx, true)
 	}
@@ -183,7 +183,7 @@ func (x *AV) sprint(ctx *Context, deep bool) string {
 		sep = " "
 	}
 	for i, xi := range x.Slice {
-		if xi.Kind != Nil {
+		if xi.kind != valNil {
 			fmt.Fprintf(sb, "%s", sprintV(ctx, xi))
 		}
 		if i < x.Len()-1 {
@@ -212,7 +212,7 @@ func (x *AV) String() string {
 		sep = " "
 	}
 	for i, xi := range x.Slice {
-		if xi.Kind != Nil {
+		if xi.kind != valNil {
 			fmt.Fprintf(sb, "%s", xi.String())
 		}
 		if i < x.Len()-1 {
@@ -229,7 +229,7 @@ func (p projection) Sprint(ctx *Context) string {
 	sb.WriteRune('[')
 	for i := len(p.Args) - 1; i >= 0; i-- {
 		arg := p.Args[i]
-		if arg.Kind != Nil {
+		if arg.kind != valNil {
 			fmt.Fprintf(sb, "%s", arg.Sprint(ctx))
 		}
 		if i > 0 {
@@ -246,7 +246,7 @@ func (p projection) String() string {
 	sb.WriteRune('[')
 	for i := len(p.Args) - 1; i >= 0; i-- {
 		arg := p.Args[i]
-		if arg.Kind != Nil {
+		if arg.kind != valNil {
 			fmt.Fprintf(sb, "%s", arg.String())
 		}
 		if i > 0 {

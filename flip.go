@@ -4,7 +4,7 @@ package goal
 func flip(x V) V {
 	//assertCanonical(x)
 	x = toArray(x)
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AV:
 		cols := xv.Len()
 		if cols == 0 {
@@ -13,7 +13,7 @@ func flip(x V) V {
 		lines := -1
 		for _, o := range xv.Slice {
 			nl := int(Length(o))
-			if _, ok := o.Value.(array); !ok {
+			if _, ok := o.value.(array); !ok {
 				continue
 			}
 			switch {
@@ -99,7 +99,7 @@ func flipAF(x *AV) V {
 			r[i] = float64(xi.F())
 			continue
 		}
-		switch z := xi.Value.(type) {
+		switch z := xi.value.(type) {
 		case *AB:
 			r[i] = float64(b2f(z.At(0)))
 		case *AF:
@@ -125,7 +125,7 @@ func flipAVAF(x *AV, lines int) V {
 				q[i] = float64(xi.F())
 				continue
 			}
-			switch z := xi.Value.(type) {
+			switch z := xi.value.(type) {
 			case *AB:
 				q[i] = float64(b2f(z.At(j)))
 			case *AF:
@@ -146,7 +146,7 @@ func flipAI(x *AV) V {
 			r[i] = xi.I()
 			continue
 		}
-		switch z := xi.Value.(type) {
+		switch z := xi.value.(type) {
 		case *AB:
 			r[i] = b2i(z.At(0))
 		case *AI:
@@ -166,7 +166,7 @@ func flipAVAI(x *AV, lines int) V {
 				q[i] = xi.I()
 				continue
 			}
-			switch z := xi.Value.(type) {
+			switch z := xi.value.(type) {
 			case *AB:
 				q[i] = b2i(z.At(j))
 			case *AI:
@@ -181,7 +181,7 @@ func flipAVAI(x *AV, lines int) V {
 func flipAS(x *AV) V {
 	r := make([]string, x.Len())
 	for i, xi := range x.Slice {
-		switch z := xi.Value.(type) {
+		switch z := xi.value.(type) {
 		case S:
 			r[i] = string(z)
 		case *AS:
@@ -197,7 +197,7 @@ func flipAVAS(x *AV, lines int) V {
 	for j := range r {
 		q := a[j*x.Len() : (j+1)*x.Len()]
 		for i, xi := range x.Slice {
-			switch z := xi.Value.(type) {
+			switch z := xi.value.(type) {
 			case S:
 				q[i] = string(z)
 			case *AS:
@@ -212,7 +212,7 @@ func flipAVAS(x *AV, lines int) V {
 func flipAV(x *AV) V {
 	r := make([]V, x.Len())
 	for i, xi := range x.Slice {
-		switch z := xi.Value.(type) {
+		switch z := xi.value.(type) {
 		case array:
 			r[i] = z.at(0)
 		default:
@@ -228,7 +228,7 @@ func flipAVAV(x *AV, lines int) V {
 	for j := range r {
 		q := a[j*x.Len() : (j+1)*x.Len()]
 		for i, xi := range x.Slice {
-			switch z := xi.Value.(type) {
+			switch z := xi.value.(type) {
 			case array:
 				q[i] = z.at(j)
 			default:

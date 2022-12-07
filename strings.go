@@ -19,7 +19,7 @@ func applyS(s S, x V) V {
 		}
 		return applyS(s, NewI(int64(x.F())))
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		return applyS(s, fromABtoAI(xv))
 	case *AI:
@@ -67,7 +67,7 @@ func applyS2(s S, x V, y V) V {
 		}
 		l = int64(y.F())
 	} else {
-		switch yv := y.Value.(type) {
+		switch yv := y.value.(type) {
 		case *AI:
 		case *AB:
 			if Length(x) != yv.Len() {
@@ -91,7 +91,7 @@ func applyS2(s S, x V, y V) V {
 		if xv < 0 || xv > int64(len(s)) {
 			return panicf("s[i;y] : i out of bounds index (%d)", xv)
 		}
-		if _, ok := y.Value.(*AI); ok {
+		if _, ok := y.value.(*AI); ok {
 			return panicf("s[x;y] : x is an atom but y is an array")
 		}
 		if xv+l > int64(len(s)) {
@@ -106,12 +106,12 @@ func applyS2(s S, x V, y V) V {
 		}
 		return applyS2(s, NewI(int64(x.F())), y)
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		return applyS2(s, fromABtoAI(xv), y)
 	case *AI:
 		r := make([]string, xv.Len())
-		if z, ok := y.Value.(*AI); ok {
+		if z, ok := y.value.(*AI); ok {
 			if z.Len() != xv.Len() {
 				return panicf("s[x;y] : length mismatch: %d (#x) %d (#y)",
 					xv.Len(), z.Len())
@@ -166,7 +166,7 @@ func applyS2(s S, x V, y V) V {
 }
 
 func bytes(x V) V {
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case S:
 		return NewI(int64(len(xv)))
 	case *AS:
@@ -210,7 +210,7 @@ func casti(y V) V {
 	if y.IsF() {
 		return NewI(int64(y.F()))
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case S:
 		runes := []rune(yv)
 		r := make([]int64, len(runes))
@@ -248,7 +248,7 @@ func castn(y V) V {
 	if y.IsI() || y.IsF() {
 		return y
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case S:
 		xi, err := parseNumber(string(yv))
 		if err != nil {
@@ -292,7 +292,7 @@ func casts(y V) V {
 	if y.IsF() {
 		return casts(NewI(int64(y.F())))
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case *AB:
 		return casts(fromABtoAI(yv))
 	case *AI:
@@ -318,7 +318,7 @@ func casts(y V) V {
 }
 
 func drops(s S, y V) V {
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case S:
 		return NewS(strings.TrimPrefix(string(yv), string(s)))
 	case *AS:
@@ -343,7 +343,7 @@ func drops(s S, y V) V {
 
 // trim returns s^y.
 func trim(s S, y V) V {
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case S:
 		return NewS(strings.Trim(string(yv), string(s)))
 	case *AS:

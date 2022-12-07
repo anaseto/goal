@@ -83,7 +83,7 @@ func maxS(x, y S) S {
 // is reusable.
 func clone(x V) V {
 	x = cloneShallow(x)
-	if xv, ok := x.Value.(*AV); ok {
+	if xv, ok := x.value.(*AV); ok {
 		for i, xi := range xv.Slice {
 			xv.Slice[i] = clone(xi)
 		}
@@ -94,8 +94,8 @@ func clone(x V) V {
 // clone creates an identical shallow copy of a value, or the value itself if
 // it is reusable.
 func cloneShallow(x V) V {
-	if xv, ok := x.Value.(array); ok {
-		x.Value = cloneShallowArray(xv)
+	if xv, ok := x.value.(array); ok {
+		x.value = cloneShallowArray(xv)
 	}
 	return x
 }
@@ -139,7 +139,7 @@ func isIndices(x V) bool {
 	if x.IsI() {
 		return true
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AI:
 		return true
 	case *AV:
@@ -172,7 +172,7 @@ func toIndicesRec(x V) V {
 		}
 		return NewI(int64(x.F()))
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		return fromABtoAI(xv)
 	case *AF:
@@ -204,7 +204,7 @@ func toArray(x V) V {
 	if x.IsF() {
 		return NewAF([]float64{float64(x.F())})
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case S:
 		return NewAS([]string{string(xv)})
 	case array:
@@ -243,11 +243,11 @@ func isFalse(x V) bool {
 	if x.IsF() {
 		return x.F() == 0
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case S:
 		return xv == ""
 	default:
-		return x.Kind == Nil || Length(x) == 0
+		return x.kind == valNil || Length(x) == 0
 	}
 }
 
@@ -258,11 +258,11 @@ func isTrue(x V) bool {
 	if x.IsF() {
 		return x.F() != 0
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case S:
 		return xv != ""
 	default:
-		return x.Kind != Nil && Length(x) > 0
+		return x.kind != valNil && Length(x) > 0
 	}
 }
 
@@ -303,7 +303,7 @@ func eType(x V) eltype {
 	if x.IsF() {
 		return tF
 	}
-	switch x.Value.(type) {
+	switch x.value.(type) {
 	case S:
 		return tS
 	case *AB:
@@ -334,7 +334,7 @@ func cType(x V) eltype {
 	if x.IsF() {
 		return tF
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		return tAB
 	case *AF:
@@ -393,21 +393,21 @@ func sameType(x, y V) bool {
 	if x.IsF() {
 		return y.IsF()
 	}
-	switch x.Value.(type) {
+	switch x.value.(type) {
 	case *AB:
-		_, ok := y.Value.(*AB)
+		_, ok := y.value.(*AB)
 		return ok
 	case *AI:
-		_, ok := y.Value.(*AI)
+		_, ok := y.value.(*AI)
 		return ok
 	case *AF:
-		_, ok := y.Value.(*AF)
+		_, ok := y.value.(*AF)
 		return ok
 	case *AS:
-		_, ok := y.Value.(*AS)
+		_, ok := y.value.(*AS)
 		return ok
 	case *AV:
-		_, ok := y.Value.(*AV)
+		_, ok := y.value.(*AV)
 		return ok
 	default:
 		// TODO: sameType, handle other cases (unused for now)
@@ -422,7 +422,7 @@ func compatEltType(x array, y V) bool {
 	case *AF:
 		return y.IsF()
 	case *AS:
-		_, ok := y.Value.(S)
+		_, ok := y.value.(S)
 		return ok
 	case *AV:
 		return true
@@ -500,7 +500,7 @@ func maxAB(x AB) bool {
 }
 
 func isCanonicalV(x V) bool {
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AV:
 		_, ok := isCanonical(xv)
 		return ok
@@ -566,7 +566,7 @@ func normalize(x *AV) (array, bool) {
 	case tS:
 		r := make([]string, x.Len())
 		for i, xi := range x.Slice {
-			r[i] = string(xi.Value.(S))
+			r[i] = string(xi.value.(S))
 		}
 		return &AS{Slice: r}, true
 	case tV:
@@ -582,7 +582,7 @@ func normalize(x *AV) (array, bool) {
 
 // canonicalV returns the canonical form of a given value.
 func canonicalV(x V) V {
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AV:
 		r, b := normalize(xv)
 		if b {
@@ -603,7 +603,7 @@ func canonical(x *AV) Value {
 // hasNil returns true if there is a nil value in the given array.
 func hasNil(a []V) bool {
 	for _, x := range a {
-		if x.Kind == Nil {
+		if x.kind == valNil {
 			return true
 		}
 	}
@@ -614,7 +614,7 @@ func hasNil(a []V) bool {
 func countNils(a []V) int {
 	n := 0
 	for _, ai := range a {
-		if ai.Kind == Nil {
+		if ai.kind == valNil {
 			n++
 		}
 	}

@@ -4,7 +4,7 @@ package goal
 
 // amend3 implements @[x;y;f].
 func (ctx *Context) amend3(x, y, f V) V {
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case array:
 		y = toIndices(y)
 		if y.IsPanic() {
@@ -41,14 +41,14 @@ func (ctx *Context) amend3array(x array, y, f V) V {
 	if y.IsI() {
 		return ctx.amend3arrayI(x, y.I(), f)
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case *AI:
 		for _, yi := range yv.Slice {
 			ax := ctx.amend3arrayI(x, yi, f)
 			if ax.IsPanic() {
 				return ax
 			}
-			x = ax.Value.(array)
+			x = ax.value.(array)
 		}
 		return NewV(x)
 	case *AV:
@@ -57,7 +57,7 @@ func (ctx *Context) amend3array(x array, y, f V) V {
 			if ax.IsPanic() {
 				return ax
 			}
-			x = ax.Value.(array)
+			x = ax.value.(array)
 		}
 		return NewV(x)
 	default:
@@ -67,7 +67,7 @@ func (ctx *Context) amend3array(x array, y, f V) V {
 
 // amend4 implements @[x;y;f;z].
 func (ctx *Context) amend4(x, y, f, z V) V {
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case array:
 		y = toIndices(y)
 		if y.IsPanic() {
@@ -102,22 +102,22 @@ func (ctx *Context) amend4arrayI(x array, y int64, f, z V) V {
 
 func (ctx *Context) amend4array(x array, y, f, z V) V {
 	if y.IsI() {
-		switch z.Value.(type) {
+		switch z.value.(type) {
 		case array:
 			return panics("@[x;y;f;z] : shape mismatch between x and y")
 		}
 		return ctx.amend4arrayI(x, y.I(), f, z)
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case *AI:
-		az, ok := z.Value.(array)
+		az, ok := z.value.(array)
 		if !ok {
 			for _, xi := range yv.Slice {
 				ax := ctx.amend4arrayI(x, xi, f, z)
 				if ax.IsPanic() {
 					return ax
 				}
-				x = ax.Value.(array)
+				x = ax.value.(array)
 			}
 			return NewV(x)
 		}
@@ -130,18 +130,18 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 			if ax.IsPanic() {
 				return ax
 			}
-			x = ax.Value.(array)
+			x = ax.value.(array)
 		}
 		return NewV(x)
 	case *AV:
-		az, ok := z.Value.(array)
+		az, ok := z.value.(array)
 		if !ok {
 			for _, xi := range yv.Slice {
 				ax := ctx.amend4array(x, xi, f, z)
 				if ax.IsPanic() {
 					return ax
 				}
-				x = ax.Value.(array)
+				x = ax.value.(array)
 			}
 			return NewV(x)
 		}
@@ -154,7 +154,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 			if ax.IsPanic() {
 				return ax
 			}
-			x = ax.Value.(array)
+			x = ax.value.(array)
 		}
 		return NewV(x)
 	default:
@@ -164,13 +164,13 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 
 // try implements .[f1;x;f2].
 func try(ctx *Context, f1, x, f2 V) V {
-	av := toArray(x).Value.(array)
+	av := toArray(x).value.(array)
 	for i := av.Len() - 1; i >= 0; i-- {
 		ctx.push(av.at(i))
 	}
 	r := ctx.applyN(f1, av.Len())
 	if r.IsPanic() {
-		r.Kind = Boxed // we used the boxed value
+		r.kind = valBoxed // we used the boxed value
 		ctx.push(r)
 		r = ctx.applyN(f2, 1)
 		if r.IsPanic() {

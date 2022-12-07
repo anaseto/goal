@@ -44,10 +44,10 @@ func rcdecr(args []V) {
 // applyN applies x with the top n arguments in the stack. It consumes the
 // arguments, but does not push the result, returing it instead.
 func (ctx *Context) applyN(x V, n int) V {
-	switch x.Kind {
-	case Lambda:
+	switch x.kind {
+	case valLambda:
 		return ctx.applyLambda(x.lambda(), n)
-	case Variadic:
+	case valVariadic:
 		switch n {
 		case 1:
 			return ctx.applyVariadic(x.variadic())
@@ -57,7 +57,7 @@ func (ctx *Context) applyN(x V, n int) V {
 			return ctx.applyNVariadic(x.variadic(), n)
 		}
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case derivedVerb:
 		ctx.push(xv.Arg)
 		args := ctx.peekN(n + 1)
@@ -122,8 +122,8 @@ func (ctx *Context) applyN(x V, n int) V {
 
 // applyArray applies an array to a value.
 func (ctx *Context) applyArray(x V, y V) V {
-	xv := x.Value.(array)
-	if y.Kind == Nil {
+	xv := x.value.(array)
+	if y.kind == valNil {
 		return x
 	}
 	if y.IsI() {
@@ -150,7 +150,7 @@ func (ctx *Context) applyArray(x V, y V) V {
 		}
 		return xv.at(int(i))
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case *AV:
 		r := make([]V, yv.Len())
 		for i, yi := range yv.Slice {
@@ -163,9 +163,9 @@ func (ctx *Context) applyArray(x V, y V) V {
 	case array:
 		iy := toIndices(y)
 		if iy.IsPanic() {
-			return panicf("x[y] : %v", iy.Value)
+			return panicf("x[y] : %v", iy.value)
 		}
-		r := xv.atIndices(iy.Value.(*AI).Slice)
+		r := xv.atIndices(iy.value.(*AI).Slice)
 		return r
 	default:
 		return panicf("x[y] : y non-array non-integer (%s)", y.Type())
@@ -173,12 +173,12 @@ func (ctx *Context) applyArray(x V, y V) V {
 }
 
 func (ctx *Context) applyArrayArgs(x V, arg V, args []V) V {
-	xv := x.Value.(array)
+	xv := x.value.(array)
 	// TODO: annotate error with depth?
 	if len(args) == 0 {
 		return ctx.applyArray(x, arg)
 	}
-	if arg.Kind == Nil {
+	if arg.kind == valNil {
 		r := make([]V, xv.Len())
 		for i := 0; i < len(r); i++ {
 			r[i] = ctx.ApplyN(xv.at(i), args)
@@ -188,7 +188,7 @@ func (ctx *Context) applyArrayArgs(x V, arg V, args []V) V {
 		}
 		return canonicalV(NewAV(r))
 	}
-	switch argv := arg.Value.(type) {
+	switch argv := arg.value.(type) {
 	case array:
 		r := make([]V, argv.Len())
 		for i := 0; i < argv.Len(); i++ {
@@ -210,7 +210,7 @@ func (ctx *Context) applyArrayArgs(x V, arg V, args []V) V {
 func (ctx *Context) applyVariadic(v variadic) V {
 	args := ctx.peek()
 	x := args[0]
-	if x.Kind == Nil {
+	if x.kind == valNil {
 		ctx.drop()
 		return NewV(projectionMonad{Fun: newVariadic(v)})
 	}
@@ -227,14 +227,14 @@ func (ctx *Context) applyVariadic(v variadic) V {
 
 func (ctx *Context) apply2Variadic(v variadic) V {
 	args := ctx.peekN(2)
-	if args[0].Kind == Nil {
-		if args[1].Kind != Nil {
+	if args[0].kind == valNil {
+		if args[1].kind != valNil {
 			arg := args[1]
 			ctx.drop2()
 			return NewV(projectionFirst{Fun: newVariadic(v), Arg: arg})
 		}
 		return NewV(projection{Fun: newVariadic(v), Args: ctx.popN(2)})
-	} else if args[1].Kind == Nil {
+	} else if args[1].kind == valNil {
 		return NewV(projection{Fun: newVariadic(v), Args: ctx.popN(2)})
 	}
 	args[0].rcincr()
@@ -268,7 +268,7 @@ func (ctx *Context) applyProjection(p projection, n int) V {
 		nilc := 0
 		for _, arg := range p.Args {
 			switch {
-			case arg.Kind != Nil:
+			case arg.kind != valNil:
 				ctx.push(arg)
 			default:
 				ctx.push(args[nilc])
@@ -282,7 +282,7 @@ func (ctx *Context) applyProjection(p projection, n int) V {
 		vargs := cloneArgs(p.Args)
 		nilc := 1
 		for i := len(vargs) - 1; i >= 0; i-- {
-			if vargs[i].Kind == Nil {
+			if vargs[i].kind == valNil {
 				if nilc > len(args) {
 					break
 				}
@@ -306,13 +306,13 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 	args := ctx.peekN(n)
 	if lc.Rank > n || hasNil(args) {
 		if n == 1 {
-			if args[0].Kind == Nil {
+			if args[0].kind == valNil {
 				ctx.drop() // drop nil
 				return NewV(projectionMonad{Fun: newLambda(id)})
 			}
 			return NewV(projectionFirst{Fun: newLambda(id), Arg: ctx.pop()})
 		}
-		if n == 2 && args[1].Kind == Nil && args[0].Kind != Nil {
+		if n == 2 && args[1].kind == valNil && args[0].kind != valNil {
 			return NewV(projectionFirst{Fun: newLambda(id), Arg: ctx.pop()})
 		}
 		return NewV(projection{Fun: newLambda(id), Args: ctx.popN(n)})
@@ -442,12 +442,12 @@ func (x AV) set(i int, y V) {
 
 // set changes x at i with y (in place).
 func (x AB) set(i int, y V) {
-	x.Slice[i] = y.N == 1
+	x.Slice[i] = y.n == 1
 }
 
 // set changes x at i with y (in place).
 func (x AI) set(i int, y V) {
-	x.Slice[i] = y.N
+	x.Slice[i] = y.n
 }
 
 // set changes x at i with y (in place).
@@ -457,7 +457,7 @@ func (x AF) set(i int, y V) {
 
 // set changes x at i with y (in place).
 func (x AS) set(i int, y V) {
-	x.Slice[i] = string(y.Value.(S))
+	x.Slice[i] = string(y.value.(S))
 }
 
 //// setIndices x at y with z (in place).

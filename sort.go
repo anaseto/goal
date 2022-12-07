@@ -54,7 +54,7 @@ func less(x, y V) bool {
 	if x.IsF() {
 		return lessF(x, y)
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case S:
 		return lessS(x, y)
 	case *AB:
@@ -95,7 +95,7 @@ func lessF(x V, y V) bool {
 	if y.IsF() {
 		return xv < y.F()
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case *AB:
 		if yv.Len() == 0 {
 			return false
@@ -129,7 +129,7 @@ func lessI(x V, y V) bool {
 	if y.IsF() {
 		return float64(xv) < y.F()
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case *AB:
 		if yv.Len() == 0 {
 			return false
@@ -156,8 +156,8 @@ func lessI(x V, y V) bool {
 }
 
 func lessS(x V, y V) bool {
-	xv := x.Value.(S)
-	switch yv := y.Value.(type) {
+	xv := x.value.(S)
+	switch yv := y.value.(type) {
 	case S:
 		return xv < yv
 	case *AS:
@@ -176,14 +176,14 @@ func lessS(x V, y V) bool {
 }
 
 func lessAB(x V, y V) bool {
-	xv := x.Value.(*AB)
+	xv := x.value.(*AB)
 	if y.IsI() {
 		return !lessI(y, x)
 	}
 	if y.IsF() {
 		return !lessF(y, x)
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case *AB:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if !xv.At(i) && yv.At(i) {
@@ -230,14 +230,14 @@ func lessAB(x V, y V) bool {
 }
 
 func lessAI(x V, y V) bool {
-	xv := x.Value.(*AI)
+	xv := x.value.(*AI)
 	if y.IsI() {
 		return !lessI(y, x)
 	}
 	if y.IsF() {
 		return !lessF(y, x)
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case *AB:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if xv.At(i) < b2i(yv.At(i)) {
@@ -284,14 +284,14 @@ func lessAI(x V, y V) bool {
 }
 
 func lessAF(x V, y V) bool {
-	xv := x.Value.(*AF)
+	xv := x.value.(*AF)
 	if y.IsI() {
 		return !lessI(y, x)
 	}
 	if y.IsF() {
 		return !lessF(y, x)
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case *AB:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if xv.At(i) < b2f(yv.At(i)) {
@@ -338,8 +338,8 @@ func lessAF(x V, y V) bool {
 }
 
 func lessAS(x V, y V) bool {
-	xv := x.Value.(*AS)
-	switch yv := y.Value.(type) {
+	xv := x.value.(*AS)
+	switch yv := y.value.(type) {
 	case S:
 		return !lessS(y, x)
 	case *AS:
@@ -368,14 +368,14 @@ func lessAS(x V, y V) bool {
 }
 
 func lessAV(x V, y V) bool {
-	xv := x.Value.(*AV)
+	xv := x.value.(*AV)
 	if y.IsI() {
 		return less(xv.At(0), y)
 	}
 	if y.IsF() {
 		return less(xv.At(0), y)
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case *AB:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
 			if less(xv.At(i), NewI(b2i(yv.At(i)))) {
@@ -424,7 +424,7 @@ func lessAV(x V, y V) bool {
 // sortUp returns ^x.
 func sortUp(x V) V {
 	x = cloneShallow(x)
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		sort.Stable(sortAB(xv.Slice))
 		return NewV(xv)
@@ -540,7 +540,7 @@ func permRange(n int) []int64 {
 
 // ascend returns <x.
 func ascend(x V) V {
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		p := &permutationAB{Perm: permRange(xv.Len()), X: sortAB(xv.Slice)}
 		sort.Stable(p)
@@ -570,7 +570,7 @@ func ascend(x V) V {
 func descend(x V) V {
 	p := ascend(x)
 	if p.IsPanic() {
-		return panics(">" + strings.TrimPrefix(string(p.Value.(S)), "<"))
+		return panics(">" + strings.TrimPrefix(string(p.value.(S)), "<"))
 	}
 	reverseMut(p)
 	return p
@@ -578,12 +578,12 @@ func descend(x V) V {
 
 // search implements x$y.
 func search(x V, y V) V {
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		if !sort.IsSorted(sortAB(xv.Slice)) {
 			return panicDomain("x$y", "x is not ascending")
 		}
-		return searchAI(fromABtoAI(xv).Value.(*AI), y)
+		return searchAI(fromABtoAI(xv).value.(*AI), y)
 	case *AI:
 		if !sort.IsSorted(sortAI(xv.Slice)) {
 			return panicDomain("x$y", "x is not ascending")
@@ -637,7 +637,7 @@ func searchAI(x *AI, y V) V {
 	if y.IsF() {
 		return NewI(searchAIF(x, y.F()))
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case *AB:
 		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
@@ -675,7 +675,7 @@ func searchAF(x *AF, y V) V {
 	if y.IsF() {
 		return NewI(searchAFF(x, y.F()))
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case *AB:
 		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
@@ -707,7 +707,7 @@ func searchAF(x *AF, y V) V {
 }
 
 func searchAS(x *AS, y V) V {
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case S:
 		return NewI(searchASS(x, yv))
 	case *AS:
@@ -729,7 +729,7 @@ func searchAS(x *AS, y V) V {
 }
 
 func searchAV(x *AV, y V) V {
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case array:
 		r := make([]int64, yv.Len())
 		for i := 0; i < yv.Len(); i++ {

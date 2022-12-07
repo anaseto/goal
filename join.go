@@ -8,7 +8,7 @@ func joinTo(x, y V) V {
 	if x.IsF() {
 		return joinToF(x.F(), y, true)
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case S:
 		return joinToS(xv, y, true)
 	case *AB:
@@ -22,7 +22,7 @@ func joinTo(x, y V) V {
 	case *AV:
 		return joinToAV(y, xv, false)
 	default:
-		switch yv := y.Value.(type) {
+		switch yv := y.value.(type) {
 		case array:
 			return joinAtomToArray(x, yv, true)
 		default:
@@ -44,7 +44,7 @@ func joinToI(x int64, y V, left bool) V {
 		}
 		return NewAF([]float64{float64(y.F()), float64(x)})
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case S:
 		if left {
 			return NewAV([]V{NewI(x), y})
@@ -78,7 +78,7 @@ func joinToF(x float64, y V, left bool) V {
 		}
 		return NewAF([]float64{float64(y.F()), float64(x)})
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case S:
 		if left {
 			return NewAV([]V{NewF(x), y})
@@ -112,7 +112,7 @@ func joinToS(x S, y V, left bool) V {
 		}
 		return NewAV([]V{y, NewV(x)})
 	}
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case S:
 		if left {
 			return NewAS([]string{string(x), string(yv)})
@@ -134,7 +134,7 @@ func joinToS(x S, y V, left bool) V {
 }
 
 func joinToAV(x V, y *AV, left bool) V {
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case array:
 		if left {
 			return joinArrays(xv, y)
@@ -187,7 +187,7 @@ func joinAtomToArray(x V, y array, left bool) V {
 }
 
 func joinToAS(x V, y *AS, left bool) V {
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case S:
 		if left {
 			r := make([]string, y.Len()+1)
@@ -276,7 +276,7 @@ func joinToAB(x V, y *AB, left bool) V {
 		}
 		return NewAF(r)
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		if left {
 			return joinABAB(xv, y)
@@ -335,7 +335,7 @@ func joinToAI(x V, y *AI, left bool) V {
 		}
 		return NewAF(r)
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		if left {
 			return joinABAI(xv, y)
@@ -394,7 +394,7 @@ func joinToAF(x V, y *AF, left bool) V {
 		copy(r[:len(r)-1], y.Slice)
 		return NewAF(r)
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		if left {
 			return joinABAF(xv, y)
@@ -536,7 +536,7 @@ func enlist(x V) V {
 	if x.IsF() {
 		return NewAF([]float64{x.F()})
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case S:
 		return NewAS([]string{string(xv)})
 	default:

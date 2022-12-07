@@ -351,8 +351,8 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 		if n > 0 {
 			return c.errorf("type n cannot be applied")
 		}
-		if x.Kind == Int && x.N <= math.MaxInt32 && x.N >= math.MinInt32 {
-			c.push2(opInt, opcode(int32(x.N)))
+		if x.kind == valInt && x.n <= math.MaxInt32 && x.n >= math.MinInt32 {
+			c.push2(opInt, opcode(int32(x.n)))
 		} else {
 			id := c.ctx.storeConst(x)
 			c.push2(opConst, opcode(id))

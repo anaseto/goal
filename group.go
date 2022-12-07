@@ -5,7 +5,7 @@ func group(x V) V {
 	if Length(x) == 0 {
 		return NewAV([]V{})
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		n := int(sumAB(xv))
 		r := make([]V, int(b2i(n > 0)+1))
@@ -84,7 +84,7 @@ func icount(x V) V {
 	if Length(x) == 0 {
 		return NewAI([]int64{})
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		n := sumAB(xv)
 		return NewAI([]int64{int64(xv.Len()) - n, n})
@@ -121,12 +121,12 @@ func groupBy(x, y V) V {
 	if x.IsPanic() {
 		return panics("f=y : f[y] not an integer array")
 	}
-	avx := x.Value.(*AV) // group should always return AV or errV
-	switch yv := y.Value.(type) {
+	avx := x.value.(*AV) // group should always return AV or errV
+	switch yv := y.value.(type) {
 	case array:
 		r := make([]V, avx.Len())
 		for i, xi := range avx.Slice {
-			r[i] = yv.atIndices(xi.Value.(*AI).Slice)
+			r[i] = yv.atIndices(xi.value.(*AI).Slice)
 		}
 		return NewAV(r)
 	default:

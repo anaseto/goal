@@ -7,8 +7,8 @@ import (
 
 func fold2(ctx *Context, args []V) V {
 	f := args[1]
-	switch f.Kind {
-	case Variadic:
+	switch f.kind {
+	case valVariadic:
 		switch f.variadic() {
 		case vAdd:
 			return fold2vAdd(args[0])
@@ -21,7 +21,7 @@ func fold2(ctx *Context, args []V) V {
 		if f.IsF() {
 			return fold2Decode(f, args[0])
 		}
-		switch fv := f.Value.(type) {
+		switch fv := f.value.(type) {
 		case S:
 			return fold2Join(fv, args[0])
 		case *AB, *AI, *AF:
@@ -35,10 +35,10 @@ func fold2(ctx *Context, args []V) V {
 		return panicf("F/x : F rank is %d (expected 2)", f.Rank(ctx))
 	}
 	x := args[0]
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case array:
 		if xv.Len() == 0 {
-			f, ok := f.Value.(zeroFun)
+			f, ok := f.value.(zeroFun)
 			if ok {
 				return f.zero()
 			}
@@ -57,7 +57,7 @@ func fold2(ctx *Context, args []V) V {
 }
 
 func fold2vAdd(x V) V {
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		n := int64(0)
 		for _, b := range xv.Slice {
@@ -107,7 +107,7 @@ func fold2vAdd(x V) V {
 }
 
 func fold2Join(sep S, x V) V {
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case S:
 		return x
 	case *AS:
@@ -131,7 +131,7 @@ func fold2Decode(f V, x V) V {
 			}
 			return NewI(int64(x.F()))
 		}
-		switch xv := x.Value.(type) {
+		switch xv := x.value.(type) {
 		case *AI:
 			var r, n int64 = 0, 1
 			for i := xv.Len() - 1; i >= 0; i-- {
@@ -172,7 +172,7 @@ func fold2Decode(f V, x V) V {
 		}
 		return fold2Decode(NewI(int64(f.F())), x)
 	}
-	switch fv := f.Value.(type) {
+	switch fv := f.value.(type) {
 	case *AB:
 		return fold2Decode(fromABtoAI(fv), x)
 	case *AI:
@@ -190,7 +190,7 @@ func fold2Decode(f V, x V) V {
 			}
 			return fold2Decode(f, NewI(int64(x.F())))
 		}
-		switch xv := x.Value.(type) {
+		switch xv := x.value.(type) {
 		case *AI:
 			if fv.Len() != xv.Len() {
 				return panicf("I/x : length mismatch: %d (#I) %d (#x)", fv.Len(), xv.Len())
@@ -242,7 +242,7 @@ func fold3(ctx *Context, args []V) V {
 		return fold3While(ctx, args)
 	}
 	y := args[0]
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case array:
 		r := args[2]
 		if yv.Len() == 0 {
@@ -318,7 +318,7 @@ func scan2(ctx *Context, f, x V) V {
 		if f.IsF() {
 			return scan2Encode(f, x)
 		}
-		switch fv := f.Value.(type) {
+		switch fv := f.value.(type) {
 		case S:
 			return scan2Split(fv, x)
 		case *AB, *AI, *AF:
@@ -331,10 +331,10 @@ func scan2(ctx *Context, f, x V) V {
 		// TODO: converge
 		return panicf("f\\x : f rank is %d (expected 2)", f.Rank(ctx))
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case array:
 		if xv.Len() == 0 {
-			ff, ok := f.Value.(zeroFun)
+			ff, ok := f.value.(zeroFun)
 			if ok {
 				return ff.zero()
 			}
@@ -360,7 +360,7 @@ func scan2(ctx *Context, f, x V) V {
 }
 
 func scan2Split(sep S, x V) V {
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case S:
 		return NewAS(strings.Split(string(xv), string(sep)))
 	case *AS:
@@ -402,7 +402,7 @@ func scan2Encode(f V, x V) V {
 			r := make([]int64, n)
 			for i := n - 1; i >= 0; i-- {
 				r[i] = x.I() % f.I()
-				x.N /= f.I()
+				x.n /= f.I()
 			}
 			return NewAI(r)
 		}
@@ -412,7 +412,7 @@ func scan2Encode(f V, x V) V {
 			}
 			return scan2Encode(f, NewI(int64(x.F())))
 		}
-		switch xv := x.Value.(type) {
+		switch xv := x.value.(type) {
 		case *AI:
 			min, max := minMax(xv)
 			max = maxI(absI(min), absI(max))
@@ -461,7 +461,7 @@ func scan2Encode(f V, x V) V {
 		}
 		return scan2Encode(NewI(int64(f.F())), x)
 	}
-	switch fv := f.Value.(type) {
+	switch fv := f.value.(type) {
 	case *AB:
 		return scan2Encode(fromABtoAI(fv), x)
 	case *AI:
@@ -471,7 +471,7 @@ func scan2Encode(f V, x V) V {
 			r := make([]int64, n)
 			for i := n - 1; i >= 0 && x.I() > 0; i-- {
 				r[i] = x.I() % fv.At(i)
-				x.N /= fv.At(i)
+				x.n /= fv.At(i)
 			}
 			return NewAI(r)
 
@@ -482,7 +482,7 @@ func scan2Encode(f V, x V) V {
 			}
 			return scan2Encode(f, NewI(int64(x.F())))
 		}
-		switch xv := x.Value.(type) {
+		switch xv := x.value.(type) {
 		case *AI:
 			n := fv.Len()
 			ai := make([]int64, n*xv.Len())
@@ -543,7 +543,7 @@ func scan3(ctx *Context, args []V) V {
 	}
 	y := args[0]
 	x := args[2]
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 	case array:
 		if yv.Len() == 0 {
 			return NewAV([]V{})
@@ -633,7 +633,7 @@ func each2(ctx *Context, args []V) V {
 		return panicf("f'x : f not a function (%s)", f.Type())
 	}
 	x := toArray(args[0])
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case array:
 		r := make([]V, 0, xv.Len())
 		for i := 0; i < xv.Len(); i++ {
@@ -656,8 +656,8 @@ func each3(ctx *Context, args []V) V {
 	if !f.IsFunction() {
 		return panicf("x f'y : f not a function (%s)", f.Type())
 	}
-	x, okax := args[2].Value.(array)
-	y, okay := args[0].Value.(array)
+	x, okax := args[2].value.(array)
+	y, okay := args[0].value.(array)
 	if !okax && !okay {
 		return ctx.ApplyN(f, args)
 	}

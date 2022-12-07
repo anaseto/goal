@@ -13,7 +13,7 @@ func negate(x V) V {
 	if x.IsF() {
 		return NewF(-x.F())
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		r := make([]int64, xv.Len())
 		for i, xi := range xv.Slice {
@@ -73,7 +73,7 @@ func sign(x V) V {
 	if x.IsF() {
 		return NewI(int64(signF(x.F())))
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		return x
 	case *AI:
@@ -107,7 +107,7 @@ func floor(x V) V {
 	if x.IsF() {
 		return NewF(math.Floor(float64(x.F())))
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case S:
 		return NewS(strings.ToLower(string(xv)))
 	case *AB:
@@ -147,7 +147,7 @@ func ceil(x V) V {
 	if x.IsF() {
 		return NewF(math.Ceil(float64(x.F())))
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case S:
 		return NewS(strings.ToUpper(string(xv)))
 	case *AB:
@@ -185,7 +185,7 @@ func not(x V) V {
 	if x.IsF() {
 		return NewI(b2i(x.F() == 0))
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case S:
 		return NewI(b2i(xv == ""))
 	case *AB:
@@ -225,7 +225,7 @@ func abs(x V) V {
 	if x.IsF() {
 		return NewF(math.Abs(float64(x.F())))
 	}
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 	case *AB:
 		return x
 	case *AI:
