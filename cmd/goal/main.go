@@ -157,9 +157,13 @@ func runDebug(ctx *goal.Context) {
 }
 
 func runCommand(ctx *goal.Context, cmd string) {
-	_, err := ctx.Eval(cmd)
+	r, err := ctx.Eval(cmd)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "goal: %v", err)
+		os.Exit(1)
+	}
+	if r.IsError() {
+		fmt.Fprint(os.Stderr, r.Error())
 		os.Exit(1)
 	}
 }
