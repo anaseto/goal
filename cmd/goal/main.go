@@ -224,7 +224,7 @@ Type help TOPIC or h TOPIC where TOPIC is one of:
 
 Notations:
 	s (string) f (function) F (2-args function)
-	n (numeric) i (integer) x,y (any other)
+	n (number) i (integer) x,y (any other)
 `
 const helpVERBS = `
 VERBS
@@ -239,7 +239,7 @@ s-s trim suffix "file.txt"-".txt" -> "file"
 *x  first	*3 2 4 -> 3
 x*y multiply	2*3 -> 6
 s*x repeat	"a"*3 2 1 0 -> "aaa" "aa" "a" ""
-%x  classify	%1 2 3 1 2 3 -> 0 1 2 0 1 2
+%x  classify	%1 2 3 1 2 3 -> 0 1 2 0 1 2	%"a" "b" "a" -> 0 1 0
 x%y divide	3%2 -> 1.5
 !i  enum	!5 -> 0 1 2 3 4
 !x  odometer	!2 3 -> (0 0 0 1 1 1;0 1 2 0 1 2)
@@ -300,6 +300,7 @@ ocount x  occur-count	ocount 3 2 5 3 2 2 7 -> 0 0 0 1 1 2 0
 icount x  index-count	icount 0 0 1 -1 0 1 2 3 2 -> 3 2 2 1 (same as #'=x)
 sign x    sign		sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
 bytes x	  byte-count	bytes "abc" -> 3
+error x	  error		r:{?[~x=0;1%%x;error "zero"]};*r -> "zero"
 `
 
 const helpADVERBS = `

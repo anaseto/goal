@@ -81,13 +81,14 @@ func NewContext() *Context {
 		"'":      vEach,
 		"/":      vFold,
 		"\\":     vScan,
-		"in":     vIn,
-		"sign":   vSign,
-		"ocount": vOCount,
-		"icount": vICount,
-		"bytes":  vBytes,
-		"or":     vOr,
 		"and":    vAnd,
+		"bytes":  vBytes,
+		"error":  vError,
+		"icount": vICount,
+		"in":     vIn,
+		"ocount": vOCount,
+		"or":     vOr,
+		"sign":   vSign,
 	}
 	ctx.initVariadics()
 	return ctx

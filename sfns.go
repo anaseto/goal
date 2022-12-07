@@ -120,6 +120,8 @@ func rotate(x, y V) V {
 // first returns *x.
 func first(x V) V {
 	switch xv := x.Value.(type) {
+	case errV:
+		return xv.V
 	case array:
 		if xv.Len() == 0 {
 			switch xv.(type) {

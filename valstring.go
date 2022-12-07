@@ -45,6 +45,9 @@ func (v V) String() string {
 	}
 }
 
+func (e errV) Sprint(ctx *Context) string { return e.V.Sprint(ctx) }
+func (e errV) String() string             { return e.V.String() }
+
 func (e panicV) Sprint(ctx *Context) string { return e.String() }
 func (e panicV) String() string             { return "'ERROR " + string(e) }
 

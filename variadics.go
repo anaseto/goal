@@ -33,13 +33,14 @@ const (
 	vEach                     // ' (adverb)
 	vFold                     // / (adverb)
 	vScan                     // \ (adverb)
-	vIn                       // in
-	vSign                     // sign
-	vOCount                   // ocount (occurrence count)
-	vICount                   // icount (index count)
-	vBytes                    // bytes (byte count)
 	vAnd                      // and
+	vBytes                    // bytes (byte count)
+	vError                    // error
+	vICount                   // icount (index count)
+	vIn                       // in
+	vOCount                   // ocount (occurrence count)
 	vOr                       // or
+	vSign                     // sign
 )
 
 type zeroFun interface {
@@ -83,15 +84,22 @@ var vStrings = [...]string{
 	vFind:     "?",
 	vApply:    "@",
 	vApplyN:   ".",
-	vIn:       "in",
 	vList:     "list",
 	vEach:     "'",
 	vFold:     "/",
 	vScan:     "\\",
+	vAnd:      "and",
+	vBytes:    "bytes",
+	vError:    "error",
+	vICount:   "icount",
+	vIn:       "in",
+	vOCount:   "ocount",
+	vOr:       "or",
+	vSign:     "sign",
 }
 
 func (v variadic) String() string {
-	if v <= vScan {
+	if int(v) <= len(vStrings)-1 {
 		return vStrings[v]
 	}
 	return fmt.Sprintf("{Variadic %d}", v)
@@ -129,13 +137,14 @@ func (ctx *Context) initVariadics() {
 		vEach:     {Func: VEach, Adverb: true},
 		vFold:     {Func: VFold, Adverb: true},
 		vScan:     {Func: VScan, Adverb: true},
-		vIn:       {Func: VIn},
-		vSign:     {Func: VSign},
-		vOCount:   {Func: VOCount},
-		vICount:   {Func: VICount},
-		vBytes:    {Func: VBytes},
-		vOr:       {Func: VOr},
 		vAnd:      {Func: VAnd},
+		vBytes:    {Func: VBytes},
+		vError:    {Func: VError},
+		vICount:   {Func: VICount},
+		vIn:       {Func: VIn},
+		vOCount:   {Func: VOCount},
+		vOr:       {Func: VOr},
+		vSign:     {Func: VSign},
 	}
 
 	ctx.variadicsNames = []string{
@@ -163,13 +172,13 @@ func (ctx *Context) initVariadics() {
 		vEach:     "'",
 		vFold:     "/",
 		vScan:     "\\",
-		vIn:       "in",
-		vSign:     "sign",
-		vOCount:   "ocount",
-		vICount:   "icount",
-		vBytes:    "bytes",
-		vOr:       "or",
 		vAnd:      "and",
+		vBytes:    "bytes",
+		vICount:   "icount",
+		vIn:       "in",
+		vOCount:   "ocount",
+		vOr:       "or",
+		vSign:     "sign",
 	}
 }
 
@@ -481,78 +490,6 @@ func VApplyN(ctx *Context, args []V) V {
 	}
 }
 
-// VIn implements the "in" variadic verb.
-func VIn(ctx *Context, args []V) V {
-	switch len(args) {
-	case 1:
-		return panics("in : got only one argument")
-	case 2:
-		return memberOf(args[1], args[0])
-	default:
-		return panicRank("in")
-	}
-}
-
-// VSign implements the "sign" variadic verb.
-func VSign(ctx *Context, args []V) V {
-	switch len(args) {
-	case 1:
-		return sign(args[0])
-	default:
-		return panicRank("sign")
-	}
-}
-
-// VOCount implements the "ocount" variadic verb.
-func VOCount(ctx *Context, args []V) V {
-	switch len(args) {
-	case 1:
-		return occurrenceCount(args[0])
-	default:
-		return panicRank("ocount")
-	}
-}
-
-// VICount implements the "icount" variadic verb.
-func VICount(ctx *Context, args []V) V {
-	switch len(args) {
-	case 1:
-		return icount(args[0])
-	default:
-		return panicRank("icount")
-	}
-}
-
-// VBytes implements the "bytes" variadic verb.
-func VBytes(ctx *Context, args []V) V {
-	switch len(args) {
-	case 1:
-		return bytes(args[0])
-	default:
-		return panicRank("icount")
-	}
-}
-
-// VAnd implements the "and" variadic verb.
-func VAnd(ctx *Context, args []V) V {
-	for _, arg := range args {
-		if isFalse(arg) {
-			return arg
-		}
-	}
-	return args[0]
-}
-
-// VOr implements the "or" variadic verb.
-func VOr(ctx *Context, args []V) V {
-	for _, arg := range args {
-		if isTrue(arg) {
-			return arg
-		}
-	}
-	return args[0]
-}
-
 // VList implements (x;y;...) array constructor variadic verb.
 func VList(ctx *Context, args []V) V {
 	xv, cloned := normalize(&AV{Slice: args})
@@ -603,4 +540,90 @@ func VScan(ctx *Context, args []V) V {
 		return panicRank("\\")
 	}
 	return V{}
+}
+
+// VAnd implements the "and" variadic verb.
+func VAnd(ctx *Context, args []V) V {
+	for _, arg := range args {
+		if isFalse(arg) {
+			return arg
+		}
+	}
+	return args[0]
+}
+
+// VBytes implements the "bytes" variadic verb.
+func VBytes(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		return bytes(args[0])
+	default:
+		return panicRank("icount")
+	}
+}
+
+// VError implements the "error" variadic verb.
+func VError(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		x := args[0]
+		if x.IsError() {
+			return panics("error x : x is already an error")
+		}
+		return NewError(x)
+	default:
+		return panicRank("error")
+	}
+}
+
+// VICount implements the "icount" variadic verb.
+func VICount(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		return icount(args[0])
+	default:
+		return panicRank("icount")
+	}
+}
+
+// VIn implements the "in" variadic verb.
+func VIn(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		return panics("in : got only one argument")
+	case 2:
+		return memberOf(args[1], args[0])
+	default:
+		return panicRank("in")
+	}
+}
+
+// VOCount implements the "ocount" variadic verb.
+func VOCount(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		return occurrenceCount(args[0])
+	default:
+		return panicRank("ocount")
+	}
+}
+
+// VOr implements the "or" variadic verb.
+func VOr(ctx *Context, args []V) V {
+	for _, arg := range args {
+		if isTrue(arg) {
+			return arg
+		}
+	}
+	return args[0]
+}
+
+// VSign implements the "sign" variadic verb.
+func VSign(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		return sign(args[0])
+	default:
+		return panicRank("sign")
+	}
 }

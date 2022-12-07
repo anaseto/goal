@@ -27,9 +27,6 @@ const (
 	Panic              // boxed value (Value field)
 )
 
-// lambda represents an user defined function by ID.
-type lambda int32
-
 // Value represents any kind of boxed value.
 type Value interface {
 	fmt.Stringer
@@ -47,9 +44,17 @@ func newVariadic(v variadic) V {
 	return V{Kind: Variadic, N: int64(v)}
 }
 
+// lambda represents an user defined function by ID.
+type lambda int32
+
 // newLambda returns a new lambda value.
 func newLambda(v lambda) V {
 	return V{Kind: Lambda, N: int64(v)}
+}
+
+// NewError returns a new recoverable error value.
+func NewError(x V) V {
+	return V{Kind: Boxed, Value: &errV{V: x}}
 }
 
 // NewI returns a new int64 value.
@@ -85,12 +90,17 @@ func (v V) lambda() lambda {
 	return lambda(v.N)
 }
 
-// I retrieves the integer value from N field. It assumes Kind is Int.
+// Error retrieves the error value. It assumes IsError(v).
+func (v V) Error() V {
+	return v.Value.(errV).V
+}
+
+// I retrieves the integer value from N field. It assumes IsI(v).
 func (v V) I() int64 {
 	return v.N
 }
 
-// F retrieves the float64 value. It assumes Kind is Float.
+// F retrieves the float64 value. It assumes Kind isF(v).
 func (v V) F() float64 {
 	i := v.N
 	f := *(*float64)(unsafe.Pointer(&i))
@@ -147,18 +157,31 @@ func (v V) Type() string {
 	}
 }
 
+// IsI returns true if the value is an integer.
 func (x V) IsI() bool {
 	return x.Kind == Int
 }
 
+// IsF returns true if the value is a float.
 func (x V) IsF() bool {
 	return x.Kind == Float
 }
 
+// isPanic returns true if the value is a fatal error.
 func (x V) isPanic() bool {
 	return x.Kind == Panic
 }
 
+// IsError returns true if the value is a recoverable error.
+func (x V) IsError() bool {
+	if x.Kind != Boxed {
+		return false
+	}
+	_, ok := x.Value.(errV)
+	return ok
+}
+
+// IsFunction returns true if the value is some kind of function.
 func (x V) IsFunction() bool {
 	switch x.Kind {
 	case Variadic, Lambda:
@@ -171,8 +194,8 @@ func (x V) IsFunction() bool {
 	}
 }
 
-// Rank returns the default rank of the value. It returns 0 for non-function
-// values.
+// Rank returns the default rank of the value, that is the number of arguments
+// it normally takes. It returns 0 for non-function values.
 func (v V) Rank(ctx *Context) int {
 	switch v.Kind {
 	case Variadic:
@@ -208,6 +231,23 @@ func (v V) rcdecr() {
 		vrc.rcdecr()
 	}
 }
+
+// errV represents a recoverable error. It may contain some goal value of any
+// kind.
+type errV struct {
+	V V
+}
+
+func (e errV) Matches(y Value) bool {
+	switch yv := y.(type) {
+	case errV:
+		return Match(e.V, yv.V)
+	default:
+		return false
+	}
+}
+
+func (e errV) Type() string { return "e" }
 
 // panicV represents a fatal error string.
 type panicV string
