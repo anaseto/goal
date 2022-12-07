@@ -231,7 +231,7 @@ func (ctx *Context) exec() error {
 }
 
 func (ctx *Context) getError(err error, compile bool) error {
-	e := &Error{
+	e := &PanicError{
 		Msg:       err.Error(),
 		positions: ctx.errPos,
 		sources:   ctx.sources,

@@ -13,14 +13,14 @@ type position struct {
 	lambda   *lambdaCode
 }
 
-// newErr returns an error from a panicV value. It assumes isErr(x) is true and
-// the Value type is panicV.
-func newErr(x V) error {
+// newExecError returns an execution error from a panicV value. It assumes
+// isPanic(x) is true and the Value type is panicV.
+func newExecError(x V) error {
 	return errors.New(string(x.Value.(panicV)))
 }
 
-// Error represents an error returned by any Context method.
-type Error struct {
+// PanicError represents a fatal error returned by any Context method.
+type PanicError struct {
 	Msg string // error message (without location)
 
 	compile   bool
@@ -30,7 +30,7 @@ type Error struct {
 
 // Error returns the default string representation. It makes uses of position
 // information obtained from its running context.
-func (e *Error) Error() string {
+func (e *PanicError) Error() string {
 	if len(e.positions) == 0 {
 		return e.Msg
 	}
@@ -98,25 +98,21 @@ func getPosLine(s string, pos int) (string, int, int) {
 	return s[start:], count, pos - start
 }
 
-func errNYI(s string) V {
-	return errs("NYI: " + s)
-}
-
 func errs(s string) V {
-	return V{Kind: PanicError, Value: panicV(s)}
+	return V{Kind: Panic, Value: panicV(s)}
 }
 
 func errf(format string, a ...interface{}) V {
 	return errs(fmt.Sprintf(format, a...))
 }
 
-// Errorf returns a formatted error value.
-func Errorf(format string, a ...interface{}) V {
+// Panicf returns a formatted fatal error value.
+func Panicf(format string, a ...interface{}) V {
 	return errs(fmt.Sprintf(format, a...))
 }
 
-// NewError returns an error value.
-func NewError(s string) V {
+// NewPanic returns a fatal error value.
+func NewPanic(s string) V {
 	return errs(s)
 }
 

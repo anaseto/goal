@@ -23,8 +23,8 @@ func Match(x, y V) bool {
 		return y.Kind == Variadic && x.N == y.N
 	case Lambda:
 		return y.Kind == Lambda && x.N == y.N
-	case PanicError:
-		return y.Kind == PanicError && x.Value.Matches(y.Value)
+	case Panic:
+		return y.Kind == Panic && x.Value.Matches(y.Value)
 	default:
 		return y.Kind == Boxed && x.Value.Matches(y.Value)
 	}
@@ -718,7 +718,7 @@ func findS(s S, y V) V {
 		r := make([]V, yv.Len())
 		for i, yi := range yv.Slice {
 			r[i] = findS(s, yi)
-			if r[i].IsErr() {
+			if r[i].isPanic() {
 				return r[i]
 			}
 		}

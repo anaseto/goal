@@ -487,7 +487,7 @@ func TestErrors(t *testing.T) {
 					t.Errorf("no error left: result: %v\nexpected: %v", v, mt.Right)
 				}
 			}
-			e, ok := err.(*Error)
+			e, ok := err.(*PanicError)
 			if !ok {
 				// should never happen
 				t.Log(ps)

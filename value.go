@@ -18,13 +18,13 @@ type V struct {
 type ValueKind int8
 
 const (
-	Nil        ValueKind = iota
-	Int                  // unboxed int64 (N field)
-	Float                // unboxed float64 (N field)
-	Variadic             // unboxed int32 (N field)
-	Lambda               // unboxed int32 (N field)
-	Boxed                // boxed value (Value field)
-	PanicError           // boxed value (Value field)
+	Nil      ValueKind = iota
+	Int                // unboxed int64 (N field)
+	Float              // unboxed float64 (N field)
+	Variadic           // unboxed int32 (N field)
+	Lambda             // unboxed int32 (N field)
+	Boxed              // boxed value (Value field)
+	Panic              // boxed value (Value field)
 )
 
 // lambda represents an user defined function by ID.
@@ -155,8 +155,8 @@ func (x V) IsF() bool {
 	return x.Kind == Float
 }
 
-func (x V) IsErr() bool {
-	return x.Kind == PanicError
+func (x V) isPanic() bool {
+	return x.Kind == Panic
 }
 
 func (x V) IsFunction() bool {
@@ -209,7 +209,7 @@ func (v V) rcdecr() {
 	}
 }
 
-// panicV represents a panic error string.
+// panicV represents a fatal error string.
 type panicV string
 
 func (e panicV) Matches(y Value) bool {

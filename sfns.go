@@ -161,7 +161,7 @@ func drop(x, y V) V {
 		return cutAI(xv, y)
 	case *AF:
 		z := toAI(xv)
-		if z.IsErr() {
+		if z.isPanic() {
 			return z
 		}
 		return drop(z, y)

@@ -569,7 +569,7 @@ func ascend(x V) V {
 // descend returns >x.
 func descend(x V) V {
 	p := ascend(x)
-	if p.IsErr() {
+	if p.isPanic() {
 		return errs(">" + strings.TrimPrefix(string(p.Value.(S)), "<"))
 	}
 	reverseMut(p)

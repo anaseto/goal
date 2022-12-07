@@ -148,7 +148,7 @@ func fold2Decode(f V, x V) V {
 			return NewI(r)
 		case *AF:
 			aix := toAI(xv)
-			if aix.IsErr() {
+			if aix.isPanic() {
 				return aix
 			}
 			return fold2Decode(f, aix)
@@ -156,7 +156,7 @@ func fold2Decode(f V, x V) V {
 			r := make([]V, xv.Len())
 			for i, xi := range xv.Slice {
 				r[i] = fold2Decode(f, xi)
-				if r[i].IsErr() {
+				if r[i].isPanic() {
 					return r[i]
 				}
 			}
@@ -205,7 +205,7 @@ func fold2Decode(f V, x V) V {
 			return fold2Decode(f, fromABtoAI(xv))
 		case *AF:
 			aix := toAI(xv)
-			if aix.IsErr() {
+			if aix.isPanic() {
 				return aix
 			}
 			return fold2Decode(f, aix)
@@ -213,7 +213,7 @@ func fold2Decode(f V, x V) V {
 			r := make([]V, xv.Len())
 			for i, xi := range xv.Slice {
 				r[i] = fold2Decode(f, xi)
-				if r[i].IsErr() {
+				if r[i].isPanic() {
 					return r[i]
 				}
 			}
@@ -223,7 +223,7 @@ func fold2Decode(f V, x V) V {
 		}
 	case *AF:
 		aif := toAI(fv)
-		if aif.IsErr() {
+		if aif.isPanic() {
 			return aif
 		}
 		return fold2Decode(aif, x)
@@ -252,7 +252,7 @@ func fold3(ctx *Context, args []V) V {
 			ctx.push(yv.at(i))
 			ctx.push(r)
 			r = ctx.applyN(f, 2)
-			if r.IsErr() {
+			if r.isPanic() {
 				return r
 			}
 		}
@@ -283,7 +283,7 @@ func fold3While(ctx *Context, args []V) V {
 			y.rcincr()
 			cond := ctx.applyN(x, 1)
 			y.rcdecr()
-			if cond.IsErr() {
+			if cond.isPanic() {
 				return cond
 			}
 			if !isTrue(cond) {
@@ -291,7 +291,7 @@ func fold3While(ctx *Context, args []V) V {
 			}
 			ctx.push(y)
 			y = ctx.applyN(f, 1)
-			if y.IsErr() {
+			if y.isPanic() {
 				return y
 			}
 		}
@@ -303,7 +303,7 @@ func fold3doTimes(ctx *Context, n int64, f, y V) V {
 	for i := int64(0); i < n; i++ {
 		ctx.push(y)
 		y = ctx.applyN(f, 1)
-		if y.IsErr() {
+		if y.isPanic() {
 			return y
 		}
 	}
@@ -348,7 +348,7 @@ func scan2(ctx *Context, f, x V) V {
 			last.rcincr()
 			next := ctx.applyN(f, 2)
 			last.rcdecr()
-			if next.IsErr() {
+			if next.isPanic() {
 				return next
 			}
 			r = append(r, next)
@@ -437,7 +437,7 @@ func scan2Encode(f V, x V) V {
 			return scan2Encode(f, fromABtoAI(xv))
 		case *AF:
 			aix := toAI(xv)
-			if aix.IsErr() {
+			if aix.isPanic() {
 				return aix
 			}
 			return scan2Encode(f, aix)
@@ -445,7 +445,7 @@ func scan2Encode(f V, x V) V {
 			r := make([]V, xv.Len())
 			for i, xi := range xv.Slice {
 				r[i] = scan2Encode(f, xi)
-				if r[i].IsErr() {
+				if r[i].isPanic() {
 					return r[i]
 				}
 			}
@@ -505,7 +505,7 @@ func scan2Encode(f V, x V) V {
 			return scan2Encode(f, fromABtoAI(xv))
 		case *AF:
 			aix := toAI(xv)
-			if aix.IsErr() {
+			if aix.isPanic() {
 				return aix
 			}
 			return scan2Encode(f, aix)
@@ -513,7 +513,7 @@ func scan2Encode(f V, x V) V {
 			r := make([]V, xv.Len())
 			for i, xi := range xv.Slice {
 				r[i] = scan2Encode(f, xi)
-				if r[i].IsErr() {
+				if r[i].isPanic() {
 					return r[i]
 				}
 			}
@@ -523,7 +523,7 @@ func scan2Encode(f V, x V) V {
 		}
 	case *AF:
 		aif := toAI(fv)
-		if aif.IsErr() {
+		if aif.isPanic() {
 			return aif
 		}
 		return scan2Encode(aif, x)
@@ -553,7 +553,7 @@ func scan3(ctx *Context, args []V) V {
 		x.rcincr()
 		first := ctx.applyN(f, 2)
 		x.rcdecr()
-		if first.IsErr() {
+		if first.isPanic() {
 			return first
 		}
 		r := []V{first}
@@ -564,7 +564,7 @@ func scan3(ctx *Context, args []V) V {
 			last.rcincr()
 			next := ctx.applyN(f, 2)
 			last.rcdecr()
-			if next.IsErr() {
+			if next.isPanic() {
 				return next
 			}
 			r = append(r, next)
@@ -597,7 +597,7 @@ func scan3While(ctx *Context, args []V) V {
 			y.rcincr()
 			cond := ctx.applyN(x, 1)
 			y.rcdecr()
-			if cond.IsErr() {
+			if cond.isPanic() {
 				return cond
 			}
 			if !isTrue(cond) {
@@ -605,7 +605,7 @@ func scan3While(ctx *Context, args []V) V {
 			}
 			ctx.push(y)
 			y = ctx.applyN(f, 1)
-			if y.IsErr() {
+			if y.isPanic() {
 				return y
 			}
 			r = append(r, y)
@@ -619,7 +619,7 @@ func scan3doTimes(ctx *Context, n int64, f, y V) V {
 	for i := int64(0); i < n; i++ {
 		ctx.push(y)
 		y = ctx.applyN(f, 1)
-		if y.IsErr() {
+		if y.isPanic() {
 			return y
 		}
 		r = append(r, y)
@@ -639,7 +639,7 @@ func each2(ctx *Context, args []V) V {
 		for i := 0; i < xv.Len(); i++ {
 			ctx.push(xv.at(i))
 			next := ctx.applyN(f, 1)
-			if next.IsErr() {
+			if next.isPanic() {
 				return next
 			}
 			r = append(r, next)
@@ -668,7 +668,7 @@ func each3(ctx *Context, args []V) V {
 			ctx.push(y.at(i))
 			ctx.push(args[2])
 			next := ctx.applyN(f, 2)
-			if next.IsErr() {
+			if next.isPanic() {
 				return next
 			}
 			r = append(r, next)
@@ -682,7 +682,7 @@ func each3(ctx *Context, args []V) V {
 			ctx.push(args[0])
 			ctx.push(x.at(i))
 			next := ctx.applyN(f, 2)
-			if next.IsErr() {
+			if next.isPanic() {
 				return next
 			}
 			r = append(r, next)
@@ -698,7 +698,7 @@ func each3(ctx *Context, args []V) V {
 		ctx.push(y.at(i))
 		ctx.push(x.at(i))
 		next := ctx.applyN(f, 2)
-		if next.IsErr() {
+		if next.isPanic() {
 			return next
 		}
 		r = append(r, next)

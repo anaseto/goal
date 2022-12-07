@@ -198,14 +198,14 @@ func registerVariadics(ctx *goal.Context) {
 				case goal.S:
 					bytes, err := os.ReadFile(string(x))
 					if err != nil {
-						return goal.Errorf("slurp: %v", err)
+						return goal.Panicf("slurp: %v", err)
 					}
 					return goal.NewS(string(bytes))
 				default:
-					return goal.NewError("slurp: non-string filename")
+					return goal.NewPanic("slurp: non-string filename")
 				}
 			default:
-				return goal.NewError("slurp: too many arguments")
+				return goal.NewPanic("slurp: too many arguments")
 			}
 		}})
 	ctx.AssignGlobal("slurp", slurp)
