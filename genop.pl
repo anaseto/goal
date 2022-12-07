@@ -7,193 +7,193 @@ use v5.28;
 my %dyads = (
     equal =>  {
         B_B => ["x == y", "B"],
-        B_I => ["B2I(x) == y", "B"],
-        B_F => ["B2F(x) == y", "B"],
-        I_B => ["x == B2I(y)", "B"],
+        B_I => ["b2i(x) == y", "B"],
+        B_F => ["b2f(x) == y", "B"],
+        I_B => ["x == b2i(y)", "B"],
         I_I => ["x == y", "B"],
         I_F => ["float64(x) == y", "B"],
-        F_B => ["x == B2F(y)", "B"],
+        F_B => ["x == b2f(y)", "B"],
         F_I => ["x == float64(y)", "B"],
         F_F => ["x == y", "B"],
         S_S => ["x == y", "B"],
     },
     #NotEqual =>  {
         #B_B => ["x != y", "B"],
-        #B_I => ["B2I(x) != y", "B"],
-        #B_F => ["B2F(x) != y", "B"],
-        #I_B => ["x != B2I(y)", "B"],
+        #B_I => ["b2i(x) != y", "B"],
+        #B_F => ["b2f(x) != y", "B"],
+        #I_B => ["x != b2i(y)", "B"],
         #I_I => ["x != y", "B"],
         #I_F => ["float64(x) != y", "B"],
-        #F_B => ["x != B2F(y)", "B"],
+        #F_B => ["x != b2f(y)", "B"],
         #F_I => ["x != float64(y)", "B"],
         #F_F => ["x != y", "B"],
         #S_S => ["x != y", "B"],
     #},
     lesser =>  {
         B_B => ["!x && y", "B"],
-        B_I => ["B2I(x) < y", "B"],
-        B_F => ["B2F(x) < y", "B"],
-        I_B => ["x < B2I(y)", "B"],
+        B_I => ["b2i(x) < y", "B"],
+        B_F => ["b2f(x) < y", "B"],
+        I_B => ["x < b2i(y)", "B"],
         I_I => ["x < y", "B"],
         I_F => ["float64(x) < y", "B"],
-        F_B => ["x < B2F(y)", "B"],
+        F_B => ["x < b2f(y)", "B"],
         F_I => ["x < float64(y)", "B"],
         F_F => ["x < y", "B"],
         S_S => ["x < y", "B"],
     },
     #LesserEq =>  {
         #B_B => ["y || !x", "B"],
-        #B_I => ["B2I(x) <= y", "B"],
-        #B_F => ["B2F(x) <= y", "B"],
-        #I_B => ["x <= B2I(y)", "B"],
+        #B_I => ["b2i(x) <= y", "B"],
+        #B_F => ["b2f(x) <= y", "B"],
+        #I_B => ["x <= b2i(y)", "B"],
         #I_I => ["x <= y", "B"],
         #I_F => ["float64(x) <= y", "B"],
-        #F_B => ["x <= B2F(y)", "B"],
+        #F_B => ["x <= b2f(y)", "B"],
         #F_I => ["x <= float64(y)", "B"],
         #F_F => ["x <= y", "B"],
         #S_S => ["x <= y", "B"],
     #},
     greater =>  {
         B_B => ["x && !y", "B"],
-        B_I => ["B2I(x) > y", "B"],
-        B_F => ["B2F(x) > y", "B"],
-        I_B => ["x > B2I(y)", "B"],
+        B_I => ["b2i(x) > y", "B"],
+        B_F => ["b2f(x) > y", "B"],
+        I_B => ["x > b2i(y)", "B"],
         I_I => ["x > y", "B"],
         I_F => ["float64(x) > y", "B"],
-        F_B => ["x > B2F(y)", "B"],
+        F_B => ["x > b2f(y)", "B"],
         F_I => ["x > float64(y)", "B"],
         F_F => ["x > y", "B"],
         S_S => ["x > y", "B"],
     },
     #GreaterEq =>  {
         #B_B => ["x || !y", "B"],
-        #B_I => ["B2I(x) >= y", "B"],
-        #B_F => ["B2F(x) >= y", "B"],
-        #I_B => ["x >= B2I(y)", "B"],
+        #B_I => ["b2i(x) >= y", "B"],
+        #B_F => ["b2f(x) >= y", "B"],
+        #I_B => ["x >= b2i(y)", "B"],
         #I_I => ["x >= y", "B"],
         #I_F => ["float64(x) >= y", "B"],
-        #F_B => ["x >= B2F(y)", "B"],
+        #F_B => ["x >= b2f(y)", "B"],
         #F_I => ["x >= float64(y)", "B"],
         #F_F => ["x >= y", "B"],
         #S_S => ["x >= y", "B"],
     #},
     add =>  {
-        B_B => ["B2I(x) + B2I(y)", "I"],
-        B_I => ["B2I(x) + y", "I"],
-        B_F => ["B2F(x) + y", "F"],
-        I_B => ["x + B2I(y)", "I"],
+        B_B => ["b2i(x) + b2i(y)", "I"],
+        B_I => ["b2i(x) + y", "I"],
+        B_F => ["b2f(x) + y", "F"],
+        I_B => ["x + b2i(y)", "I"],
         I_I => ["x + y", "I"],
         I_F => ["float64(x) + y", "F"],
-        F_B => ["x + B2F(y)", "F"],
+        F_B => ["x + b2f(y)", "F"],
         F_I => ["x + float64(y)", "F"],
         F_F => ["x + y", "F"],
         S_S => ["x + y", "S"],
     },
     subtract =>  {
-        B_B => ["B2I(x) - B2I(y)", "I"],
-        B_I => ["B2I(x) - y", "I"],
-        B_F => ["B2F(x) - y", "F"],
-        I_B => ["x - B2I(y)", "I"],
+        B_B => ["b2i(x) - b2i(y)", "I"],
+        B_I => ["b2i(x) - y", "I"],
+        B_F => ["b2f(x) - y", "F"],
+        I_B => ["x - b2i(y)", "I"],
         I_I => ["x - y", "I"],
         I_F => ["float64(x) - y", "F"],
-        F_B => ["x - B2F(y)", "F"],
+        F_B => ["x - b2f(y)", "F"],
         F_I => ["x - float64(y)", "F"],
         F_F => ["x - y", "F"],
         S_S => ["strings.TrimSuffix(string(x), string(y))", "S"],
     },
     #Span =>  {
-        #B_B => ["1+ B2I(x) - B2I(y)", "I"],
-        #B_I => ["1 + B2I(x) - y", "I"],
-        #B_F => ["1 + B2F(x) - y", "F"],
-        #I_B => ["1 + x - B2I(y)", "I"],
+        #B_B => ["1+ b2i(x) - b2i(y)", "I"],
+        #B_I => ["1 + b2i(x) - y", "I"],
+        #B_F => ["1 + b2f(x) - y", "F"],
+        #I_B => ["1 + x - b2i(y)", "I"],
         #I_I => ["1 + x - y", "I"],
         #I_F => ["1 + float64(x) - y", "F"],
-        #F_B => ["1 + x - B2F(y)", "F"],
+        #F_B => ["1 + x - b2f(y)", "F"],
         #F_I => ["1 + x - float64(y)", "F"],
         #F_F => ["1 + x - y", "F"],
     #},
     multiply =>  {
         B_B => ["x && y", "B"],
-        B_I => ["B2I(x) * y", "I"],
-        B_F => ["B2F(x) * y", "F"],
-        B_S => ["strings.Repeat(string(y), int(B2I(x)))", "S"],
-        I_B => ["x * B2I(y)", "I"],
+        B_I => ["b2i(x) * y", "I"],
+        B_F => ["b2f(x) * y", "F"],
+        B_S => ["strings.Repeat(string(y), int(b2i(x)))", "S"],
+        I_B => ["x * b2i(y)", "I"],
         I_I => ["x * y", "I"],
         I_F => ["float64(x) * y", "F"],
         I_S => ["strings.Repeat(string(y), int(x))", "S"],
-        F_B => ["x * B2F(y)", "F"],
+        F_B => ["x * b2f(y)", "F"],
         F_I => ["x * float64(y)", "F"],
         F_F => ["x * y", "F"],
         F_S => ["strings.Repeat(string(y), int(float64(x)))", "S"],
-        S_B => ["strings.Repeat(string(x), int(B2I(y)))", "S"],
+        S_B => ["strings.Repeat(string(x), int(b2i(y)))", "S"],
         S_I => ["strings.Repeat(string(x), int(y))", "S"],
         S_F => ["strings.Repeat(string(x), int(float64(y)))", "S"],
     },
     divide =>  {
-        B_B => ["divideF(B2F(x), B2F(y))", "F"],
-        B_I => ["divideF(B2F(x), float64(y))", "F"],
-        B_F => ["divideF(B2F(x), y)", "F"],
-        I_B => ["divideF(float64(x), B2F(y))", "F"],
+        B_B => ["divideF(b2f(x), b2f(y))", "F"],
+        B_I => ["divideF(b2f(x), float64(y))", "F"],
+        B_F => ["divideF(b2f(x), y)", "F"],
+        I_B => ["divideF(float64(x), b2f(y))", "F"],
         I_I => ["divideF(float64(x), float64(y))", "F"],
         I_F => ["divideF(float64(x), y)", "F"],
-        F_B => ["divideF(x, B2F(y))", "F"],
+        F_B => ["divideF(x, b2f(y))", "F"],
         F_I => ["divideF(x, float64(y))", "F"],
         F_F => ["divideF(x, y)", "F"],
     },
     minimum =>  {
         B_B => ["x && y", "B"],
-        B_I => ["minI(B2I(x), y)", "I"],
-        B_F => ["math.Min(B2F(x), y)", "F"],
-        I_B => ["minI(x, B2I(y))", "I"],
+        B_I => ["minI(b2i(x), y)", "I"],
+        B_F => ["math.Min(b2f(x), y)", "F"],
+        I_B => ["minI(x, b2i(y))", "I"],
         I_I => ["minI(x, y)", "I"],
         I_F => ["math.Min(float64(x), y)", "F"],
-        F_B => ["math.Min(x, B2F(y))", "F"],
+        F_B => ["math.Min(x, b2f(y))", "F"],
         F_I => ["math.Min(x, float64(y))", "F"],
         F_F => ["math.Min(x, float64(y))", "F"],
         S_S => ["minS(x, y)", "S"],
     },
     maximum =>  {
         B_B => ["x || y", "B"],
-        B_I => ["maxI(B2I(x), y)", "I"],
-        B_F => ["math.Max(B2F(x), y)", "F"],
-        I_B => ["maxI(x, B2I(y))", "I"],
+        B_I => ["maxI(b2i(x), y)", "I"],
+        B_F => ["math.Max(b2f(x), y)", "F"],
+        I_B => ["maxI(x, b2i(y))", "I"],
         I_I => ["maxI(x, y)", "I"],
         I_F => ["math.Max(float64(x), y)", "F"],
-        F_B => ["math.Max(x, B2F(y))", "F"],
+        F_B => ["math.Max(x, b2f(y))", "F"],
         F_I => ["math.Max(x, float64(y))", "F"],
         F_F => ["math.Max(x, float64(y))", "F"],
         S_S => ["maxS(x, y)", "S"],
     },
     #Or =>  {
         #B_B => ["x || y", "B"],
-        #B_I => ["1-((1-B2I(x)) * (1-y))", "I"],
-        #B_F => ["1-((1-B2F(x)) * (1-y))", "F"],
-        #I_B => ["1-((1-x) * (1-B2I(y)))", "I"],
+        #B_I => ["1-((1-b2i(x)) * (1-y))", "I"],
+        #B_F => ["1-((1-b2f(x)) * (1-y))", "F"],
+        #I_B => ["1-((1-x) * (1-b2i(y)))", "I"],
         #I_I => ["1-((1-x) * (1-y))", "I"],
         #I_F => ["1-((1-float64(x)) * (1-y))", "F"],
-        #F_B => ["1-((1-x) * (1-B2F(y)))", "F"],
+        #F_B => ["1-((1-x) * (1-b2f(y)))", "F"],
         #F_I => ["1-((1-x) * float64F(1-y))", "F"],
         #F_F => ["1-((1-x) * (1-y))", "F"],
     #},
     #And =>  {
         #B_B => ["x && y", "B"],
-        #B_I => ["B2I(x) * y", "I"],
-        #B_F => ["B2F(x) * y", "F"],
-        #I_B => ["x * B2I(y)", "I"],
+        #B_I => ["b2i(x) * y", "I"],
+        #B_F => ["b2f(x) * y", "F"],
+        #I_B => ["x * b2i(y)", "I"],
         #I_I => ["x * y", "I"],
         #I_F => ["float64F(x) * y", "F"],
-        #F_B => ["x * B2F(y)", "F"],
+        #F_B => ["x * b2f(y)", "F"],
         #F_I => ["x * float64F(y)", "F"],
         #F_F => ["x * y", "F"],
     #},
     modulus =>  {
-        B_B => ["modI(B2I(x), B2I(y))", "I"],
-        B_I => ["modI(B2I(x), y)", "I"],
-        B_F => ["modF(B2F(x), y)", "F"],
-        I_B => ["modI(x, B2I(y))", "I"],
+        B_B => ["modI(b2i(x), b2i(y))", "I"],
+        B_I => ["modI(b2i(x), y)", "I"],
+        B_F => ["modF(b2f(x), y)", "F"],
+        I_B => ["modI(x, b2i(y))", "I"],
         I_I => ["modI(x, y)", "I"],
         I_F => ["modF(float64(x), y)", "F"],
-        F_B => ["modF(x, B2F(y))", "F"],
+        F_B => ["modF(x, b2f(y))", "F"],
         F_I => ["modF(x, float64(y))", "F"],
         F_F => ["modF(x, y)", "F"],
     },
@@ -263,7 +263,7 @@ EOS
 EOS
     }
         print $out <<EOS;
-	switch xv := x.Value.(type) {
+	switch xv := x.value.(type) {
 EOS
     for my $t (sort keys %types) {
         next if $t =~ /^[BIF]$/;
@@ -280,7 +280,7 @@ EOS
     }
     print $out <<EOS;
 	case *AV:
-                switch yv := y.Value.(type) {
+                switch yv := y.value.(type) {
                 case array:
                         if yv.Len() != xv.Len() {
                                 return panicf("x${errOp}y : length mismatch: %d vs %d", xv.Len(), yv.Len())
@@ -337,7 +337,7 @@ EOS
     if ($types{"I"}) {
         my $expr = $cases->{"${t}_I"}->[0];
         my $type = $cases->{"${t}_I"}->[1];
-        $expr = "B2I($expr)" if $type eq "B";
+        $expr = "b2i($expr)" if $type eq "B";
         $expr =~ s/\by\b/y.I()/g;
         $type = "I" if $type eq "B";
         my $ret = "NewV($type($expr))";
@@ -356,7 +356,7 @@ EOS
     if ($types{"F"}) {
         my $expr = $cases->{"${t}_F"}->[0];
         my $type = $cases->{"${t}_F"}->[1];
-        $expr = "B2I($expr)" if $type eq "B";
+        $expr = "b2i($expr)" if $type eq "B";
         $expr =~ s/\by\b/y.F()/g;
         $type = "I" if $type eq "B";
         my $ret = "NewV($type($expr))";
@@ -373,7 +373,7 @@ EOS
 EOS
     }
     print $out <<EOS;
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 EOS
     for my $tt (sort keys %types) {
         next if $tt =~ /^[BIF]$/;
@@ -382,7 +382,7 @@ EOS
         my $nt = "V";
         $nt = "I" if $type eq "B" or $type eq "I";
         $nt = "F" if $type eq "F";
-        $expr = "B2I($expr)" if $type eq "B";
+        $expr = "b2i($expr)" if $type eq "B";
         my $iexpr = subst($expr, $t, $tt, "x", "yv");
         $type = "int64" if $type eq "B" or $type eq "I";
         $type = "float64" if $type eq "F";
@@ -499,7 +499,7 @@ EOS
         }
     }
     print $out <<EOS;
-	switch yv := y.Value.(type) {
+	switch yv := y.value.(type) {
 EOS
     for my $tt (sort keys %types) {
         next if $tt =~ /^[BIF]$/;
@@ -573,7 +573,7 @@ EOS
     my $tt = $t;
     if ($t eq "B") {
         $t = "I";
-        $tt = "B2I";
+        $tt = "b2i";
     } elsif ($t eq "I") {
         $tt = "int64";
     } elsif ($t eq "F") {
