@@ -99,7 +99,7 @@ func (ctx *Context) RegisterVariadic(name string, vf VariadicFun) V {
 	id := len(ctx.variadics)
 	ctx.variadics = append(ctx.variadics, vf)
 	ctx.variadicsNames = append(ctx.variadicsNames, name)
-	return NewVariadic(variadic(id))
+	return newVariadic(variadic(id))
 }
 
 // RegisterMonad adds a variadic function to the context, and generates a new
@@ -114,7 +114,7 @@ func (ctx *Context) RegisterMonad(name string, vf VariadicFun) V {
 	ctx.variadicsNames = append(ctx.variadicsNames, name)
 	ctx.names[name] = NameMonad
 	ctx.vNames[name] = variadic(id)
-	return NewVariadic(variadic(id))
+	return newVariadic(variadic(id))
 }
 
 // RegisterDyad adds a variadic function to the context, and generates a new
@@ -126,7 +126,7 @@ func (ctx *Context) RegisterDyad(name string, vf VariadicFun) V {
 	ctx.variadicsNames = append(ctx.variadicsNames, name)
 	ctx.names[name] = NameDyad
 	ctx.vNames[name] = variadic(id)
-	return NewVariadic(variadic(id))
+	return newVariadic(variadic(id))
 }
 
 // AssignGlobal assigns a value to a global variable name.

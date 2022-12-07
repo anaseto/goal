@@ -1,6 +1,7 @@
 package goal
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -12,22 +13,10 @@ type position struct {
 	lambda   *lambdaCode
 }
 
-type errV struct {
-	V V
-}
-
-func newErr(v V) error {
-	return &errV{V: v}
-}
-
-func (e *errV) Error() string {
-	switch v := e.V.Value.(type) {
-	case S:
-		return string(v)
-	default:
-		// NOTE: we could add other kinds of errors.
-		return ""
-	}
+// newErr returns an error from a panicV value. It assumes isErr(x) is true and
+// the Value type is panicV.
+func newErr(x V) error {
+	return errors.New(string(x.Value.(panicV)))
 }
 
 // Error represents an error returned by any Context method.
@@ -114,7 +103,7 @@ func errNYI(s string) V {
 }
 
 func errs(s string) V {
-	return V{Kind: BoxedError, Value: S(s)}
+	return V{Kind: PanicError, Value: panicV(s)}
 }
 
 func errf(format string, a ...interface{}) V {

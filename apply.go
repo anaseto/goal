@@ -212,7 +212,7 @@ func (ctx *Context) applyVariadic(v variadic) V {
 	x := args[0]
 	if x.Kind == Nil {
 		ctx.drop()
-		return NewV(ProjectionMonad{Fun: NewVariadic(v)})
+		return NewV(ProjectionMonad{Fun: newVariadic(v)})
 	}
 	if ctx.variadics[v].Adverb {
 		ctx.drop()
@@ -231,11 +231,11 @@ func (ctx *Context) apply2Variadic(v variadic) V {
 		if args[1].Kind != Nil {
 			arg := args[1]
 			ctx.drop2()
-			return NewV(ProjectionFirst{Fun: NewVariadic(v), Arg: arg})
+			return NewV(ProjectionFirst{Fun: newVariadic(v), Arg: arg})
 		}
-		return NewV(Projection{Fun: NewVariadic(v), Args: ctx.popN(2)})
+		return NewV(Projection{Fun: newVariadic(v), Args: ctx.popN(2)})
 	} else if args[1].Kind == Nil {
-		return NewV(Projection{Fun: NewVariadic(v), Args: ctx.popN(2)})
+		return NewV(Projection{Fun: newVariadic(v), Args: ctx.popN(2)})
 	}
 	args[0].rcincr()
 	args[1].rcincr()
@@ -249,7 +249,7 @@ func (ctx *Context) apply2Variadic(v variadic) V {
 func (ctx *Context) applyNVariadic(v variadic, n int) V {
 	args := ctx.peekN(n)
 	if hasNil(args) {
-		return NewV(Projection{Fun: NewVariadic(v), Args: ctx.popN(n)})
+		return NewV(Projection{Fun: newVariadic(v), Args: ctx.popN(n)})
 	}
 	rcincr(args)
 	r := ctx.variadics[v].Func(ctx, args)
@@ -308,14 +308,14 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 		if n == 1 {
 			if args[0].Kind == Nil {
 				ctx.drop() // drop nil
-				return NewV(ProjectionMonad{Fun: NewLambda(id)})
+				return NewV(ProjectionMonad{Fun: newLambda(id)})
 			}
-			return NewV(ProjectionFirst{Fun: NewLambda(id), Arg: ctx.pop()})
+			return NewV(ProjectionFirst{Fun: newLambda(id), Arg: ctx.pop()})
 		}
 		if n == 2 && args[1].Kind == Nil && args[0].Kind != Nil {
-			return NewV(ProjectionFirst{Fun: NewLambda(id), Arg: ctx.pop()})
+			return NewV(ProjectionFirst{Fun: newLambda(id), Arg: ctx.pop()})
 		}
-		return NewV(Projection{Fun: NewLambda(id), Args: ctx.popN(n)})
+		return NewV(Projection{Fun: newLambda(id), Args: ctx.popN(n)})
 	}
 	for i, arg := range args {
 		if lc.lastUses[i].bn >= 1 {

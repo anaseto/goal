@@ -26,7 +26,7 @@ const (
 	Variadic             // unboxed int32 (N field)
 	Lambda               // unboxed int32 (N field)
 	Boxed                // boxed value (Value field)
-	BoxedError           // boxed value (Value field)
+	PanicError           // boxed value (Value field)
 )
 
 // lambda represents an user defined function by ID.
@@ -67,24 +67,41 @@ func (v V) F() float64 {
 	return f
 }
 
-// AB retrieves the AB value. It assumes Value type is AB.
+// S retrieves the S value. It assumes Value type is S.
+func (v V) S() S {
+	return v.Value.(S)
+}
+
+// AB retrieves the *AB value. It assumes Value type is *AB.
 func (v V) AB() *AB {
 	return v.Value.(*AB)
 }
 
-// AI retrieves the AI value. It assumes Value type is AI.
+// AI retrieves the *AI value. It assumes Value type is *AI.
 func (v V) AI() *AI {
 	return v.Value.(*AI)
 }
 
-// AF retrieves the AF value. It assumes Value type is AF.
+// AF retrieves the *AF value. It assumes Value type is *AF.
 func (v V) AF() *AF {
 	return v.Value.(*AF)
+}
+
+// AS retrieves the *AS value. It assumes Value type is *AS.
+func (v V) AS() *AS {
+	return v.Value.(*AS)
+}
+
+// AV retrieves the *AV value. It assumes Value type is *AV.
+func (v V) AV() *AV {
+	return v.Value.(*AV)
 }
 
 // Type returns the name of the value's type.
 func (v V) Type() string {
 	switch v.Kind {
+	case Nil:
+		return "nil"
 	case Int:
 		return "n"
 	case Float:
@@ -159,18 +176,13 @@ func (v V) rcdecr() {
 	}
 }
 
-// NewV returns a new boxed value.
-func NewV(bv Value) V {
-	return V{Kind: Boxed, Value: bv}
-}
-
-// NewVariadic returns a new int value.
-func NewVariadic(v variadic) V {
+// newVariadic returns a new variadic value.
+func newVariadic(v variadic) V {
 	return V{Kind: Variadic, N: int64(v)}
 }
 
-// NewLambda returns a new int value.
-func NewLambda(v lambda) V {
+// newLambda returns a new lambda value.
+func newLambda(v lambda) V {
 	return V{Kind: Lambda, N: int64(v)}
 }
 
@@ -190,8 +202,10 @@ func NewS(s string) V {
 	return V{Kind: Boxed, Value: S(s)}
 }
 
-// S represents (immutable) strings of bytes.
-type S string
+// NewV returns a new boxed value.
+func NewV(bv Value) V {
+	return V{Kind: Boxed, Value: bv}
+}
 
 func (x V) IsI() bool {
 	return x.Kind == Int
@@ -202,7 +216,7 @@ func (x V) IsF() bool {
 }
 
 func (x V) IsErr() bool {
-	return x.Kind == BoxedError
+	return x.Kind == PanicError
 }
 
 func (x V) IsFunction() bool {
@@ -217,6 +231,24 @@ func (x V) IsFunction() bool {
 	}
 }
 
+// panicV represents a panic error string.
+type panicV string
+
+func (e panicV) Matches(y Value) bool {
+	switch yv := y.(type) {
+	case panicV:
+		return e == yv
+	default:
+		return false
+	}
+}
+
+func (e panicV) Type() string               { return "e" }
+func (e panicV) Sprint(ctx *Context) string { return "'ERROR " + string(e) }
+
+// S represents (immutable) strings of bytes.
+type S string
+
 func (s S) Matches(y Value) bool {
 	switch yv := y.(type) {
 	case S:
@@ -229,6 +261,7 @@ func (s S) Matches(y Value) bool {
 // Type retuns "s" for string atoms.
 func (s S) Type() string { return "s" }
 
+// Sprint returns a properly quoted string.
 func (s S) Sprint(ctx *Context) string { return strconv.Quote(string(s)) }
 
 type Flags int16

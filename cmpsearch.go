@@ -23,6 +23,8 @@ func Match(x, y V) bool {
 		return y.Kind == Variadic && x.N == y.N
 	case Lambda:
 		return y.Kind == Lambda && x.N == y.N
+	case PanicError:
+		return y.Kind == PanicError && x.Value.Matches(y.Value)
 	default:
 		return y.Kind == Boxed && x.Value.Matches(y.Value)
 	}

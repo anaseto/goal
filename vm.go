@@ -62,10 +62,10 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ctx.stack[ctx.frameIdx-int32(ops[ip])] = x
 			ip++
 		case opVariadic:
-			ctx.push(NewVariadic(variadic(ops[ip])))
+			ctx.push(newVariadic(variadic(ops[ip])))
 			ip++
 		case opLambda:
-			ctx.push(NewLambda(lambda(ops[ip])))
+			ctx.push(newLambda(lambda(ops[ip])))
 			ip++
 		case opApply:
 			err := ctx.popApplyN(1)
