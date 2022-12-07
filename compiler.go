@@ -758,7 +758,7 @@ func (ctx *Context) analyzeLambdaLiveness(lc *lambdaCode) {
 			lc.joinPoints[ip+int(lc.Body[ip])]++
 		case opReturn:
 			for _, lu := range lc.lastUses {
-				if branch > 0 && lu.bn != bn {
+				if branch > 0 && lu.bn != bn || lu.bn == 0 {
 					continue
 				}
 				lc.Body[lu.opIdx] = opLocalLast
