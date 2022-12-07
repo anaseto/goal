@@ -727,11 +727,12 @@ func (ctx *Context) analyzeLambdaLiveness(lc *lambdaCode) {
 	// or[x;y;z] gives ...jumpTrue #y+#z; jumpTrue #z
 	// :x gives opReturn
 	//
-	// Errors act kinda like return, but they are not handled to avoid a
-	// big performance impact. This means some refcounts might not be
-	// decreased in case of errors, but this only means some more cloning
-	// might happen, it does not leak memory (as this is handled by Go's
-	// GC).
+	// Errors act kinda like return and both are ignored. This means some
+	// refcounts might not be decreased if the early path is taken. Note
+	// that this only means some more cloning might happen, it does not
+	// leak memory, as memory management is handled by Go's GC
+	// independently. Refcount in goal is only used as an optimization to
+	// reduce cloning.
 	lc.lastUses = make([]lastUse, len(lc.Names))
 	// bn is the basic-block number, starting from 1.
 	var bn int32 = 1
@@ -756,14 +757,12 @@ func (ctx *Context) analyzeLambdaLiveness(lc *lambdaCode) {
 			bn++
 			lc.joinPoints[ip+int(lc.Body[ip])]++
 		case opReturn:
-			if lc.joinPoints == nil {
-				lc.joinPoints = make([]int32, len(lc.Body)+1)
+			for _, lu := range lc.lastUses {
+				if branch > 0 && lu.bn != bn {
+					continue
+				}
+				lc.Body[lu.opIdx] = opLocalLast
 			}
-			// All code after a return is considered to be on a
-			// branch.
-			branch++
-			bn++
-			//lc.joinPoints[len(lc.Body)]++
 		case opLocal, opLocalLast:
 			i := lc.Body[ip]
 			lc.lastUses[i].opIdx = int32(ip) - 1
