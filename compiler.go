@@ -857,7 +857,7 @@ func (c *compiler) doApplyN(a *astApplyN, n int) error {
 		switch v.Text {
 		case "?":
 			if len(a.Args) >= 3 {
-				err := c.doCond(a, n)
+				err := c.doCond(a, n, v.Pos)
 				if err != nil {
 					return err
 				}
@@ -892,12 +892,15 @@ func (c *compiler) doApplyN(a *astApplyN, n int) error {
 	return nil
 }
 
-func (c *compiler) doCond(a *astApplyN, n int) error {
+func (c *compiler) doCond(a *astApplyN, n, pos int) error {
 	body := a.Args
 	if len(body)%2 != 1 {
 		return c.errorf("conditional ?[if;then;else] with even number of statements")
 	}
 	cond := body[0]
+	if !nonEmpty(cond) {
+		return c.perrorf(pos, "?[if;then;else] : empty condition")
+	}
 	err := c.doExpr(cond, 0)
 	if err != nil {
 		return err
@@ -910,6 +913,9 @@ func (c *compiler) doCond(a *astApplyN, n int) error {
 	for i := 1; i < len(body); i += 2 {
 		c.push(opDrop)
 		then := body[i]
+		if !nonEmpty(then) {
+			return c.perrorf(pos, "?[if;then;else] : empty then (%d-th)", i+1)
+		}
 		err := c.doExpr(then, 0)
 		if err != nil {
 			return err
@@ -919,6 +925,9 @@ func (c *compiler) doCond(a *astApplyN, n int) error {
 		jumpsElse = append(jumpsElse, len(c.body()))
 		c.push(opDrop)
 		elseCond := body[i+1]
+		if !nonEmpty(elseCond) {
+			return c.perrorf(pos, "?[if;then;else] : empty cond (%d-th)", i+2)
+		}
 		err = c.doExpr(elseCond, 0)
 		if err != nil {
 			return err

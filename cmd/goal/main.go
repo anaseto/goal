@@ -212,7 +212,7 @@ func vSlurp(ctx *goal.Context, args []goal.V) goal.V {
 		case goal.S:
 			bytes, err := os.ReadFile(string(x))
 			if err != nil {
-				return goal.NewError(goal.NewS(fmt.Sprintf("slurp: %v", err)))
+				return goal.NewError(goal.NewS(err.Error()))
 			}
 			return goal.NewS(string(bytes))
 		default:

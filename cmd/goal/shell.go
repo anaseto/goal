@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"goal"
 	"os"
 	"os/exec"
@@ -25,7 +24,7 @@ func vShell(ctx *goal.Context, args []goal.V) goal.V {
 	cmd.Stderr = os.Stderr
 	bytes, err := cmd.Output()
 	if err != nil {
-		return goal.NewError(goal.NewS(fmt.Sprintf("shell[cmd] : %v", err)))
+		return goal.NewError(goal.NewS(err.Error()))
 	}
 	return goal.NewS(string(bytes))
 }
