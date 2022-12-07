@@ -90,6 +90,8 @@ func runStdin(ctx *goal.Context) {
 					fmt.Println(strings.TrimSpace(helpIO))
 				case goal.Match(arg, goal.NewS("syn")):
 					fmt.Println(strings.TrimSpace(helpSyntax))
+				case goal.Match(arg, goal.NewS("types")):
+					fmt.Println(strings.TrimSpace(helpTypes))
 				default:
 					fmt.Println(strings.TrimSpace(helpTopics))
 				}
@@ -175,42 +177,42 @@ func usageError(usage bool, msgs ...interface{}) {
 }
 
 func registerVariadics(ctx *goal.Context) {
-	say := ctx.RegisterMonad("say", goal.VariadicFun{
-		Func: func(ctx *goal.Context, args []goal.V) goal.V {
-			for _, arg := range args {
-				switch argv := arg.Value().(type) {
-				case goal.S:
-					fmt.Println(string(argv))
-					return goal.V{}
-				default:
-					fmt.Println(arg.Sprint(ctx))
-					return goal.V{}
-				}
-			}
-			return goal.V{}
-		}})
+	say := ctx.RegisterMonad("say", goal.VariadicFun{Func: vSay})
 	ctx.AssignGlobal("say", say)
-	slurp := ctx.RegisterMonad("slurp", goal.VariadicFun{
-		Func: func(ctx *goal.Context, args []goal.V) goal.V {
-			switch len(args) {
-			case 1:
-				switch x := args[0].Value().(type) {
-				case goal.S:
-					bytes, err := os.ReadFile(string(x))
-					if err != nil {
-						return goal.Panicf("slurp: %v", err)
-					}
-					return goal.NewS(string(bytes))
-				default:
-					return goal.NewPanic("slurp: non-string filename")
-				}
-			default:
-				return goal.NewPanic("slurp: too many arguments")
-			}
-		}})
+	slurp := ctx.RegisterMonad("slurp", goal.VariadicFun{Func: vSlurp})
 	ctx.AssignGlobal("slurp", slurp)
 	shell := ctx.RegisterMonad("shell", goal.VariadicFun{Func: vShell})
 	ctx.AssignGlobal("shell", shell)
+}
+
+func vSay(ctx *goal.Context, args []goal.V) goal.V {
+	for _, arg := range args {
+		switch argv := arg.Value().(type) {
+		case goal.S:
+			fmt.Println(string(argv))
+		default:
+			fmt.Println(arg.Sprint(ctx))
+		}
+	}
+	return goal.NewI(1)
+}
+
+func vSlurp(ctx *goal.Context, args []goal.V) goal.V {
+	switch len(args) {
+	case 1:
+		switch x := args[0].Value().(type) {
+		case goal.S:
+			bytes, err := os.ReadFile(string(x))
+			if err != nil {
+				return goal.NewError(goal.NewS(fmt.Sprintf("slurp: %v", err)))
+			}
+			return goal.NewS(string(bytes))
+		default:
+			return goal.NewPanic("slurp: non-string filename")
+		}
+	default:
+		return goal.NewPanic("slurp: too many arguments")
+	}
 }
 
 const helpTopics = `
@@ -221,6 +223,7 @@ Type help TOPIC or h TOPIC where TOPIC is one of:
 "'"	adverbs ('/\)
 "io"	io functions (slurp, say)
 "syn"   syntax
+"types" types
 
 Notations:
 	s (string) f (function) F (2-args function)
@@ -296,11 +299,11 @@ x.y applyN	{x+y}.2 3 -> 5    {x+y}[2;3] -> 5    (1 2;3 4)[0;1] -> 2
 const helpNAMEDVERBS = `
 NAMED VERBS
 x in y    member of	2 3 in 0 2 4 -> 1 0
-ocount x  occur-count	ocount 3 2 5 3 2 2 7 -> 0 0 0 1 1 2 0
-icount x  index-count	icount 0 0 1 -1 0 1 2 3 2 -> 3 2 2 1 (same as #'=x)
-sign x    sign		sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
 bytes x	  byte-count	bytes "abc" -> 3
-error x	  error		r:{?[~x=0;1%%x;error "zero"]}0;?["e"~@r;*r;r] -> "zero"
+error x	  error		r:{?[~x=0;1%x;error "zero"]}0;?["e"~@r;*r;r] -> "zero"
+icount x  index-count	icount 0 0 1 -1 0 1 2 3 2 -> 3 2 2 1 (same as #'=x)
+ocount x  occur-count	ocount 3 2 5 3 2 2 7 -> 0 0 0 1 1 2 0
+sign x    sign		sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
 `
 
 const helpADVERBS = `
@@ -333,9 +336,21 @@ arrays		1 2 -3 4	1 "a" -2 "b"	(1 2;"a";(3;"b"))
 variables	a:2 (assign)	a+3 (use)	a::2 (assign global)
 expressions	2*3+4 -> 14	1+|1 2 3 -> 4 3 2	+/1 2 3 -> 6
 index		1 2 3[1] -> 2 (same as x@1) (1 2;3 4)[0;1] -> 2 (same as x.(0;1))
-lambdas		{x+y}[2;3] -> 5		{[a;b;c]a+b+c}[1;2;3] -> 6
+lambdas		{x+y+z}[2;3;0] -> 5	{[a;b;c]a+b+c}[1;2;3] -> 6
+projections	{x+y}[2;] 3 -> 5	(2+) 3 -> 5
 cond		?[1;2;3] -> 2	?[0;2;3] -> 3	?[0;2;"";3;4] -> 4
 and/or		and[1;2] -> 2   and[1;0;3] -> 0   or[0;2] -> 2   or[0;0;0] -> 0
 sequence	[a:2;b:a+3;a+10] -> 12 (bracket block [] at start of expression)
 return		[1;:2;3] -> 2 (a : at start of expression)
+`
+
+const helpTypes = `
+atom	array	name		examples
+-----------------------------------------------------------------------
+n	N	number		0	1.5	!5	1.2 3 1.8
+s	S	string		"abc"	"a" "b" "c"
+f		function	+	{x*2}	(1-)	%[;2]
+e		error		error "msg"
+	A	generic array	("a" 1;"b" 2;"c" 3)	(+;-;*;"any")
+-----------------------------------------------------------------------
 `
