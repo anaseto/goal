@@ -4,7 +4,7 @@ package goal
 func enum(x V) V {
 	x = toIndices(x)
 	if x.isPanic() {
-		return errf("!x : %v", x)
+		return panicf("!x : %v", x)
 	}
 	if x.IsI() {
 		return rangeI(x.I())
@@ -13,13 +13,13 @@ func enum(x V) V {
 	case *AI:
 		return rangeArray(xv)
 	default:
-		return errs("!x : x nested array")
+		return panics("!x : x nested array")
 	}
 }
 
 func rangeI(n int64) V {
 	if n < 0 {
-		return errs("!x : x negative")
+		return panics("!x : x negative")
 	}
 	r := make([]int64, n)
 	for i := range r {
@@ -60,7 +60,7 @@ func where(x V) V {
 	if x.IsI() {
 		switch {
 		case x.I() < 0:
-			return errf("&x : x negative (%d)", x.I())
+			return panicf("&x : x negative (%d)", x.I())
 		case x.I() == 0:
 			return NewAI([]int64{})
 		default:
@@ -70,12 +70,12 @@ func where(x V) V {
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
-			return errf("&x : x non-integer (%g)", x.F())
+			return panicf("&x : x non-integer (%g)", x.F())
 		}
 		n := int64(x.F())
 		switch {
 		case n < 0:
-			return errf("&x : x negative (%d)", n)
+			return panicf("&x : x negative (%d)", n)
 		case n == 0:
 			return NewAI([]int64{})
 		default:
@@ -101,7 +101,7 @@ func where(x V) V {
 		n := int64(0)
 		for _, xi := range xv.Slice {
 			if xi < 0 {
-				return errf("&x : x contains negative integer (%d)", xv)
+				return panicf("&x : x contains negative integer (%d)", xv)
 			}
 			n += xi
 		}
@@ -116,10 +116,10 @@ func where(x V) V {
 		n := int64(0)
 		for _, xi := range xv.Slice {
 			if !isI(xi) {
-				return errf("&x : x contains non-integer (%g)", xi)
+				return panicf("&x : x contains non-integer (%g)", xi)
 			}
 			if xi < 0 {
-				return errf("&x : x contains negative (%d)", int64(xi))
+				return panicf("&x : x contains negative (%d)", int64(xi))
 			}
 			n += int64(xi)
 		}
@@ -137,16 +137,16 @@ func where(x V) V {
 			for _, xi := range xv.Slice {
 				if xi.IsI() {
 					if xi.I() < 0 {
-						return errf("&x : negative integer (%d)", xi.I())
+						return panicf("&x : negative integer (%d)", xi.I())
 					}
 					n += xi.I()
 				} else {
 					xif := xi.F()
 					if !isI(xif) {
-						return errf("&x : not an integer (%g)", xif)
+						return panicf("&x : not an integer (%g)", xif)
 					}
 					if xif < 0 {
-						return errf("&x : negative integer (%d)", int64(xif))
+						return panicf("&x : negative integer (%d)", int64(xif))
 					}
 					n += int64(xif)
 				}
@@ -165,10 +165,10 @@ func where(x V) V {
 			}
 			return NewAI(r)
 		default:
-			return errs("&x : x non-integer array")
+			return panics("&x : x non-integer array")
 		}
 	default:
-		return errf("&x : x non-integer (type %s)", x.Type())
+		return panicf("&x : x non-integer (type %s)", x.Type())
 	}
 }
 
@@ -177,40 +177,40 @@ func replicate(x, y V) V {
 	if x.IsI() {
 		switch {
 		case x.I() < 0:
-			return errf("f#y : f[y] negative integer (%d)", x.I())
+			return panicf("f#y : f[y] negative integer (%d)", x.I())
 		default:
 			return repeat(y, x.I())
 		}
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
-			return errf("f#y : f[y] not an integer (%g)", x.F())
+			return panicf("f#y : f[y] not an integer (%g)", x.F())
 		}
 		return replicate(NewI(int64(x.F())), y)
 	}
 	switch xv := x.Value.(type) {
 	case *AB:
 		if xv.Len() != Length(y) {
-			return errf("f#y : length mismatch: %d (f[y]) vs %d (y)", xv.Len(), Length(y))
+			return panicf("f#y : length mismatch: %d (f[y]) vs %d (y)", xv.Len(), Length(y))
 		}
 		return repeatAB(xv, y)
 	case *AI:
 		if xv.Len() != Length(y) {
-			return errf("f#y : length mismatch: %d (f[y]) vs %d (y)", xv.Len(), Length(y))
+			return panicf("f#y : length mismatch: %d (f[y]) vs %d (y)", xv.Len(), Length(y))
 		}
 		return repeatAI(xv, y)
 	case *AF:
 		ix := toAI(xv)
 		if ix.isPanic() {
-			return errf("f#y : x %v", ix)
+			return panicf("f#y : x %v", ix)
 		}
 		return replicate(ix, y)
 	case *AV:
 		// should be canonical
 		//assertCanonical(x)
-		return errf("f#y : f[y] non-integer (%s)", x.Type())
+		return panicf("f#y : f[y] non-integer (%s)", x.Type())
 	default:
-		return errf("f#y : f[y] non-integer (%s)", x.Type())
+		return panicf("f#y : f[y] non-integer (%s)", x.Type())
 	}
 }
 
@@ -299,7 +299,7 @@ func repeatAB(x *AB, y V) V {
 		}
 		return canonicalV(NewAV(r))
 	default:
-		return errf("f#y : y not an array (%s)", y.Type())
+		return panicf("f#y : y not an array (%s)", y.Type())
 	}
 }
 
@@ -307,7 +307,7 @@ func repeatAI(x *AI, y V) V {
 	n := int64(0)
 	for _, xi := range x.Slice {
 		if xi < 0 {
-			return errf("f#y : f[y] contains negative integer (%d)", xi)
+			return panicf("f#y : f[y] contains negative integer (%d)", xi)
 		}
 		n += xi
 	}
@@ -353,7 +353,7 @@ func repeatAI(x *AI, y V) V {
 		}
 		return canonicalV(NewAV(r))
 	default:
-		return errf("f#y : y not an array (%s)", y.Type())
+		return panicf("f#y : y not an array (%s)", y.Type())
 	}
 }
 
@@ -379,14 +379,14 @@ func weedOut(x, y V) V {
 	case *AF:
 		ix := toAI(xv)
 		if ix.isPanic() {
-			return errf("f#y : x %v", ix)
+			return panicf("f#y : x %v", ix)
 		}
 		return weedOut(ix, y)
 	case *AV:
 		//assertCanonical(x)
-		return errf("f#y : f[y] non-integer (%s)", x.Type())
+		return panicf("f#y : f[y] non-integer (%s)", x.Type())
 	default:
-		return errf("f_y : f[y] non-integer (%s)", x.Type())
+		return panicf("f_y : f[y] non-integer (%s)", x.Type())
 	}
 }
 
@@ -437,7 +437,7 @@ func weedOutAB(x *AB, y V) V {
 		}
 		return canonicalV(NewAV(r))
 	default:
-		return errf("f_y : y not an array (%s)", y.Type())
+		return panicf("f_y : y not an array (%s)", y.Type())
 	}
 }
 
@@ -488,7 +488,7 @@ func weedOutAI(x *AI, y V) V {
 		}
 		return canonicalV(NewAV(r))
 	default:
-		return errf("f_y : y not an array (%s)", y.Type())
+		return panicf("f_y : y not an array (%s)", y.Type())
 	}
 }
 
@@ -500,11 +500,11 @@ func eval(ctx *Context, x V) V {
 	case S:
 		r, err := nctx.Eval(string(xv))
 		if err != nil {
-			return errf(".s : %v", err)
+			return panicf(".s : %v", err)
 		}
 		ctx.merge(nctx)
 		return r
 	default:
-		return errType(".x", "x", x)
+		return panicType(".x", "x", x)
 	}
 }

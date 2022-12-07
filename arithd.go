@@ -30,7 +30,7 @@ func equal(x, y V) V {
 		switch yv := y.Value.(type) {
 		case array:
 			if yv.Len() != xv.Len() {
-				return errf("x=y : length mismatch: %d vs %d", xv.Len(), yv.Len())
+				return panicf("x=y : length mismatch: %d vs %d", xv.Len(), yv.Len())
 			}
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
@@ -52,7 +52,7 @@ func equal(x, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x=y", "x", x)
+		return panicTypeElt("x=y", "x", x)
 	}
 }
 
@@ -93,7 +93,7 @@ func equalFV(x float64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x=y", "y", y)
+		return panicTypeElt("x=y", "y", y)
 	}
 }
 
@@ -134,7 +134,7 @@ func equalIV(x int64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x=y", "y", y)
+		return panicTypeElt("x=y", "y", y)
 	}
 }
 
@@ -159,7 +159,7 @@ func equalSV(x S, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x=y", "y", y)
+		return panicTypeElt("x=y", "y", y)
 	}
 }
 
@@ -181,7 +181,7 @@ func equalABV(x *AB, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -190,7 +190,7 @@ func equalABV(x *AB, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -199,7 +199,7 @@ func equalABV(x *AB, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -208,7 +208,7 @@ func equalABV(x *AB, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -221,7 +221,7 @@ func equalABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x=y", "y", y)
+		return panicTypeElt("x=y", "y", y)
 	}
 }
 
@@ -243,7 +243,7 @@ func equalAFV(x *AF, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -252,7 +252,7 @@ func equalAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := make([]bool, yv.Len())
 		for i := range r {
@@ -261,7 +261,7 @@ func equalAFV(x *AF, y V) V {
 		return NewAB(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := make([]bool, yv.Len())
 		for i := range r {
@@ -270,7 +270,7 @@ func equalAFV(x *AF, y V) V {
 		return NewAB(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -283,7 +283,7 @@ func equalAFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x=y", "y", y)
+		return panicTypeElt("x=y", "y", y)
 	}
 }
 
@@ -305,7 +305,7 @@ func equalAIV(x *AI, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -314,7 +314,7 @@ func equalAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := make([]bool, yv.Len())
 		for i := range r {
@@ -323,7 +323,7 @@ func equalAIV(x *AI, y V) V {
 		return NewAB(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := make([]bool, yv.Len())
 		for i := range r {
@@ -332,7 +332,7 @@ func equalAIV(x *AI, y V) V {
 		return NewAB(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -345,7 +345,7 @@ func equalAIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x=y", "y", y)
+		return panicTypeElt("x=y", "y", y)
 	}
 }
 
@@ -359,7 +359,7 @@ func equalASV(x *AS, y V) V {
 		return NewAB(r)
 	case *AS:
 		if x.Len() != yv.Len() {
-			return errf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := make([]bool, yv.Len())
 		for i := range r {
@@ -368,7 +368,7 @@ func equalASV(x *AS, y V) V {
 		return NewAB(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -381,7 +381,7 @@ func equalASV(x *AS, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x=y", "y", y)
+		return panicTypeElt("x=y", "y", y)
 	}
 }
 
@@ -408,7 +408,7 @@ func lesser(x, y V) V {
 		switch yv := y.Value.(type) {
 		case array:
 			if yv.Len() != xv.Len() {
-				return errf("x<y : length mismatch: %d vs %d", xv.Len(), yv.Len())
+				return panicf("x<y : length mismatch: %d vs %d", xv.Len(), yv.Len())
 			}
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
@@ -430,7 +430,7 @@ func lesser(x, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x<y", "x", x)
+		return panicTypeElt("x<y", "x", x)
 	}
 }
 
@@ -471,7 +471,7 @@ func lesserFV(x float64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x<y", "y", y)
+		return panicTypeElt("x<y", "y", y)
 	}
 }
 
@@ -512,7 +512,7 @@ func lesserIV(x int64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x<y", "y", y)
+		return panicTypeElt("x<y", "y", y)
 	}
 }
 
@@ -537,7 +537,7 @@ func lesserSV(x S, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x<y", "y", y)
+		return panicTypeElt("x<y", "y", y)
 	}
 }
 
@@ -559,7 +559,7 @@ func lesserABV(x *AB, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -568,7 +568,7 @@ func lesserABV(x *AB, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -577,7 +577,7 @@ func lesserABV(x *AB, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -586,7 +586,7 @@ func lesserABV(x *AB, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -599,7 +599,7 @@ func lesserABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x<y", "y", y)
+		return panicTypeElt("x<y", "y", y)
 	}
 }
 
@@ -621,7 +621,7 @@ func lesserAFV(x *AF, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -630,7 +630,7 @@ func lesserAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := make([]bool, yv.Len())
 		for i := range r {
@@ -639,7 +639,7 @@ func lesserAFV(x *AF, y V) V {
 		return NewAB(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := make([]bool, yv.Len())
 		for i := range r {
@@ -648,7 +648,7 @@ func lesserAFV(x *AF, y V) V {
 		return NewAB(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -661,7 +661,7 @@ func lesserAFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x<y", "y", y)
+		return panicTypeElt("x<y", "y", y)
 	}
 }
 
@@ -683,7 +683,7 @@ func lesserAIV(x *AI, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -692,7 +692,7 @@ func lesserAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := make([]bool, yv.Len())
 		for i := range r {
@@ -701,7 +701,7 @@ func lesserAIV(x *AI, y V) V {
 		return NewAB(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := make([]bool, yv.Len())
 		for i := range r {
@@ -710,7 +710,7 @@ func lesserAIV(x *AI, y V) V {
 		return NewAB(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -723,7 +723,7 @@ func lesserAIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x<y", "y", y)
+		return panicTypeElt("x<y", "y", y)
 	}
 }
 
@@ -737,7 +737,7 @@ func lesserASV(x *AS, y V) V {
 		return NewAB(r)
 	case *AS:
 		if x.Len() != yv.Len() {
-			return errf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := make([]bool, yv.Len())
 		for i := range r {
@@ -746,7 +746,7 @@ func lesserASV(x *AS, y V) V {
 		return NewAB(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -759,7 +759,7 @@ func lesserASV(x *AS, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x<y", "y", y)
+		return panicTypeElt("x<y", "y", y)
 	}
 }
 
@@ -786,7 +786,7 @@ func greater(x, y V) V {
 		switch yv := y.Value.(type) {
 		case array:
 			if yv.Len() != xv.Len() {
-				return errf("x>y : length mismatch: %d vs %d", xv.Len(), yv.Len())
+				return panicf("x>y : length mismatch: %d vs %d", xv.Len(), yv.Len())
 			}
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
@@ -808,7 +808,7 @@ func greater(x, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x>y", "x", x)
+		return panicTypeElt("x>y", "x", x)
 	}
 }
 
@@ -849,7 +849,7 @@ func greaterFV(x float64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x>y", "y", y)
+		return panicTypeElt("x>y", "y", y)
 	}
 }
 
@@ -890,7 +890,7 @@ func greaterIV(x int64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x>y", "y", y)
+		return panicTypeElt("x>y", "y", y)
 	}
 }
 
@@ -915,7 +915,7 @@ func greaterSV(x S, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x>y", "y", y)
+		return panicTypeElt("x>y", "y", y)
 	}
 }
 
@@ -937,7 +937,7 @@ func greaterABV(x *AB, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -946,7 +946,7 @@ func greaterABV(x *AB, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -955,7 +955,7 @@ func greaterABV(x *AB, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -964,7 +964,7 @@ func greaterABV(x *AB, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -977,7 +977,7 @@ func greaterABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x>y", "y", y)
+		return panicTypeElt("x>y", "y", y)
 	}
 }
 
@@ -999,7 +999,7 @@ func greaterAFV(x *AF, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -1008,7 +1008,7 @@ func greaterAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := make([]bool, yv.Len())
 		for i := range r {
@@ -1017,7 +1017,7 @@ func greaterAFV(x *AF, y V) V {
 		return NewAB(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := make([]bool, yv.Len())
 		for i := range r {
@@ -1026,7 +1026,7 @@ func greaterAFV(x *AF, y V) V {
 		return NewAB(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -1039,7 +1039,7 @@ func greaterAFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x>y", "y", y)
+		return panicTypeElt("x>y", "y", y)
 	}
 }
 
@@ -1061,7 +1061,7 @@ func greaterAIV(x *AI, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -1070,7 +1070,7 @@ func greaterAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := make([]bool, yv.Len())
 		for i := range r {
@@ -1079,7 +1079,7 @@ func greaterAIV(x *AI, y V) V {
 		return NewAB(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := make([]bool, yv.Len())
 		for i := range r {
@@ -1088,7 +1088,7 @@ func greaterAIV(x *AI, y V) V {
 		return NewAB(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -1101,7 +1101,7 @@ func greaterAIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x>y", "y", y)
+		return panicTypeElt("x>y", "y", y)
 	}
 }
 
@@ -1115,7 +1115,7 @@ func greaterASV(x *AS, y V) V {
 		return NewAB(r)
 	case *AS:
 		if x.Len() != yv.Len() {
-			return errf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := make([]bool, yv.Len())
 		for i := range r {
@@ -1124,7 +1124,7 @@ func greaterASV(x *AS, y V) V {
 		return NewAB(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -1137,7 +1137,7 @@ func greaterASV(x *AS, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x>y", "y", y)
+		return panicTypeElt("x>y", "y", y)
 	}
 }
 
@@ -1164,7 +1164,7 @@ func add(x, y V) V {
 		switch yv := y.Value.(type) {
 		case array:
 			if yv.Len() != xv.Len() {
-				return errf("x+y : length mismatch: %d vs %d", xv.Len(), yv.Len())
+				return panicf("x+y : length mismatch: %d vs %d", xv.Len(), yv.Len())
 			}
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
@@ -1186,7 +1186,7 @@ func add(x, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x+y", "x", x)
+		return panicTypeElt("x+y", "x", x)
 	}
 }
 
@@ -1227,7 +1227,7 @@ func addFV(x float64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x+y", "y", y)
+		return panicTypeElt("x+y", "y", y)
 	}
 }
 
@@ -1268,7 +1268,7 @@ func addIV(x int64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x+y", "y", y)
+		return panicTypeElt("x+y", "y", y)
 	}
 }
 
@@ -1293,7 +1293,7 @@ func addSV(x S, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x+y", "y", y)
+		return panicTypeElt("x+y", "y", y)
 	}
 }
 
@@ -1315,7 +1315,7 @@ func addABV(x *AB, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := make([]int64, yv.Len())
 		for i := range r {
@@ -1324,7 +1324,7 @@ func addABV(x *AB, y V) V {
 		return NewAI(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -1333,7 +1333,7 @@ func addABV(x *AB, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -1342,7 +1342,7 @@ func addABV(x *AB, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -1355,7 +1355,7 @@ func addABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x+y", "y", y)
+		return panicTypeElt("x+y", "y", y)
 	}
 }
 
@@ -1377,7 +1377,7 @@ func addAFV(x *AF, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -1386,7 +1386,7 @@ func addAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -1395,7 +1395,7 @@ func addAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -1404,7 +1404,7 @@ func addAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -1417,7 +1417,7 @@ func addAFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x+y", "y", y)
+		return panicTypeElt("x+y", "y", y)
 	}
 }
 
@@ -1439,7 +1439,7 @@ func addAIV(x *AI, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -1448,7 +1448,7 @@ func addAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -1457,7 +1457,7 @@ func addAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -1466,7 +1466,7 @@ func addAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -1479,7 +1479,7 @@ func addAIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x+y", "y", y)
+		return panicTypeElt("x+y", "y", y)
 	}
 }
 
@@ -1493,7 +1493,7 @@ func addASV(x *AS, y V) V {
 		return NewV(r)
 	case *AS:
 		if x.Len() != yv.Len() {
-			return errf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -1502,7 +1502,7 @@ func addASV(x *AS, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -1515,7 +1515,7 @@ func addASV(x *AS, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x+y", "y", y)
+		return panicTypeElt("x+y", "y", y)
 	}
 }
 
@@ -1542,7 +1542,7 @@ func subtract(x, y V) V {
 		switch yv := y.Value.(type) {
 		case array:
 			if yv.Len() != xv.Len() {
-				return errf("x-y : length mismatch: %d vs %d", xv.Len(), yv.Len())
+				return panicf("x-y : length mismatch: %d vs %d", xv.Len(), yv.Len())
 			}
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
@@ -1564,7 +1564,7 @@ func subtract(x, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x-y", "x", x)
+		return panicTypeElt("x-y", "x", x)
 	}
 }
 
@@ -1605,7 +1605,7 @@ func subtractFV(x float64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x-y", "y", y)
+		return panicTypeElt("x-y", "y", y)
 	}
 }
 
@@ -1646,7 +1646,7 @@ func subtractIV(x int64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x-y", "y", y)
+		return panicTypeElt("x-y", "y", y)
 	}
 }
 
@@ -1671,7 +1671,7 @@ func subtractSV(x S, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x-y", "y", y)
+		return panicTypeElt("x-y", "y", y)
 	}
 }
 
@@ -1693,7 +1693,7 @@ func subtractABV(x *AB, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := make([]int64, yv.Len())
 		for i := range r {
@@ -1702,7 +1702,7 @@ func subtractABV(x *AB, y V) V {
 		return NewAI(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -1711,7 +1711,7 @@ func subtractABV(x *AB, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -1720,7 +1720,7 @@ func subtractABV(x *AB, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -1733,7 +1733,7 @@ func subtractABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x-y", "y", y)
+		return panicTypeElt("x-y", "y", y)
 	}
 }
 
@@ -1755,7 +1755,7 @@ func subtractAFV(x *AF, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -1764,7 +1764,7 @@ func subtractAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -1773,7 +1773,7 @@ func subtractAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -1782,7 +1782,7 @@ func subtractAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -1795,7 +1795,7 @@ func subtractAFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x-y", "y", y)
+		return panicTypeElt("x-y", "y", y)
 	}
 }
 
@@ -1817,7 +1817,7 @@ func subtractAIV(x *AI, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -1826,7 +1826,7 @@ func subtractAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -1835,7 +1835,7 @@ func subtractAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -1844,7 +1844,7 @@ func subtractAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -1857,7 +1857,7 @@ func subtractAIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x-y", "y", y)
+		return panicTypeElt("x-y", "y", y)
 	}
 }
 
@@ -1871,7 +1871,7 @@ func subtractASV(x *AS, y V) V {
 		return NewV(r)
 	case *AS:
 		if x.Len() != yv.Len() {
-			return errf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -1880,7 +1880,7 @@ func subtractASV(x *AS, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -1893,7 +1893,7 @@ func subtractASV(x *AS, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x-y", "y", y)
+		return panicTypeElt("x-y", "y", y)
 	}
 }
 
@@ -1920,7 +1920,7 @@ func multiply(x, y V) V {
 		switch yv := y.Value.(type) {
 		case array:
 			if yv.Len() != xv.Len() {
-				return errf("x*y : length mismatch: %d vs %d", xv.Len(), yv.Len())
+				return panicf("x*y : length mismatch: %d vs %d", xv.Len(), yv.Len())
 			}
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
@@ -1942,7 +1942,7 @@ func multiply(x, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x*y", "x", x)
+		return panicTypeElt("x*y", "x", x)
 	}
 }
 
@@ -1991,7 +1991,7 @@ func multiplyFV(x float64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x*y", "y", y)
+		return panicTypeElt("x*y", "y", y)
 	}
 }
 
@@ -2040,7 +2040,7 @@ func multiplyIV(x int64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x*y", "y", y)
+		return panicTypeElt("x*y", "y", y)
 	}
 }
 
@@ -2081,7 +2081,7 @@ func multiplySV(x S, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x*y", "y", y)
+		return panicTypeElt("x*y", "y", y)
 	}
 }
 
@@ -2109,7 +2109,7 @@ func multiplyABV(x *AB, y V) V {
 		return NewAS(r)
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -2118,7 +2118,7 @@ func multiplyABV(x *AB, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -2127,7 +2127,7 @@ func multiplyABV(x *AB, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -2136,7 +2136,7 @@ func multiplyABV(x *AB, y V) V {
 		return NewV(r)
 	case *AS:
 		if x.Len() != yv.Len() {
-			return errf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -2145,7 +2145,7 @@ func multiplyABV(x *AB, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -2158,7 +2158,7 @@ func multiplyABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x*y", "y", y)
+		return panicTypeElt("x*y", "y", y)
 	}
 }
 
@@ -2186,7 +2186,7 @@ func multiplyAFV(x *AF, y V) V {
 		return NewAS(r)
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -2195,7 +2195,7 @@ func multiplyAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -2204,7 +2204,7 @@ func multiplyAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -2213,7 +2213,7 @@ func multiplyAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AS:
 		if x.Len() != yv.Len() {
-			return errf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -2222,7 +2222,7 @@ func multiplyAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -2235,7 +2235,7 @@ func multiplyAFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x*y", "y", y)
+		return panicTypeElt("x*y", "y", y)
 	}
 }
 
@@ -2263,7 +2263,7 @@ func multiplyAIV(x *AI, y V) V {
 		return NewAS(r)
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -2272,7 +2272,7 @@ func multiplyAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -2281,7 +2281,7 @@ func multiplyAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -2290,7 +2290,7 @@ func multiplyAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AS:
 		if x.Len() != yv.Len() {
-			return errf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -2299,7 +2299,7 @@ func multiplyAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -2312,7 +2312,7 @@ func multiplyAIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x*y", "y", y)
+		return panicTypeElt("x*y", "y", y)
 	}
 }
 
@@ -2334,7 +2334,7 @@ func multiplyASV(x *AS, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -2343,7 +2343,7 @@ func multiplyASV(x *AS, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -2352,7 +2352,7 @@ func multiplyASV(x *AS, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -2361,7 +2361,7 @@ func multiplyASV(x *AS, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -2374,7 +2374,7 @@ func multiplyASV(x *AS, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x*y", "y", y)
+		return panicTypeElt("x*y", "y", y)
 	}
 }
 
@@ -2397,7 +2397,7 @@ func divide(x, y V) V {
 		switch yv := y.Value.(type) {
 		case array:
 			if yv.Len() != xv.Len() {
-				return errf("x%%y : length mismatch: %d vs %d", xv.Len(), yv.Len())
+				return panicf("x%%y : length mismatch: %d vs %d", xv.Len(), yv.Len())
 			}
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
@@ -2419,7 +2419,7 @@ func divide(x, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x%%y", "x", x)
+		return panicTypeElt("x%%y", "x", x)
 	}
 }
 
@@ -2460,7 +2460,7 @@ func divideFV(x float64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x%%y", "y", y)
+		return panicTypeElt("x%%y", "y", y)
 	}
 }
 
@@ -2501,7 +2501,7 @@ func divideIV(x int64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x%%y", "y", y)
+		return panicTypeElt("x%%y", "y", y)
 	}
 }
 
@@ -2523,7 +2523,7 @@ func divideABV(x *AB, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := make([]float64, yv.Len())
 		for i := range r {
@@ -2532,7 +2532,7 @@ func divideABV(x *AB, y V) V {
 		return NewAF(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -2541,7 +2541,7 @@ func divideABV(x *AB, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := make([]float64, yv.Len())
 		for i := range r {
@@ -2550,7 +2550,7 @@ func divideABV(x *AB, y V) V {
 		return NewAF(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -2563,7 +2563,7 @@ func divideABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x%%y", "y", y)
+		return panicTypeElt("x%%y", "y", y)
 	}
 }
 
@@ -2585,7 +2585,7 @@ func divideAFV(x *AF, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -2594,7 +2594,7 @@ func divideAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -2603,7 +2603,7 @@ func divideAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -2612,7 +2612,7 @@ func divideAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -2625,7 +2625,7 @@ func divideAFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x%%y", "y", y)
+		return panicTypeElt("x%%y", "y", y)
 	}
 }
 
@@ -2647,7 +2647,7 @@ func divideAIV(x *AI, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := make([]float64, yv.Len())
 		for i := range r {
@@ -2656,7 +2656,7 @@ func divideAIV(x *AI, y V) V {
 		return NewAF(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -2665,7 +2665,7 @@ func divideAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := make([]float64, yv.Len())
 		for i := range r {
@@ -2674,7 +2674,7 @@ func divideAIV(x *AI, y V) V {
 		return NewAF(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -2687,7 +2687,7 @@ func divideAIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x%%y", "y", y)
+		return panicTypeElt("x%%y", "y", y)
 	}
 }
 
@@ -2714,7 +2714,7 @@ func minimum(x, y V) V {
 		switch yv := y.Value.(type) {
 		case array:
 			if yv.Len() != xv.Len() {
-				return errf("x&y : length mismatch: %d vs %d", xv.Len(), yv.Len())
+				return panicf("x&y : length mismatch: %d vs %d", xv.Len(), yv.Len())
 			}
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
@@ -2736,7 +2736,7 @@ func minimum(x, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x&y", "x", x)
+		return panicTypeElt("x&y", "x", x)
 	}
 }
 
@@ -2777,7 +2777,7 @@ func minimumFV(x float64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x&y", "y", y)
+		return panicTypeElt("x&y", "y", y)
 	}
 }
 
@@ -2818,7 +2818,7 @@ func minimumIV(x int64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x&y", "y", y)
+		return panicTypeElt("x&y", "y", y)
 	}
 }
 
@@ -2843,7 +2843,7 @@ func minimumSV(x S, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x&y", "y", y)
+		return panicTypeElt("x&y", "y", y)
 	}
 }
 
@@ -2865,7 +2865,7 @@ func minimumABV(x *AB, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -2874,7 +2874,7 @@ func minimumABV(x *AB, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -2883,7 +2883,7 @@ func minimumABV(x *AB, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -2892,7 +2892,7 @@ func minimumABV(x *AB, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -2905,7 +2905,7 @@ func minimumABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x&y", "y", y)
+		return panicTypeElt("x&y", "y", y)
 	}
 }
 
@@ -2927,7 +2927,7 @@ func minimumAFV(x *AF, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -2936,7 +2936,7 @@ func minimumAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -2945,7 +2945,7 @@ func minimumAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -2954,7 +2954,7 @@ func minimumAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -2967,7 +2967,7 @@ func minimumAFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x&y", "y", y)
+		return panicTypeElt("x&y", "y", y)
 	}
 }
 
@@ -2989,7 +2989,7 @@ func minimumAIV(x *AI, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -2998,7 +2998,7 @@ func minimumAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -3007,7 +3007,7 @@ func minimumAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -3016,7 +3016,7 @@ func minimumAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -3029,7 +3029,7 @@ func minimumAIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x&y", "y", y)
+		return panicTypeElt("x&y", "y", y)
 	}
 }
 
@@ -3043,7 +3043,7 @@ func minimumASV(x *AS, y V) V {
 		return NewV(r)
 	case *AS:
 		if x.Len() != yv.Len() {
-			return errf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -3052,7 +3052,7 @@ func minimumASV(x *AS, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -3065,7 +3065,7 @@ func minimumASV(x *AS, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x&y", "y", y)
+		return panicTypeElt("x&y", "y", y)
 	}
 }
 
@@ -3092,7 +3092,7 @@ func maximum(x, y V) V {
 		switch yv := y.Value.(type) {
 		case array:
 			if yv.Len() != xv.Len() {
-				return errf("x|y : length mismatch: %d vs %d", xv.Len(), yv.Len())
+				return panicf("x|y : length mismatch: %d vs %d", xv.Len(), yv.Len())
 			}
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
@@ -3114,7 +3114,7 @@ func maximum(x, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x|y", "x", x)
+		return panicTypeElt("x|y", "x", x)
 	}
 }
 
@@ -3155,7 +3155,7 @@ func maximumFV(x float64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x|y", "y", y)
+		return panicTypeElt("x|y", "y", y)
 	}
 }
 
@@ -3196,7 +3196,7 @@ func maximumIV(x int64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x|y", "y", y)
+		return panicTypeElt("x|y", "y", y)
 	}
 }
 
@@ -3221,7 +3221,7 @@ func maximumSV(x S, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x|y", "y", y)
+		return panicTypeElt("x|y", "y", y)
 	}
 }
 
@@ -3243,7 +3243,7 @@ func maximumABV(x *AB, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -3252,7 +3252,7 @@ func maximumABV(x *AB, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -3261,7 +3261,7 @@ func maximumABV(x *AB, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -3270,7 +3270,7 @@ func maximumABV(x *AB, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -3283,7 +3283,7 @@ func maximumABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x|y", "y", y)
+		return panicTypeElt("x|y", "y", y)
 	}
 }
 
@@ -3305,7 +3305,7 @@ func maximumAFV(x *AF, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -3314,7 +3314,7 @@ func maximumAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -3323,7 +3323,7 @@ func maximumAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -3332,7 +3332,7 @@ func maximumAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -3345,7 +3345,7 @@ func maximumAFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x|y", "y", y)
+		return panicTypeElt("x|y", "y", y)
 	}
 }
 
@@ -3367,7 +3367,7 @@ func maximumAIV(x *AI, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -3376,7 +3376,7 @@ func maximumAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -3385,7 +3385,7 @@ func maximumAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -3394,7 +3394,7 @@ func maximumAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -3407,7 +3407,7 @@ func maximumAIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x|y", "y", y)
+		return panicTypeElt("x|y", "y", y)
 	}
 }
 
@@ -3421,7 +3421,7 @@ func maximumASV(x *AS, y V) V {
 		return NewV(r)
 	case *AS:
 		if x.Len() != yv.Len() {
-			return errf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -3430,7 +3430,7 @@ func maximumASV(x *AS, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -3443,7 +3443,7 @@ func maximumASV(x *AS, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x|y", "y", y)
+		return panicTypeElt("x|y", "y", y)
 	}
 }
 
@@ -3466,7 +3466,7 @@ func modulus(x, y V) V {
 		switch yv := y.Value.(type) {
 		case array:
 			if yv.Len() != xv.Len() {
-				return errf("x mod y : length mismatch: %d vs %d", xv.Len(), yv.Len())
+				return panicf("x mod y : length mismatch: %d vs %d", xv.Len(), yv.Len())
 			}
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
@@ -3488,7 +3488,7 @@ func modulus(x, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x mod y", "x", x)
+		return panicTypeElt("x mod y", "x", x)
 	}
 }
 
@@ -3529,7 +3529,7 @@ func modulusFV(x float64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x mod y", "y", y)
+		return panicTypeElt("x mod y", "y", y)
 	}
 }
 
@@ -3570,7 +3570,7 @@ func modulusIV(x int64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x mod y", "y", y)
+		return panicTypeElt("x mod y", "y", y)
 	}
 }
 
@@ -3592,7 +3592,7 @@ func modulusABV(x *AB, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := make([]int64, yv.Len())
 		for i := range r {
@@ -3601,7 +3601,7 @@ func modulusABV(x *AB, y V) V {
 		return NewAI(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -3610,7 +3610,7 @@ func modulusABV(x *AB, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -3619,7 +3619,7 @@ func modulusABV(x *AB, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -3632,7 +3632,7 @@ func modulusABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x mod y", "y", y)
+		return panicTypeElt("x mod y", "y", y)
 	}
 }
 
@@ -3654,7 +3654,7 @@ func modulusAFV(x *AF, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -3663,7 +3663,7 @@ func modulusAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -3672,7 +3672,7 @@ func modulusAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -3681,7 +3681,7 @@ func modulusAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -3694,7 +3694,7 @@ func modulusAFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x mod y", "y", y)
+		return panicTypeElt("x mod y", "y", y)
 	}
 }
 
@@ -3716,7 +3716,7 @@ func modulusAIV(x *AI, y V) V {
 	switch yv := y.Value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return errf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -3725,7 +3725,7 @@ func modulusAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return errf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -3734,7 +3734,7 @@ func modulusAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return errf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -3743,7 +3743,7 @@ func modulusAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return errf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -3756,6 +3756,6 @@ func modulusAIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x mod y", "y", y)
+		return panicTypeElt("x mod y", "y", y)
 	}
 }

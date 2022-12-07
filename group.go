@@ -75,7 +75,7 @@ func group(x V) V {
 		}
 		return group(z)
 	default:
-		return errf("=x : x not an integer array (%s)", x.Type())
+		return panicf("=x : x not an integer array (%s)", x.Type())
 	}
 }
 
@@ -107,19 +107,19 @@ func icount(x V) V {
 		}
 		return icount(z)
 	default:
-		return errf("icount x : x not an integer array (%s)", x.Type())
+		return panicf("icount x : x not an integer array (%s)", x.Type())
 	}
 }
 
 // groupBy by returns {x}=y.
 func groupBy(x, y V) V {
 	if Length(x) != Length(y) {
-		return errf("f=y : length mismatch for f[y] and y: %d vs %d ",
+		return panicf("f=y : length mismatch for f[y] and y: %d vs %d ",
 			Length(x), Length(y))
 	}
 	x = group(x)
 	if x.isPanic() {
-		return errs("f=y : f[y] not an integer array")
+		return panics("f=y : f[y] not an integer array")
 	}
 	avx := x.Value.(*AV) // group should always return AV or errV
 	switch yv := y.Value.(type) {
@@ -130,6 +130,6 @@ func groupBy(x, y V) V {
 		}
 		return NewAV(r)
 	default:
-		return errf("f=y : y not array (%s)", y.Type())
+		return panicf("f=y : y not array (%s)", y.Type())
 	}
 }

@@ -6,19 +6,6 @@ import (
 	"strings"
 )
 
-// position represents a source location, usually where an error occured.
-type position struct {
-	Filename string // file name (as obtained from SetSource)
-	Pos      int    // byte offset
-	lambda   *lambdaCode
-}
-
-// newExecError returns an execution error from a panicV value. It assumes
-// isPanic(x) is true and the Value type is panicV.
-func newExecError(x V) error {
-	return errors.New(string(x.Value.(panicV)))
-}
-
 // PanicError represents a fatal error returned by any Context method.
 type PanicError struct {
 	Msg string // error message (without location)
@@ -26,6 +13,13 @@ type PanicError struct {
 	compile   bool
 	positions []position        // error location stack
 	sources   map[string]string // filename: source
+}
+
+// position represents a source location, usually where an error occured.
+type position struct {
+	Filename string // file name (as obtained from SetSource)
+	Pos      int    // byte offset
+	lambda   *lambdaCode
 }
 
 // Error returns the default string representation. It makes uses of position
@@ -98,36 +92,42 @@ func getPosLine(s string, pos int) (string, int, int) {
 	return s[start:], count, pos - start
 }
 
-func errs(s string) V {
+// newExecError returns an execution error from a panicV value. It assumes
+// isPanic(x) is true and the Value type is panicV.
+func newExecError(x V) error {
+	return errors.New(string(x.Value.(panicV)))
+}
+
+func panics(s string) V {
 	return V{Kind: Panic, Value: panicV(s)}
 }
 
-func errf(format string, a ...interface{}) V {
-	return errs(fmt.Sprintf(format, a...))
+func panicf(format string, a ...interface{}) V {
+	return panics(fmt.Sprintf(format, a...))
 }
 
 // Panicf returns a formatted fatal error value.
 func Panicf(format string, a ...interface{}) V {
-	return errs(fmt.Sprintf(format, a...))
+	return panics(fmt.Sprintf(format, a...))
 }
 
 // NewPanic returns a fatal error value.
 func NewPanic(s string) V {
-	return errs(s)
+	return panics(s)
 }
 
-func errType(op, sym string, x V) V {
-	return errf("%s : bad type for %s (%s)", op, sym, x.Type())
+func panicType(op, sym string, x V) V {
+	return panicf("%s : bad type for %s (%s)", op, sym, x.Type())
 }
 
-func errTypeElt(op, sym string, x V) V {
-	return errf("%s : bad type in %s (%s)", op, sym, x.Type())
+func panicTypeElt(op, sym string, x V) V {
+	return panicf("%s : bad type in %s (%s)", op, sym, x.Type())
 }
 
-func errDomain(op, s string) V {
-	return errs(op + " : " + s)
+func panicDomain(op, s string) V {
+	return panics(op + " : " + s)
 }
 
-func errRank(op string) V {
-	return errs(op + " got too many arguments")
+func panicRank(op string) V {
+	return panics(op + " got too many arguments")
 }

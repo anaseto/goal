@@ -216,7 +216,7 @@ func classify(x V) V {
 		}
 		return NewAI(r)
 	default:
-		return errf("%%x : x not an array (%s)", x.Type())
+		return panicf("%%x : x not an array (%s)", x.Type())
 	}
 }
 
@@ -289,7 +289,7 @@ func uniq(x V) V {
 		return canonicalV(NewAV(r))
 	default:
 		// NOTE: ?atom could be used for something.
-		return errf("?x : x not an array (%s)", x.Type())
+		return panicf("?x : x not an array (%s)", x.Type())
 	}
 }
 
@@ -362,7 +362,7 @@ func markFirsts(x V) V {
 		}
 		return NewAB(r)
 	default:
-		return errf("∊x : x not an array (%s)", x.Type())
+		return panicf("∊x : x not an array (%s)", x.Type())
 	}
 }
 
@@ -394,7 +394,7 @@ func memberOf(x, y V) V {
 	case *AV:
 		return memberOfAV(x, yv)
 	default:
-		return errf("x in y : y not an array (%s)", y.Type())
+		return panicf("x in y : y not an array (%s)", y.Type())
 	}
 }
 
@@ -645,7 +645,7 @@ func occurrenceCount(x V) V {
 		}
 		return NewAI(r)
 	default:
-		return errf("⊒x : x not an array (%s)", x.Type())
+		return panicf("⊒x : x not an array (%s)", x.Type())
 	}
 }
 
@@ -656,7 +656,7 @@ func without(x, y V) V {
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
-			return errf("i^y : i non-integer (%g)", x.F())
+			return panicf("i^y : i non-integer (%g)", x.F())
 		}
 		return windows(int64(x.F()), y)
 	}
@@ -678,7 +678,7 @@ func without(x, y V) V {
 		r = replicate(r, y)
 		return r
 	default:
-		return errType("x^y", "x", x)
+		return panicType("x^y", "x", x)
 	}
 }
 
@@ -700,7 +700,7 @@ func find(x, y V) V {
 	case *AV:
 		return findAV(xv, y)
 	default:
-		return errf("x?y : x not an array (%s)", x.Type())
+		return panicf("x?y : x not an array (%s)", x.Type())
 	}
 }
 
@@ -724,7 +724,7 @@ func findS(s S, y V) V {
 		}
 		return NewAV(r)
 	default:
-		return errType("s?y", "y", y)
+		return panicType("s?y", "y", y)
 	}
 }
 

@@ -20,7 +20,7 @@ func flip(x V) V {
 			case lines < 0:
 				lines = nl
 			case nl >= 1 && nl != lines:
-				return errf("line length mismatch: %d vs %d", nl, lines)
+				return panicf("line length mismatch: %d vs %d", nl, lines)
 			}
 		}
 		t := aType(xv)

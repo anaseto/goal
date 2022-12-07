@@ -39,7 +39,7 @@ func negate(x V) V {
 		}
 		return NewV(r)
 	default:
-		return errType("-x", "x", x)
+		return panicType("-x", "x", x)
 	}
 }
 
@@ -95,7 +95,7 @@ func sign(x V) V {
 		}
 		return NewV(r)
 	default:
-		return errType("sign x", "x", x)
+		return panicType("sign x", "x", x)
 	}
 }
 
@@ -135,7 +135,7 @@ func floor(x V) V {
 		}
 		return NewV(r)
 	default:
-		return errType("_N", "N", x)
+		return panicType("_N", "N", x)
 	}
 }
 
@@ -173,7 +173,7 @@ func ceil(x V) V {
 		}
 		return NewV(r)
 	default:
-		return errType("ceil x", "x", x)
+		return panicType("ceil x", "x", x)
 	}
 }
 
@@ -247,7 +247,7 @@ func abs(x V) V {
 		}
 		return NewV(r)
 	default:
-		return errType("abs x", "x", x)
+		return panicType("abs x", "x", x)
 	}
 }
 

@@ -441,7 +441,7 @@ func sortUp(x V) V {
 		sort.Stable(sortVSlice(xv.Slice))
 		return NewV(xv)
 	default:
-		return errf("^x : x not an array (%s)", x.Type())
+		return panicf("^x : x not an array (%s)", x.Type())
 	}
 }
 
@@ -562,7 +562,7 @@ func ascend(x V) V {
 		sort.Stable(p)
 		return NewAI(p.Perm)
 	default:
-		return errf("<x : x not an array (%s)", x.Type())
+		return panicf("<x : x not an array (%s)", x.Type())
 	}
 }
 
@@ -570,7 +570,7 @@ func ascend(x V) V {
 func descend(x V) V {
 	p := ascend(x)
 	if p.isPanic() {
-		return errs(">" + strings.TrimPrefix(string(p.Value.(S)), "<"))
+		return panics(">" + strings.TrimPrefix(string(p.Value.(S)), "<"))
 	}
 	reverseMut(p)
 	return p
@@ -581,32 +581,32 @@ func search(x V, y V) V {
 	switch xv := x.Value.(type) {
 	case *AB:
 		if !sort.IsSorted(sortAB(xv.Slice)) {
-			return errDomain("x$y", "x is not ascending")
+			return panicDomain("x$y", "x is not ascending")
 		}
 		return searchAI(fromABtoAI(xv).Value.(*AI), y)
 	case *AI:
 		if !sort.IsSorted(sortAI(xv.Slice)) {
-			return errDomain("x$y", "x is not ascending")
+			return panicDomain("x$y", "x is not ascending")
 		}
 		return searchAI(xv, y)
 	case *AF:
 		if !sort.IsSorted(sort.Float64Slice(xv.Slice)) {
-			return errDomain("x$y", "x is not ascending")
+			return panicDomain("x$y", "x is not ascending")
 		}
 		return searchAF(xv, y)
 	case *AS:
 		if !sort.IsSorted(sort.StringSlice(xv.Slice)) {
-			return errDomain("x$y", "x is not ascending")
+			return panicDomain("x$y", "x is not ascending")
 		}
 		return searchAS(xv, y)
 	case *AV:
 		if !sort.IsSorted(sortVSlice(xv.Slice)) {
-			return errDomain("x$y", "x is not ascending")
+			return panicDomain("x$y", "x is not ascending")
 		}
 		return searchAV(xv, y)
 	default:
 		// should not happen
-		return errType("x$y", "x", x)
+		return panicType("x$y", "x", x)
 	}
 }
 

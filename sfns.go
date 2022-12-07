@@ -56,7 +56,7 @@ func reverse(x V) V {
 		reverseMut(x)
 		return x
 	default:
-		return errType("|x", "x", x)
+		return panicType("|x", "x", x)
 	}
 }
 
@@ -67,11 +67,11 @@ func rotate(x, y V) V {
 		i = x.I()
 	} else if x.IsF() {
 		if !isI(x.F()) {
-			return errf("f|y : non-integer f[y] (%g)", x.F())
+			return panicf("f|y : non-integer f[y] (%g)", x.F())
 		}
 		i = int64(x.F())
 	} else {
-		return errf("f|y : non-integer f[y] (%s)", x.Type())
+		return panicf("f|y : non-integer f[y] (%s)", x.Type())
 	}
 	ylen := int64(Length(y))
 	if ylen == 0 {
@@ -113,7 +113,7 @@ func rotate(x, y V) V {
 		}
 		return NewAV(r)
 	default:
-		return errType("f|y", "y", y)
+		return panicType("f|y", "y", y)
 	}
 }
 
@@ -148,7 +148,7 @@ func drop(x, y V) V {
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
-			return errf("i_y : non-integer i (%g)", x.F())
+			return panicf("i_y : non-integer i (%g)", x.F())
 		}
 		return dropi(int64(x.F()), y)
 	}
@@ -167,9 +167,9 @@ func drop(x, y V) V {
 		return drop(z, y)
 	case *AV:
 		//assertCanonical(x)
-		return errs("x_y : x non-integer")
+		return panics("x_y : x non-integer")
 	default:
-		return errf("x_y : bad type i (%s)", x.Type())
+		return panicf("x_y : bad type i (%s)", x.Type())
 	}
 }
 
@@ -192,18 +192,18 @@ func dropi(i int64, y V) V {
 			return canonicalV(y)
 		}
 	default:
-		return errs("i_y : y not an array")
+		return panics("i_y : y not an array")
 	}
 }
 
 func cutAI(x *AI, y V) V {
 	if !sort.IsSorted(sortAI(x.Slice)) {
-		return errs("x_y : x is not ascending")
+		return panics("x_y : x is not ascending")
 	}
 	ylen := int64(Length(y))
 	for _, i := range x.Slice {
 		if i < 0 || i > ylen {
-			return errf("x_y : x contains out of bound index (%d)", i)
+			return panicf("x_y : x contains out of bound index (%d)", i)
 		}
 	}
 	if x.Len() == 0 {
@@ -261,7 +261,7 @@ func cutAI(x *AI, y V) V {
 		}
 		return canonicalV(NewAV(r))
 	default:
-		return errf("x_y : y not an array (%s)", y.Type())
+		return panicf("x_y : y not an array (%s)", y.Type())
 	}
 }
 
@@ -272,11 +272,11 @@ func take(x, y V) V {
 		i = x.I()
 	} else if x.IsF() {
 		if !isI(x.F()) {
-			return errf("i#y : non-integer i (%g)", x.F())
+			return panicf("i#y : non-integer i (%g)", x.F())
 		}
 		i = int64(x.F())
 	} else {
-		return errf("i#y : non-integer i (%s)", x.Type())
+		return panicf("i#y : non-integer i (%s)", x.Type())
 	}
 	yv := toArray(y).Value.(array)
 	switch {
@@ -410,7 +410,7 @@ func shiftBefore(x, y V) V {
 			}
 			return NewAI(r)
 		default:
-			return errType("x»y", "x", x)
+			return panicType("x»y", "x", x)
 		}
 	case *AF:
 		ys := yv.Slice
@@ -437,7 +437,7 @@ func shiftBefore(x, y V) V {
 			copy(r[max:], ys[:len(ys)-max])
 			return NewAF(r)
 		default:
-			return errType("x»y", "x", x)
+			return panicType("x»y", "x", x)
 		}
 	case *AI:
 		ys := yv.Slice
@@ -466,7 +466,7 @@ func shiftBefore(x, y V) V {
 			copy(r[max:], ys[:len(ys)-max])
 			return NewAI(r)
 		default:
-			return errType("x»y", "x", x)
+			return panicType("x»y", "x", x)
 		}
 	case *AS:
 		ys := yv.Slice
@@ -479,7 +479,7 @@ func shiftBefore(x, y V) V {
 			copy(r[max:], ys[:len(ys)-max])
 			return NewAS(r)
 		default:
-			return errType("x»y", "x", x)
+			return panicType("x»y", "x", x)
 		}
 	case *AV:
 		ys := yv.Slice
@@ -492,10 +492,10 @@ func shiftBefore(x, y V) V {
 			copy(r[max:], ys[:len(ys)-max])
 			return canonicalV(NewAV(r))
 		default:
-			return errType("x»y", "x", x)
+			return panicType("x»y", "x", x)
 		}
 	default:
-		return errs("x»y: y not an array")
+		return panics("x»y: y not an array")
 	}
 }
 
@@ -523,7 +523,7 @@ func nudge(x V) V {
 		copy(r[1:], xv.Slice[0:xv.Len()-1])
 		return canonicalV(NewAV(r))
 	default:
-		return errs("»x : not an array")
+		return panics("»x : not an array")
 	}
 }
 
@@ -564,7 +564,7 @@ func shiftAfter(x, y V) V {
 			}
 			return NewAI(r)
 		default:
-			return errType("x«y", "x", x)
+			return panicType("x«y", "x", x)
 		}
 	case *AF:
 		ys := yv.Slice
@@ -591,7 +591,7 @@ func shiftAfter(x, y V) V {
 			copy(r[:len(ys)-max], ys[max:])
 			return NewAF(r)
 		default:
-			return errType("x«y", "x", x)
+			return panicType("x«y", "x", x)
 		}
 	case *AI:
 		ys := yv.Slice
@@ -620,7 +620,7 @@ func shiftAfter(x, y V) V {
 			copy(r[:len(ys)-max], ys[max:])
 			return NewAI(r)
 		default:
-			return errType("x«y", "x", x)
+			return panicType("x«y", "x", x)
 		}
 	case *AS:
 		ys := yv.Slice
@@ -633,7 +633,7 @@ func shiftAfter(x, y V) V {
 			copy(r[:len(ys)-max], ys[max:])
 			return NewAS(r)
 		default:
-			return errType("x«y", "x", x)
+			return panicType("x«y", "x", x)
 		}
 	case *AV:
 		ys := yv.Slice
@@ -646,10 +646,10 @@ func shiftAfter(x, y V) V {
 			copy(r[:len(ys)-max], ys[max:])
 			return canonicalV(NewAV(r))
 		default:
-			return errType("x«y", "x", x)
+			return panicType("x«y", "x", x)
 		}
 	default:
-		return errs("x«y: y not an array")
+		return panics("x«y: y not an array")
 	}
 }
 
@@ -680,7 +680,7 @@ func nudgeBack(x V) V {
 		copy(r[0:xv.Len()-1], xv.Slice[1:])
 		return canonicalV(NewAV(r))
 	default:
-		return errs("«x : x not an array")
+		return panics("«x : x not an array")
 	}
 }
 
@@ -689,7 +689,7 @@ func windows(i int64, y V) V {
 	switch yv := y.Value.(type) {
 	case array:
 		if i <= 0 || i >= int64(yv.Len()+1) {
-			return errf("i^y : i out of range !%d (%d)", yv.Len()+1, i)
+			return panicf("i^y : i out of range !%d (%d)", yv.Len()+1, i)
 		}
 		r := make([]V, 1+yv.Len()-int(i))
 		for j := range r {
@@ -699,7 +699,7 @@ func windows(i int64, y V) V {
 		}
 		return NewAV(r)
 	default:
-		return errs("i^y : y not an array")
+		return panics("i^y : y not an array")
 	}
 }
 
@@ -712,7 +712,7 @@ func shapeSplit(x V, y V) V {
 		// x.IsF() should be true
 		f := x.F()
 		if !isI(f) {
-			return errf("i$y : i non-integer (%g)", f)
+			return panicf("i$y : i non-integer (%g)", f)
 		}
 		i = int64(f)
 	}
@@ -720,7 +720,7 @@ func shapeSplit(x V, y V) V {
 	case array:
 		ylen := yv.Len()
 		if i <= 0 {
-			return errf("i$y : i not positive (%d)", i)
+			return panicf("i$y : i not positive (%d)", i)
 		}
 		if i >= int64(ylen) {
 			return NewAV([]V{y})
@@ -739,6 +739,6 @@ func shapeSplit(x V, y V) V {
 		}
 		return NewAV(r)
 	default:
-		return errs("i$y : y not an array")
+		return panics("i$y : y not an array")
 	}
 }

@@ -9,13 +9,13 @@ func applyS(s S, x V) V {
 			xv += int64(len(s))
 		}
 		if xv < 0 || xv > int64(len(s)) {
-			return errf("s[i] : i out of bounds index (%d)", xv)
+			return panicf("s[i] : i out of bounds index (%d)", xv)
 		}
 		return NewV(s[xv:])
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
-			return errf("s[x] : x non-integer (%g)", x.F())
+			return panicf("s[x] : x non-integer (%g)", x.F())
 		}
 		return applyS(s, NewI(int64(x.F())))
 	}
@@ -29,7 +29,7 @@ func applyS(s S, x V) V {
 				n += int64(len(s))
 			}
 			if n < 0 || n > int64(len(s)) {
-				return errf("s[i] : i out of bounds index (%d)", n)
+				return panicf("s[i] : i out of bounds index (%d)", n)
 			}
 			r[i] = string(s[n:])
 		}
@@ -50,7 +50,7 @@ func applyS(s S, x V) V {
 		}
 		return canonicalV(NewAV(r))
 	default:
-		return errf("s[x] : x non-integer (%s)", x.Type())
+		return panicf("s[x] : x non-integer (%s)", x.Type())
 	}
 }
 
@@ -58,12 +58,12 @@ func applyS2(s S, x V, y V) V {
 	var l int64
 	if y.IsI() {
 		if y.I() < 0 {
-			return errf("s[x;y] : y negative (%d)", y.I())
+			return panicf("s[x;y] : y negative (%d)", y.I())
 		}
 		l = y.I()
 	} else if y.IsF() {
 		if !isI(y.F()) {
-			return errf("s[x;y] : y non-integer (%g)", y.F())
+			return panicf("s[x;y] : y non-integer (%g)", y.F())
 		}
 		l = int64(y.F())
 	} else {
@@ -80,7 +80,7 @@ func applyS2(s S, x V, y V) V {
 			}
 			return applyS2(s, x, z)
 		default:
-			return errType("s[x;y]", "y", y)
+			return panicType("s[x;y]", "y", y)
 		}
 	}
 	if x.IsI() {
@@ -89,10 +89,10 @@ func applyS2(s S, x V, y V) V {
 			xv += int64(len(s))
 		}
 		if xv < 0 || xv > int64(len(s)) {
-			return errf("s[i;y] : i out of bounds index (%d)", xv)
+			return panicf("s[i;y] : i out of bounds index (%d)", xv)
 		}
 		if _, ok := y.Value.(*AI); ok {
-			return errf("s[x;y] : x is an atom but y is an array")
+			return panicf("s[x;y] : x is an atom but y is an array")
 		}
 		if xv+l > int64(len(s)) {
 			l = int64(len(s)) - xv
@@ -102,7 +102,7 @@ func applyS2(s S, x V, y V) V {
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
-			return errf("s[x;y] : x non-integer (%g)", x.F())
+			return panicf("s[x;y] : x non-integer (%g)", x.F())
 		}
 		return applyS2(s, NewI(int64(x.F())), y)
 	}
@@ -113,7 +113,7 @@ func applyS2(s S, x V, y V) V {
 		r := make([]string, xv.Len())
 		if z, ok := y.Value.(*AI); ok {
 			if z.Len() != xv.Len() {
-				return errf("s[x;y] : length mismatch: %d (#x) %d (#y)",
+				return panicf("s[x;y] : length mismatch: %d (#x) %d (#y)",
 					xv.Len(), z.Len())
 			}
 			for i, n := range xv.Slice {
@@ -121,7 +121,7 @@ func applyS2(s S, x V, y V) V {
 					n += int64(len(s))
 				}
 				if n < 0 || n > int64(len(s)) {
-					return errf("s[i;y] : i out of bounds index (%d)", n)
+					return panicf("s[i;y] : i out of bounds index (%d)", n)
 				}
 				l := z.At(i)
 				if n+l > int64(len(s)) {
@@ -136,7 +136,7 @@ func applyS2(s S, x V, y V) V {
 				n += int64(len(s))
 			}
 			if n < 0 || n > int64(len(s)) {
-				return errf("s[i;y] : i out of bounds index (%d)", n)
+				return panicf("s[i;y] : i out of bounds index (%d)", n)
 			}
 			l := l
 			if n+l > int64(len(s)) {
@@ -161,7 +161,7 @@ func applyS2(s S, x V, y V) V {
 		}
 		return canonicalV(NewAV(r))
 	default:
-		return errf("s[x;y] : x non-integer (%s)", x.Type())
+		return panicf("s[x;y] : x non-integer (%s)", x.Type())
 	}
 }
 
@@ -185,7 +185,7 @@ func bytes(x V) V {
 		}
 		return canonicalV(NewAV(r))
 	default:
-		return errType("bytes x", "x", x)
+		return panicType("bytes x", "x", x)
 	}
 }
 
@@ -199,7 +199,7 @@ func cast(s S, y V) V {
 	case "s":
 		return casts(y)
 	default:
-		return errf("s$y : unsupported \"%s\" value for s", s)
+		return panicf("s$y : unsupported \"%s\" value for s", s)
 	}
 }
 
@@ -240,7 +240,7 @@ func casti(y V) V {
 		}
 		return NewAV(r)
 	default:
-		return errs("\"i\"$y : non-numeric y")
+		return panics("\"i\"$y : non-numeric y")
 	}
 }
 
@@ -252,7 +252,7 @@ func castn(y V) V {
 	case S:
 		xi, err := parseNumber(string(yv))
 		if err != nil {
-			return errf("\"i\"$y : non-numeric y (%s) : %v", yv, err)
+			return panicf("\"i\"$y : non-numeric y (%s) : %v", yv, err)
 		}
 		return xi
 	case *AB:
@@ -264,7 +264,7 @@ func castn(y V) V {
 		for i, s := range yv.Slice {
 			n, err := parseNumber(s)
 			if err != nil {
-				return errf("\"i\"$y : y contains non-numeric (%s) : %v", s, err)
+				return panicf("\"i\"$y : y contains non-numeric (%s) : %v", s, err)
 			}
 			r[i] = n
 		}
@@ -281,7 +281,7 @@ func castn(y V) V {
 		}
 		return canonicalV(NewAV(r))
 	default:
-		return errs("\"i\"$y : non-numeric y")
+		return panics("\"i\"$y : non-numeric y")
 	}
 }
 
@@ -313,7 +313,7 @@ func casts(y V) V {
 		}
 		return canonicalV(NewAV(r))
 	default:
-		return errs("\"i\"$y : non-numeric y")
+		return panics("\"i\"$y : non-numeric y")
 	}
 }
 
@@ -337,7 +337,7 @@ func drops(s S, y V) V {
 		}
 		return NewAV(r)
 	default:
-		return errType("s_y", "y", y)
+		return panicType("s_y", "y", y)
 	}
 }
 
@@ -362,6 +362,6 @@ func trim(s S, y V) V {
 		}
 		return NewAV(r)
 	default:
-		return errType("s^y", "y", y)
+		return panicType("s^y", "y", y)
 	}
 }

@@ -181,7 +181,7 @@ func VRight(ctx *Context, args []V) V {
 	case 2:
 		return args[0]
 	default:
-		return errRank(":")
+		return panicRank(":")
 	}
 }
 
@@ -193,7 +193,7 @@ func VAdd(ctx *Context, args []V) V {
 	case 2:
 		return add(args[1], args[0])
 	default:
-		return errRank("+")
+		return panicRank("+")
 	}
 }
 
@@ -205,7 +205,7 @@ func VSubtract(ctx *Context, args []V) V {
 	case 2:
 		return subtract(args[1], args[0])
 	default:
-		return errRank("-")
+		return panicRank("-")
 	}
 }
 
@@ -217,7 +217,7 @@ func VMultiply(ctx *Context, args []V) V {
 	case 2:
 		return multiply(args[1], args[0])
 	default:
-		return errRank("*")
+		return panicRank("*")
 	}
 }
 
@@ -229,7 +229,7 @@ func VDivide(ctx *Context, args []V) V {
 	case 2:
 		return divide(args[1], args[0])
 	default:
-		return errRank("%")
+		return panicRank("%")
 	}
 }
 
@@ -241,7 +241,7 @@ func VMod(ctx *Context, args []V) V {
 	case 2:
 		return modulus(args[1], args[0])
 	default:
-		return errRank("!")
+		return panicRank("!")
 	}
 }
 
@@ -253,7 +253,7 @@ func VMin(ctx *Context, args []V) V {
 	case 2:
 		return minimum(args[1], args[0])
 	default:
-		return errRank("&")
+		return panicRank("&")
 	}
 }
 
@@ -276,7 +276,7 @@ func VMax(ctx *Context, args []V) V {
 		}
 		return maximum(x, y)
 	default:
-		return errRank("|")
+		return panicRank("|")
 	}
 }
 
@@ -288,7 +288,7 @@ func VLess(ctx *Context, args []V) V {
 	case 2:
 		return lesser(args[1], args[0])
 	default:
-		return errRank("<")
+		return panicRank("<")
 	}
 }
 
@@ -300,7 +300,7 @@ func VMore(ctx *Context, args []V) V {
 	case 2:
 		return greater(args[1], args[0])
 	default:
-		return errRank(">")
+		return panicRank(">")
 	}
 }
 
@@ -323,7 +323,7 @@ func VEqual(ctx *Context, args []V) V {
 		}
 		return equal(x, y)
 	default:
-		return errRank("=")
+		return panicRank("=")
 	}
 }
 
@@ -335,7 +335,7 @@ func VMatch(ctx *Context, args []V) V {
 	case 2:
 		return NewI(B2I(Match(args[1], args[0])))
 	default:
-		return errRank("~")
+		return panicRank("~")
 	}
 }
 
@@ -347,7 +347,7 @@ func VJoin(ctx *Context, args []V) V {
 	case 2:
 		return joinTo(args[1], args[0])
 	default:
-		return errRank(",")
+		return panicRank(",")
 	}
 }
 
@@ -359,7 +359,7 @@ func VWithout(ctx *Context, args []V) V {
 	case 2:
 		return without(args[1], args[0])
 	default:
-		return errRank("^")
+		return panicRank("^")
 	}
 }
 
@@ -382,7 +382,7 @@ func VTake(ctx *Context, args []V) V {
 		}
 		return take(x, y)
 	default:
-		return errRank("#")
+		return panicRank("#")
 	}
 }
 
@@ -405,7 +405,7 @@ func VDrop(ctx *Context, args []V) V {
 		}
 		return drop(x, y)
 	default:
-		return errRank("_")
+		return panicRank("_")
 	}
 }
 
@@ -425,10 +425,10 @@ func VCast(ctx *Context, args []V) V {
 		case S:
 			return cast(xv, y)
 		default:
-			return errType("x$y", "x", x)
+			return panicType("x$y", "x", x)
 		}
 	default:
-		return errRank("$")
+		return panicRank("$")
 	}
 }
 
@@ -440,7 +440,7 @@ func VFind(ctx *Context, args []V) V {
 	case 2:
 		return find(args[1], args[0])
 	default:
-		return errRank("?")
+		return panicRank("?")
 	}
 }
 
@@ -458,7 +458,7 @@ func VApply(ctx *Context, args []V) V {
 	case 4:
 		return ctx.amend4(args[3], args[2], args[1], args[0])
 	default:
-		return errRank("@")
+		return panicRank("@")
 	}
 }
 
@@ -477,7 +477,7 @@ func VApplyN(ctx *Context, args []V) V {
 	case 3:
 		return try(ctx, args[2], args[1], args[0])
 	default:
-		return errRank(".")
+		return panicRank(".")
 	}
 }
 
@@ -485,11 +485,11 @@ func VApplyN(ctx *Context, args []V) V {
 func VIn(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return errs("in : got only one argument")
+		return panics("in : got only one argument")
 	case 2:
 		return memberOf(args[1], args[0])
 	default:
-		return errRank("in")
+		return panicRank("in")
 	}
 }
 
@@ -499,7 +499,7 @@ func VSign(ctx *Context, args []V) V {
 	case 1:
 		return sign(args[0])
 	default:
-		return errRank("sign")
+		return panicRank("sign")
 	}
 }
 
@@ -509,7 +509,7 @@ func VOCount(ctx *Context, args []V) V {
 	case 1:
 		return occurrenceCount(args[0])
 	default:
-		return errRank("ocount")
+		return panicRank("ocount")
 	}
 }
 
@@ -519,7 +519,7 @@ func VICount(ctx *Context, args []V) V {
 	case 1:
 		return icount(args[0])
 	default:
-		return errRank("icount")
+		return panicRank("icount")
 	}
 }
 
@@ -529,7 +529,7 @@ func VBytes(ctx *Context, args []V) V {
 	case 1:
 		return bytes(args[0])
 	default:
-		return errRank("icount")
+		return panicRank("icount")
 	}
 }
 
@@ -574,7 +574,7 @@ func VEach(ctx *Context, args []V) V {
 	case 3:
 		return each3(ctx, args)
 	default:
-		return errRank("'")
+		return panicRank("'")
 	}
 	return V{}
 }
@@ -587,7 +587,7 @@ func VFold(ctx *Context, args []V) V {
 	case 3:
 		return fold3(ctx, args)
 	default:
-		return errRank("/")
+		return panicRank("/")
 	}
 	return V{}
 }
@@ -600,7 +600,7 @@ func VScan(ctx *Context, args []V) V {
 	case 3:
 		return scan3(ctx, args)
 	default:
-		return errRank("\\")
+		return panicRank("\\")
 	}
 	return V{}
 }

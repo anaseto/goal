@@ -71,7 +71,7 @@ func (ctx *Context) applyN(x V, n int) V {
 		return r
 	case ProjectionFirst:
 		if n > 1 {
-			return errf("too many arguments: got %d, expected 1", n)
+			return panicf("too many arguments: got %d, expected 1", n)
 		}
 		ctx.push(xv.Arg)
 		xv.Arg.rcincr()
@@ -80,7 +80,7 @@ func (ctx *Context) applyN(x V, n int) V {
 		return r
 	case ProjectionMonad:
 		if n > 1 {
-			return errf("too many arguments: got %d, expected 1", n)
+			return panicf("too many arguments: got %d, expected 1", n)
 		}
 		return ctx.applyN(xv.Fun, 1)
 	case Projection:
@@ -101,7 +101,7 @@ func (ctx *Context) applyN(x V, n int) V {
 			ctx.dropN(n)
 			return r
 		default:
-			return errf("too many arguments")
+			return panicf("too many arguments")
 		}
 	case array:
 		switch n {
@@ -116,7 +116,7 @@ func (ctx *Context) applyN(x V, n int) V {
 			return r
 		}
 	default:
-		return errf("type %s cannot be applied", x.Type())
+		return panicf("type %s cannot be applied", x.Type())
 	}
 }
 
@@ -132,21 +132,21 @@ func (ctx *Context) applyArray(x V, y V) V {
 			i = int64(xv.Len()) + i
 		}
 		if i < 0 || i >= int64(xv.Len()) {
-			return errf("x[y] : out of bounds index: %d", i)
+			return panicf("x[y] : out of bounds index: %d", i)
 		}
 		return xv.at(int(i))
 
 	}
 	if y.IsF() {
 		if !isI(y.F()) {
-			return errf("x[y] : non-integer index (%g)", y.F())
+			return panicf("x[y] : non-integer index (%g)", y.F())
 		}
 		i := int64(y.F())
 		if i < 0 {
 			i = int64(xv.Len()) + i
 		}
 		if i < 0 || i >= int64(xv.Len()) {
-			return errf("x[y] : out of bounds index: %d", i)
+			return panicf("x[y] : out of bounds index: %d", i)
 		}
 		return xv.at(int(i))
 	}
@@ -163,12 +163,12 @@ func (ctx *Context) applyArray(x V, y V) V {
 	case array:
 		iy := toIndices(y)
 		if iy.isPanic() {
-			return errf("x[y] : %v", iy.Value)
+			return panicf("x[y] : %v", iy.Value)
 		}
 		r := xv.atIndices(iy.Value.(*AI).Slice)
 		return r
 	default:
-		return errf("x[y] : y non-array non-integer (%s)", y.Type())
+		return panicf("x[y] : y non-array non-integer (%s)", y.Type())
 	}
 }
 
@@ -263,7 +263,7 @@ func (ctx *Context) applyProjection(p Projection, n int) V {
 	nNils := countNils(p.Args)
 	switch {
 	case len(args) > nNils:
-		return errs("too many arguments")
+		return panics("too many arguments")
 	case len(args) == nNils:
 		nilc := 0
 		for _, arg := range p.Args {
@@ -297,11 +297,11 @@ func (ctx *Context) applyProjection(p Projection, n int) V {
 
 func (ctx *Context) applyLambda(id lambda, n int) V {
 	if ctx.callDepth > maxCallDepth {
-		return errs("lambda: exceeded maximum call depth")
+		return panics("lambda: exceeded maximum call depth")
 	}
 	lc := ctx.lambdas[int(id)]
 	if lc.Rank < n {
-		return errf("lambda: too many arguments: got %d, expected %d", n, lc.Rank)
+		return panicf("lambda: too many arguments: got %d, expected %d", n, lc.Rank)
 	}
 	args := ctx.peekN(n)
 	if lc.Rank > n || hasNil(args) {
@@ -339,7 +339,7 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 
 	if err != nil {
 		ctx.updateErrPos(ip, lc)
-		return errs(err.Error())
+		return panics(err.Error())
 	}
 	var r V
 	switch len(ctx.stack) {
@@ -350,7 +350,7 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 	default:
 		ctx.updateErrPos(ip, lc)
 		// should not happen
-		return errf("lambda %d: bad len %d vs old %d (depth: %d): %v", id, len(ctx.stack), olen, ctx.callDepth, ctx.stack)
+		return panicf("lambda %d: bad len %d vs old %d (depth: %d): %v", id, len(ctx.stack), olen, ctx.callDepth, ctx.stack)
 	}
 	if nVars > 0 {
 		ctx.dropN(nVars)
@@ -368,7 +368,7 @@ func (x *AV) atIndices(y []int64) V {
 			yi += xlen
 		}
 		if yi < 0 || yi >= xlen {
-			return errf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
+			return panicf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
 		}
 		r[i] = x.At(int(yi))
 	}
@@ -383,7 +383,7 @@ func (x *AB) atIndices(y []int64) V {
 			yi += xlen
 		}
 		if yi < 0 || yi >= xlen {
-			return errf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
+			return panicf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
 		}
 		r[i] = x.At(int(yi))
 	}
@@ -398,7 +398,7 @@ func (x *AI) atIndices(y []int64) V {
 			yi += xlen
 		}
 		if yi < 0 || yi >= xlen {
-			return errf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
+			return panicf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
 		}
 		r[i] = x.At(int(yi))
 	}
@@ -413,7 +413,7 @@ func (x *AF) atIndices(y []int64) V {
 			yi += xlen
 		}
 		if yi < 0 || yi >= xlen {
-			return errf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
+			return panicf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
 		}
 		r[i] = x.At(int(yi))
 	}
@@ -428,7 +428,7 @@ func (x *AS) atIndices(y []int64) V {
 			yi += xlen
 		}
 		if yi < 0 || yi >= xlen {
-			return errf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
+			return panicf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
 		}
 		r[i] = x.At(int(yi))
 	}

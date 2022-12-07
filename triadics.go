@@ -12,18 +12,18 @@ func (ctx *Context) amend3(x, y, f V) V {
 		}
 		return canonicalV(ctx.amend3array(cloneShallowArray(xv), y, f))
 	default:
-		return errType("@[x;y;f]", "x", x)
+		return panicType("@[x;y;f]", "x", x)
 	}
 }
 
 func (ctx *Context) amend3arrayI(x array, y int64, f V) V {
 	if y < 0 || y >= int64(x.Len()) {
-		return errf("@[x;y;f] : x out of bounds (%d)", y)
+		return panicf("@[x;y;f] : x out of bounds (%d)", y)
 	}
 	xy := x.at(int(y))
 	repl := ctx.Apply(f, xy)
 	if repl.isPanic() {
-		return errf("f call in @[x;y;f] : %v", repl)
+		return panicf("f call in @[x;y;f] : %v", repl)
 	}
 	if compatEltType(x, repl) {
 		x.set(int(y), repl)
@@ -61,7 +61,7 @@ func (ctx *Context) amend3array(x array, y, f V) V {
 		}
 		return NewV(x)
 	default:
-		return errType("@[x;y;f]", "y", y)
+		return panicType("@[x;y;f]", "y", y)
 	}
 }
 
@@ -75,18 +75,18 @@ func (ctx *Context) amend4(x, y, f, z V) V {
 		}
 		return canonicalV(ctx.amend4array(cloneShallowArray(xv), y, f, z))
 	default:
-		return errType("@[x;y;f;z]", "x", x)
+		return panicType("@[x;y;f;z]", "x", x)
 	}
 }
 
 func (ctx *Context) amend4arrayI(x array, y int64, f, z V) V {
 	if y < 0 || y >= int64(x.Len()) {
-		return errf("@[x;y;f;z] : x out of bounds (%d)", y)
+		return panicf("@[x;y;f;z] : x out of bounds (%d)", y)
 	}
 	xy := x.at(int(y))
 	repl := ctx.Apply2(f, xy, z)
 	if repl.isPanic() {
-		return errf("f call in @[x;y;f;z] : %v", repl)
+		return panicf("f call in @[x;y;f;z] : %v", repl)
 	}
 	if compatEltType(x, repl) {
 		x.set(int(y), repl)
@@ -104,7 +104,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 	if y.IsI() {
 		switch z.Value.(type) {
 		case array:
-			return errs("@[x;y;f;z] : shape mismatch between x and y")
+			return panics("@[x;y;f;z] : shape mismatch between x and y")
 		}
 		return ctx.amend4arrayI(x, y.I(), f, z)
 	}
@@ -122,7 +122,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 			return NewV(x)
 		}
 		if az.Len() != yv.Len() {
-			return errf("@[x;y;f;z] : length mismatch between x and y (%d vs %d)",
+			return panicf("@[x;y;f;z] : length mismatch between x and y (%d vs %d)",
 				yv.Len(), az.Len())
 		}
 		for i, xi := range yv.Slice {
@@ -146,7 +146,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 			return NewV(x)
 		}
 		if az.Len() != yv.Len() {
-			return errf("@[x;y;f;z] : length mismatch between x and y (%d vs %d)",
+			return panicf("@[x;y;f;z] : length mismatch between x and y (%d vs %d)",
 				yv.Len(), az.Len())
 		}
 		for i, xi := range yv.Slice {
@@ -158,7 +158,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 		}
 		return NewV(x)
 	default:
-		return errType("@[x;y;f;z]", "y", y)
+		return panicType("@[x;y;f;z]", "y", y)
 	}
 }
 
@@ -174,7 +174,7 @@ func try(ctx *Context, f1, x, f2 V) V {
 		ctx.push(r)
 		r = ctx.applyN(f2, 1)
 		if r.isPanic() {
-			return errf("f2 call in .[f1;x;f2] : %v", r)
+			return panicf("f2 call in .[f1;x;f2] : %v", r)
 		}
 	}
 	return r

@@ -168,7 +168,7 @@ func toIndicesRec(x V) V {
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
-			return errf("non-integer index (%g)", x.F())
+			return panicf("non-integer index (%g)", x.F())
 		}
 		return NewI(int64(x.F()))
 	}
@@ -187,7 +187,7 @@ func toIndicesRec(x V) V {
 		}
 		return canonicalV(NewAV(r))
 	default:
-		return errs("not an indices array")
+		return panics("not an indices array")
 	}
 }
 
@@ -219,7 +219,7 @@ func toAI(x *AF) V {
 	r := make([]int64, x.Len())
 	for i, xi := range x.Slice {
 		if !isI(xi) {
-			return errf("contains non-integer (%g)", xi)
+			return panicf("contains non-integer (%g)", xi)
 		}
 		r[i] = int64(xi)
 	}
