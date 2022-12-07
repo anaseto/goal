@@ -48,13 +48,14 @@ func NewContext() *Context {
 	ctx.stack = make([]V, 0, 32)
 	ctx.sources = map[string]string{}
 	ctx.names = map[string]NameType{
-		"in":     NameDyad,
-		"sign":   NameMonad,
-		"ocount": NameMonad,
-		"icount": NameMonad,
-		"bytes":  NameMonad,
 		"and":    NameDyad,
+		"bytes":  NameMonad,
+		"error":  NameMonad,
+		"icount": NameMonad,
+		"in":     NameDyad,
+		"ocount": NameMonad,
 		"or":     NameDyad,
+		"sign":   NameMonad,
 	}
 	ctx.vNames = map[string]variadic{
 		":":      vRight,

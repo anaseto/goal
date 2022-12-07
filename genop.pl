@@ -250,7 +250,7 @@ func ${name}(x, y V) V {
 EOS
     if ($types{"I"}) {
         print $out <<EOS;
-        if x.IsInt() {
+        if x.IsI() {
 		return ${namelc}IV(x.I(), y)
         }
 EOS
@@ -283,12 +283,12 @@ EOS
                 switch yv := y.Value.(type) {
                 case array:
                         if yv.Len() != xv.Len() {
-                                return errf("x${errOp}y : length mismatch: %d vs %d", xv.Len(), yv.Len())
+                                return panicf("x${errOp}y : length mismatch: %d vs %d", xv.Len(), yv.Len())
                         }
                         r := xv.reuse()
                         for i, xi := range xv.Slice {
                                 ri := ${name}(xi, yv.at(i))
-                                if ri.IsErr() {
+                                if ri.IsPanic() {
                                         return ri
                                 }
                                 r.Slice[i] = ri
@@ -298,14 +298,14 @@ EOS
                 r := xv.reuse()
                 for i, xi := range xv.Slice {
                         ri := ${name}(xi, y)
-                        if ri.IsErr() {
+                        if ri.IsPanic() {
                                 return ri
                         }
                         r.Slice[i] = ri
                 }
                 return NewV(r)
 	default:
-		return errTypeElt("x${errOp}y", "x", x)
+		return panicTypeElt("x${errOp}y", "x", x)
 	}
 }\n
 EOS
@@ -348,7 +348,7 @@ EOS
             $ret = "NewF($expr)";
         }
         print $out <<EOS;
-        if y.IsInt() {
+        if y.IsI() {
             return $ret;
         }
 EOS
@@ -422,14 +422,14 @@ EOS
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := ${name}${t}V(x, yi)
-                        if ri.IsErr() {
+                        if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x${errOp}y", "y", y)
+		return panicTypeElt("x${errOp}y", "y", y)
 	}
 }\n
 EOS
@@ -451,7 +451,7 @@ EOS
         my $rtype = $atypes{$type};
         if ($t eq $type) {
             print $out <<EOS;
-        if y.IsInt() {
+        if y.IsI() {
             r := x.reuse()
             for i := range r.Slice {
                     r.Slice[i] = $rtype($iexpr)
@@ -461,7 +461,7 @@ EOS
 EOS
         } else {
             print $out <<EOS;
-        if y.IsInt() {
+        if y.IsI() {
             r := make([]$rtype, x.Len())
             for i := range r {
                     r[i] = $rtype($iexpr)
@@ -536,7 +536,7 @@ EOS
             print $out <<EOS;
 	case *A$tt:
                 if x.Len() != yv.Len() {
-                        return errf("x${errOp}y : length mismatch: %d vs %d", x.Len(), yv.Len())
+                        return panicf("x${errOp}y : length mismatch: %d vs %d", x.Len(), yv.Len())
                 }
                 r := x.reuse()
 		for i := range r.Slice {
@@ -548,7 +548,7 @@ EOS
             print $out <<EOS;
 	case *A$tt:
                 if x.Len() != yv.Len() {
-                        return errf("x${errOp}y : length mismatch: %d vs %d", x.Len(), yv.Len())
+                        return panicf("x${errOp}y : length mismatch: %d vs %d", x.Len(), yv.Len())
                 }
                 r := yv.reuse()
 		for i := range r.Slice {
@@ -560,7 +560,7 @@ EOS
             print $out <<EOS;
 	case *A$tt:
                 if x.Len() != yv.Len() {
-                        return errf("x${errOp}y : length mismatch: %d vs %d", x.Len(), yv.Len())
+                        return panicf("x${errOp}y : length mismatch: %d vs %d", x.Len(), yv.Len())
                 }
 		r := make([]$rtype, yv.Len())
 		for i := range r {
@@ -597,19 +597,19 @@ EOS
     print $out <<EOS if $t !~ /^A/;
 	case *AV:
                 if x.Len() != yv.Len() {
-                        return errf("x${errOp}y : length mismatch: %d vs %d", x.Len(), yv.Len())
+                        return panicf("x${errOp}y : length mismatch: %d vs %d", x.Len(), yv.Len())
                 }
                 $reuse
 		for i := range r.Slice {
 			ri := ${name}${t}V($tt(x.At(i)), yv.At(i))
-                        if ri.IsErr() {
+                        if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
 		}
 		return NewV(r)
 	default:
-		return errTypeElt("x${errOp}y", "y", y)
+		return panicTypeElt("x${errOp}y", "y", y)
 	}
 }\n
 EOS

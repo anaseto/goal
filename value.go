@@ -167,8 +167,8 @@ func (x V) IsF() bool {
 	return x.Kind == Float
 }
 
-// isPanic returns true if the value is a fatal error.
-func (x V) isPanic() bool {
+// IsPanic returns true if the value is a fatal error.
+func (x V) IsPanic() bool {
 	return x.Kind == Panic
 }
 

@@ -181,7 +181,7 @@ func toIndicesRec(x V) V {
 		r := make([]V, xv.Len())
 		for i, z := range xv.Slice {
 			r[i] = toIndicesRec(z)
-			if r[i].isPanic() {
+			if r[i].IsPanic() {
 				return r[i]
 			}
 		}

@@ -75,7 +75,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 		case opApplyV:
 			v := variadic(ops[ip])
 			r := ctx.applyVariadic(v)
-			if r.isPanic() {
+			if r.IsPanic() {
 				return ip - 1, newExecError(r)
 			}
 			ctx.push(r)
@@ -88,7 +88,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 		case opApply2V:
 			v := variadic(ops[ip])
 			r := ctx.apply2Variadic(v)
-			if r.isPanic() {
+			if r.IsPanic() {
 				return ip - 1, newExecError(r)
 			}
 			ctx.push(r)
@@ -103,7 +103,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			v := variadic(ops[ip])
 			ip++
 			r := ctx.applyNVariadic(v, int(ops[ip]))
-			if r.isPanic() {
+			if r.IsPanic() {
 				return ip - 2, newExecError(r)
 			}
 			ctx.push(r)
@@ -135,7 +135,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 func (ctx *Context) popApplyN(n int) error {
 	x := ctx.pop()
 	r := ctx.applyN(x, n)
-	if r.isPanic() {
+	if r.IsPanic() {
 		return newExecError(r)
 	}
 	ctx.push(r)

@@ -70,7 +70,7 @@ func group(x V) V {
 		return NewAV(r)
 	case *AF:
 		z := toAI(xv)
-		if z.isPanic() {
+		if z.IsPanic() {
 			return z
 		}
 		return group(z)
@@ -102,7 +102,7 @@ func icount(x V) V {
 		return NewAI(counts)
 	case *AF:
 		z := toAI(xv)
-		if z.isPanic() {
+		if z.IsPanic() {
 			return z
 		}
 		return icount(z)
@@ -118,7 +118,7 @@ func groupBy(x, y V) V {
 			Length(x), Length(y))
 	}
 	x = group(x)
-	if x.isPanic() {
+	if x.IsPanic() {
 		return panics("f=y : f[y] not an integer array")
 	}
 	avx := x.Value.(*AV) // group should always return AV or errV

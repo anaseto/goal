@@ -155,14 +155,14 @@ func (ctx *Context) applyArray(x V, y V) V {
 		r := make([]V, yv.Len())
 		for i, yi := range yv.Slice {
 			r[i] = ctx.applyArray(x, yi)
-			if r[i].isPanic() {
+			if r[i].IsPanic() {
 				return r[i]
 			}
 		}
 		return canonicalV(NewAV(r))
 	case array:
 		iy := toIndices(y)
-		if iy.isPanic() {
+		if iy.IsPanic() {
 			return panicf("x[y] : %v", iy.Value)
 		}
 		r := xv.atIndices(iy.Value.(*AI).Slice)
@@ -182,7 +182,7 @@ func (ctx *Context) applyArrayArgs(x V, arg V, args []V) V {
 		r := make([]V, xv.Len())
 		for i := 0; i < len(r); i++ {
 			r[i] = ctx.ApplyN(xv.at(i), args)
-			if r[i].isPanic() {
+			if r[i].IsPanic() {
 				return r[i]
 			}
 		}
@@ -193,14 +193,14 @@ func (ctx *Context) applyArrayArgs(x V, arg V, args []V) V {
 		r := make([]V, argv.Len())
 		for i := 0; i < argv.Len(); i++ {
 			r[i] = ctx.applyArrayArgs(x, argv.at(i), args)
-			if r[i].isPanic() {
+			if r[i].IsPanic() {
 				return r[i]
 			}
 		}
 		return canonicalV(NewAV(r))
 	default:
 		r := ctx.applyArray(x, arg)
-		if r.isPanic() {
+		if r.IsPanic() {
 			return r
 		}
 		return ctx.ApplyN(r, args)

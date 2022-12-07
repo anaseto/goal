@@ -278,7 +278,7 @@ func VMax(ctx *Context, args []V) V {
 			y.rcincr()
 			r := ctx.applyN(x, 1)
 			y.rcdecr()
-			if r.isPanic() {
+			if r.IsPanic() {
 				return r
 			}
 			return rotate(r, y)
@@ -325,7 +325,7 @@ func VEqual(ctx *Context, args []V) V {
 			y.rcincr()
 			r := ctx.applyN(x, 1)
 			y.rcdecr()
-			if r.isPanic() {
+			if r.IsPanic() {
 				return r
 			}
 			return groupBy(r, y)
@@ -384,7 +384,7 @@ func VTake(ctx *Context, args []V) V {
 			y.rcincr()
 			r := ctx.applyN(x, 1)
 			y.rcdecr()
-			if r.isPanic() {
+			if r.IsPanic() {
 				return r
 			}
 			return replicate(r, y)
@@ -407,7 +407,7 @@ func VDrop(ctx *Context, args []V) V {
 			y.rcincr()
 			r := ctx.applyN(x, 1)
 			y.rcdecr()
-			if r.isPanic() {
+			if r.IsPanic() {
 				return r
 			}
 			return weedOut(r, y)

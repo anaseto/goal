@@ -120,7 +120,7 @@ func rotate(x, y V) V {
 // first returns *x.
 func first(x V) V {
 	switch xv := x.Value.(type) {
-	case errV:
+	case *errV:
 		return xv.V
 	case array:
 		if xv.Len() == 0 {
@@ -163,7 +163,7 @@ func drop(x, y V) V {
 		return cutAI(xv, y)
 	case *AF:
 		z := toAI(xv)
-		if z.isPanic() {
+		if z.IsPanic() {
 			return z
 		}
 		return drop(z, y)

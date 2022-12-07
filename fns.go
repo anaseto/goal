@@ -3,7 +3,7 @@ package goal
 // enum returns !x.
 func enum(x V) V {
 	x = toIndices(x)
-	if x.isPanic() {
+	if x.IsPanic() {
 		return panicf("!x : %v", x)
 	}
 	if x.IsI() {
@@ -201,7 +201,7 @@ func replicate(x, y V) V {
 		return repeatAI(xv, y)
 	case *AF:
 		ix := toAI(xv)
-		if ix.isPanic() {
+		if ix.IsPanic() {
 			return panicf("f#y : x %v", ix)
 		}
 		return replicate(ix, y)
@@ -378,7 +378,7 @@ func weedOut(x, y V) V {
 		return weedOutAI(xv, y)
 	case *AF:
 		ix := toAI(xv)
-		if ix.isPanic() {
+		if ix.IsPanic() {
 			return panicf("f#y : x %v", ix)
 		}
 		return weedOut(ix, y)

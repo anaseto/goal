@@ -718,7 +718,7 @@ func findS(s S, y V) V {
 		r := make([]V, yv.Len())
 		for i, yi := range yv.Slice {
 			r[i] = findS(s, yi)
-			if r[i].isPanic() {
+			if r[i].IsPanic() {
 				return r[i]
 			}
 		}

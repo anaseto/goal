@@ -300,7 +300,7 @@ ocount x  occur-count	ocount 3 2 5 3 2 2 7 -> 0 0 0 1 1 2 0
 icount x  index-count	icount 0 0 1 -1 0 1 2 3 2 -> 3 2 2 1 (same as #'=x)
 sign x    sign		sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
 bytes x	  byte-count	bytes "abc" -> 3
-error x	  error		r:{?[~x=0;1%%x;error "zero"]};*r -> "zero"
+error x	  error		r:{?[~x=0;1%%x;error "zero"]}0;?["e"~@r;*r;r] -> "zero"
 `
 
 const helpADVERBS = `

@@ -36,7 +36,7 @@ func applyS(s S, x V) V {
 		return NewAS(r)
 	case *AF:
 		z := toAI(xv)
-		if z.isPanic() {
+		if z.IsPanic() {
 			return z
 		}
 		return applyS(s, z)
@@ -44,7 +44,7 @@ func applyS(s S, x V) V {
 		r := make([]V, xv.Len())
 		for i, xi := range xv.Slice {
 			r[i] = applyS(s, xi)
-			if r[i].isPanic() {
+			if r[i].IsPanic() {
 				return r[i]
 			}
 		}
@@ -75,7 +75,7 @@ func applyS2(s S, x V, y V) V {
 			return applyS2(s, x, fromABtoAI(yv))
 		case *AF:
 			z := toAI(yv)
-			if z.isPanic() {
+			if z.IsPanic() {
 				return z
 			}
 			return applyS2(s, x, z)
@@ -147,7 +147,7 @@ func applyS2(s S, x V, y V) V {
 		return NewAS(r)
 	case *AF:
 		z := toAI(xv)
-		if z.isPanic() {
+		if z.IsPanic() {
 			return z
 		}
 		return applyS2(s, z, y)
@@ -155,7 +155,7 @@ func applyS2(s S, x V, y V) V {
 		r := make([]V, xv.Len())
 		for i, xi := range xv.Slice {
 			r[i] = applyS2(s, xi, y)
-			if r[i].isPanic() {
+			if r[i].IsPanic() {
 				return r[i]
 			}
 		}
@@ -179,7 +179,7 @@ func bytes(x V) V {
 		r := make([]V, xv.Len())
 		for i, xi := range xv.Slice {
 			r[i] = bytes(xi)
-			if r[i].isPanic() {
+			if r[i].IsPanic() {
 				return r[i]
 			}
 		}
@@ -234,7 +234,7 @@ func casti(y V) V {
 		r := make([]V, yv.Len())
 		for i := range r {
 			r[i] = casti(yv.At(i))
-			if r[i].isPanic() {
+			if r[i].IsPanic() {
 				return r[i]
 			}
 		}
@@ -275,7 +275,7 @@ func castn(y V) V {
 		r := make([]V, yv.Len())
 		for i := range r {
 			r[i] = castn(yv.At(i))
-			if r[i].isPanic() {
+			if r[i].IsPanic() {
 				return r[i]
 			}
 		}
@@ -307,7 +307,7 @@ func casts(y V) V {
 		r := make([]V, yv.Len())
 		for i := range r {
 			r[i] = casts(yv.At(i))
-			if r[i].isPanic() {
+			if r[i].IsPanic() {
 				return r[i]
 			}
 		}
@@ -331,7 +331,7 @@ func drops(s S, y V) V {
 		r := make([]V, yv.Len())
 		for i, yi := range yv.Slice {
 			r[i] = drops(s, yi)
-			if r[i].isPanic() {
+			if r[i].IsPanic() {
 				return r[i]
 			}
 		}
@@ -356,7 +356,7 @@ func trim(s S, y V) V {
 		r := make([]V, yv.Len())
 		for i, yi := range yv.Slice {
 			r[i] = trim(s, yi)
-			if r[i].isPanic() {
+			if r[i].IsPanic() {
 				return r[i]
 			}
 		}

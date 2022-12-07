@@ -7,7 +7,7 @@ func (ctx *Context) amend3(x, y, f V) V {
 	switch xv := x.Value.(type) {
 	case array:
 		y = toIndices(y)
-		if y.isPanic() {
+		if y.IsPanic() {
 			return y
 		}
 		return canonicalV(ctx.amend3array(cloneShallowArray(xv), y, f))
@@ -22,7 +22,7 @@ func (ctx *Context) amend3arrayI(x array, y int64, f V) V {
 	}
 	xy := x.at(int(y))
 	repl := ctx.Apply(f, xy)
-	if repl.isPanic() {
+	if repl.IsPanic() {
 		return panicf("f call in @[x;y;f] : %v", repl)
 	}
 	if compatEltType(x, repl) {
@@ -45,7 +45,7 @@ func (ctx *Context) amend3array(x array, y, f V) V {
 	case *AI:
 		for _, yi := range yv.Slice {
 			ax := ctx.amend3arrayI(x, yi, f)
-			if ax.isPanic() {
+			if ax.IsPanic() {
 				return ax
 			}
 			x = ax.Value.(array)
@@ -54,7 +54,7 @@ func (ctx *Context) amend3array(x array, y, f V) V {
 	case *AV:
 		for _, yi := range yv.Slice {
 			ax := ctx.amend3array(x, yi, f)
-			if ax.isPanic() {
+			if ax.IsPanic() {
 				return ax
 			}
 			x = ax.Value.(array)
@@ -70,7 +70,7 @@ func (ctx *Context) amend4(x, y, f, z V) V {
 	switch xv := x.Value.(type) {
 	case array:
 		y = toIndices(y)
-		if y.isPanic() {
+		if y.IsPanic() {
 			return y
 		}
 		return canonicalV(ctx.amend4array(cloneShallowArray(xv), y, f, z))
@@ -85,7 +85,7 @@ func (ctx *Context) amend4arrayI(x array, y int64, f, z V) V {
 	}
 	xy := x.at(int(y))
 	repl := ctx.Apply2(f, xy, z)
-	if repl.isPanic() {
+	if repl.IsPanic() {
 		return panicf("f call in @[x;y;f;z] : %v", repl)
 	}
 	if compatEltType(x, repl) {
@@ -114,7 +114,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 		if !ok {
 			for _, xi := range yv.Slice {
 				ax := ctx.amend4arrayI(x, xi, f, z)
-				if ax.isPanic() {
+				if ax.IsPanic() {
 					return ax
 				}
 				x = ax.Value.(array)
@@ -127,7 +127,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 		}
 		for i, xi := range yv.Slice {
 			ax := ctx.amend4arrayI(x, xi, f, az.at(i))
-			if ax.isPanic() {
+			if ax.IsPanic() {
 				return ax
 			}
 			x = ax.Value.(array)
@@ -138,7 +138,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 		if !ok {
 			for _, xi := range yv.Slice {
 				ax := ctx.amend4array(x, xi, f, z)
-				if ax.isPanic() {
+				if ax.IsPanic() {
 					return ax
 				}
 				x = ax.Value.(array)
@@ -151,7 +151,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 		}
 		for i, xi := range yv.Slice {
 			ax := ctx.amend4array(x, xi, f, az.at(i))
-			if ax.isPanic() {
+			if ax.IsPanic() {
 				return ax
 			}
 			x = ax.Value.(array)
@@ -169,11 +169,11 @@ func try(ctx *Context, f1, x, f2 V) V {
 		ctx.push(av.at(i))
 	}
 	r := ctx.applyN(f1, av.Len())
-	if r.isPanic() {
+	if r.IsPanic() {
 		r.Kind = Boxed // we used the boxed value
 		ctx.push(r)
 		r = ctx.applyN(f2, 1)
-		if r.isPanic() {
+		if r.IsPanic() {
 			return panicf("f2 call in .[f1;x;f2] : %v", r)
 		}
 	}

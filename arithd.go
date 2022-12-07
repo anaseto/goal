@@ -35,7 +35,7 @@ func equal(x, y V) V {
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
 				ri := equal(xi, yv.at(i))
-				if ri.isPanic() {
+				if ri.IsPanic() {
 					return ri
 				}
 				r.Slice[i] = ri
@@ -45,7 +45,7 @@ func equal(x, y V) V {
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
 			ri := equal(xi, y)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -86,7 +86,7 @@ func equalFV(x float64, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := equalFV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -127,7 +127,7 @@ func equalIV(x int64, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := equalIV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -152,7 +152,7 @@ func equalSV(x S, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := equalSV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -214,7 +214,7 @@ func equalABV(x *AB, y V) V {
 
 		for i := range r.Slice {
 			ri := equalIV(B2I(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -276,7 +276,7 @@ func equalAFV(x *AF, y V) V {
 
 		for i := range r.Slice {
 			ri := equalFV(float64(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -338,7 +338,7 @@ func equalAIV(x *AI, y V) V {
 
 		for i := range r.Slice {
 			ri := equalIV(int64(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -374,7 +374,7 @@ func equalASV(x *AS, y V) V {
 
 		for i := range r.Slice {
 			ri := equalSV(S(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -413,7 +413,7 @@ func lesser(x, y V) V {
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
 				ri := lesser(xi, yv.at(i))
-				if ri.isPanic() {
+				if ri.IsPanic() {
 					return ri
 				}
 				r.Slice[i] = ri
@@ -423,7 +423,7 @@ func lesser(x, y V) V {
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
 			ri := lesser(xi, y)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -464,7 +464,7 @@ func lesserFV(x float64, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := lesserFV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -505,7 +505,7 @@ func lesserIV(x int64, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := lesserIV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -530,7 +530,7 @@ func lesserSV(x S, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := lesserSV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -592,7 +592,7 @@ func lesserABV(x *AB, y V) V {
 
 		for i := range r.Slice {
 			ri := lesserIV(B2I(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -654,7 +654,7 @@ func lesserAFV(x *AF, y V) V {
 
 		for i := range r.Slice {
 			ri := lesserFV(float64(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -716,7 +716,7 @@ func lesserAIV(x *AI, y V) V {
 
 		for i := range r.Slice {
 			ri := lesserIV(int64(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -752,7 +752,7 @@ func lesserASV(x *AS, y V) V {
 
 		for i := range r.Slice {
 			ri := lesserSV(S(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -791,7 +791,7 @@ func greater(x, y V) V {
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
 				ri := greater(xi, yv.at(i))
-				if ri.isPanic() {
+				if ri.IsPanic() {
 					return ri
 				}
 				r.Slice[i] = ri
@@ -801,7 +801,7 @@ func greater(x, y V) V {
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
 			ri := greater(xi, y)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -842,7 +842,7 @@ func greaterFV(x float64, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := greaterFV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -883,7 +883,7 @@ func greaterIV(x int64, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := greaterIV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -908,7 +908,7 @@ func greaterSV(x S, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := greaterSV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -970,7 +970,7 @@ func greaterABV(x *AB, y V) V {
 
 		for i := range r.Slice {
 			ri := greaterIV(B2I(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -1032,7 +1032,7 @@ func greaterAFV(x *AF, y V) V {
 
 		for i := range r.Slice {
 			ri := greaterFV(float64(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -1094,7 +1094,7 @@ func greaterAIV(x *AI, y V) V {
 
 		for i := range r.Slice {
 			ri := greaterIV(int64(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -1130,7 +1130,7 @@ func greaterASV(x *AS, y V) V {
 
 		for i := range r.Slice {
 			ri := greaterSV(S(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -1169,7 +1169,7 @@ func add(x, y V) V {
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
 				ri := add(xi, yv.at(i))
-				if ri.isPanic() {
+				if ri.IsPanic() {
 					return ri
 				}
 				r.Slice[i] = ri
@@ -1179,7 +1179,7 @@ func add(x, y V) V {
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
 			ri := add(xi, y)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -1220,7 +1220,7 @@ func addFV(x float64, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := addFV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -1261,7 +1261,7 @@ func addIV(x int64, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := addIV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -1286,7 +1286,7 @@ func addSV(x S, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := addSV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -1348,7 +1348,7 @@ func addABV(x *AB, y V) V {
 
 		for i := range r.Slice {
 			ri := addIV(B2I(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -1410,7 +1410,7 @@ func addAFV(x *AF, y V) V {
 
 		for i := range r.Slice {
 			ri := addFV(float64(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -1472,7 +1472,7 @@ func addAIV(x *AI, y V) V {
 
 		for i := range r.Slice {
 			ri := addIV(int64(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -1508,7 +1508,7 @@ func addASV(x *AS, y V) V {
 
 		for i := range r.Slice {
 			ri := addSV(S(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -1547,7 +1547,7 @@ func subtract(x, y V) V {
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
 				ri := subtract(xi, yv.at(i))
-				if ri.isPanic() {
+				if ri.IsPanic() {
 					return ri
 				}
 				r.Slice[i] = ri
@@ -1557,7 +1557,7 @@ func subtract(x, y V) V {
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
 			ri := subtract(xi, y)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -1598,7 +1598,7 @@ func subtractFV(x float64, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := subtractFV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -1639,7 +1639,7 @@ func subtractIV(x int64, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := subtractIV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -1664,7 +1664,7 @@ func subtractSV(x S, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := subtractSV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -1726,7 +1726,7 @@ func subtractABV(x *AB, y V) V {
 
 		for i := range r.Slice {
 			ri := subtractIV(B2I(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -1788,7 +1788,7 @@ func subtractAFV(x *AF, y V) V {
 
 		for i := range r.Slice {
 			ri := subtractFV(float64(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -1850,7 +1850,7 @@ func subtractAIV(x *AI, y V) V {
 
 		for i := range r.Slice {
 			ri := subtractIV(int64(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -1886,7 +1886,7 @@ func subtractASV(x *AS, y V) V {
 
 		for i := range r.Slice {
 			ri := subtractSV(S(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -1925,7 +1925,7 @@ func multiply(x, y V) V {
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
 				ri := multiply(xi, yv.at(i))
-				if ri.isPanic() {
+				if ri.IsPanic() {
 					return ri
 				}
 				r.Slice[i] = ri
@@ -1935,7 +1935,7 @@ func multiply(x, y V) V {
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
 			ri := multiply(xi, y)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -1984,7 +1984,7 @@ func multiplyFV(x float64, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := multiplyFV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -2033,7 +2033,7 @@ func multiplyIV(x int64, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := multiplyIV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -2074,7 +2074,7 @@ func multiplySV(x S, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := multiplySV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -2151,7 +2151,7 @@ func multiplyABV(x *AB, y V) V {
 
 		for i := range r.Slice {
 			ri := multiplyIV(B2I(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -2228,7 +2228,7 @@ func multiplyAFV(x *AF, y V) V {
 
 		for i := range r.Slice {
 			ri := multiplyFV(float64(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -2305,7 +2305,7 @@ func multiplyAIV(x *AI, y V) V {
 
 		for i := range r.Slice {
 			ri := multiplyIV(int64(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -2367,7 +2367,7 @@ func multiplyASV(x *AS, y V) V {
 
 		for i := range r.Slice {
 			ri := multiplySV(S(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -2402,7 +2402,7 @@ func divide(x, y V) V {
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
 				ri := divide(xi, yv.at(i))
-				if ri.isPanic() {
+				if ri.IsPanic() {
 					return ri
 				}
 				r.Slice[i] = ri
@@ -2412,7 +2412,7 @@ func divide(x, y V) V {
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
 			ri := divide(xi, y)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -2453,7 +2453,7 @@ func divideFV(x float64, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := divideFV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -2494,7 +2494,7 @@ func divideIV(x int64, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := divideIV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -2556,7 +2556,7 @@ func divideABV(x *AB, y V) V {
 
 		for i := range r.Slice {
 			ri := divideIV(B2I(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -2618,7 +2618,7 @@ func divideAFV(x *AF, y V) V {
 
 		for i := range r.Slice {
 			ri := divideFV(float64(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -2680,7 +2680,7 @@ func divideAIV(x *AI, y V) V {
 
 		for i := range r.Slice {
 			ri := divideIV(int64(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -2719,7 +2719,7 @@ func minimum(x, y V) V {
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
 				ri := minimum(xi, yv.at(i))
-				if ri.isPanic() {
+				if ri.IsPanic() {
 					return ri
 				}
 				r.Slice[i] = ri
@@ -2729,7 +2729,7 @@ func minimum(x, y V) V {
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
 			ri := minimum(xi, y)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -2770,7 +2770,7 @@ func minimumFV(x float64, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := minimumFV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -2811,7 +2811,7 @@ func minimumIV(x int64, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := minimumIV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -2836,7 +2836,7 @@ func minimumSV(x S, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := minimumSV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -2898,7 +2898,7 @@ func minimumABV(x *AB, y V) V {
 
 		for i := range r.Slice {
 			ri := minimumIV(B2I(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -2960,7 +2960,7 @@ func minimumAFV(x *AF, y V) V {
 
 		for i := range r.Slice {
 			ri := minimumFV(float64(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -3022,7 +3022,7 @@ func minimumAIV(x *AI, y V) V {
 
 		for i := range r.Slice {
 			ri := minimumIV(int64(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -3058,7 +3058,7 @@ func minimumASV(x *AS, y V) V {
 
 		for i := range r.Slice {
 			ri := minimumSV(S(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -3097,7 +3097,7 @@ func maximum(x, y V) V {
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
 				ri := maximum(xi, yv.at(i))
-				if ri.isPanic() {
+				if ri.IsPanic() {
 					return ri
 				}
 				r.Slice[i] = ri
@@ -3107,7 +3107,7 @@ func maximum(x, y V) V {
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
 			ri := maximum(xi, y)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -3148,7 +3148,7 @@ func maximumFV(x float64, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := maximumFV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -3189,7 +3189,7 @@ func maximumIV(x int64, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := maximumIV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -3214,7 +3214,7 @@ func maximumSV(x S, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := maximumSV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -3276,7 +3276,7 @@ func maximumABV(x *AB, y V) V {
 
 		for i := range r.Slice {
 			ri := maximumIV(B2I(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -3338,7 +3338,7 @@ func maximumAFV(x *AF, y V) V {
 
 		for i := range r.Slice {
 			ri := maximumFV(float64(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -3400,7 +3400,7 @@ func maximumAIV(x *AI, y V) V {
 
 		for i := range r.Slice {
 			ri := maximumIV(int64(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -3436,7 +3436,7 @@ func maximumASV(x *AS, y V) V {
 
 		for i := range r.Slice {
 			ri := maximumSV(S(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -3471,7 +3471,7 @@ func modulus(x, y V) V {
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
 				ri := modulus(xi, yv.at(i))
-				if ri.isPanic() {
+				if ri.IsPanic() {
 					return ri
 				}
 				r.Slice[i] = ri
@@ -3481,7 +3481,7 @@ func modulus(x, y V) V {
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
 			ri := modulus(xi, y)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -3522,7 +3522,7 @@ func modulusFV(x float64, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := modulusFV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -3563,7 +3563,7 @@ func modulusIV(x int64, y V) V {
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := modulusIV(x, yi)
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -3625,7 +3625,7 @@ func modulusABV(x *AB, y V) V {
 
 		for i := range r.Slice {
 			ri := modulusIV(B2I(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -3687,7 +3687,7 @@ func modulusAFV(x *AF, y V) V {
 
 		for i := range r.Slice {
 			ri := modulusFV(float64(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
@@ -3749,7 +3749,7 @@ func modulusAIV(x *AI, y V) V {
 
 		for i := range r.Slice {
 			ri := modulusIV(int64(x.At(i)), yv.At(i))
-			if ri.isPanic() {
+			if ri.IsPanic() {
 				return ri
 			}
 			r.Slice[i] = ri
