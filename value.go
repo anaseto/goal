@@ -92,7 +92,7 @@ func (x V) lambda() lambda {
 
 // Error retrieves the error value. It assumes IsError(v).
 func (x V) Error() V {
-	return x.value.(errV).V
+	return x.value.(*errV).V
 }
 
 // I retrieves the unboxed integer value from N field. It assumes IsI(v).
@@ -168,7 +168,7 @@ func (x V) IsError() bool {
 	if x.kind != valBoxed {
 		return false
 	}
-	_, ok := x.value.(errV)
+	_, ok := x.value.(*errV)
 	return ok
 }
 
@@ -258,7 +258,7 @@ func (e panicV) Matches(y Value) bool {
 	}
 }
 
-func (e panicV) Type() string { return "e" }
+func (e panicV) Type() string { return "panic" }
 
 // S represents (immutable) strings of bytes.
 type S string

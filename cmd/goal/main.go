@@ -67,9 +67,13 @@ func main() {
 		printProgram(ctx)
 		os.Exit(0)
 	}
-	_, err = ctx.Run()
+	r, err := ctx.Run()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "goal: %v", err)
+		os.Exit(1)
+	}
+	if r.IsError() {
+		fmt.Fprint(os.Stderr, r.Error())
 		os.Exit(1)
 	}
 }

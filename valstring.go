@@ -53,7 +53,7 @@ func (e panicV) String() string             { return "'ERROR " + string(e) }
 
 // Sprint returns a properly quoted string.
 func (s S) Sprint(ctx *Context) string { return strconv.Quote(string(s)) }
-func (s S) String() string             { return strconv.Quote(string(s)) }
+func (s S) String() string             { return string(s) }
 
 func (x *AB) Sprint(ctx *Context) string {
 	return x.String()
