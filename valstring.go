@@ -66,11 +66,11 @@ func (x *AB) String() string {
 	sb := &strings.Builder{}
 	if x.Len() == 1 {
 		sb.WriteRune(',')
-		fmt.Fprintf(sb, "%d", B2I(x.At(0)))
+		fmt.Fprintf(sb, "%d", b2i(x.At(0)))
 		return sb.String()
 	}
 	for i, xi := range x.Slice {
-		fmt.Fprintf(sb, "%d", B2I(xi))
+		fmt.Fprintf(sb, "%d", b2i(xi))
 		if i < x.Len()-1 {
 			sb.WriteRune(' ')
 		}
@@ -223,7 +223,7 @@ func (x *AV) String() string {
 	return sb.String()
 }
 
-func (p Projection) Sprint(ctx *Context) string {
+func (p projection) Sprint(ctx *Context) string {
 	sb := &strings.Builder{}
 	fmt.Fprintf(sb, "%s", p.Fun.Sprint(ctx))
 	sb.WriteRune('[')
@@ -240,7 +240,7 @@ func (p Projection) Sprint(ctx *Context) string {
 	return sb.String()
 }
 
-func (p Projection) String() string {
+func (p projection) String() string {
 	sb := &strings.Builder{}
 	fmt.Fprintf(sb, "%s", p.Fun.String())
 	sb.WriteRune('[')
@@ -257,26 +257,26 @@ func (p Projection) String() string {
 	return sb.String()
 }
 
-func (p ProjectionFirst) Sprint(ctx *Context) string {
+func (p projectionFirst) Sprint(ctx *Context) string {
 	return fmt.Sprintf("%s[%s;]", p.Fun.Sprint(ctx), p.Arg.Sprint(ctx))
 }
 
-func (p ProjectionFirst) String() string {
+func (p projectionFirst) String() string {
 	return fmt.Sprintf("%s[%s;]", p.Fun.String(), p.Arg.String())
 }
 
-func (p ProjectionMonad) Sprint(ctx *Context) string {
+func (p projectionMonad) Sprint(ctx *Context) string {
 	return fmt.Sprintf("%s[]", p.Fun.Sprint(ctx))
 }
 
-func (p ProjectionMonad) String() string {
+func (p projectionMonad) String() string {
 	return fmt.Sprintf("%s[]", p.Fun.String())
 }
 
-func (r DerivedVerb) Sprint(ctx *Context) string {
+func (r derivedVerb) Sprint(ctx *Context) string {
 	return fmt.Sprintf("%s%s", r.Arg.Sprint(ctx), r.Fun.String())
 }
 
-func (r DerivedVerb) String() string {
+func (r derivedVerb) String() string {
 	return fmt.Sprintf("%s%s", r.Arg.String(), r.Fun.String())
 }

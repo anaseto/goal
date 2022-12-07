@@ -88,7 +88,7 @@ func where(x V) V {
 	case *AB:
 		n := int64(0)
 		for _, xi := range xv.Slice {
-			n += B2I(xi)
+			n += b2i(xi)
 		}
 		r := make([]int64, 0, n)
 		for i, xi := range xv.Slice {
@@ -255,7 +255,7 @@ func repeat(x V, n int64) V {
 func repeatAB(x *AB, y V) V {
 	n := int64(0)
 	for _, xi := range x.Slice {
-		n += B2I(xi)
+		n += b2i(xi)
 	}
 	switch yv := y.Value.(type) {
 	case *AB:
@@ -393,7 +393,7 @@ func weedOut(x, y V) V {
 func weedOutAB(x *AB, y V) V {
 	n := int64(0)
 	for _, xi := range x.Slice {
-		n += 1 - B2I(xi)
+		n += 1 - b2i(xi)
 	}
 	switch yv := y.Value.(type) {
 	case *AB:
@@ -444,7 +444,7 @@ func weedOutAB(x *AB, y V) V {
 func weedOutAI(x *AI, y V) V {
 	n := int64(0)
 	for _, xi := range x.Slice {
-		n += B2I(xi == 0)
+		n += b2i(xi == 0)
 	}
 	switch yv := y.Value.(type) {
 	case *AB:

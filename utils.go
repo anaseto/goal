@@ -5,14 +5,14 @@ import (
 	"math"
 )
 
-func B2I(b bool) (i int64) {
+func b2i(b bool) (i int64) {
 	if b {
 		i = 1
 	}
 	return
 }
 
-func B2F(b bool) (f float64) {
+func b2f(b bool) (f float64) {
 	if b {
 		f = 1
 	}
@@ -231,7 +231,7 @@ func toAI(x *AF) V {
 func fromABtoAI(x *AB) V {
 	r := make([]int64, x.Len())
 	for i := range r {
-		r[i] = B2I(x.At(i))
+		r[i] = b2i(x.At(i))
 	}
 	return NewAI(r)
 }
@@ -487,7 +487,7 @@ func minMaxB(x *AB) (int64, int64) {
 			break
 		}
 	}
-	return B2I(min), B2I(max)
+	return b2i(min), b2i(max)
 }
 
 func maxAB(x AB) bool {

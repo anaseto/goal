@@ -17,7 +17,7 @@ func negate(x V) V {
 	case *AB:
 		r := make([]int64, xv.Len())
 		for i, xi := range xv.Slice {
-			r[i] = -B2I(xi)
+			r[i] = -b2i(xi)
 		}
 		return NewAI(r)
 	case *AI:
@@ -180,14 +180,14 @@ func ceil(x V) V {
 // not returns ~x.
 func not(x V) V {
 	if x.IsI() {
-		return NewI(B2I(x.I() == 0))
+		return NewI(b2i(x.I() == 0))
 	}
 	if x.IsF() {
-		return NewI(B2I(x.F() == 0))
+		return NewI(b2i(x.F() == 0))
 	}
 	switch xv := x.Value.(type) {
 	case S:
-		return NewI(B2I(xv == ""))
+		return NewI(b2i(xv == ""))
 	case *AB:
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
@@ -213,7 +213,7 @@ func not(x V) V {
 		}
 		return NewV(r)
 	default:
-		return NewI(B2I(!isTrue(x)))
+		return NewI(b2i(!isTrue(x)))
 	}
 }
 

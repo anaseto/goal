@@ -58,18 +58,18 @@ func (ctx *Context) applyN(x V, n int) V {
 		}
 	}
 	switch xv := x.Value.(type) {
-	case DerivedVerb:
+	case derivedVerb:
 		ctx.push(xv.Arg)
 		args := ctx.peekN(n + 1)
 		if hasNil(args) {
-			return NewV(Projection{Fun: x, Args: ctx.popN(n + 1)})
+			return NewV(projection{Fun: x, Args: ctx.popN(n + 1)})
 		}
 		rcincr(args)
 		r := ctx.variadics[xv.Fun].Func(ctx, args)
 		rcdecr(args)
 		ctx.dropN(n + 1)
 		return r
-	case ProjectionFirst:
+	case projectionFirst:
 		if n > 1 {
 			return panicf("too many arguments: got %d, expected 1", n)
 		}
@@ -78,12 +78,12 @@ func (ctx *Context) applyN(x V, n int) V {
 		r := ctx.applyN(xv.Fun, 2)
 		xv.Arg.rcdecr()
 		return r
-	case ProjectionMonad:
+	case projectionMonad:
 		if n > 1 {
 			return panicf("too many arguments: got %d, expected 1", n)
 		}
 		return ctx.applyN(xv.Fun, 1)
-	case Projection:
+	case projection:
 		return ctx.applyProjection(xv, n)
 	case S:
 		switch n {
@@ -212,11 +212,11 @@ func (ctx *Context) applyVariadic(v variadic) V {
 	x := args[0]
 	if x.Kind == Nil {
 		ctx.drop()
-		return NewV(ProjectionMonad{Fun: newVariadic(v)})
+		return NewV(projectionMonad{Fun: newVariadic(v)})
 	}
 	if ctx.variadics[v].Adverb {
 		ctx.drop()
-		return NewV(DerivedVerb{Fun: v, Arg: x})
+		return NewV(derivedVerb{Fun: v, Arg: x})
 	}
 	x.rcincr()
 	r := ctx.variadics[v].Func(ctx, args)
@@ -231,11 +231,11 @@ func (ctx *Context) apply2Variadic(v variadic) V {
 		if args[1].Kind != Nil {
 			arg := args[1]
 			ctx.drop2()
-			return NewV(ProjectionFirst{Fun: newVariadic(v), Arg: arg})
+			return NewV(projectionFirst{Fun: newVariadic(v), Arg: arg})
 		}
-		return NewV(Projection{Fun: newVariadic(v), Args: ctx.popN(2)})
+		return NewV(projection{Fun: newVariadic(v), Args: ctx.popN(2)})
 	} else if args[1].Kind == Nil {
-		return NewV(Projection{Fun: newVariadic(v), Args: ctx.popN(2)})
+		return NewV(projection{Fun: newVariadic(v), Args: ctx.popN(2)})
 	}
 	args[0].rcincr()
 	args[1].rcincr()
@@ -249,7 +249,7 @@ func (ctx *Context) apply2Variadic(v variadic) V {
 func (ctx *Context) applyNVariadic(v variadic, n int) V {
 	args := ctx.peekN(n)
 	if hasNil(args) {
-		return NewV(Projection{Fun: newVariadic(v), Args: ctx.popN(n)})
+		return NewV(projection{Fun: newVariadic(v), Args: ctx.popN(n)})
 	}
 	rcincr(args)
 	r := ctx.variadics[v].Func(ctx, args)
@@ -258,7 +258,7 @@ func (ctx *Context) applyNVariadic(v variadic, n int) V {
 	return r
 }
 
-func (ctx *Context) applyProjection(p Projection, n int) V {
+func (ctx *Context) applyProjection(p projection, n int) V {
 	args := ctx.peekN(n)
 	nNils := countNils(p.Args)
 	switch {
@@ -291,7 +291,7 @@ func (ctx *Context) applyProjection(p Projection, n int) V {
 			}
 		}
 		ctx.dropN(n)
-		return NewV(Projection{Fun: NewV(p), Args: vargs})
+		return NewV(projection{Fun: NewV(p), Args: vargs})
 	}
 }
 
@@ -308,14 +308,14 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 		if n == 1 {
 			if args[0].Kind == Nil {
 				ctx.drop() // drop nil
-				return NewV(ProjectionMonad{Fun: newLambda(id)})
+				return NewV(projectionMonad{Fun: newLambda(id)})
 			}
-			return NewV(ProjectionFirst{Fun: newLambda(id), Arg: ctx.pop()})
+			return NewV(projectionFirst{Fun: newLambda(id), Arg: ctx.pop()})
 		}
 		if n == 2 && args[1].Kind == Nil && args[0].Kind != Nil {
-			return NewV(ProjectionFirst{Fun: newLambda(id), Arg: ctx.pop()})
+			return NewV(projectionFirst{Fun: newLambda(id), Arg: ctx.pop()})
 		}
-		return NewV(Projection{Fun: newLambda(id), Args: ctx.popN(n)})
+		return NewV(projection{Fun: newLambda(id), Args: ctx.popN(n)})
 	}
 	for i, arg := range args {
 		if lc.lastUses[i].bn >= 1 {

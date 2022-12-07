@@ -100,7 +100,7 @@ func lessF(x V, y V) bool {
 		if yv.Len() == 0 {
 			return false
 		}
-		return xv < B2F(yv.At(0)) || xv == B2F(yv.At(0)) && yv.Len() > 1
+		return xv < b2f(yv.At(0)) || xv == b2f(yv.At(0)) && yv.Len() > 1
 	case *AF:
 		if yv.Len() == 0 {
 			return false
@@ -134,7 +134,7 @@ func lessI(x V, y V) bool {
 		if yv.Len() == 0 {
 			return false
 		}
-		return xv < B2I(yv.At(0)) || xv == B2I(yv.At(0)) && yv.Len() > 1
+		return xv < b2i(yv.At(0)) || xv == b2i(yv.At(0)) && yv.Len() > 1
 	case *AF:
 		if yv.Len() == 0 {
 			return false
@@ -196,30 +196,30 @@ func lessAB(x V, y V) bool {
 		return xv.Len() < yv.Len()
 	case *AF:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if B2F(xv.At(i)) < yv.At(i) {
+			if b2f(xv.At(i)) < yv.At(i) {
 				return true
 			}
-			if B2F(xv.At(i)) > yv.At(i) {
+			if b2f(xv.At(i)) > yv.At(i) {
 				return false
 			}
 		}
 		return xv.Len() < yv.Len()
 	case *AI:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if B2I(xv.At(i)) < yv.At(i) {
+			if b2i(xv.At(i)) < yv.At(i) {
 				return true
 			}
-			if B2I(xv.At(i)) > yv.At(i) {
+			if b2i(xv.At(i)) > yv.At(i) {
 				return false
 			}
 		}
 		return xv.Len() < yv.Len()
 	case *AV:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if less(NewI(B2I(xv.At(i))), yv.At(i)) {
+			if less(NewI(b2i(xv.At(i))), yv.At(i)) {
 				return true
 			}
-			if less(yv.At(i), NewI(B2I(xv.At(i)))) {
+			if less(yv.At(i), NewI(b2i(xv.At(i)))) {
 				return false
 			}
 		}
@@ -240,10 +240,10 @@ func lessAI(x V, y V) bool {
 	switch yv := y.Value.(type) {
 	case *AB:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if xv.At(i) < B2I(yv.At(i)) {
+			if xv.At(i) < b2i(yv.At(i)) {
 				return true
 			}
-			if xv.At(i) > B2I(yv.At(i)) {
+			if xv.At(i) > b2i(yv.At(i)) {
 				return false
 			}
 		}
@@ -294,10 +294,10 @@ func lessAF(x V, y V) bool {
 	switch yv := y.Value.(type) {
 	case *AB:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if xv.At(i) < B2F(yv.At(i)) {
+			if xv.At(i) < b2f(yv.At(i)) {
 				return true
 			}
-			if xv.At(i) > B2F(yv.At(i)) {
+			if xv.At(i) > b2f(yv.At(i)) {
 				return false
 			}
 		}
@@ -378,10 +378,10 @@ func lessAV(x V, y V) bool {
 	switch yv := y.Value.(type) {
 	case *AB:
 		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if less(xv.At(i), NewI(B2I(yv.At(i)))) {
+			if less(xv.At(i), NewI(b2i(yv.At(i)))) {
 				return true
 			}
-			if less(NewI(B2I(yv.At(i))), xv.At(i)) {
+			if less(NewI(b2i(yv.At(i))), xv.At(i)) {
 				return false
 			}
 		}
@@ -641,7 +641,7 @@ func searchAI(x *AI, y V) V {
 	case *AB:
 		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
-			r[i] = searchAII(x, B2I(yi))
+			r[i] = searchAII(x, b2i(yi))
 		}
 		return NewAI(r)
 	case *AI:
@@ -679,7 +679,7 @@ func searchAF(x *AF, y V) V {
 	case *AB:
 		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
-			r[i] = searchAFI(x, B2I(yi))
+			r[i] = searchAFI(x, b2i(yi))
 		}
 		return NewAI(r)
 	case *AI:

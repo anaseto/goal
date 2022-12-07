@@ -399,7 +399,7 @@ func shiftBefore(x, y V) V {
 				r[i] = xv.At(i)
 			}
 			for i := max; i < len(ys); i++ {
-				r[i] = float64(B2F(ys[i-max]))
+				r[i] = float64(b2f(ys[i-max]))
 			}
 			return NewAF(r)
 		case *AI:
@@ -408,7 +408,7 @@ func shiftBefore(x, y V) V {
 				r[i] = xv.At(i)
 			}
 			for i := max; i < len(ys); i++ {
-				r[i] = B2I(ys[i-max])
+				r[i] = b2i(ys[i-max])
 			}
 			return NewAI(r)
 		default:
@@ -420,7 +420,7 @@ func shiftBefore(x, y V) V {
 		case *AB:
 			r := make([]float64, len(ys))
 			for i := 0; i < max; i++ {
-				r[i] = float64(B2F(xv.At(i)))
+				r[i] = float64(b2f(xv.At(i)))
 			}
 			copy(r[max:], ys[:len(ys)-max])
 			return NewAF(r)
@@ -447,7 +447,7 @@ func shiftBefore(x, y V) V {
 		case *AB:
 			r := make([]int64, len(ys))
 			for i := 0; i < max; i++ {
-				r[i] = B2I(xv.At(i))
+				r[i] = b2i(xv.At(i))
 			}
 			copy(r[max:], ys[:len(ys)-max])
 			return NewAI(r)
@@ -553,7 +553,7 @@ func shiftAfter(x, y V) V {
 				r[len(ys)-1-i] = xv.At(i)
 			}
 			for i := max; i < len(ys); i++ {
-				r[i-max] = float64(B2F(ys[i]))
+				r[i-max] = float64(b2f(ys[i]))
 			}
 			return NewAF(r)
 		case *AI:
@@ -562,7 +562,7 @@ func shiftAfter(x, y V) V {
 				r[len(ys)-1-i] = xv.At(i)
 			}
 			for i := max; i < len(ys); i++ {
-				r[i-max] = B2I(ys[i])
+				r[i-max] = b2i(ys[i])
 			}
 			return NewAI(r)
 		default:
@@ -574,7 +574,7 @@ func shiftAfter(x, y V) V {
 		case *AB:
 			r := make([]float64, len(ys))
 			for i := 0; i < max; i++ {
-				r[len(ys)-1-i] = float64(B2F(xv.At(i)))
+				r[len(ys)-1-i] = float64(b2f(xv.At(i)))
 			}
 			copy(r[:len(ys)-max], ys[max:])
 			return NewAF(r)
@@ -601,7 +601,7 @@ func shiftAfter(x, y V) V {
 		case *AB:
 			r := make([]int64, len(ys))
 			for i := 0; i < max; i++ {
-				r[len(ys)-1-i] = B2I(xv.At(i))
+				r[len(ys)-1-i] = b2i(xv.At(i))
 			}
 			copy(r[:len(ys)-max], ys[max:])
 			return NewAI(r)

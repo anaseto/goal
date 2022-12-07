@@ -250,12 +250,12 @@ func joinToAB(x V, y *AB, left bool) V {
 		if left {
 			r[0] = x.I()
 			for i := 1; i < len(r); i++ {
-				r[i] = B2I(y.At(i - 1))
+				r[i] = b2i(y.At(i - 1))
 			}
 		} else {
 			r[len(r)-1] = x.I()
 			for i := 0; i < len(r); i++ {
-				r[i] = B2I(y.At(i))
+				r[i] = b2i(y.At(i))
 			}
 		}
 		return NewAI(r)
@@ -266,12 +266,12 @@ func joinToAB(x V, y *AB, left bool) V {
 		if left {
 			r[0] = x.F()
 			for i := 1; i < len(r); i++ {
-				r[i] = B2F(y.At(i - 1))
+				r[i] = b2f(y.At(i - 1))
 			}
 		} else {
 			r[len(r)-1] = x.F()
 			for i := 0; i < len(r); i++ {
-				r[i] = B2F(y.At(i))
+				r[i] = b2f(y.At(i))
 			}
 		}
 		return NewAF(r)
@@ -456,7 +456,7 @@ func joinAFAF(x *AF, y *AF) V {
 func joinABAI(x *AB, y *AI) V {
 	r := make([]int64, x.Len()+y.Len())
 	for i := 0; i < x.Len(); i++ {
-		r[i] = B2I(x.At(i))
+		r[i] = b2i(x.At(i))
 	}
 	copy(r[x.Len():], y.Slice)
 	return NewAI(r)
@@ -465,14 +465,14 @@ func joinABAI(x *AB, y *AI) V {
 func joinAIAB(x *AI, y *AB) V {
 	if x.reusable() {
 		for _, yi := range y.Slice {
-			x.Slice = append(x.Slice, B2I(yi))
+			x.Slice = append(x.Slice, b2i(yi))
 		}
 		return NewV(x)
 	}
 	r := make([]int64, x.Len()+y.Len())
 	copy(r[:x.Len()], x.Slice)
 	for i := x.Len(); i < len(r); i++ {
-		r[i] = B2I(y.At(i - x.Len()))
+		r[i] = b2i(y.At(i - x.Len()))
 	}
 	return NewAI(r)
 }
@@ -480,7 +480,7 @@ func joinAIAB(x *AI, y *AB) V {
 func joinABAF(x *AB, y *AF) V {
 	r := make([]float64, x.Len()+y.Len())
 	for i := 0; i < x.Len(); i++ {
-		r[i] = float64(B2F(x.At(i)))
+		r[i] = float64(b2f(x.At(i)))
 	}
 	copy(r[x.Len():], y.Slice)
 	return NewAF(r)
@@ -489,14 +489,14 @@ func joinABAF(x *AB, y *AF) V {
 func joinAFAB(x *AF, y *AB) V {
 	if x.reusable() {
 		for _, yi := range y.Slice {
-			x.Slice = append(x.Slice, float64(B2I(yi)))
+			x.Slice = append(x.Slice, float64(b2i(yi)))
 		}
 		return NewV(x)
 	}
 	r := make([]float64, x.Len()+y.Len())
 	copy(r[:x.Len()], x.Slice)
 	for i := x.Len(); i < len(r); i++ {
-		r[i] = float64(B2F(y.At(i - x.Len())))
+		r[i] = float64(b2f(y.At(i - x.Len())))
 	}
 	return NewAF(r)
 }

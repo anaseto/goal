@@ -98,7 +98,7 @@ func matchAB(x, y *AB) bool {
 
 func matchABAI(x *AB, y *AI) bool {
 	for i, yi := range y.Slice {
-		if yi != B2I(x.At(i)) {
+		if yi != b2i(x.At(i)) {
 			return false
 		}
 	}
@@ -107,7 +107,7 @@ func matchABAI(x *AB, y *AI) bool {
 
 func matchABAF(x *AB, y *AF) bool {
 	for i, yi := range y.Slice {
-		if yi != B2F(x.At(i)) {
+		if yi != b2f(x.At(i)) {
 			return false
 		}
 	}
@@ -374,7 +374,7 @@ func memberOf(x, y V) V {
 			r := make([]bool, xv.Len())
 			return NewAB(r)
 		default:
-			return NewI(B2I(false))
+			return NewI(b2i(false))
 		}
 	}
 	if Length(x) == 0 {
@@ -415,13 +415,13 @@ func memberOfAB(x V, y *AB) V {
 			}
 			return NewAB(r)
 		default:
-			return NewI(B2I(true))
+			return NewI(b2i(true))
 		}
 	}
 	if t {
-		return equal(x, NewI(B2I(true)))
+		return equal(x, NewI(b2i(true)))
 	}
-	return equal(x, NewI(B2I(false)))
+	return equal(x, NewI(b2i(false)))
 }
 
 func memberOfAF(x V, y *AF) V {
@@ -435,17 +435,17 @@ func memberOfAF(x V, y *AF) V {
 	}
 	if x.IsI() {
 		_, ok := m[float64(x.I())]
-		return NewI(B2I(ok))
+		return NewI(b2i(ok))
 	}
 	if x.IsF() {
 		_, ok := m[x.F()]
-		return NewI(B2I(ok))
+		return NewI(b2i(ok))
 	}
 	switch xv := x.Value.(type) {
 	case *AB:
 		r := make([]bool, xv.Len())
 		for i, xi := range xv.Slice {
-			_, r[i] = m[B2F(xi)]
+			_, r[i] = m[b2f(xi)]
 		}
 		return NewAB(r)
 	case *AI:
@@ -478,20 +478,20 @@ func memberOfAI(x V, y *AI) V {
 	}
 	if x.IsI() {
 		_, ok := m[x.I()]
-		return NewI(B2I(ok))
+		return NewI(b2i(ok))
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
-			return NewI(B2I(false))
+			return NewI(b2i(false))
 		}
 		_, ok := m[int64(x.F())]
-		return NewI(B2I(ok))
+		return NewI(b2i(ok))
 	}
 	switch xv := x.Value.(type) {
 	case *AB:
 		r := make([]bool, xv.Len())
 		for i, xi := range xv.Slice {
-			_, r[i] = m[B2I(xi)]
+			_, r[i] = m[b2i(xi)]
 		}
 		return NewAB(r)
 	case *AI:
@@ -528,7 +528,7 @@ func memberOfAS(x V, y *AS) V {
 	switch xv := x.Value.(type) {
 	case S:
 		_, ok := m[string(xv)]
-		return NewI(B2I(ok))
+		return NewI(b2i(ok))
 	case *AS:
 		r := make([]bool, xv.Len())
 		for i, xi := range xv.Slice {
@@ -549,10 +549,10 @@ func memberOfAV(x V, y *AV) V {
 	default:
 		for _, yi := range y.Slice {
 			if Match(x, yi) {
-				return NewI(B2I(true))
+				return NewI(b2i(true))
 			}
 		}
-		return NewI(B2I(false))
+		return NewI(b2i(false))
 	}
 }
 
@@ -734,10 +734,10 @@ func imapAB(x *AB) (m [2]int64) {
 	if x.Len() == 0 {
 		return m
 	}
-	m[B2I(x.At(0))] = 0
+	m[b2i(x.At(0))] = 0
 	for i, xi := range x.Slice[1:] {
 		if xi != x.At(0) {
-			m[B2I(xi)] = int64(i) + 1
+			m[b2i(xi)] = int64(i) + 1
 			break
 		}
 	}
@@ -783,7 +783,7 @@ func imapAS(x *AS) map[string]int {
 func findAB(x *AB, y V) V {
 	if y.IsI() {
 		for i, xi := range x.Slice {
-			if B2I(xi) == y.I() {
+			if b2i(xi) == y.I() {
 				return NewI(int64(i))
 			}
 		}
@@ -800,7 +800,7 @@ func findAB(x *AB, y V) V {
 		m := imapAB(x)
 		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
-			r[i] = m[B2I(yi)]
+			r[i] = m[b2i(yi)]
 		}
 		return NewAI(r)
 	case *AI:
@@ -855,7 +855,7 @@ func findAF(x *AF, y V) V {
 		m := imapAF(x)
 		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
-			j, ok := m[float64(B2F(yi))]
+			j, ok := m[float64(b2f(yi))]
 			if ok {
 				r[i] = j
 			} else {
@@ -917,7 +917,7 @@ func findAI(x *AI, y V) V {
 		m := imapAI(x)
 		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
-			j, ok := m[B2I(yi)]
+			j, ok := m[b2i(yi)]
 			if ok {
 				r[i] = j
 			} else {

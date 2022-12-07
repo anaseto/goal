@@ -389,7 +389,7 @@ func (x *AS) Len() int { return len(x.Slice) }
 // Len returns the length of the array.
 func (x *AV) Len() int { return len(x.Slice) }
 
-func (x *AB) at(i int) V { return NewI(B2I(x.Slice[i])) }
+func (x *AB) at(i int) V { return NewI(b2i(x.Slice[i])) }
 func (x *AI) at(i int) V { return NewI(x.Slice[i]) }
 func (x *AF) at(i int) V { return NewF(x.Slice[i]) }
 func (x *AS) at(i int) V { return NewS(x.Slice[i]) }
@@ -416,38 +416,38 @@ func (x *AF) slice(i, j int) array { return &AF{rc: x.rc, flags: x.flags, Slice:
 func (x *AS) slice(i, j int) array { return &AS{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
 func (x *AV) slice(i, j int) array { return &AV{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
 
-// DerivedVerb represents values modified by an adverb. This kind value is not
+// derivedVerb represents values modified by an adverb. This kind value is not
 // manipulable within the program, as it is only produced as an intermediary
 // value in adverb trains and only appears as an adverb argument.
-type DerivedVerb struct {
+type derivedVerb struct {
 	Fun variadic
 	Arg V
 }
 
-// Projection represents a partial application of a function. Because variadic
+// projection represents a partial application of a function. Because variadic
 // verbs do not have a fixed arity, it is possible to produce a projection of
 // arbitrary arity.
-type Projection struct {
+type projection struct {
 	Fun  V
 	Args []V
 }
 
-// ProjectionFirst represents a monadic projection fixing the first argument of
+// projectionFirst represents a monadic projection fixing the first argument of
 // a function with rank greater than 2.
-type ProjectionFirst struct {
+type projectionFirst struct {
 	Fun V // function with rank >= 2
 	Arg V // first argument x
 }
 
-// ProjectionMonad represents a monadic projection of a function of any rank.
-type ProjectionMonad struct {
+// projectionMonad represents a monadic projection of a function of any rank.
+type projectionMonad struct {
 	Fun V
 }
 
-func (p Projection) Type() string      { return "f" }
-func (p ProjectionFirst) Type() string { return "f" }
-func (p ProjectionMonad) Type() string { return "f" }
-func (r DerivedVerb) Type() string     { return "f" }
+func (p projection) Type() string      { return "f" }
+func (p projectionFirst) Type() string { return "f" }
+func (p projectionMonad) Type() string { return "f" }
+func (r derivedVerb) Type() string     { return "f" }
 
 // function interface is satisfied by the different kind of functions. A
 // function is a value thas has a default rank. The default rank is used in
@@ -460,19 +460,19 @@ type function interface {
 }
 
 // Rank for a projection is the number of nil arguments.
-func (p Projection) rank(ctx *Context) int { return countNils(p.Args) }
+func (p projection) rank(ctx *Context) int { return countNils(p.Args) }
 
 // Rank for a 1-arg projection is 1.
-func (p ProjectionFirst) rank(ctx *Context) int { return 1 }
+func (p projectionFirst) rank(ctx *Context) int { return 1 }
 
 // Rank for a curryfied function is 1.
-func (p ProjectionMonad) rank(ctx *Context) int { return 1 }
+func (p projectionMonad) rank(ctx *Context) int { return 1 }
 
 // Rank returns 2 for derived verbs.
-func (r DerivedVerb) rank(ctx *Context) int { return 2 }
+func (r derivedVerb) rank(ctx *Context) int { return 2 }
 
-func (p Projection) Matches(x Value) bool {
-	xp, ok := x.(Projection)
+func (p projection) Matches(x Value) bool {
+	xp, ok := x.(projection)
 	if !ok || !Match(p.Fun, xp.Fun) {
 		return false
 	}
@@ -487,18 +487,18 @@ func (p Projection) Matches(x Value) bool {
 	return true
 }
 
-func (p ProjectionFirst) Matches(x Value) bool {
-	xp, ok := x.(ProjectionFirst)
+func (p projectionFirst) Matches(x Value) bool {
+	xp, ok := x.(projectionFirst)
 	return ok && Match(p.Fun, xp.Fun) && Match(p.Arg, xp.Arg)
 }
 
-func (p ProjectionMonad) Matches(x Value) bool {
-	xp, ok := x.(ProjectionMonad)
+func (p projectionMonad) Matches(x Value) bool {
+	xp, ok := x.(projectionMonad)
 	return ok && Match(p.Fun, xp.Fun)
 }
 
-func (r DerivedVerb) Matches(x Value) bool {
-	xr, ok := x.(DerivedVerb)
+func (r derivedVerb) Matches(x Value) bool {
+	xr, ok := x.(derivedVerb)
 	return ok && r.Fun == xr.Fun && Match(r.Arg, xr.Arg)
 }
 
