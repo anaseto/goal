@@ -42,6 +42,11 @@ const (
 	vOr                       // or
 )
 
+type zeroFun interface {
+	function
+	zero() V
+}
+
 func (v variadic) zero() V {
 	switch v {
 	case vAdd, vSubtract:

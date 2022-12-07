@@ -4,8 +4,6 @@ package goal
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 	"unsafe"
 )
 
@@ -34,6 +32,7 @@ type lambda int32
 
 // Value represents any kind of boxed value.
 type Value interface {
+	fmt.Stringer
 	// Matches returns true if the value matches another (in the sense of
 	// the ~ operator).
 	Matches(x Value) bool
@@ -41,6 +40,37 @@ type Value interface {
 	Sprint(*Context) string
 	// Type returns the name of the value's type.
 	Type() string
+}
+
+// newVariadic returns a new variadic value.
+func newVariadic(v variadic) V {
+	return V{Kind: Variadic, N: int64(v)}
+}
+
+// newLambda returns a new lambda value.
+func newLambda(v lambda) V {
+	return V{Kind: Lambda, N: int64(v)}
+}
+
+// NewI returns a new int64 value.
+func NewI(i int64) V {
+	return V{Kind: Int, N: i}
+}
+
+// NewF returns a new float64 value.
+func NewF(f float64) V {
+	i := *(*int64)(unsafe.Pointer(&f))
+	return V{Kind: Float, N: i}
+}
+
+// NewS returns a new string value.
+func NewS(s string) V {
+	return V{Kind: Boxed, Value: S(s)}
+}
+
+// NewV returns a new boxed value.
+func NewV(bv Value) V {
+	return V{Kind: Boxed, Value: bv}
 }
 
 // variadic retrieves the variadic value from N field. It assumes Kind is
@@ -117,24 +147,27 @@ func (v V) Type() string {
 	}
 }
 
-// Sprint returns a prettified string representation of the value.
-func (v V) Sprint(ctx *Context) string {
-	switch v.Kind {
-	case Int:
-		return fmt.Sprintf("%d", v.N)
-	case Float:
-		return fmt.Sprintf("%g", v.F())
-	case Variadic:
-		return variadic(v.N).String()
-	case Lambda:
-		if v.N < 0 || v.N >= int64(len(ctx.lambdas)) {
-			return fmt.Sprintf("{Lambda %d}", v.N)
-		}
-		return ctx.lambdas[v.N].Source
+func (x V) IsI() bool {
+	return x.Kind == Int
+}
+
+func (x V) IsF() bool {
+	return x.Kind == Float
+}
+
+func (x V) IsErr() bool {
+	return x.Kind == PanicError
+}
+
+func (x V) IsFunction() bool {
+	switch x.Kind {
+	case Variadic, Lambda:
+		return true
 	case Boxed:
-		return v.Value.Sprint(ctx)
+		_, ok := x.Value.(function)
+		return ok
 	default:
-		return ""
+		return false
 	}
 }
 
@@ -176,61 +209,6 @@ func (v V) rcdecr() {
 	}
 }
 
-// newVariadic returns a new variadic value.
-func newVariadic(v variadic) V {
-	return V{Kind: Variadic, N: int64(v)}
-}
-
-// newLambda returns a new lambda value.
-func newLambda(v lambda) V {
-	return V{Kind: Lambda, N: int64(v)}
-}
-
-// NewI returns a new int64 value.
-func NewI(i int64) V {
-	return V{Kind: Int, N: i}
-}
-
-// NewF returns a new float64 value.
-func NewF(f float64) V {
-	i := *(*int64)(unsafe.Pointer(&f))
-	return V{Kind: Float, N: i}
-}
-
-// NewS returns a new string value.
-func NewS(s string) V {
-	return V{Kind: Boxed, Value: S(s)}
-}
-
-// NewV returns a new boxed value.
-func NewV(bv Value) V {
-	return V{Kind: Boxed, Value: bv}
-}
-
-func (x V) IsI() bool {
-	return x.Kind == Int
-}
-
-func (x V) IsF() bool {
-	return x.Kind == Float
-}
-
-func (x V) IsErr() bool {
-	return x.Kind == PanicError
-}
-
-func (x V) IsFunction() bool {
-	switch x.Kind {
-	case Variadic, Lambda:
-		return true
-	case Boxed:
-		_, ok := x.Value.(function)
-		return ok
-	default:
-		return false
-	}
-}
-
 // panicV represents a panic error string.
 type panicV string
 
@@ -243,8 +221,7 @@ func (e panicV) Matches(y Value) bool {
 	}
 }
 
-func (e panicV) Type() string               { return "e" }
-func (e panicV) Sprint(ctx *Context) string { return "'ERROR " + string(e) }
+func (e panicV) Type() string { return "e" }
 
 // S represents (immutable) strings of bytes.
 type S string
@@ -260,9 +237,6 @@ func (s S) Matches(y Value) bool {
 
 // Type retuns "s" for string atoms.
 func (s S) Type() string { return "s" }
-
-// Sprint returns a properly quoted string.
-func (s S) Sprint(ctx *Context) string { return strconv.Quote(string(s)) }
 
 type Flags int16
 
@@ -346,129 +320,6 @@ func (x *AS) Type() string { return "S" }
 
 // Type returns a string representation of the array's type.
 func (x *AV) Type() string { return "A" }
-
-func (x *AB) Sprint(ctx *Context) string {
-	if x.Len() == 0 {
-		return `!0`
-	}
-	sb := &strings.Builder{}
-	if x.Len() == 1 {
-		sb.WriteRune(',')
-		fmt.Fprintf(sb, "%d", B2I(x.At(0)))
-		return sb.String()
-	}
-	for i, xi := range x.Slice {
-		fmt.Fprintf(sb, "%d", B2I(xi))
-		if i < x.Len()-1 {
-			sb.WriteRune(' ')
-		}
-	}
-	return sb.String()
-}
-
-func (x *AI) Sprint(ctx *Context) string {
-	if x.Len() == 0 {
-		return `!0`
-	}
-	sb := &strings.Builder{}
-	if x.Len() == 1 {
-		sb.WriteRune(',')
-		fmt.Fprintf(sb, "%d", x.At(0))
-		return sb.String()
-	}
-	for i, xi := range x.Slice {
-		fmt.Fprintf(sb, "%d", xi)
-		if i < x.Len()-1 {
-			sb.WriteRune(' ')
-		}
-	}
-	return sb.String()
-}
-
-func (x *AF) Sprint(ctx *Context) string {
-	if x.Len() == 0 {
-		return `!0`
-	}
-	sb := &strings.Builder{}
-	if x.Len() == 1 {
-		sb.WriteRune(',')
-		fmt.Fprintf(sb, "%g", x.At(0))
-		return sb.String()
-	}
-	for i, xi := range x.Slice {
-		fmt.Fprintf(sb, "%g", xi)
-		if i < x.Len()-1 {
-			sb.WriteRune(' ')
-		}
-	}
-	return sb.String()
-}
-
-func (x *AS) Sprint(ctx *Context) string {
-	if x.Len() == 0 {
-		return `0#""`
-	}
-	sb := &strings.Builder{}
-	if x.Len() == 1 {
-		sb.WriteRune(',')
-		fmt.Fprintf(sb, "%q", x.At(0))
-		return sb.String()
-	}
-	for i, xi := range x.Slice {
-		fmt.Fprintf(sb, "%q", xi)
-		if i < x.Len()-1 {
-			sb.WriteRune(' ')
-		}
-	}
-	return sb.String()
-}
-
-// sprintV returns a string for a V deep in an AV.
-func sprintV(ctx *Context, x V) string {
-	avx, ok := x.Value.(*AV)
-	if ok {
-		return avx.sprint(ctx, true)
-	}
-	return x.Sprint(ctx)
-}
-
-func (x *AV) Sprint(ctx *Context) string {
-	return x.sprint(ctx, false)
-}
-
-func (x *AV) sprint(ctx *Context, deep bool) string {
-	if x.Len() == 0 {
-		return `!0`
-	}
-	sb := &strings.Builder{}
-	if x.Len() == 1 {
-		sb.WriteRune(',')
-		fmt.Fprintf(sb, "%s", x.At(0).Sprint(ctx))
-		return sb.String()
-	}
-	sb.WriteRune('(')
-	var sep string
-	if deep {
-		sep = ";"
-	} else {
-		sep = "\n "
-	}
-	t := aType(x)
-	switch t {
-	case tB, tI, tF, tS:
-		sep = " "
-	}
-	for i, xi := range x.Slice {
-		if xi.Kind != Nil {
-			fmt.Fprintf(sb, "%s", sprintV(ctx, xi))
-		}
-		if i < x.Len()-1 {
-			sb.WriteString(sep)
-		}
-	}
-	sb.WriteRune(')')
-	return sb.String()
-}
 
 // array interface is satisfied by the different kind of supported arrays.
 // Typical implementation is given in comments.
@@ -558,35 +409,6 @@ func (p ProjectionFirst) Type() string { return "f" }
 func (p ProjectionMonad) Type() string { return "f" }
 func (r DerivedVerb) Type() string     { return "f" }
 
-func (p Projection) Sprint(ctx *Context) string {
-	sb := &strings.Builder{}
-	fmt.Fprintf(sb, "%s", p.Fun.Sprint(ctx))
-	sb.WriteRune('[')
-	for i := len(p.Args) - 1; i >= 0; i-- {
-		arg := p.Args[i]
-		if arg.Kind != Nil {
-			fmt.Fprintf(sb, "%s", arg.Sprint(ctx))
-		}
-		if i > 0 {
-			sb.WriteRune(';')
-		}
-	}
-	sb.WriteRune(']')
-	return sb.String()
-}
-
-func (p ProjectionFirst) Sprint(ctx *Context) string {
-	return fmt.Sprintf("%s[%s;]", p.Fun.Sprint(ctx), p.Arg.Sprint(ctx))
-}
-
-func (p ProjectionMonad) Sprint(ctx *Context) string {
-	return fmt.Sprintf("%s[]", p.Fun.Sprint(ctx))
-}
-
-func (r DerivedVerb) Sprint(ctx *Context) string {
-	return fmt.Sprintf("%s%s", r.Arg.Sprint(ctx), r.Fun.String())
-}
-
 // function interface is satisfied by the different kind of functions. A
 // function is a value thas has a default rank. The default rank is used in
 // situations where an adverb or function has different meanings depending on
@@ -608,11 +430,6 @@ func (p ProjectionMonad) rank(ctx *Context) int { return 1 }
 
 // Rank returns 2 for derived verbs.
 func (r DerivedVerb) rank(ctx *Context) int { return 2 }
-
-type zeroFun interface {
-	function
-	zero() V
-}
 
 func (p Projection) Matches(x Value) bool {
 	xp, ok := x.(Projection)
