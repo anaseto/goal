@@ -17,6 +17,8 @@
 {[a 1]} / expected ; or ] in argument list
 1.a / number: invalid syntax
 "\%" / string: invalid syntax
+2 1.a / number: invalid syntax
+"a" "\%" / string: invalid syntax
 {[a;a]a} / name a appears twice
 ?[1;2;3;4] / even number of statements
 and[1;;3;4] / empty argument (2-th)

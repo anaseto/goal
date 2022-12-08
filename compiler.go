@@ -522,23 +522,15 @@ func (c *compiler) doAssignOp(e *astAssignOp, n int) error {
 		return nil
 	}
 	local, ok := lc.local(e.Name)
-	if ok {
-		c.push2(opLocalLast, opArg)
-		lc.opIdxLocal[len(lc.Body)-1] = local
-		c.doVariadicAt(e.Dyad, e.Pos-1, 2)
-		c.push2(opAssignLocal, opArg)
-		lc.opIdxLocal[len(lc.Body)-1] = local
-		c.applyN(n)
-		return nil
+	if !ok {
+		return c.perrorf(e.Pos,
+			"undefined variable in assignement operation: %s", e.Name)
 	}
-	local = lambdaLocal{Type: localVar, ID: lc.nVars}
-	lc.locals[e.Name] = local
 	c.push2(opLocalLast, opArg)
 	lc.opIdxLocal[len(lc.Body)-1] = local
 	c.doVariadicAt(e.Dyad, e.Pos-1, 2)
 	c.push2(opAssignLocal, opArg)
 	lc.opIdxLocal[len(lc.Body)-1] = local
-	lc.nVars++
 	c.applyN(n)
 	return nil
 }
