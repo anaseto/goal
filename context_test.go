@@ -104,9 +104,9 @@ func TestErrors(t *testing.T) {
 	if err != nil {
 		t.Errorf("getMatchTests: %v", err)
 	}
-	for i, mt := range mts {
+	for _, mt := range mts {
 		mt := mt
-		name := fmt.Sprintf("String%d", i)
+		name := fmt.Sprintf("%s:%d", mt.Fname, mt.Line)
 		matchString := fmt.Sprintf("%s", mt.Left)
 		t.Run(name, func(t *testing.T) {
 			ctx := NewContext()
