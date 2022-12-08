@@ -276,7 +276,7 @@ func uniq(x V) V {
 	case *AV:
 		// NOTE: quadratic algorithm, worst case complexity could be
 		// improved by sorting or string hashing.
-		r := make([]V, xv.Len())
+		r := []V{}
 	loop:
 		for i, xi := range xv.Slice {
 			for j := range xv.Slice[:i] {
@@ -410,12 +410,16 @@ func memberOfAB(x V, y *AB) V {
 		switch xv := x.value.(type) {
 		case array:
 			r := make([]bool, xv.Len())
-			for i := range r {
-				r[i] = true
+			for i := 0; i < xv.Len(); i++ {
+				xi := xv.at(i)
+				r[i] = xi.IsI() && (xi.n == 0 || xi.n == 1) ||
+					xi.IsF() && (xi.F() == 0 || xi.F() == 1)
 			}
 			return NewAB(r)
 		default:
-			return NewI(b2i(true))
+			b := x.IsI() && (x.n == 0 || x.n == 1) ||
+				x.IsF() && (x.F() == 0 || x.F() == 1)
+			return NewI(b2i(b))
 		}
 	}
 	if t {

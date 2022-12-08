@@ -38,3 +38,6 @@ a:3 "a";"c" 2=a / bad type
 5/4.5 / non-integer
 1.2 {|x}/1 2 / non-integer
 {1+"a"}{x+y}/"a" "b" / bad type
+?[;1;2] / empty condition
+?[0;;2] / empty then
+?[0;1;] / empty cond
