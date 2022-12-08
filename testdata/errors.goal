@@ -30,3 +30,9 @@ a:3 "a";"c" 2=a / bad type
 0$!6 / not positive
 0$6 / not an array
 0.3$6 / non-integer
+" "/1 2 / not a string array
+" "/(1 2;3 4) / not a string array
+60.2/1 2 3 / non-integer
+5/4.5 / non-integer
+1.2 {|x}/1 2 / non-integer
+{1+"a"}{x+y}/"a" "b" / bad type

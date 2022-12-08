@@ -38,9 +38,8 @@ func fold2(ctx *Context, args []V) V {
 	switch xv := x.value.(type) {
 	case array:
 		if xv.Len() == 0 {
-			f, ok := f.value.(zeroFun)
-			if ok {
-				return f.zero()
+			if f.kind == valVariadic {
+				return f.variadic().zero()
 			}
 			return NewI(0)
 		}
@@ -334,11 +333,7 @@ func scan2(ctx *Context, f, x V) V {
 	switch xv := x.value.(type) {
 	case array:
 		if xv.Len() == 0 {
-			ff, ok := f.value.(zeroFun)
-			if ok {
-				return ff.zero()
-			}
-			return NewI(0)
+			return NewAV([]V{})
 		}
 		r := []V{xv.at(0)}
 		for i := 1; i < xv.Len(); i++ {
@@ -383,6 +378,9 @@ func encodeBaseDigits(b int64, x int64) int {
 	}
 	if x < 0 {
 		x = -x
+	}
+	if b == 1 {
+		return 0
 	}
 	n := 1
 	for x >= b {
@@ -656,17 +654,19 @@ func each3(ctx *Context, args []V) V {
 	if !f.IsFunction() {
 		return panicf("x f'y : f not a function (%s)", f.Type())
 	}
-	x, okax := args[2].value.(array)
-	y, okay := args[0].value.(array)
+	x := args[2]
+	y := args[0]
+	xa, okax := x.value.(array)
+	ya, okay := y.value.(array)
 	if !okax && !okay {
-		return ctx.ApplyN(f, args)
+		return ctx.Apply2(f, x, y)
 	}
 	if !okax {
-		ylen := y.Len()
+		ylen := ya.Len()
 		r := make([]V, 0, ylen)
 		for i := 0; i < ylen; i++ {
-			ctx.push(y.at(i))
-			ctx.push(args[2])
+			ctx.push(ya.at(i))
+			ctx.push(x)
 			next := ctx.applyN(f, 2)
 			if next.IsPanic() {
 				return next
@@ -676,11 +676,11 @@ func each3(ctx *Context, args []V) V {
 		return canonicalV(NewAV(r))
 	}
 	if !okay {
-		xlen := x.Len()
+		xlen := xa.Len()
 		r := make([]V, 0, xlen)
 		for i := 0; i < xlen; i++ {
-			ctx.push(args[0])
-			ctx.push(x.at(i))
+			ctx.push(y)
+			ctx.push(xa.at(i))
 			next := ctx.applyN(f, 2)
 			if next.IsPanic() {
 				return next
@@ -689,14 +689,14 @@ func each3(ctx *Context, args []V) V {
 		}
 		return canonicalV(NewAV(r))
 	}
-	xlen := x.Len()
-	if xlen != y.Len() {
-		return panicf("x f'y : length mismatch: %d (#x) vs %d (#y)", x.Len(), y.Len())
+	xlen := xa.Len()
+	if xlen != ya.Len() {
+		return panicf("x f'y : length mismatch: %d (#x) vs %d (#y)", xa.Len(), ya.Len())
 	}
 	r := make([]V, 0, xlen)
 	for i := 0; i < xlen; i++ {
-		ctx.push(y.at(i))
-		ctx.push(x.at(i))
+		ctx.push(ya.at(i))
+		ctx.push(xa.at(i))
 		next := ctx.applyN(f, 2)
 		if next.IsPanic() {
 			return next
