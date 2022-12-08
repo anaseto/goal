@@ -2,16 +2,19 @@ Features:
 - some kind of namespace or object and import mechanism
 - math and rand primitives
 - regexp primitives
-- proper io (open/read/close/defer?)
+- proper io (open/read/write/close/defer?)
 - date and time
 - array shift primitives (maybe bitwise operations too)
 - use general x#y array case for something
 - maybe triadic amend with .
+- try-like statement (maybe ')
+- rename eval from . to "eval" and reuse . for something?
 
 Tests:
 - improve test coverage and fix any remaining bugs in corner cases
 
 Optimizations:
 - more special code for common op/ and op\
+- use sorted flag for arrays
 - improve some special and general cases in self-search functions
 - maybe improve liveness analysis (though simple, already good enough)

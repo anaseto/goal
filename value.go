@@ -275,12 +275,9 @@ func (s S) Matches(y Value) bool {
 // Type retuns "s" for string atoms.
 func (s S) Type() string { return "s" }
 
-type Flags int16
-
 // AB represents an array of booleans.
 type AB struct {
-	rc    int16
-	flags Flags
+	rc    int32
 	Slice []bool
 }
 
@@ -291,8 +288,7 @@ func NewAB(x []bool) V {
 
 // AI represents an array of integers.
 type AI struct {
-	rc    int16
-	flags Flags
+	rc    int32
 	Slice []int64
 }
 
@@ -303,8 +299,7 @@ func NewAI(x []int64) V {
 
 // AF represents an array of reals.
 type AF struct {
-	rc    int16
-	flags Flags
+	rc    int32
 	Slice []float64
 }
 
@@ -315,8 +310,7 @@ func NewAF(x []float64) V {
 
 // AS represents an array of strings.
 type AS struct {
-	rc    int16
-	flags Flags
+	rc    int32
 	Slice []string // string array
 }
 
@@ -327,8 +321,7 @@ func NewAS(x []string) V {
 
 // AV represents a generic array.
 type AV struct {
-	rc    int16
-	flags Flags
+	rc    int32
 	Slice []V
 }
 
@@ -407,11 +400,11 @@ func (x *AS) At(i int) string { return x.Slice[i] }
 // At returns array value at the given index.
 func (x *AV) At(i int) V { return x.Slice[i] }
 
-func (x *AB) slice(i, j int) array { return &AB{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
-func (x *AI) slice(i, j int) array { return &AI{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
-func (x *AF) slice(i, j int) array { return &AF{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
-func (x *AS) slice(i, j int) array { return &AS{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
-func (x *AV) slice(i, j int) array { return &AV{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
+func (x *AB) slice(i, j int) array { return &AB{rc: x.rc, Slice: x.Slice[i:j]} }
+func (x *AI) slice(i, j int) array { return &AI{rc: x.rc, Slice: x.Slice[i:j]} }
+func (x *AF) slice(i, j int) array { return &AF{rc: x.rc, Slice: x.Slice[i:j]} }
+func (x *AS) slice(i, j int) array { return &AS{rc: x.rc, Slice: x.Slice[i:j]} }
+func (x *AV) slice(i, j int) array { return &AV{rc: x.rc, Slice: x.Slice[i:j]} }
 
 // derivedVerb represents values modified by an adverb. This kind value is not
 // manipulable within the program, as it is only produced as an intermediary
