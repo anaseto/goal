@@ -7,8 +7,8 @@ Features:
 - array shift primitives (maybe bitwise operations too)
 - use general x#y array case for something
 - maybe triadic amend with .
-- try-like statement (maybe ')
 - rename eval from . to "eval" and reuse . for something?
+- some kind of templating/interpolation
 
 Tests:
 - improve test coverage and fix any remaining bugs in corner cases
