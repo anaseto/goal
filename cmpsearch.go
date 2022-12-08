@@ -144,7 +144,7 @@ func matchAF(x, y *AF) bool {
 // classify returns %x.
 func classify(x V) V {
 	if Length(x) == 0 {
-		return NewAB([]bool{})
+		return NewAI([]int64{})
 	}
 	//assertCanonical(x)
 	switch xv := x.value.(type) {
@@ -668,11 +668,11 @@ func without(x, y V) V {
 	case S:
 		return trim(xv, y)
 	case array:
-		y = toArray(y)
-		r := memberOf(y, x)
-		if r.IsI() {
-			r = NewI(1 - r.I())
+		_, ok := y.value.(array)
+		if !ok {
+			return panicf("x^y : y not an array (%s)", y.Type())
 		}
+		r := memberOf(y, x)
 		switch bres := r.value.(type) {
 		case *AB:
 			for i, b := range bres.Slice {

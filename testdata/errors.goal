@@ -41,3 +41,4 @@ a:3 "a";"c" 2=a / bad type
 ?[;1;2] / empty condition
 ?[0;;2] / empty then
 ?[0;1;] / empty cond
+1 2 3^2 / not an array
