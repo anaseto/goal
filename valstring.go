@@ -14,6 +14,9 @@ func (v V) Sprint(ctx *Context) string {
 	case valFloat:
 		return fmt.Sprintf("%g", v.F())
 	case valVariadic:
+		if v.n < int64(len(ctx.variadicsNames)) {
+			return ctx.variadicsNames[v.n]
+		}
 		return variadic(v.n).String()
 	case valLambda:
 		if v.n < 0 || v.n >= int64(len(ctx.lambdas)) {

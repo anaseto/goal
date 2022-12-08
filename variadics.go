@@ -5,6 +5,12 @@ import (
 	"math"
 )
 
+// VariadicFun represents a variadic function, either a verb or an adverb.
+type VariadicFun struct {
+	Adverb bool
+	Func   func(*Context, []V) V
+}
+
 // variadic represents a built-in function.
 type variadic int32
 
@@ -33,34 +39,33 @@ const (
 	vEach                     // ' (adverb)
 	vFold                     // / (adverb)
 	vScan                     // \ (adverb)
-	vAnd                      // and
-	vBytes                    // bytes (byte count)
-	vError                    // error
-	vICount                   // icount (index count)
-	vIn                       // in
-	vOCount                   // ocount (occurrence count)
-	vOr                       // or
-	vSign                     // sign
 )
 
-type zeroFun interface {
-	function
-	zero() V
-}
-
-func (v variadic) zero() V {
-	switch v {
-	case vAdd, vSubtract:
-		return NewI(0)
-	case vMultiply:
-		return NewI(1)
-	case vMin:
-		return NewI(math.MinInt64)
-	case vMax:
-		return NewI(math.MaxInt64)
-	default:
-		return NewI(0)
-	}
+var vFuns = [...]VariadicFun{
+	vRight:    {Func: VRight},
+	vAdd:      {Func: VAdd},
+	vSubtract: {Func: VSubtract},
+	vMultiply: {Func: VMultiply},
+	vDivide:   {Func: VDivide},
+	vMod:      {Func: VMod},
+	vMin:      {Func: VMin},
+	vMax:      {Func: VMax},
+	vLess:     {Func: VLess},
+	vMore:     {Func: VMore},
+	vEqual:    {Func: VEqual},
+	vMatch:    {Func: VMatch},
+	vJoin:     {Func: VJoin},
+	vWithout:  {Func: VWithout},
+	vTake:     {Func: VTake},
+	vDrop:     {Func: VDrop},
+	vCast:     {Func: VCast},
+	vFind:     {Func: VFind},
+	vApply:    {Func: VApply},
+	vApplyN:   {Func: VApplyN},
+	vList:     {Func: VList},
+	vEach:     {Func: VEach, Adverb: true},
+	vFold:     {Func: VFold, Adverb: true},
+	vScan:     {Func: VScan, Adverb: true},
 }
 
 var vStrings = [...]string{
@@ -88,14 +93,6 @@ var vStrings = [...]string{
 	vEach:     "'",
 	vFold:     "/",
 	vScan:     "\\",
-	vAnd:      "and",
-	vBytes:    "bytes",
-	vError:    "error",
-	vICount:   "icount",
-	vIn:       "in",
-	vOCount:   "ocount",
-	vOr:       "or",
-	vSign:     "sign",
 }
 
 func (v variadic) String() string {
@@ -105,80 +102,45 @@ func (v variadic) String() string {
 	return fmt.Sprintf("{Variadic %d}", v)
 }
 
-// VariadicFun represents a variadic function, either a verb or an adverb.
-type VariadicFun struct {
-	Adverb bool
-	Func   func(*Context, []V) V
+func (ctx *Context) initVariadics() {
+	const size = 32
+	ctx.variadics = make([]VariadicFun, len(vFuns), size)
+	copy(ctx.variadics, vFuns[:])
+	ctx.variadicsNames = make([]string, len(vStrings), size)
+	copy(ctx.variadicsNames, vStrings[:])
+	ctx.vNames = make(map[string]variadic, size)
+	for v, s := range ctx.variadicsNames {
+		ctx.vNames[s] = variadic(v)
+	}
+	ctx.vNames["::"] = vRight
+	ctx.keywords = map[string]NameType{}
+	ctx.RegisterMonad("bytes", VariadicFun{Func: VBytes})
+	ctx.RegisterMonad("error", VariadicFun{Func: VError})
+	ctx.RegisterMonad("icount", VariadicFun{Func: VICount})
+	ctx.RegisterMonad("ocount", VariadicFun{Func: VOCount})
+	ctx.RegisterMonad("sign", VariadicFun{Func: VSign})
+	ctx.RegisterDyad("and", VariadicFun{Func: VAnd})
+	ctx.RegisterDyad("in", VariadicFun{Func: VIn})
+	ctx.RegisterDyad("or", VariadicFun{Func: VOr})
 }
 
-func (ctx *Context) initVariadics() {
-	ctx.variadics = []VariadicFun{
-		vRight:    {Func: VRight},
-		vAdd:      {Func: VAdd},
-		vSubtract: {Func: VSubtract},
-		vMultiply: {Func: VMultiply},
-		vDivide:   {Func: VDivide},
-		vMod:      {Func: VMod},
-		vMin:      {Func: VMin},
-		vMax:      {Func: VMax},
-		vLess:     {Func: VLess},
-		vMore:     {Func: VMore},
-		vEqual:    {Func: VEqual},
-		vMatch:    {Func: VMatch},
-		vJoin:     {Func: VJoin},
-		vWithout:  {Func: VWithout},
-		vTake:     {Func: VTake},
-		vDrop:     {Func: VDrop},
-		vCast:     {Func: VCast},
-		vFind:     {Func: VFind},
-		vApply:    {Func: VApply},
-		vApplyN:   {Func: VApplyN},
-		vList:     {Func: VList},
-		vEach:     {Func: VEach, Adverb: true},
-		vFold:     {Func: VFold, Adverb: true},
-		vScan:     {Func: VScan, Adverb: true},
-		vAnd:      {Func: VAnd},
-		vBytes:    {Func: VBytes},
-		vError:    {Func: VError},
-		vICount:   {Func: VICount},
-		vIn:       {Func: VIn},
-		vOCount:   {Func: VOCount},
-		vOr:       {Func: VOr},
-		vSign:     {Func: VSign},
-	}
+type zeroFun interface {
+	function
+	zero() V
+}
 
-	ctx.variadicsNames = []string{
-		vRight:    ":",
-		vAdd:      "+",
-		vSubtract: "-",
-		vMultiply: "*",
-		vDivide:   "%",
-		vMod:      "!",
-		vMin:      "&",
-		vMax:      "|",
-		vLess:     "<",
-		vMore:     ">",
-		vEqual:    "=",
-		vMatch:    "~",
-		vJoin:     ",",
-		vWithout:  "^",
-		vTake:     "#",
-		vDrop:     "_",
-		vCast:     "$",
-		vFind:     "?",
-		vApply:    "@",
-		vApplyN:   ".",
-		vList:     "list",
-		vEach:     "'",
-		vFold:     "/",
-		vScan:     "\\",
-		vAnd:      "and",
-		vBytes:    "bytes",
-		vICount:   "icount",
-		vIn:       "in",
-		vOCount:   "ocount",
-		vOr:       "or",
-		vSign:     "sign",
+func (v variadic) zero() V {
+	switch v {
+	case vAdd, vSubtract:
+		return NewI(0)
+	case vMultiply:
+		return NewI(1)
+	case vMin:
+		return NewI(math.MinInt64)
+	case vMax:
+		return NewI(math.MaxInt64)
+	default:
+		return NewI(0)
 	}
 }
 

@@ -32,7 +32,7 @@ type Context struct {
 	fname    string              // filename
 	sources  map[string]string   // filename: source
 	assigned bool                // last instruction was opAssignGlobal
-	names    map[string]NameType // special keyword names
+	keywords map[string]NameType // special keyword names
 	vNames   map[string]variadic // variadic keywords
 
 	// error positions stack
@@ -46,50 +46,6 @@ func NewContext() *Context {
 	ctx.gIDs = map[string]int{}
 	ctx.stack = make([]V, 0, 32)
 	ctx.sources = map[string]string{}
-	ctx.names = map[string]NameType{
-		"and":    NameDyad,
-		"bytes":  NameMonad,
-		"error":  NameMonad,
-		"icount": NameMonad,
-		"in":     NameDyad,
-		"ocount": NameMonad,
-		"or":     NameDyad,
-		"sign":   NameMonad,
-	}
-	ctx.vNames = map[string]variadic{
-		":":      vRight,
-		"::":     vRight,
-		"+":      vAdd,
-		"-":      vSubtract,
-		"*":      vMultiply,
-		"%":      vDivide,
-		"!":      vMod,
-		"&":      vMin,
-		"|":      vMax,
-		"<":      vLess,
-		">":      vMore,
-		"=":      vEqual,
-		"~":      vMatch,
-		",":      vJoin,
-		"^":      vWithout,
-		"#":      vTake,
-		"_":      vDrop,
-		"$":      vCast,
-		"?":      vFind,
-		"@":      vApply,
-		".":      vApplyN,
-		"'":      vEach,
-		"/":      vFold,
-		"\\":     vScan,
-		"and":    vAnd,
-		"bytes":  vBytes,
-		"error":  vError,
-		"icount": vICount,
-		"in":     vIn,
-		"ocount": vOCount,
-		"or":     vOr,
-		"sign":   vSign,
-	}
 	ctx.initVariadics()
 	return ctx
 }
@@ -113,7 +69,7 @@ func (ctx *Context) RegisterMonad(name string, vf VariadicFun) V {
 	id := len(ctx.variadics)
 	ctx.variadics = append(ctx.variadics, vf)
 	ctx.variadicsNames = append(ctx.variadicsNames, name)
-	ctx.names[name] = NameMonad
+	ctx.keywords[name] = NameMonad
 	ctx.vNames[name] = variadic(id)
 	return newVariadic(variadic(id))
 }
@@ -125,7 +81,7 @@ func (ctx *Context) RegisterDyad(name string, vf VariadicFun) V {
 	id := len(ctx.variadics)
 	ctx.variadics = append(ctx.variadics, vf)
 	ctx.variadicsNames = append(ctx.variadicsNames, name)
-	ctx.names[name] = NameDyad
+	ctx.keywords[name] = NameDyad
 	ctx.vNames[name] = variadic(id)
 	return newVariadic(variadic(id))
 }
@@ -156,7 +112,7 @@ func (ctx *Context) Compile(name string, s string) error {
 	}
 	ctx.fname = name
 	ctx.sources[name] = s
-	ctx.scanner = NewScanner(ctx.names, s)
+	ctx.scanner = NewScanner(ctx.keywords, s)
 	ctx.compiler = newCompiler(ctx)
 	llen := len(ctx.lambdas)
 	err := ctx.compiler.ParseCompile()
@@ -298,7 +254,7 @@ func (ctx *Context) derive() *Context {
 
 	nctx.variadics = ctx.variadics
 	nctx.variadicsNames = ctx.variadicsNames
-	nctx.names = ctx.names
+	nctx.keywords = ctx.keywords
 	nctx.vNames = ctx.vNames
 	nctx.lambdas = ctx.lambdas
 	nctx.globals = ctx.globals
