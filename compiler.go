@@ -543,12 +543,6 @@ func (c *compiler) parseVariadic(s string) variadic {
 	return v
 }
 
-func getVerb(e expr) (*astToken, bool) {
-	tok, ok := e.(*astToken)
-	return tok, ok && (tok.Type == astDYAD || tok.Type == astMONAD)
-
-}
-
 func (c *compiler) doDerivedVerb(dv *astDerivedVerb, n int) error {
 	if dv.Verb == nil {
 		return c.doVariadic(dv.Adverb, n)
