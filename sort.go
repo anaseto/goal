@@ -48,11 +48,15 @@ func (bs sortVSlice) Swap(i, j int) {
 }
 
 func less(x, y V) bool {
-	if x.IsI() {
+	switch x.kind {
+	case valInt:
 		return lessI(x, y)
-	}
-	if x.IsF() {
+	case valFloat:
 		return lessF(x, y)
+	case valVariadic:
+		return y.kind == valVariadic && x.n < y.n
+	case valLambda:
+		return y.kind == valLambda && x.n < y.n
 	}
 	switch xv := x.value.(type) {
 	case S:
@@ -82,6 +86,24 @@ func less(x, y V) bool {
 			return Length(y) > 0
 		}
 		return lessAV(x, y)
+	case derivedVerb:
+		yv, ok := y.value.(derivedVerb)
+		return ok && xv.Fun < yv.Fun ||
+			xv.Fun == yv.Fun && less(xv.Arg, yv.Arg)
+	case projection:
+		yv, ok := y.value.(projection)
+		return ok && less(xv.Fun, yv.Fun) ||
+			Match(xv.Fun, yv.Fun) && less(NewAV(xv.Args), NewAV(yv.Args))
+	case projectionFirst:
+		yv, ok := y.value.(projectionFirst)
+		return ok && less(xv.Fun, yv.Fun) ||
+			Match(xv.Fun, yv.Fun) && less(xv.Arg, yv.Arg)
+	case projectionMonad:
+		yv, ok := y.value.(projectionMonad)
+		return ok && less(xv.Fun, yv.Fun)
+	case *errV:
+		yv, ok := y.value.(*errV)
+		return ok && less(xv.V, yv.V)
 	default:
 		return false
 	}
