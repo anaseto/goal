@@ -126,6 +126,10 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			}
 		case opReturn:
 			return len(ops), nil
+		case opTry:
+			if ctx.top().IsError() {
+				return len(ops), nil
+			}
 		}
 		//fmt.Printf("stack: %v\n", ctx.stack)
 	}

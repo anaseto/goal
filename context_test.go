@@ -353,6 +353,8 @@ var matchTests = [...]matchTest{
 	{`f:or;f[0;0]`, `0`},
 	{`r:{?[~x=0;1%x;error "zero"]}0;?["e"~@r;*r;r]`, `"zero"`},
 	{`r:{?[~x=0;1%x;error "zero"]}2;?["e"~@r;*r;r]`, `1%2`},
+	{`'error "msg";"ok"`, `error "msg"`},
+	{`'"msg";"ok"`, `"ok"`},
 	// immutability tests
 	{`a:3;1+a;a`, `3`},
 	{`a:3 5;1-a;a`, `3 5`},

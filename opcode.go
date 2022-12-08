@@ -32,13 +32,14 @@ const (
 	opJumpFalse
 	opJumpTrue
 	opReturn
+	opTry
 
 	opArg = -1 // argument to be computed later
 )
 
 func (opc opcode) argc() int {
 	switch opc {
-	case opNop, opNil, opApply, opApply2, opDrop, opReturn:
+	case opNop, opNil, opApply, opApply2, opDrop, opReturn, opTry:
 		return 0
 	case opApplyNV:
 		return 2

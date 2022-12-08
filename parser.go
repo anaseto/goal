@@ -104,6 +104,17 @@ func (p *parser) expr(es exprs) (exprs, error) {
 		err = p.errorf("%s", tok)
 		return es, err
 	case ADVERB:
+		switch tok.Text {
+		case "'":
+			switch p.peek().Type {
+			case EOF, NEWLINE, SEMICOLON,
+				RIGHTBRACE, RIGHTBRACKET, RIGHTPAREN,
+				LEFTBRACKET, ADVERB:
+			default:
+				e, err = p.earlyReturn(tok.Text)
+				return append(es, e), err
+			}
+		}
 		// We handle adverb at start of expression.
 		e = p.derivedVerb(nil)
 	case IDENT:
@@ -168,13 +179,14 @@ func (p *parser) expr(es exprs) (exprs, error) {
 		err = parseCLOSE{tok.Pos}
 		return es, err
 	case DYAD:
-		if tok.Text == ":" {
+		switch tok.Text {
+		case ":":
 			switch p.peek().Type {
 			case EOF, NEWLINE, SEMICOLON,
 				RIGHTBRACE, RIGHTBRACKET, RIGHTPAREN,
 				LEFTBRACKET, ADVERB:
 			default:
-				e, err := p.earlyReturn()
+				e, err = p.earlyReturn(tok.Text)
 				return append(es, e), err
 			}
 		}
@@ -369,8 +381,8 @@ func (p *parser) apply2(verb, left expr) (expr, error) {
 	return a, err
 }
 
-func (p *parser) earlyReturn() (expr, error) {
-	a := &astReturn{}
+func (p *parser) earlyReturn(s string) (expr, error) {
+	a := &astReturn{OnError: s == "'"}
 	es, err := p.subExpr()
 	a.Expr = es
 	if err != nil {

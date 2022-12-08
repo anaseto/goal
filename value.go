@@ -235,16 +235,16 @@ type errV struct {
 	V V
 }
 
-func (e errV) Matches(y Value) bool {
+func (e *errV) Matches(y Value) bool {
 	switch yv := y.(type) {
-	case errV:
+	case *errV:
 		return Match(e.V, yv.V)
 	default:
 		return false
 	}
 }
 
-func (e errV) Type() string { return "e" }
+func (e *errV) Type() string { return "e" }
 
 // panicV represents a fatal error string.
 type panicV string

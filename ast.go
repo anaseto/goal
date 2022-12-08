@@ -52,9 +52,10 @@ const (
 	astEMPTYLIST
 )
 
-// astReturn represents an early return :x.
+// astReturn represents an early return :x or 'x.
 type astReturn struct {
-	Expr expr
+	Expr    expr
+	OnError bool
 }
 
 // astAssign represents an assignment x:y.

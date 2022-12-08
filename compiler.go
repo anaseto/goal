@@ -278,7 +278,11 @@ func (c *compiler) doExpr(e expr, n int) error {
 		if err != nil {
 			return err
 		}
-		c.push(opReturn)
+		if e.OnError {
+			c.push(opTry)
+		} else {
+			c.push(opReturn)
+		}
 		return nil
 	case *astAssign:
 		err := c.doAssign(e, n)
