@@ -3,14 +3,14 @@ package goal
 // joinTo returns x,y.
 func joinTo(x, y V) V {
 	if x.IsI() {
-		return joinToI(x.I(), y, true)
+		return joinToI(x.I(), y)
 	}
 	if x.IsF() {
-		return joinToF(x.F(), y, true)
+		return joinToF(x.F(), y)
 	}
 	switch xv := x.value.(type) {
 	case S:
-		return joinToS(xv, y, true)
+		return joinToS(xv, y)
 	case *AB:
 		return joinToAB(y, xv, false)
 	case *AF:
@@ -31,25 +31,17 @@ func joinTo(x, y V) V {
 	}
 }
 
-func joinToI(x int64, y V, left bool) V {
+func joinToI(x int64, y V) V {
 	if y.IsI() {
-		if left {
-			return NewAI([]int64{int64(x), y.I()})
-		}
-		return NewAI([]int64{y.I(), x})
+		return NewAI([]int64{int64(x), y.I()})
 	}
 	if y.IsF() {
-		if left {
-			return NewAF([]float64{float64(x), float64(y.F())})
-		}
-		return NewAF([]float64{float64(y.F()), float64(x)})
+		return NewAF([]float64{float64(x), float64(y.F())})
 	}
+	left := true
 	switch yv := y.value.(type) {
 	case S:
-		if left {
-			return NewAV([]V{NewI(x), y})
-		}
-		return NewAV([]V{y, NewI(x)})
+		return NewAV([]V{NewI(x), y})
 	case *AB:
 		return joinToAB(NewI(x), yv, left)
 	case *AF:
@@ -65,25 +57,17 @@ func joinToI(x int64, y V, left bool) V {
 	}
 }
 
-func joinToF(x float64, y V, left bool) V {
+func joinToF(x float64, y V) V {
 	if y.IsI() {
-		if left {
-			return NewAF([]float64{float64(x), float64(y.I())})
-		}
-		return NewAF([]float64{float64(y.I()), float64(x)})
+		return NewAF([]float64{float64(x), float64(y.I())})
 	}
 	if y.IsF() {
-		if left {
-			return NewAF([]float64{float64(x), float64(y.F())})
-		}
-		return NewAF([]float64{float64(y.F()), float64(x)})
+		return NewAF([]float64{float64(x), float64(y.F())})
 	}
+	left := true
 	switch yv := y.value.(type) {
 	case S:
-		if left {
-			return NewAV([]V{NewF(x), y})
-		}
-		return NewAV([]V{y, NewF(x)})
+		return NewAV([]V{NewF(x), y})
 	case *AB:
 		return joinToAB(NewF(x), yv, left)
 	case *AF:
@@ -99,25 +83,17 @@ func joinToF(x float64, y V, left bool) V {
 	}
 }
 
-func joinToS(x S, y V, left bool) V {
+func joinToS(x S, y V) V {
 	if y.IsI() {
-		if left {
-			return NewAV([]V{NewV(x), y})
-		}
-		return NewAV([]V{y, NewV(x)})
+		return NewAV([]V{NewV(x), y})
 	}
 	if y.IsF() {
-		if left {
-			return NewAV([]V{NewV(x), y})
-		}
-		return NewAV([]V{y, NewV(x)})
+		return NewAV([]V{NewV(x), y})
 	}
+	left := true
 	switch yv := y.value.(type) {
 	case S:
-		if left {
-			return NewAS([]string{string(x), string(yv)})
-		}
-		return NewAS([]string{string(yv), string(x)})
+		return NewAS([]string{string(x), string(yv)})
 	case *AB:
 		return joinToAB(NewV(x), yv, left)
 	case *AF:
