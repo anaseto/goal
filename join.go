@@ -109,102 +109,6 @@ func joinToS(x S, y V) V {
 	}
 }
 
-func joinToAV(x *AV, y V, left bool) V {
-	switch yv := y.value.(type) {
-	case *AV:
-		// left == false
-		if x.reusable() {
-			x.Slice = append(x.Slice, yv.Slice...)
-			return NewV(x)
-		}
-		return joinArrays(x, yv)
-	case array:
-		// left == false
-		return joinArrays(x, yv)
-	default:
-		if left {
-			r := make([]V, x.Len()+1)
-			r[0] = y
-			copy(r[1:], x.Slice)
-			return NewAV(r)
-		}
-		if x.reusable() {
-			x.Slice = append(x.Slice, y)
-			return NewV(x)
-		}
-		r := make([]V, x.Len()+1)
-		r[len(r)-1] = y
-		copy(r[:len(r)-1], x.Slice)
-		return NewAV(r)
-	}
-}
-
-func joinArrays(x, y array) V {
-	r := make([]V, y.Len()+x.Len())
-	for i := 0; i < x.Len(); i++ {
-		r[i] = x.at(i)
-	}
-	for i := x.Len(); i < len(r); i++ {
-		r[i] = y.at(i - x.Len())
-	}
-	return NewAV(r)
-}
-
-func joinAtomToArray(x V, y array, left bool) V {
-	yv, ok := y.(*AV)
-	if ok {
-		return joinToAV(yv, x, left)
-	}
-	r := make([]V, y.Len()+1)
-	if left {
-		r[0] = x
-		for i := 1; i < len(r); i++ {
-			r[i] = y.at(i - 1)
-		}
-	} else {
-		r[len(r)-1] = x
-		for i := 0; i < len(r)-1; i++ {
-			r[i] = y.at(i)
-		}
-	}
-	return NewAV(r)
-}
-
-func joinToAS(x *AS, y V, left bool) V {
-	switch yv := y.value.(type) {
-	case S:
-		if left {
-			r := make([]string, x.Len()+1)
-			r[0] = string(yv)
-			copy(r[1:], x.Slice)
-			return NewAS(r)
-		}
-		if x.reusable() {
-			x.Slice = append(x.Slice, string(yv))
-			return NewV(x)
-		}
-		r := make([]string, x.Len()+1)
-		r[len(r)-1] = string(yv)
-		copy(r[:len(r)-1], x.Slice)
-		return NewAS(r)
-	case *AS:
-		// left == false
-		if x.reusable() {
-			x.Slice = append(x.Slice, yv.Slice...)
-			return NewV(x)
-		}
-		r := make([]string, x.Len()+yv.Len())
-		copy(r[:x.Len()], x.Slice)
-		copy(r[x.Len():], yv.Slice)
-		return NewAS(r)
-	case array:
-		// left == false
-		return joinArrays(x, yv)
-	default:
-		return joinAtomToArray(y, x, left)
-	}
-}
-
 func joinToAB(x *AB, y V, left bool) V {
 	if y.IsI() {
 		if isBI(y.I()) {
@@ -476,6 +380,102 @@ func joinAFAI(x *AF, y *AI) V {
 		r[i] = float64(y.At(i - x.Len()))
 	}
 	return NewAF(r)
+}
+
+func joinToAS(x *AS, y V, left bool) V {
+	switch yv := y.value.(type) {
+	case S:
+		if left {
+			r := make([]string, x.Len()+1)
+			r[0] = string(yv)
+			copy(r[1:], x.Slice)
+			return NewAS(r)
+		}
+		if x.reusable() {
+			x.Slice = append(x.Slice, string(yv))
+			return NewV(x)
+		}
+		r := make([]string, x.Len()+1)
+		r[len(r)-1] = string(yv)
+		copy(r[:len(r)-1], x.Slice)
+		return NewAS(r)
+	case *AS:
+		// left == false
+		if x.reusable() {
+			x.Slice = append(x.Slice, yv.Slice...)
+			return NewV(x)
+		}
+		r := make([]string, x.Len()+yv.Len())
+		copy(r[:x.Len()], x.Slice)
+		copy(r[x.Len():], yv.Slice)
+		return NewAS(r)
+	case array:
+		// left == false
+		return joinArrays(x, yv)
+	default:
+		return joinAtomToArray(y, x, left)
+	}
+}
+
+func joinToAV(x *AV, y V, left bool) V {
+	switch yv := y.value.(type) {
+	case *AV:
+		// left == false
+		if x.reusable() {
+			x.Slice = append(x.Slice, yv.Slice...)
+			return NewV(x)
+		}
+		return joinArrays(x, yv)
+	case array:
+		// left == false
+		return joinArrays(x, yv)
+	default:
+		if left {
+			r := make([]V, x.Len()+1)
+			r[0] = y
+			copy(r[1:], x.Slice)
+			return NewAV(r)
+		}
+		if x.reusable() {
+			x.Slice = append(x.Slice, y)
+			return NewV(x)
+		}
+		r := make([]V, x.Len()+1)
+		r[len(r)-1] = y
+		copy(r[:len(r)-1], x.Slice)
+		return NewAV(r)
+	}
+}
+
+func joinArrays(x, y array) V {
+	r := make([]V, y.Len()+x.Len())
+	for i := 0; i < x.Len(); i++ {
+		r[i] = x.at(i)
+	}
+	for i := x.Len(); i < len(r); i++ {
+		r[i] = y.at(i - x.Len())
+	}
+	return NewAV(r)
+}
+
+func joinAtomToArray(x V, y array, left bool) V {
+	yv, ok := y.(*AV)
+	if ok {
+		return joinToAV(yv, x, left)
+	}
+	r := make([]V, y.Len()+1)
+	if left {
+		r[0] = x
+		for i := 1; i < len(r); i++ {
+			r[i] = y.at(i - 1)
+		}
+	} else {
+		r[len(r)-1] = x
+		for i := 0; i < len(r)-1; i++ {
+			r[i] = y.at(i)
+		}
+	}
+	return NewAV(r)
 }
 
 // enlist returns ,x.
