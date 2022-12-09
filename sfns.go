@@ -125,16 +125,10 @@ func first(x V) V {
 	case array:
 		if xv.Len() == 0 {
 			switch xv.(type) {
-			case *AB:
-				return NewI(0)
-			case *AF:
-				return NewF(0)
-			case *AI:
-				return NewI(0)
 			case *AS:
 				return NewS("")
 			default:
-				return V{}
+				return NewI(0)
 			}
 		}
 		return xv.at(0)
@@ -167,11 +161,11 @@ func drop(x, y V) V {
 			return z
 		}
 		return drop(z, y)
-	case *AV:
+	case array:
 		//assertCanonical(x)
-		return panics("x_y : x non-integer")
+		return panics("x_y : x non-integer array")
 	default:
-		return panicf("x_y : bad type i (%s)", x.Type())
+		return panicType("x_y", "x", x)
 	}
 }
 
@@ -281,6 +275,13 @@ func take(x, y V) V {
 		return panicf("i#y : non-integer i (%s)", x.Type())
 	}
 	yv := toArray(y).value.(array)
+	if yv.Len() == 0 {
+		if i < 0 {
+			i = -i
+		}
+		r := make([]bool, i)
+		return NewAB(r)
+	}
 	switch {
 	case i >= 0:
 		if i > int64(yv.Len()) {
@@ -306,70 +307,95 @@ func takeCyclic(y array, n int64) V {
 	case *AB:
 		ys := yv.Slice
 		r := make([]bool, n)
-		for i+step < n {
+		if neg {
+			res := n % step
+			if res > 0 {
+				copy(r[0:res], ys[step-res:])
+				i += res
+			}
+		}
+		for i+step <= n {
 			copy(r[i:i+step], ys)
 			i += step
 		}
-		if neg {
-			copy(r[i:n], ys[int64(len(ys))-n+i:])
-		} else {
+		if !neg && i < n {
 			copy(r[i:n], ys[:n-i])
 		}
 		return NewAB(r)
 	case *AI:
 		ys := yv.Slice
 		r := make([]int64, n)
-		for i+step < n {
+		if neg {
+			res := n % step
+			if res > 0 {
+				copy(r[0:res], ys[step-res:])
+				i += res
+			}
+		}
+		for i+step <= n {
 			copy(r[i:i+step], ys)
 			i += step
 		}
-		if neg {
-			copy(r[i:n], ys[int64(len(ys))-n+i:])
-		} else {
+		if !neg && i < n {
 			copy(r[i:n], ys[:n-i])
 		}
 		return NewAI(r)
 	case *AF:
 		ys := yv.Slice
 		r := make([]float64, n)
-		for i+step < n {
+		if neg {
+			res := n % step
+			if res > 0 {
+				copy(r[0:res], ys[step-res:])
+				i += res
+			}
+		}
+		for i+step <= n {
 			copy(r[i:i+step], ys)
 			i += step
 		}
-		if neg {
-			copy(r[i:n], ys[int64(len(ys))-n+i:])
-		} else {
+		if !neg && i < n {
 			copy(r[i:n], ys[:n-i])
 		}
 		return NewAF(r)
 	case *AS:
 		ys := yv.Slice
 		r := make([]string, n)
-		for i+step < n {
+		if neg {
+			res := n % step
+			if res > 0 {
+				copy(r[0:res], ys[step-res:])
+				i += res
+			}
+		}
+		for i+step <= n {
 			copy(r[i:i+step], ys)
 			i += step
 		}
-		if neg {
-			copy(r[i:n], ys[int64(len(ys))-n+i:])
-		} else {
+		if !neg && i < n {
 			copy(r[i:n], ys[:n-i])
 		}
 		return NewAS(r)
 	case *AV:
 		ys := yv.Slice
 		r := make([]V, n)
-		for i+step < n {
+		if neg {
+			res := n % step
+			if res > 0 {
+				copy(r[0:res], ys[step-res:])
+				i += res
+			}
+		}
+		for i+step <= n {
 			copy(r[i:i+step], ys)
 			i += step
 		}
-		if neg {
-			copy(r[i:n], ys[int64(len(ys))-n+i:])
-		} else {
+		if !neg && i < n {
 			copy(r[i:n], ys[:n-i])
 		}
 		return NewAV(r)
 	default:
-		return NewV(y)
+		panic("takeCyclic: y not an array")
 	}
 }
 
