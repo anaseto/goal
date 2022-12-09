@@ -254,7 +254,7 @@ func joinToAB(x V, y *AB, left bool) V {
 			}
 		} else {
 			r[len(r)-1] = x.I()
-			for i := 0; i < len(r); i++ {
+			for i := 0; i < len(r)-1; i++ {
 				r[i] = b2i(y.At(i))
 			}
 		}
@@ -270,7 +270,7 @@ func joinToAB(x V, y *AB, left bool) V {
 			}
 		} else {
 			r[len(r)-1] = x.F()
-			for i := 0; i < len(r); i++ {
+			for i := 0; i < len(r)-1; i++ {
 				r[i] = b2f(y.At(i))
 			}
 		}

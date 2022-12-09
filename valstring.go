@@ -41,7 +41,7 @@ func (v V) String() string {
 		return variadic(v.n).String()
 	case valLambda:
 		return fmt.Sprintf("{Lambda %d}", v.n)
-	case valBoxed:
+	case valBoxed, valPanic:
 		return v.value.String()
 	default:
 		return ""

@@ -130,43 +130,9 @@ func where(x V) V {
 			}
 		}
 		return NewAI(r)
-	case *AV:
-		switch aType(xv) {
-		case tB, tF, tI:
-			n := int64(0)
-			for _, xi := range xv.Slice {
-				if xi.IsI() {
-					if xi.I() < 0 {
-						return panicf("&x : negative integer (%d)", xi.I())
-					}
-					n += xi.I()
-				} else {
-					xif := xi.F()
-					if !isI(xif) {
-						return panicf("&x : not an integer (%g)", xif)
-					}
-					if xif < 0 {
-						return panicf("&x : negative integer (%d)", int64(xif))
-					}
-					n += int64(xif)
-				}
-			}
-			r := make([]int64, 0, n)
-			for i, xi := range xv.Slice {
-				var max int64
-				if xi.IsI() {
-					max = xi.I()
-				} else {
-					max = int64(xi.F())
-				}
-				for j := int64(0); j < max; j++ {
-					r = append(r, int64(i))
-				}
-			}
-			return NewAI(r)
-		default:
-			return panics("&x : x non-integer array")
-		}
+	case array:
+		// assertCanonical(xv)
+		return panics("&x : x non-integer array")
 	default:
 		return panicf("&x : x non-integer (type %s)", x.Type())
 	}
@@ -206,8 +172,7 @@ func replicate(x, y V) V {
 		}
 		return replicate(ix, y)
 	case *AV:
-		// should be canonical
-		//assertCanonical(x)
+		//assertCanonical(xv)
 		return panicf("f#y : f[y] non-integer (%s)", x.Type())
 	default:
 		return panicf("f#y : f[y] non-integer (%s)", x.Type())
@@ -243,6 +208,51 @@ func repeat(x V, n int64) V {
 			r[i] = string(xv)
 		}
 		return NewAS(r)
+	case *AB:
+		r := make([]bool, n*int64(xv.Len()))
+		for i, xi := range xv.Slice {
+			in := int64(i) * n
+			for j := int64(0); j < n; j++ {
+				r[in+j] = xi
+			}
+		}
+		return NewAB(r)
+	case *AI:
+		r := make([]int64, n*int64(xv.Len()))
+		for i, xi := range xv.Slice {
+			in := int64(i) * n
+			for j := int64(0); j < n; j++ {
+				r[in+j] = xi
+			}
+		}
+		return NewAI(r)
+	case *AF:
+		r := make([]float64, n*int64(xv.Len()))
+		for i, xi := range xv.Slice {
+			in := int64(i) * n
+			for j := int64(0); j < n; j++ {
+				r[in+j] = xi
+			}
+		}
+		return NewAF(r)
+	case *AS:
+		r := make([]string, n*int64(xv.Len()))
+		for i, xi := range xv.Slice {
+			in := int64(i) * n
+			for j := int64(0); j < n; j++ {
+				r[in+j] = xi
+			}
+		}
+		return NewAS(r)
+	case *AV:
+		r := make([]V, n*int64(xv.Len()))
+		for i, xi := range xv.Slice {
+			in := int64(i) * n
+			for j := int64(0); j < n; j++ {
+				r[in+j] = xi
+			}
+		}
+		return NewAV(r)
 	default:
 		r := make([]V, n)
 		for i := range r {
@@ -383,7 +393,7 @@ func weedOut(x, y V) V {
 		}
 		return weedOut(ix, y)
 	case *AV:
-		//assertCanonical(x)
+		//assertCanonical(xv)
 		return panicf("f#y : f[y] non-integer (%s)", x.Type())
 	default:
 		return panicf("f_y : f[y] non-integer (%s)", x.Type())
@@ -494,7 +504,7 @@ func weedOutAI(x *AI, y V) V {
 
 // eval implements .s.
 func eval(ctx *Context, x V) V {
-	//assertCanonical(x)
+	//assertCanonicalV(x)
 	nctx := ctx.derive()
 	switch xv := x.value.(type) {
 	case S:
