@@ -246,8 +246,10 @@ func isFalse(x V) bool {
 	switch xv := x.value.(type) {
 	case S:
 		return xv == ""
+	case *errV:
+		return true
 	default:
-		return x.kind == valNil || Length(x) == 0
+		return Length(x) == 0
 	}
 }
 
@@ -261,8 +263,10 @@ func isTrue(x V) bool {
 	switch xv := x.value.(type) {
 	case S:
 		return xv != ""
+	case *errV:
+		return false
 	default:
-		return x.kind != valNil && Length(x) > 0
+		return Length(x) > 0
 	}
 }
 

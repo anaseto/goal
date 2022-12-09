@@ -312,8 +312,10 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 			}
 			return NewV(projectionFirst{Fun: newLambda(id), Arg: ctx.pop()})
 		}
-		if n == 2 && args[1].kind == valNil && args[0].kind != valNil {
-			return NewV(projectionFirst{Fun: newLambda(id), Arg: ctx.pop()})
+		if n == 2 && args[1].kind != valNil && args[0].kind == valNil {
+			x := args[1]
+			ctx.drop2() // drop nil
+			return NewV(projectionFirst{Fun: newLambda(id), Arg: x})
 		}
 		return NewV(projection{Fun: newLambda(id), Args: ctx.popN(n)})
 	}

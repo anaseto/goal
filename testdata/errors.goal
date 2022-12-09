@@ -53,3 +53,4 @@ a:3 "a";"c" 2=a / bad type
 &2 3.5 / contains non-integer
 &"a" "b" / non-integer array
 &"a" / non-integer
+« / unexpected character

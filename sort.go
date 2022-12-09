@@ -682,7 +682,7 @@ func searchAI(x *AI, y V) V {
 		r := make([]int64, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
 			r[i] = int64(sort.Search(x.Len(),
-				func(i int) bool { return less(yv.at(i), NewI(x.At(i))) }))
+				func(j int) bool { return less(yv.at(i), NewI(x.At(j))) }))
 		}
 		return NewAI(r)
 	default:
@@ -720,7 +720,7 @@ func searchAF(x *AF, y V) V {
 		r := make([]int64, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
 			r[i] = int64(sort.Search(x.Len(),
-				func(i int) bool { return less(yv.at(i), NewF(x.At(i))) }))
+				func(j int) bool { return less(yv.at(i), NewF(x.At(j))) }))
 		}
 		return NewAI(r)
 	default:
@@ -742,7 +742,7 @@ func searchAS(x *AS, y V) V {
 		r := make([]int64, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
 			r[i] = int64(sort.Search(x.Len(),
-				func(i int) bool { return less(yv.at(i), NewS(x.At(i))) }))
+				func(j int) bool { return less(yv.at(i), NewS(x.At(j))) }))
 		}
 		return NewAI(r)
 	default:
@@ -756,7 +756,7 @@ func searchAV(x *AV, y V) V {
 		r := make([]int64, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
 			r[i] = int64(sort.Search(x.Len(),
-				func(i int) bool { return less(yv.at(i), x.At(i)) }))
+				func(j int) bool { return less(yv.at(i), x.At(j)) }))
 		}
 		return NewAI(r)
 	default:

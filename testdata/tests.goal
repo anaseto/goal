@@ -345,3 +345,7 @@ r:{?[~x=0;1%x;error "zero"]}0;?["e"~@r;*r;r] / "zero"
 r:{?[~x=0;1%x;error "zero"]}2;?["e"~@r;*r;r] / 1%2
 'error "msg";"ok" / error "msg"
 '"msg";"ok" / "ok"
+?[1.0;2;3] / 2
+?["";2;3] / 3
+?[+;2;3] / 2
+?[error"msg";2;3] / 3
