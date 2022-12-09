@@ -12,15 +12,15 @@ func joinTo(x, y V) V {
 	case S:
 		return joinToS(xv, y)
 	case *AB:
-		return joinToAB(y, xv, false)
+		return joinToAB(xv, y, false)
 	case *AF:
-		return joinToAF(y, xv, false)
+		return joinToAF(xv, y, false)
 	case *AI:
-		return joinToAI(y, xv, false)
+		return joinToAI(xv, y, false)
 	case *AS:
-		return joinToAS(y, xv, false)
+		return joinToAS(xv, y, false)
 	case *AV:
-		return joinToAV(y, xv, false)
+		return joinToAV(xv, y, false)
 	default:
 		switch yv := y.value.(type) {
 		case array:
@@ -43,15 +43,15 @@ func joinToI(x int64, y V) V {
 	case S:
 		return NewAV([]V{NewI(x), y})
 	case *AB:
-		return joinToAB(NewI(x), yv, left)
+		return joinToAB(yv, NewI(x), left)
 	case *AF:
-		return joinToAF(NewI(x), yv, left)
+		return joinToAF(yv, NewI(x), left)
 	case *AI:
-		return joinToAI(NewI(x), yv, left)
+		return joinToAI(yv, NewI(x), left)
 	case *AS:
-		return joinToAS(NewI(x), yv, left)
+		return joinToAS(yv, NewI(x), left)
 	case *AV:
-		return joinToAV(NewI(x), yv, left)
+		return joinToAV(yv, NewI(x), left)
 	default:
 		return NewAV([]V{NewI(x), y})
 	}
@@ -69,15 +69,15 @@ func joinToF(x float64, y V) V {
 	case S:
 		return NewAV([]V{NewF(x), y})
 	case *AB:
-		return joinToAB(NewF(x), yv, left)
+		return joinToAB(yv, NewF(x), left)
 	case *AF:
-		return joinToAF(NewF(x), yv, left)
+		return joinToAF(yv, NewF(x), left)
 	case *AI:
-		return joinToAI(NewF(x), yv, left)
+		return joinToAI(yv, NewF(x), left)
 	case *AS:
-		return joinToAS(NewF(x), yv, left)
+		return joinToAS(yv, NewF(x), left)
 	case *AV:
-		return joinToAV(NewF(x), yv, left)
+		return joinToAV(yv, NewF(x), left)
 	default:
 		return NewAV([]V{NewF(x), y})
 	}
@@ -95,47 +95,51 @@ func joinToS(x S, y V) V {
 	case S:
 		return NewAS([]string{string(x), string(yv)})
 	case *AB:
-		return joinToAB(NewV(x), yv, left)
+		return joinToAB(yv, NewV(x), left)
 	case *AF:
-		return joinToAF(NewV(x), yv, left)
+		return joinToAF(yv, NewV(x), left)
 	case *AI:
-		return joinToAI(NewV(x), yv, left)
+		return joinToAI(yv, NewV(x), left)
 	case *AS:
-		return joinToAS(NewV(x), yv, left)
+		return joinToAS(yv, NewV(x), left)
 	case *AV:
-		return joinToAV(NewV(x), yv, left)
+		return joinToAV(yv, NewV(x), left)
 	default:
 		return NewAV([]V{NewV(x), y})
 	}
 }
 
-func joinToAV(x V, y *AV, left bool) V {
-	switch xv := x.value.(type) {
-	case array:
-		if left {
-			return joinArrays(xv, y)
+func joinToAV(x *AV, y V, left bool) V {
+	switch yv := y.value.(type) {
+	case *AV:
+		// left == false
+		if x.reusable() {
+			x.Slice = append(x.Slice, yv.Slice...)
+			return NewV(x)
 		}
-		return joinArrays(y, xv)
+		return joinArrays(x, yv)
+	case array:
+		// left == false
+		return joinArrays(x, yv)
 	default:
 		if left {
-			r := make([]V, y.Len()+1)
-			r[0] = x
-			copy(r[1:], y.Slice)
+			r := make([]V, x.Len()+1)
+			r[0] = y
+			copy(r[1:], x.Slice)
 			return NewAV(r)
 		}
-		if y.reusable() {
-			y.Slice = append(y.Slice, x)
-			return NewV(y)
+		if x.reusable() {
+			x.Slice = append(x.Slice, y)
+			return NewV(x)
 		}
-		r := make([]V, y.Len()+1)
-		r[len(r)-1] = x
-		copy(r[:len(r)-1], y.Slice)
+		r := make([]V, x.Len()+1)
+		r[len(r)-1] = y
+		copy(r[:len(r)-1], x.Slice)
 		return NewAV(r)
 	}
 }
 
 func joinArrays(x, y array) V {
-	// TODO: joinArrays can use reusable.
 	r := make([]V, y.Len()+x.Len())
 	for i := 0; i < x.Len(); i++ {
 		r[i] = x.at(i)
@@ -147,6 +151,10 @@ func joinArrays(x, y array) V {
 }
 
 func joinAtomToArray(x V, y array, left bool) V {
+	yv, ok := y.(*AV)
+	if ok {
+		return joinToAV(yv, x, left)
+	}
 	r := make([]V, y.Len()+1)
 	if left {
 		r[0] = x
@@ -162,237 +170,206 @@ func joinAtomToArray(x V, y array, left bool) V {
 	return NewAV(r)
 }
 
-func joinToAS(x V, y *AS, left bool) V {
-	switch xv := x.value.(type) {
+func joinToAS(x *AS, y V, left bool) V {
+	switch yv := y.value.(type) {
 	case S:
 		if left {
-			r := make([]string, y.Len()+1)
-			r[0] = string(xv)
-			copy(r[1:], y.Slice)
+			r := make([]string, x.Len()+1)
+			r[0] = string(yv)
+			copy(r[1:], x.Slice)
 			return NewAS(r)
 		}
-		if y.reusable() {
-			y.Slice = append(y.Slice, string(xv))
-			return NewV(y)
+		if x.reusable() {
+			x.Slice = append(x.Slice, string(yv))
+			return NewV(x)
 		}
-		r := make([]string, y.Len()+1)
-		r[len(r)-1] = string(xv)
-		copy(r[:len(r)-1], y.Slice)
+		r := make([]string, x.Len()+1)
+		r[len(r)-1] = string(yv)
+		copy(r[:len(r)-1], x.Slice)
 		return NewAS(r)
 	case *AS:
-		if left {
-			r := make([]string, y.Len()+xv.Len())
-			copy(r[:xv.Len()], xv.Slice)
-			copy(r[xv.Len():], y.Slice)
-			return NewAS(r)
+		// left == false
+		if x.reusable() {
+			x.Slice = append(x.Slice, yv.Slice...)
+			return NewV(x)
 		}
-		if y.reusable() {
-			y.Slice = append(y.Slice, xv.Slice...)
-			return NewV(y)
-		}
-		r := make([]string, y.Len()+xv.Len())
-		copy(r[:y.Len()], y.Slice)
-		copy(r[y.Len():], xv.Slice)
+		r := make([]string, x.Len()+yv.Len())
+		copy(r[:x.Len()], x.Slice)
+		copy(r[x.Len():], yv.Slice)
 		return NewAS(r)
 	case array:
-		if left {
-			return joinArrays(xv, y)
-		}
-		return joinArrays(y, xv)
+		// left == false
+		return joinArrays(x, yv)
 	default:
-		return joinAtomToArray(x, y, left)
+		return joinAtomToArray(y, x, left)
 	}
 }
 
-func joinToAB(x V, y *AB, left bool) V {
-	if x.IsI() {
-		if isBI(x.I()) {
+func joinToAB(x *AB, y V, left bool) V {
+	if y.IsI() {
+		if isBI(y.I()) {
 			if left {
-				r := make([]bool, y.Len()+1)
-				r[0] = x.I() == 1
-				copy(r[1:], y.Slice)
+				r := make([]bool, x.Len()+1)
+				r[0] = y.I() == 1
+				copy(r[1:], x.Slice)
 				return NewAB(r)
 			}
-			if y.reusable() {
-				y.Slice = append(y.Slice, x.I() == 1)
-				return NewV(y)
+			if x.reusable() {
+				x.Slice = append(x.Slice, y.I() == 1)
+				return NewV(x)
 			}
-			r := make([]bool, y.Len()+1)
-			r[len(r)-1] = x.I() == 1
-			copy(r[:len(r)-1], y.Slice)
+			r := make([]bool, x.Len()+1)
+			r[len(r)-1] = y.I() == 1
+			copy(r[:len(r)-1], x.Slice)
 			return NewAB(r)
 		}
-		r := make([]int64, y.Len()+1)
+		r := make([]int64, x.Len()+1)
 		if left {
-			r[0] = x.I()
+			r[0] = y.I()
 			for i := 1; i < len(r); i++ {
-				r[i] = b2i(y.At(i - 1))
+				r[i] = b2i(x.At(i - 1))
 			}
 		} else {
-			r[len(r)-1] = x.I()
+			r[len(r)-1] = y.I()
 			for i := 0; i < len(r)-1; i++ {
-				r[i] = b2i(y.At(i))
+				r[i] = b2i(x.At(i))
 			}
 		}
 		return NewAI(r)
 
 	}
-	if x.IsF() {
-		r := make([]float64, y.Len()+1)
+	if y.IsF() {
+		r := make([]float64, x.Len()+1)
 		if left {
-			r[0] = x.F()
+			r[0] = y.F()
 			for i := 1; i < len(r); i++ {
-				r[i] = b2f(y.At(i - 1))
+				r[i] = b2f(x.At(i - 1))
 			}
 		} else {
-			r[len(r)-1] = x.F()
+			r[len(r)-1] = y.F()
 			for i := 0; i < len(r)-1; i++ {
-				r[i] = b2f(y.At(i))
+				r[i] = b2f(x.At(i))
 			}
 		}
 		return NewAF(r)
 	}
-	switch xv := x.value.(type) {
+	switch yv := y.value.(type) {
 	case *AB:
-		if left {
-			return joinABAB(xv, y)
-		}
-		return joinABAB(y, xv)
+		// left == false
+		return joinABAB(x, yv)
 	case *AI:
-		if left {
-			return joinAIAB(xv, y)
-		}
-		return joinABAI(y, xv)
+		// left == false
+		return joinABAI(x, yv)
 	case *AF:
-		if left {
-			return joinAFAB(xv, y)
-		}
-		return joinABAF(y, xv)
+		// left == false
+		return joinABAF(x, yv)
 	case array:
-		if left {
-			return joinArrays(xv, y)
-		}
-		return joinArrays(y, xv)
+		// left == false
+		return joinArrays(x, yv)
 	default:
-		return joinAtomToArray(x, y, left)
+		return joinAtomToArray(y, x, left)
 	}
 }
 
-func joinToAI(x V, y *AI, left bool) V {
-	if x.IsI() {
+func joinToAI(x *AI, y V, left bool) V {
+	if y.IsI() {
 		if left {
-			r := make([]int64, y.Len()+1)
-			r[0] = x.I()
-			copy(r[1:], y.Slice)
+			r := make([]int64, x.Len()+1)
+			r[0] = y.I()
+			copy(r[1:], x.Slice)
 			return NewAI(r)
 		}
-		if y.reusable() {
-			y.Slice = append(y.Slice, x.I())
-			return NewV(y)
+		if x.reusable() {
+			x.Slice = append(x.Slice, y.I())
+			return NewV(x)
 		}
-		r := make([]int64, y.Len()+1)
-		r[len(r)-1] = x.I()
-		copy(r[:len(r)-1], y.Slice)
+		r := make([]int64, x.Len()+1)
+		r[len(r)-1] = y.I()
+		copy(r[:len(r)-1], x.Slice)
 		return NewAI(r)
 
 	}
-	if x.IsF() {
-		r := make([]float64, y.Len()+1)
+	if y.IsF() {
+		r := make([]float64, x.Len()+1)
 		if left {
-			r[0] = x.F()
+			r[0] = y.F()
 			for i := 1; i < len(r); i++ {
-				r[i] = float64(y.At(i - 1))
+				r[i] = float64(x.At(i - 1))
 			}
 		} else {
-			r[len(r)-1] = x.F()
+			r[len(r)-1] = y.F()
 			for i := 0; i < len(r)-1; i++ {
-				r[i] = float64(y.At(i))
+				r[i] = float64(x.At(i))
 			}
 		}
 		return NewAF(r)
 	}
-	switch xv := x.value.(type) {
+	switch yv := y.value.(type) {
 	case *AB:
-		if left {
-			return joinABAI(xv, y)
-		}
-		return joinAIAB(y, xv)
+		// left == false
+		return joinAIAB(x, yv)
 	case *AI:
-		if left {
-			return joinAIAI(xv, y)
-		}
-		return joinAIAI(y, xv)
+		// left == false
+		return joinAIAI(x, yv)
 	case *AF:
-		if left {
-			return joinAFAI(xv, y)
-		}
-		return joinAIAF(y, xv)
+		// left == false
+		return joinAIAF(x, yv)
 	case array:
-		if left {
-			return joinArrays(xv, y)
-		}
-		return joinArrays(y, xv)
+		// left == false
+		return joinArrays(x, yv)
 	default:
-		return joinAtomToArray(x, y, left)
+		return joinAtomToArray(y, x, left)
 	}
 }
 
-func joinToAF(x V, y *AF, left bool) V {
-	if x.IsI() {
+func joinToAF(x *AF, y V, left bool) V {
+	if y.IsI() {
 		if left {
-			r := make([]float64, y.Len()+1)
-			r[0] = float64(x.I())
-			copy(r[1:], y.Slice)
+			r := make([]float64, x.Len()+1)
+			r[0] = float64(y.I())
+			copy(r[1:], x.Slice)
 			return NewAF(r)
 		}
-		if y.reusable() {
-			y.Slice = append(y.Slice, float64(x.I()))
-			return NewV(y)
+		if x.reusable() {
+			x.Slice = append(x.Slice, float64(y.I()))
+			return NewV(x)
 		}
-		r := make([]float64, y.Len()+1)
-		r[len(r)-1] = float64(x.I())
-		copy(r[:len(r)-1], y.Slice)
+		r := make([]float64, x.Len()+1)
+		r[len(r)-1] = float64(y.I())
+		copy(r[:len(r)-1], x.Slice)
 		return NewAF(r)
 	}
-	if x.IsF() {
+	if y.IsF() {
 		if left {
-			r := make([]float64, y.Len()+1)
-			r[0] = x.F()
-			copy(r[1:], y.Slice)
+			r := make([]float64, x.Len()+1)
+			r[0] = y.F()
+			copy(r[1:], x.Slice)
 			return NewAF(r)
 		}
-		if y.reusable() {
-			y.Slice = append(y.Slice, x.F())
-			return NewV(y)
+		if x.reusable() {
+			x.Slice = append(x.Slice, y.F())
+			return NewV(x)
 		}
-		r := make([]float64, y.Len()+1)
-		r[len(r)-1] = x.F()
-		copy(r[:len(r)-1], y.Slice)
+		r := make([]float64, x.Len()+1)
+		r[len(r)-1] = y.F()
+		copy(r[:len(r)-1], x.Slice)
 		return NewAF(r)
 	}
-	switch xv := x.value.(type) {
+	switch yv := y.value.(type) {
 	case *AB:
-		if left {
-			return joinABAF(xv, y)
-		}
-		return joinAFAB(y, xv)
+		// left == false
+		return joinAFAB(x, yv)
 	case *AI:
-		if left {
-			return joinAIAF(xv, y)
-		}
-		return joinAFAI(y, xv)
+		// left == false
+		return joinAFAI(x, yv)
 	case *AF:
-		if left {
-			return joinAFAF(xv, y)
-		}
-		return joinAFAF(y, xv)
+		// left == false
+		return joinAFAF(x, yv)
 	case array:
-		if left {
-			return joinArrays(xv, y)
-		}
-		return joinArrays(y, xv)
+		// left == false
+		return joinArrays(x, yv)
 	default:
-		return joinAtomToArray(x, y, left)
+		return joinAtomToArray(y, x, left)
 	}
 }
 
