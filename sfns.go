@@ -267,7 +267,7 @@ func cutAI(x *AI, y V) V {
 	}
 }
 
-// take returns i#x.
+// take returns i#y.
 func take(x, y V) V {
 	i := int64(0)
 	if x.IsI() {
@@ -286,14 +286,12 @@ func take(x, y V) V {
 		if i > int64(yv.Len()) {
 			return takeCyclic(yv, i)
 		}
-		y.value = yv.slice(0, int(i))
-		return canonicalV(y)
+		return canonicalV(NewV(yv.slice(0, int(i))))
 	default:
 		if i < int64(-yv.Len()) {
 			return takeCyclic(yv, i)
 		}
-		y.value = yv.slice(yv.Len()+int(i), yv.Len())
-		return canonicalV(y)
+		return canonicalV(NewV(yv.slice(yv.Len()+int(i), yv.Len())))
 	}
 }
 
