@@ -328,11 +328,15 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 		ctx.dropNnoRC(nVars)
 	}
 	for i, v := range args {
-		if v.kind == valBoxed && lc.lastUses[i].bn >= 1 {
+		if v.kind != valBoxed {
+			continue
+		}
+		if lc.lastUses[i].bn >= 1 {
 			v.rcdecrRefCounter()
 		}
+		args[i].value = nil
 	}
-	ctx.dropN(n)
+	ctx.stack = ctx.stack[:len(ctx.stack)-n]
 	ctx.frameIdx = oframeIdx
 	return r
 }
