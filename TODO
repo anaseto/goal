@@ -1,6 +1,7 @@
 Features:
 - some kind of namespace or object and import mechanism
 - math and rand primitives
+- split i$s and replace @[s;old(s);new(s)[;n]] or @[s;I;s]
 - regexp primitives
 - proper io (open/read/write/close/defer?)
 - date and time
@@ -15,6 +16,6 @@ Tests:
 
 Optimizations:
 - more special code for common op/ and op\
-- use sorted flag for arrays
+- use sorted flag for arrays? (it can be invalidated by most verbs, though)
 - improve some special and general cases in self-search functions
 - maybe improve liveness analysis (though simple, already good enough)
