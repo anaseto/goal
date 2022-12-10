@@ -100,3 +100,57 @@ shift 0 2 / 2 0
 shift "a" "b" / "b" ""
 shift 0 2.5 / 2.5 0
 shift (+;*) / (*;0)
+// XXXX
+() rshift 0 1 / 0 1
+() rshift 1 2 / 1 2
+() rshift 1.5 2 / 1.5 2
+() rshift "a" "b" / "a" "b"
+() rshift (+;*) / (+;*)
+5 rshift 1 2 3 / 5 1 2
+5.0 rshift 1 2 3 / 5.0 1 2
+(+) rshift 1 2 3 / (+;1;2)
+5 rshift 1 2.5 3 / 5 1 2.5
+(+) rshift 1 2.5 3 / (+;1;2.5) 
+5 rshift 1 0 1 / 5 1 0
+0 rshift 1 1 0 / 0 1 1
+0.0 rshift 1 1 0 / 0 1 1
+(+) rshift 1 0 1 / (+;1;0)
+5 rshift "a" "b" "c" / 5 "a" "b"
+"d" rshift "a" "b" "c" / "d" "a" "b"
+5 rshift (+;*;%) / (5;+;*)
+5.5 rshift 1 2 3 / 5.5 1 2
+5.5 rshift 1 2.5 3 / 5.5 1 2.5
+5.5 rshift 1 0 1 / 5.5 1 0
+5.5 rshift "a" "b" "c" / 5.5 "a" "b"
+5.5 rshift (+;*;%) / (5.5;+;*)
+4 5 rshift 1 2 3 / 4 5 1
+4 5 rshift 1 2.5 3 / 4 5 1
+4 5 rshift 1 0 1 / 4 5 1
+4 5 rshift "a" "b" "c" / 4 5 "a"
+4 5 rshift (+;*;%) / (4;5;+)
+1 0 rshift 1 2 3 / 1 0 1
+1 0 rshift 1 2.5 3 / 1 0 1
+1 0 rshift 1 0 1 / 1 0 1
+1 0 rshift "a" "b" "c" / 1 0 "a"
+1 0 rshift (+;*;%) / (1;0;+)
+4 5.5 rshift 1 2 3 / 4 5.5 1
+4 5.5 rshift 1 2.5 3 / 4 5.5 1
+4 5.5 rshift 1 0 1 / 4 5.5 1
+4 5.5 rshift "a" "b" "c" / 4 5.5 "a"
+4 5.5 rshift (+;*;%) / (4;5.5;+)
+"a" "b" rshift 1 2 3 / "a" "b" 1
+"a" "b" rshift 1 2.5 3 / "a" "b" 1
+"a" "b" rshift 1 0 1 / "a" "b" 1
+"a" "b" rshift "a" "b" "c" / "a" "b" "a"
+"a" "b" rshift (+;*;%) / ("a";"b";+)
+(|;!) rshift 1 2 3 / (|;!;1)
+(|;!) rshift 1 2.5 3 / (|;!;1)
+(|;!) rshift 1 0 1 / (|;!;1)
+(|;!) rshift "a" "b" "c" / (|;!;"a")
+(|;!) rshift (+;*;%) / (|;!;+)
+rshift () / ()
+rshift 0 1 / 0 0
+rshift 0 2 / 0 0
+rshift "a" "b" / "" "a"
+rshift 0 2.5 / 0 0
+rshift (+;*) / (0;+)

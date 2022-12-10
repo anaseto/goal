@@ -517,7 +517,7 @@ func shiftBeforeAI(x V, yv *AI) V {
 		for i := max; i < len(ys); i++ {
 			r[i] = float64(ys[i-max])
 		}
-		copy(r[len(ys)-max:], xv.Slice)
+		copy(r[:max], xv.Slice)
 		return NewAF(r)
 	case *AI:
 		r := yv.reuse()
@@ -650,7 +650,7 @@ func shiftVBeforeArray(x V, yv array) V {
 	ylen := yv.Len()
 	r := make([]V, ylen)
 	for i := 1; i < ylen; i++ {
-		r[i-1] = yv.at(i)
+		r[i] = yv.at(i - 1)
 	}
 	r[0] = x
 	return NewAV(r)
@@ -669,30 +669,33 @@ func shiftAVBeforeArray(xv *AV, yv array) V {
 
 // nudge returns rshift x.
 func nudge(x V) V {
+	if Length(x) == 0 {
+		return x
+	}
 	switch xv := x.value.(type) {
 	case *AB:
 		r := xv.reuse()
-		copy(r.Slice[1:], xv.Slice[0:xv.Len()-1])
+		copy(r.Slice[1:], xv.Slice[:xv.Len()-1])
 		r.Slice[0] = false
 		return NewV(r)
 	case *AI:
 		r := xv.reuse()
-		copy(r.Slice[1:], xv.Slice[0:xv.Len()-1])
+		copy(r.Slice[1:], xv.Slice[:xv.Len()-1])
 		r.Slice[0] = 0
 		return NewV(r)
 	case *AF:
 		r := xv.reuse()
-		copy(r.Slice[1:], xv.Slice[0:xv.Len()-1])
+		copy(r.Slice[1:], xv.Slice[:xv.Len()-1])
 		r.Slice[0] = 0
 		return NewV(r)
 	case *AS:
 		r := xv.reuse()
-		copy(r.Slice[1:], xv.Slice[0:xv.Len()-1])
+		copy(r.Slice[1:], xv.Slice[:xv.Len()-1])
 		r.Slice[0] = ""
 		return NewV(r)
 	case *AV:
 		r := xv.reuse()
-		copy(r.Slice[1:], xv.Slice[0:xv.Len()-1])
+		copy(r.Slice[1:], xv.Slice[:xv.Len()-1])
 		r.Slice[0] = NewI(0)
 		return canonicalV(NewV(r))
 	default:
