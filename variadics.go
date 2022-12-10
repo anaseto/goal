@@ -122,6 +122,9 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterDyad("and", VariadicFun{Func: VAnd})
 	ctx.RegisterDyad("in", VariadicFun{Func: VIn})
 	ctx.RegisterDyad("or", VariadicFun{Func: VOr})
+	ctx.RegisterDyad("rotate", VariadicFun{Func: VRotate})
+	ctx.RegisterDyad("shift", VariadicFun{Func: VShift})
+	ctx.RegisterDyad("rshift", VariadicFun{Func: VRShift})
 }
 
 type zeroFun interface {
@@ -234,18 +237,7 @@ func VMax(ctx *Context, args []V) V {
 	case 1:
 		return reverse(args[0])
 	case 2:
-		x, y := args[1], args[0]
-		if x.IsFunction() {
-			ctx.push(y)
-			y.rcincr()
-			r := ctx.applyN(x, 1)
-			y.rcdecr()
-			if r.IsPanic() {
-				return r
-			}
-			return rotate(r, y)
-		}
-		return maximum(x, y)
+		return maximum(args[1], args[0])
 	default:
 		return panicRank("|")
 	}
@@ -587,5 +579,41 @@ func VSign(ctx *Context, args []V) V {
 		return sign(args[0])
 	default:
 		return panicRank("sign")
+	}
+}
+
+// VRotate implements the rotate variadic verb.
+func VRotate(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		return panics("rotate : got only one argument")
+	case 2:
+		return rotate(args[1], args[0])
+	default:
+		return panicRank("rotate")
+	}
+}
+
+// VShift implements the shift variadic verb.
+func VShift(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		return nudgeBack(args[0])
+	case 2:
+		return shiftAfter(args[1], args[0])
+	default:
+		return panicRank("shift")
+	}
+}
+
+// VRShift implements the rshift variadic verb.
+func VRShift(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		return nudge(args[0])
+	case 2:
+		return shiftBefore(args[1], args[0])
+	default:
+		return panicRank("rshift")
 	}
 }
