@@ -555,184 +555,279 @@ func nudge(x V) V {
 
 // ShiftAfter returns x shift y.
 func shiftAfter(x, y V) V {
-	x = toArray(x)
-	max := minInt(Length(x), Length(y))
-	if max == 0 {
-		return y
-	}
 	switch yv := y.value.(type) {
 	case *AB:
-		ys := yv.Slice
-		switch xv := x.value.(type) {
-		case *AB:
-			r := yv.reuse()
-			copy(r.Slice[:len(ys)-max], ys[max:])
-			copy(r.Slice[len(ys)-max:], xv.Slice)
-			return NewV(r)
-		case *AF:
-			r := make([]float64, len(ys))
-			for i := max; i < len(ys); i++ {
-				r[i-max] = b2f(ys[i])
-			}
-			copy(r[len(ys)-max:], xv.Slice)
-			return NewAF(r)
-		case *AI:
-			r := make([]int64, len(ys))
-			for i := max; i < len(ys); i++ {
-				r[i-max] = b2i(yv.At(i))
-			}
-			copy(r[len(ys)-max:], xv.Slice)
-			return NewAI(r)
-		case *AV:
-			r := make([]V, len(ys))
-			for i := max; i < len(ys); i++ {
-				r[i-max] = yv.at(i)
-			}
-			copy(r[len(ys)-max:], xv.Slice)
-			return NewAV(r)
-		case array:
-			r := make([]V, len(ys))
-			for i := max; i < len(ys); i++ {
-				r[i-max] = yv.at(i)
-			}
-			for i := 0; i < max; i++ {
-				r[len(ys)-max+i] = xv.at(i)
-			}
-			return canonicalV(NewAV(r))
-		default:
-			return panicType("x shift y", "x", x)
-		}
-	case *AF:
-		ys := yv.Slice
-		switch xv := x.value.(type) {
-		case *AB:
-			r := yv.reuse()
-			copy(r.Slice[:len(ys)-max], ys[max:])
-			for i := 0; i < max; i++ {
-				r.Slice[len(ys)-max+i] = float64(b2f(xv.At(i)))
-			}
-			return NewV(r)
-		case *AF:
-			r := yv.reuse()
-			copy(r.Slice[:len(ys)-max], ys[max:])
-			for i := 0; i < max; i++ {
-				r.Slice[len(ys)-max+i] = xv.At(i)
-			}
-			return NewV(r)
-		case *AI:
-			r := yv.reuse()
-			copy(r.Slice[:len(ys)-max], ys[max:])
-			for i := 0; i < max; i++ {
-				r.Slice[len(ys)-max+i] = float64(xv.At(i))
-			}
-			return NewV(r)
-		case *AV:
-			r := make([]V, len(ys))
-			for i := max; i < len(ys); i++ {
-				r[i-max] = yv.at(i)
-			}
-			copy(r[len(ys)-max:], xv.Slice)
-			return NewAV(r)
-		case array:
-			r := make([]V, len(ys))
-			for i := max; i < len(ys); i++ {
-				r[i-max] = yv.at(i)
-			}
-			for i := 0; i < max; i++ {
-				r[len(ys)-max+i] = xv.at(i)
-			}
-			return canonicalV(NewAV(r))
-		default:
-			return panicType("x shift y", "x", x)
-		}
+		return shiftAfterAB(x, yv)
 	case *AI:
-		ys := yv.Slice
-		switch xv := x.value.(type) {
-		case *AB:
-			r := yv.reuse()
-			copy(r.Slice[:len(ys)-max], ys[max:])
-			for i := 0; i < max; i++ {
-				r.Slice[len(ys)-max+i] = b2i(xv.At(i))
-			}
-			return NewV(r)
-		case *AF:
-			r := make([]float64, len(ys))
-			for i := max; i < len(ys); i++ {
-				r[i-max] = float64(ys[i])
-			}
-			copy(r[len(ys)-max:], xv.Slice)
-			return NewAF(r)
-		case *AI:
-			r := yv.reuse()
-			copy(r.Slice[:len(ys)-max], ys[max:])
-			for i := 0; i < max; i++ {
-				r.Slice[len(ys)-max+i] = xv.At(i)
-			}
-			return NewV(r)
-		case *AV:
-			r := make([]V, len(ys))
-			for i := max; i < len(ys); i++ {
-				r[i-max] = yv.at(i)
-			}
-			copy(r[len(ys)-max:], xv.Slice)
-			return NewAV(r)
-		case array:
-			r := make([]V, len(ys))
-			for i := max; i < len(ys); i++ {
-				r[i-max] = yv.at(i)
-			}
-			for i := 0; i < max; i++ {
-				r[len(ys)-max+i] = xv.at(i)
-			}
-			return canonicalV(NewAV(r))
-		default:
-			return panicType("x shift y", "x", x)
-		}
+		return shiftAfterAI(x, yv)
+	case *AF:
+		return shiftAfterAF(x, yv)
 	case *AS:
-		ys := yv.Slice
-		switch xv := x.value.(type) {
-		case *AS:
-			r := yv.reuse()
-			copy(r.Slice[:len(ys)-max], ys[max:])
-			for i := 0; i < max; i++ {
-				r.Slice[len(ys)-max+i] = xv.At(i)
-			}
-			return NewV(r)
-		case *AV:
-			r := make([]V, len(ys))
-			for i := max; i < len(ys); i++ {
-				r[i-max] = yv.at(i)
-			}
-			copy(r[len(ys)-max:], xv.Slice)
-			return NewAV(r)
-		case array:
-			r := make([]V, len(ys))
-			for i := max; i < len(ys); i++ {
-				r[i-max] = yv.at(i)
-			}
-			for i := 0; i < max; i++ {
-				r[len(ys)-max+i] = xv.at(i)
-			}
-			return canonicalV(NewAV(r))
-		default:
-			return panicType("x shift y", "x", x)
-		}
+		return shiftAfterAS(x, yv)
 	case *AV:
-		ys := yv.Slice
-		switch xv := x.value.(type) {
-		case array:
-			r := yv.reuse()
-			copy(r.Slice[:len(ys)-max], ys[max:])
-			for i := 0; i < max; i++ {
-				r.Slice[len(ys)-max+i] = xv.at(i)
-			}
-			return canonicalV(NewV(r))
-		default:
-			return panicType("x shift y", "x", x)
-		}
+		return shiftAfterAV(x, yv)
 	default:
 		return panics("x shift y: y not an array")
 	}
+}
+
+func shiftAfterAB(x V, yv *AB) V {
+	max := minInt(Length(x), yv.Len())
+	if max == 0 {
+		return NewV(yv)
+	}
+	ys := yv.Slice
+	if x.IsI() {
+		if isBI(x.I()) {
+			r := yv.reuse()
+			copy(r.Slice[:len(ys)-max], ys[max:])
+			r.Slice[len(ys)-1] = x.I() == 1
+			return NewV(r)
+		}
+		r := make([]int64, len(ys))
+		for i := max; i < len(ys); i++ {
+			r[i-max] = b2i(yv.At(i))
+		}
+		r[len(ys)-1] = x.I()
+		return NewAI(r)
+	} else if x.IsF() {
+		if isBF(x.F()) {
+			r := yv.reuse()
+			copy(r.Slice[:len(ys)-max], ys[max:])
+			r.Slice[len(ys)-1] = x.F() == 1
+			return NewV(r)
+		}
+		r := make([]float64, len(ys))
+		for i := max; i < len(ys); i++ {
+			r[i-max] = b2f(yv.At(i))
+		}
+		r[len(ys)-1] = x.F()
+		return NewAF(r)
+	}
+	switch xv := x.value.(type) {
+	case *AB:
+		r := yv.reuse()
+		copy(r.Slice[:len(ys)-max], ys[max:])
+		copy(r.Slice[len(ys)-max:], xv.Slice)
+		return NewV(r)
+	case *AF:
+		r := make([]float64, len(ys))
+		for i := max; i < len(ys); i++ {
+			r[i-max] = b2f(ys[i])
+		}
+		copy(r[len(ys)-max:], xv.Slice)
+		return NewAF(r)
+	case *AI:
+		r := make([]int64, len(ys))
+		for i := max; i < len(ys); i++ {
+			r[i-max] = b2i(yv.At(i))
+		}
+		copy(r[len(ys)-max:], xv.Slice)
+		return NewAI(r)
+	case *AV:
+		return shiftAVAfterArray(xv, yv)
+	case array:
+		return shiftArrayAfterArray(xv, yv)
+	default:
+		return shiftVAfterArray(x, yv)
+	}
+}
+
+func shiftAfterAI(x V, yv *AI) V {
+	max := minInt(Length(x), yv.Len())
+	if max == 0 {
+		return NewV(yv)
+	}
+	ys := yv.Slice
+	if x.IsI() {
+		r := yv.reuse()
+		copy(r.Slice[:len(ys)-max], ys[max:])
+		r.Slice[len(ys)-1] = x.I()
+		return NewV(r)
+	} else if x.IsF() {
+		if isI(x.F()) {
+			r := yv.reuse()
+			copy(r.Slice[:len(ys)-max], ys[max:])
+			r.Slice[len(ys)-1] = int64(x.F())
+			return NewV(r)
+		}
+		r := make([]float64, len(ys))
+		for i := max; i < len(ys); i++ {
+			r[i-max] = float64(yv.At(i))
+		}
+		r[len(ys)-1] = x.F()
+		return NewAF(r)
+	}
+	switch xv := x.value.(type) {
+	case *AB:
+		r := yv.reuse()
+		copy(r.Slice[:len(ys)-max], ys[max:])
+		for i := 0; i < max; i++ {
+			r.Slice[len(ys)-max+i] = b2i(xv.At(i))
+		}
+		return NewV(r)
+	case *AF:
+		r := make([]float64, len(ys))
+		for i := max; i < len(ys); i++ {
+			r[i-max] = float64(ys[i])
+		}
+		copy(r[len(ys)-max:], xv.Slice)
+		return NewAF(r)
+	case *AI:
+		r := yv.reuse()
+		copy(r.Slice[:len(ys)-max], ys[max:])
+		for i := 0; i < max; i++ {
+			r.Slice[len(ys)-max+i] = xv.At(i)
+		}
+		return NewV(r)
+	case *AV:
+		return shiftAVAfterArray(xv, yv)
+	case array:
+		return shiftArrayAfterArray(xv, yv)
+	default:
+		return shiftVAfterArray(x, yv)
+	}
+}
+
+func shiftAfterAF(x V, yv *AF) V {
+	max := minInt(Length(x), yv.Len())
+	if max == 0 {
+		return NewV(yv)
+	}
+	ys := yv.Slice
+	if x.IsI() {
+		r := yv.reuse()
+		copy(r.Slice[:len(ys)-max], ys[max:])
+		r.Slice[len(ys)-1] = float64(x.I())
+		return NewV(r)
+	} else if x.IsF() {
+		r := yv.reuse()
+		copy(r.Slice[:len(ys)-max], ys[max:])
+		r.Slice[len(ys)-1] = x.F()
+		return NewV(r)
+	}
+	switch xv := x.value.(type) {
+	case *AB:
+		r := yv.reuse()
+		copy(r.Slice[:len(ys)-max], ys[max:])
+		for i := 0; i < max; i++ {
+			r.Slice[len(ys)-max+i] = float64(b2f(xv.At(i)))
+		}
+		return NewV(r)
+	case *AF:
+		r := yv.reuse()
+		copy(r.Slice[:len(ys)-max], ys[max:])
+		for i := 0; i < max; i++ {
+			r.Slice[len(ys)-max+i] = xv.At(i)
+		}
+		return NewV(r)
+	case *AI:
+		r := yv.reuse()
+		copy(r.Slice[:len(ys)-max], ys[max:])
+		for i := 0; i < max; i++ {
+			r.Slice[len(ys)-max+i] = float64(xv.At(i))
+		}
+		return NewV(r)
+	case *AV:
+		return shiftAVAfterArray(xv, yv)
+	case array:
+		return shiftArrayAfterArray(xv, yv)
+	default:
+		return shiftVAfterArray(x, yv)
+	}
+}
+
+func shiftAfterAS(x V, yv *AS) V {
+	max := minInt(Length(x), yv.Len())
+	if max == 0 {
+		return NewV(yv)
+	}
+	ys := yv.Slice
+	switch xv := x.value.(type) {
+	case S:
+		r := yv.reuse()
+		copy(r.Slice[:len(ys)-max], ys[max:])
+		r.Slice[len(ys)-1] = string(xv)
+		return NewV(r)
+	case *AS:
+		r := yv.reuse()
+		copy(r.Slice[:len(ys)-max], ys[max:])
+		for i := 0; i < max; i++ {
+			r.Slice[len(ys)-max+i] = xv.At(i)
+		}
+		return NewV(r)
+	case *AV:
+		return shiftAVAfterArray(xv, yv)
+	case array:
+		return shiftArrayAfterArray(xv, yv)
+	default:
+		return shiftVAfterArray(x, yv)
+	}
+}
+
+func shiftAfterAV(x V, yv *AV) V {
+	max := minInt(Length(x), yv.Len())
+	if max == 0 {
+		return NewV(yv)
+	}
+	ys := yv.Slice
+	switch xv := x.value.(type) {
+	case array:
+		r := yv.reuse()
+		copy(r.Slice[:len(ys)-max], ys[max:])
+		for i := 0; i < max; i++ {
+			r.Slice[len(ys)-max+i] = xv.at(i)
+		}
+		return canonicalV(NewV(r))
+	default:
+		r := yv.reuse()
+		copy(r.Slice[:len(ys)-max], ys[max:])
+		r.Slice[len(ys)-1] = x
+		return NewV(r)
+	}
+}
+
+func shiftArrayAfterArray(xv, yv array) V {
+	ylen := yv.Len()
+	max := minInt(xv.Len(), ylen)
+	if max == 0 {
+		return NewV(yv)
+	}
+	r := make([]V, ylen)
+	for i := max; i < ylen; i++ {
+		r[i-max] = yv.at(i)
+	}
+	for i := 0; i < max; i++ {
+		r[ylen-max+i] = xv.at(i)
+	}
+	return NewAV(r)
+}
+
+func shiftVAfterArray(x V, yv array) V {
+	ylen := yv.Len()
+	if ylen == 0 {
+		return NewV(yv)
+	}
+	r := make([]V, ylen)
+	for i := 1; i < ylen; i++ {
+		r[i-1] = yv.at(i)
+	}
+	r[ylen-1] = x
+	return NewAV(r)
+}
+
+func shiftAVAfterArray(xv *AV, yv array) V {
+	ylen := yv.Len()
+	max := minInt(xv.Len(), ylen)
+	if max == 0 {
+		return NewV(yv)
+	}
+	r := make([]V, ylen)
+	for i := max; i < ylen; i++ {
+		r[i-max] = yv.at(i)
+	}
+	copy(r[ylen-max:], xv.Slice)
+	return NewAV(r)
 }
 
 // NudgeBack returns shift x.
