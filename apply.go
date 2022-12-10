@@ -289,9 +289,9 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 		}
 		return NewV(projection{Fun: newLambda(id), Args: ctx.popN(n)})
 	}
-	for i, arg := range args {
-		if lc.lastUses[i].bn >= 1 {
-			arg.rcincr()
+	for i, v := range args {
+		if v.kind == valBoxed && lc.lastUses[i].bn < 1 {
+			v.rcdecrRefCounter()
 		}
 	}
 	nVars := len(lc.Names) - lc.Rank
@@ -325,7 +325,12 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 		return panicf("lambda %d: bad len %d vs old %d (depth: %d): %v", id, len(ctx.stack), olen, ctx.callDepth, ctx.stack)
 	}
 	if nVars > 0 {
-		ctx.dropN(nVars)
+		ctx.dropNnoRC(nVars)
+	}
+	for i, v := range args {
+		if v.kind == valBoxed && lc.lastUses[i].bn >= 1 {
+			v.rcdecrRefCounter()
+		}
 	}
 	ctx.dropN(n)
 	ctx.frameIdx = oframeIdx

@@ -152,7 +152,6 @@ func (ctx *Context) push(x V) {
 }
 
 func (ctx *Context) pushLast(x V) {
-	x.rcdecr()
 	ctx.stack = append(ctx.stack, x)
 }
 
@@ -197,14 +196,18 @@ func (ctx *Context) peekN(n int) []V {
 }
 
 func (ctx *Context) drop() {
-	ctx.stack[len(ctx.stack)-1].rcdecr()
+	if v := ctx.stack[len(ctx.stack)-1]; v.kind == valBoxed {
+		v.rcdecrRefCounter()
+	}
 	//ctx.stack[len(ctx.stack)-1] = V{}
 	ctx.stack = ctx.stack[:len(ctx.stack)-1]
 }
 
 func (ctx *Context) drop2() {
 	//ctx.stack[len(ctx.stack)-2] = V{}
-	ctx.stack[len(ctx.stack)-2].rcdecr()
+	if v := ctx.stack[len(ctx.stack)-2]; v.kind == valBoxed {
+		v.rcdecrRefCounter()
+	}
 	last := len(ctx.stack) - 1
 	if ctx.stack[last].kind == valBoxed {
 		ctx.stack[last].rcdecrRefCounter()
@@ -218,6 +221,16 @@ func (ctx *Context) dropN(n int) {
 	for i, v := range topN {
 		if v.kind == valBoxed {
 			v.rcdecrRefCounter()
+			topN[i].value = nil
+		}
+	}
+	ctx.stack = ctx.stack[:len(ctx.stack)-n]
+}
+
+func (ctx *Context) dropNnoRC(n int) {
+	topN := ctx.stack[len(ctx.stack)-n:]
+	for i, v := range topN {
+		if v.kind == valBoxed {
 			topN[i].value = nil
 		}
 	}

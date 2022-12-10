@@ -261,8 +261,8 @@ func BenchmarkAppend2(b *testing.B) {
 func BenchmarkDrop2(b *testing.B) {
 	ctx := NewContext()
 	for n := 0; n < b.N; n++ {
-		ctx.push(V{})
-		ctx.push(V{})
+		ctx.stack = append(ctx.stack, V{})
+		ctx.stack = append(ctx.stack, V{})
 		ctx.drop2()
 	}
 }
@@ -270,8 +270,8 @@ func BenchmarkDrop2(b *testing.B) {
 func BenchmarkDropN2(b *testing.B) {
 	ctx := NewContext()
 	for n := 0; n < b.N; n++ {
-		ctx.push(V{})
-		ctx.push(V{})
+		ctx.stack = append(ctx.stack, V{})
+		ctx.stack = append(ctx.stack, V{})
 		ctx.dropN(2)
 	}
 }
