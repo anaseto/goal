@@ -229,6 +229,13 @@ func (x V) rcdecr() {
 	}
 }
 
+func (x V) rcdecrRefCounter() {
+	xrc, ok := x.value.(refCounter)
+	if ok {
+		xrc.rcdecr()
+	}
+}
+
 // errV represents a recoverable error. It may contain some goal value of any
 // kind.
 type errV struct {

@@ -31,8 +31,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 				return ip - 1, fmt.Errorf("undefined global: %s",
 					ctx.gNames[ops[ip]])
 			}
-			x.rcdecr()
-			ctx.push(x)
+			ctx.pushLast(x)
 			ip++
 		case opLocal:
 			x := ctx.stack[ctx.frameIdx-int32(ops[ip])]
@@ -48,8 +47,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 				return ip - 1, fmt.Errorf("undefined local: %s",
 					ctx.lambdas[ctx.lambda].Names[int32(ops[ip])])
 			}
-			x.rcdecr()
-			ctx.push(x)
+			ctx.pushLast(x)
 			ip++
 		case opAssignGlobal:
 			x := ctx.top()
@@ -149,16 +147,26 @@ func (ctx *Context) popApplyN(n int) error {
 const maxCallDepth = 100000
 
 func (ctx *Context) push(x V) {
+	x.rcincr()
+	ctx.stack = append(ctx.stack, x)
+}
+
+func (ctx *Context) pushLast(x V) {
+	x.rcdecr()
 	ctx.stack = append(ctx.stack, x)
 }
 
 func (ctx *Context) pushArgs(args []V) {
+	rcincr(args)
 	ctx.stack = append(ctx.stack, args...)
 }
 
 func (ctx *Context) pop() V {
 	arg := ctx.stack[len(ctx.stack)-1]
-	ctx.stack[len(ctx.stack)-1] = V{}
+	if arg.kind == valBoxed {
+		arg.rcdecrRefCounter()
+		ctx.stack[len(ctx.stack)-1].value = nil
+	}
 	ctx.stack = ctx.stack[:len(ctx.stack)-1]
 	return arg
 }
@@ -170,8 +178,11 @@ func (ctx *Context) top() V {
 func (ctx *Context) popN(n int) []V {
 	topN := ctx.stack[len(ctx.stack)-n:]
 	args := cloneArgs(topN)
-	for i := range topN {
-		topN[i] = V{}
+	for i, v := range topN {
+		if v.kind == valBoxed {
+			v.rcdecrRefCounter()
+			topN[i].value = nil
+		}
 	}
 	ctx.stack = ctx.stack[:len(ctx.stack)-n]
 	return args
@@ -186,14 +197,17 @@ func (ctx *Context) peekN(n int) []V {
 }
 
 func (ctx *Context) drop() {
+	ctx.stack[len(ctx.stack)-1].rcdecr()
 	//ctx.stack[len(ctx.stack)-1] = V{}
 	ctx.stack = ctx.stack[:len(ctx.stack)-1]
 }
 
 func (ctx *Context) drop2() {
 	//ctx.stack[len(ctx.stack)-2] = V{}
+	ctx.stack[len(ctx.stack)-2].rcdecr()
 	last := len(ctx.stack) - 1
 	if ctx.stack[last].kind == valBoxed {
+		ctx.stack[last].rcdecrRefCounter()
 		ctx.stack[last].value = nil
 	}
 	ctx.stack = ctx.stack[:len(ctx.stack)-2]
@@ -203,8 +217,21 @@ func (ctx *Context) dropN(n int) {
 	topN := ctx.stack[len(ctx.stack)-n:]
 	for i, v := range topN {
 		if v.kind == valBoxed {
+			v.rcdecrRefCounter()
 			topN[i].value = nil
 		}
 	}
 	ctx.stack = ctx.stack[:len(ctx.stack)-n]
+}
+
+func rcincr(args []V) {
+	for _, v := range args {
+		v.rcincr()
+	}
+}
+
+func rcdecr(args []V) {
+	for _, v := range args {
+		v.rcdecr()
+	}
 }

@@ -276,9 +276,7 @@ func VEqual(ctx *Context, args []V) V {
 		x, y := args[1], args[0]
 		if x.IsFunction() {
 			ctx.push(y)
-			y.rcincr()
 			r := ctx.applyN(x, 1)
-			y.rcdecr()
 			if r.IsPanic() {
 				return r
 			}
@@ -335,9 +333,7 @@ func VTake(ctx *Context, args []V) V {
 		x, y := args[1], args[0]
 		if x.IsFunction() {
 			ctx.push(y)
-			y.rcincr()
 			r := ctx.applyN(x, 1)
-			y.rcdecr()
 			if r.IsPanic() {
 				return r
 			}
@@ -358,9 +354,7 @@ func VDrop(ctx *Context, args []V) V {
 		x, y := args[1], args[0]
 		if x.IsFunction() {
 			ctx.push(y)
-			y.rcincr()
 			r := ctx.applyN(x, 1)
-			y.rcdecr()
 			if r.IsPanic() {
 				return r
 			}

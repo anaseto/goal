@@ -29,18 +29,6 @@ func (ctx *Context) ApplyN(x V, args []V) V {
 	return r
 }
 
-func rcincr(args []V) {
-	for _, v := range args {
-		v.rcincr()
-	}
-}
-
-func rcdecr(args []V) {
-	for _, v := range args {
-		v.rcdecr()
-	}
-}
-
 // applyN applies x with the top n arguments in the stack. It consumes the
 // arguments, but does not push the result, returing it instead.
 func (ctx *Context) applyN(x V, n int) V {
@@ -64,9 +52,7 @@ func (ctx *Context) applyN(x V, n int) V {
 		if hasNil(args) {
 			return NewV(projection{Fun: x, Args: ctx.popN(n + 1)})
 		}
-		rcincr(args)
 		r := ctx.variadics[xv.Fun].Func(ctx, args)
-		rcdecr(args)
 		ctx.dropN(n + 1)
 		return r
 	case projectionFirst:
@@ -74,9 +60,7 @@ func (ctx *Context) applyN(x V, n int) V {
 			return panicf("too many arguments: got %d, expected 1", n)
 		}
 		ctx.push(xv.Arg)
-		xv.Arg.rcincr()
 		r := ctx.applyN(xv.Fun, 2)
-		xv.Arg.rcdecr()
 		return r
 	case projectionMonad:
 		if n > 1 {
@@ -88,16 +72,12 @@ func (ctx *Context) applyN(x V, n int) V {
 	case S:
 		switch n {
 		case 1:
-			y := ctx.pop()
-			y.rcincr()
-			r := applyS(xv, y)
-			y.rcdecr()
+			r := applyS(xv, ctx.top())
+			ctx.drop()
 			return r
 		case 2:
 			args := ctx.peekN(n)
-			rcincr(args)
 			r := applyS2(xv, args[1], args[0])
-			rcdecr(args)
 			ctx.dropN(n)
 			return r
 		default:
@@ -109,9 +89,7 @@ func (ctx *Context) applyN(x V, n int) V {
 			return ctx.applyArray(x, ctx.pop())
 		default:
 			args := ctx.peekN(n)
-			rcincr(args)
 			r := ctx.applyArrayArgs(x, args[len(args)-1], args[:len(args)-1])
-			rcdecr(args)
 			ctx.dropN(n)
 			return r
 		}
@@ -218,9 +196,7 @@ func (ctx *Context) applyVariadic(v variadic) V {
 		ctx.drop()
 		return NewV(derivedVerb{Fun: v, Arg: x})
 	}
-	x.rcincr()
 	r := ctx.variadics[v].Func(ctx, args)
-	x.rcdecr()
 	ctx.drop()
 	return r
 }
@@ -237,11 +213,7 @@ func (ctx *Context) apply2Variadic(v variadic) V {
 	} else if args[1].kind == valNil {
 		return NewV(projection{Fun: newVariadic(v), Args: ctx.popN(2)})
 	}
-	args[0].rcincr()
-	args[1].rcincr()
 	r := ctx.variadics[v].Func(ctx, args)
-	args[0].rcdecr()
-	args[1].rcdecr()
 	ctx.drop2()
 	return r
 }
@@ -251,9 +223,7 @@ func (ctx *Context) applyNVariadic(v variadic, n int) V {
 	if hasNil(args) {
 		return NewV(projection{Fun: newVariadic(v), Args: ctx.popN(n)})
 	}
-	rcincr(args)
 	r := ctx.variadics[v].Func(ctx, args)
-	rcdecr(args)
 	ctx.dropN(n)
 	return r
 }
@@ -327,7 +297,7 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 	nVars := len(lc.Names) - lc.Rank
 	olen := len(ctx.stack)
 	for i := 0; i < nVars; i++ {
-		ctx.push(V{})
+		ctx.stack = append(ctx.stack, V{})
 	}
 	oframeIdx := ctx.frameIdx
 	ctx.frameIdx = int32(len(ctx.stack) - 1)

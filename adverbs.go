@@ -548,9 +548,7 @@ func scan3(ctx *Context, args []V) V {
 		}
 		ctx.push(yv.at(0))
 		ctx.push(x)
-		x.rcincr()
 		first := ctx.applyN(f, 2)
-		x.rcdecr()
 		if first.IsPanic() {
 			return first
 		}
