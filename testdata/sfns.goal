@@ -46,11 +46,23 @@
 1.0 rotate 1 0 / 0 1
 -2.0 rotate 1 2 3 / 2 3 1
 -2.0 rotate 1 2.5 3 / 2.5 3 1
+1 rotate () / ()
+() shift 0 1 / 0 1
+() shift 1 2 / 1 2
+() shift 1.5 2 / 1.5 2
+() shift "a" "b" / "a" "b"
+() shift (+;*) / (+;*)
 5 shift 1 2 3 / 2 3 5 
+5.0 shift 1 2 3 / 2 3 5
+(+) shift 1 2 3 / (2;3;+)
 5 shift 1 2.5 3 / 2.5 3 5 
+(+) shift 1 2.5 3 / (2.5;3;+) 
 5 shift 1 0 1 / 0 1 5
 0 shift 1 0 1 / 0 1 0
+0.0 shift 1 0 1 / 0 1 0
+(+) shift 1 0 1 / (0;1;+)
 5 shift "a" "b" "c" / "b" "c" 5
+"d" shift "a" "b" "c" / "b" "c" "d"
 5 shift (+;*;%) / (*;%;5)
 5.5 shift 1 2 3 / 2 3 5.5
 5.5 shift 1 2.5 3 / 2.5 3 5.5
@@ -82,3 +94,9 @@
 (|;!) shift 1 0 1 / (1;|;!)
 (|;!) shift "a" "b" "c" / ("c";|;!)
 (|;!) shift (+;*;%) / (%;|;!)
+shift () / ()
+shift 0 1 / 1 0
+shift 0 2 / 2 0
+shift "a" "b" / "b" ""
+shift 0 2.5 / 2.5 0
+shift (+;*) / (*;0)

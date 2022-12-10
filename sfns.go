@@ -790,9 +790,6 @@ func shiftAfterAV(x V, yv *AV) V {
 func shiftArrayAfterArray(xv, yv array) V {
 	ylen := yv.Len()
 	max := minInt(xv.Len(), ylen)
-	if max == 0 {
-		return NewV(yv)
-	}
 	r := make([]V, ylen)
 	for i := max; i < ylen; i++ {
 		r[i-max] = yv.at(i)
@@ -805,9 +802,6 @@ func shiftArrayAfterArray(xv, yv array) V {
 
 func shiftVAfterArray(x V, yv array) V {
 	ylen := yv.Len()
-	if ylen == 0 {
-		return NewV(yv)
-	}
 	r := make([]V, ylen)
 	for i := 1; i < ylen; i++ {
 		r[i-1] = yv.at(i)
@@ -819,9 +813,6 @@ func shiftVAfterArray(x V, yv array) V {
 func shiftAVAfterArray(xv *AV, yv array) V {
 	ylen := yv.Len()
 	max := minInt(xv.Len(), ylen)
-	if max == 0 {
-		return NewV(yv)
-	}
 	r := make([]V, ylen)
 	for i := max; i < ylen; i++ {
 		r[i-max] = yv.at(i)
@@ -855,6 +846,7 @@ func nudgeBack(x V) V {
 	case *AV:
 		r := make([]V, xv.Len())
 		copy(r[0:xv.Len()-1], xv.Slice[1:])
+		r[xv.Len()-1] = NewI(0)
 		return canonicalV(NewAV(r))
 	default:
 		return panics("shift x : x not an array")
