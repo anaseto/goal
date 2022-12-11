@@ -251,7 +251,6 @@ func (ctx *Context) derive() *Context {
 	nctx := &Context{}
 	nctx.gCode = &globalCode{}
 	nctx.stack = make([]V, 0, 32)
-	nctx.compiler = newCompiler(nctx)
 
 	nctx.variadics = ctx.variadics
 	nctx.variadicsNames = ctx.variadicsNames

@@ -296,7 +296,8 @@ x?y find	3 2 1?2 -> 1	3 2 1?0	-> 3
 f@y apply	(|)@1 2 -> 2 1 (like |[1 2] -> 2 1 or |1 2)
 s@y substr	"012345"[2] -> "2345"	"012345"[2;3] -> "234"
 a@y at		1 2 3@2 -> 3	1 2 3[2] -> 3
-.s  eval	."2+3" -> 5
+.s  reval	."2+3" -> 5	a:1;."a" -> panic ".s : undefined global: a"
+.e  get error	.error "msg" -> "msg"
 x.y applyN	{x+y}.2 3 -> 5    {x+y}[2;3] -> 5    (1 2;3 4)[0;1] -> 2
 
 @[x;y;f]    amend	@[1 2 3;0 1;10+] -> 11 12 3
@@ -306,12 +307,19 @@ x.y applyN	{x+y}.2 3 -> 5    {x+y}[2;3] -> 5    (1 2;3 4)[0;1] -> 2
 
 const helpNAMEDVERBS = `
 NAMED VERBS
-x in y    member of	2 3 in 0 2 4 -> 1 0
 bytes x	  byte-count	bytes "abc" -> 3
 error x	  error		r:{?[~x=0;1%x;error "zero"]}0;?["e"~@r;*r;r] -> "zero"
+eval x    eval		a:5;eval "a+2" -> 7 (unrestricted eval)
+firsts x  mark firsts	firsts 0 0 2 3 0 2 3 4 -> 1 0 1 1 0 0 0 1
 icount x  index-count	icount 0 0 1 -1 0 1 2 3 2 -> 3 2 2 1 (same as #'=x)
 ocount x  occur-count	ocount 3 2 5 3 2 2 7 -> 0 0 0 1 1 2 0
+rshift x  right shift	rshift 1 2 -> 0 1	rshift "a" "b" -> "" "a"
+shift x   shift	shift	shift 1 2 -> 2 0	shift "a" "b" -> "b" ""
 sign x    sign		sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
+
+x in y      member of	2 3 in 0 2 4 -> 1 0
+x rshift y  right shift	"a" "b" rshift 1 2 3 / "a" "b" 1
+x shift y   shift	"a" "b" shift 1 2 3 -> 3 "a" "b"
 `
 
 const helpADVERBS = `

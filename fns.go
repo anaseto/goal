@@ -502,12 +502,32 @@ func weedOutAI(x *AI, y V) V {
 	}
 }
 
-// eval implements .s.
-func eval(ctx *Context, x V) V {
-	//assertCanonicalV(x)
-	nctx := ctx.derive()
+func get(ctx *Context, x V) V {
 	switch xv := x.value.(type) {
 	case S:
+		return reval(ctx, xv)
+	case *errV:
+		return xv.V
+	default:
+		return panicType(".x", "x", x)
+	}
+}
+
+// reval implements .s.
+func reval(ctx *Context, s S) V {
+	nctx := NewContext()
+	r, err := nctx.Eval(string(s))
+	if err != nil {
+		return panicf(".s : %v", err)
+	}
+	return r
+}
+
+// eval implements eval x.
+func eval(ctx *Context, x V) V {
+	switch xv := x.value.(type) {
+	case S:
+		nctx := ctx.derive()
 		r, err := nctx.Eval(string(xv))
 		if err != nil {
 			return panicf(".s : %v", err)
@@ -515,6 +535,6 @@ func eval(ctx *Context, x V) V {
 		ctx.merge(nctx)
 		return r
 	default:
-		return panicType(".x", "x", x)
+		return panicf("eval x : x not a string (%s)", x.Type())
 	}
 }

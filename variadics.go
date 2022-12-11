@@ -41,31 +41,35 @@ const (
 	vScan                     // \ (adverb)
 )
 
-var vFuns = [...]VariadicFun{
-	vRight:    {Func: VRight},
-	vAdd:      {Func: VAdd},
-	vSubtract: {Func: VSubtract},
-	vMultiply: {Func: VMultiply},
-	vDivide:   {Func: VDivide},
-	vMod:      {Func: VMod},
-	vMin:      {Func: VMin},
-	vMax:      {Func: VMax},
-	vLess:     {Func: VLess},
-	vMore:     {Func: VMore},
-	vEqual:    {Func: VEqual},
-	vMatch:    {Func: VMatch},
-	vJoin:     {Func: VJoin},
-	vWithout:  {Func: VWithout},
-	vTake:     {Func: VTake},
-	vDrop:     {Func: VDrop},
-	vCast:     {Func: VCast},
-	vFind:     {Func: VFind},
-	vApply:    {Func: VApply},
-	vApplyN:   {Func: VApplyN},
-	vList:     {Func: VList},
-	vEach:     {Func: VEach, Adverb: true},
-	vFold:     {Func: VFold, Adverb: true},
-	vScan:     {Func: VScan, Adverb: true},
+var vFuns []VariadicFun
+
+func init() {
+	vFuns = []VariadicFun{
+		vRight:    {Func: VRight},
+		vAdd:      {Func: VAdd},
+		vSubtract: {Func: VSubtract},
+		vMultiply: {Func: VMultiply},
+		vDivide:   {Func: VDivide},
+		vMod:      {Func: VMod},
+		vMin:      {Func: VMin},
+		vMax:      {Func: VMax},
+		vLess:     {Func: VLess},
+		vMore:     {Func: VMore},
+		vEqual:    {Func: VEqual},
+		vMatch:    {Func: VMatch},
+		vJoin:     {Func: VJoin},
+		vWithout:  {Func: VWithout},
+		vTake:     {Func: VTake},
+		vDrop:     {Func: VDrop},
+		vCast:     {Func: VCast},
+		vFind:     {Func: VFind},
+		vApply:    {Func: VApply},
+		vApplyN:   {Func: VApplyN},
+		vList:     {Func: VList},
+		vEach:     {Func: VEach, Adverb: true},
+		vFold:     {Func: VFold, Adverb: true},
+		vScan:     {Func: VScan, Adverb: true},
+	}
 }
 
 var vStrings = [...]string{
@@ -116,6 +120,7 @@ func (ctx *Context) initVariadics() {
 	ctx.keywords = map[string]NameType{}
 	ctx.RegisterMonad("bytes", VariadicFun{Func: VBytes})
 	ctx.RegisterMonad("error", VariadicFun{Func: VError})
+	ctx.RegisterMonad("eval", VariadicFun{Func: VEval})
 	ctx.RegisterMonad("firsts", VariadicFun{Func: VFirsts})
 	ctx.RegisterMonad("icount", VariadicFun{Func: VICount})
 	ctx.RegisterMonad("ocount", VariadicFun{Func: VOCount})
@@ -424,7 +429,7 @@ func VApply(ctx *Context, args []V) V {
 func VApplyN(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return eval(ctx, args[0])
+		return get(ctx, args[0])
 	case 2:
 		x := args[1]
 		av := toArray(args[0]).value.(array)
@@ -522,6 +527,16 @@ func VError(ctx *Context, args []V) V {
 		return NewError(x)
 	default:
 		return panicRank("error")
+	}
+}
+
+// VEval implements the "eval" variadic verb.
+func VEval(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		return eval(ctx, args[0])
+	default:
+		return panicRank("eval")
 	}
 }
 
