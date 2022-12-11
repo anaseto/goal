@@ -189,7 +189,7 @@ func (ctx *Context) applyVariadic(v variadic) V {
 	args := ctx.peek()
 	x := args[0]
 	if x.kind == valNil {
-		ctx.drop()
+		ctx.dropNoRC()
 		return NewV(projectionMonad{Fun: newVariadic(v)})
 	}
 	if ctx.variadics[v].Adverb {
@@ -277,7 +277,7 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 	if lc.Rank > n || hasNil(args) {
 		if n == 1 {
 			if args[0].kind == valNil {
-				ctx.drop() // drop nil
+				ctx.dropNoRC() // drop nil
 				return NewV(projectionMonad{Fun: newLambda(id)})
 			}
 			return NewV(projectionFirst{Fun: newLambda(id), Arg: ctx.pop()})
@@ -295,7 +295,7 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 			v.value = nil
 		}
 	}
-	nVars := len(lc.Names) - lc.Rank
+	nVars := lc.nVars
 	olen := len(ctx.stack)
 	for i := 0; i < nVars; i++ {
 		ctx.stack = append(ctx.stack, V{})
@@ -316,7 +316,6 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 	}
 	var r V
 	switch len(ctx.stack) {
-	case olen + nVars:
 	case olen + nVars + 1:
 		r = ctx.stack[len(ctx.stack)-1]
 		ctx.drop()

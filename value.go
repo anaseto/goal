@@ -363,6 +363,7 @@ func (x *AV) Type() string { return "A" }
 type array interface {
 	Value
 	refCounter
+	reusable() bool
 	Len() int
 	at(i int) V            // x[i]
 	slice(i, j int) array  // x[i:j]
@@ -412,6 +413,47 @@ func (x *AI) slice(i, j int) array { return &AI{rc: x.rc, Slice: x.Slice[i:j]} }
 func (x *AF) slice(i, j int) array { return &AF{rc: x.rc, Slice: x.Slice[i:j]} }
 func (x *AS) slice(i, j int) array { return &AS{rc: x.rc, Slice: x.Slice[i:j]} }
 func (x *AV) slice(i, j int) array { return &AV{rc: x.rc, Slice: x.Slice[i:j]} }
+
+func (x *AB) reusable() bool { return x.rc <= 1 }
+func (x *AI) reusable() bool { return x.rc <= 1 }
+func (x *AF) reusable() bool { return x.rc <= 1 }
+func (x *AS) reusable() bool { return x.rc <= 1 }
+func (x *AV) reusable() bool { return x.rc <= 1 }
+
+func (x *AB) reuse() *AB {
+	if x.rc <= 1 {
+		return x
+	}
+	return &AB{Slice: make([]bool, x.Len())}
+}
+
+func (x *AI) reuse() *AI {
+	if x.rc <= 1 {
+		return x
+	}
+	return &AI{Slice: make([]int64, x.Len())}
+}
+
+func (x *AF) reuse() *AF {
+	if x.rc <= 1 {
+		return x
+	}
+	return &AF{Slice: make([]float64, x.Len())}
+}
+
+func (x *AS) reuse() *AS {
+	if x.rc <= 1 {
+		return x
+	}
+	return &AS{Slice: make([]string, x.Len())}
+}
+
+func (x *AV) reuse() *AV {
+	if x.rc <= 1 {
+		return x
+	}
+	return &AV{Slice: make([]V, x.Len())}
+}
 
 // derivedVerb represents values modified by an adverb. This kind value is not
 // manipulable within the program, as it is only produced as an intermediary
@@ -508,14 +550,7 @@ func (r derivedVerb) Matches(x Value) bool {
 type refCounter interface {
 	rcincr()
 	rcdecr()
-	reusable() bool
 }
-
-func (x *AB) reusable() bool { return x.rc <= 1 }
-func (x *AI) reusable() bool { return x.rc <= 1 }
-func (x *AF) reusable() bool { return x.rc <= 1 }
-func (x *AS) reusable() bool { return x.rc <= 1 }
-func (x *AV) reusable() bool { return x.rc <= 1 }
 
 func (x *AB) rcincr() { x.rc++ }
 func (x *AI) rcincr() { x.rc++ }
@@ -526,6 +561,26 @@ func (x *AV) rcincr() {
 	for _, xi := range x.Slice {
 		xi.rcincr()
 	}
+}
+
+func (r derivedVerb) rcincr() {
+	r.Arg.rcincr()
+}
+
+func (p projection) rcincr() {
+	p.Fun.rcincr()
+	for _, arg := range p.Args {
+		arg.rcincr()
+	}
+}
+
+func (p projectionFirst) rcincr() {
+	p.Fun.rcincr()
+	p.Arg.rcincr()
+}
+
+func (p projectionMonad) rcincr() {
+	p.Fun.rcincr()
 }
 
 func (x *AB) rcdecr() {
@@ -561,37 +616,22 @@ func (x *AV) rcdecr() {
 	}
 }
 
-func (x *AB) reuse() *AB {
-	if x.rc <= 1 {
-		return x
-	}
-	return &AB{Slice: make([]bool, x.Len())}
+func (r derivedVerb) rcdecr() {
+	r.Arg.rcdecr()
 }
 
-func (x *AI) reuse() *AI {
-	if x.rc <= 1 {
-		return x
+func (p projection) rcdecr() {
+	p.Fun.rcdecr()
+	for _, arg := range p.Args {
+		arg.rcdecr()
 	}
-	return &AI{Slice: make([]int64, x.Len())}
 }
 
-func (x *AF) reuse() *AF {
-	if x.rc <= 1 {
-		return x
-	}
-	return &AF{Slice: make([]float64, x.Len())}
+func (p projectionFirst) rcdecr() {
+	p.Fun.rcdecr()
+	p.Arg.rcdecr()
 }
 
-func (x *AS) reuse() *AS {
-	if x.rc <= 1 {
-		return x
-	}
-	return &AS{Slice: make([]string, x.Len())}
-}
-
-func (x *AV) reuse() *AV {
-	if x.rc <= 1 {
-		return x
-	}
-	return &AV{Slice: make([]V, x.Len())}
+func (p projectionMonad) rcdecr() {
+	p.Fun.rcdecr()
 }
