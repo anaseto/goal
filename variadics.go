@@ -116,6 +116,7 @@ func (ctx *Context) initVariadics() {
 	ctx.keywords = map[string]NameType{}
 	ctx.RegisterMonad("bytes", VariadicFun{Func: VBytes})
 	ctx.RegisterMonad("error", VariadicFun{Func: VError})
+	ctx.RegisterMonad("firsts", VariadicFun{Func: VFirsts})
 	ctx.RegisterMonad("icount", VariadicFun{Func: VICount})
 	ctx.RegisterMonad("ocount", VariadicFun{Func: VOCount})
 	ctx.RegisterMonad("sign", VariadicFun{Func: VSign})
@@ -521,6 +522,16 @@ func VError(ctx *Context, args []V) V {
 		return NewError(x)
 	default:
 		return panicRank("error")
+	}
+}
+
+// VFirsts implements the "firsts" variadic verb.
+func VFirsts(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		return markFirsts(args[0])
+	default:
+		return panicRank("firsts")
 	}
 }
 

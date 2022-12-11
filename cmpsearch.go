@@ -293,7 +293,7 @@ func uniq(x V) V {
 	}
 }
 
-// Mark Firsts returns ∊x. XXX unused for now
+// Mark Firsts returns ∊x.
 func markFirsts(x V) V {
 	if Length(x) == 0 {
 		return NewAB([]bool{})
