@@ -120,6 +120,7 @@ func (ctx *Context) initVariadics() {
 	ctx.keywords = map[string]NameType{}
 	ctx.RegisterMonad("abs", VariadicFun{Func: VAbs})
 	ctx.RegisterMonad("bytes", VariadicFun{Func: VBytes})
+	ctx.RegisterMonad("ceil", VariadicFun{Func: VCeil})
 	ctx.RegisterMonad("error", VariadicFun{Func: VError})
 	ctx.RegisterMonad("eval", VariadicFun{Func: VEval})
 	ctx.RegisterMonad("firsts", VariadicFun{Func: VFirsts})
@@ -513,7 +514,7 @@ func VAbs(ctx *Context, args []V) V {
 	case 1:
 		return abs(args[0])
 	default:
-		return panicRank("icount")
+		return panicRank("abs")
 	}
 }
 
@@ -524,6 +525,16 @@ func VBytes(ctx *Context, args []V) V {
 		return bytes(args[0])
 	default:
 		return panicRank("icount")
+	}
+}
+
+// VCeil implements the "ceil" variadic verb.
+func VCeil(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		return ceil(args[0])
+	default:
+		return panicRank("ceil")
 	}
 }
 

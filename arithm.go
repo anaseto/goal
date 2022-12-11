@@ -139,7 +139,7 @@ func floor(x V) V {
 	}
 }
 
-// ceil returns ⌈x. XXX unused for now
+// ceil returns ⌈x.
 func ceil(x V) V {
 	if x.IsI() {
 		return x
