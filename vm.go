@@ -66,10 +66,12 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ctx.pushNoRC(newLambda(lambda(ops[ip])))
 			ip++
 		case opApply:
-			err := ctx.popApplyN(1)
-			if err != nil {
-				return ip - 1, err
+			x := ctx.pop()
+			r := ctx.applyN(x, 1)
+			if r.IsPanic() {
+				return ip - 1, newExecError(r)
 			}
+			ctx.push(r)
 		case opApplyV:
 			v := variadic(ops[ip])
 			r := ctx.applyVariadic(v)
@@ -79,10 +81,12 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ctx.push(r)
 			ip++
 		case opApply2:
-			err := ctx.popApplyN(2)
-			if err != nil {
-				return ip - 1, err
+			x := ctx.pop()
+			r := ctx.applyN(x, 2)
+			if r.IsPanic() {
+				return ip - 1, newExecError(r)
 			}
+			ctx.push(r)
 		case opApply2V:
 			v := variadic(ops[ip])
 			r := ctx.apply2Variadic(v)
@@ -92,10 +96,12 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ctx.push(r)
 			ip++
 		case opApplyN:
-			err := ctx.popApplyN(int(ops[ip]))
-			if err != nil {
-				return ip - 1, err
+			x := ctx.pop()
+			r := ctx.applyN(x, int(ops[ip]))
+			if r.IsPanic() {
+				return ip - 1, newExecError(r)
 			}
+			ctx.push(r)
 			ip++
 		case opApplyNV:
 			v := variadic(ops[ip])
@@ -132,16 +138,6 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 		//fmt.Printf("stack: %v\n", ctx.stack)
 	}
 	return len(ops), nil
-}
-
-func (ctx *Context) popApplyN(n int) error {
-	x := ctx.pop()
-	r := ctx.applyN(x, n)
-	if r.IsPanic() {
-		return newExecError(r)
-	}
-	ctx.push(r)
-	return nil
 }
 
 const maxCallDepth = 100000
