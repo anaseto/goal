@@ -180,36 +180,38 @@ func BenchmarkFoldLambdaPlusFloat(b *testing.B) {
 }
 
 func BenchmarkFoldWhile(b *testing.B) {
+	ctx := NewContext()
 	for n := 0; n < b.N; n++ {
-		ctx := NewContext()
 		ctx.Eval("{x<1000}{x+1}/1")
 	}
 }
 
 func BenchmarkFoldDo(b *testing.B) {
+	ctx := NewContext()
 	for n := 0; n < b.N; n++ {
-		ctx := NewContext()
 		ctx.Eval("1000{x+1}/1")
 	}
 }
 
 func BenchmarkFib(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("fib:{?[x~0;0;x~1;1;(fib x-1)+(fib x-2)]}")
 	for n := 0; n < b.N; n++ {
-		ctx := NewContext()
-		ctx.Eval("fib:{?[x~0;0;x~1;1;(fib x-1)+(fib x-2)]}; fib 35")
+		ctx.Eval("fib 35")
 	}
 }
 
 func BenchmarkFibTailRec(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("fibrec:{?[x~0;y;x~1;z;fibrec[x-1;z;y+z]]}")
 	for n := 0; n < b.N; n++ {
-		ctx := NewContext()
-		ctx.Eval("fibrec:{?[x~0;y;x~1;z;fibrec[x-1;z;y+z]]};fibrec[35;0;1]")
+		ctx.Eval("fibrec[35;0;1]")
 	}
 }
 
 func BenchmarkFibDoWhile(b *testing.B) {
+	ctx := NewContext()
 	for n := 0; n < b.N; n++ {
-		ctx := NewContext()
 		ctx.Eval("*35{x[1],+/x}/0 1")
 	}
 }
@@ -221,15 +223,15 @@ func BenchmarkNewContext(b *testing.B) {
 }
 
 func BenchmarkWhileN(b *testing.B) {
+	ctx := NewContext()
 	for n := 0; n < b.N; n++ {
-		ctx := NewContext()
 		ctx.Eval("100 {x+1}/!10000")
 	}
 }
 
 func BenchmarkReverse(b *testing.B) {
+	ctx := NewContext()
 	for n := 0; n < b.N; n++ {
-		ctx := NewContext()
 		ctx.Eval("100 {|x}/!10000")
 	}
 }

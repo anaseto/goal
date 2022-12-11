@@ -230,6 +230,7 @@ func (ctx *Context) Show() string {
 }
 
 func (ctx *Context) storeConst(x V) int {
+	x.rcincr()
 	ctx.constants = append(ctx.constants, x)
 	return len(ctx.constants) - 1
 }

@@ -18,17 +18,17 @@ type globalCode struct {
 
 // lambdaCode represents a compiled user defined function.
 type lambdaCode struct {
-	Body       []opcode               // object code of the function
-	Pos        []int                  // position associated to opcode of same index
-	Names      []string               // local arguments and variables names
-	Rank       int                    // number of arguments
-	Source     string                 // source code of the function
-	Filename   string                 // filename of the file containing the source (if any)
-	StartPos   int                    // starting position in the source
-	EndPos     int                    // end position in the source
+	Body       []opcode // object code of the function
+	Pos        []int    // position associated to opcode of same index
+	Names      []string // local arguments and variables names
+	Rank       int      // number of arguments
+	Source     string   // source code of the function
+	Filename   string   // filename of the file containing the source (if any)
+	StartPos   int      // starting position in the source
+	UnusedArgs []int32  // reversed indices of unused arguments
+	UsedArgs   []int32  // reversed indices of used arguments
+
 	namedArgs  bool                   // uses named parameters like {[a;b;c]....}
-	unusedArgs []int32                // reversed indices of unused arguments
-	usedArgs   []int32                // reversed indices of used arguments
 	lastUses   []lastUse              // opcode index and block number of variable last use
 	joinPoints []int32                // number of jumps ending at a given opcode index
 	locals     map[string]lambdaLocal // arguments and variables
@@ -624,8 +624,7 @@ func (c *compiler) doLambda(b *astLambda, n int) error {
 	id := len(c.ctx.lambdas)
 	c.ctx.lambdas = append(c.ctx.lambdas, lc)
 	lc.StartPos = b.StartPos
-	lc.EndPos = b.EndPos
-	lc.Source = c.ctx.sources[c.ctx.fname][lc.StartPos:lc.EndPos]
+	lc.Source = c.ctx.sources[c.ctx.fname][lc.StartPos:b.EndPos]
 	lc.Filename = c.ctx.fname
 	c.ctx.resolveLambda(lc)
 	c.ctx.analyzeLambdaLiveness(lc)
@@ -776,13 +775,13 @@ func (ctx *Context) analyzeLambdaLiveness(lc *lambdaCode) {
 	for i, lu := range lc.lastUses {
 		if lu.bn == 0 {
 			if i >= lc.nVars {
-				lc.unusedArgs = append(lc.unusedArgs, int32(len(lc.Names)-i-1))
+				lc.UnusedArgs = append(lc.UnusedArgs, int32(len(lc.Names)-i-1))
 			}
 			// unused variable
 			continue
 		}
 		if i >= lc.nVars {
-			lc.usedArgs = append(lc.usedArgs, int32(len(lc.Names)-i-1))
+			lc.UsedArgs = append(lc.UsedArgs, int32(len(lc.Names)-i-1))
 		}
 		lc.Body[lu.opIdx] = opLocalLast
 	}

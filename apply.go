@@ -289,7 +289,7 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 		}
 		return NewV(projection{Fun: newLambda(id), Args: ctx.popN(n)})
 	}
-	for _, i := range lc.unusedArgs {
+	for _, i := range lc.UnusedArgs {
 		if v := args[i]; v.kind == valBoxed {
 			v.rcdecrRefCounter()
 			v.value = nil
@@ -328,7 +328,7 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 	if nVars > 0 {
 		ctx.dropNnoRC(nVars)
 	}
-	for _, i := range lc.usedArgs {
+	for _, i := range lc.UsedArgs {
 		if v := args[i]; v.kind == valBoxed {
 			v.rcdecrRefCounter()
 			v.value = nil

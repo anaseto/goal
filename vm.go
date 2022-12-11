@@ -13,10 +13,10 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ctx.push(ctx.constants[ops[ip]])
 			ip++
 		case opInt:
-			ctx.push(NewI(int64(ops[ip])))
+			ctx.pushNoRC(NewI(int64(ops[ip])))
 			ip++
 		case opNil:
-			ctx.push(V{})
+			ctx.pushNoRC(V{})
 		case opGlobal:
 			x := ctx.globals[ops[ip]]
 			if x.kind == valNil {
@@ -31,7 +31,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 				return ip - 1, fmt.Errorf("undefined global: %s",
 					ctx.gNames[ops[ip]])
 			}
-			ctx.pushLast(x)
+			ctx.pushNoRC(x)
 			ip++
 		case opLocal:
 			x := ctx.stack[ctx.frameIdx-int32(ops[ip])]
@@ -47,7 +47,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 				return ip - 1, fmt.Errorf("undefined local: %s",
 					ctx.lambdas[ctx.lambda].Names[int32(ops[ip])])
 			}
-			ctx.pushLast(x)
+			ctx.pushNoRC(x)
 			ip++
 		case opAssignGlobal:
 			x := ctx.top()
@@ -60,10 +60,10 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ctx.stack[ctx.frameIdx-int32(ops[ip])] = x
 			ip++
 		case opVariadic:
-			ctx.push(newVariadic(variadic(ops[ip])))
+			ctx.pushNoRC(newVariadic(variadic(ops[ip])))
 			ip++
 		case opLambda:
-			ctx.push(newLambda(lambda(ops[ip])))
+			ctx.pushNoRC(newLambda(lambda(ops[ip])))
 			ip++
 		case opApply:
 			err := ctx.popApplyN(1)
@@ -151,7 +151,7 @@ func (ctx *Context) push(x V) {
 	ctx.stack = append(ctx.stack, x)
 }
 
-func (ctx *Context) pushLast(x V) {
+func (ctx *Context) pushNoRC(x V) {
 	ctx.stack = append(ctx.stack, x)
 }
 
