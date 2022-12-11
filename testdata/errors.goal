@@ -56,5 +56,5 @@ a:3 "a";"c" 2=a / bad type
 « / unexpected character
 a+1 / undefined global
 a+1;a / undefined global
-{a+1}0 / undefined local
-{a+1;a}0 / undefined local
+{?[0;a:2;0];a+1}0 / undefined local
+{?[0;a:2;0];a+1;a}0 / undefined local
