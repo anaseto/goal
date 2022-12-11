@@ -289,9 +289,10 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 		}
 		return NewV(projection{Fun: newLambda(id), Args: ctx.popN(n)})
 	}
-	for i, v := range args {
-		if v.kind == valBoxed && lc.lastUses[i].bn < 1 {
+	for _, i := range lc.unusedArgs {
+		if v := args[i]; v.kind == valBoxed {
 			v.rcdecrRefCounter()
+			v.value = nil
 		}
 	}
 	nVars := len(lc.Names) - lc.Rank
@@ -327,14 +328,11 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 	if nVars > 0 {
 		ctx.dropNnoRC(nVars)
 	}
-	for i, v := range args {
-		if v.kind != valBoxed {
-			continue
-		}
-		if lc.lastUses[i].bn >= 1 {
+	for _, i := range lc.usedArgs {
+		if v := args[i]; v.kind == valBoxed {
 			v.rcdecrRefCounter()
+			v.value = nil
 		}
-		args[i].value = nil
 	}
 	ctx.stack = ctx.stack[:len(ctx.stack)-n]
 	ctx.frameIdx = oframeIdx

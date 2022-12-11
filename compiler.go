@@ -27,6 +27,8 @@ type lambdaCode struct {
 	StartPos   int                    // starting position in the source
 	EndPos     int                    // end position in the source
 	namedArgs  bool                   // uses named parameters like {[a;b;c]....}
+	unusedArgs []int32                // reversed indices of unused arguments
+	usedArgs   []int32                // reversed indices of used arguments
 	lastUses   []lastUse              // opcode index and block number of variable last use
 	joinPoints []int32                // number of jumps ending at a given opcode index
 	locals     map[string]lambdaLocal // arguments and variables
@@ -662,7 +664,7 @@ func (ctx *Context) resolveLambda(lc *lambdaCode) {
 		nlocals++
 		nargs = 1
 	}
-	nvars := nlocals - nargs
+	nvars := lc.nVars
 	lc.Rank = nargs
 	names := make([]string, nlocals)
 	getID := func(local lambdaLocal) int {
@@ -771,13 +773,20 @@ func (ctx *Context) analyzeLambdaLiveness(lc *lambdaCode) {
 	if lc.joinPoints != nil {
 		lc.joinPoints = nil // unused after this pass
 	}
-	for _, lu := range lc.lastUses {
+	for i, lu := range lc.lastUses {
 		if lu.bn == 0 {
+			if i >= lc.nVars {
+				lc.unusedArgs = append(lc.unusedArgs, int32(len(lc.Names)-i-1))
+			}
 			// unused variable
 			continue
 		}
+		if i >= lc.nVars {
+			lc.usedArgs = append(lc.usedArgs, int32(len(lc.Names)-i-1))
+		}
 		lc.Body[lu.opIdx] = opLocalLast
 	}
+	lc.lastUses = nil
 }
 
 func (c *compiler) doApply2(a *astApply2, n int) error {
