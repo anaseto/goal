@@ -70,8 +70,6 @@ func applyS2(s S, x V, y V) V {
 		switch yv := y.value.(type) {
 		case *AI:
 		case *AB:
-			if Length(x) != yv.Len() {
-			}
 			return applyS2(s, x, fromABtoAI(yv))
 		case *AF:
 			z := toAI(yv)
