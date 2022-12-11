@@ -146,6 +146,10 @@ func (ctx *Context) popApplyN(n int) error {
 
 const maxCallDepth = 100000
 
+func (ctx *Context) swap() {
+	ctx.stack[len(ctx.stack)-1], ctx.stack[len(ctx.stack)-2] = ctx.stack[len(ctx.stack)-2], ctx.stack[len(ctx.stack)-1]
+}
+
 func (ctx *Context) push(x V) {
 	x.rcincr()
 	ctx.stack = append(ctx.stack, x)

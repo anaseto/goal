@@ -22,7 +22,7 @@ func (ctx *Context) Apply2(x, y, z V) V {
 // used by the language.
 func (ctx *Context) ApplyN(x V, args []V) V {
 	if len(args) == 0 {
-		panic("ApplyArgs: len(args) should be > 0")
+		panic("ApplyN: len(args) should be > 0")
 	}
 	ctx.pushArgs(args)
 	r := ctx.applyN(x, len(args))
@@ -50,7 +50,11 @@ func (ctx *Context) applyN(x V, n int) V {
 		ctx.push(xv.Arg)
 		args := ctx.peekN(n + 1)
 		if hasNil(args) {
-			return NewV(projection{Fun: x, Args: ctx.popN(n + 1)})
+			ctx.drop()
+			return NewV(projection{Fun: x, Args: ctx.popN(n)})
+		}
+		if n > 1 {
+			ctx.swap()
 		}
 		r := ctx.variadics[xv.Fun].Func(ctx, args)
 		ctx.dropN(n + 1)
@@ -152,7 +156,6 @@ func (ctx *Context) applyArray(x V, y V) V {
 
 func (ctx *Context) applyArrayArgs(x V, arg V, args []V) V {
 	xv := x.value.(array)
-	// TODO: annotate error with depth?
 	if len(args) == 0 {
 		return ctx.applyArray(x, arg)
 	}
