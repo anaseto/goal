@@ -250,9 +250,3 @@ func rcincr(args []V) {
 		v.rcincr()
 	}
 }
-
-func rcdecr(args []V) {
-	for _, v := range args {
-		v.rcdecr()
-	}
-}
