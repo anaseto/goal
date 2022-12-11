@@ -118,6 +118,7 @@ func (ctx *Context) initVariadics() {
 	}
 	ctx.vNames["::"] = vRight
 	ctx.keywords = map[string]NameType{}
+	ctx.RegisterMonad("abs", VariadicFun{Func: VAbs})
 	ctx.RegisterMonad("bytes", VariadicFun{Func: VBytes})
 	ctx.RegisterMonad("error", VariadicFun{Func: VError})
 	ctx.RegisterMonad("eval", VariadicFun{Func: VEval})
@@ -504,6 +505,16 @@ func VAnd(ctx *Context, args []V) V {
 		}
 	}
 	return args[0]
+}
+
+// VAbs implements the "abs" variadic verb.
+func VAbs(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		return abs(args[0])
+	default:
+		return panicRank("icount")
+	}
 }
 
 // VBytes implements the "bytes" variadic verb.
