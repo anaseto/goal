@@ -229,7 +229,7 @@ func casti(y V) V {
 		}
 		return NewAV(r)
 	case *AF:
-		return toAI(yv)
+		return toAI(floor(y).value.(*AF))
 	case *AV:
 		r := make([]V, yv.Len())
 		for i := range r {
