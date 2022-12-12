@@ -91,3 +91,6 @@ shift 2 / not an array
 (,1)[,2] / out of bound
 (,1)[,2.0] / out of bound
 (,"a")[,2.0] / out of bound
+a,:: / assignment operation without expression right
+a: / assignment without expression right
+(1;) / empty slot in list

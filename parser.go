@@ -507,9 +507,3 @@ func pDoExprs(es exprs) {
 		es[i], es[len(es)-i-1] = es[len(es)-i-1], es[i]
 	}
 }
-
-func bodyRev(body []exprs) {
-	for i := 0; i < len(body)/2; i++ {
-		body[i], body[len(body)-i-1] = body[len(body)-i-1], body[i]
-	}
-}
