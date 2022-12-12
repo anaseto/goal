@@ -19,10 +19,6 @@ func b2f(b bool) (f float64) {
 	return
 }
 
-func isNum(x V) bool {
-	return x.IsI() || x.IsF()
-}
-
 func divideF(x, y float64) float64 {
 	if y == 0 {
 		return math.Inf(signF(x))
@@ -91,8 +87,8 @@ func clone(x V) V {
 	return x
 }
 
-// clone creates an identical shallow copy of a value, or the value itself if
-// it is reusable.
+// cloneShallow creates an identical shallow copy of a value, or the value
+// itself if it is reusable.
 func cloneShallow(x V) V {
 	if xv, ok := x.value.(array); ok {
 		x.value = cloneShallowArray(xv)
