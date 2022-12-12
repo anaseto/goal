@@ -124,8 +124,6 @@ func nonEmpty(e expr) bool {
 	switch e := e.(type) {
 	case exprs:
 		return len(e) > 0
-	case *astParen:
-		return nonEmpty(e.Expr)
 	default:
 		return true
 	}
