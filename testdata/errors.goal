@@ -6,7 +6,7 @@
 2.3 5[7] / out of bounds
 "a" "b"[7] / out of bounds
 0 1 0[7] / out of bounds
-(!5)[`a`] / non-array
+(!5)[`a`] / non-integer
 { / EOF
 ) / unexpected ) without opening
 {) / unexpected ) without closing
@@ -81,3 +81,13 @@ shift 2 / not an array
 0^!5 / out of range
 2^"a" / not an array
 +(1;2 3;4 5 6) / length mismatch
++[][2;3;4] / too many arguments
+"s"[1;2;3] / too many arguments
+1 2[0.5] / non-integer index
+1 2[-4.0] / out of bound
+1 2[*] / non-integer
+{x+y}[1;][2;3] / too many arguments
+(,1)[,1] / out of bound
+(,1)[,2] / out of bound
+(,1)[,2.0] / out of bound
+(,"a")[,2.0] / out of bound

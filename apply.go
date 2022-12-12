@@ -150,7 +150,7 @@ func (ctx *Context) applyArray(x V, y V) V {
 		r := xv.atIndices(iy.value.(*AI).Slice)
 		return r
 	default:
-		return Panicf("x[y] : y non-array non-integer (%s)", y.Type())
+		return Panicf("x[y] : y non-integer (%s)", y.Type())
 	}
 }
 
