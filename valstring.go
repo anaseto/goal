@@ -198,32 +198,7 @@ func (x *AV) sprint(ctx *Context, deep bool) string {
 }
 
 func (x *AV) String() string {
-	if x.Len() == 0 {
-		return `!0`
-	}
-	sb := &strings.Builder{}
-	if x.Len() == 1 {
-		sb.WriteRune(',')
-		fmt.Fprintf(sb, "%s", x.At(0).String())
-		return sb.String()
-	}
-	sb.WriteRune('(')
-	sep := ";"
-	t := aType(x)
-	switch t {
-	case tB, tI, tF, tS:
-		sep = " "
-	}
-	for i, xi := range x.Slice {
-		if xi.kind != valNil {
-			fmt.Fprintf(sb, "%s", xi.String())
-		}
-		if i < x.Len()-1 {
-			sb.WriteString(sep)
-		}
-	}
-	sb.WriteRune(')')
-	return sb.String()
+	return x.sprint(NewContext(), true)
 }
 
 func (p projection) Sprint(ctx *Context) string {
@@ -244,20 +219,7 @@ func (p projection) Sprint(ctx *Context) string {
 }
 
 func (p projection) String() string {
-	sb := &strings.Builder{}
-	fmt.Fprintf(sb, "%s", p.Fun.String())
-	sb.WriteRune('[')
-	for i := len(p.Args) - 1; i >= 0; i-- {
-		arg := p.Args[i]
-		if arg.kind != valNil {
-			fmt.Fprintf(sb, "%s", arg.String())
-		}
-		if i > 0 {
-			sb.WriteRune(';')
-		}
-	}
-	sb.WriteRune(']')
-	return sb.String()
+	return p.Sprint(NewContext())
 }
 
 func (p projectionFirst) Sprint(ctx *Context) string {
