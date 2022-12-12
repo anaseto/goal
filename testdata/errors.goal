@@ -58,6 +58,7 @@ a+1 / undefined global
 a+1;a / undefined global
 a,:1 / undefined global
 {a,::1}0 / undefined global
+{a,:1}0 / undefined local
 f:{x+y};f[1;2;3] / too many arguments
 {?[0;a:2;0];a+1}0 / undefined local
 {?[0;a:2;0];a+1;a}0 / undefined local

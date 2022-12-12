@@ -529,7 +529,7 @@ func (c *compiler) doAssignOp(e *astAssignOp, n int) error {
 	local, ok := lc.local(e.Name)
 	if !ok {
 		return c.perrorf(e.Pos,
-			"undefined variable in assignement operation: %s", e.Name)
+			"undefined local in assignement operation: %s", e.Name)
 	}
 	c.push2(opLocalLast, opArg)
 	lc.opIdxLocal[len(lc.Body)-1] = local
@@ -794,9 +794,7 @@ func (ctx *Context) analyzeLambdaLiveness(lc *lambdaCode) {
 func (c *compiler) doApply2(a *astApply2, n int) error {
 	switch v := a.Verb.(type) {
 	case *astToken:
-		if v.Type != astDYAD {
-			break
-		}
+		// e.Type == astDYAD
 		switch v.Text {
 		case "and":
 			aN := &astApplyN{
