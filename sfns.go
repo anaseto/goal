@@ -43,8 +43,8 @@ func reverseMut(x V) {
 		for i := 0; i < len(xs)/2; i++ {
 			xs[i], xs[len(xs)-i-1] = xs[len(xs)-i-1], xs[i]
 		}
-	case sort.Interface:
-		sort.Reverse(xv)
+		//case sort.Interface:
+		//sort.Reverse(xv)
 	}
 }
 
@@ -56,22 +56,22 @@ func reverse(x V) V {
 		reverseMut(x)
 		return x
 	default:
-		return panicType("|x", "x", x)
+		return panicf("|x : x not an array (%s)", x.Type())
 	}
 }
 
-// Rotate returns f|y.
+// Rotate returns x rotate y.
 func rotate(x, y V) V {
 	i := int64(0)
 	if x.IsI() {
 		i = x.I()
 	} else if x.IsF() {
 		if !isI(x.F()) {
-			return panicf("f|y : non-integer f[y] (%g)", x.F())
+			return panicf("x rotate y : non-integer f[y] (%g)", x.F())
 		}
 		i = int64(x.F())
 	} else {
-		return panicf("f|y : non-integer f[y] (%s)", x.Type())
+		return panicf("x rotate y : non-integer f[y] (%s)", x.Type())
 	}
 	ylen := int64(Length(y))
 	if ylen == 0 {
@@ -113,7 +113,7 @@ func rotate(x, y V) V {
 		}
 		return NewAV(r)
 	default:
-		return panicType("f|y", "y", y)
+		return panicf("x rotate y : y not an array (%s)", y.Type())
 	}
 }
 
