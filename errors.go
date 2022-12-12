@@ -102,10 +102,6 @@ func panics(s string) V {
 	return V{kind: valPanic, value: panicV(s)}
 }
 
-func panicf(format string, a ...interface{}) V {
-	return panics(fmt.Sprintf(format, a...))
-}
-
 // Panicf returns a formatted fatal error value.
 func Panicf(format string, a ...interface{}) V {
 	return panics(fmt.Sprintf(format, a...))
@@ -117,11 +113,11 @@ func NewPanic(s string) V {
 }
 
 func panicType(op, sym string, x V) V {
-	return panicf("%s : bad type for %s (%s)", op, sym, x.Type())
+	return Panicf("%s : bad type for %s (%s)", op, sym, x.Type())
 }
 
 func panicTypeElt(op, sym string, x V) V {
-	return panicf("%s : bad type in %s (%s)", op, sym, x.Type())
+	return Panicf("%s : bad type in %s (%s)", op, sym, x.Type())
 }
 
 func panicDomain(op, s string) V {

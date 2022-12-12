@@ -463,7 +463,7 @@ func sortUp(x V) V {
 		sort.Stable(sortVSlice(xv.Slice))
 		return NewV(xv)
 	default:
-		return panicf("^x : x not an array (%s)", x.Type())
+		return Panicf("^x : x not an array (%s)", x.Type())
 	}
 }
 
@@ -584,7 +584,7 @@ func ascend(x V) V {
 		sort.Stable(p)
 		return NewAI(p.Perm)
 	default:
-		return panicf("<x : x not an array (%s)", x.Type())
+		return Panicf("<x : x not an array (%s)", x.Type())
 	}
 }
 

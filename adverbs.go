@@ -32,7 +32,7 @@ func fold2(ctx *Context, args []V) V {
 	}
 	if f.Rank(ctx) != 2 {
 		// TODO: converge
-		return panicf("F/x : F rank is %d (expected 2)", f.Rank(ctx))
+		return Panicf("F/x : F rank is %d (expected 2)", f.Rank(ctx))
 	}
 	x := args[0]
 	switch xv := x.value.(type) {
@@ -113,9 +113,9 @@ func fold2Join(sep S, x V) V {
 		return NewS(strings.Join([]string(xv.Slice), string(sep)))
 	case *AV:
 		//assertCanonical(xv)
-		return panicf("s/x : x not a string array (%s)", x.Type())
+		return Panicf("s/x : x not a string array (%s)", x.Type())
 	default:
-		return panicf("s/x : x not a string array (%s)", x.Type())
+		return Panicf("s/x : x not a string array (%s)", x.Type())
 	}
 }
 
@@ -126,7 +126,7 @@ func fold2Decode(f V, x V) V {
 		}
 		if x.IsF() {
 			if !isI(x.F()) {
-				return panicf("i/x : x non-integer (%g)", x.F())
+				return Panicf("i/x : x non-integer (%g)", x.F())
 			}
 			return NewI(int64(x.F()))
 		}
@@ -167,7 +167,7 @@ func fold2Decode(f V, x V) V {
 	}
 	if f.IsF() {
 		if !isI(f.F()) {
-			return panicf("i/x : i non-integer (%g)", f.F())
+			return Panicf("i/x : i non-integer (%g)", f.F())
 		}
 		return fold2Decode(NewI(int64(f.F())), x)
 	}
@@ -185,14 +185,14 @@ func fold2Decode(f V, x V) V {
 		}
 		if x.IsF() {
 			if !isI(x.F()) {
-				return panicf("I/x : x non-integer (%g)", x.F())
+				return Panicf("I/x : x non-integer (%g)", x.F())
 			}
 			return fold2Decode(f, NewI(int64(x.F())))
 		}
 		switch xv := x.value.(type) {
 		case *AI:
 			if fv.Len() != xv.Len() {
-				return panicf("I/x : length mismatch: %d (#I) %d (#x)", fv.Len(), xv.Len())
+				return Panicf("I/x : length mismatch: %d (#I) %d (#x)", fv.Len(), xv.Len())
 			}
 			var r, n int64 = 0, 1
 			for i := xv.Len() - 1; i >= 0; i-- {
@@ -235,7 +235,7 @@ func fold2Decode(f V, x V) V {
 func fold3(ctx *Context, args []V) V {
 	f := args[1]
 	if !f.IsFunction() {
-		return panicf("x F/y : F not a function (%s)", f.Type())
+		return Panicf("x F/y : F not a function (%s)", f.Type())
 	}
 	if f.Rank(ctx) != 2 {
 		return fold3While(ctx, args)
@@ -272,7 +272,7 @@ func fold3While(ctx *Context, args []V) V {
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
-			return panicf("n f/y : non-integer n (%g)", x.F())
+			return Panicf("n f/y : non-integer n (%g)", x.F())
 		}
 		return fold3doTimes(ctx, int64(x.F()), f, y)
 	}
@@ -328,7 +328,7 @@ func scan2(ctx *Context, f, x V) V {
 	}
 	if f.Rank(ctx) != 2 {
 		// TODO: converge
-		return panicf("f\\x : f rank is %d (expected 2)", f.Rank(ctx))
+		return Panicf("f\\x : f rank is %d (expected 2)", f.Rank(ctx))
 	}
 	switch xv := x.value.(type) {
 	case array:
@@ -366,9 +366,9 @@ func scan2Split(sep S, x V) V {
 		return NewAV(r)
 	case *AV:
 		//assertCanonical(x)
-		return panicf("s/x : x not a string atom or array (%s)", xv.Type())
+		return Panicf("s/x : x not a string atom or array (%s)", xv.Type())
 	default:
-		return panicf("s/x : x not a string atom or array (%s)", x.Type())
+		return Panicf("s/x : x not a string atom or array (%s)", x.Type())
 	}
 }
 
@@ -406,7 +406,7 @@ func scan2Encode(f V, x V) V {
 		}
 		if x.IsF() {
 			if !isI(x.F()) {
-				return panicf("i\\x : x non-integer (%g)", x.F())
+				return Panicf("i\\x : x non-integer (%g)", x.F())
 			}
 			return scan2Encode(f, NewI(int64(x.F())))
 		}
@@ -455,7 +455,7 @@ func scan2Encode(f V, x V) V {
 	}
 	if f.IsF() {
 		if !isI(f.F()) {
-			return panicf("i\\x : i non-integer (%g)", f.F())
+			return Panicf("i\\x : i non-integer (%g)", f.F())
 		}
 		return scan2Encode(NewI(int64(f.F())), x)
 	}
@@ -476,7 +476,7 @@ func scan2Encode(f V, x V) V {
 		}
 		if x.IsF() {
 			if !isI(x.F()) {
-				return panicf("I/x : x non-integer (%g)", x.F())
+				return Panicf("I/x : x non-integer (%g)", x.F())
 			}
 			return scan2Encode(f, NewI(int64(x.F())))
 		}
@@ -534,7 +534,7 @@ func scan2Encode(f V, x V) V {
 func scan3(ctx *Context, args []V) V {
 	f := args[1]
 	if !f.IsFunction() {
-		return panicf("x f'y : f not a function (%s)", f.Type())
+		return Panicf("x f'y : f not a function (%s)", f.Type())
 	}
 	if f.Rank(ctx) != 2 {
 		return scan3While(ctx, args)
@@ -582,7 +582,7 @@ func scan3While(ctx *Context, args []V) V {
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
-			return panicf("n f\\y : non-integer n (%g)", x.F())
+			return Panicf("n f\\y : non-integer n (%g)", x.F())
 		}
 		return scan3doTimes(ctx, int64(x.F()), f, y)
 	}
@@ -626,7 +626,7 @@ func scan3doTimes(ctx *Context, n int64, f, y V) V {
 func each2(ctx *Context, args []V) V {
 	f := args[1]
 	if !f.IsFunction() {
-		return panicf("f'x : f not a function (%s)", f.Type())
+		return Panicf("f'x : f not a function (%s)", f.Type())
 	}
 	x := toArray(args[0])
 	switch xv := x.value.(type) {
@@ -643,14 +643,14 @@ func each2(ctx *Context, args []V) V {
 		return Canonical(NewAV(r))
 	default:
 		// should not happen
-		return panicf("f'x : x not an array (%s)", x.Type())
+		return Panicf("f'x : x not an array (%s)", x.Type())
 	}
 }
 
 func each3(ctx *Context, args []V) V {
 	f := args[1]
 	if !f.IsFunction() {
-		return panicf("x f'y : f not a function (%s)", f.Type())
+		return Panicf("x f'y : f not a function (%s)", f.Type())
 	}
 	x := args[2]
 	y := args[0]
@@ -689,7 +689,7 @@ func each3(ctx *Context, args []V) V {
 	}
 	xlen := xa.Len()
 	if xlen != ya.Len() {
-		return panicf("x f'y : length mismatch: %d (#x) vs %d (#y)", xa.Len(), ya.Len())
+		return Panicf("x f'y : length mismatch: %d (#x) vs %d (#y)", xa.Len(), ya.Len())
 	}
 	r := make([]V, 0, xlen)
 	for i := 0; i < xlen; i++ {

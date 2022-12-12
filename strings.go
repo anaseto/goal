@@ -9,13 +9,13 @@ func applyS(s S, x V) V {
 			xv += int64(len(s))
 		}
 		if xv < 0 || xv > int64(len(s)) {
-			return panicf("s[i] : i out of bounds index (%d)", xv)
+			return Panicf("s[i] : i out of bounds index (%d)", xv)
 		}
 		return NewV(s[xv:])
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
-			return panicf("s[x] : x non-integer (%g)", x.F())
+			return Panicf("s[x] : x non-integer (%g)", x.F())
 		}
 		return applyS(s, NewI(int64(x.F())))
 	}
@@ -29,7 +29,7 @@ func applyS(s S, x V) V {
 				n += int64(len(s))
 			}
 			if n < 0 || n > int64(len(s)) {
-				return panicf("s[i] : i out of bounds index (%d)", n)
+				return Panicf("s[i] : i out of bounds index (%d)", n)
 			}
 			r[i] = string(s[n:])
 		}
@@ -50,7 +50,7 @@ func applyS(s S, x V) V {
 		}
 		return Canonical(NewAV(r))
 	default:
-		return panicf("s[x] : x non-integer (%s)", x.Type())
+		return Panicf("s[x] : x non-integer (%s)", x.Type())
 	}
 }
 
@@ -58,12 +58,12 @@ func applyS2(s S, x V, y V) V {
 	var l int64
 	if y.IsI() {
 		if y.I() < 0 {
-			return panicf("s[x;y] : y negative (%d)", y.I())
+			return Panicf("s[x;y] : y negative (%d)", y.I())
 		}
 		l = y.I()
 	} else if y.IsF() {
 		if !isI(y.F()) {
-			return panicf("s[x;y] : y non-integer (%g)", y.F())
+			return Panicf("s[x;y] : y non-integer (%g)", y.F())
 		}
 		l = int64(y.F())
 	} else {
@@ -87,10 +87,10 @@ func applyS2(s S, x V, y V) V {
 			xv += int64(len(s))
 		}
 		if xv < 0 || xv > int64(len(s)) {
-			return panicf("s[i;y] : i out of bounds index (%d)", xv)
+			return Panicf("s[i;y] : i out of bounds index (%d)", xv)
 		}
 		if _, ok := y.value.(*AI); ok {
-			return panicf("s[x;y] : x is an atom but y is an array")
+			return Panicf("s[x;y] : x is an atom but y is an array")
 		}
 		if xv+l > int64(len(s)) {
 			l = int64(len(s)) - xv
@@ -100,7 +100,7 @@ func applyS2(s S, x V, y V) V {
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
-			return panicf("s[x;y] : x non-integer (%g)", x.F())
+			return Panicf("s[x;y] : x non-integer (%g)", x.F())
 		}
 		return applyS2(s, NewI(int64(x.F())), y)
 	}
@@ -111,15 +111,16 @@ func applyS2(s S, x V, y V) V {
 		r := make([]string, xv.Len())
 		if z, ok := y.value.(*AI); ok {
 			if z.Len() != xv.Len() {
-				return panicf("s[x;y] : length mismatch: %d (#x) %d (#y)",
+				return Panicf("s[x;y] : length mismatch: %d (#x) %d (#y)",
 					xv.Len(), z.Len())
+
 			}
 			for i, n := range xv.Slice {
 				if n < 0 {
 					n += int64(len(s))
 				}
 				if n < 0 || n > int64(len(s)) {
-					return panicf("s[i;y] : i out of bounds index (%d)", n)
+					return Panicf("s[i;y] : i out of bounds index (%d)", n)
 				}
 				l := z.At(i)
 				if n+l > int64(len(s)) {
@@ -134,7 +135,7 @@ func applyS2(s S, x V, y V) V {
 				n += int64(len(s))
 			}
 			if n < 0 || n > int64(len(s)) {
-				return panicf("s[i;y] : i out of bounds index (%d)", n)
+				return Panicf("s[i;y] : i out of bounds index (%d)", n)
 			}
 			l := l
 			if n+l > int64(len(s)) {
@@ -159,7 +160,7 @@ func applyS2(s S, x V, y V) V {
 		}
 		return Canonical(NewAV(r))
 	default:
-		return panicf("s[x;y] : x non-integer (%s)", x.Type())
+		return Panicf("s[x;y] : x non-integer (%s)", x.Type())
 	}
 }
 
@@ -197,7 +198,7 @@ func cast(s S, y V) V {
 	case "s":
 		return casts(y)
 	default:
-		return panicf("s$y : unsupported \"%s\" value for s", s)
+		return Panicf("s$y : unsupported \"%s\" value for s", s)
 	}
 }
 
@@ -250,7 +251,7 @@ func castn(y V) V {
 	case S:
 		xi, err := parseNumber(string(yv))
 		if err != nil {
-			return panicf("\"i\"$y : non-numeric y (%s) : %v", yv, err)
+			return Panicf("\"i\"$y : non-numeric y (%s) : %v", yv, err)
 		}
 		return xi
 	case *AB:
@@ -262,7 +263,7 @@ func castn(y V) V {
 		for i, s := range yv.Slice {
 			n, err := parseNumber(s)
 			if err != nil {
-				return panicf("\"i\"$y : y contains non-numeric (%s) : %v", s, err)
+				return Panicf("\"i\"$y : y contains non-numeric (%s) : %v", s, err)
 			}
 			r[i] = n
 		}

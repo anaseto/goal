@@ -56,7 +56,7 @@ func reverse(x V) V {
 		reverseMut(x)
 		return x
 	default:
-		return panicf("|x : x not an array (%s)", x.Type())
+		return Panicf("|x : x not an array (%s)", x.Type())
 	}
 }
 
@@ -67,11 +67,11 @@ func rotate(x, y V) V {
 		i = x.I()
 	} else if x.IsF() {
 		if !isI(x.F()) {
-			return panicf("x rotate y : non-integer f[y] (%g)", x.F())
+			return Panicf("x rotate y : non-integer f[y] (%g)", x.F())
 		}
 		i = int64(x.F())
 	} else {
-		return panicf("x rotate y : non-integer f[y] (%s)", x.Type())
+		return Panicf("x rotate y : non-integer f[y] (%s)", x.Type())
 	}
 	ylen := int64(Length(y))
 	if ylen == 0 {
@@ -113,7 +113,7 @@ func rotate(x, y V) V {
 		}
 		return NewAV(r)
 	default:
-		return panicf("x rotate y : y not an array (%s)", y.Type())
+		return Panicf("x rotate y : y not an array (%s)", y.Type())
 	}
 }
 
@@ -142,7 +142,7 @@ func drop(x, y V) V {
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
-			return panicf("i_y : non-integer i (%g)", x.F())
+			return Panicf("i_y : non-integer i (%g)", x.F())
 		}
 		return dropi(int64(x.F()), y)
 	}
@@ -197,7 +197,7 @@ func cutAI(x *AI, y V) V {
 	ylen := int64(Length(y))
 	for _, i := range x.Slice {
 		if i < 0 || i > ylen {
-			return panicf("x_y : x contains out of bound index (%d)", i)
+			return Panicf("x_y : x contains out of bound index (%d)", i)
 		}
 	}
 	if x.Len() == 0 {
@@ -255,7 +255,7 @@ func cutAI(x *AI, y V) V {
 		}
 		return Canonical(NewAV(r))
 	default:
-		return panicf("x_y : y not an array (%s)", y.Type())
+		return Panicf("x_y : y not an array (%s)", y.Type())
 	}
 }
 
@@ -266,11 +266,11 @@ func take(x, y V) V {
 		i = x.I()
 	} else if x.IsF() {
 		if !isI(x.F()) {
-			return panicf("i#y : non-integer i (%g)", x.F())
+			return Panicf("i#y : non-integer i (%g)", x.F())
 		}
 		i = int64(x.F())
 	} else {
-		return panicf("i#y : non-integer i (%s)", x.Type())
+		return Panicf("i#y : non-integer i (%s)", x.Type())
 	}
 	yv := toArray(y).value.(array)
 	if yv.Len() == 0 {
@@ -1010,7 +1010,7 @@ func windows(i int64, y V) V {
 	switch yv := y.value.(type) {
 	case array:
 		if i <= 0 || i >= int64(yv.Len()+1) {
-			return panicf("i^y : i out of range !%d (%d)", yv.Len()+1, i)
+			return Panicf("i^y : i out of range !%d (%d)", yv.Len()+1, i)
 		}
 		r := make([]V, 1+yv.Len()-int(i))
 		for j := range r {
@@ -1033,7 +1033,7 @@ func shapeSplit(x V, y V) V {
 		// x.IsF() should be true
 		f := x.F()
 		if !isI(f) {
-			return panicf("i$y : i non-integer (%g)", f)
+			return Panicf("i$y : i non-integer (%g)", f)
 		}
 		i = int64(f)
 	}
@@ -1041,7 +1041,7 @@ func shapeSplit(x V, y V) V {
 	case array:
 		ylen := yv.Len()
 		if i <= 0 {
-			return panicf("i$y : i not positive (%d)", i)
+			return Panicf("i$y : i not positive (%d)", i)
 		}
 		if i >= int64(ylen) {
 			return NewAV([]V{y})

@@ -18,12 +18,12 @@ func (ctx *Context) amend3(x, y, f V) V {
 
 func (ctx *Context) amend3arrayI(x array, y int64, f V) V {
 	if y < 0 || y >= int64(x.Len()) {
-		return panicf("@[x;y;f] : x out of bounds (%d)", y)
+		return Panicf("@[x;y;f] : x out of bounds (%d)", y)
 	}
 	xy := x.at(int(y))
 	repl := ctx.Apply(f, xy)
 	if repl.IsPanic() {
-		return panicf("f call in @[x;y;f] : %v", repl)
+		return Panicf("f call in @[x;y;f] : %v", repl)
 	}
 	if compatEltType(x, repl) {
 		x.set(int(y), repl)
@@ -81,12 +81,12 @@ func (ctx *Context) amend4(x, y, f, z V) V {
 
 func (ctx *Context) amend4arrayI(x array, y int64, f, z V) V {
 	if y < 0 || y >= int64(x.Len()) {
-		return panicf("@[x;y;f;z] : x out of bounds (%d)", y)
+		return Panicf("@[x;y;f;z] : x out of bounds (%d)", y)
 	}
 	xy := x.at(int(y))
 	repl := ctx.Apply2(f, xy, z)
 	if repl.IsPanic() {
-		return panicf("f call in @[x;y;f;z] : %v", repl)
+		return Panicf("f call in @[x;y;f;z] : %v", repl)
 	}
 	if compatEltType(x, repl) {
 		x.set(int(y), repl)
@@ -122,8 +122,9 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 			return NewV(x)
 		}
 		if az.Len() != yv.Len() {
-			return panicf("@[x;y;f;z] : length mismatch between x and y (%d vs %d)",
+			return Panicf("@[x;y;f;z] : length mismatch between x and y (%d vs %d)",
 				yv.Len(), az.Len())
+
 		}
 		for i, xi := range yv.Slice {
 			ax := ctx.amend4arrayI(x, xi, f, az.at(i))
@@ -146,8 +147,9 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 			return NewV(x)
 		}
 		if az.Len() != yv.Len() {
-			return panicf("@[x;y;f;z] : length mismatch between x and y (%d vs %d)",
+			return Panicf("@[x;y;f;z] : length mismatch between x and y (%d vs %d)",
 				yv.Len(), az.Len())
+
 		}
 		for i, xi := range yv.Slice {
 			ax := ctx.amend4array(x, xi, f, az.at(i))
@@ -174,7 +176,7 @@ func try(ctx *Context, f1, x, f2 V) V {
 		ctx.push(r)
 		r = ctx.applyN(f2, 1)
 		if r.IsPanic() {
-			return panicf("f2 call in .[f1;x;f2] : %v", r)
+			return Panicf("f2 call in .[f1;x;f2] : %v", r)
 		}
 	}
 	return r

@@ -164,7 +164,7 @@ func toIndicesRec(x V) V {
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
-			return panicf("non-integer index (%g)", x.F())
+			return Panicf("non-integer index (%g)", x.F())
 		}
 		return NewI(int64(x.F()))
 	}
@@ -215,7 +215,7 @@ func toAI(x *AF) V {
 	r := make([]int64, x.Len())
 	for i, xi := range x.Slice {
 		if !isI(xi) {
-			return panicf("contains non-integer (%g)", xi)
+			return Panicf("contains non-integer (%g)", xi)
 		}
 		r[i] = int64(xi)
 	}

@@ -75,7 +75,7 @@ func group(x V) V {
 		}
 		return group(z)
 	default:
-		return panicf("=x : x not an integer array (%s)", x.Type())
+		return Panicf("=x : x not an integer array (%s)", x.Type())
 	}
 }
 
@@ -107,15 +107,16 @@ func icount(x V) V {
 		}
 		return icount(z)
 	default:
-		return panicf("icount x : x not an integer array (%s)", x.Type())
+		return Panicf("icount x : x not an integer array (%s)", x.Type())
 	}
 }
 
 // groupBy by returns {x}=y.
 func groupBy(x, y V) V {
 	if Length(x) != Length(y) {
-		return panicf("f=y : length mismatch for f[y] and y: %d vs %d ",
+		return Panicf("f=y : length mismatch for f[y] and y: %d vs %d ",
 			Length(x), Length(y))
+
 	}
 	x = group(x)
 	if x.IsPanic() {
@@ -130,6 +131,6 @@ func groupBy(x, y V) V {
 		}
 		return NewAV(r)
 	default:
-		return panicf("f=y : y not array (%s)", y.Type())
+		return Panicf("f=y : y not array (%s)", y.Type())
 	}
 }

@@ -61,14 +61,14 @@ func (ctx *Context) applyN(x V, n int) V {
 		return r
 	case projectionFirst:
 		if n > 1 {
-			return panicf("too many arguments: got %d, expected 1", n)
+			return Panicf("too many arguments: got %d, expected 1", n)
 		}
 		ctx.push(xv.Arg)
 		r := ctx.applyN(xv.Fun, 2)
 		return r
 	case projectionMonad:
 		if n > 1 {
-			return panicf("too many arguments: got %d, expected 1", n)
+			return Panicf("too many arguments: got %d, expected 1", n)
 		}
 		return ctx.applyN(xv.Fun, 1)
 	case projection:
@@ -85,7 +85,7 @@ func (ctx *Context) applyN(x V, n int) V {
 			ctx.dropN(n)
 			return r
 		default:
-			return panicf("too many arguments")
+			return Panicf("too many arguments")
 		}
 	case array:
 		switch n {
@@ -98,7 +98,7 @@ func (ctx *Context) applyN(x V, n int) V {
 			return r
 		}
 	default:
-		return panicf("type %s cannot be applied", x.Type())
+		return Panicf("type %s cannot be applied", x.Type())
 	}
 }
 
@@ -114,21 +114,21 @@ func (ctx *Context) applyArray(x V, y V) V {
 			i = int64(xv.Len()) + i
 		}
 		if i < 0 || i >= int64(xv.Len()) {
-			return panicf("x[y] : out of bounds index: %d", i)
+			return Panicf("x[y] : out of bounds index: %d", i)
 		}
 		return xv.at(int(i))
 
 	}
 	if y.IsF() {
 		if !isI(y.F()) {
-			return panicf("x[y] : non-integer index (%g)", y.F())
+			return Panicf("x[y] : non-integer index (%g)", y.F())
 		}
 		i := int64(y.F())
 		if i < 0 {
 			i = int64(xv.Len()) + i
 		}
 		if i < 0 || i >= int64(xv.Len()) {
-			return panicf("x[y] : out of bounds index: %d", i)
+			return Panicf("x[y] : out of bounds index: %d", i)
 		}
 		return xv.at(int(i))
 	}
@@ -145,12 +145,12 @@ func (ctx *Context) applyArray(x V, y V) V {
 	case array:
 		iy := toIndices(y)
 		if iy.IsPanic() {
-			return panicf("x[y] : %v", iy.value)
+			return Panicf("x[y] : %v", iy.value)
 		}
 		r := xv.atIndices(iy.value.(*AI).Slice)
 		return r
 	default:
-		return panicf("x[y] : y non-array non-integer (%s)", y.Type())
+		return Panicf("x[y] : y non-array non-integer (%s)", y.Type())
 	}
 }
 
@@ -274,7 +274,7 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 	}
 	lc := ctx.lambdas[int(id)]
 	if lc.Rank < n {
-		return panicf("lambda: too many arguments: got %d, expected %d", n, lc.Rank)
+		return Panicf("lambda: too many arguments: got %d, expected %d", n, lc.Rank)
 	}
 	args := ctx.peekN(n)
 	if lc.Rank > n || hasNil(args) {
@@ -325,7 +325,7 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 	default:
 		ctx.updateErrPos(ip, lc)
 		// should not happen
-		return panicf("lambda %d: bad len %d vs old %d (depth: %d): %v", id, len(ctx.stack), olen, ctx.callDepth, ctx.stack)
+		return Panicf("lambda %d: bad len %d vs old %d (depth: %d): %v", id, len(ctx.stack), olen, ctx.callDepth, ctx.stack)
 	}
 	if nVars > 0 {
 		ctx.dropNnoRC(nVars)
@@ -349,7 +349,7 @@ func (x *AV) atIndices(y []int64) V {
 			yi += xlen
 		}
 		if yi < 0 || yi >= xlen {
-			return panicf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
+			return Panicf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
 		}
 		r[i] = x.At(int(yi))
 	}
@@ -364,7 +364,7 @@ func (x *AB) atIndices(y []int64) V {
 			yi += xlen
 		}
 		if yi < 0 || yi >= xlen {
-			return panicf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
+			return Panicf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
 		}
 		r[i] = x.At(int(yi))
 	}
@@ -379,7 +379,7 @@ func (x *AI) atIndices(y []int64) V {
 			yi += xlen
 		}
 		if yi < 0 || yi >= xlen {
-			return panicf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
+			return Panicf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
 		}
 		r[i] = x.At(int(yi))
 	}
@@ -394,7 +394,7 @@ func (x *AF) atIndices(y []int64) V {
 			yi += xlen
 		}
 		if yi < 0 || yi >= xlen {
-			return panicf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
+			return Panicf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
 		}
 		r[i] = x.At(int(yi))
 	}
@@ -409,7 +409,7 @@ func (x *AS) atIndices(y []int64) V {
 			yi += xlen
 		}
 		if yi < 0 || yi >= xlen {
-			return panicf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
+			return Panicf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
 		}
 		r[i] = x.At(int(yi))
 	}
