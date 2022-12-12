@@ -1,0 +1,28 @@
+f:{
+a:(
+  0
+  1
+  2 / comment
+  3
+  4
+  5
+
+  6
+  7
+  8
+  9
+)
+/ comment line
+b:[
+  c:|a;
+
+  c
+]
+/
+long comment
+\
++/b
+}
+f 0   
+/RESULT:
+45 /   

@@ -51,12 +51,45 @@ func getMatchTests(s string) ([]matchTest, error) {
 	return mts, nil
 }
 
+func getScriptMatchTests(s string) ([]matchTest, error) {
+	d := os.DirFS("testdata/scripts")
+	fnames, err := fs.Glob(d, s)
+	if err != nil {
+		return nil, err
+	}
+	mts := []matchTest{}
+	for _, fname := range fnames {
+		bs, err := fs.ReadFile(d, fname)
+		if err != nil {
+			return nil, err
+		}
+		text := string(bs)
+		body := strings.SplitN(text, "\n/RESULT:\n", 2)
+		if len(body) != 2 {
+			log.Printf("%s: bad script", fname)
+			continue
+		}
+		left := body[0]
+		right := body[1]
+		mts = append(mts, matchTest{
+			Fname: fname,
+			Left:  strings.TrimSpace(left),
+			Right: strings.TrimSpace(right),
+		})
+	}
+	return mts, nil
+}
+
 func TestEval(t *testing.T) {
 	mts, err := getMatchTests("*.goal")
 	if err != nil {
 		t.Errorf("getMatchTests: %v", err)
 	}
-	for _, mt := range mts {
+	smts, err := getScriptMatchTests("*.goal")
+	if err != nil {
+		t.Errorf("getScriptMatchTests: %v", err)
+	}
+	for _, mt := range append(mts, smts...) {
 		if mt.Fname == "errors.goal" {
 			continue
 		}
@@ -104,7 +137,11 @@ func TestErrors(t *testing.T) {
 	if err != nil {
 		t.Errorf("getMatchTests: %v", err)
 	}
-	for _, mt := range mts {
+	smts, err := getScriptMatchTests("errors.goal")
+	if err != nil {
+		t.Errorf("getScriptMatchTests: %v", err)
+	}
+	for _, mt := range append(mts, smts...) {
 		mt := mt
 		name := fmt.Sprintf("%s:%d", mt.Fname, mt.Line)
 		matchString := fmt.Sprintf("%s", mt.Left)
@@ -128,10 +165,14 @@ func TestErrors(t *testing.T) {
 				t.Log(matchString)
 				t.Errorf("bad error: `%v`\nexpected:`%v`", err, mt.Right)
 			}
+			msg := e.Msg
+			if strings.Contains(mt.Left, "\n") {
+				msg = e.Error()
+			}
 			if !strings.Contains(e.Msg, mt.Right) {
 				t.Log(ps)
 				t.Log(matchString)
-				t.Logf("\n   error: %v\nexpected: %v", e.Msg, mt.Right)
+				t.Logf("\n   error: %s\nexpected: %v", msg, mt.Right)
 				t.Fail()
 				return
 			}

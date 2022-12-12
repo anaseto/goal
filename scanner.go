@@ -283,7 +283,6 @@ func scanAny(s *Scanner) stateFn {
 	default:
 		return s.emitError(fmt.Sprintf("unexpected character: %c", r))
 	}
-	return nil
 }
 
 func isDigit(r rune) bool {
@@ -443,7 +442,8 @@ func scanIdent(s *Scanner) stateFn {
 			if !isAlpha(r) {
 				return s.emitIDENT()
 			}
-			s.next()
+			//s.next()
+			return s.emitError(". in identifier not implemented yet")
 		case isAlphaNum(r):
 			s.next()
 		default:
