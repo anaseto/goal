@@ -1,10 +1,5 @@
 package goal
 
-import (
-	"fmt"
-	"strings"
-)
-
 // expr are built by the first left to right pass, resulting in a tree
 // of blocks producing a whole expression, with simplified token
 // information, and stack-like order. It is a non-resolved AST intermediary
@@ -16,26 +11,11 @@ type expr interface {
 // exprs represents a sequence of expressions applied in sequence monadically.
 type exprs []expr
 
-func (es exprs) String() string {
-	sb := &strings.Builder{}
-	for i, e := range es {
-		fmt.Fprintf(sb, "%v", e)
-		if i < len(es)-1 {
-			fmt.Fprint(sb, " ")
-		}
-	}
-	return sb.String()
-}
-
 // astToken represents a simplified token after processing into expr.
 type astToken struct {
 	Type astTokenType
 	Pos  int
 	Text string
-}
-
-func (t *astToken) String() string {
-	return fmt.Sprintf("%v[%s]", t.Type, t.Text)
 }
 
 // astTokenType represents tokens in a ppExpr.
@@ -82,29 +62,10 @@ type astStrand struct {
 	Pos  int
 }
 
-func astTokensString(toks []astToken) string {
-	sb := &strings.Builder{}
-	for i, e := range toks {
-		fmt.Fprintf(sb, "%v[%s]", e.Type, e.Text)
-		if i < len(toks)-1 {
-			fmt.Fprint(sb, ";")
-		}
-	}
-	return sb.String()
-}
-
-func (t *astStrand) String() string {
-	return fmt.Sprintf("STRAND[%s]", astTokensString(t.Lits))
-}
-
 // astDerivedVerb represents a derived verb.
 type astDerivedVerb struct {
 	Adverb *astToken
 	Verb   expr
-}
-
-func (t *astDerivedVerb) String() string {
-	return fmt.Sprintf("DERIVED[%s;%v]", t.Adverb.Text, t.Verb)
 }
 
 type astParen struct {
@@ -119,32 +80,11 @@ type astApply2 struct {
 	Right expr
 }
 
-func (a *astApply2) String() (s string) {
-	s = fmt.Sprintf("%v[%v;%v]", a.Verb, a.Left, a.Right)
-	return s
-}
-
-func argsString(es []expr) string {
-	sb := &strings.Builder{}
-	for i, e := range es {
-		fmt.Fprintf(sb, "%v", e)
-		if i < len(es)-1 {
-			fmt.Fprint(sb, ";")
-		}
-	}
-	return sb.String()
-}
-
 type astApplyN struct {
 	Verb     expr
 	Args     []expr
 	StartPos int // remove?
 	EndPos   int // remove?
-}
-
-func (a *astApplyN) String() (s string) {
-	s = fmt.Sprintf("%v[%s]", a.Verb, argsString(a.Args))
-	return s
 }
 
 type astList struct {
@@ -153,20 +93,10 @@ type astList struct {
 	EndPos   int // remove?
 }
 
-func (l *astList) String() (s string) {
-	s = fmt.Sprintf("list[%d;%s]", len(l.Args), argsString(l.Args))
-	return s
-}
-
 type astSeq struct {
 	Body     []expr
 	StartPos int // remove?
 	EndPos   int // remove?
-}
-
-func (b *astSeq) String() (s string) {
-	s = fmt.Sprintf("[%v]", argsString(b.Body))
-	return s
 }
 
 type astLambda struct {
@@ -174,11 +104,6 @@ type astLambda struct {
 	Args     []string
 	StartPos int
 	EndPos   int
-}
-
-func (b *astLambda) String() (s string) {
-	args := "[" + strings.Join([]string(b.Args), ";") + "]"
-	return fmt.Sprintf("{%s %v}", args, argsString(b.Body))
 }
 
 func (es exprs) node()           {}
