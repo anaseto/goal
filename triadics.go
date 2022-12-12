@@ -25,7 +25,7 @@ func (ctx *Context) amend3arrayI(x array, y int64, f V) V {
 	if repl.IsPanic() {
 		return Panicf("f call in @[x;y;f] : %v", repl)
 	}
-	if compatEltType(x, repl) {
+	if isEltType(x, repl) {
 		x.set(int(y), repl)
 		return NewV(x)
 	}
@@ -88,7 +88,7 @@ func (ctx *Context) amend4arrayI(x array, y int64, f, z V) V {
 	if repl.IsPanic() {
 		return Panicf("f call in @[x;y;f;z] : %v", repl)
 	}
-	if compatEltType(x, repl) {
+	if isEltType(x, repl) {
 		x.set(int(y), repl)
 		return NewV(x)
 	}

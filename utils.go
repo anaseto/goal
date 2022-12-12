@@ -5,6 +5,7 @@ import (
 	"math"
 )
 
+// b2i converts a boolean to an integer.
 func b2i(b bool) (i int64) {
 	if b {
 		i = 1
@@ -12,6 +13,7 @@ func b2i(b bool) (i int64) {
 	return
 }
 
+// b2i converts a boolean to a float.
 func b2f(b bool) (f float64) {
 	if b {
 		f = 1
@@ -19,6 +21,8 @@ func b2f(b bool) (f float64) {
 	return
 }
 
+// divideF divides two floats, returning infinity with appropriate sign when
+// dividing by zero.
 func divideF(x, y float64) float64 {
 	if y == 0 {
 		return math.Inf(signF(x))
@@ -26,6 +30,7 @@ func divideF(x, y float64) float64 {
 	return x / y
 }
 
+// modI returns y % x or y if x is zero
 func modI(x, y int64) int64 {
 	if x == 0 {
 		return y
@@ -33,6 +38,7 @@ func modI(x, y int64) int64 {
 	return y % x
 }
 
+// modF returns y % x or y if x is zero
 func modF(x, y float64) float64 {
 	if x == 0 {
 		return y
@@ -232,6 +238,7 @@ func fromABtoAI(x *AB) V {
 	return NewAI(r)
 }
 
+// isFalse returns true for false values.
 func isFalse(x V) bool {
 	if x.IsI() {
 		return x.I() == 0
@@ -249,6 +256,7 @@ func isFalse(x V) bool {
 	}
 }
 
+// isTrue returns true for true values.
 func isTrue(x V) bool {
 	if x.IsI() {
 		return x.I() != 0
@@ -266,32 +274,42 @@ func isTrue(x V) bool {
 	}
 }
 
-// eltype represents distinct kinds of elements for specialized
-// arrays.
-type eltype int32
+// vType represents information about value types.
+type vType int32
 
 const (
-	tV  eltype = 0b00000
-	tB  eltype = 0b00111
-	tF  eltype = 0b00001
-	tI  eltype = 0b00011
-	tS  eltype = 0b01000
-	tAB eltype = 0b10111
-	tAF eltype = 0b10001
-	tAI eltype = 0b10011
-	tAS eltype = 0b11000
-	tAO eltype = 0b10000
+	tV  vType = 0b00000
+	tB  vType = 0b00111
+	tI  vType = 0b00011
+	tF  vType = 0b00001
+	tS  vType = 0b01000
+	tAB vType = 0b10111
+	tAI vType = 0b10011
+	tAF vType = 0b10001
+	tAS vType = 0b11000
+	tAV vType = 0b10000
 )
 
-func mergeTypes(t, s eltype) eltype {
-	if t&tAO == s&tAO {
+// mergeArrayTypes returns the most specialized type that can represent
+// both array types, or tV if any of them is not an array type. For example,
+// merging 1 2 and 2 3 gives tAI, but merging 4 and 2 3 gives tV.
+func mergeArrayTypes(t, s vType) vType {
+	if t&tAV == s&tAV {
 		return t & s
 	}
 	return tV
 }
 
-// eType returns the eltype of x.
-func eType(x V) eltype {
+// mergeEltTypes returns the most specialized type that can represent both
+// types elements (for arrays) or themselves (for atoms). For example, merging
+// 4 and 2 3 gives tI. It is identical to mergeArrayTypes if both are array
+// types.
+func mergeEltTypes(t, s vType) vType {
+	return t & s
+}
+
+// getType returns the vType of x.
+func getType(x V) vType {
 	if x.IsI() {
 		switch x.I() {
 		case 0, 1:
@@ -315,73 +333,35 @@ func eType(x V) eltype {
 	case *AS:
 		return tAS
 	case *AV:
-		return tAO
+		return tAV
 	default:
 		return tV
 	}
 }
 
-// cType returns the canonical eltype of x. XXX: unused.
-func cType(x V) eltype {
-	if x.IsI() {
-		switch x.I() {
-		case 0, 1:
-			return tB
-		default:
-			return tI
-		}
-	}
-	if x.IsF() {
-		return tF
-	}
-	switch xv := x.value.(type) {
-	case *AB:
-		return tAB
-	case *AF:
-		return tAF
-	case *AI:
-		return tAI
-	case S:
-		return tS
-	case *AS:
-		return tAS
-	case *AV:
-		return cTypeAO(xv)
-	default:
-		return tV
-	}
-}
-
-func cTypeAO(x *AV) eltype {
-	if x.Len() == 0 {
-		return tAO
-	}
-	t := eType(x.At(0))
-	for _, xi := range x.Slice[1:] {
-		t = mergeTypes(t, eType(xi))
-	}
-	switch t {
-	case tB:
-		return tAB
-	case tF:
-		return tAF
-	case tI:
-		return tAI
-	case tS:
-		return tAS
-	default:
-		return tAO
-	}
-}
-
-// aType returns the most specific eltype of the elements of a generic array.
-func aType(x *AV) eltype {
+// aType returns the most specific type common to the elements of a generic
+// array. For example, aType (1 2;2 3) returns tAI, but aType (1;2 3) returns
+// tV.
+func aType(x *AV) vType {
 	if x.Len() == 0 {
 		return tV
 	}
-	t := eType(x.Slice[0])
+	t := getType(x.Slice[0])
 	for i := 1; i < x.Len(); i++ {
-		t = mergeTypes(t, eType(x.At(i)))
+		t = mergeArrayTypes(t, getType(x.At(i)))
+	}
+	return t
+}
+
+// eType returns the most specific element type common to the the elements of a
+// generic array. For example, eType (1;2 3) returns tI.
+func eType(x *AV) vType {
+	if x.Len() == 0 {
+		return tV
+	}
+	t := getType(x.Slice[0])
+	for i := 1; i < x.Len(); i++ {
+		t = mergeEltTypes(t, getType(x.At(i)))
 	}
 	return t
 }
@@ -415,7 +395,9 @@ func sameType(x, y V) bool {
 	}
 }
 
-func compatEltType(x array, y V) bool {
+// isEltType returns true if the type of y is compatible with the type of x
+// elements.
+func isEltType(x array, y V) bool {
 	switch x.(type) {
 	case *AI:
 		return y.IsI()
@@ -511,7 +493,7 @@ func isCanonicalV(x V) bool {
 
 // isCanonical returns true if the given generic array is in canonical form,
 // that is, it uses the most specialized representation.
-func isCanonical(x *AV) (eltype, bool) {
+func isCanonical(x *AV) (vType, bool) {
 	t := aType(x)
 	switch t {
 	case tB, tI, tF, tS:
