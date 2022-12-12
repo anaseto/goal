@@ -584,7 +584,7 @@ func (c *compiler) doStrand(st *astStrand, n int) error {
 			a = append(a, NewS(s))
 		}
 	}
-	id := c.ctx.storeConst(canonicalV(NewAV(a)))
+	id := c.ctx.storeConst(Canonical(NewAV(a)))
 	c.pos = st.Pos
 	c.push2(opConst, opcode(id))
 	c.applyN(n)

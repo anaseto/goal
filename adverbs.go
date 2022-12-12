@@ -159,7 +159,7 @@ func fold2Decode(f V, x V) V {
 					return r[i]
 				}
 			}
-			return canonicalV(NewAV(r))
+			return Canonical(NewAV(r))
 		default:
 			return panicType("i/x", "x", x)
 		}
@@ -216,7 +216,7 @@ func fold2Decode(f V, x V) V {
 					return r[i]
 				}
 			}
-			return canonicalV(NewAV(r))
+			return Canonical(NewAV(r))
 		default:
 			return panicType("I/x", "x", x)
 		}
@@ -255,7 +255,7 @@ func fold3(ctx *Context, args []V) V {
 				return r
 			}
 		}
-		return canonicalV(r)
+		return Canonical(r)
 	default:
 		ctx.push(y)
 		ctx.push(args[2])
@@ -348,7 +348,7 @@ func scan2(ctx *Context, f, x V) V {
 			}
 			r = append(r, next)
 		}
-		return canonicalV(NewAV(r))
+		return Canonical(NewAV(r))
 	default:
 		return x
 	}
@@ -447,7 +447,7 @@ func scan2Encode(f V, x V) V {
 					return r[i]
 				}
 			}
-			return canonicalV(NewAV(r))
+			return Canonical(NewAV(r))
 		default:
 			return panicType("i\\x", "x", x)
 		}
@@ -515,7 +515,7 @@ func scan2Encode(f V, x V) V {
 					return r[i]
 				}
 			}
-			return canonicalV(NewAV(r))
+			return Canonical(NewAV(r))
 		default:
 			return panicType("I\\x", "x", x)
 		}
@@ -565,7 +565,7 @@ func scan3(ctx *Context, args []V) V {
 			}
 			r = append(r, next)
 		}
-		return canonicalV(NewAV(r))
+		return Canonical(NewAV(r))
 	default:
 		ctx.push(y)
 		ctx.push(x)
@@ -597,7 +597,7 @@ func scan3While(ctx *Context, args []V) V {
 				return cond
 			}
 			if !isTrue(cond) {
-				return canonicalV(NewAV(r))
+				return Canonical(NewAV(r))
 			}
 			ctx.push(y)
 			y = ctx.applyN(f, 1)
@@ -620,7 +620,7 @@ func scan3doTimes(ctx *Context, n int64, f, y V) V {
 		}
 		r = append(r, y)
 	}
-	return canonicalV(NewAV(r))
+	return Canonical(NewAV(r))
 }
 
 func each2(ctx *Context, args []V) V {
@@ -640,7 +640,7 @@ func each2(ctx *Context, args []V) V {
 			}
 			r = append(r, next)
 		}
-		return canonicalV(NewAV(r))
+		return Canonical(NewAV(r))
 	default:
 		// should not happen
 		return panicf("f'x : x not an array (%s)", x.Type())
@@ -671,7 +671,7 @@ func each3(ctx *Context, args []V) V {
 			}
 			r = append(r, next)
 		}
-		return canonicalV(NewAV(r))
+		return Canonical(NewAV(r))
 	}
 	if !okay {
 		xlen := xa.Len()
@@ -685,7 +685,7 @@ func each3(ctx *Context, args []V) V {
 			}
 			r = append(r, next)
 		}
-		return canonicalV(NewAV(r))
+		return Canonical(NewAV(r))
 	}
 	xlen := xa.Len()
 	if xlen != ya.Len() {
@@ -701,5 +701,5 @@ func each3(ctx *Context, args []V) V {
 		}
 		r = append(r, next)
 	}
-	return canonicalV(NewAV(r))
+	return Canonical(NewAV(r))
 }

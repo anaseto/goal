@@ -286,7 +286,7 @@ func uniq(x V) V {
 			}
 			r = append(r, xi)
 		}
-		return canonicalV(NewAV(r))
+		return Canonical(NewAV(r))
 	default:
 		// NOTE: ?atom could be used for something.
 		return panicf("?x : x not an array (%s)", x.Type())

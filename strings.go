@@ -48,7 +48,7 @@ func applyS(s S, x V) V {
 				return r[i]
 			}
 		}
-		return canonicalV(NewAV(r))
+		return Canonical(NewAV(r))
 	default:
 		return panicf("s[x] : x non-integer (%s)", x.Type())
 	}
@@ -157,7 +157,7 @@ func applyS2(s S, x V, y V) V {
 				return r[i]
 			}
 		}
-		return canonicalV(NewAV(r))
+		return Canonical(NewAV(r))
 	default:
 		return panicf("s[x;y] : x non-integer (%s)", x.Type())
 	}
@@ -181,7 +181,7 @@ func bytes(x V) V {
 				return r[i]
 			}
 		}
-		return canonicalV(NewAV(r))
+		return Canonical(NewAV(r))
 	default:
 		return panicType("bytes x", "x", x)
 	}
@@ -266,7 +266,7 @@ func castn(y V) V {
 			}
 			r[i] = n
 		}
-		return canonicalV(NewAV(r))
+		return Canonical(NewAV(r))
 	case *AF:
 		return y
 	case *AV:
@@ -277,7 +277,7 @@ func castn(y V) V {
 				return r[i]
 			}
 		}
-		return canonicalV(NewAV(r))
+		return Canonical(NewAV(r))
 	default:
 		return panics("\"i\"$y : non-numeric y")
 	}
@@ -309,7 +309,7 @@ func casts(y V) V {
 				return r[i]
 			}
 		}
-		return canonicalV(NewAV(r))
+		return Canonical(NewAV(r))
 	default:
 		return panics("\"i\"$y : non-numeric y")
 	}

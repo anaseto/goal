@@ -141,7 +141,7 @@ func (ctx *Context) applyArray(x V, y V) V {
 				return r[i]
 			}
 		}
-		return canonicalV(NewAV(r))
+		return Canonical(NewAV(r))
 	case array:
 		iy := toIndices(y)
 		if iy.IsPanic() {
@@ -167,7 +167,7 @@ func (ctx *Context) applyArrayArgs(x V, arg V, args []V) V {
 				return r[i]
 			}
 		}
-		return canonicalV(NewAV(r))
+		return Canonical(NewAV(r))
 	}
 	switch argv := arg.value.(type) {
 	case array:
@@ -178,7 +178,7 @@ func (ctx *Context) applyArrayArgs(x V, arg V, args []V) V {
 				return r[i]
 			}
 		}
-		return canonicalV(NewAV(r))
+		return Canonical(NewAV(r))
 	default:
 		r := ctx.applyArray(x, arg)
 		if r.IsPanic() {
@@ -353,7 +353,7 @@ func (x *AV) atIndices(y []int64) V {
 		}
 		r[i] = x.At(int(yi))
 	}
-	return canonicalV(NewAV(r))
+	return Canonical(NewAV(r))
 }
 
 func (x *AB) atIndices(y []int64) V {

@@ -10,7 +10,7 @@ func (ctx *Context) amend3(x, y, f V) V {
 		if y.IsPanic() {
 			return y
 		}
-		return canonicalV(ctx.amend3array(cloneShallowArray(xv), y, f))
+		return Canonical(ctx.amend3array(cloneShallowArray(xv), y, f))
 	default:
 		return panicType("@[x;y;f]", "x", x)
 	}
@@ -73,7 +73,7 @@ func (ctx *Context) amend4(x, y, f, z V) V {
 		if y.IsPanic() {
 			return y
 		}
-		return canonicalV(ctx.amend4array(cloneShallowArray(xv), y, f, z))
+		return Canonical(ctx.amend4array(cloneShallowArray(xv), y, f, z))
 	default:
 		return panicType("@[x;y;f;z]", "x", x)
 	}

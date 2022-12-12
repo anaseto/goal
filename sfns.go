@@ -176,14 +176,14 @@ func dropi(i int64, y V) V {
 				i = int64(yv.Len())
 			}
 			y.value = yv.slice(int(i), yv.Len())
-			return canonicalV(y)
+			return Canonical(y)
 		default:
 			i = int64(yv.Len()) + i
 			if i < 0 {
 				i = 0
 			}
 			y.value = yv.slice(0, int(i))
-			return canonicalV(y)
+			return Canonical(y)
 		}
 	default:
 		return panics("i_y : y not an array")
@@ -253,7 +253,7 @@ func cutAI(x *AI, y V) V {
 			}
 			r[i] = NewAV(yv.Slice[from:to])
 		}
-		return canonicalV(NewAV(r))
+		return Canonical(NewAV(r))
 	default:
 		return panicf("x_y : y not an array (%s)", y.Type())
 	}
@@ -285,12 +285,12 @@ func take(x, y V) V {
 		if i > int64(yv.Len()) {
 			return takeCyclic(yv, i)
 		}
-		return canonicalV(NewV(yv.slice(0, int(i))))
+		return Canonical(NewV(yv.slice(0, int(i))))
 	default:
 		if i < int64(-yv.Len()) {
 			return takeCyclic(yv, i)
 		}
-		return canonicalV(NewV(yv.slice(yv.Len()+int(i), yv.Len())))
+		return Canonical(NewV(yv.slice(yv.Len()+int(i), yv.Len())))
 	}
 }
 
@@ -622,7 +622,7 @@ func shiftBeforeAV(x V, yv *AV) V {
 		for i := 0; i < max; i++ {
 			r.Slice[i] = xv.at(i)
 		}
-		return canonicalV(NewV(r))
+		return Canonical(NewV(r))
 	default:
 		r := yv.reuse()
 		copy(r.Slice[max:], ys[:len(ys)-max])
@@ -695,7 +695,7 @@ func nudge(x V) V {
 		r := xv.reuse()
 		copy(r.Slice[1:], xv.Slice[:xv.Len()-1])
 		r.Slice[0] = NewI(0)
-		return canonicalV(NewV(r))
+		return Canonical(NewV(r))
 	default:
 		return panics("rshift x : x not an array")
 	}
@@ -926,7 +926,7 @@ func shiftAfterAV(x V, yv *AV) V {
 		for i := 0; i < max; i++ {
 			r.Slice[len(ys)-max+i] = xv.at(i)
 		}
-		return canonicalV(NewV(r))
+		return Canonical(NewV(r))
 	default:
 		r := yv.reuse()
 		copy(r.Slice[:len(ys)-max], ys[max:])
@@ -999,7 +999,7 @@ func nudgeBack(x V) V {
 		r := xv.reuse()
 		copy(r.Slice[0:xv.Len()-1], xv.Slice[1:])
 		r.Slice[xv.Len()-1] = NewI(0)
-		return canonicalV(NewV(r))
+		return Canonical(NewV(r))
 	default:
 		return panics("shift x : x not an array")
 	}
@@ -1016,7 +1016,7 @@ func windows(i int64, y V) V {
 		for j := range r {
 			yc := y
 			yc.value = yv.slice(j, j+int(i))
-			r[j] = canonicalV(yc)
+			r[j] = Canonical(yc)
 		}
 		return NewAV(r)
 	default:
@@ -1056,7 +1056,7 @@ func shapeSplit(x V, y V) V {
 			from := j * int(i)
 			to := minInt(from+int(i), ylen)
 			yc.value = yv.slice(from, to)
-			r[j] = canonicalV(yc)
+			r[j] = Canonical(yc)
 		}
 		return NewAV(r)
 	default:

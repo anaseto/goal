@@ -181,7 +181,7 @@ func toIndicesRec(x V) V {
 				return r[i]
 			}
 		}
-		return canonicalV(NewAV(r))
+		return Canonical(NewAV(r))
 	default:
 		return panics("not an indices array")
 	}
@@ -509,9 +509,8 @@ func isCanonicalV(x V) bool {
 	}
 }
 
-// isCanonical returns true if the array is in canonical form, that is, it uses
-// the most specialized representation. For example AV{I(2), I(3)} is not
-// canonical, but AI{2, 3} is.
+// isCanonical returns true if the given generic array is in canonical form,
+// that is, it uses the most specialized representation.
 func isCanonical(x *AV) (eltype, bool) {
 	t := aType(x)
 	switch t {
@@ -529,10 +528,13 @@ func isCanonical(x *AV) (eltype, bool) {
 	}
 }
 
-func assertCanonical(x *AV) {
-	_, ok := isCanonical(x)
-	if !ok {
-		panic(fmt.Sprintf("not canonical: %#v", x))
+func assertCanonical(x V) {
+	switch xv := x.value.(type) {
+	case *AV:
+		_, ok := isCanonical(xv)
+		if !ok {
+			panic(fmt.Sprintf("not canonical: %#v", x))
+		}
 	}
 }
 
@@ -571,7 +573,7 @@ func normalize(x *AV) (array, bool) {
 		return &AS{Slice: r}, true
 	case tV:
 		for i, xi := range x.Slice {
-			x.Slice[i] = canonicalV(xi)
+			x.Slice[i] = Canonical(xi)
 		}
 		return x, false
 	default:
@@ -580,8 +582,18 @@ func normalize(x *AV) (array, bool) {
 	}
 }
 
-// canonicalV returns the canonical form of a given value.
-func canonicalV(x V) V {
+// canonicalAV returns the canonicalAV form of a given generic array.
+func canonicalAV(x *AV) Value {
+	r, _ := normalize(x)
+	return r
+}
+
+// Canonical returns the canonical form of a given value, that is the most
+// specialized form. In practice, if the value is a generic array, but a more
+// specialized version could represent the value, it returns the specialized
+// value. All goal variadic functions have to return results in canonical
+// form, so this function can be used to ensure that.
+func Canonical(x V) V {
 	switch xv := x.value.(type) {
 	case *AV:
 		r, b := normalize(xv)
@@ -592,12 +604,6 @@ func canonicalV(x V) V {
 	default:
 		return x
 	}
-}
-
-// canonical returns the canonical form of a given generic array.
-func canonical(x *AV) Value {
-	r, _ := normalize(x)
-	return r
 }
 
 // hasNil returns true if there is a nil value in the given array.
