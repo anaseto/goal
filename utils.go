@@ -31,14 +31,14 @@ func divideF(x, y float64) float64 {
 }
 
 func modI(x, y int64) int64 {
-	if y == 0 {
+	if x == 0 {
 		return y
 	}
 	return y % x
 }
 
 func modF(x, y float64) float64 {
-	if y == 0 {
+	if x == 0 {
 		return y
 	}
 	return math.Mod(float64(y), float64(x))
