@@ -469,7 +469,6 @@ func VEach(ctx *Context, args []V) V {
 	default:
 		return panicRank("'")
 	}
-	return V{}
 }
 
 // VFold implements the / variadic adverb.
@@ -482,7 +481,6 @@ func VFold(ctx *Context, args []V) V {
 	default:
 		return panicRank("/")
 	}
-	return V{}
 }
 
 // VScan implements the \ variadic adverb.
@@ -495,7 +493,6 @@ func VScan(ctx *Context, args []V) V {
 	default:
 		return panicRank("\\")
 	}
-	return V{}
 }
 
 // VAnd implements the "and" variadic verb.
