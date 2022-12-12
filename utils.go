@@ -598,7 +598,7 @@ func Canonical(x V) V {
 	case *AV:
 		r, b := normalize(xv)
 		if b {
-			return NewV(r)
+			x.value = r
 		}
 		return x
 	default:
