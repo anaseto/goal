@@ -66,20 +66,20 @@ func _() {
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
 	_ = x[opNop-0]
-	_ = x[opConst-1]
-	_ = x[opInt-2]
-	_ = x[opNil-3]
-	_ = x[opGlobal-4]
-	_ = x[opGlobalLast-5]
+	_ = x[opNil-1]
+	_ = x[opConst-2]
+	_ = x[opInt-3]
+	_ = x[opVariadic-4]
+	_ = x[opLambda-5]
 	_ = x[opLocal-6]
 	_ = x[opLocalLast-7]
-	_ = x[opAssignGlobal-8]
-	_ = x[opAssignLocal-9]
-	_ = x[opDerive-10]
-	_ = x[opVariadic-11]
-	_ = x[opLambda-12]
-	_ = x[opApply-13]
-	_ = x[opApplyV-14]
+	_ = x[opGlobal-8]
+	_ = x[opGlobalLast-9]
+	_ = x[opAssignGlobal-10]
+	_ = x[opAssignLocal-11]
+	_ = x[opApply-12]
+	_ = x[opApplyV-13]
+	_ = x[opDerive-14]
 	_ = x[opApply2-15]
 	_ = x[opApply2V-16]
 	_ = x[opApplyN-17]
@@ -92,9 +92,9 @@ func _() {
 	_ = x[opTry-24]
 }
 
-const _opcode_name = "opNopopConstopIntopNilopGlobalopGlobalLastopLocalopLocalLastopAssignGlobalopAssignLocalopDeriveopVariadicopLambdaopApplyopApplyVopApply2opApply2VopApplyNopApplyNVopDropopJumpopJumpFalseopJumpTrueopReturnopTry"
+const _opcode_name = "opNopopNilopConstopIntopVariadicopLambdaopLocalopLocalLastopGlobalopGlobalLastopAssignGlobalopAssignLocalopApplyopApplyVopDeriveopApply2opApply2VopApplyNopApplyNVopDropopJumpopJumpFalseopJumpTrueopReturnopTry"
 
-var _opcode_index = [...]uint8{0, 5, 12, 17, 22, 30, 42, 49, 60, 74, 87, 95, 105, 113, 120, 128, 136, 145, 153, 162, 168, 174, 185, 195, 203, 208}
+var _opcode_index = [...]uint8{0, 5, 10, 17, 22, 32, 40, 47, 58, 66, 78, 92, 105, 112, 120, 128, 136, 145, 153, 162, 168, 174, 185, 195, 203, 208}
 
 func (i opcode) String() string {
 	if i < 0 || i >= opcode(len(_opcode_index)-1) {

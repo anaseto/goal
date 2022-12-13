@@ -8,7 +8,6 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 		//fmt.Printf("op: %s\n", op)
 		ip++
 		switch op {
-		case opNop:
 		case opConst:
 			ctx.push(ctx.constants[ops[ip]])
 			ip++

@@ -9,20 +9,20 @@ type opcode int32
 
 const (
 	opNop opcode = iota
+	opNil
 	opConst
 	opInt
-	opNil
-	opGlobal
-	opGlobalLast
-	opLocal
-	opLocalLast
-	opAssignGlobal
-	opAssignLocal
-	opDerive
 	opVariadic
 	opLambda
+	opLocal
+	opLocalLast
+	opGlobal
+	opGlobalLast
+	opAssignGlobal
+	opAssignLocal
 	opApply
 	opApplyV
+	opDerive
 	opApply2
 	opApply2V
 	opApplyN
