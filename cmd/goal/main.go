@@ -185,7 +185,8 @@ func usageError(usage bool, msgs ...interface{}) {
 }
 
 func registerVariadics(ctx *goal.Context) {
-	ctx.RegisterMonad("say", gio.VSay)
+	ctx.RegisterDyad("say", gio.VSay)
+	ctx.RegisterDyad("print", gio.VPrint)
 	ctx.RegisterMonad("slurp", gio.VSlurp)
 	ctx.RegisterMonad("shell", gio.VShell)
 }
@@ -312,9 +313,13 @@ I\x	decode	24 60 60\3723 -> 1 2 3	2\6 -> 1 1 0
 `
 const helpIO = `
 IO
-slurp[s]	read file named s	lines:"\n"\slurp["/path/to/file"]
-say[x;...]	print value(s) with newline	say 2+3
+slurp s		read file named s	lines:"\n"\slurp["/path/to/file"]
+print x		print value		print "Hello, world!\n"
+say x		same as print, but appends a newline
 shell[cmd]	run a command through the shell
+
+w print x	print to writer or filename	"filename" print "content"
+w say x		same as print, but appends a newline
 `
 
 const helpSyntax = `

@@ -107,6 +107,11 @@ func Panicf(format string, a ...interface{}) V {
 	return panics(fmt.Sprintf(format, a...))
 }
 
+// Errorf returns a formatted recoverable error value.
+func Errorf(format string, a ...interface{}) V {
+	return NewError(NewS(fmt.Sprintf(format, a...)))
+}
+
 // NewPanic returns a fatal error value.
 func NewPanic(s string) V {
 	return panics(s)
