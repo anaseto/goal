@@ -124,6 +124,7 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterMonad("icount", VICount)
 	ctx.RegisterMonad("ocount", VOCount)
 	ctx.RegisterMonad("sign", VSign)
+	ctx.RegisterMonad("sub", VSub)
 	ctx.RegisterDyad("and", VAnd)
 	ctx.RegisterDyad("in", VIn)
 	ctx.RegisterDyad("or", VOr)
@@ -657,5 +658,25 @@ func VRShift(ctx *Context, args []V) V {
 		return shiftBefore(args[1], args[0])
 	default:
 		return panicRank("rshift")
+	}
+}
+
+// VSub implements the sub variadic verb.
+func VSub(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1, 2:
+		return panics("sub : not enough arguments")
+	case 3:
+		x, y, z := args[2], args[1], args[0]
+		switch xv := x.value.(type) {
+		case S:
+			return replace(xv, y, z)
+		case *AS:
+			return replaceAS(xv, y, z)
+		default:
+			return panicType("sub[x;y;z]", "x", x)
+		}
+	default:
+		return panicRank("sub")
 	}
 }

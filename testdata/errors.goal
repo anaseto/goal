@@ -97,3 +97,13 @@ a,:: / assignment operation without expression right
 a: / assignment without expression right
 (1;) / empty slot in list
 +[ / unexpected
+sub["abc";"a";2] / non-string
+sub["abc";"a" "b";2] / not a string array
+sub["abc";"a" "b";,"c"] / length mismatch
+sub["abc";+;"c"] / type
+sub["abc" "def";"a";2] / non-string
+sub["abc" "def";"a" "b";2] / not a string array
+sub["abc" "def";"a" "b";,"c"] / length mismatch
+sub["abc" "def";+;"c"] / type
+sub["abc" "def";"a"] / not enough arguments
+sub["abc" "def";"a";"b";"c";"d"] / too many arguments

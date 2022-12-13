@@ -43,3 +43,7 @@ bytes ("a" "bc";"d" "efg") / (1 2;1 3)
 "s"$(97.0 98.0;98 99) / "ab" "bc"
 "a"_(("bc";"ad");"abc") / (("bc";"d");"bc")
 " "^(("bc ";"  ad");"abc  ") / (("bc";"ad");"abc")
+sub["abc";"b";"d"] / "adc"
+sub["abc";"b" "c";"d" "e"] / "ade"
+sub["abc" "dbe";"b";"d"] / "adc" "dde"
+sub["abc" "dbe";"b" "c";"d" "e"] / "ade" "dde"

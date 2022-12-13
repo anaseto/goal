@@ -3,6 +3,7 @@ package goal
 import (
 	"fmt"
 	"math"
+	//"reflect"
 )
 
 // b2i converts a boolean to an integer.
@@ -366,34 +367,11 @@ func eType(x *AV) vType {
 	return t
 }
 
-func sameType(x, y V) bool {
-	if x.IsI() {
-		return y.IsI()
-	}
-	if x.IsF() {
-		return y.IsF()
-	}
-	switch x.value.(type) {
-	case *AB:
-		_, ok := y.value.(*AB)
-		return ok
-	case *AI:
-		_, ok := y.value.(*AI)
-		return ok
-	case *AF:
-		_, ok := y.value.(*AF)
-		return ok
-	case *AS:
-		_, ok := y.value.(*AS)
-		return ok
-	case *AV:
-		_, ok := y.value.(*AV)
-		return ok
-	default:
-		// TODO: sameType, handle other cases (unused for now)
-		return false
-	}
-}
+//// sameType returns true if two (non-Panic) values have same type.
+//func sameType(x, y V) bool {
+//return x.kind != valBoxed && x.kind == y.kind ||
+//reflect.TypeOf(x.value) == reflect.TypeOf(y.value)
+//}
 
 // isEltType returns true if the type of y is compatible with the type of x
 // elements.

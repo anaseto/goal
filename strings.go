@@ -364,3 +364,65 @@ func trim(s S, y V) V {
 		return panicType("s^y", "y", y)
 	}
 }
+
+func replace(s S, y, z V) V {
+	switch yv := y.value.(type) {
+	case S:
+		zv, ok := z.value.(S)
+		if !ok {
+			return Panicf("@[s;s;z] : non-string z (%s)", z.Type())
+		}
+		return NewS(strings.ReplaceAll(string(s), string(yv), string(zv)))
+	case *AS:
+		zv, ok := z.value.(*AS)
+		if !ok {
+			return Panicf("@[s;S;z] : z not a string array (%s)", z.Type())
+		}
+		if yv.Len() != zv.Len() {
+			return Panicf("@[s;y;z] : length mismatch for y and z (%d vs %d)", yv.Len(), zv.Len())
+		}
+		oldnews := make([]string, 0, 2*yv.Len())
+		for i, s := range yv.Slice {
+			oldnews = append(oldnews, s, zv.At(i))
+		}
+		rep := strings.NewReplacer(oldnews...)
+		return NewS(rep.Replace(string(s)))
+	default:
+		return panicType("@[s;y;z]", "y", y)
+	}
+}
+
+func replaceAS(xv *AS, y, z V) V {
+	switch yv := y.value.(type) {
+	case S:
+		zv, ok := z.value.(S)
+		if !ok {
+			return Panicf("@[s;s;z] : non-string z (%s)", z.Type())
+		}
+		r := xv.reuse()
+		for i, s := range xv.Slice {
+			r.Slice[i] = strings.ReplaceAll(string(s), string(yv), string(zv))
+		}
+		return NewV(r)
+	case *AS:
+		zv, ok := z.value.(*AS)
+		if !ok {
+			return Panicf("@[s;S;z] : z not a string array (%s)", z.Type())
+		}
+		if yv.Len() != zv.Len() {
+			return Panicf("@[s;y;z] : length mismatch for y and z (%d vs %d)", yv.Len(), zv.Len())
+		}
+		oldnews := make([]string, 0, 2*yv.Len())
+		for i, s := range yv.Slice {
+			oldnews = append(oldnews, s, zv.At(i))
+		}
+		rep := strings.NewReplacer(oldnews...)
+		r := xv.reuse()
+		for i, s := range xv.Slice {
+			r.Slice[i] = rep.Replace(string(s))
+		}
+		return NewV(r)
+	default:
+		return panicType("@[s;y;z]", "y", y)
+	}
+}
