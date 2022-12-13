@@ -23,7 +23,7 @@ func VPrint(ctx *goal.Context, args []goal.V) goal.V {
 			return goal.Errorf("print x : %v", err)
 		}
 	case 2:
-		w := args[0]
+		w := args[1]
 		var wout io.Writer
 		switch wv := w.Value().(type) {
 		case goal.S:
@@ -37,8 +37,8 @@ func VPrint(ctx *goal.Context, args []goal.V) goal.V {
 		default:
 			return goal.NewPanic("w print x : w should be a string or writer")
 		}
-		x := args[1]
-		err := fprintV(ctx, x, wout, false)
+		x := args[0]
+		err := fprintV(ctx, wout, x, false)
 		if err != nil {
 			return goal.Errorf("w print x : %v", err)
 		}
@@ -59,7 +59,7 @@ func VSay(ctx *goal.Context, args []goal.V) goal.V {
 			return goal.Errorf("say x : %v", err)
 		}
 	case 2:
-		w := args[0]
+		w := args[1]
 		var wout io.Writer
 		switch wv := w.Value().(type) {
 		case goal.S:
@@ -73,8 +73,8 @@ func VSay(ctx *goal.Context, args []goal.V) goal.V {
 		default:
 			return goal.NewPanic("w say x : w should be a string or writer")
 		}
-		x := args[1]
-		err := fprintV(ctx, x, wout, true)
+		x := args[0]
+		err := fprintV(ctx, wout, x, true)
 		if err != nil {
 			return goal.Errorf("w say x : %v", err)
 		}
@@ -115,7 +115,7 @@ func printV(ctx *goal.Context, x goal.V, newline bool) error {
 	}
 }
 
-func fprintV(ctx *goal.Context, x goal.V, w io.Writer, newline bool) error {
+func fprintV(ctx *goal.Context, w io.Writer, x goal.V, newline bool) error {
 	buf := bufio.NewWriter(w)
 	switch xv := x.Value().(type) {
 	case goal.S:

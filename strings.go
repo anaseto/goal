@@ -373,8 +373,8 @@ func replace(x, y, z V) V {
 		return replaceAS(xv, y, z)
 	case *AV:
 		r := xv.reuse()
-		for i, v := range xv.Slice {
-			r.Slice[i] = replace(v, y, z)
+		for i, xi := range xv.Slice {
+			r.Slice[i] = replace(xi, y, z)
 			if r.Slice[i].IsPanic() {
 				return r.Slice[i]
 			}
