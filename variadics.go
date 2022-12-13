@@ -668,14 +668,7 @@ func VSub(ctx *Context, args []V) V {
 		return panics("sub : not enough arguments")
 	case 3:
 		x, y, z := args[2], args[1], args[0]
-		switch xv := x.value.(type) {
-		case S:
-			return replace(xv, y, z)
-		case *AS:
-			return replaceAS(xv, y, z)
-		default:
-			return panicType("sub[x;y;z]", "x", x)
-		}
+		return replace(x, y, z)
 	default:
 		return panicRank("sub")
 	}

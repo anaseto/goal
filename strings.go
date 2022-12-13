@@ -365,7 +365,27 @@ func trim(s S, y V) V {
 	}
 }
 
-func replace(s S, y, z V) V {
+func replace(x, y, z V) V {
+	switch xv := x.value.(type) {
+	case S:
+		return replaceS(xv, y, z)
+	case *AS:
+		return replaceAS(xv, y, z)
+	case *AV:
+		r := xv.reuse()
+		for i, v := range xv.Slice {
+			r.Slice[i] = replace(v, y, z)
+			if r.Slice[i].IsPanic() {
+				return r.Slice[i]
+			}
+		}
+		return NewV(r)
+	default:
+		return panicType("sub[x;y;z]", "x", x)
+	}
+}
+
+func replaceS(s S, y, z V) V {
 	switch yv := y.value.(type) {
 	case S:
 		zv, ok := z.value.(S)

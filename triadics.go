@@ -5,8 +5,6 @@ package goal
 // amend3 implements @[x;y;f].
 func (ctx *Context) amend3(x, y, f V) V {
 	switch xv := x.value.(type) {
-	case S:
-		return replace(xv, y, f)
 	case array:
 		y = toIndices(y)
 		if y.IsPanic() {

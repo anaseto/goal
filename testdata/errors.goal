@@ -107,3 +107,4 @@ sub["abc" "def";"a" "b";,"c"] / length mismatch
 sub["abc" "def";+;"c"] / type
 sub["abc" "def";"a"] / not enough arguments
 sub["abc" "def";"a";"b";"c";"d"] / too many arguments
+sub[("abc";*);"b";"d"] / type

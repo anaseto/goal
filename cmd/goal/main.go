@@ -289,6 +289,8 @@ sign x    sign		sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
 x in y      member of	2 3 in 0 2 4 -> 1 0
 x rshift y  right shift	"a" "b" rshift 1 2 3 / "a" "b" 1
 x shift y   shift	"a" "b" shift 1 2 3 -> 3 "a" "b"
+
+sub[x;y;z]  substitute  sub["abc";"b" "c";"d" "e"] -> "ade"
 `
 
 const helpADVERBS = `
@@ -318,15 +320,18 @@ shell[cmd]	run a command through the shell
 const helpSyntax = `
 literals	1	1.5	"text"
 arrays		1 2 -3 4	1 "a" -2 "b"	(1 2;"a";(3;"b"))
-variables	a:2 (assign)	a+3 (use)	a::2 (assign global)
+variables	a:2 (assign)	a+:1 (same as a:a+1)	a+3 (use)
+		a::2 (assign global)	a+::2 (same as a::a+2)
 expressions	2*3+4 -> 14	1+|1 2 3 -> 4 3 2	+/1 2 3 -> 6
-index		1 2 3[1] -> 2 (same as x@1) (1 2;3 4)[0;1] -> 2 (same as x.(0;1))
+index array	1 2 3[1] -> 2 (same as x@1) (1 2;3 4)[0;1] -> 2 (same as x.(0;1))
+index string	"abc"[1] -> "bcde"	"abcde"[1;2] -> "bc"	(s[offset;len])
 lambdas		{x+y+z}[2;3;0] -> 5	{[a;b;c]a+b+c}[1;2;3] -> 6
 projections	{x+y}[2;] 3 -> 5	(2+) 3 -> 5
 cond		?[1;2;3] -> 2	?[0;2;3] -> 3	?[0;2;"";3;4] -> 4
 and/or		and[1;2] -> 2   and[1;0;3] -> 0   or[0;2] -> 2   or[0;0;0] -> 0
 sequence	[a:2;b:a+3;a+10] -> 12 (bracket block [] at start of expression)
 return		[1;:2;3] -> 2 (a : at start of expression)
+return error	'error "msg" (same as :error "msg")	'4+3 (same as 4+3)
 `
 
 const helpTypes = `

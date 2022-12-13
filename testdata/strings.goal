@@ -46,4 +46,5 @@ bytes ("a" "bc";"d" "efg") / (1 2;1 3)
 sub["abc";"b";"d"] / "adc"
 sub["abc";"b" "c";"d" "e"] / "ade"
 sub["abc" "dbe";"b";"d"] / "adc" "dde"
+sub[("abc" "dbe";"bac");"b";"d"] / ("adc" "dde";"dac")
 sub["abc" "dbe";"b" "c";"d" "e"] / "ade" "dde"
