@@ -5,11 +5,8 @@ import (
 	"math"
 )
 
-// VariadicFun represents a variadic function, either a verb or an adverb.
-type VariadicFun struct {
-	Adverb bool
-	Func   func(*Context, []V) V
-}
+// VariadicFun represents a variadic function.
+type VariadicFun func(*Context, []V) V
 
 // variadic represents a built-in function.
 type variadic int32
@@ -45,30 +42,30 @@ var vFuns []VariadicFun
 
 func init() {
 	vFuns = []VariadicFun{
-		vRight:    {Func: VRight},
-		vAdd:      {Func: VAdd},
-		vSubtract: {Func: VSubtract},
-		vMultiply: {Func: VMultiply},
-		vDivide:   {Func: VDivide},
-		vMod:      {Func: VMod},
-		vMin:      {Func: VMin},
-		vMax:      {Func: VMax},
-		vLess:     {Func: VLess},
-		vMore:     {Func: VMore},
-		vEqual:    {Func: VEqual},
-		vMatch:    {Func: VMatch},
-		vJoin:     {Func: VJoin},
-		vWithout:  {Func: VWithout},
-		vTake:     {Func: VTake},
-		vDrop:     {Func: VDrop},
-		vCast:     {Func: VCast},
-		vFind:     {Func: VFind},
-		vApply:    {Func: VApply},
-		vApplyN:   {Func: VApplyN},
-		vList:     {Func: VList},
-		vEach:     {Func: VEach, Adverb: true},
-		vFold:     {Func: VFold, Adverb: true},
-		vScan:     {Func: VScan, Adverb: true},
+		vRight:    VRight,
+		vAdd:      VAdd,
+		vSubtract: VSubtract,
+		vMultiply: VMultiply,
+		vDivide:   VDivide,
+		vMod:      VMod,
+		vMin:      VMin,
+		vMax:      VMax,
+		vLess:     VLess,
+		vMore:     VMore,
+		vEqual:    VEqual,
+		vMatch:    VMatch,
+		vJoin:     VJoin,
+		vWithout:  VWithout,
+		vTake:     VTake,
+		vDrop:     VDrop,
+		vCast:     VCast,
+		vFind:     VFind,
+		vApply:    VApply,
+		vApplyN:   VApplyN,
+		vList:     VList,
+		vEach:     VEach,
+		vFold:     VFold,
+		vScan:     VScan,
 	}
 }
 
@@ -118,21 +115,21 @@ func (ctx *Context) initVariadics() {
 	}
 	ctx.vNames["::"] = vRight
 	ctx.keywords = map[string]NameType{}
-	ctx.RegisterMonad("abs", VariadicFun{Func: VAbs})
-	ctx.RegisterMonad("bytes", VariadicFun{Func: VBytes})
-	ctx.RegisterMonad("ceil", VariadicFun{Func: VCeil})
-	ctx.RegisterMonad("error", VariadicFun{Func: VError})
-	ctx.RegisterMonad("eval", VariadicFun{Func: VEval})
-	ctx.RegisterMonad("firsts", VariadicFun{Func: VFirsts})
-	ctx.RegisterMonad("icount", VariadicFun{Func: VICount})
-	ctx.RegisterMonad("ocount", VariadicFun{Func: VOCount})
-	ctx.RegisterMonad("sign", VariadicFun{Func: VSign})
-	ctx.RegisterDyad("and", VariadicFun{Func: VAnd})
-	ctx.RegisterDyad("in", VariadicFun{Func: VIn})
-	ctx.RegisterDyad("or", VariadicFun{Func: VOr})
-	ctx.RegisterDyad("rotate", VariadicFun{Func: VRotate})
-	ctx.RegisterDyad("shift", VariadicFun{Func: VShift})
-	ctx.RegisterDyad("rshift", VariadicFun{Func: VRShift})
+	ctx.RegisterMonad("abs", VAbs)
+	ctx.RegisterMonad("bytes", VBytes)
+	ctx.RegisterMonad("ceil", VCeil)
+	ctx.RegisterMonad("error", VError)
+	ctx.RegisterMonad("eval", VEval)
+	ctx.RegisterMonad("firsts", VFirsts)
+	ctx.RegisterMonad("icount", VICount)
+	ctx.RegisterMonad("ocount", VOCount)
+	ctx.RegisterMonad("sign", VSign)
+	ctx.RegisterDyad("and", VAnd)
+	ctx.RegisterDyad("in", VIn)
+	ctx.RegisterDyad("or", VOr)
+	ctx.RegisterDyad("rotate", VRotate)
+	ctx.RegisterDyad("shift", VShift)
+	ctx.RegisterDyad("rshift", VRShift)
 }
 
 type zeroFun interface {
@@ -462,6 +459,8 @@ func VList(ctx *Context, args []V) V {
 // VEach implements the ' variadic adverb.
 func VEach(ctx *Context, args []V) V {
 	switch len(args) {
+	case 1:
+		return panics("' : not enough arguments")
 	case 2:
 		return each2(ctx, args)
 	case 3:
@@ -474,6 +473,8 @@ func VEach(ctx *Context, args []V) V {
 // VFold implements the / variadic adverb.
 func VFold(ctx *Context, args []V) V {
 	switch len(args) {
+	case 1:
+		return panics("/ : not enough arguments")
 	case 2:
 		return fold2(ctx, args)
 	case 3:
@@ -486,6 +487,8 @@ func VFold(ctx *Context, args []V) V {
 // VScan implements the \ variadic adverb.
 func VScan(ctx *Context, args []V) V {
 	switch len(args) {
+	case 1:
+		return panics("\\ : not enough arguments")
 	case 2:
 		return scan2(ctx, args[1], args[0])
 	case 3:
@@ -497,9 +500,9 @@ func VScan(ctx *Context, args []V) V {
 
 // VAnd implements the "and" variadic verb.
 func VAnd(ctx *Context, args []V) V {
-	for _, arg := range args {
-		if isFalse(arg) {
-			return arg
+	for i := len(args) - 1; i > 0; i-- {
+		if isFalse(args[i]) {
+			return args[i]
 		}
 	}
 	return args[0]
@@ -603,9 +606,9 @@ func VOCount(ctx *Context, args []V) V {
 
 // VOr implements the "or" variadic verb.
 func VOr(ctx *Context, args []V) V {
-	for _, arg := range args {
-		if isTrue(arg) {
-			return arg
+	for i := len(args) - 1; i > 0; i-- {
+		if isTrue(args[i]) {
+			return args[i]
 		}
 	}
 	return args[0]

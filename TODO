@@ -12,7 +12,8 @@ Features:
 - some kind of templating/interpolation
 
 Tests:
-- improve test coverage and fix any remaining bugs in corner cases
+- improve test coverage for error messages and refactor and improve them along
+  the way
 
 Optimizations:
 - more special code for common op/ and op\

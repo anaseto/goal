@@ -18,7 +18,7 @@ const (
 	opLocalLast
 	opAssignGlobal
 	opAssignLocal
-	opAdverb
+	opDerive
 	opVariadic
 	opLambda
 	opApply

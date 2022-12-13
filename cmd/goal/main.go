@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"goal"
+	gio "goal/io"
 	"log"
 	"os"
 	"runtime/debug"
@@ -79,29 +80,28 @@ func main() {
 }
 
 func runStdin(ctx *goal.Context) {
-	help := ctx.RegisterMonad("help", goal.VariadicFun{
-		Func: func(ctx *goal.Context, args []goal.V) goal.V {
-			if len(args) >= 1 {
-				arg := args[0]
-				switch {
-				case goal.Match(arg, goal.NewS("+")):
-					fmt.Println(strings.TrimSpace(helpVERBS))
-				case goal.Match(arg, goal.NewS("nv")):
-					fmt.Println(strings.TrimSpace(helpNAMEDVERBS))
-				case goal.Match(arg, goal.NewS("'")):
-					fmt.Println(strings.TrimSpace(helpADVERBS))
-				case goal.Match(arg, goal.NewS("io")):
-					fmt.Println(strings.TrimSpace(helpIO))
-				case goal.Match(arg, goal.NewS("syn")):
-					fmt.Println(strings.TrimSpace(helpSyntax))
-				case goal.Match(arg, goal.NewS("types")):
-					fmt.Println(strings.TrimSpace(helpTypes))
-				default:
-					fmt.Println(strings.TrimSpace(helpTopics))
-				}
+	help := ctx.RegisterMonad("help", func(ctx *goal.Context, args []goal.V) goal.V {
+		if len(args) >= 1 {
+			arg := args[0]
+			switch {
+			case goal.Match(arg, goal.NewS("+")):
+				fmt.Println(strings.TrimSpace(helpVERBS))
+			case goal.Match(arg, goal.NewS("nv")):
+				fmt.Println(strings.TrimSpace(helpNAMEDVERBS))
+			case goal.Match(arg, goal.NewS("'")):
+				fmt.Println(strings.TrimSpace(helpADVERBS))
+			case goal.Match(arg, goal.NewS("io")):
+				fmt.Println(strings.TrimSpace(helpIO))
+			case goal.Match(arg, goal.NewS("syn")):
+				fmt.Println(strings.TrimSpace(helpSyntax))
+			case goal.Match(arg, goal.NewS("types")):
+				fmt.Println(strings.TrimSpace(helpTypes))
+			default:
+				fmt.Println(strings.TrimSpace(helpTopics))
 			}
-			return goal.V{}
-		}})
+		}
+		return goal.V{}
+	})
 	ctx.AssignGlobal("help", help)
 	ctx.AssignGlobal("h", help)
 	lr := lineReader{r: bufio.NewReader(os.Stdin)}
@@ -185,42 +185,9 @@ func usageError(usage bool, msgs ...interface{}) {
 }
 
 func registerVariadics(ctx *goal.Context) {
-	say := ctx.RegisterMonad("say", goal.VariadicFun{Func: vSay})
-	ctx.AssignGlobal("say", say)
-	slurp := ctx.RegisterMonad("slurp", goal.VariadicFun{Func: vSlurp})
-	ctx.AssignGlobal("slurp", slurp)
-	shell := ctx.RegisterMonad("shell", goal.VariadicFun{Func: vShell})
-	ctx.AssignGlobal("shell", shell)
-}
-
-func vSay(ctx *goal.Context, args []goal.V) goal.V {
-	for _, arg := range args {
-		switch argv := arg.Value().(type) {
-		case goal.S:
-			fmt.Println(string(argv))
-		default:
-			fmt.Println(arg.Sprint(ctx))
-		}
-	}
-	return goal.NewI(1)
-}
-
-func vSlurp(ctx *goal.Context, args []goal.V) goal.V {
-	switch len(args) {
-	case 1:
-		switch x := args[0].Value().(type) {
-		case goal.S:
-			bytes, err := os.ReadFile(string(x))
-			if err != nil {
-				return goal.NewError(goal.NewS(err.Error()))
-			}
-			return goal.NewS(string(bytes))
-		default:
-			return goal.NewPanic("slurp: non-string filename")
-		}
-	default:
-		return goal.NewPanic("slurp: too many arguments")
-	}
+	ctx.RegisterMonad("say", gio.VSay)
+	ctx.RegisterMonad("slurp", gio.VSlurp)
+	ctx.RegisterMonad("shell", gio.VShell)
 }
 
 const helpTopics = `

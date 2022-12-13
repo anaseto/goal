@@ -80,6 +80,10 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			}
 			ctx.push(r)
 			ip++
+		case opDerive:
+			v := variadic(ops[ip])
+			ctx.push(NewV(derivedVerb{Fun: v, Arg: ctx.pop()}))
+			ip++
 		case opApply2:
 			x := ctx.pop()
 			r := ctx.applyN(x, 2)

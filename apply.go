@@ -56,7 +56,7 @@ func (ctx *Context) applyN(x V, n int) V {
 		if n > 1 {
 			ctx.swap()
 		}
-		r := ctx.variadics[xv.Fun].Func(ctx, args)
+		r := ctx.variadics[xv.Fun](ctx, args)
 		ctx.dropN(n + 1)
 		return r
 	case projectionFirst:
@@ -195,11 +195,7 @@ func (ctx *Context) applyVariadic(v variadic) V {
 		ctx.dropNoRC()
 		return NewV(projectionMonad{Fun: newVariadic(v)})
 	}
-	if ctx.variadics[v].Adverb {
-		ctx.drop()
-		return NewV(derivedVerb{Fun: v, Arg: x})
-	}
-	r := ctx.variadics[v].Func(ctx, args)
+	r := ctx.variadics[v](ctx, args)
 	ctx.drop()
 	return r
 }
@@ -216,7 +212,7 @@ func (ctx *Context) apply2Variadic(v variadic) V {
 	} else if args[1].kind == valNil {
 		return NewV(projection{Fun: newVariadic(v), Args: ctx.popN(2)})
 	}
-	r := ctx.variadics[v].Func(ctx, args)
+	r := ctx.variadics[v](ctx, args)
 	ctx.drop2()
 	return r
 }
@@ -226,7 +222,7 @@ func (ctx *Context) applyNVariadic(v variadic, n int) V {
 	if hasNil(args) {
 		return NewV(projection{Fun: newVariadic(v), Args: ctx.popN(n)})
 	}
-	r := ctx.variadics[v].Func(ctx, args)
+	r := ctx.variadics[v](ctx, args)
 	ctx.dropN(n)
 	return r
 }

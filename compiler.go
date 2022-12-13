@@ -435,6 +435,14 @@ func (c *compiler) doLocal(tok *astToken, n int) {
 	c.doGlobal(tok, n)
 }
 
+func (c *compiler) doAdverb(tok *astToken) {
+	v := c.parseVariadic(tok.Text)
+	opos := c.pos
+	c.pos = tok.Pos
+	c.push2(opDerive, opcode(v))
+	c.pos = opos
+}
+
 func (c *compiler) doVariadic(tok *astToken, n int) error {
 	return c.doVariadicAt(tok.Text, tok.Pos, n)
 }
@@ -556,10 +564,7 @@ func (c *compiler) doDerivedVerb(dv *astDerivedVerb, n int) error {
 	if err != nil {
 		return err
 	}
-	err = c.doVariadic(dv.Adverb, 1)
-	if err != nil {
-		return err
-	}
+	c.doAdverb(dv.Adverb)
 	c.applyN(n)
 	return nil
 }
