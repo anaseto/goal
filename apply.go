@@ -413,12 +413,12 @@ func (x *AS) atIndices(y []int64) V {
 }
 
 // set changes x at i with y (in place).
-func (x AV) set(i int, y V) {
+func (x *AV) set(i int, y V) {
 	x.Slice[i] = y
 }
 
 // set changes x at i with y (in place).
-func (x AB) set(i int, y V) {
+func (x *AB) set(i int, y V) {
 	if y.IsI() {
 		x.Slice[i] = y.n != 0
 	} else {
@@ -427,7 +427,7 @@ func (x AB) set(i int, y V) {
 }
 
 // set changes x at i with y (in place).
-func (x AI) set(i int, y V) {
+func (x *AI) set(i int, y V) {
 	if y.IsI() {
 		x.Slice[i] = y.n
 	} else {
@@ -436,7 +436,7 @@ func (x AI) set(i int, y V) {
 }
 
 // set changes x at i with y (in place).
-func (x AF) set(i int, y V) {
+func (x *AF) set(i int, y V) {
 	if y.IsI() {
 		x.Slice[i] = float64(y.I())
 	} else {
@@ -445,7 +445,7 @@ func (x AF) set(i int, y V) {
 }
 
 // set changes x at i with y (in place).
-func (x AS) set(i int, y V) {
+func (x *AS) set(i int, y V) {
 	x.Slice[i] = string(y.value.(S))
 }
 

@@ -3,7 +3,7 @@ package goal
 import (
 	"fmt"
 	"math"
-	//"reflect"
+	"reflect"
 )
 
 // b2i converts a boolean to an integer.
@@ -385,11 +385,10 @@ func eType(x *AV) vType {
 	return t
 }
 
-//// sameType returns true if two (non-Panic) values have same type.
-//func sameType(x, y V) bool {
-//return x.kind != valBoxed && x.kind == y.kind ||
-//reflect.TypeOf(x.value) == reflect.TypeOf(y.value)
-//}
+// sameType returns true if two arrays have same type.
+func sameType(x, y array) bool {
+	return reflect.TypeOf(x) == reflect.TypeOf(y)
+}
 
 // isEltType returns true if the type of y is compatible with the type of x
 // elements.
@@ -471,7 +470,7 @@ func minMaxB(x *AB) (int64, int64) {
 	return b2i(min), b2i(max)
 }
 
-func maxAB(x AB) bool {
+func maxAB(x *AB) bool {
 	for _, xi := range x.Slice {
 		if xi {
 			return true
