@@ -292,6 +292,8 @@ x rshift y  right shift	"a" "b" rshift 1 2 3 / "a" "b" 1
 x shift y   shift	"a" "b" shift 1 2 3 -> 3 "a" "b"
 
 sub[x;y;z]  substitute  sub["abc";"b" "c";"d" "e"] -> "ade"
+
+MATH: acos, asin, atan, cos, exp, log, round, sin, sqrt, tan
 `
 
 const helpADVERBS = `
