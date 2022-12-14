@@ -9,6 +9,7 @@ Features:
 - maybe bitwise operations
 - maybe triadic amend with .
 - maybe some kind of templating/interpolation
+- maybe a switch/match
 
 Tests:
 - improve test coverage for error messages and refactor and improve them along
