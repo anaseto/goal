@@ -142,3 +142,10 @@ round[1;2] / too many arguments
 sin[1;2] / too many arguments
 sqrt[1;2] / too many arguments
 tan[1;2] / too many arguments
+@[1 2;3;+;5] / out of bounds
+@[1 2;3 5;+;5] / out of bounds
+@[1 2;3 5;:;5] / out of bounds
+@[1 2;3 5;:;5 2] / out of bounds
+@[1 2;0 1;:;5 2 3] / length mismatch
+@[1 2;"a";+;5] / non-integer
+@[2;"a";+;5] / type

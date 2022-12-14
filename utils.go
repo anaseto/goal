@@ -189,8 +189,10 @@ func toIndicesRec(x V) V {
 			}
 		}
 		return Canonical(NewAV(r))
+	case array:
+		return panics("non-integer indices")
 	default:
-		return panics("not an indices array")
+		return panics("non-integer index")
 	}
 }
 
