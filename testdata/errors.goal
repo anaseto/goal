@@ -108,3 +108,23 @@ sub["abc" "def";+;"c"] / type
 sub["abc" "def";"a"] / not enough arguments
 sub["abc" "def";"a";"b";"c";"d"] / too many arguments
 sub[("abc";*);"b";"d"] / type
+acos "a" / type
+asin "a" / type
+atan "a" / type
+cos "a" / type
+exp "a" / type
+log "a" / type
+round "a" / type
+sin "a" / type
+sqrt "a" / type
+tan "a" / type
+acos[1;2] / too many arguments
+asin[1;2] / too many arguments
+atan[1;2] / too many arguments
+cos[1;2] / too many arguments
+exp[1;2] / too many arguments
+log[1;2] / too many arguments
+round[1;2] / too many arguments
+sin[1;2] / too many arguments
+sqrt[1;2] / too many arguments
+tan[1;2] / too many arguments
