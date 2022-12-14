@@ -172,7 +172,7 @@ func try(ctx *Context, f1, x, f2 V) V {
 	}
 	r := ctx.applyN(f1, av.Len())
 	if r.IsPanic() {
-		r.kind = valBoxed // we used the boxed value
+		r = NewS(string(r.value.(panicV)))
 		ctx.push(r)
 		r = ctx.applyN(f2, 1)
 		if r.IsPanic() {

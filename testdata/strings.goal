@@ -48,3 +48,6 @@ sub["abc";"b" "c";"d" "e"] / "ade"
 sub["abc" "dbe";"b";"d"] / "adc" "dde"
 sub[("abc" "dbe";"bac");"b";"d"] / ("adc" "dde";"dac")
 sub["abc" "dbe";"b" "c";"d" "e"] / "ade" "dde"
+"bc" "ac" in "abcd" / 1 0
+"bc" in "abcd" / 1
+("bc";"ab" "de") in "abcd" / (1;1 0)

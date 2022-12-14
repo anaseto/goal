@@ -287,8 +287,9 @@ rshift x  right shift	rshift 1 2 -> 0 1	rshift "a" "b" -> "" "a"
 shift x   shift	shift	shift 1 2 -> 2 0	shift "a" "b" -> "b" ""
 sign x    sign		sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
 
+x in s      contained	"bc" "ac" in "abcd" -> 1 0
 x in y      member of	2 3 in 0 2 4 -> 1 0
-x rshift y  right shift	"a" "b" rshift 1 2 3 / "a" "b" 1
+x rshift y  right shift	"a" "b" rshift 1 2 3 -> "a" "b" 1
 x shift y   shift	"a" "b" shift 1 2 3 -> 3 "a" "b"
 
 sub[x;y;z]  substitute  sub["abc";"b" "c";"d" "e"] -> "ade"

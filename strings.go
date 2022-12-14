@@ -446,3 +446,28 @@ func replaceAS(xv *AS, y, z V) V {
 		return panicType("sub[s;y;z]", "y", y)
 	}
 }
+
+func containedInS(x V, s string) V {
+	switch xv := x.value.(type) {
+	case S:
+		return NewI(b2i(strings.Contains(s, string(xv))))
+	case *AS:
+		r := make([]bool, xv.Len())
+		for i, xi := range xv.Slice {
+			r[i] = strings.Contains(s, xi)
+		}
+		return NewAB(r)
+	case *AV:
+		r := xv.reuse()
+		for i, xi := range xv.Slice {
+			ri := containedInS(xi, s)
+			if ri.IsPanic() {
+				return ri
+			}
+			r.Slice[i] = ri
+		}
+		return NewV(r)
+	default:
+		return panicType("x in s", "x", x)
+	}
+}

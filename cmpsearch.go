@@ -383,6 +383,8 @@ func memberOf(x, y V) V {
 	//assertCanonical(x)
 	//assertCanonical(yv)
 	switch yv := y.value.(type) {
+	case S:
+		return containedInS(x, string(yv))
 	case *AB:
 		return memberOfAB(x, yv)
 	case *AF:
