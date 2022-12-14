@@ -121,6 +121,9 @@ func fold2Join(sep S, x V) V {
 
 func fold2Decode(f V, x V) V {
 	if f.IsI() {
+		if f.I() <= 0 {
+			return panics("i/x : base i is not positive")
+		}
 		if x.IsI() {
 			return x
 		}
@@ -175,6 +178,11 @@ func fold2Decode(f V, x V) V {
 	case *AB:
 		return fold2Decode(fromABtoAI(fv), x)
 	case *AI:
+		for _, b := range fv.Slice {
+			if b <= 0 {
+				return panics("I/x : I contains non positive")
+			}
+		}
 		if x.IsI() {
 			var r, n int64 = 0, 1
 			for i := fv.Len() - 1; i >= 0; i-- {
@@ -373,9 +381,6 @@ func scan2Split(sep S, x V) V {
 }
 
 func encodeBaseDigits(b int64, x int64) int {
-	if b < 0 {
-		b = -b
-	}
 	if x < 0 {
 		x = -x
 	}
@@ -392,8 +397,8 @@ func encodeBaseDigits(b int64, x int64) int {
 
 func scan2Encode(f V, x V) V {
 	if f.IsI() {
-		if f.I() == 0 {
-			return panics("i\\x : base i is zero")
+		if f.I() <= 0 {
+			return panics("i\\x : base i is not positive")
 		}
 		if x.IsI() {
 			n := encodeBaseDigits(f.I(), x.I())
@@ -463,13 +468,18 @@ func scan2Encode(f V, x V) V {
 	case *AB:
 		return scan2Encode(fromABtoAI(fv), x)
 	case *AI:
+		for _, b := range fv.Slice {
+			if b <= 0 {
+				return panics("I\\x : I contains non positive")
+			}
+		}
 		if x.IsI() {
-			// TODO: check for zero division
 			n := fv.Len()
 			r := make([]int64, n)
 			for i := n - 1; i >= 0 && x.I() > 0; i-- {
-				r[i] = x.I() % fv.At(i)
-				x.n /= fv.At(i)
+				fi := fv.At(i)
+				r[i] = x.I() % fi
+				x.n /= fi
 			}
 			return NewAI(r)
 
@@ -487,10 +497,11 @@ func scan2Encode(f V, x V) V {
 			copy(ai[(n-1)*xv.Len():], xv.Slice)
 			for i := n - 1; i >= 0; i-- {
 				for j := 0; j < xv.Len(); j++ {
+					fi := fv.At(i)
 					ox := ai[i*xv.Len()+j]
-					ai[i*xv.Len()+j] = ox % fv.At(i)
+					ai[i*xv.Len()+j] = ox % fi
 					if i > 0 {
-						ai[(i-1)*xv.Len()+j] = ox / fv.At(i)
+						ai[(i-1)*xv.Len()+j] = ox / fi
 					}
 				}
 			}
