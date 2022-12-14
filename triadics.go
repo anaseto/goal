@@ -189,7 +189,7 @@ func amendr(x array, y, z V) V {
 	case *AV:
 		return amendrAV(x, yv, z)
 	default:
-		return panicType("@[x;y;f;z]", "y", y)
+		return panicType("@[x;y;:;z]", "y", y)
 	}
 }
 
@@ -280,7 +280,7 @@ func amendrAV(x array, yv *AV, z V) V {
 		return NewV(x)
 	}
 	if az.Len() != yv.Len() {
-		return Panicf("@[x;y;f;z] : length mismatch between y and z (%d vs %d)",
+		return Panicf("@[x;y;:;z] : length mismatch between y and z (%d vs %d)",
 			yv.Len(), az.Len())
 
 	}
