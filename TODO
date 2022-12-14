@@ -1,6 +1,6 @@
 Features:
 - some kind of namespace or object and import mechanism other than eval
-- math and rand primitives
+- rand primitives
 - regexp primitives
 - proper io (open/read/write/close/defer?)
 - date and time
