@@ -170,8 +170,25 @@ func classify(x V) V {
 		return NewAI(r)
 	case *AI:
 		r := make([]int64, xv.Len())
-		m := map[int64]int64{}
+		min, max := minMax(xv)
 		n := int64(0)
+		if max-min+1 < int64(xv.Len()) {
+			// fast path avoiding hash table
+			offset := -min
+			m := make([]int64, max-min+1)
+			for i, xi := range xv.Slice {
+				c := m[xi+offset]
+				if c == 0 {
+					r[i] = n
+					m[xi+offset] = n + 1
+					n++
+					continue
+				}
+				r[i] = c - 1
+			}
+			return NewAI(r)
+		}
+		m := map[int64]int64{}
 		for i, xi := range xv.Slice {
 			c, ok := m[xi]
 			if !ok {
@@ -293,7 +310,7 @@ func uniq(x V) V {
 	}
 }
 
-// Mark Firsts returns ∊x.
+// Mark Firsts returns firsts x.
 func markFirsts(x V) V {
 	if Length(x) == 0 {
 		return NewAB([]bool{})
@@ -362,7 +379,7 @@ func markFirsts(x V) V {
 		}
 		return NewAB(r)
 	default:
-		return Panicf("∊x : x not an array (%s)", x.Type())
+		return Panicf("firsts x : x not an array (%s)", x.Type())
 	}
 }
 
