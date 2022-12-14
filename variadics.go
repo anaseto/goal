@@ -115,6 +115,7 @@ func (ctx *Context) initVariadics() {
 	}
 	ctx.vNames["::"] = vRight
 	ctx.keywords = map[string]NameType{}
+	// monads
 	ctx.RegisterMonad("abs", VAbs)
 	ctx.RegisterMonad("bytes", VBytes)
 	ctx.RegisterMonad("ceil", VCeil)
@@ -125,14 +126,20 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterMonad("ocount", VOCount)
 	ctx.RegisterMonad("sign", VSign)
 	ctx.RegisterMonad("sub", VSub)
-	ctx.RegisterMonad("sin", VSin)
-	ctx.RegisterMonad("asin", VAsin)
-	ctx.RegisterMonad("cos", VCos)
+
+	// math monads
 	ctx.RegisterMonad("acos", VAcos)
-	ctx.RegisterMonad("tan", VTan)
+	ctx.RegisterMonad("asin", VAsin)
 	ctx.RegisterMonad("atan", VAtan)
+	ctx.RegisterMonad("cos", VCos)
 	ctx.RegisterMonad("exp", VExp)
 	ctx.RegisterMonad("log", VLog)
+	ctx.RegisterMonad("round", VRoundToEven)
+	ctx.RegisterMonad("sin", VSin)
+	ctx.RegisterMonad("sqrt", VSqrt)
+	ctx.RegisterMonad("tan", VTan)
+
+	// dyads
 	ctx.RegisterDyad("and", VAnd)
 	ctx.RegisterDyad("in", VIn)
 	ctx.RegisterDyad("or", VOr)
