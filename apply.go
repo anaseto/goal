@@ -419,17 +419,29 @@ func (x AV) set(i int, y V) {
 
 // set changes x at i with y (in place).
 func (x AB) set(i int, y V) {
-	x.Slice[i] = y.n == 1
+	if y.IsI() {
+		x.Slice[i] = y.n != 0
+	} else {
+		x.Slice[i] = y.F() != 0
+	}
 }
 
 // set changes x at i with y (in place).
 func (x AI) set(i int, y V) {
-	x.Slice[i] = y.n
+	if y.IsI() {
+		x.Slice[i] = y.n
+	} else {
+		x.Slice[i] = int64(y.F())
+	}
 }
 
 // set changes x at i with y (in place).
 func (x AF) set(i int, y V) {
-	x.Slice[i] = y.F()
+	if y.IsI() {
+		x.Slice[i] = float64(y.I())
+	} else {
+		x.Slice[i] = y.F()
+	}
 }
 
 // set changes x at i with y (in place).

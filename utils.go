@@ -395,8 +395,11 @@ func eType(x *AV) vType {
 // elements.
 func isEltType(x array, y V) bool {
 	switch x.(type) {
+	case *AB:
+		return y.IsI() && (y.n == 0 || y.n == 1) || y.IsF() &&
+			(y.F() == 0 || y.F() == 1)
 	case *AI:
-		return y.IsI()
+		return y.IsI() || y.IsF() && isI(y.F())
 	case *AF:
 		return y.IsF()
 	case *AS:
