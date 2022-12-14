@@ -97,6 +97,20 @@ a,:: / assignment operation without expression right
 a: / assignment without expression right
 (1;) / empty slot in list
 +[ / unexpected
+(1;"a")/2 / type
+(1)2/"a" / not a function
+2/"a" / type
+2 1/2.5 / non-integer
+2 1/5 3 5 / length mismatch
+2 1/(+) / type
+"a"{x}/"a" / type
+("a")"b"\"a" / not a function
+("a")"b"/"a" / not a function
+" "\1 2 3 / not a string
+" "\(1 2 3;1) / not a string
+60\2.5 / non-integer
+60/2.5 / non-integer
+60.5/2 / non-integer
 sub["abc";"a";2] / non-string
 sub["abc";"a" "b";2] / not a string array
 sub["abc";"a" "b";,"c"] / length mismatch
