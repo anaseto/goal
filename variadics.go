@@ -120,7 +120,6 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterMonad("bytes", VBytes)
 	ctx.RegisterMonad("ceil", VCeil)
 	ctx.RegisterMonad("error", VError)
-	ctx.RegisterMonad("eval", VEval)
 	ctx.RegisterMonad("firsts", VFirsts)
 	ctx.RegisterMonad("icount", VICount)
 	ctx.RegisterMonad("ocount", VOCount)
@@ -142,6 +141,7 @@ func (ctx *Context) initVariadics() {
 
 	// dyads
 	ctx.RegisterDyad("and", VAnd)
+	ctx.RegisterDyad("eval", VEval)
 	ctx.RegisterDyad("in", VIn)
 	ctx.RegisterDyad("or", VOr)
 	ctx.RegisterDyad("rotate", VRotate)
@@ -582,6 +582,8 @@ func VEval(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return eval(ctx, args[0])
+	case 2:
+		return evalWithName(ctx, args[1], args[0])
 	default:
 		return panicRank("eval")
 	}

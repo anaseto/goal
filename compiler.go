@@ -148,8 +148,6 @@ func (c *compiler) ParseCompileNext() error {
 	if err != nil {
 		_, eof = err.(errEOF)
 		if !eof {
-			c.ctx.errPos = append(c.ctx.errPos,
-				position{Filename: c.ctx.fname, Pos: c.p.token.Pos})
 			ctx.compiler = newCompiler(ctx)
 			return err
 		}

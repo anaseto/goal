@@ -538,3 +538,23 @@ func eval(ctx *Context, x V) V {
 		return Panicf("eval x : x not a string (%s)", x.Type())
 	}
 }
+
+// evalWithName implements x eval y.
+func evalWithName(ctx *Context, x V, y V) V {
+	s, ok := x.value.(S)
+	if !ok {
+		return Panicf("x eval y : x not a string (%s)", x.Type())
+	}
+	switch yv := y.value.(type) {
+	case S:
+		nctx := ctx.derive()
+		r, err := nctx.EvalWithName(string(s), string(yv))
+		if err != nil {
+			return Panicf(".s : %v", err)
+		}
+		ctx.merge(nctx)
+		return r
+	default:
+		return Panicf("x eval y : y not a string (%s)", y.Type())
+	}
+}

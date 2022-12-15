@@ -86,7 +86,6 @@ func (p *parser) expr(es exprs) (exprs, error) {
 		if len(p.depth) > 0 {
 			opTok := p.depth[len(p.depth)-1]
 			err = p.errorf("unexpected EOF without closing previous %s", opTok)
-			p.ctx.errPos = append(p.ctx.errPos, position{Filename: p.ctx.fname, Pos: opTok.Pos})
 			return es, err
 		}
 		return es, nil

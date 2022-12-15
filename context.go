@@ -154,6 +154,16 @@ func (ctx *Context) Eval(s string) (V, error) {
 	return ctx.Run()
 }
 
+// EvalWithName calls Compile with the given name and string as source, and
+// then Run.
+func (ctx *Context) EvalWithName(name, s string) (V, error) {
+	err := ctx.Compile(name, s)
+	if err != nil {
+		return V{}, err
+	}
+	return ctx.Run()
+}
+
 // AssignedLast returns true if the last compiled expression was an assignment.
 func (ctx *Context) AssignedLast() bool {
 	return ctx.assigned
