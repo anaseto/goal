@@ -92,6 +92,8 @@ func runStdin(ctx *goal.Context) {
 				fmt.Println(strings.TrimSpace(helpADVERBS))
 			case goal.Match(arg, goal.NewS("io")):
 				fmt.Println(strings.TrimSpace(helpIO))
+			case goal.Match(arg, goal.NewS("time")):
+				fmt.Println(strings.TrimSpace(helpTime))
 			case goal.Match(arg, goal.NewS("syn")):
 				fmt.Println(strings.TrimSpace(helpSyntax))
 			case goal.Match(arg, goal.NewS("types")):
@@ -198,6 +200,7 @@ Type help TOPIC or h TOPIC where TOPIC is one of:
 "nv"	named verbs (like in, sign)
 "'"	adverbs ('/\)
 "io"	io functions (slurp, say)
+"time"	time functions
 "syn"   syntax
 "types" types
 
@@ -320,7 +323,7 @@ I/x	encode	24 60 60/1 2 3 -> 3723	2/1 1 0 -> 6
 I\x	decode	24 60 60\3723 -> 1 2 3	2\6 -> 1 1 0
 `
 const helpIO = `
-IO
+IO HELP
 slurp s		read file named s	lines:"\n"\slurp["/path/to/file"]
 print x		print value		print "Hello, world!\n"
 say x		same as print, but appends a newline
@@ -329,8 +332,32 @@ shell[cmd]	run a command through the shell
 w print x	print to writer or filename	"filename" print "content"
 w say x		same as print, but appends a newline
 `
+const helpTime = `
+TIME HELP
+time cmd	time command with current time
+t time cmd	time command with time t
 
+Time t should be either an integer representing unix epochtime, or a string
+in RFC3339 format as in "2006-01-02T15:04:05Z07:00".
+
+Currently available commands:
+	""		RFC3339 formatting (s)
+	"day"		day number (i)
+	"date"		year, month, day (I)
+	"clock"		hour, minute, second (I)
+	"hour"		0-23 hour (i)
+	"minute"	0-59 minute (i)
+	"second"	0-59 second (i)
+	"unix"		unix epoch time (i)
+	"unixmilli"	unix (millisecond version, only for current time)
+	"unixmicro"	unix (microsecond version, only for current time)
+	"unixnano"	unix (nanosecond version, only for current time)
+	"year"		year
+	"yearday"	1-365/6 year day
+	"weekday"	0-7 weekday (starts from Sunday)
+`
 const helpSyntax = `
+SYNTAX HELP
 literals	1	1.5	"text"
 arrays		1 2 -3 4	1 "a" -2 "b"	(1 2;"a";(3;"b"))
 variables	a:2 (assign)	a+:1 (same as a:a+1)	a+3 (use)
@@ -348,12 +375,11 @@ return error	'error "msg" (same as :error "msg")	'4+3 (same as 4+3)
 `
 
 const helpTypes = `
+TYPES HELP
 atom	array	name		examples
------------------------------------------------------------------------
 n	N	number		0	1.5	!5	1.2 3 1.8
 s	S	string		"abc"	"a" "b" "c"
 f		function	+	{x*2}	(1-)	%[;2]
 e		error		error "msg"
 	A	generic array	("a" 1;"b" 2;"c" 3)	(+;-;*;"any")
------------------------------------------------------------------------
 `

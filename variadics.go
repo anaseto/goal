@@ -147,6 +147,7 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterDyad("rotate", VRotate)
 	ctx.RegisterDyad("shift", VShift)
 	ctx.RegisterDyad("rshift", VRShift)
+	ctx.RegisterDyad("time", VTime)
 }
 
 type zeroFun interface {
