@@ -172,7 +172,7 @@ func classify(x V) V {
 		r := make([]int64, xv.Len())
 		min, max := minMax(xv)
 		n := int64(0)
-		if max-min+1 < int64(xv.Len()) {
+		if max-min+1 < int64(xv.Len())+8 {
 			// fast path avoiding hash table
 			offset := -min
 			m := make([]int64, max-min+1)
