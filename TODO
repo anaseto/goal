@@ -1,5 +1,4 @@
 Features:
-- rand primitives
 - some kind of namespace or object and import mechanism other than eval
 - regexp primitives
 - date and time
