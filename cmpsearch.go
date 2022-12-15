@@ -723,7 +723,7 @@ func find(x, y V) V {
 	case *AV:
 		return findAV(xv, y)
 	default:
-		return Panicf("x?y : x not an array (%s)", x.Type())
+		return panicType("x?y", "x", x)
 	}
 }
 

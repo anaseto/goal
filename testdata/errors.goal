@@ -149,3 +149,16 @@ tan[1;2] / too many arguments
 @[1 2;0 1;:;5 2 3] / length mismatch
 @[1 2;"a";+;5] / non-integer
 @[2;"a";+;5] / type
+?-3 / negative integer
+?3.5 / not an integer
+1.5?10 / not an integer
+3?-10 / non-positive
+3?0 / non-positive
+-3?0 / non-positive
+-3?2 / i > y
+-3?4.5 / not an integer
+3?0.5 / not an integer
+(+)?4.5 / type
+2?(+) / type
+-2?(+) / type
+seed 2.5 / not an integer

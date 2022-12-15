@@ -257,13 +257,16 @@ i$x split	2$!6 -> (0 1;2 3;4 5)	2$"a" "b" "c" -> ("a" "b";,"c")
 s$y cast	"i"$2.3 -> 2    "i"$"ab" -> 97 98   "s"$97 98 -> "ab"
 s$y parse num	"n"$"1.5" -> 1.5
 x$y binsearch	2 3 5 7$8 2 7 5 5.5 3 0 -> 4 1 4 3 3 2 0
+?i  uniform	?2 -> 0.6046602879796196 0.9405090880450124
 ?x  uniq	?2 2 3 4 3 3 -> 2 3 4
+i?y roll	5?100 -> 10 51 21 51 37
+i?y deal	-5?100 -> 19 26 0 73 94 (always distinct)
 s?y index	"a = a + 1"?"=" "+" -> 2 6
 x?y find	3 2 1?2 -> 1	3 2 1?0	-> 3
 @x  type	@2 -> "i"    @"ab" -> "s"    @2 3 -> "I"
 f@y apply	(|)@1 2 -> 2 1 (like |[1 2] -> 2 1 or |1 2)
 s@y substr	"012345"[2] -> "2345"	"012345"[2;3] -> "234"
-a@y at		1 2 3@2 -> 3	1 2 3[2] -> 3
+x@y at		1 2 3@2 -> 3	1 2 3[2] -> 3
 .s  reval	."2+3" -> 5	a:1;."a" -> panic ".s : undefined global: a"
 .e  get error	.error "msg" -> "msg"
 x.y applyN	{x+y}.2 3 -> 5    {x+y}[2;3] -> 5    (1 2;3 4)[0;1] -> 2
@@ -284,6 +287,7 @@ firsts x  mark firsts	firsts 0 0 2 3 0 2 3 4 -> 1 0 1 1 0 0 0 1
 icount x  index-count	icount 0 0 1 -1 0 1 2 3 2 -> 3 2 2 1 (same as #'=x)
 ocount x  occur-count	ocount 3 2 5 3 2 2 7 -> 0 0 0 1 1 2 0
 rshift x  right shift	rshift 1 2 -> 0 1	rshift "a" "b" -> "" "a"
+seed x	  rand seed	seed 42 (for non-secure pseudo-rand with ?)
 shift x   shift	shift	shift 1 2 -> 2 0	shift "a" "b" -> "b" ""
 sign x    sign		sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
 

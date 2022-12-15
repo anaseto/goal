@@ -124,6 +124,7 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterMonad("firsts", VFirsts)
 	ctx.RegisterMonad("icount", VICount)
 	ctx.RegisterMonad("ocount", VOCount)
+	ctx.RegisterMonad("seed", VSeed)
 	ctx.RegisterMonad("sign", VSign)
 	ctx.RegisterMonad("sub", VSub)
 
@@ -414,9 +415,17 @@ func VCast(ctx *Context, args []V) V {
 func VFind(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return uniq(args[0])
+		x := args[0]
+		if x.IsI() || x.IsF() {
+			return uniform(ctx, x)
+		}
+		return uniq(x)
 	case 2:
-		return find(args[1], args[0])
+		x, y := args[1], args[0]
+		if x.IsI() || x.IsF() {
+			return roll(ctx, x, y)
+		}
+		return find(x, y)
 	default:
 		return panicRank("?")
 	}
@@ -628,6 +637,16 @@ func VOr(ctx *Context, args []V) V {
 		}
 	}
 	return args[0]
+}
+
+// VSeed implements the "seed" variadic verb.
+func VSeed(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		return seed(ctx, args[0])
+	default:
+		return panicRank("seed")
+	}
 }
 
 // VSign implements the "sign" variadic verb.

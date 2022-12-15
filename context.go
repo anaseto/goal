@@ -2,6 +2,7 @@ package goal
 
 import (
 	"errors"
+	"math/rand"
 )
 
 // Context holds the state of the interpreter.
@@ -37,6 +38,9 @@ type Context struct {
 
 	// error positions stack
 	errPos []position
+
+	// rand
+	rand *rand.Rand
 }
 
 // NewContext returns a new context for compiling and interpreting code.
@@ -46,6 +50,7 @@ func NewContext() *Context {
 	ctx.gIDs = map[string]int{}
 	ctx.stack = make([]V, 0, 32)
 	ctx.sources = map[string]string{}
+	ctx.rand = rand.New(rand.NewSource(1))
 	ctx.initVariadics()
 	return ctx
 }
@@ -261,6 +266,7 @@ func (ctx *Context) derive() *Context {
 	nctx.lambdas = ctx.lambdas
 	nctx.globals = ctx.globals
 	nctx.gNames = ctx.gNames
+	nctx.rand = ctx.rand
 	nctx.gIDs = ctx.gIDs
 	nctx.sources = ctx.sources
 	nctx.errPos = ctx.errPos
