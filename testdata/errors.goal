@@ -166,5 +166,6 @@ time 2 / non-string cmd
 time "invalid" / unknown command
 "2042" time "unix" / parsing time
 2.5 time "unix" / non-integer
+2 time "invalid" / unknown command
 (+) time "unix" / bad type
 time[1;"format";"UnixDate"] / NYI
