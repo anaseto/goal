@@ -2,23 +2,20 @@ package goal
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
 // VTime implements the time variadic verb.
 func VTime(ctx *Context, args []V) V {
 	var x V
-	if len(args) == 1 {
-		x = args[0]
-	} else {
-		x = args[len(args)-2]
-	}
+	x = args[len(args)-1]
 	var cmd string
 	switch xv := x.value.(type) {
 	case S:
 		cmd = string(xv)
 	default:
-		return Panicf("time[[t;]cmd[;...]] : non-string cmd (%s)", x.Type())
+		return Panicf("time[cmd;t;format] : non-string cmd (%s)", x.Type())
 	}
 	if len(args) == 1 {
 		r := timem(time.Now(), cmd)
@@ -27,21 +24,74 @@ func VTime(ctx *Context, args []V) V {
 		}
 		return r
 	}
-	t, err := parseTime(args[len(args)-1])
-	if err != nil {
-		return Panicf("time[t;cmd[;...]] : %v", err)
+	y := args[len(args)-2]
+	var t time.Time
+	var err error
+	switch len(args) {
+	case 2:
+		t, err = parseTime(y, time.RFC3339, "")
+	case 3:
+		format, ok := args[len(args)-3].value.(S)
+		if !ok {
+			return Panicf("time[t;cmd;format] : non-string format (%s)",
+				args[len(args)-3].Type())
+		}
+		t, err = parseTime(y, getFormat(string(format)), "")
+	case 4:
+		format, ok := args[len(args)-3].value.(S)
+		if !ok {
+			return Panicf("time[t;cmd;format;loc] : non-string format (%s)",
+				args[len(args)-3].Type())
+		}
+		loc, ok := args[len(args)-4].value.(S)
+		if !ok {
+			return Panicf("time[t;cmd;format;loc] : non-string location (%s)",
+				args[len(args)-4].Type())
+		}
+		t, err = parseTime(y, getFormat(string(format)), string(loc))
+	default:
+		return Panicf("time : too many arguments (%d)", len(args))
 	}
-	if len(args) > 2 {
-		return panics("time[t;cmd;...] : more than two arguments (NYI)")
+	if err != nil {
+		return Panicf("time[t;cmd;format] : %v", err)
 	}
 	r := timem(t, cmd)
 	if r.IsPanic() {
-		return Panicf("time[t;cmd[;...]] : %v", r)
+		return Panicf("time[t;cmd;format] : %v", r)
 	}
 	return r
 }
 
-func parseTime(x V) (time.Time, error) {
+func getFormat(name string) string {
+	switch name {
+	case "ANSIC":
+		return time.ANSIC
+	case "UnixDate":
+		return time.UnixDate
+	case "RubyDate":
+		return time.RubyDate
+	case "RFC822":
+		return time.RFC822
+	case "RFC822Z":
+		return time.RFC822Z
+	case "RFC850":
+		return time.RFC850
+	case "RFC1123":
+		return time.RFC1123
+	case "RFC1123Z":
+		return time.RFC1123Z
+	case "RFC3339", "":
+		return time.RFC3339
+	case "RFC3339Nano":
+		return time.RFC3339Nano
+	case "Kitchen":
+		return time.Kitchen
+	default:
+		return name
+	}
+}
+
+func parseTime(x V, layout, loc string) (time.Time, error) {
 	if x.IsI() {
 		return time.Unix(x.I(), 0), nil
 	}
@@ -49,11 +99,18 @@ func parseTime(x V) (time.Time, error) {
 		if !isI(x.F()) {
 			return time.Time{}, fmt.Errorf("time x non-integer (%g)", x.F())
 		}
-		return parseTime(NewI(int64(x.F())))
+		return parseTime(NewI(int64(x.F())), layout, loc)
 	}
 	switch xv := x.value.(type) {
 	case S:
-		return time.Parse(time.RFC3339, string(xv))
+		if loc == "" {
+			return time.Parse(layout, string(xv))
+		}
+		l, err := time.LoadLocation(loc)
+		if err != nil {
+			return time.Time{}, err
+		}
+		return time.ParseInLocation(layout, string(xv), l)
 	default:
 		return time.Time{}, fmt.Errorf("bad type for time x (%s)", x.Type())
 	}
@@ -61,8 +118,9 @@ func parseTime(x V) (time.Time, error) {
 
 func timem(t time.Time, cmd string) V {
 	switch cmd {
-	case "":
-		return NewS(t.Format(time.RFC3339))
+	case "week":
+		y, w := t.ISOWeek()
+		return NewAI([]int64{int64(y), int64(w)})
 	case "day":
 		return NewI(int64(t.Day()))
 	case "date":
@@ -94,6 +152,11 @@ func timem(t time.Time, cmd string) V {
 	case "weekday":
 		return NewI(int64(t.Weekday()))
 	default:
+		cmd = getFormat(cmd)
+		if strings.ContainsAny(cmd, " 0123456789-") {
+			// TODO: better condition
+			return NewS(t.Format(cmd))
+		}
 		return panics("unknown command")
 	}
 }

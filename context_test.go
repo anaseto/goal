@@ -103,9 +103,7 @@ func TestEval(t *testing.T) {
 			if err != nil {
 				t.Log(ps)
 				t.Log(matchString)
-				t.Logf("compile error: %v", err)
-				t.Fail()
-				return
+				t.Fatalf("compile error: %v", err)
 			}
 			vLeft, errLeft := ctxLeft.Run()
 			ctxRight := NewContext()
@@ -113,9 +111,7 @@ func TestEval(t *testing.T) {
 			if errLeft != nil || errRight != nil {
 				t.Log(ps)
 				t.Log(matchString)
-				t.Logf("return error: `%v` vs `%v`", errLeft, errRight)
-				t.Fail()
-				return
+				t.Fatalf("return error: `%v` vs `%v`", errLeft, errRight)
 			}
 			if !Match(vLeft, vRight) {
 				t.Log(ps)
@@ -155,7 +151,7 @@ func TestErrors(t *testing.T) {
 				if err == nil {
 					t.Log(ps)
 					t.Log(matchString)
-					t.Errorf("no error left: result: %v\nexpected: %v", v, mt.Right)
+					t.Fatalf("no error left: result: %v\nexpected: %v", v, mt.Right)
 				}
 			}
 			e, ok := err.(*PanicError)
@@ -163,7 +159,7 @@ func TestErrors(t *testing.T) {
 				// should never happen
 				t.Log(ps)
 				t.Log(matchString)
-				t.Errorf("bad error: `%v`\nexpected:`%v`", err, mt.Right)
+				t.Fatalf("bad error: `%v`\nexpected:`%v`", err, mt.Right)
 			}
 			msg := e.Msg
 			if strings.Contains(mt.Left, "\n") {

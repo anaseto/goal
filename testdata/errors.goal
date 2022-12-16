@@ -164,8 +164,11 @@ tan[1;2] / too many arguments
 seed 2.5 / not an integer
 time 2 / non-string cmd
 time "invalid" / unknown command
-"2042" time "unix" / parsing time
-2.5 time "unix" / non-integer
-2 time "invalid" / unknown command
-(+) time "unix" / bad type
-time[1;"format";"UnixDate"] / NYI
+"unix"  time "2042" / parsing time
+"unix"  time 2.5 / non-integer
+"invalid"  time 2 / unknown command
+"unix"  time (+) / bad type
+time["unix";10000;"RFC3339";"UTC";"UTC"] / too many arguments
+time["unix";10000;2;"UTC"] / non-string format
+time["unix";10000;2] / non-string format
+time["unix";10000;"RFC3339";42] / non-string location

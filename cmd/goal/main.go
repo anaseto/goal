@@ -334,8 +334,10 @@ w say x		same as print, but appends a newline
 `
 const helpTime = `
 TIME HELP
-time cmd	time command with current time
-t time cmd	time command with time t
+time cmd		time command with current time
+cmd time t		time command with time t
+time[cmd;t;format]	time command with time t in given format
+time[cmd;t;format;loc]	time command with time t in given format and location
 
 Time t should be either an integer representing unix epochtime, or a string
 in RFC3339 format as in "2006-01-02T15:04:05Z07:00".

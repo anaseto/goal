@@ -1,18 +1,24 @@
-1000000 time "" / "1970-01-12T13:46:40Z"
-1000000 time "day" / 12
-1000000 time "date" / 1970 1 12
-1000000 time "clock" / 13 46 40
-1000000 time "hour" / 13
-1000000 time "minute" / 46
-1000000 time "month" / 1
-1000000 time "second" / 40
-1000000 time "unix" / 1000000
-1000000 time "unixmilli" / 1000000000
-1000000 time "unixmicro" / 1000000000000
-1000000 time "unixnano" / 1000000000000000
-1000000 time "year" / 1970
-1000000 time "yearday" / 12
-1000000 time "weekday" / 1
-1000000.0 time "weekday" / 1
-2000 < time "year" / 1
-"1970-01-12T13:46:40Z" time "unix" / 1000000
+"" time 1000000 / "1970-01-12T13:46:40Z"
+"day"  time 1000000 / 12
+"date"  time 1000000 / 1970 1 12
+"clock"  time 1000000 / 13 46 40
+"hour"  time 1000000 / 13
+"minute"  time 1000000 / 46
+"month"  time 1000000 / 1
+"second"  time 1000000 / 40
+"unix"  time 1000000 / 1000000
+"unixmilli"  time 1000000 / 1000000000
+"unixmicro"  time 1000000 / 1000000000000
+"unixnano"  time 1000000 / 1000000000000000
+"year"  time 1000000 / 1970
+"yearday"  time 1000000 / 12
+"weekday"  time 1000000 / 1
+"weekday"  time 1000000.0 / 1
+(time "year") > 2000 / 1
+"unix"  time "1970-01-12T13:46:40Z" / 1000000
+time["";"Mon Jan 2 15:04:05 MST 2006";"Mon Jan _2 15:04:05 MST 2006"] / "2006-01-02T15:04:05Z"
+time["unix";"Mon Jan 2 15:04:05 MST 2006";"Mon Jan _2 15:04:05 MST 2006"] / 1136214245
+time["unix";"Mon Jan 2 15:04:05 UTC 2006";"UnixDate"] / 1136214245
+time["unix";"Mon Jan 2 15:04:05 MST 2006";"UnixDate";"MST"] / 1136239445
+time["unix";"2006-01-02T15:04:05";"2006-01-02T15:04:05";"UTC"] / 1136214245
+time["unix";"2006-01-02T15:04:05";"2006-01-02T15:04:05";"MST"] / 1136239445
