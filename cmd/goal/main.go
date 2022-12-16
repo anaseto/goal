@@ -345,7 +345,6 @@ default). See https://pkg.go.dev/time for information on layouts and locations,
 as goal uses the same conventions as Go's time package.
 
 Currently available commands:
-	""		RFC3339 formatting (s)
 	"day"		day number (i)
 	"date"		year, month, day (I)
 	"clock"		hour, minute, second (I)
@@ -360,6 +359,7 @@ Currently available commands:
 	"yearday"	1-365/6 year day (i)
 	"week"		year, week (I)
 	"weekday"	0-7 weekday (starts from Sunday) (i)
+	format (s)	format time using given layout (s)
 `
 const helpSyntax = `
 SYNTAX HELP
