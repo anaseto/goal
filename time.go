@@ -1,7 +1,7 @@
 package goal
 
 import (
-	"fmt"
+	//"fmt"
 	"strings"
 	"time"
 )
@@ -18,48 +18,40 @@ func VTime(ctx *Context, args []V) V {
 		return Panicf("time[cmd;t;format] : non-string cmd (%s)", x.Type())
 	}
 	if len(args) == 1 {
-		r := timem(time.Now(), cmd)
+		r := ftime(cmd, time.Now())
 		if r.IsPanic() {
 			return Panicf("time x : %v", r)
 		}
 		return r
 	}
 	y := args[len(args)-2]
-	var t time.Time
-	var err error
 	switch len(args) {
 	case 2:
-		t, err = parseTime(y, time.RFC3339, "")
+		return doTime(cmd, y, time.RFC3339, "")
 	case 3:
-		format, ok := args[len(args)-3].value.(S)
+		z := args[len(args)-3]
+		format, ok := z.value.(S)
 		if !ok {
 			return Panicf("time[t;cmd;format] : non-string format (%s)",
-				args[len(args)-3].Type())
+				z.Type())
 		}
-		t, err = parseTime(y, getFormat(string(format)), "")
+		return doTime(cmd, y, getFormat(string(format)), "")
 	case 4:
-		format, ok := args[len(args)-3].value.(S)
+		z := args[len(args)-3]
+		format, ok := z.value.(S)
 		if !ok {
 			return Panicf("time[t;cmd;format;loc] : non-string format (%s)",
-				args[len(args)-3].Type())
+				z.Type())
 		}
 		loc, ok := args[len(args)-4].value.(S)
 		if !ok {
 			return Panicf("time[t;cmd;format;loc] : non-string location (%s)",
 				args[len(args)-4].Type())
 		}
-		t, err = parseTime(y, getFormat(string(format)), string(loc))
+		return doTime(cmd, y, getFormat(string(format)), string(loc))
 	default:
 		return Panicf("time : too many arguments (%d)", len(args))
 	}
-	if err != nil {
-		return Panicf("time[t;cmd;format] : %v", err)
-	}
-	r := timem(t, cmd)
-	if r.IsPanic() {
-		return Panicf("time[t;cmd;format] : %v", r)
-	}
-	return r
 }
 
 func getFormat(name string) string {
@@ -91,32 +83,99 @@ func getFormat(name string) string {
 	}
 }
 
-func parseTime(x V, layout, loc string) (time.Time, error) {
-	if x.IsI() {
-		return time.Unix(x.I(), 0), nil
+func doTime(cmd string, y V, layout, loc string) V {
+	if y.IsI() {
+		return doTimeI(cmd, y.I(), layout)
 	}
-	if x.IsF() {
-		if !isI(x.F()) {
-			return time.Time{}, fmt.Errorf("time x non-integer (%g)", x.F())
+	if y.IsF() {
+		if !isI(y.F()) {
+			return Panicf("time[cmd;t;...] : t non-integer number (%g)",
+				y.F())
 		}
-		return parseTime(NewI(int64(x.F())), layout, loc)
+		return doTimeI(cmd, int64(y.F()), layout)
 	}
-	switch xv := x.value.(type) {
+	switch yv := y.value.(type) {
+	case *AB:
+		return doTime(cmd, fromABtoAI(yv), layout, loc)
+	case *AI:
+		// doTime: allocations could be optimized depending on cmd.
+		r := make([]V, yv.Len())
+		for i, yi := range yv.Slice {
+			ri := doTimeI(cmd, yi, layout)
+			if ri.IsPanic() {
+				return ri
+			}
+			r[i] = ri
+		}
+		return Canonical(NewAV(r))
+	case *AF:
+		y = toAI(yv)
+		if y.IsPanic() {
+			return y
+		}
+		return doTime(cmd, y, layout, loc)
 	case S:
-		if loc == "" {
-			return time.Parse(layout, string(xv))
+		return doTimeS(cmd, string(yv), layout, loc)
+	case *AS:
+		r := make([]V, yv.Len())
+		for i, yi := range yv.Slice {
+			ri := doTimeS(cmd, yi, layout, loc)
+			if ri.IsPanic() {
+				return ri
+			}
+			r[i] = ri
 		}
-		l, err := time.LoadLocation(loc)
-		if err != nil {
-			return time.Time{}, err
+		return Canonical(NewAV(r))
+	case *AV:
+		r := make([]V, yv.Len())
+		for i, yi := range yv.Slice {
+			ri := doTime(cmd, yi, layout, loc)
+			if ri.IsPanic() {
+				return ri
+			}
+			r[i] = ri
 		}
-		return time.ParseInLocation(layout, string(xv), l)
+		return Canonical(NewAV(r))
 	default:
-		return time.Time{}, fmt.Errorf("bad type for time x (%s)", x.Type())
+		return Panicf("time[cmd;t;...] : bad type for t (%s)", y.Type())
 	}
 }
 
-func timem(t time.Time, cmd string) V {
+func doTimeI(cmd string, yv int64, layout string) V {
+	switch layout {
+	case "milli":
+		return ftime(cmd, time.UnixMilli(yv))
+	case "micro":
+		return ftime(cmd, time.UnixMicro(yv))
+	case "nano":
+		return ftime(cmd, time.Unix(yv/1_000_000_000, yv%1_000_000_000))
+	default:
+		return ftime(cmd, time.Unix(yv, 0))
+	}
+}
+
+func doTimeS(cmd string, yv string, layout, loc string) V {
+	var t time.Time
+	var err error
+	if loc == "" {
+		t, err := time.Parse(layout, string(yv))
+		if err != nil {
+			return Errorf("%v", err)
+		}
+		return ftime(cmd, t)
+	}
+	l, err := time.LoadLocation(loc)
+	if err != nil {
+		return Errorf("%v", err)
+	}
+	t, err = time.ParseInLocation(layout, string(yv), l)
+	if err != nil {
+		return Errorf("%v", err)
+	}
+	return ftime(cmd, t)
+}
+
+func ftime(cmd string, t time.Time) V {
 	switch cmd {
 	case "week":
 		y, w := t.ISOWeek()
@@ -154,9 +213,9 @@ func timem(t time.Time, cmd string) V {
 	default:
 		cmd = getFormat(cmd)
 		if strings.ContainsAny(cmd, " 0123456789-") {
-			// TODO: better condition
+			// TODO: ftime: better error check
 			return NewS(t.Format(cmd))
 		}
-		return panics("unknown command")
+		return Panicf("time[cmd;...] : unknown command %s", cmd)
 	}
 }

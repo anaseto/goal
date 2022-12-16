@@ -164,7 +164,6 @@ tan[1;2] / too many arguments
 seed 2.5 / not an integer
 time 2 / non-string cmd
 time "invalid" / unknown command
-"unix"  time "2042" / parsing time
 "unix"  time 2.5 / non-integer
 "invalid"  time 2 / unknown command
 "unix"  time (+) / bad type

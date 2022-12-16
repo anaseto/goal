@@ -340,7 +340,9 @@ time[cmd;t;format]	time command with time t in given format
 time[cmd;t;format;loc]	time command with time t in given format and location
 
 Time t should be either an integer representing unix epochtime, or a string
-in RFC3339 format as in "2006-01-02T15:04:05Z07:00".
+in the given format (RFC3339 format layout "2006-01-02T15:04:05Z07:00" is the
+default). See https://pkg.go.dev/time for information on layouts and locations,
+as goal uses the same conventions as Go's time package.
 
 Currently available commands:
 	""		RFC3339 formatting (s)
@@ -351,12 +353,13 @@ Currently available commands:
 	"minute"	0-59 minute (i)
 	"second"	0-59 second (i)
 	"unix"		unix epoch time (i)
-	"unixmilli"	unix (millisecond version, only for current time)
-	"unixmicro"	unix (microsecond version, only for current time)
-	"unixnano"	unix (nanosecond version, only for current time)
-	"year"		year
-	"yearday"	1-365/6 year day
-	"weekday"	0-7 weekday (starts from Sunday)
+	"unixmilli"	unix (millisecond version, only for current time) (i)
+	"unixmicro"	unix (microsecond version, only for current time) (i)
+	"unixnano"	unix (nanosecond version, only for current time) (i)
+	"year"		year (i)
+	"yearday"	1-365/6 year day (i)
+	"week"		year, week (I)
+	"weekday"	0-7 weekday (starts from Sunday) (i)
 `
 const helpSyntax = `
 SYNTAX HELP
