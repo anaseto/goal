@@ -217,6 +217,9 @@ loop:
 			if err != nil {
 				return es, err
 			}
+			if isAmend(e) {
+				return append(es, e), nil
+			}
 		default:
 			break loop
 		}
@@ -351,6 +354,7 @@ func (p *parser) applyN(verb expr) (expr, error) {
 		Args:     []expr{},
 		StartPos: p.token.Pos,
 	}
+loop:
 	for {
 		es, err := p.expr(exprs{})
 		if err == nil {
@@ -363,11 +367,70 @@ func (p *parser) applyN(verb expr) (expr, error) {
 			pDoExprs(es)
 			a.Args = append(a.Args, es)
 			a.EndPos = err.Pos + 1
-			return a, nil
+			break loop
 		default:
 			return a, err
 		}
 	}
+	identok, ok := getIdent(verb)
+	if !ok {
+		return a, nil
+	}
+	switch ntok := p.peek(); ntok.Type {
+	case DYAD:
+		if ntok.Text != ":" && ntok.Text != "::" {
+			return a, nil
+		}
+		p.next()
+		global := strings.HasSuffix(ntok.Text, "::")
+		return p.assignAmendOp(identok, a.Args, ":", global)
+	case DYADASSIGN:
+		p.next()
+		dyad := strings.TrimRight(ntok.Text, ":")
+		global := strings.HasSuffix(ntok.Text, "::")
+		return p.assignAmendOp(identok, a.Args, dyad, global)
+	default:
+		return a, nil
+	}
+}
+
+func getIdent(e expr) (*astToken, bool) {
+	atok, ok := e.(*astToken)
+	if !ok || atok.Type != astIDENT {
+		return nil, false
+	}
+	return atok, true
+}
+
+func isAmend(e expr) bool {
+	_, ok := e.(*astAssignAmendOp)
+	return ok
+}
+
+func (p *parser) assignAmendOp(identok *astToken, args []expr,
+	dyad string, global bool) (expr, error) {
+	a := &astAssignAmendOp{
+		Name:   identok.Text,
+		Global: global,
+		Dyad:   dyad,
+		Pos:    identok.Pos,
+	}
+	if len(args) == 0 {
+		return a, p.errorf("assignement with amend has no indices")
+	}
+	if len(args) > 1 {
+		return a, p.errorf("assignement with deep amend NYI")
+	}
+	a.Indices = args[0]
+	es, err := p.subExpr()
+	a.Right = es
+	if err != nil {
+		return a, err
+	}
+	if len(es) == 0 {
+		return a, p.errorf("assignment operation without expression right")
+	}
+	return a, nil
 }
 
 func (p *parser) apply2(verb, left expr) (expr, error) {

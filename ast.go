@@ -40,20 +40,31 @@ type astReturn struct {
 
 // astAssign represents an assignment x:y.
 type astAssign struct {
-	Name   string
-	Global bool
-	Right  expr
+	Name   string // x
+	Global bool   // whether :: or not
+	Right  expr   // y
 	Pos    int
 }
 
 // astAssignOp represents a variable assignment with a built-in operator, of
 // the form x op: y, semantically equivalent to x: x op y.
 type astAssignOp struct {
-	Name   string
-	Global bool
-	Dyad   string
-	Right  expr
+	Name   string // x
+	Global bool   // wether :: or not
+	Dyad   string // op
+	Right  expr   // y
 	Pos    int
+}
+
+// astAssinAmendOp represents an assign-amend call with a built-in operator, of
+// the form x[y]op: z, semantically equivalent to x: @[x;y;op;z].
+type astAssignAmendOp struct {
+	Name    string // x
+	Global  bool   // whether :: or not
+	Dyad    string // op
+	Indices expr   // y
+	Right   expr   // z
+	Pos     int
 }
 
 // astStrand represents a stranding of literals, like 1 23 456
@@ -106,19 +117,20 @@ type astLambda struct {
 	EndPos   int
 }
 
-func (es exprs) node()           {}
-func (t *astToken) node()        {}
-func (a *astReturn) node()       {}
-func (a *astAssign) node()       {}
-func (a *astAssignOp) node()     {}
-func (st *astStrand) node()      {}
-func (dv *astDerivedVerb) node() {}
-func (p *astParen) node()        {}
-func (a *astApply2) node()       {}
-func (a *astApplyN) node()       {}
-func (l *astList) node()         {}
-func (b *astSeq) node()          {}
-func (b *astLambda) node()       {}
+func (es exprs) node()            {}
+func (t *astToken) node()         {}
+func (a *astReturn) node()        {}
+func (a *astAssign) node()        {}
+func (a *astAssignOp) node()      {}
+func (a *astAssignAmendOp) node() {}
+func (st *astStrand) node()       {}
+func (dv *astDerivedVerb) node()  {}
+func (p *astParen) node()         {}
+func (a *astApply2) node()        {}
+func (a *astApplyN) node()        {}
+func (l *astList) node()          {}
+func (b *astSeq) node()           {}
+func (b *astLambda) node()        {}
 
 func nonEmpty(e expr) bool {
 	switch e := e.(type) {

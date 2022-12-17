@@ -294,6 +294,11 @@ func (c *compiler) doExpr(e expr, n int) error {
 		if err != nil {
 			return err
 		}
+	case *astAssignAmendOp:
+		err := c.doAssignAmendOp(e, n)
+		if err != nil {
+			return err
+		}
 	case *astDerivedVerb:
 		err := c.doDerivedVerb(e, n)
 		if err != nil {
@@ -540,6 +545,46 @@ func (c *compiler) doAssignOp(e *astAssignOp, n int) error {
 	c.push2(opLocalLast, opArg)
 	lc.opIdxLocal[len(lc.Body)-1] = local
 	c.doVariadicAt(e.Dyad, e.Pos-1, 2)
+	c.push2(opAssignLocal, opArg)
+	lc.opIdxLocal[len(lc.Body)-1] = local
+	c.applyN(n)
+	return nil
+}
+
+func (c *compiler) doAssignAmendOp(e *astAssignAmendOp, n int) error {
+	err := c.doExpr(e.Right, 0)
+	if err != nil {
+		return err
+	}
+	c.doVariadicAt(e.Dyad, e.Pos-1, 0)
+	err = c.doExpr(e.Indices, 0)
+	if err != nil {
+		return err
+	}
+	lc := c.scope()
+	if lc == nil || e.Global {
+		id, ok := c.ctx.gIDs[e.Name]
+		if !ok {
+			if lc == nil {
+				return c.perrorf(e.Pos,
+					"undefined global in assignement amend operation: %s", e.Name)
+			}
+			id = c.ctx.global(e.Name)
+		}
+		c.push2(opGlobalLast, opcode(id))
+		c.doVariadicAt("@", e.Pos-1, 4)
+		c.push2(opAssignGlobal, opcode(id))
+		c.applyN(n)
+		return nil
+	}
+	local, ok := lc.local(e.Name)
+	if !ok {
+		return c.perrorf(e.Pos,
+			"undefined local in assignement amend operation: %s", e.Name)
+	}
+	c.push2(opLocalLast, opArg)
+	lc.opIdxLocal[len(lc.Body)-1] = local
+	c.doVariadicAt("@", e.Pos-1, 4)
 	c.push2(opAssignLocal, opArg)
 	lc.opIdxLocal[len(lc.Body)-1] = local
 	c.applyN(n)
