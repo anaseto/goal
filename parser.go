@@ -214,11 +214,8 @@ loop:
 		case LEFTBRACKET:
 			p.next()
 			e, err = p.applyN(e)
-			if err != nil {
-				return es, err
-			}
-			if isAmend(e) {
-				return append(es, e), nil
+			if err != nil || isAmend(e) {
+				return append(es, e), err
 			}
 		default:
 			break loop
@@ -415,12 +412,10 @@ func (p *parser) assignAmendOp(identok *astToken, args []expr,
 		Dyad:   dyad,
 		Pos:    identok.Pos,
 	}
-	if len(args) == 0 {
-		return a, p.errorf("assignement with amend has no indices")
-	}
 	if len(args) > 1 {
 		return a, p.errorf("assignement with deep amend NYI")
 	}
+	// len(args) == 1
 	a.Indices = args[0]
 	es, err := p.subExpr()
 	a.Right = es

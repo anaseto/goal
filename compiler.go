@@ -557,6 +557,9 @@ func (c *compiler) doAssignAmendOp(e *astAssignAmendOp, n int) error {
 		return err
 	}
 	c.doVariadicAt(e.Dyad, e.Pos-1, 0)
+	if !nonEmpty(e.Indices) {
+		return c.perrorf(e.Pos, "no indices in assignement amend operation")
+	}
 	err = c.doExpr(e.Indices, 0)
 	if err != nil {
 		return err
