@@ -266,6 +266,13 @@ func BenchmarkWhileN(b *testing.B) {
 	}
 }
 
+func BenchmarkWhileNAt(b *testing.B) {
+	ctx := NewContext()
+	for n := 0; n < b.N; n++ {
+		ctx.Eval("100 {x[2]+:1}/!10000")
+	}
+}
+
 func BenchmarkReverse(b *testing.B) {
 	ctx := NewContext()
 	for n := 0; n < b.N; n++ {
