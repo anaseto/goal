@@ -138,6 +138,7 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterMonad("sin", VSin)
 	ctx.RegisterMonad("sqrt", VSqrt)
 	ctx.RegisterMonad("tan", VTan)
+	ctx.RegisterDyad("nan", VNaN)
 
 	// dyads
 	ctx.RegisterDyad("and", VAnd)
