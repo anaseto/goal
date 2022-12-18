@@ -2,9 +2,22 @@ package goal
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 )
+
+func sprintFloat(f float64) string {
+	switch {
+	case math.IsInf(f, 0):
+		if f >= 0 {
+			return "0w"
+		}
+		return "-0w"
+	default:
+		return fmt.Sprintf("%g", f)
+	}
+}
 
 // Sprint returns a prettified string representation of the value.
 func (v V) Sprint(ctx *Context) string {
@@ -12,7 +25,7 @@ func (v V) Sprint(ctx *Context) string {
 	case valInt:
 		return fmt.Sprintf("%d", v.n)
 	case valFloat:
-		return fmt.Sprintf("%g", v.F())
+		return sprintFloat(v.F())
 	case valVariadic:
 		if v.n < int64(len(ctx.variadicsNames)) {
 			return ctx.variadicsNames[v.n]
@@ -36,7 +49,7 @@ func (v V) String() string {
 	case valInt:
 		return fmt.Sprintf("%d", v.n)
 	case valFloat:
-		return fmt.Sprintf("%g", v.F())
+		return sprintFloat(v.F())
 	case valVariadic:
 		return variadic(v.n).String()
 	case valLambda:
@@ -115,11 +128,11 @@ func (x *AF) String() string {
 	sb := &strings.Builder{}
 	if x.Len() == 1 {
 		sb.WriteRune(',')
-		fmt.Fprintf(sb, "%g", x.At(0))
+		sb.WriteString(sprintFloat(x.At(0)))
 		return sb.String()
 	}
 	for i, xi := range x.Slice {
-		fmt.Fprintf(sb, "%g", xi)
+		sb.WriteString(sprintFloat(xi))
 		if i < x.Len()-1 {
 			sb.WriteRune(' ')
 		}
