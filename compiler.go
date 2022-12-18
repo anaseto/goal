@@ -403,6 +403,8 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 
 func parseNumber(s string) (V, error) {
 	switch s {
+	case "0n":
+		s = "NaN"
 	case "0w":
 		s = "Inf"
 	case "-0w":

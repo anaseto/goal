@@ -14,6 +14,8 @@ func sprintFloat(f float64) string {
 			return "0w"
 		}
 		return "-0w"
+	case math.IsNaN(f):
+		return "0n"
 	default:
 		return fmt.Sprintf("%g", f)
 	}
