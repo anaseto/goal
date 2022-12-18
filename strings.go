@@ -393,6 +393,8 @@ func replaceS(s S, y, z V) V {
 			return Panicf("sub[s;s;z] : non-string z (%s)", z.Type())
 		}
 		return NewS(strings.ReplaceAll(string(s), string(yv), string(zv)))
+	case *rx:
+		return replaceSRx(s, yv, z)
 	case *AS:
 		zv, ok := z.value.(*AS)
 		if !ok {
@@ -424,6 +426,8 @@ func replaceAS(xv *AS, y, z V) V {
 			r.Slice[i] = strings.ReplaceAll(string(s), string(yv), string(zv))
 		}
 		return NewV(r)
+	case *rx:
+		return replaceASRx(xv, yv, z)
 	case *AS:
 		zv, ok := z.value.(*AS)
 		if !ok {

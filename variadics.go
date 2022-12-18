@@ -124,6 +124,7 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterMonad("icount", VICount)
 	ctx.RegisterMonad("ocount", VOCount)
 	ctx.RegisterMonad("panic", VPanic)
+	ctx.RegisterMonad("rx", VRx)
 	ctx.RegisterMonad("seed", VSeed)
 	ctx.RegisterMonad("sign", VSign)
 	ctx.RegisterMonad("sub", VSub)
