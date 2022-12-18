@@ -3,7 +3,6 @@ package goal
 //go:generate stringer -type=TokenType,astTokenType,opcode -output stringer.go
 
 import (
-	"fmt"
 	"unsafe"
 )
 
@@ -29,7 +28,6 @@ const (
 
 // Value is the interface satisfied by all boxed values.
 type Value interface {
-	fmt.Stringer
 	// Matches returns true if the value matches another (in the sense of
 	// the ~ operator).
 	Matches(x Value) bool

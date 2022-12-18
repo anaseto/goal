@@ -43,33 +43,12 @@ func (v V) Sprint(ctx *Context) string {
 	}
 }
 
-// String returns a prettified string representation of the value.
-func (v V) String() string {
-	switch v.kind {
-	case valInt:
-		return fmt.Sprintf("%d", v.n)
-	case valFloat:
-		return sprintFloat(v.F())
-	case valVariadic:
-		return variadic(v.n).String()
-	case valLambda:
-		return fmt.Sprintf("{Lambda %d}", v.n)
-	case valBoxed, valPanic:
-		return v.value.String()
-	default:
-		return ""
-	}
-}
+func (e *errV) Sprint(ctx *Context) string { return "error[" + e.V.Sprint(ctx) + "]" }
 
-func (e errV) Sprint(ctx *Context) string { return "error[" + e.V.Sprint(ctx) + "]" }
-func (e errV) String() string             { return "error[" + e.V.String() + "]" }
-
-func (e panicV) Sprint(ctx *Context) string { return e.String() }
-func (e panicV) String() string             { return "'ERROR " + string(e) }
+func (e panicV) Sprint(ctx *Context) string { return "panic[" + string(e) + "]" }
 
 // Sprint returns a properly quoted string.
 func (s S) Sprint(ctx *Context) string { return strconv.Quote(string(s)) }
-func (s S) String() string             { return string(s) }
 
 func (x *AB) Sprint(ctx *Context) string {
 	return x.String()
@@ -210,10 +189,6 @@ func (x *AV) sprint(ctx *Context, deep bool) string {
 	return sb.String()
 }
 
-func (x *AV) String() string {
-	return x.sprint(NewContext(), true)
-}
-
 func (p projection) Sprint(ctx *Context) string {
 	sb := &strings.Builder{}
 	fmt.Fprintf(sb, "%s", p.Fun.Sprint(ctx))
@@ -231,30 +206,14 @@ func (p projection) Sprint(ctx *Context) string {
 	return sb.String()
 }
 
-func (p projection) String() string {
-	return p.Sprint(NewContext())
-}
-
 func (p projectionFirst) Sprint(ctx *Context) string {
 	return fmt.Sprintf("%s[%s;]", p.Fun.Sprint(ctx), p.Arg.Sprint(ctx))
-}
-
-func (p projectionFirst) String() string {
-	return fmt.Sprintf("%s[%s;]", p.Fun.String(), p.Arg.String())
 }
 
 func (p projectionMonad) Sprint(ctx *Context) string {
 	return fmt.Sprintf("%s[]", p.Fun.Sprint(ctx))
 }
 
-func (p projectionMonad) String() string {
-	return fmt.Sprintf("%s[]", p.Fun.String())
-}
-
 func (r derivedVerb) Sprint(ctx *Context) string {
 	return fmt.Sprintf("%s%s", r.Arg.Sprint(ctx), r.Fun.String())
-}
-
-func (r derivedVerb) String() string {
-	return fmt.Sprintf("%s%s", r.Arg.String(), r.Fun.String())
 }
