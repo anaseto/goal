@@ -731,6 +731,12 @@ func findS(s S, y V) V {
 	switch yv := y.value.(type) {
 	case S:
 		return NewI(int64(strings.Index(string(s), string(yv))))
+	case *rx:
+		loc := yv.Regexp.FindStringIndex(string(s))
+		if loc == nil {
+			return NewAI([]int64{int64(len(s)), int64(len(s))})
+		}
+		return NewAI([]int64{int64(loc[0]), int64(loc[1])})
 	case *AS:
 		r := make([]int64, yv.Len())
 		for i, ss := range yv.Slice {

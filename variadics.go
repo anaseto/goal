@@ -722,6 +722,10 @@ func VSub(ctx *Context, args []V) V {
 		return panics("sub : not enough arguments")
 	case 3:
 		x, y, z := args[2], args[1], args[0]
+		r, ok := y.value.(*rx)
+		if ok {
+			return replaceRx(ctx, x, r, z)
+		}
 		return replace(x, y, z)
 	default:
 		return panicRank("sub")

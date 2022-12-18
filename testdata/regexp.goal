@@ -1,0 +1,6 @@
+'r:rx`[a-z]`;sub["aBbcC";r;"Z"] / "ZBZZC"
+'r:rx`[a-z]`;sub["aBbcC" "a";r;"Z"] / "ZBZZC" "Z"
+'r:rx`[a-z]`;sub["aBbcC";r;ceil] / "ABBCC"
+'r:rx`[A-Z]`;sub["aBbcC" "a";r;_] / "abbcc" "a"
+"abcde"?rx`[bc]` / 1 2
+"abcde"?rx`[BC]` / 5 5

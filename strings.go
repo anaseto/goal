@@ -251,7 +251,7 @@ func castn(y V) V {
 	case S:
 		xi, err := parseNumber(string(yv))
 		if err != nil {
-			return Errorf("\"n\"$y : non-numeric y (%s) : %v", yv, err)
+			return Errorf("%v", err)
 		}
 		return xi
 	case *AB:
@@ -263,7 +263,7 @@ func castn(y V) V {
 		for i, s := range yv.Slice {
 			n, err := parseNumber(s)
 			if err != nil {
-				return Errorf("\"n\"$y : y contains non-numeric (%s) : %v", s, err)
+				return Errorf("%v", err)
 			}
 			r[i] = n
 		}
@@ -393,8 +393,6 @@ func replaceS(s S, y, z V) V {
 			return Panicf("sub[s;s;z] : non-string z (%s)", z.Type())
 		}
 		return NewS(strings.ReplaceAll(string(s), string(yv), string(zv)))
-	case *rx:
-		return replaceSRx(s, yv, z)
 	case *AS:
 		zv, ok := z.value.(*AS)
 		if !ok {
@@ -426,8 +424,6 @@ func replaceAS(xv *AS, y, z V) V {
 			r.Slice[i] = strings.ReplaceAll(string(s), string(yv), string(zv))
 		}
 		return NewV(r)
-	case *rx:
-		return replaceASRx(xv, yv, z)
 	case *AS:
 		zv, ok := z.value.(*AS)
 		if !ok {
