@@ -85,7 +85,7 @@ func (ctx *Context) applyN(x V, n int) V {
 			ctx.dropN(n)
 			return r
 		default:
-			return Panicf("too many arguments")
+			return Panicf("string got too many arguments")
 		}
 	case array:
 		switch n {
@@ -96,6 +96,13 @@ func (ctx *Context) applyN(x V, n int) V {
 			r := ctx.applyArrayArgs(x, args[len(args)-1], args[:len(args)-1])
 			ctx.dropN(n)
 			return r
+		}
+	case *rx:
+		switch n {
+		case 1:
+			return applyRx(xv, ctx.pop())
+		default:
+			return Panicf("regexp got too many arguments")
 		}
 	default:
 		return Panicf("type %s cannot be applied", x.Type())

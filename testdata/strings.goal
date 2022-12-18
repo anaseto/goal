@@ -53,3 +53,4 @@ sub["abc" "dbe";"b" "c";"d" "e"] / "ade" "dde"
 ("bc";"ab" "de") in "abcd" / (1;1 0)
 $0w / "0w"
 $-0w / "-0w"
+","\(("a,b";"c,d");"e,f") / (("a" "b";"c" "d");"e" "f")

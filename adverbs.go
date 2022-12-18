@@ -282,6 +282,8 @@ func scan2(ctx *Context, f, x V) V {
 		switch fv := f.value.(type) {
 		case S:
 			return scan2Split(fv, x)
+		case *rx:
+			return scan2SplitRx(fv, x)
 		case *AB, *AI, *AF:
 			return scan2Encode(f, x)
 		default:
@@ -327,8 +329,15 @@ func scan2Split(sep S, x V) V {
 		}
 		return NewAV(r)
 	case *AV:
-		//assertCanonical(x)
-		return Panicf("s/x : x not a string atom or array (%s)", xv.Type())
+		r := xv.reuse()
+		for i, xi := range xv.Slice {
+			ri := scan2Split(sep, xi)
+			if ri.IsPanic() {
+				return ri
+			}
+			r.Slice[i] = ri
+		}
+		return NewV(r)
 	default:
 		return Panicf("s/x : x not a string atom or array (%s)", x.Type())
 	}
