@@ -205,7 +205,8 @@ Type help TOPIC or h TOPIC where TOPIC is one of:
 
 Notations:
 	s (string) f (function) F (2-args function)
-	n (number) i (integer) x,y (any other)
+	n (number) i (integer) r (regexp)
+	x,y (any other)
 `
 const helpVERBS = `
 VERBS
@@ -263,11 +264,13 @@ x$y binsearch	2 3 5 7$8 2 7 5 5.5 3 0 -> 4 1 4 3 3 2 0
 ?x  uniq	?2 2 3 4 3 3 -> 2 3 4
 i?y roll	5?100 -> 10 51 21 51 37
 i?y deal	-5?100 -> 19 26 0 73 94 (always distinct)
-s?y index	"a = a + 1"?"=" "+" -> 2 6
+s?r rindex	"abcde"?rx/b../ -> 1 4
+s?s index	"a = a + 1"?"=" "+" -> 2 6
 x?y find	3 2 1?2 -> 1	3 2 1?0	-> 3
 @x  type	@2 -> "i"    @"ab" -> "s"    @2 3 -> "I"
-f@y apply	(|)@1 2 -> 2 1 (like |[1 2] -> 2 1 or |1 2)
 s@y substr	"012345"[2] -> "2345"	"012345"[2;3] -> "234"
+r@y match	rx/[a-z]/"abc" -> 1	rx/([a-z])/"abc" -> "a" "b" "c"
+f@y apply	(|)@1 2 -> 2 1 (like |[1 2] -> 2 1 or |1 2)
 x@y at		1 2 3@2 -> 3	1 2 3[2] -> 3
 .s  reval	."2+3" -> 5	a:1;."a" -> panic ".s : undefined global: a"
 .e  get error	.error "msg" -> "msg"
@@ -300,7 +303,9 @@ x nan y     fill NaNs	42 nan (1.5;sqrt -1) -> 1.5 42
 x rshift y  right shift	"a" "b" rshift 1 2 3 -> "a" "b" 1
 x shift y   shift	"a" "b" shift 1 2 3 -> 3 "a" "b"
 
-sub[x;y;z]  substitute  sub["abc";"b" "c";"d" "e"] -> "ade"
+sub[r;y;z]  regsub  	sub["aBc";rx/[a-z]/;"Z"] -> "ZBZ"
+sub[r;y;f]  regsub  	sub["aBc";rx/[A-Z]/;_] -> "abc"
+sub[x;y;z]  replace	sub["abc";"b" "c";"d" "e"] -> "ade"
 
 MATH: acos, asin, atan, cos, exp, log, round, sin, sqrt, tan, nan
 `

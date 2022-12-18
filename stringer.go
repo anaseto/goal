@@ -21,16 +21,17 @@ func _() {
 	_ = x[NEWLINE-10]
 	_ = x[NUMBER-11]
 	_ = x[MONAD-12]
-	_ = x[RIGHTBRACE-13]
-	_ = x[RIGHTBRACKET-14]
-	_ = x[RIGHTPAREN-15]
-	_ = x[SEMICOLON-16]
-	_ = x[STRING-17]
+	_ = x[REGEXP-13]
+	_ = x[RIGHTBRACE-14]
+	_ = x[RIGHTBRACKET-15]
+	_ = x[RIGHTPAREN-16]
+	_ = x[SEMICOLON-17]
+	_ = x[STRING-18]
 }
 
-const _TokenType_name = "NONEEOFERRORADVERBDYADDYADASSIGNIDENTLEFTBRACELEFTBRACKETLEFTPARENNEWLINENUMBERMONADRIGHTBRACERIGHTBRACKETRIGHTPARENSEMICOLONSTRING"
+const _TokenType_name = "NONEEOFERRORADVERBDYADDYADASSIGNIDENTLEFTBRACELEFTBRACKETLEFTPARENNEWLINENUMBERMONADREGEXPRIGHTBRACERIGHTBRACKETRIGHTPARENSEMICOLONSTRING"
 
-var _TokenType_index = [...]uint8{0, 4, 7, 12, 18, 22, 32, 37, 46, 57, 66, 73, 79, 84, 94, 106, 116, 125, 131}
+var _TokenType_index = [...]uint8{0, 4, 7, 12, 18, 22, 32, 37, 46, 57, 66, 73, 79, 84, 90, 100, 112, 122, 131, 137}
 
 func (i TokenType) String() string {
 	if i < 0 || i >= TokenType(len(_TokenType_index)-1) {
@@ -48,12 +49,13 @@ func _() {
 	_ = x[astMONAD-3]
 	_ = x[astDYAD-4]
 	_ = x[astADVERB-5]
-	_ = x[astEMPTYLIST-6]
+	_ = x[astREGEXP-6]
+	_ = x[astEMPTYLIST-7]
 }
 
-const _astTokenType_name = "astNUMBERastSTRINGastIDENTastMONADastDYADastADVERBastEMPTYLIST"
+const _astTokenType_name = "astNUMBERastSTRINGastIDENTastMONADastDYADastADVERBastREGEXPastEMPTYLIST"
 
-var _astTokenType_index = [...]uint8{0, 9, 18, 26, 34, 41, 50, 62}
+var _astTokenType_index = [...]uint8{0, 9, 18, 26, 34, 41, 50, 59, 71}
 
 func (i astTokenType) String() string {
 	if i < 0 || i >= astTokenType(len(_astTokenType_index)-1) {

@@ -15,10 +15,8 @@ type Token struct {
 
 func (t Token) String() string {
 	switch t.Type {
-	case ERROR:
-		return t.Text
-	case ADVERB, IDENT, DYAD, NUMBER:
-		return t.Text
+	case ADVERB, ERROR, IDENT, DYAD, NUMBER, REGEXP:
+		return fmt.Sprintf("{%s %s}", t.Type.String(), t.Text)
 	case LEFTBRACE:
 		return "{"
 	case LEFTBRACKET:
@@ -58,6 +56,7 @@ const (
 	NEWLINE
 	NUMBER
 	MONAD
+	REGEXP
 	RIGHTBRACE
 	RIGHTBRACKET
 	RIGHTPAREN
@@ -174,6 +173,14 @@ func (s *Scanner) emitError(err string) stateFn {
 
 func (s *Scanner) emitString(t TokenType) stateFn {
 	s.token = Token{Type: t, Pos: s.tpos, Text: s.source[s.tpos:s.npos]}
+	s.start = false
+	s.delimOp = false
+	s.exprEnd = true
+	return nil
+}
+
+func (s *Scanner) emitRegexp(text string) stateFn {
+	s.token = Token{Type: REGEXP, Pos: s.tpos, Text: text}
 	s.start = false
 	s.delimOp = false
 	s.exprEnd = true
@@ -386,6 +393,26 @@ func scanRawString(s *Scanner) stateFn {
 	}
 }
 
+func scanRegexp(s *Scanner) stateFn {
+	sb := strings.Builder{}
+	for {
+		r := s.next()
+		switch r {
+		case eof:
+			return s.emitError("non terminated regexp: unexpected EOF")
+		case '\\':
+			r := s.peek()
+			if r == '/' {
+				s.next()
+			}
+		case '/':
+			return s.emitRegexp(sb.String())
+		default:
+			sb.WriteRune(r)
+		}
+	}
+}
+
 func scanNumber(s *Scanner) stateFn {
 	for {
 		r := s.peek()
@@ -436,6 +463,12 @@ func scanIdent(s *Scanner) stateFn {
 		r := s.peek()
 		switch {
 		case r == eof:
+			return s.emitIDENT()
+		case r == '/':
+			if s.source[s.tpos:s.npos] == "rx" {
+				s.next()
+				return scanRegexp
+			}
 			return s.emitIDENT()
 		case r == '.':
 			r = s.peek()

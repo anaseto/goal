@@ -3,6 +3,7 @@ package goal
 import (
 	"fmt"
 	"math"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -390,6 +391,15 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 		return c.doVariadic(tok, n)
 	case astMONAD:
 		return c.doVariadic(tok, n)
+	case astREGEXP:
+		r, err := regexp.Compile(tok.Text)
+		if err != nil {
+			return c.errorf("rx// : %v", err)
+		}
+		id := c.ctx.storeConst(NewV(&rx{Regexp: r}))
+		c.push2(opConst, opcode(id))
+		c.applyN(n)
+		return nil
 	case astEMPTYLIST:
 		id := c.ctx.storeConst(NewAV([]V{}))
 		c.push2(opConst, opcode(id))

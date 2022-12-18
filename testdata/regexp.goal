@@ -1,8 +1,11 @@
 rx[`[a-z]`]~rx[`[a-z]`] / 1
 rx[`[a-z]`]~rx[`[a-d]`] / 0
 @rx[`[a-z]`] / "r"
+@rx/[a-z]/ / "r"
 $rx[`[a-z]`] / "rx[\"[a-z]\"]"
 'r:rx`[a-z]`;sub["aBbcC";r;"Z"] / "ZBZZC"
+sub["aBc";rx/[a-z]/;"Z"] / "ZBZ"
+sub["aBc";rx/[A-Z]/;_] / "abc"
 'r:rx`[a-z]`;sub["aBbcC" "a";r;"Z"] / "ZBZZC" "Z"
 'r:rx`[a-z]`;sub["aBbcC";r;ceil] / "ABBCC"
 'r:rx`[a-z]`;sub["aBbcC";r;bytes] / "1B11C"
@@ -10,12 +13,16 @@ $rx[`[a-z]`] / "rx[\"[a-z]\"]"
 'r:rx`[A-Z]`;sub["aBbcC" "a";r;bytes] / "a1bc1" "a"
 'r:rx`[A-Z]`;sub[("aBbcC" "a";"B");r;_] / ("abbcc" "a";"b")
 "abcde"?rx`[bc]` / 1 2
+"abcde"?rx`b..` / 1 4
 "abcde"?rx`[BC]` / 5 5
 rx[`[a-z]`] "abc" / 1
+rx/[a-z]/ "abc" / 1
+rx/\// "/" / 1
 rx[`[a-z]`] "abc" "ABC" / 1 0
 rx[`[a-z]`] ("abc" "ABC";"123") / (1 0;0)
 rx[`[a-z]`] "123" / 0
 rx[`([a-z])`] "abc" / "a" "b" "c"
+rx/([a-z])/ "abc" / "a" "b" "c"
 rx[`([a-z])`] "abc" "D" / ("a" "b" "c";())
 rx[`([a-z])`] ("abc" "D";"b") / (("a" "b" "c";());,"b")
 rx[`([a-z](.))`] "aAbBcC" / ("aA" "A";"bB" "B";"cC" "C")
@@ -24,3 +31,4 @@ rx[`([a-z](.))`] ("aAbB" "cC";"dD") / ((("aA" "A";"bB" "B");,"cC" "C");,"dD" "D"
 rx[`[,;]`]\"a,b;c" / "a" "b" "c"
 rx[`[,;]`]\"a,b" "c;d" / ("a" "b";"c" "d")
 rx[`[,;]`]\("a,b" "c;d";"e,f") / (("a" "b";"c" "d");"e" "f")
+rx/[,;]/\("a,b" "c;d";"e,f") / (("a" "b";"c" "d");"e" "f")

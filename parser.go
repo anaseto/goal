@@ -163,6 +163,8 @@ func (p *parser) expr(es exprs) (exprs, error) {
 			}
 			e = ptok
 		}
+	case REGEXP:
+		e = &astToken{Type: astREGEXP, Pos: tok.Pos, Text: tok.Text}
 	case RIGHTBRACE, RIGHTBRACKET, RIGHTPAREN:
 		if len(p.depth) == 0 {
 			err = p.errorf("unexpected %s without opening matching pair", tok)

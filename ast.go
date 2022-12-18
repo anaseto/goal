@@ -29,6 +29,7 @@ const (
 	astMONAD
 	astDYAD
 	astADVERB // only within astDerivedVerb
+	astREGEXP
 	astEMPTYLIST
 )
 
