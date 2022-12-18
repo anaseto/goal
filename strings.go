@@ -239,7 +239,7 @@ func casti(y V) V {
 		}
 		return NewAV(r)
 	default:
-		return panics("\"i\"$y : non-numeric y")
+		return panicType("\"i\"$y", "y", y)
 	}
 }
 
@@ -251,7 +251,7 @@ func castn(y V) V {
 	case S:
 		xi, err := parseNumber(string(yv))
 		if err != nil {
-			return Panicf("\"i\"$y : non-numeric y (%s) : %v", yv, err)
+			return Errorf("\"n\"$y : non-numeric y (%s) : %v", yv, err)
 		}
 		return xi
 	case *AB:
@@ -263,7 +263,7 @@ func castn(y V) V {
 		for i, s := range yv.Slice {
 			n, err := parseNumber(s)
 			if err != nil {
-				return Panicf("\"i\"$y : y contains non-numeric (%s) : %v", s, err)
+				return Errorf("\"n\"$y : y contains non-numeric (%s) : %v", s, err)
 			}
 			r[i] = n
 		}
@@ -280,7 +280,7 @@ func castn(y V) V {
 		}
 		return Canonical(NewAV(r))
 	default:
-		return panics("\"i\"$y : non-numeric y")
+		return panicType("\"n\"$y", "y", y)
 	}
 }
 
@@ -312,7 +312,7 @@ func casts(y V) V {
 		}
 		return Canonical(NewAV(r))
 	default:
-		return panics("\"i\"$y : non-numeric y")
+		return panicType("\"s\"$y", "y", y)
 	}
 }
 
