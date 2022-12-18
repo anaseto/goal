@@ -61,7 +61,7 @@ func fold2vAdd(x V) V {
 
 func fold2vMax(x V) V {
 	if Length(x) == 0 {
-		return NewI(math.MinInt64)
+		return NewF(math.Inf(-1))
 	}
 	switch xv := x.value.(type) {
 	case *AB:
@@ -96,7 +96,7 @@ func fold2vMax(x V) V {
 
 func fold2vMin(x V) V {
 	if Length(x) == 0 {
-		return NewI(math.MaxInt64)
+		return NewF(math.Inf(1))
 	}
 	switch xv := x.value.(type) {
 	case *AB:

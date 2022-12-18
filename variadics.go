@@ -162,9 +162,9 @@ func (v variadic) zero() V {
 	case vMultiply:
 		return NewI(1)
 	case vMin:
-		return NewI(math.MaxInt64)
+		return NewF(math.Inf(1))
 	case vMax:
-		return NewI(math.MinInt64)
+		return NewF(math.Inf(-1))
 	default:
 		return NewI(0)
 	}
