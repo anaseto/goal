@@ -25,9 +25,8 @@ func b2f(b bool) (f float64) {
 // divideF divides two floats, returning infinity with appropriate sign when
 // dividing by zero.
 func divideF(x, y float64) float64 {
-	if y == 0 {
-		return math.Inf(signF(x))
-	}
+	// NOTE: Go's standard says it could panic, but current implementation
+	// seems to provide the desired behaviour.
 	return x / y
 }
 
