@@ -456,6 +456,45 @@ func maxAI(x *AI) int64 {
 	return max
 }
 
+func minAI(x *AI) int64 {
+	min := int64(math.MaxInt64)
+	if x.Len() == 0 {
+		return min
+	}
+	for _, xi := range x.Slice {
+		if xi < min {
+			min = xi
+		}
+	}
+	return min
+}
+
+func maxAF(x *AF) float64 {
+	max := math.Inf(-1)
+	if x.Len() == 0 {
+		return max
+	}
+	for _, xi := range x.Slice {
+		if xi > max {
+			max = xi
+		}
+	}
+	return max
+}
+
+func minAF(x *AF) float64 {
+	min := math.Inf(1)
+	if x.Len() == 0 {
+		return min
+	}
+	for _, xi := range x.Slice {
+		if xi < min {
+			min = xi
+		}
+	}
+	return min
+}
+
 func minMaxB(x *AB) (int64, int64) {
 	if x.Len() == 0 {
 		return 0, 0

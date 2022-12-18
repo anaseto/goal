@@ -183,3 +183,6 @@ nan "a" / type
 panic[1;2] / too many arguments
 panic[1] / type
 panic["msg"] / msg
+-60/45 / not positive
+-60\45 / not positive
+60 -60/2 42 / non positive

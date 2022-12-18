@@ -159,14 +159,12 @@ type zeroFun interface {
 
 func (v variadic) zero() V {
 	switch v {
-	case vAdd, vSubtract:
-		return NewI(0)
 	case vMultiply:
 		return NewI(1)
 	case vMin:
-		return NewI(math.MinInt64)
-	case vMax:
 		return NewI(math.MaxInt64)
+	case vMax:
+		return NewI(math.MinInt64)
 	default:
 		return NewI(0)
 	}

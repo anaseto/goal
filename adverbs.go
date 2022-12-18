@@ -12,6 +12,10 @@ func fold2(ctx *Context, args []V) V {
 		switch f.variadic() {
 		case vAdd:
 			return fold2vAdd(args[0])
+		case vMax:
+			return fold2vMax(args[0])
+		case vMin:
+			return fold2vMin(args[0])
 		}
 	}
 	if !f.IsFunction() {
@@ -48,56 +52,6 @@ func fold2(ctx *Context, args []V) V {
 			ctx.push(xv.at(i))
 			ctx.push(r)
 			r = ctx.applyN(f, 2)
-		}
-		return r
-	default:
-		return x
-	}
-}
-
-func fold2vAdd(x V) V {
-	switch xv := x.value.(type) {
-	case *AB:
-		n := int64(0)
-		for _, b := range xv.Slice {
-			if b {
-				n++
-			}
-		}
-		return NewI(n)
-	case *AI:
-		n := int64(0)
-		for _, xi := range xv.Slice {
-			n += xi
-		}
-		return NewI(n)
-	case *AF:
-		n := 0.0
-		for _, xi := range xv.Slice {
-			n += xi
-		}
-		return NewF(n)
-	case *AS:
-		if xv.Len() == 0 {
-			return NewS("")
-		}
-		n := 0
-		for _, s := range xv.Slice {
-			n += len(s)
-		}
-		var b strings.Builder
-		b.Grow(n)
-		for _, s := range xv.Slice {
-			b.WriteString(s)
-		}
-		return NewS(b.String())
-	case *AV:
-		if xv.Len() == 0 {
-			return NewI(0)
-		}
-		r := xv.At(0)
-		for _, xi := range xv.Slice[1:] {
-			r = add(r, xi)
 		}
 		return r
 	default:
