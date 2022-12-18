@@ -180,3 +180,6 @@ nan[1;2;3] / too many arguments
 nan "a" / type
 "b" nan 2.5 / type
 2 nan "a" / type
+panic[1;2] / too many arguments
+panic[1] / type
+panic["msg"] / msg

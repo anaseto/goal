@@ -123,6 +123,7 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterMonad("firsts", VFirsts)
 	ctx.RegisterMonad("icount", VICount)
 	ctx.RegisterMonad("ocount", VOCount)
+	ctx.RegisterMonad("panic", VPanic)
 	ctx.RegisterMonad("seed", VSeed)
 	ctx.RegisterMonad("sign", VSign)
 	ctx.RegisterMonad("sub", VSub)
@@ -630,6 +631,22 @@ func VOCount(ctx *Context, args []V) V {
 		return occurrenceCount(args[0])
 	default:
 		return panicRank("ocount")
+	}
+}
+
+// VPanic implements the "panic" variadic verb.
+func VPanic(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		x := args[0]
+		switch xv := x.value.(type) {
+		case S:
+			return panics(string(xv))
+		default:
+			return panicType("panic x", "x", x)
+		}
+	default:
+		return panicRank("panic")
 	}
 }
 
