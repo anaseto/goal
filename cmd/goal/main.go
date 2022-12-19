@@ -269,7 +269,8 @@ s?s index	"a = a + 1"?"=" "+" -> 2 6
 x?y find	3 2 1?2 -> 1	3 2 1?0	-> 3
 @x  type	@2 -> "i"    @"ab" -> "s"    @2 3 -> "I"
 s@y substr	"012345"[2] -> "2345"	"012345"[2;3] -> "234"
-r@y match	rx/[a-z]/"abc" -> 1	rx/([a-z])/"abc" -> "a" "b" "c"
+r@y match	rx/[a-z]/"abc" -> 1
+r@y find	rx/[a-z](.)/"abc" -> "ab" "b"	rx/[a-z]/["abc";-1] -> "a" "b" "c"
 f@y apply	(|)@1 2 -> 2 1 (like |[1 2] -> 2 1 or |1 2)
 x@y at		1 2 3@2 -> 3	1 2 3[2] -> 3
 .s  reval	."2+3" -> 5	a:1;."a" -> panic ".s : undefined global: a"
@@ -368,8 +369,9 @@ Currently available commands:
 `
 const helpSyntax = `
 SYNTAX HELP
-literals	1	1.5	"text"
+atoms		1	1.5	"text"
 arrays		1 2 -3 4	1 "a" -2 "b"	(1 2;"a";(3;"b"))
+regexps		rx/[a-z]/	(see https://pkg.go.dev/regexp/syntax for syntax)
 variables	a:2 (assign)	a+:1 (same as a:a+1)	a+3 (use)
 		a::2 (assign global)	a+::2 (same as a::a+2)
 expressions	2*3+4 -> 14	1+|1 2 3 -> 4 3 2	+/1 2 3 -> 6

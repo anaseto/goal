@@ -1,6 +1,5 @@
 Features:
 - some kind of namespace or object and import mechanism other than eval
-- regexp primitives
 - more general io (open/read/write/close/defer?)
 - use general x#y array case for something
 - split i$s, and cut x_s and maybe amend string @[s;I;s]

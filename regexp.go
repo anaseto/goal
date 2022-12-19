@@ -113,11 +113,8 @@ func replaceASRx(ctx *Context, x *AS, y *rx, z V) V {
 }
 
 func applyRx(x *rx, y V) V {
-	if x.Regexp.NumSubexp() > 1 {
+	if x.Regexp.NumSubexp() > 0 {
 		return applyRxFindSubmatch(x, y)
-	}
-	if x.Regexp.NumSubexp() == 1 {
-		return applyRxFind(x, y)
 	}
 	return applyRxMatch(x, y)
 }
@@ -147,27 +144,20 @@ func applyRxMatch(x *rx, y V) V {
 	}
 }
 
-func applyRxFind(x *rx, y V) V {
+func applyRxFindSubmatch(x *rx, y V) V {
 	switch yv := y.value.(type) {
 	case S:
-		r := []string{}
-		matches := x.Regexp.FindAllStringSubmatch(string(yv), -1)
-		for _, sm := range matches {
-			if len(sm) > 1 {
-				r = append(r, sm[1])
-			}
-		}
-		return NewAS(r)
+		return NewAS(x.Regexp.FindStringSubmatch(string(yv)))
 	case *AS:
 		r := make([]V, yv.Len())
 		for i, yi := range yv.Slice {
-			r[i] = applyRxFind(x, NewS(yi))
+			r[i] = applyRxFindSubmatch(x, NewS(yi))
 		}
 		return NewAV(r)
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
-			ri := applyRxFind(x, yi)
+			ri := applyRxFindSubmatch(x, yi)
 			if ri.IsPanic() {
 				return ri
 			}
@@ -179,25 +169,68 @@ func applyRxFind(x *rx, y V) V {
 	}
 }
 
-func applyRxFindSubmatch(x *rx, y V) V {
+func applyRx2(x *rx, y, z V) V {
+	var n int64
+	if z.IsI() {
+		n = z.I()
+	} else if z.IsF() {
+		if !isI(z.F()) {
+			return Panicf("r[x;y] : y not an integer (%g)", z.F())
+		}
+	} else {
+		return panicType("r[x;y]", "y", z)
+	}
+	if x.Regexp.NumSubexp() > 0 {
+		return applyRxFindAllSubmatch(x, y, n)
+	}
+	return applyRxFindAll(x, y, n)
+}
+
+func applyRxFindAllSubmatch(x *rx, y V, n int64) V {
 	switch yv := y.value.(type) {
 	case S:
-		matches := x.Regexp.FindAllStringSubmatch(string(yv), -1)
+		matches := x.Regexp.FindAllStringSubmatch(string(yv), int(n))
 		r := make([]V, len(matches))
 		for i, sm := range matches {
-			r[i] = NewAS(sm[1:])
+			r[i] = NewAS(sm)
 		}
 		return NewAV(r)
 	case *AS:
 		r := make([]V, yv.Len())
 		for i, yi := range yv.Slice {
-			r[i] = applyRxFindSubmatch(x, NewS(yi))
+			r[i] = applyRxFindAllSubmatch(x, NewS(yi), n)
 		}
 		return NewAV(r)
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
-			ri := applyRxFindSubmatch(x, yi)
+			ri := applyRxFindAllSubmatch(x, yi, n)
+			if ri.IsPanic() {
+				return ri
+			}
+			r.Slice[i] = ri
+		}
+		return NewV(r)
+	default:
+		return panicType("r[y]", "y", y)
+	}
+}
+
+func applyRxFindAll(x *rx, y V, n int64) V {
+	switch yv := y.value.(type) {
+	case S:
+		matches := x.Regexp.FindAllString(string(yv), int(n))
+		return NewAS(matches)
+	case *AS:
+		r := make([]V, yv.Len())
+		for i, yi := range yv.Slice {
+			r[i] = applyRxFindAll(x, NewS(yi), n)
+		}
+		return NewAV(r)
+	case *AV:
+		r := yv.reuse()
+		for i, yi := range yv.Slice {
+			ri := applyRxFindAll(x, yi, n)
 			if ri.IsPanic() {
 				return ri
 			}

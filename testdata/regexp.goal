@@ -17,17 +17,20 @@ sub["aBc";rx/[A-Z]/;_] / "abc"
 "abcde"?rx`[BC]` / 5 5
 rx[`[a-z]`] "abc" / 1
 rx/[a-z]/ "abc" / 1
+rx/[a-z](.)/ "abc" / "ab" "b"
+rx/[a-z](.)/ "abc" "bc" / ("ab" "b";"bc" "c")
+rx/[a-z](.)/ ("abc" "bc";"123") / (("ab" "b";"bc" "c");())
 rx/\// "/" / 1
 rx[`[a-z]`] "abc" "ABC" / 1 0
 rx[`[a-z]`] ("abc" "ABC";"123") / (1 0;0)
 rx[`[a-z]`] "123" / 0
-rx[`([a-z])`] "abc" / "a" "b" "c"
-rx/([a-z])/ "abc" / "a" "b" "c"
-rx[`([a-z])`] "abc" "D" / ("a" "b" "c";())
-rx[`([a-z])`] ("abc" "D";"b") / (("a" "b" "c";());,"b")
-rx[`([a-z](.))`] "aAbBcC" / ("aA" "A";"bB" "B";"cC" "C")
-rx[`([a-z](.))`] "aAbB" "cC" / (("aA" "A";"bB" "B");,"cC" "C")
-rx[`([a-z](.))`] ("aAbB" "cC";"dD") / ((("aA" "A";"bB" "B");,"cC" "C");,"dD" "D")
+rx[`[a-z]`]["abc";-1] / "a" "b" "c"
+rx/[a-z]/["abc";-1] / "a" "b" "c"
+rx/[a-z]/["abc" "D";-1] / ("a" "b" "c";())
+rx/[a-z]/[("abc" "D";"b");-1] / (("a" "b" "c";());,"b")
+(1_)'rx/([a-z](.))/["aAbBcC";-1] / ("aA" "A";"bB" "B";"cC" "C")
+{(1_)'x}'rx/([a-z](.))/["aAbB" "cC";-1] / (("aA" "A";"bB" "B");,"cC" "C")
+rx[`([a-z](.))`][("aAbB" "cC";"dD");-1] / ((("aA" "aA" "A";"bB" "bB" "B");,"cC" "cC" "C");,"dD" "dD" "D")
 rx[`[,;]`]\"a,b;c" / "a" "b" "c"
 rx[`[,;]`]\"a,b" "c;d" / ("a" "b";"c" "d")
 rx[`[,;]`]\("a,b" "c;d";"e,f") / (("a" "b";"c" "d");"e" "f")

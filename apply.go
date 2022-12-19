@@ -101,6 +101,11 @@ func (ctx *Context) applyN(x V, n int) V {
 		switch n {
 		case 1:
 			return applyRx(xv, ctx.pop())
+		case 2:
+			args := ctx.peekN(2)
+			r := applyRx2(xv, args[1], args[0])
+			ctx.drop2()
+			return r
 		default:
 			return Panicf("regexp got too many arguments")
 		}

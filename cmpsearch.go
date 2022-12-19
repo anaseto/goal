@@ -313,7 +313,7 @@ func uniq(x V) V {
 // Mark Firsts returns firsts x.
 func markFirsts(x V) V {
 	if Length(x) == 0 {
-		return NewAB([]bool{})
+		return NewAB(nil)
 	}
 	//assertCanonical(xv)
 	switch xv := x.value.(type) {
@@ -395,7 +395,7 @@ func memberOf(x, y V) V {
 		}
 	}
 	if Length(x) == 0 {
-		return NewAB([]bool{})
+		return NewAB(nil)
 	}
 	//assertCanonical(x)
 	//assertCanonical(yv)
@@ -597,7 +597,7 @@ func memberOfArray(x, y array) V {
 // OccurrenceCount returns ⊒x.
 func occurrenceCount(x V) V {
 	if Length(x) == 0 {
-		return NewAB([]bool{})
+		return NewAB(nil)
 	}
 	//assertCanonical(x)
 	switch xv := x.value.(type) {
