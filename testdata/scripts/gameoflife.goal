@@ -5,7 +5,7 @@ life:{
   rotx:{y rotate x}[padx;]'-1 0 1
   roty:,/{(y rotate)''x}[rotx;]'-1 0 1
   nbs8:(+/(roty))-padx
-  upad(nbs8=3)|padx&(nbs8>1)&(nbs8<4)
+  upad(nbs8=3)|padx&nbs8=2
 }
 blinker:(0 0 0;1 1 1;0 0 0)
 toad:(0 0 0 0;0 1 1 1;1 1 1 0;0 0 0 0)
