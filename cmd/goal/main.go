@@ -59,7 +59,7 @@ func main() {
 	source := string(bs)
 	if len(source) > 2 && source[:2] == "#!" {
 		// skip shellbang #! line
-		i := strings.IndexByte('\n')
+		i := strings.IndexByte(source, '\n')
 		if i > 0 {
 			source = source[i+1:]
 		} else {
