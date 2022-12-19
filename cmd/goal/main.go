@@ -56,7 +56,17 @@ func main() {
 		fmt.Fprintf(os.Stderr, "goal: %v", err)
 		os.Exit(1)
 	}
-	err = ctx.Compile(fname, string(bs))
+	source := string(bs)
+	if len(source) > 2 && source[:2] == "#!" {
+		// skip shellbang #! line
+		i := strings.IndexByte('\n')
+		if i > 0 {
+			source = source[i+1:]
+		} else {
+			source = ""
+		}
+	}
+	err = ctx.Compile(fname, source)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "goal: %v", err)
 		if *optD {
