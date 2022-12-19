@@ -3,7 +3,7 @@ package goal
 // group returns =x.
 func group(x V) V {
 	if Length(x) == 0 {
-		return NewAV([]V{})
+		return NewAV(nil)
 	}
 	switch xv := x.value.(type) {
 	case *AB:
@@ -82,7 +82,7 @@ func group(x V) V {
 // icount efficiently returns #'=x.
 func icount(x V) V {
 	if Length(x) == 0 {
-		return NewAI([]int64{})
+		return NewAI(nil)
 	}
 	switch xv := x.value.(type) {
 	case *AB:

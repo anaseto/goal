@@ -297,7 +297,7 @@ func scan2(ctx *Context, f, x V) V {
 	switch xv := x.value.(type) {
 	case array:
 		if xv.Len() == 0 {
-			return NewAV([]V{})
+			return NewAV(nil)
 		}
 		r := []V{xv.at(0)}
 		for i := 1; i < xv.Len(); i++ {
@@ -518,7 +518,7 @@ func scan3(ctx *Context, args []V) V {
 	switch yv := y.value.(type) {
 	case array:
 		if yv.Len() == 0 {
-			return NewAV([]V{})
+			return NewAV(nil)
 		}
 		ctx.push(yv.at(0))
 		ctx.push(x)

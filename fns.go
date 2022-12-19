@@ -32,7 +32,7 @@ func rangeArray(x *AI) V {
 	cols := int64(1)
 	for _, n := range x.Slice {
 		if n == 0 {
-			return NewAV([]V{})
+			return NewAV(nil)
 		}
 		cols *= n
 	}
@@ -62,7 +62,7 @@ func where(x V) V {
 		case x.I() < 0:
 			return Panicf("&x : x negative (%d)", x.I())
 		case x.I() == 0:
-			return NewAI([]int64{})
+			return NewAI(nil)
 		default:
 			r := make([]int64, x.I())
 			return NewAI(r)
@@ -77,7 +77,7 @@ func where(x V) V {
 		case n < 0:
 			return Panicf("&x : x negative (%d)", n)
 		case n == 0:
-			return NewAI([]int64{})
+			return NewAI(nil)
 		default:
 			r := make([]int64, n)
 			return NewAI(r)
@@ -371,13 +371,13 @@ func repeatAI(x *AI, y V) V {
 func weedOut(x, y V) V {
 	if x.IsI() {
 		if x.I() != 0 {
-			return NewAV([]V{})
+			return NewAV(nil)
 		}
 		return y
 	}
 	if x.IsF() {
 		if x.F() != 0 {
-			return NewAV([]V{})
+			return NewAV(nil)
 		}
 		return y
 	}

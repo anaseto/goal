@@ -144,7 +144,7 @@ func matchAF(x, y *AF) bool {
 // classify returns %x.
 func classify(x V) V {
 	if Length(x) == 0 {
-		return NewAI([]int64{})
+		return NewAI(nil)
 	}
 	//assertCanonical(x)
 	switch xv := x.value.(type) {

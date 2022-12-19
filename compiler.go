@@ -401,7 +401,7 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 		c.applyN(n)
 		return nil
 	case astEMPTYLIST:
-		id := c.ctx.storeConst(NewAV([]V{}))
+		id := c.ctx.storeConst(NewAV(nil))
 		c.push2(opConst, opcode(id))
 		c.applyN(n)
 		return nil

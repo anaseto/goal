@@ -201,7 +201,7 @@ func cutAI(x *AI, y V) V {
 		}
 	}
 	if x.Len() == 0 {
-		return NewAV([]V{})
+		return NewAV(nil)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
