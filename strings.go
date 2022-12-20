@@ -1,6 +1,67 @@
 package goal
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
+
+type stringReplacer interface {
+	Value
+	replace(*Context, string) string
+}
+
+type nReplacer struct {
+	olds S
+	news S
+	n    int
+}
+
+func (r *nReplacer) Matches(x Value) bool {
+	xv, ok := x.(*nReplacer)
+	return ok && r.olds == xv.olds && r.news == xv.news && r.n == xv.n
+}
+
+func (r *nReplacer) Sprint(ctx *Context) string {
+	return fmt.Sprintf("sub[%s;%s;%d]", r.olds.Sprint(ctx), r.news.Sprint(ctx), r.n)
+}
+
+func (r *nReplacer) Type() string {
+	return "f"
+}
+
+func (r *nReplacer) replace(ctx *Context, s string) string {
+	return strings.Replace(s, string(r.olds), string(r.news), r.n)
+}
+
+type replacer struct {
+	r      *strings.Replacer
+	oldnew *AS
+}
+
+func (r *replacer) Matches(x Value) bool {
+	xv, ok := x.(*replacer)
+	return ok && r.oldnew.Matches(xv.oldnew)
+}
+
+func (r *replacer) Sprint(ctx *Context) string {
+	return "sub[" + r.oldnew.Sprint(ctx) + "]"
+}
+
+func (r *replacer) Type() string {
+	return "f"
+}
+
+func (r *replacer) replace(ctx *Context, s string) string {
+	return r.r.Replace(s)
+}
+
+func (r *replacer) rcincr() {
+	r.oldnew.rcincr()
+}
+
+func (r *replacer) rcdecr() {
+	r.oldnew.rcdecr()
+}
 
 func applyS(s S, x V) V {
 	if x.IsI() {
@@ -365,85 +426,99 @@ func trim(s S, y V) V {
 	}
 }
 
-func replace(x, y, z V) V {
+func sub1(x V) V {
+	switch xv := x.value.(type) {
+	case *AS:
+		if xv.Len()%2 != 0 {
+			return panics("sub[S] : non-even length array")
+		}
+		return NewV(&replacer{r: strings.NewReplacer(xv.Slice...), oldnew: xv})
+	default:
+		return panicType("sub[x]", "x", x)
+	}
+}
+
+func sub2(x, y V) V {
 	switch xv := x.value.(type) {
 	case S:
-		return replaceS(xv, y, z)
-	case *AS:
-		return replaceAS(xv, y, z)
-	case *AV:
-		r := xv.reuse()
-		for i, xi := range xv.Slice {
-			r.Slice[i] = replace(xi, y, z)
-			if r.Slice[i].IsPanic() {
-				return r.Slice[i]
-			}
+		yv, ok := y.value.(S)
+		if !ok {
+			return panicType("sub[s;y]", "y", y)
 		}
-		return NewV(r)
+		return NewV(&nReplacer{olds: xv, news: yv, n: -1})
+	case *AS:
+		yv, ok := y.value.(*AS)
+		if !ok {
+			return panicType("sub[S;y]", "y", y)
+		}
+		if xv.Len() != yv.Len() {
+			return Panicf("sub[S;S] : length mismatch (%d vs %d)", xv.Len(), yv.Len())
+		}
+		oldnew := make([]string, 2*xv.Len())
+		for i, xi := range xv.Slice {
+			oldnew[2*i] = xi
+			oldnew[2*i+1] = yv.Slice[i]
+		}
+		return NewV(&replacer{r: strings.NewReplacer(oldnew...), oldnew: &AS{Slice: oldnew}})
+	case *rx:
+		switch y.value.(type) {
+		case S:
+			return NewV(&rxReplacer{r: xv, repl: y})
+		default:
+			if y.IsFunction() {
+				return NewV(&rxReplacer{r: xv, repl: y})
+			}
+			return panicType("sub[r;y]", "y", y)
+		}
+	default:
+		return panicType("sub[x;y]", "x", x)
+	}
+}
+
+func sub3(x, y, z V) V {
+	switch xv := x.value.(type) {
+	case S:
+		yv, ok := y.value.(S)
+		if !ok {
+			return panicType("sub[s;y;z]", "y", y)
+		}
+		var n int64
+		if z.IsI() {
+			n = z.I()
+		} else if z.IsF() {
+			if !isI(z.F()) {
+				return panicType("sub[s;y;z]", "z", z)
+			}
+			n = int64(z.F())
+		}
+		return NewV(&nReplacer{olds: xv, news: yv, n: int(n)})
 	default:
 		return panicType("sub[x;y;z]", "x", x)
 	}
 }
 
-func replaceS(s S, y, z V) V {
-	switch yv := y.value.(type) {
+func (ctx *Context) replace(f stringReplacer, x V) V {
+	switch xv := x.value.(type) {
 	case S:
-		zv, ok := z.value.(S)
-		if !ok {
-			return Panicf("sub[s;s;z] : non-string z (%s)", z.Type())
-		}
-		return NewS(strings.ReplaceAll(string(s), string(yv), string(zv)))
+		return NewS(f.replace(ctx, string(xv)))
 	case *AS:
-		zv, ok := z.value.(*AS)
-		if !ok {
-			return Panicf("sub[s;S;z] : z not a string array (%s)", z.Type())
-		}
-		if yv.Len() != zv.Len() {
-			return Panicf("sub[s;y;z] : length mismatch for y and z (%d vs %d)", yv.Len(), zv.Len())
-		}
-		oldnews := make([]string, 0, 2*yv.Len())
-		for i, s := range yv.Slice {
-			oldnews = append(oldnews, s, zv.At(i))
-		}
-		rep := strings.NewReplacer(oldnews...)
-		return NewS(rep.Replace(string(s)))
-	default:
-		return panicType("sub[s;y;z]", "y", y)
-	}
-}
-
-func replaceAS(xv *AS, y, z V) V {
-	switch yv := y.value.(type) {
-	case S:
-		zv, ok := z.value.(S)
-		if !ok {
-			return Panicf("sub[s;s;z] : non-string z (%s)", z.Type())
-		}
 		r := xv.reuse()
-		for i, s := range xv.Slice {
-			r.Slice[i] = strings.ReplaceAll(string(s), string(yv), string(zv))
+		for i, xi := range xv.Slice {
+			r.Slice[i] = f.replace(ctx, xi)
 		}
 		return NewV(r)
-	case *AS:
-		zv, ok := z.value.(*AS)
-		if !ok {
-			return Panicf("sub[s;S;z] : z not a string array (%s)", z.Type())
-		}
-		if yv.Len() != zv.Len() {
-			return Panicf("sub[s;y;z] : length mismatch for y and z (%d vs %d)", yv.Len(), zv.Len())
-		}
-		oldnews := make([]string, 0, 2*yv.Len())
-		for i, s := range yv.Slice {
-			oldnews = append(oldnews, s, zv.At(i))
-		}
-		rep := strings.NewReplacer(oldnews...)
+	case *AV:
 		r := xv.reuse()
-		for i, s := range xv.Slice {
-			r.Slice[i] = rep.Replace(string(s))
+		for i, xi := range xv.Slice {
+			ri := ctx.replace(f, xi)
+			if ri.IsPanic() {
+				return ri
+			}
+			r.Slice[i] = ri
 		}
 		return NewV(r)
 	default:
-		return panicType("sub[s;y;z]", "y", y)
+		return panicType("sub[...] x", "x", x)
 	}
 }
 

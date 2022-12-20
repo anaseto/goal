@@ -718,15 +718,12 @@ func VRShift(ctx *Context, args []V) V {
 // VSub implements the sub variadic verb.
 func VSub(ctx *Context, args []V) V {
 	switch len(args) {
-	case 1, 2:
-		return panics("sub : not enough arguments")
+	case 1:
+		return sub1(args[0])
+	case 2:
+		return sub2(args[1], args[0])
 	case 3:
-		x, y, z := args[2], args[1], args[0]
-		r, ok := y.value.(*rx)
-		if ok {
-			return replaceRx(ctx, x, r, z)
-		}
-		return replace(x, y, z)
+		return sub3(args[2], args[1], args[0])
 	default:
 		return panicRank("sub")
 	}

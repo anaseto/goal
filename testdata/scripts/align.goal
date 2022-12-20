@@ -20,7 +20,7 @@ res:(
  {padc'[colw;x]}'records
 )
 fmt:" \n"^"\n"/ "\n"/'" "/''res
-sub[fmt;rx/(?m)\s*$/;""]
+sub[rx/(?m)\s*$/;""] fmt
 /RESULT:
 result:" \n"^`
 atom  array  name
@@ -44,4 +44,4 @@ atom  array       name
   f             function
   e              error
         A    generic array`
-sub[result;rx/(?m)\s*$/;""]
+sub[rx/(?m)\s*$/;""] result

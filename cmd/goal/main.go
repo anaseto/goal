@@ -314,9 +314,12 @@ x nan y     fill NaNs	42 nan (1.5;sqrt -1) -> 1.5 42
 x rshift y  right shift	"a" "b" rshift 1 2 3 -> "a" "b" 1
 x shift y   shift	"a" "b" shift 1 2 3 -> 3 "a" "b"
 
-sub[r;y;z]  regsub  	sub["aBc";rx/[a-z]/;"Z"] -> "ZBZ"
-sub[r;y;f]  regsub  	sub["aBc";rx/[A-Z]/;_] -> "abc"
-sub[x;y;z]  replace	sub["abc";"b" "c";"d" "e"] -> "ade"
+sub[r;y]    regsub  	sub[rx/[a-z]/;"Z"] "aBc" -> "ZBZ"
+sub[r;y;f]  regsub  	sub[rx/[A-Z]/;_] "aBc" -> "abc"
+sub[x;y]    replace	sub["b";"B"] "abc" -> "aBc"
+sub[x;y]    replace n	sub["a";"b";2] "aaa" -> "bba"
+sub[x;y]    replace	sub["b" "c";"d" "e"] "abc" -> "ade"
+sub[x]      replace	sub["b" "d" "c" "e"] "abc" -> "ade"
 
 MATH: acos, asin, atan, cos, exp, log, round, sin, sqrt, tan, nan
 `

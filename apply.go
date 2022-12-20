@@ -109,6 +109,13 @@ func (ctx *Context) applyN(x V, n int) V {
 		default:
 			return Panicf("regexp got too many arguments")
 		}
+	case stringReplacer:
+		if n > 1 {
+			return Panicf("substitution got too many arguments")
+		}
+		r := ctx.replace(xv, ctx.top())
+		ctx.drop()
+		return r
 	default:
 		return Panicf("type %s cannot be applied", x.Type())
 	}

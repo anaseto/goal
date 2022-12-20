@@ -1,6 +1,9 @@
 package goal
 
-import "regexp"
+import (
+	"fmt"
+	"regexp"
+)
 
 type rx struct {
 	Regexp *regexp.Regexp
@@ -17,6 +20,54 @@ func (r *rx) Sprint(ctx *Context) string {
 
 func (r *rx) Type() string {
 	return "r"
+}
+
+type rxReplacer struct {
+	r    *rx
+	repl V
+}
+
+func (r *rxReplacer) Matches(x Value) bool {
+	xv, ok := x.(*rxReplacer)
+	return ok && r.r.Matches(xv.r) && Match(r.repl, xv.repl)
+}
+
+func (r *rxReplacer) Sprint(ctx *Context) string {
+	return fmt.Sprintf("sub[%s;%s]", r.r.Sprint(ctx), r.repl.Sprint(ctx))
+}
+
+func (r *rxReplacer) Type() string {
+	return "f"
+}
+
+func (r *rxReplacer) rcincr() {
+	r.repl.rcincr()
+}
+
+func (r *rxReplacer) rcdecr() {
+	r.repl.rcdecr()
+}
+
+func (r *rxReplacer) replace(ctx *Context, s string) string {
+	switch zv := r.repl.value.(type) {
+	case S:
+		return r.r.Regexp.ReplaceAllString(string(s), string(zv))
+	default:
+		// zv is a function
+		f := func(s string) string {
+			r := ctx.Apply(r.repl, NewS(s))
+			switch rv := r.value.(type) {
+			case S:
+				return string(rv)
+			default:
+				return r.Sprint(ctx)
+			}
+		}
+		r.repl.rcincr()
+		rs := r.r.Regexp.ReplaceAllStringFunc(string(s), f)
+		r.repl.rcdecr()
+		return rs
+	}
 }
 
 func VRx(ctx *Context, args []V) V {
@@ -38,77 +89,6 @@ func compileRegex(x V) V {
 		return NewV(&rx{Regexp: r})
 	default:
 		return panicType("rx x", "x", x)
-	}
-}
-
-func replaceRx(ctx *Context, x V, y *rx, z V) V {
-	switch xv := x.value.(type) {
-	case S:
-		return replaceSRx(ctx, xv, y, z)
-	case *AS:
-		return replaceASRx(ctx, xv, y, z)
-	case *AV:
-		r := xv.reuse()
-		for i, xi := range xv.Slice {
-			ri := replaceRx(ctx, xi, y, z)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.Slice[i] = ri
-		}
-		return NewV(r)
-	default:
-		return panicType("sub[x;y;z]", "x", x)
-	}
-}
-
-func replaceSRx(ctx *Context, s S, y *rx, z V) V {
-	switch zv := z.value.(type) {
-	case S:
-		return NewS(y.Regexp.ReplaceAllString(string(s), string(zv)))
-	default:
-		if z.IsFunction() {
-			f := func(s string) string {
-				r := ctx.Apply(z, NewS(s))
-				switch rv := r.value.(type) {
-				case S:
-					return string(rv)
-				default:
-					return r.Sprint(ctx)
-				}
-			}
-			return NewS(y.Regexp.ReplaceAllStringFunc(string(s), f))
-		}
-		return panicType("sub[s;r;repl]", "repl", z)
-	}
-}
-
-func replaceASRx(ctx *Context, x *AS, y *rx, z V) V {
-	switch zv := z.value.(type) {
-	case S:
-		x := x.reuse()
-		for i, s := range x.Slice {
-			x.Slice[i] = y.Regexp.ReplaceAllString(string(s), string(zv))
-		}
-		return NewV(x)
-	default:
-		if z.IsFunction() {
-			f := func(s string) string {
-				r := ctx.Apply(z, NewS(s))
-				switch rv := r.value.(type) {
-				case S:
-					return string(rv)
-				default:
-					return r.Sprint(ctx)
-				}
-			}
-			x := x.reuse()
-			for i, s := range x.Slice {
-				x.Slice[i] = y.Regexp.ReplaceAllStringFunc(string(s), f)
-			}
-			return NewV(x)
-		}
-		return panicType("sub[s;r;repl]", "repl", z)
 	}
 }
 

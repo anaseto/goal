@@ -111,17 +111,16 @@ a: / assignment without expression right
 60\2.5 / non-integer
 60/2.5 / non-integer
 60.5/2 / non-integer
-sub["abc";"a";2] / non-string
-sub["abc";"a" "b";2] / not a string array
-sub["abc";"a" "b";,"c"] / length mismatch
+sub["abc";"a" "b";2] / type
+sub["abc";"a" "b";,"c"] / type
 sub["abc";+;"c"] / type
-sub["abc" "def";"a";2] / non-string
-sub["abc" "def";"a" "b";2] / not a string array
-sub["abc" "def";"a" "b";,"c"] / length mismatch
-sub["abc" "def";+;"c"] / type
-sub["abc" "def";"a"] / not enough arguments
-sub["abc" "def";"a";"b";"c";"d"] / too many arguments
-sub[("abc";*);"b";"d"] / type
+sub["a";2] / type
+sub["a" "b";2] / type
+sub["a" "b";,"c"] / length mismatch
+sub[+;"c"] / type
+sub["a"] / type
+sub["a";"b";"c";"d"] / too many arguments
+sub["b";"d"] ("abc";*) / type
 acos "a" / type
 asin "a" / type
 atan "a" / type
