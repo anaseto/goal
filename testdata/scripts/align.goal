@@ -1,4 +1,4 @@
-csv:`
+csvs:`
 atom,array,name
 n,N,number
 s,S,string
@@ -6,18 +6,18 @@ r,,regexp
 f,,function
 e,,error
 ,A,generic array`
-fields:","\'"\n"\" \n"^csv
+records:","\'"\n"\" \n"^csvs
 padr:{y+" "*1+x-bytes y}
 padl:{(" "*1+x-bytes y)+y}
 padc:{n:(1+x-bytes y)%2;+/(" "*_n;y;" "*ceil n)}
-colw:|/bytes fields
+colw:|/bytes records
 res:(
 / Justify left
- {padr'[colw;x]}'fields
+ {padr'[colw;x]}'records
 / Justify right
- {padl'[colw;x]}'fields
+ {padl'[colw;x]}'records
 / Justify center
- {padc'[colw;x]}'fields
+ {padc'[colw;x]}'records
 )
 fmt:" \n"^"\n"/ "\n"/'" "/''res
 sub[fmt;rx/(?m)\s*$/;""]
