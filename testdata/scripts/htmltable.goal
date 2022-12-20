@@ -1,0 +1,21 @@
+escape:{
+  sub[x
+      `&`     `'`     `<`    `>`    `"`
+      "&amp;" "&#39;" "&lt;" "&gt;" "&#34;"]}
+elt:{+/(`<`;x;`>`;y;`</`;x;`>`)}
+ths:{elt[`tr`;+/elt["th";]'x]+"\n"}
+tds:{elt[`tr`;+/elt["td";]'x]+"\n"}
+table:{+/("<table>\n";ths[x];(+/tds'y);"</table>\n")}
+table[
+  "" "X" "Y" "Z"
+  escape[$''(!4),'3$!12]
+]
+/RESULT:
+`<table>
+<tr><th></th><th>X</th><th>Y</th><th>Z</th></tr>
+<tr><td>0</td><td>0</td><td>1</td><td>2</td></tr>
+<tr><td>1</td><td>3</td><td>4</td><td>5</td></tr>
+<tr><td>2</td><td>6</td><td>7</td><td>8</td></tr>
+<tr><td>3</td><td>9</td><td>10</td><td>11</td></tr>
+</table>
+`
