@@ -223,9 +223,8 @@ func scanAny(s *Scanner) stateFn {
 		if !s.start {
 			if !s.delimOp {
 				return s.emit(NEWLINE)
-			} else {
-				s.start = true
 			}
+			s.start = true
 		}
 		return scanAny
 	case ' ', '\t':
@@ -337,7 +336,10 @@ func scanComment(s *Scanner) stateFn {
 			return s.emitEOF()
 		case '\n':
 			if !s.start {
-				return s.emit(NEWLINE)
+				if !s.delimOp {
+					return s.emit(NEWLINE)
+				}
+				s.start = true
 			}
 			return scanAny
 		}

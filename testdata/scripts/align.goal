@@ -12,11 +12,11 @@ padl:{(" "*1+x-bytes y)+y}
 padc:{n:(1+x-bytes y)%2;+/(" "*_n;y;" "*ceil n)}
 colw:|/bytes records
 res:(
-/ Justify left
+ / Justify left
  {padr'[colw;x]}'records
-/ Justify right
+ / Justify right
  {padl'[colw;x]}'records
-/ Justify center
+ / Justify center
  {padc'[colw;x]}'records
 )
 fmt:" \n"^"\n"/ "\n"/'" "/''res
