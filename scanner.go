@@ -220,8 +220,12 @@ func scanAny(s *Scanner) stateFn {
 	case eof:
 		return s.emitEOF()
 	case '\n':
-		if !s.start && !s.delimOp {
-			return s.emit(NEWLINE)
+		if !s.start {
+			if !s.delimOp {
+				return s.emit(NEWLINE)
+			} else {
+				s.start = true
+			}
 		}
 		return scanAny
 	case ' ', '\t':
@@ -401,9 +405,11 @@ func scanRegexp(s *Scanner) stateFn {
 		case eof:
 			return s.emitError("non terminated regexp: unexpected EOF")
 		case '\\':
-			r := s.peek()
-			if r == '/' {
+			nr := s.peek()
+			if nr == '/' {
 				s.next()
+			} else {
+				sb.WriteRune(r)
 			}
 		case '/':
 			return s.emitRegexp(sb.String())

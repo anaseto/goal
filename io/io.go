@@ -97,7 +97,7 @@ func printV(ctx *goal.Context, x goal.V, newline bool) error {
 		buf := bufio.NewWriter(os.Stdout)
 		for i, s := range xv.Slice {
 			buf.WriteString(s)
-			if i < len(s)-1 {
+			if i < xv.Len()-1 {
 				buf.WriteRune(' ')
 			}
 		}
@@ -126,7 +126,7 @@ func fprintV(ctx *goal.Context, w io.Writer, x goal.V, newline bool) error {
 	case *goal.AS:
 		for i, s := range xv.Slice {
 			buf.WriteString(s)
-			if i < len(s)-1 {
+			if i < xv.Len()-1 {
 				buf.WriteRune(' ')
 			}
 		}

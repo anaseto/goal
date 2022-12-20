@@ -401,6 +401,7 @@ TYPES HELP
 atom	array	name		examples
 n	N	number		0	1.5	!5	1.2 3 1.8
 s	S	string		"abc"	"a" "b" "c"
+r		regexp		rx/[a-z]/
 f		function	+	{x*2}	(1-)	%[;2]
 e		error		error "msg"
 	A	generic array	("a" 1;"b" 2;"c" 3)	(+;-;*;"any")

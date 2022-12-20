@@ -1,0 +1,47 @@
+csv:`
+atom,array,name
+n,N,number
+s,S,string
+r,,regexp
+f,,function
+e,,error
+,A,generic array`
+fields:","\'"\n"\" \n"^csv
+padr:{y+" "*1+x-bytes y}
+padl:{(" "*1+x-bytes y)+y}
+padc:{n:(1+x-bytes y)%2;+/(" "*_n;y;" "*ceil n)}
+colw:|/bytes fields
+res:(
+/ Justify left
+ {padr'[colw;x]}'fields
+/ Justify right
+ {padl'[colw;x]}'fields
+/ Justify center
+ {padc'[colw;x]}'fields
+)
+fmt:" \n"^"\n"/ "\n"/'" "/''res
+sub[fmt;rx/(?m)\s*$/;""]
+/RESULT:
+result:" \n"^`
+atom  array  name
+n     N      number
+s     S      string
+r            regexp
+f            function
+e            error
+      A      generic array
+ atom  array           name
+    n      N         number
+    s      S         string
+    r                regexp
+    f              function
+    e                 error
+           A  generic array
+atom  array       name
+  n     N        number
+  s     S        string
+  r              regexp
+  f             function
+  e              error
+        A    generic array`
+sub[result;rx/(?m)\s*$/;""]

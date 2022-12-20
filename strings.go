@@ -471,3 +471,10 @@ func containedInS(x V, s string) V {
 		return panicType("x in s", "x", x)
 	}
 }
+
+func srepeat(s S, n int64) string {
+	if n <= 0 {
+		return ""
+	}
+	return strings.Repeat(string(s), int(n))
+}

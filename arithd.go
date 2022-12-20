@@ -1955,7 +1955,7 @@ func multiplyFV(x float64, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case S:
-		return NewV(S(strings.Repeat(string(S(yv)), int(float64(x)))))
+		return NewV(S(srepeat(S(yv), int64(x))))
 	case *AB:
 		r := make([]float64, yv.Len())
 		for i := range r {
@@ -1977,7 +1977,7 @@ func multiplyFV(x float64, y V) V {
 	case *AS:
 		r := yv.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = string(strings.Repeat(string(S(yv.At(i))), int(float64(x))))
+			r.Slice[i] = string(srepeat(S(yv.At(i)), int64(x)))
 		}
 		return NewV(r)
 	case *AV:
@@ -2004,7 +2004,7 @@ func multiplyIV(x int64, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case S:
-		return NewV(S(strings.Repeat(string(S(yv)), int(x))))
+		return NewV(S(srepeat(S(yv), x)))
 	case *AB:
 		r := make([]int64, yv.Len())
 		for i := range r {
@@ -2026,7 +2026,7 @@ func multiplyIV(x int64, y V) V {
 	case *AS:
 		r := yv.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = string(strings.Repeat(string(S(yv.At(i))), int(x)))
+			r.Slice[i] = string(srepeat(S(yv.At(i)), x))
 		}
 		return NewV(r)
 	case *AV:
@@ -2046,28 +2046,28 @@ func multiplyIV(x int64, y V) V {
 
 func multiplySV(x S, y V) V {
 	if y.IsI() {
-		return NewV(S(strings.Repeat(string(x), int(y.I()))))
+		return NewV(S(srepeat(x, y.I())))
 	}
 	if y.IsF() {
-		return NewV(S(strings.Repeat(string(x), int(float64(y.F())))))
+		return NewV(S(srepeat(x, int64(y.F()))))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
 		r := make([]string, yv.Len())
 		for i := range r {
-			r[i] = string(strings.Repeat(string(S(x)), int(b2i(yv.At(i)))))
+			r[i] = string(srepeat(S(x), b2i(yv.At(i))))
 		}
 		return NewAS(r)
 	case *AF:
 		r := make([]string, yv.Len())
 		for i := range r {
-			r[i] = string(strings.Repeat(string(S(x)), int(float64(yv.At(i)))))
+			r[i] = string(srepeat(S(x), int64(yv.At(i))))
 		}
 		return NewAS(r)
 	case *AI:
 		r := make([]string, yv.Len())
 		for i := range r {
-			r[i] = string(strings.Repeat(string(S(x)), int(yv.At(i))))
+			r[i] = string(srepeat(S(x), yv.At(i)))
 		}
 		return NewAS(r)
 	case *AV:
@@ -2104,7 +2104,7 @@ func multiplyABV(x *AB, y V) V {
 	case S:
 		r := make([]string, x.Len())
 		for i := range r {
-			r[i] = string(strings.Repeat(string(S(yv)), int(b2i(x.At(i)))))
+			r[i] = string(srepeat(S(yv), b2i(x.At(i))))
 		}
 		return NewAS(r)
 	case *AB:
@@ -2140,7 +2140,7 @@ func multiplyABV(x *AB, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = string(strings.Repeat(string(S(yv.At(i))), int(b2i(x.At(i)))))
+			r.Slice[i] = string(srepeat(S(yv.At(i)), b2i(x.At(i))))
 		}
 		return NewV(r)
 	case *AV:
@@ -2181,7 +2181,7 @@ func multiplyAFV(x *AF, y V) V {
 	case S:
 		r := make([]string, x.Len())
 		for i := range r {
-			r[i] = string(strings.Repeat(string(S(yv)), int(float64(x.At(i)))))
+			r[i] = string(srepeat(S(yv), int64(x.At(i))))
 		}
 		return NewAS(r)
 	case *AB:
@@ -2217,7 +2217,7 @@ func multiplyAFV(x *AF, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = string(strings.Repeat(string(S(yv.At(i))), int(float64(x.At(i)))))
+			r.Slice[i] = string(srepeat(S(yv.At(i)), int64(x.At(i))))
 		}
 		return NewV(r)
 	case *AV:
@@ -2258,7 +2258,7 @@ func multiplyAIV(x *AI, y V) V {
 	case S:
 		r := make([]string, x.Len())
 		for i := range r {
-			r[i] = string(strings.Repeat(string(S(yv)), int(x.At(i))))
+			r[i] = string(srepeat(S(yv), x.At(i)))
 		}
 		return NewAS(r)
 	case *AB:
@@ -2294,7 +2294,7 @@ func multiplyAIV(x *AI, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = string(strings.Repeat(string(S(yv.At(i))), int(x.At(i))))
+			r.Slice[i] = string(srepeat(S(yv.At(i)), x.At(i)))
 		}
 		return NewV(r)
 	case *AV:
@@ -2320,14 +2320,14 @@ func multiplyASV(x *AS, y V) V {
 	if y.IsI() {
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = string(strings.Repeat(string(S(x.At(i))), int(int64(y.I()))))
+			r.Slice[i] = string(srepeat(S(x.At(i)), int64(y.I())))
 		}
 		return NewV(r)
 	}
 	if y.IsF() {
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = string(strings.Repeat(string(S(x.At(i))), int(float64(float64(y.F())))))
+			r.Slice[i] = string(srepeat(S(x.At(i)), int64(float64(y.F()))))
 		}
 		return NewV(r)
 	}
@@ -2338,7 +2338,7 @@ func multiplyASV(x *AS, y V) V {
 		}
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = string(strings.Repeat(string(S(x.At(i))), int(b2i(yv.At(i)))))
+			r.Slice[i] = string(srepeat(S(x.At(i)), b2i(yv.At(i))))
 		}
 		return NewV(r)
 	case *AF:
@@ -2347,7 +2347,7 @@ func multiplyASV(x *AS, y V) V {
 		}
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = string(strings.Repeat(string(S(x.At(i))), int(float64(yv.At(i)))))
+			r.Slice[i] = string(srepeat(S(x.At(i)), int64(yv.At(i))))
 		}
 		return NewV(r)
 	case *AI:
@@ -2356,7 +2356,7 @@ func multiplyASV(x *AS, y V) V {
 		}
 		r := x.reuse()
 		for i := range r.Slice {
-			r.Slice[i] = string(strings.Repeat(string(S(x.At(i))), int(yv.At(i))))
+			r.Slice[i] = string(srepeat(S(x.At(i)), yv.At(i)))
 		}
 		return NewV(r)
 	case *AV:
