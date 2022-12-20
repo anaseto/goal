@@ -1,4 +1,4 @@
-escape: sub[,/,/(
+escape: sub[,/(
   `&` "&amp;"
   `'` "&#39;"
   `<` "&lt;"
