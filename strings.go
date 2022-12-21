@@ -553,3 +553,28 @@ func srepeat(s S, n int64) string {
 	}
 	return strings.Repeat(string(s), int(n))
 }
+
+func scount(s S, y V) V {
+	switch yv := y.value.(type) {
+	case S:
+		return NewI(int64(strings.Count(string(yv), string(s))))
+	case *AS:
+		r := make([]int64, yv.Len())
+		for i, yi := range yv.Slice {
+			r[i] = int64(strings.Count(string(yi), string(s)))
+		}
+		return NewAI(r)
+	case *AV:
+		r := make([]V, yv.Len())
+		for i, yi := range yv.Slice {
+			ri := scount(s, yi)
+			if ri.IsPanic() {
+				return ri
+			}
+			r[i] = ri
+		}
+		return NewAV(r)
+	default:
+		return panicType("s#y", "y", y)
+	}
+}

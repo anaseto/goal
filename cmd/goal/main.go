@@ -258,6 +258,7 @@ s^y trim	" []"^"  [text]  " -> "text"
 x^y without	2 3^1 2 3 4 -> 1 4
 #x  length	#2 4 5 -> 3
 i#y take	2#4 1 5 -> 4 1	    4#3 1 5 -> 3 1 5 3 (cyclic)
+s#y count	"ab"#"cabdab" "cd" "deab" -> 2 0 1
 f#y replicate	{0 1 1 0}#4 1 5 3 -> 1 5    {x>0}#2 -3 1 -> 2 1
 _N  floor	_2.3 -> 2     _1.5 3.7 -> 1 3
 _S  to lower	_"ABC" -> "abc"     _"AB" "CD" -> "ab" "cd"
@@ -280,7 +281,7 @@ x?y find	3 2 1?2 -> 1	3 2 1?0	-> 3
 @x  type	@2 -> "i"    @"ab" -> "s"    @2 3 -> "I"
 s@y substr	"012345"[2] -> "2345"	"012345"[2;3] -> "234"
 r@y match	rx/[a-z]/"abc" -> 1
-r@y find	rx/[a-z](.)/"abc" -> "ab" "b"	rx/[a-z]/["abc";-1] -> "a" "b" "c"
+r@y find	rx/[a-z](.)/"abc" -> "ab" "b"	rx/[a-z]/["abc";2] -> "a" "b"
 f@y apply	(|)@1 2 -> 2 1 (like |[1 2] -> 2 1 or |1 2)
 x@y at		1 2 3@2 -> 3	1 2 3[2] -> 3
 .s  reval	."2+3" -> 5	a:1;."a" -> panic ".s : undefined global: a"

@@ -270,7 +270,12 @@ func take(x, y V) V {
 		}
 		i = int64(x.F())
 	} else {
-		return Panicf("i#y : non-integer i (%s)", x.Type())
+		switch xv := x.value.(type) {
+		case S:
+			return scount(xv, y)
+		default:
+			return panicType("x#y", "x", x)
+		}
 	}
 	yv := toArray(y).value.(array)
 	if yv.Len() == 0 {
