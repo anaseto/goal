@@ -581,6 +581,7 @@ EOS
     }
     my $reuse;
     if ($t eq "V") {
+        # never call with currently implemented operators
         $reuse = <<EOS;
                 var r *AV
                 if x.reusable() {

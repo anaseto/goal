@@ -191,9 +191,10 @@ func dropi(i int64, y V) V {
 }
 
 func cutAI(x *AI, y V) V {
-	if !sort.IsSorted(sortAI(x.Slice)) {
+	if !x.flags.Has(flagAscending) && !sort.IsSorted(sortAI(x.Slice)) {
 		return panics("x_y : x is not ascending")
 	}
+	x.flags |= flagAscending
 	ylen := int64(Length(y))
 	for _, i := range x.Slice {
 		if i < 0 || i > ylen {

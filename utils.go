@@ -106,6 +106,9 @@ func cloneShallow(x V) V {
 // it is reusable.
 func cloneShallowArray(x array) array {
 	if x.reusable() {
+		// We're asking for a clone, so we usually are going to modify
+		// it afterwards and invalidate the flags (safe approximation).
+		x.setFlags(flagNone)
 		return x
 	}
 	switch xv := x.(type) {

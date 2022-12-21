@@ -120,6 +120,7 @@ func joinToAB(x *AB, y V, left bool) V {
 			}
 			if x.reusable() {
 				x.Slice = append(x.Slice, y.I() == 1)
+				x.flags = flagNone
 				return NewV(x)
 			}
 			r := make([]bool, x.Len()+1)
@@ -185,6 +186,7 @@ func joinToAI(x *AI, y V, left bool) V {
 		}
 		if x.reusable() {
 			x.Slice = append(x.Slice, y.I())
+			x.flags = flagNone
 			return NewV(x)
 		}
 		r := make([]int64, x.Len()+1)
@@ -236,6 +238,7 @@ func joinToAF(x *AF, y V, left bool) V {
 		}
 		if x.reusable() {
 			x.Slice = append(x.Slice, float64(y.I()))
+			x.flags = flagNone
 			return NewV(x)
 		}
 		r := make([]float64, x.Len()+1)
@@ -252,6 +255,7 @@ func joinToAF(x *AF, y V, left bool) V {
 		}
 		if x.reusable() {
 			x.Slice = append(x.Slice, y.F())
+			x.flags = flagNone
 			return NewV(x)
 		}
 		r := make([]float64, x.Len()+1)
@@ -280,6 +284,7 @@ func joinToAF(x *AF, y V, left bool) V {
 func joinABAB(x *AB, y *AB) V {
 	if x.reusable() {
 		x.Slice = append(x.Slice, y.Slice...)
+		x.flags = flagNone
 		return NewV(x)
 	}
 	r := make([]bool, y.Len()+x.Len())
@@ -291,6 +296,7 @@ func joinABAB(x *AB, y *AB) V {
 func joinAIAI(x *AI, y *AI) V {
 	if x.reusable() {
 		x.Slice = append(x.Slice, y.Slice...)
+		x.flags = flagNone
 		return NewV(x)
 	}
 	r := make([]int64, y.Len()+x.Len())
@@ -302,6 +308,7 @@ func joinAIAI(x *AI, y *AI) V {
 func joinAFAF(x *AF, y *AF) V {
 	if x.reusable() {
 		x.Slice = append(x.Slice, y.Slice...)
+		x.flags = flagNone
 		return NewV(x)
 	}
 	r := make([]float64, y.Len()+x.Len())
@@ -324,6 +331,7 @@ func joinAIAB(x *AI, y *AB) V {
 		for _, yi := range y.Slice {
 			x.Slice = append(x.Slice, b2i(yi))
 		}
+		x.flags = flagNone
 		return NewV(x)
 	}
 	r := make([]int64, x.Len()+y.Len())
@@ -348,6 +356,7 @@ func joinAFAB(x *AF, y *AB) V {
 		for _, yi := range y.Slice {
 			x.Slice = append(x.Slice, float64(b2i(yi)))
 		}
+		x.flags = flagNone
 		return NewV(x)
 	}
 	r := make([]float64, x.Len()+y.Len())
@@ -372,6 +381,7 @@ func joinAFAI(x *AF, y *AI) V {
 		for _, yi := range y.Slice {
 			x.Slice = append(x.Slice, float64(yi))
 		}
+		x.flags = flagNone
 		return NewV(x)
 	}
 	r := make([]float64, x.Len()+y.Len())
@@ -393,6 +403,7 @@ func joinToAS(x *AS, y V, left bool) V {
 		}
 		if x.reusable() {
 			x.Slice = append(x.Slice, string(yv))
+			x.flags = flagNone
 			return NewV(x)
 		}
 		r := make([]string, x.Len()+1)
@@ -403,6 +414,7 @@ func joinToAS(x *AS, y V, left bool) V {
 		// left == false
 		if x.reusable() {
 			x.Slice = append(x.Slice, yv.Slice...)
+			x.flags = flagNone
 			return NewV(x)
 		}
 		r := make([]string, x.Len()+yv.Len())
@@ -423,6 +435,7 @@ func joinToAV(x *AV, y V, left bool) V {
 		// left == false
 		if x.reusable() {
 			x.Slice = append(x.Slice, yv.Slice...)
+			x.flags = flagNone
 			return NewV(x)
 		}
 		return joinArrays(x, yv)
@@ -438,6 +451,7 @@ func joinToAV(x *AV, y V, left bool) V {
 		}
 		if x.reusable() {
 			x.Slice = append(x.Slice, y)
+			x.flags = flagNone
 			return NewV(x)
 		}
 		r := make([]V, x.Len()+1)

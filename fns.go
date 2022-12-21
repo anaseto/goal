@@ -25,7 +25,7 @@ func rangeI(n int64) V {
 	for i := range r {
 		r[i] = int64(i)
 	}
-	return NewAI(r)
+	return newAscUniqAI(r)
 }
 
 func rangeArray(x *AI) V {

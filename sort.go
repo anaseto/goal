@@ -449,18 +449,23 @@ func sortUp(x V) V {
 	switch xv := x.value.(type) {
 	case *AB:
 		sort.Stable(sortAB(xv.Slice))
+		xv.flags |= flagAscending
 		return NewV(xv)
 	case *AF:
 		sort.Stable(sort.Float64Slice(xv.Slice))
+		xv.flags |= flagAscending
 		return NewV(xv)
 	case *AI:
 		sort.Stable(sortAI(xv.Slice))
+		xv.flags |= flagAscending
 		return NewV(xv)
 	case *AS:
 		sort.Stable(sort.StringSlice(xv.Slice))
+		xv.flags |= flagAscending
 		return NewV(xv)
 	case *AV:
 		sort.Stable(sortVSlice(xv.Slice))
+		xv.flags |= flagAscending
 		return NewV(xv)
 	default:
 		return Panicf("^x : x not an array (%s)", x.Type())
@@ -602,29 +607,34 @@ func descend(x V) V {
 func search(x V, y V) V {
 	switch xv := x.value.(type) {
 	case *AB:
-		if !sort.IsSorted(sortAB(xv.Slice)) {
+		if !xv.flags.Has(flagAscending) && !sort.IsSorted(sortAB(xv.Slice)) {
 			return panicDomain("x$y", "x is not ascending")
 		}
+		xv.flags |= flagAscending
 		return searchAI(fromABtoAI(xv).value.(*AI), y)
 	case *AI:
-		if !sort.IsSorted(sortAI(xv.Slice)) {
+		if !xv.flags.Has(flagAscending) && !sort.IsSorted(sortAI(xv.Slice)) {
 			return panicDomain("x$y", "x is not ascending")
 		}
+		xv.flags |= flagAscending
 		return searchAI(xv, y)
 	case *AF:
-		if !sort.IsSorted(sort.Float64Slice(xv.Slice)) {
+		if !xv.flags.Has(flagAscending) && !sort.IsSorted(sort.Float64Slice(xv.Slice)) {
 			return panicDomain("x$y", "x is not ascending")
 		}
+		xv.flags |= flagAscending
 		return searchAF(xv, y)
 	case *AS:
-		if !sort.IsSorted(sort.StringSlice(xv.Slice)) {
+		if !xv.flags.Has(flagAscending) && !sort.IsSorted(sort.StringSlice(xv.Slice)) {
 			return panicDomain("x$y", "x is not ascending")
 		}
+		xv.flags |= flagAscending
 		return searchAS(xv, y)
 	case *AV:
-		if !sort.IsSorted(sortVSlice(xv.Slice)) {
+		if !xv.flags.Has(flagAscending) && !sort.IsSorted(sortVSlice(xv.Slice)) {
 			return panicDomain("x$y", "x is not ascending")
 		}
+		xv.flags |= flagAscending
 		return searchAV(xv, y)
 	default:
 		// should not happen

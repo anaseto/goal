@@ -280,9 +280,22 @@ func (s S) Matches(y Value) bool {
 // Type retuns "s" for string atoms.
 func (s S) Type() string { return "s" }
 
+type flags int32
+
+const (
+	flagNone      flags = 0b00
+	flagAscending       = 0b01
+	flagUnique          = 0b10 // unused for now
+)
+
+func (f flags) Has(ff flags) bool {
+	return f&ff != 0
+}
+
 // AB represents an array of booleans.
 type AB struct {
 	rc    int32
+	flags flags
 	Slice []bool
 }
 
@@ -294,6 +307,7 @@ func NewAB(x []bool) V {
 // AI represents an array of integers.
 type AI struct {
 	rc    int32
+	flags flags
 	Slice []int64
 }
 
@@ -302,9 +316,15 @@ func NewAI(x []int64) V {
 	return NewV(&AI{Slice: x})
 }
 
+// newAscUniqAI returns a new sorted int array.
+func newAscUniqAI(x []int64) V {
+	return NewV(&AI{Slice: x, flags: flagAscending | flagUnique})
+}
+
 // AF represents an array of reals.
 type AF struct {
 	rc    int32
+	flags flags
 	Slice []float64
 }
 
@@ -316,6 +336,7 @@ func NewAF(x []float64) V {
 // AS represents an array of strings.
 type AS struct {
 	rc    int32
+	flags flags
 	Slice []string // string array
 }
 
@@ -327,6 +348,7 @@ func NewAS(x []string) V {
 // AV represents a generic array.
 type AV struct {
 	rc    int32
+	flags flags
 	Slice []V
 }
 
@@ -340,6 +362,18 @@ func (x *AI) Matches(y Value) bool { return matchArray(x, y) }
 func (x *AF) Matches(y Value) bool { return matchArray(x, y) }
 func (x *AS) Matches(y Value) bool { return matchArray(x, y) }
 func (x *AV) Matches(y Value) bool { return matchArray(x, y) }
+
+func (x *AB) getFlags() flags { return x.flags }
+func (x *AI) getFlags() flags { return x.flags }
+func (x *AF) getFlags() flags { return x.flags }
+func (x *AS) getFlags() flags { return x.flags }
+func (x *AV) getFlags() flags { return x.flags }
+
+func (x *AB) setFlags(f flags) { x.flags = f }
+func (x *AI) setFlags(f flags) { x.flags = f }
+func (x *AF) setFlags(f flags) { x.flags = f }
+func (x *AS) setFlags(f flags) { x.flags = f }
+func (x *AV) setFlags(f flags) { x.flags = f }
 
 // Type returns a string representation of the array's type.
 func (x *AB) Type() string { return "N" }
@@ -367,6 +401,8 @@ type array interface {
 	slice(i, j int) array  // x[i:j]
 	atIndices(y []int64) V // x[y] (goal code)
 	set(i int, y V)
+	getFlags() flags
+	setFlags(flags)
 	//setIndices(y AI, z V) error
 }
 
@@ -420,6 +456,7 @@ func (x *AV) reusable() bool { return x.rc <= 1 }
 
 func (x *AB) reuse() *AB {
 	if x.rc <= 1 {
+		x.flags = flagNone
 		return x
 	}
 	return &AB{Slice: make([]bool, x.Len())}
@@ -427,6 +464,7 @@ func (x *AB) reuse() *AB {
 
 func (x *AI) reuse() *AI {
 	if x.rc <= 1 {
+		x.flags = flagNone
 		return x
 	}
 	return &AI{Slice: make([]int64, x.Len())}
@@ -434,6 +472,7 @@ func (x *AI) reuse() *AI {
 
 func (x *AF) reuse() *AF {
 	if x.rc <= 1 {
+		x.flags = flagNone
 		return x
 	}
 	return &AF{Slice: make([]float64, x.Len())}
@@ -441,6 +480,7 @@ func (x *AF) reuse() *AF {
 
 func (x *AS) reuse() *AS {
 	if x.rc <= 1 {
+		x.flags = flagNone
 		return x
 	}
 	return &AS{Slice: make([]string, x.Len())}
@@ -448,6 +488,7 @@ func (x *AS) reuse() *AS {
 
 func (x *AV) reuse() *AV {
 	if x.rc <= 1 {
+		x.flags = flagNone
 		return x
 	}
 	return &AV{Slice: make([]V, x.Len())}
