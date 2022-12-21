@@ -182,6 +182,9 @@ func (p *parser) expr(es exprs) (exprs, error) {
 	case DYAD:
 		switch tok.Text {
 		case ":":
+			if len(es) > 0 && isLeftArg(es[len(es)-1]) {
+				break
+			}
 			switch p.peek().Type {
 			case EOF, NEWLINE, SEMICOLON,
 				RIGHTBRACE, RIGHTBRACKET, RIGHTPAREN,

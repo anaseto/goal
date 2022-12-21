@@ -177,7 +177,11 @@ func VRight(ctx *Context, args []V) V {
 	case 1:
 		return args[0]
 	case 2:
-		return args[0]
+		y := args[0]
+		if y.IsError() {
+			return args[1]
+		}
+		return y
 	default:
 		return panicRank(":")
 	}

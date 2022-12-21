@@ -221,7 +221,7 @@ Notations:
 const helpVERBS = `
 VERBS
 :x  return	:3 -> return 3 prematurely
-x:y right	2:3 -> 3	name:3 -> assign 3 to name
+x:y try right	2:3 -> 3	42:error "msg" -> 42
 +x  flip	+(1 2;3 4) -> (1 3;2 4)
 x+y add		2+3 -> 5
 s+s concat	"a"+"b" -> "ab"

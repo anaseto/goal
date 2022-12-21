@@ -332,6 +332,8 @@ f:or;f[0;0] / 0
 r:{?[~x=0;1%x;error "zero"]}0;?["e"~@r;.r;r] / "zero"
 r:{?[~x=0;1%x;error "zero"]}2;?["e"~@r;.r;r] / 1%2
 'error "msg";"ok" / error "msg"
+42:error "msg" / 42
+42:"ok" / "ok"
 '"msg";"ok" / "ok"
 ?[1.0;2;3] / 2
 ?["";2;3] / 3
