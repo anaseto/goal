@@ -61,10 +61,21 @@ func (l *lambdaCode) local(s string) (lambdaLocal, bool) {
 	if !l.namedArgs && len(s) == 1 {
 		switch r := rune(s[0]); r {
 		case 'x', 'y', 'z':
-			id := r - 'x'
-			arg := lambdaLocal{Type: localArg, ID: int(id)}
-			l.locals[s] = arg
-			return arg, true
+			for rr := 'x'; rr <= r; rr++ {
+				// If z is used, then arity is 3, even if y and
+				// x are not used.
+				rs := string(rr)
+				_, ok := l.locals[rs]
+				if ok {
+					continue
+				}
+				id := rr - 'x'
+				arg := lambdaLocal{Type: localArg, ID: int(id)}
+				l.locals[rs] = arg
+				if rr == r {
+					return arg, true
+				}
+			}
 		}
 	}
 	return lambdaLocal{}, false
