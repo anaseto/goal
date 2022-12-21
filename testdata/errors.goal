@@ -74,7 +74,8 @@ f:{x+y};f[1;2;3] / too many arguments
 20 40_!10 / out of bound
 0 0_"a" / not an array
 1.5#!10 / non-integer
-2 3#!10 / type
+1 2 3#4 / not an array
+sub["a";"b"]#4 / type
 "a"#!10 / type
 1 rshift 2 / not an array
 rshift 2 / not an array

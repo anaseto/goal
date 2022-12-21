@@ -274,6 +274,8 @@ func take(x, y V) V {
 		switch xv := x.value.(type) {
 		case S:
 			return scount(xv, y)
+		case array:
+			return intersection(x, y)
 		default:
 			return panicType("x#y", "x", x)
 		}

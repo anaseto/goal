@@ -705,6 +705,15 @@ func without(x, y V) V {
 	}
 }
 
+// intersection implements keep x#y.
+func intersection(x, y V) V {
+	_, ok := y.value.(array)
+	if !ok {
+		return Panicf("x#y : y not an array (%s)", y.Type())
+	}
+	return replicate(memberOf(y, x), y)
+}
+
 // find returns x?y.
 func find(x, y V) V {
 	//assertCanonical(y)
