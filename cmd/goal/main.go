@@ -304,6 +304,7 @@ eval x    eval		a:5;eval "a+2" -> 7 (unrestricted eval)
 firsts x  mark firsts	firsts 0 0 2 3 0 2 3 4 -> 1 0 1 1 0 0 0 1
 icount x  index-count	icount 0 0 1 -1 0 1 2 3 2 -> 3 2 2 1 (same as #'=x)
 ocount x  occur-count	ocount 3 2 5 3 2 2 7 -> 0 0 0 1 1 2 0
+panic x   panic		panic "msg" (for fatal programming-errors) 
 rshift x  right shift	rshift 1 2 -> 0 1	rshift "a" "b" -> "" "a"
 seed x	  rand seed	seed 42 (for non-secure pseudo-rand with ?)
 shift x   shift	shift	shift 1 2 -> 2 0	shift "a" "b" -> "b" ""
@@ -398,7 +399,7 @@ cond		?[1;2;3] -> 2	?[0;2;3] -> 3	?[0;2;"";3;4] -> 4
 and/or		and[1;2] -> 2   and[1;0;3] -> 0   or[0;2] -> 2   or[0;0;0] -> 0
 sequence	[a:2;b:a+3;a+10] -> 12 (bracket block [] at start of expression)
 return		[1;:2;3] -> 2 (a : at start of expression)
-return error	'error "msg" (same as :error "msg")	'4+3 (same as 4+3)
+try		'error "msg" (same as :error "msg")	'4+3 (same as 4+3)
 `
 
 const helpTypes = `
