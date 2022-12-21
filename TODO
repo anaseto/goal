@@ -20,6 +20,5 @@ Documentation:
 
 Optimizations:
 - more special code for common op/ and op\
-- use sorted flag for arrays? (it can be invalidated by most verbs, though)
 - improve some special and general cases in self-search functions
 - maybe improve liveness analysis (though simple, already good enough)
