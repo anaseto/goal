@@ -3,6 +3,7 @@ package goal
 import (
 	"errors"
 	"math/rand"
+	"strings"
 )
 
 // Context holds the state of the interpreter.
@@ -24,8 +25,9 @@ type Context struct {
 	variadicsNames []string
 
 	// symbol handling
-	gNames []string
-	gIDs   map[string]int
+	gNames  []string       // ID: name
+	gIDs    map[string]int // name: ID
+	gPrefix string         // current name prefix
 
 	// parsing, scanning
 	scanner  *Scanner
@@ -146,6 +148,9 @@ func (ctx *Context) Run() (V, error) {
 }
 
 // Eval calls Compile with the given string as unnamed source, and then Run.
+// You cannot call it within a variadic function, as it the evaluation is done
+// on the current context, so it would interrupt compilation of current file.
+// Use EvalPackage for that.
 func (ctx *Context) Eval(s string) (V, error) {
 	err := ctx.Compile("", s)
 	if err != nil {
@@ -154,14 +159,43 @@ func (ctx *Context) Eval(s string) (V, error) {
 	return ctx.Run()
 }
 
-// EvalWithName calls Compile with the given name and string as source, and
-// then Run.
-func (ctx *Context) EvalWithName(name, s string) (V, error) {
-	err := ctx.Compile(name, s)
+// ErrPackageImported is returned by EvalPackage for packages that have already
+// been processed.
+type ErrPackageImported struct{}
+
+func (e ErrPackageImported) Error() string {
+	return "ErrPackageImported"
+}
+
+// EvalPackage calls Compile with the string as source, name (for error
+// location and caching, usually a filename), prefix (for global variables,
+// usually a filename without the extension), and then Run.  If a package with
+// same name has already been evaled, it returns ErrPackageImported. The
+// package is evaluated in a derived context that is then merged on successful
+// completion, so this function can be called within a variadic function.
+func (ctx *Context) EvalPackage(s, name, prefix string) (V, error) {
+	oprefix := ctx.gPrefix
+	if prefix != "" {
+		ctx.gPrefix = prefix
+		defer func() {
+			ctx.gPrefix = oprefix
+		}()
+	}
+	_, ok := ctx.sources[name]
+	if ok {
+		return NewI(0), ErrPackageImported{}
+	}
+	nctx := ctx.derive()
+	err := nctx.Compile(name, s)
 	if err != nil {
 		return V{}, err
 	}
-	return ctx.Run()
+	r, err := nctx.Run()
+	if err != nil {
+		return V{}, err
+	}
+	ctx.merge(nctx)
+	return r, nil
 }
 
 // AssignedLast returns true if the last compiled expression was an assignment.
@@ -253,6 +287,9 @@ func (ctx *Context) storeConst(x V) int {
 }
 
 func (ctx *Context) global(s string) int {
+	if ctx.gPrefix != "" && !strings.ContainsRune(s, '.') {
+		s = ctx.gPrefix + "." + s
+	}
 	id, ok := ctx.gIDs[s]
 	if ok {
 		return id
@@ -280,6 +317,7 @@ func (ctx *Context) derive() *Context {
 	nctx.gIDs = ctx.gIDs
 	nctx.sources = ctx.sources
 	nctx.errPos = ctx.errPos
+	nctx.gPrefix = ctx.gPrefix
 	return nctx
 }
 
@@ -291,4 +329,5 @@ func (ctx *Context) merge(nctx *Context) {
 	ctx.gIDs = nctx.gIDs
 	ctx.sources = nctx.sources
 	ctx.errPos = nctx.errPos
+	ctx.gPrefix = nctx.gPrefix
 }

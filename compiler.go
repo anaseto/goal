@@ -54,6 +54,9 @@ const (
 )
 
 func (l *lambdaCode) local(s string) (lambdaLocal, bool) {
+	if strings.ContainsRune(s, '.') {
+		return lambdaLocal{}, false
+	}
 	param, ok := l.locals[s]
 	if ok {
 		return param, true

@@ -539,22 +539,32 @@ func eval(ctx *Context, x V) V {
 	}
 }
 
-// evalWithName implements x eval y.
-func evalWithName(ctx *Context, x V, y V) V {
+// evalPackage implements eval[x;y;z].
+func evalPackage(ctx *Context, x V, y V, z V) V {
 	s, ok := x.value.(S)
 	if !ok {
-		return Panicf("x eval y : x not a string (%s)", x.Type())
+		return Panicf("eval[x;...] : x not a string (%s)", x.Type())
 	}
-	switch yv := y.value.(type) {
-	case S:
-		nctx := ctx.derive()
-		r, err := nctx.EvalWithName(string(s), string(yv))
-		if err != nil {
-			return Panicf(".s : %v", err)
+	name, ok := y.value.(S)
+	if !ok {
+		return Panicf("eval[x;y;...] : y not a string (%s)", y.Type())
+	}
+	prefix, ok := z.value.(S)
+	if !ok {
+		return Panicf("eval[x;y;z] : z not a string (%s)", z.Type())
+	}
+	for i, r := range prefix {
+		if i == 0 && !isAlpha(r) || !isAlphaNum(r) {
+			return Panicf("eval[x;y;z] : z invalid identifier prefix (%s)", prefix)
 		}
-		ctx.merge(nctx)
-		return r
-	default:
-		return Panicf("x eval y : y not a string (%s)", y.Type())
 	}
+	r, err := ctx.EvalPackage(string(s), string(name), string(prefix))
+	if err != nil {
+		_, ok := err.(ErrPackageImported)
+		if ok {
+			return NewI(0)
+		}
+		return Panicf(".s : %v", err)
+	}
+	return r
 }

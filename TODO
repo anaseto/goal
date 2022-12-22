@@ -1,5 +1,5 @@
 Features:
-- some kind of namespace or object and import mechanism other than eval
+- some kind of object
 - more general io (open/read/write/close/defer?)
 - split i$s, and cut x_s and maybe amend string @[s;I;s]
 - maybe bitwise operations

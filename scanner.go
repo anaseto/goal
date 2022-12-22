@@ -467,6 +467,7 @@ func scanMinus(s *Scanner) stateFn {
 }
 
 func scanIdent(s *Scanner) stateFn {
+	dots := 0
 	for {
 		r := s.peek()
 		switch {
@@ -479,12 +480,15 @@ func scanIdent(s *Scanner) stateFn {
 			}
 			return s.emitIDENT()
 		case r == '.':
+			s.next()
 			r = s.peek()
 			if !isAlpha(r) {
-				return s.emitIDENT()
+				return s.emitError(s.source[s.tpos:s.npos] + " : invalid prefixed identifier")
 			}
-			//s.next()
-			return s.emitError(". in identifier not implemented yet")
+			if dots > 0 {
+				return s.emitError("field of prefixed identifier not implemented yet")
+			}
+			dots++
 		case isAlphaNum(r):
 			s.next()
 		default:

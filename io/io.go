@@ -7,7 +7,50 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strings"
 )
+
+// VImport implements the import dyad.
+func VImport(ctx *goal.Context, args []goal.V) goal.V {
+	var fname string
+	var prefix string
+	if len(args) > 2 {
+		return goal.Panicf("import: too many arguments (%d)", len(args))
+	}
+	// TODO: VImport: support importing several files at once
+	s, ok := args[0].Value().(goal.S)
+	if !ok {
+		return goal.Panicf("import name : name not a string (%s)", args[0].Type())
+	}
+	if strings.ContainsRune(string(s), '.') {
+		return goal.Panicf("import name : name should not include extension .", args[0].Type())
+	}
+	fname = string(s) + ".goal"
+	if len(args) == 2 {
+		p, ok := args[1].Value().(goal.S)
+		if !ok {
+			return goal.Panicf("prefix import name : prefix a string (%s)", args[1].Type())
+		}
+		prefix = string(p)
+	} else {
+		// TODO: check that fname is valid (otherwise identifiers could
+		// not be written).
+		prefix = string(s)
+	}
+	bytes, err := os.ReadFile(fname)
+	if err != nil {
+		return goal.Panicf("import : %v", err)
+	}
+	r, err := ctx.EvalPackage(string(bytes), fname, string(prefix))
+	if err != nil {
+		_, ok := err.(goal.ErrPackageImported)
+		if ok {
+			return goal.NewI(0)
+		}
+		return goal.Panicf("import : %v", err)
+	}
+	return r
+}
 
 // VPrint implements the print dyad.
 //

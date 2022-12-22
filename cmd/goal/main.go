@@ -196,10 +196,11 @@ func usageError(usage bool, msgs ...interface{}) {
 }
 
 func registerVariadics(ctx *goal.Context) {
-	ctx.RegisterDyad("say", gio.VSay)
+	ctx.RegisterDyad("import", gio.VImport)
 	ctx.RegisterDyad("print", gio.VPrint)
-	ctx.RegisterMonad("slurp", gio.VSlurp)
+	ctx.RegisterDyad("say", gio.VSay)
 	ctx.RegisterMonad("shell", gio.VShell)
+	ctx.RegisterMonad("slurp", gio.VSlurp)
 }
 
 const helpTopics = `
@@ -312,7 +313,6 @@ sign x    sign		sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
 
 x in s      contained	"bc" "ac" in "abcd" -> 1 0
 x in y      member of	2 3 in 0 2 4 -> 1 0
-x eval y    eval	same as eval y, but provide prefix name x for errors
 x nan y     fill NaNs	42 nan (1.5;sqrt -1) -> 1.5 42
 x rshift y  right shift	"a" "b" rshift 1 2 3 -> "a" "b" 1
 x shift y   shift	"a" "b" shift 1 2 3 -> 3 "a" "b"
@@ -323,6 +323,9 @@ sub[s;s]    replace	sub["b";"B"] "abc" -> "aBc"
 sub[s;s;z]  replace n	sub["a";"b";2] "aaa" -> "bba"
 sub[S]      replace	sub["b" "d" "c" "e"] "abc" -> "ade"
 sub[S;S]    replace	sub["b" "c";"d" "e"] "abc" -> "ade"
+
+eval[x;y;z] eval	like eval x, but provide name y for errors and prefix z
+			for globals
 
 MATH: acos, asin, atan, cos, exp, log, round, sin, sqrt, tan, nan
 `
@@ -346,11 +349,13 @@ I\x	decode	24 60 60\3723 -> 1 2 3	2\6 -> 1 1 0
 `
 const helpIO = `
 IO HELP
-slurp s		read file named s	lines:"\n"\slurp["/path/to/file"]
+import name	import package 		import "package" (imports "package.goal")
 print x		print value		print "Hello, world!\n"
 say x		same as print, but appends a newline
 shell[cmd]	run a command through the shell
+slurp s		read file named s	lines:"\n"\slurp["/path/to/file"]
 
+pfx import name	import package with prefix pfx for globals
 w print x	print to writer or filename	"filename" print "content"
 w say x		same as print, but appends a newline
 `
