@@ -222,7 +222,7 @@ Notations:
 const helpVERBS = `
 VERBS
 :x  return	:3 -> return 3 prematurely
-x:y try right	2:3 -> 3	42:error "msg" -> 42
+x:y right	2:3 -> 3
 +x  flip	+(1 2;3 4) -> (1 3;2 4)
 x+y add		2+3 -> 5
 s+s concat	"a"+"b" -> "ab"
@@ -290,6 +290,8 @@ x@y at		1 2 3@2 -> 3	1 2 3[2] -> 3
 .e  get error	.error "msg" -> "msg"
 x.y applyN	{x+y}.2 3 -> 5    {x+y}[2;3] -> 5    (1 2;3 4)[0;1] -> 2
 
+::x	    get global  a:3;::"a" -> 3
+::[x;y]	    set	global	::["a";3];a -> 3
 @[x;y;f]    amend	@[1 2 3;0 1;10+] -> 11 12 3
 @[x;y;F;z]  amend	@[8 4 5;(1 2;0);+;(10 5;-2)] -> 6 14 10
 .[f;x;f]    try		.[+;2 3;{"msg"}] -> 5	.[+;2 "a";{"msg"}] -> "msg"

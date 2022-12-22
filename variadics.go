@@ -113,7 +113,9 @@ func (ctx *Context) initVariadics() {
 	for v, s := range ctx.variadicsNames {
 		ctx.vNames[s] = variadic(v)
 	}
-	ctx.vNames["::"] = vRight
+	ctx.variadics = append(ctx.variadics, VSet)
+	ctx.variadicsNames = append(ctx.variadicsNames, "::")
+	ctx.vNames["::"] = variadic(len(ctx.variadics) - 1)
 	ctx.keywords = map[string]NameType{}
 	// monads
 	ctx.RegisterMonad("abs", VAbs)
@@ -668,6 +670,31 @@ func VSeed(ctx *Context, args []V) V {
 		return seed(ctx, args[0])
 	default:
 		return panicRank("seed")
+	}
+}
+
+// VSet implements the "set" variadic verb.
+func VSet(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		name, ok := args[0].value.(S)
+		if !ok {
+			return panicType(":: x", "x", args[0])
+		}
+		r, ok := ctx.GetGlobal(string(name))
+		if !ok {
+			return Panicf(":: x : undefined variable (%s)", name)
+		}
+		return r
+	case 2:
+		name, ok := args[1].value.(S)
+		if !ok {
+			return panicType("::[x;y]", "x", args[1])
+		}
+		ctx.AssignGlobal(string(name), args[0])
+		return args[0]
+	default:
+		return panicRank("::")
 	}
 }
 

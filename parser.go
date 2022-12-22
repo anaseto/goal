@@ -196,7 +196,10 @@ func (p *parser) expr(es exprs) (exprs, error) {
 		}
 		e = &astToken{Type: astDYAD, Pos: tok.Pos, Text: tok.Text}
 	case DYADASSIGN:
-		err = p.errorf("assignment operation without identifier left")
+		if tok.Text != "::" {
+			return es, p.errorf("assignment operation without identifier left")
+		}
+		e = &astToken{Type: astDYAD, Pos: tok.Pos, Text: tok.Text}
 	case MONAD:
 		e = &astToken{Type: astMONAD, Pos: tok.Pos, Text: tok.Text}
 	default:
