@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path"
 	"strings"
 )
 
@@ -29,7 +30,7 @@ func VImport(ctx *goal.Context, args []goal.V) goal.V {
 	if len(args) == 2 {
 		p, ok := args[1].Value().(goal.S)
 		if !ok {
-			return goal.Panicf("prefix import name : prefix a string (%s)", args[1].Type())
+			return goal.Panicf("prefix import name : prefix not a string (%s)", args[1].Type())
 		}
 		prefix = string(p)
 	} else {
@@ -41,7 +42,7 @@ func VImport(ctx *goal.Context, args []goal.V) goal.V {
 	if err != nil {
 		return goal.Panicf("import : %v", err)
 	}
-	r, err := ctx.EvalPackage(string(bytes), fname, string(prefix))
+	r, err := ctx.EvalPackage(string(bytes), path.Base(fname), string(prefix))
 	if err != nil {
 		_, ok := err.(goal.ErrPackageImported)
 		if ok {
@@ -140,9 +141,6 @@ func printV(ctx *goal.Context, x goal.V, newline bool) error {
 		buf := bufio.NewWriter(os.Stdout)
 		for i, s := range xv.Slice {
 			buf.WriteString(s)
-			if i < xv.Len()-1 {
-				buf.WriteRune(' ')
-			}
 		}
 		if newline {
 			buf.WriteRune('\n')
@@ -169,9 +167,6 @@ func fprintV(ctx *goal.Context, w io.Writer, x goal.V, newline bool) error {
 	case *goal.AS:
 		for i, s := range xv.Slice {
 			buf.WriteString(s)
-			if i < xv.Len()-1 {
-				buf.WriteRune(' ')
-			}
 		}
 		if newline {
 			buf.WriteRune('\n')
