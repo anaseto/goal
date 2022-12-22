@@ -1,5 +1,5 @@
 Features:
-- some kind of object
+- some kind of object/interface thing
 - more general io (open/read/write/close/defer?)
 - split i$s, and cut x_s and maybe amend string @[s;I;s]
 - maybe bitwise operations
