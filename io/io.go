@@ -161,22 +161,15 @@ func fprintV(ctx *goal.Context, w io.Writer, x goal.V, newline bool) error {
 	switch xv := x.Value().(type) {
 	case goal.S:
 		buf.WriteString(string(xv))
-		if newline {
-			buf.WriteRune('\n')
-		}
 	case *goal.AS:
 		for i, s := range xv.Slice {
 			buf.WriteString(s)
 		}
-		if newline {
-			buf.WriteRune('\n')
-		}
 	default:
-		if newline {
-			fmt.Fprintln(buf, x.Sprint(ctx))
-		} else {
-			fmt.Fprint(buf, x.Sprint(ctx))
-		}
+		fmt.Fprint(buf, x.Sprint(ctx))
+	}
+	if newline {
+		buf.WriteRune('\n')
 	}
 	return buf.Flush()
 }
