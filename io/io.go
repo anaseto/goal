@@ -16,9 +16,9 @@ func VImport(ctx *goal.Context, args []goal.V) goal.V {
 	var fname string
 	var prefix string
 	if len(args) > 2 {
-		return goal.Panicf("import: too many arguments (%d)", len(args))
+		return goal.Panicf("import : too many arguments (%d)", len(args))
 	}
-	// TODO: VImport: support importing several files at once
+	// TODO: VImport: support importing several files at once?
 	s, ok := args[0].Value().(goal.S)
 	if !ok {
 		return goal.Panicf("import name : name not a string (%s)", args[0].Type())
@@ -34,15 +34,15 @@ func VImport(ctx *goal.Context, args []goal.V) goal.V {
 		}
 		prefix = string(p)
 	} else {
-		// TODO: check that fname is valid (otherwise identifiers could
+		// TODO: check that prefix is valid (otherwise identifiers could
 		// not be written).
-		prefix = string(s)
+		prefix = path.Base(string(s))
 	}
 	bytes, err := os.ReadFile(fname)
 	if err != nil {
 		return goal.Panicf("import : %v", err)
 	}
-	r, err := ctx.EvalPackage(string(bytes), path.Base(fname), string(prefix))
+	r, err := ctx.EvalPackage(string(bytes), fname, string(prefix))
 	if err != nil {
 		_, ok := err.(goal.ErrPackageImported)
 		if ok {
@@ -139,7 +139,7 @@ func printV(ctx *goal.Context, x goal.V, newline bool) error {
 		return err
 	case *goal.AS:
 		buf := bufio.NewWriter(os.Stdout)
-		for i, s := range xv.Slice {
+		for _, s := range xv.Slice {
 			buf.WriteString(s)
 		}
 		if newline {
@@ -162,7 +162,7 @@ func fprintV(ctx *goal.Context, w io.Writer, x goal.V, newline bool) error {
 	case goal.S:
 		buf.WriteString(string(xv))
 	case *goal.AS:
-		for i, s := range xv.Slice {
+		for _, s := range xv.Slice {
 			buf.WriteString(s)
 		}
 	default:

@@ -170,9 +170,13 @@ func (e ErrPackageImported) Error() string {
 // EvalPackage calls Compile with the string as source, name (for error
 // location and caching, usually a filename), prefix (for global variables,
 // usually a filename without the extension), and then Run.  If a package with
-// same name has already been evaled, it returns ErrPackageImported. The
-// package is evaluated in a derived context that is then merged on successful
-// completion, so this function can be called within a variadic function.
+// same name has already been evaluated, it returns ErrPackageImported. Current
+// implementation has the following limitation: if a prefix is provided, it is
+// only used the first time a same package is evaluated (so all imports have to
+// share the same prefix).
+// The package is evaluated in a derived context that is then merged on
+// successful completion, so this function can be called within a variadic
+// function.
 func (ctx *Context) EvalPackage(s, name, prefix string) (V, error) {
 	oprefix := ctx.gPrefix
 	if prefix != "" {
