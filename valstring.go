@@ -60,14 +60,14 @@ func (x *AB) String() string {
 	if x.Len() == 0 {
 		return `!0`
 	}
-	sb := &strings.Builder{}
+	sb := strings.Builder{}
 	if x.Len() == 1 {
 		sb.WriteRune(',')
-		fmt.Fprintf(sb, "%d", b2i(x.At(0)))
+		fmt.Fprintf(&sb, "%d", b2i(x.At(0)))
 		return sb.String()
 	}
 	for i, xi := range x.Slice {
-		fmt.Fprintf(sb, "%d", b2i(xi))
+		fmt.Fprintf(&sb, "%d", b2i(xi))
 		if i < x.Len()-1 {
 			sb.WriteRune(' ')
 		}
@@ -83,14 +83,14 @@ func (x *AI) String() string {
 	if x.Len() == 0 {
 		return `!0`
 	}
-	sb := &strings.Builder{}
+	sb := strings.Builder{}
 	if x.Len() == 1 {
 		sb.WriteRune(',')
-		fmt.Fprintf(sb, "%d", x.At(0))
+		fmt.Fprintf(&sb, "%d", x.At(0))
 		return sb.String()
 	}
 	for i, xi := range x.Slice {
-		fmt.Fprintf(sb, "%d", xi)
+		fmt.Fprintf(&sb, "%d", xi)
 		if i < x.Len()-1 {
 			sb.WriteRune(' ')
 		}
@@ -106,7 +106,7 @@ func (x *AF) String() string {
 	if x.Len() == 0 {
 		return `!0`
 	}
-	sb := &strings.Builder{}
+	sb := strings.Builder{}
 	if x.Len() == 1 {
 		sb.WriteRune(',')
 		sb.WriteString(sprintFloat(x.At(0)))
@@ -129,14 +129,14 @@ func (x *AS) String() string {
 	if x.Len() == 0 {
 		return `0#""`
 	}
-	sb := &strings.Builder{}
+	sb := strings.Builder{}
 	if x.Len() == 1 {
 		sb.WriteRune(',')
-		fmt.Fprintf(sb, "%q", x.At(0))
+		fmt.Fprintf(&sb, "%q", x.At(0))
 		return sb.String()
 	}
 	for i, xi := range x.Slice {
-		fmt.Fprintf(sb, "%q", xi)
+		fmt.Fprintf(&sb, "%q", xi)
 		if i < x.Len()-1 {
 			sb.WriteRune(' ')
 		}
@@ -161,10 +161,10 @@ func (x *AV) sprint(ctx *Context, deep bool) string {
 	if x.Len() == 0 {
 		return `!0`
 	}
-	sb := &strings.Builder{}
+	sb := strings.Builder{}
 	if x.Len() == 1 {
 		sb.WriteRune(',')
-		fmt.Fprintf(sb, "%s", x.At(0).Sprint(ctx))
+		fmt.Fprintf(&sb, "%s", x.At(0).Sprint(ctx))
 		return sb.String()
 	}
 	sb.WriteRune('(')
@@ -181,7 +181,7 @@ func (x *AV) sprint(ctx *Context, deep bool) string {
 	}
 	for i, xi := range x.Slice {
 		if xi.kind != valNil {
-			fmt.Fprintf(sb, "%s", sprintV(ctx, xi))
+			fmt.Fprintf(&sb, "%s", sprintV(ctx, xi))
 		}
 		if i < x.Len()-1 {
 			sb.WriteString(sep)
@@ -192,13 +192,13 @@ func (x *AV) sprint(ctx *Context, deep bool) string {
 }
 
 func (p projection) Sprint(ctx *Context) string {
-	sb := &strings.Builder{}
-	fmt.Fprintf(sb, "%s", p.Fun.Sprint(ctx))
+	sb := strings.Builder{}
+	fmt.Fprintf(&sb, "%s", p.Fun.Sprint(ctx))
 	sb.WriteRune('[')
 	for i := len(p.Args) - 1; i >= 0; i-- {
 		arg := p.Args[i]
 		if arg.kind != valNil {
-			fmt.Fprintf(sb, "%s", arg.Sprint(ctx))
+			fmt.Fprintf(&sb, "%s", arg.Sprint(ctx))
 		}
 		if i > 0 {
 			sb.WriteRune(';')

@@ -87,32 +87,32 @@ func (l *lambdaCode) local(s string) (lambdaLocal, bool) {
 // programString returns a string representation of the compiled program and
 // relevant data.
 func (ctx *Context) programString() string {
-	sb := &strings.Builder{}
-	fmt.Fprintln(sb, "---- Compiled program -----")
-	fmt.Fprintln(sb, "Instructions:")
-	fmt.Fprint(sb, ctx.opcodesString(ctx.gCode.Body, nil))
-	fmt.Fprintln(sb, "Globals:")
+	sb := strings.Builder{}
+	fmt.Fprintln(&sb, "---- Compiled program -----")
+	fmt.Fprintln(&sb, "Instructions:")
+	fmt.Fprint(&sb, ctx.opcodesString(ctx.gCode.Body, nil))
+	fmt.Fprintln(&sb, "Globals:")
 	for id, name := range ctx.gNames {
-		fmt.Fprintf(sb, "\t%s\t%d\n", name, id)
+		fmt.Fprintf(&sb, "\t%s\t%d\n", name, id)
 	}
-	fmt.Fprintln(sb, "Constants:")
+	fmt.Fprintln(&sb, "Constants:")
 	for id, ci := range ctx.constants {
-		fmt.Fprintf(sb, "\t%d\t%s\n", id, ci.Sprint(ctx))
+		fmt.Fprintf(&sb, "\t%d\t%s\n", id, ci.Sprint(ctx))
 	}
 	for id, lc := range ctx.lambdas {
-		fmt.Fprintf(sb, "---- Lambda %d (Rank: %d) -----\n", id, lc.Rank)
-		fmt.Fprintf(sb, "%s", ctx.lambdaString(lc))
+		fmt.Fprintf(&sb, "---- Lambda %d (Rank: %d) -----\n", id, lc.Rank)
+		fmt.Fprintf(&sb, "%s", ctx.lambdaString(lc))
 	}
 	return sb.String()
 }
 
 func (ctx *Context) lambdaString(lc *lambdaCode) string {
-	sb := &strings.Builder{}
-	fmt.Fprintln(sb, "Instructions:")
-	fmt.Fprint(sb, ctx.opcodesString(lc.Body, lc))
-	fmt.Fprintln(sb, "Locals:")
+	sb := strings.Builder{}
+	fmt.Fprintln(&sb, "Instructions:")
+	fmt.Fprint(&sb, ctx.opcodesString(lc.Body, lc))
+	fmt.Fprintln(&sb, "Locals:")
 	for i, name := range lc.Names {
-		fmt.Fprintf(sb, "\t%s\t%d\n", name, i)
+		fmt.Fprintf(&sb, "\t%s\t%d\n", name, i)
 	}
 	return sb.String()
 }

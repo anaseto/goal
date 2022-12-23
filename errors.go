@@ -28,18 +28,18 @@ func (e *PanicError) Error() string {
 	if len(e.positions) == 0 {
 		return e.Msg
 	}
-	sb := &strings.Builder{}
+	sb := strings.Builder{}
 	sources := e.sources
 	for i, pos := range e.positions {
 		if i == 0 {
 			if pos.Filename != "" {
 				s, line, col := getPosLine(sources[pos.Filename], pos.Pos)
-				fmt.Fprintf(sb, "%s:%d:%d: %s\n",
+				fmt.Fprintf(&sb, "%s:%d:%d: %s\n",
 					pos.Filename, line, col+1, e.Msg)
-				writeLine(sb, s, col)
+				writeLine(&sb, s, col)
 				continue
 			}
-			fmt.Fprintf(sb, "%s\n", e.Msg)
+			fmt.Fprintf(&sb, "%s\n", e.Msg)
 		}
 		if pos.Filename != "" {
 			s, line, col := getPosLine(sources[pos.Filename], pos.Pos)
@@ -47,14 +47,14 @@ func (e *PanicError) Error() string {
 			if e.compile {
 				ctxs = "from"
 			}
-			fmt.Fprintf(sb, "  (%s) %s:%d:%d:%d\n", ctxs, pos.Filename, line, col+1, pos.Pos)
-			writeLine(sb, s, col)
+			fmt.Fprintf(&sb, "  (%s) %s:%d:%d:%d\n", ctxs, pos.Filename, line, col+1, pos.Pos)
+			writeLine(&sb, s, col)
 		} else if lc := pos.lambda; lc != nil {
 			s, _, col := getPosLine(lc.Source, pos.Pos-lc.StartPos)
-			writeLine(sb, s, col)
+			writeLine(&sb, s, col)
 		} else {
 			s, _, col := getPosLine(sources[""], pos.Pos)
-			writeLine(sb, s, col)
+			writeLine(&sb, s, col)
 		}
 	}
 	return sb.String()

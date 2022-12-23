@@ -147,6 +147,7 @@ func (ctx *Context) initVariadics() {
 
 	// dyads
 	ctx.RegisterDyad("and", VAnd)
+	ctx.RegisterDyad("csv", VCSV)
 	ctx.RegisterDyad("in", VIn)
 	ctx.RegisterDyad("or", VOr)
 	ctx.RegisterDyad("rotate", VRotate)
@@ -535,6 +536,18 @@ func VAnd(ctx *Context, args []V) V {
 		}
 	}
 	return args[0]
+}
+
+// VCSV implements the "csv" variadic verb.
+func VCSV(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		return fCSV(',', args[0])
+	case 2:
+		return fCSV2(args[1], args[0])
+	default:
+		return panicRank("csv")
+	}
 }
 
 // VAbs implements the "abs" variadic verb.

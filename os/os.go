@@ -12,6 +12,12 @@ import (
 )
 
 // VImport implements the import dyad.
+//
+// import "name" : evaluate file "name.goal" with prefix "name"
+//
+// pfx import "name" : evaluate file "name.goal" with custom prefix pfx
+//
+// It returns 0 and does nothing if a file has already been evaluated.
 func VImport(ctx *goal.Context, args []goal.V) goal.V {
 	var fname string
 	var prefix string

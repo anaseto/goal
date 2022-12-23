@@ -356,7 +356,7 @@ func casts(y V) V {
 	case *AB:
 		return casts(fromABtoAI(yv))
 	case *AI:
-		sb := &strings.Builder{}
+		sb := strings.Builder{}
 		for _, i := range yv.Slice {
 			sb.WriteRune(rune(i))
 		}

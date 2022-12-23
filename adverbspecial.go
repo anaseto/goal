@@ -39,12 +39,12 @@ func fold2vAdd(x V) V {
 		for _, s := range xv.Slice {
 			n += len(s)
 		}
-		var b strings.Builder
-		b.Grow(n)
+		var sb strings.Builder
+		sb.Grow(n)
 		for _, s := range xv.Slice {
-			b.WriteString(s)
+			sb.WriteString(s)
 		}
-		return NewS(b.String())
+		return NewS(sb.String())
 	case *AV:
 		if xv.Len() == 0 {
 			return NewI(0)
