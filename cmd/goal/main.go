@@ -313,13 +313,13 @@ seed x	  rand seed	seed 42 (for non-secure pseudo-rand with ?)
 shift x   shift	shift	shift 1 2 -> 2 0	shift "a" "b" -> "b" ""
 sign x    sign		sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
 
+x csv y	    csv r/w	csv "1,2,3" -> ,"1" "2" "3"	" " csv "1 2 3" -> ,"1" "2" "3"
+			csv ,"1" "2" "3" -> "1,2,3\n"   " " csv ,"1" "2" "3" -> "1 2 3\n"
 x in s      contained	"bc" "ac" in "abcd" -> 1 0
 x in y      member of	2 3 in 0 2 4 -> 1 0
 x nan y     fill NaNs	42 nan (1.5;sqrt -1) -> 1.5 42
 x rshift y  right shift	"a" "b" rshift 1 2 3 -> "a" "b" 1
 x shift y   shift	"a" "b" shift 1 2 3 -> 3 "a" "b"
-x csv y	    csv r/w	csv "1,2,3" -> ,"1" "2" "3"	" " csv "1 2 3" -> ,"1" "2" "3"
-			csv ,"1" "2" "3" -> "1,2,3\n"   " " csv ,"1" "2" "3" -> "1 2 3\n"
 
 sub[r;s]    regsub  	sub[rx/[a-z]/;"Z"] "aBc" -> "ZBZ"
 sub[r;f]    regsub  	sub[rx/[A-Z]/;_] "aBc" -> "abc"
