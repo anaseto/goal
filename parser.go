@@ -100,7 +100,7 @@ func (p *parser) expr(es exprs) (exprs, error) {
 	case SEMICOLON:
 		return es, nil
 	case ERROR:
-		err = p.errorf("%s", tok)
+		err = p.errorf("%s", tok.Text)
 		return es, err
 	case ADVERB:
 		switch tok.Text {
@@ -173,7 +173,8 @@ func (p *parser) expr(es exprs) (exprs, error) {
 		opTok := p.depth[len(p.depth)-1]
 		clTokt := closeToken(opTok.Type)
 		if clTokt != tok.Type {
-			err = p.errorf("unexpected %s without closing previous %s at %d", tok, opTok, opTok.Pos)
+			err = p.errorf("unexpected %s without closing last %s", tok, opTok)
+			p.ctx.errPos = append(p.ctx.errPos, position{Filename: p.ctx.fname, Pos: opTok.Pos})
 			return es, err
 		}
 		p.depth = p.depth[:len(p.depth)-1]

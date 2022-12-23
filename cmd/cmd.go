@@ -100,6 +100,7 @@ func Cmd(ctx *goal.Context, cfg Config) {
 
 func runStdin(ctx *goal.Context, cfg Config) {
 	help := cfg.Help
+	helpLast := false
 	helpv := ctx.RegisterMonad("help", func(ctx *goal.Context, args []goal.V) goal.V {
 		if len(args) >= 1 {
 			arg, ok := args[0].Value().(goal.S)
@@ -108,8 +109,10 @@ func runStdin(ctx *goal.Context, cfg Config) {
 			}
 			fmt.Println(strings.TrimSpace(help[string(arg)]))
 		}
-		return goal.V{} // XXX: help should be done differently
+		helpLast = true
+		return goal.NewI(1)
 	})
+	// We define an alias for help as a global to allow redefinition.
 	ctx.AssignGlobal("h", helpv)
 	lr := lineReader{r: bufio.NewReader(os.Stdin)}
 	fmt.Printf("%s repl, type help\"\" for basic info.\n", cfg.ProgramName)
@@ -125,9 +128,10 @@ func runStdin(ctx *goal.Context, cfg Config) {
 			continue
 		}
 		assigned := ctx.AssignedLast()
-		if !assigned {
+		if !assigned && !helpLast {
 			echo(ctx, r)
 		}
+		helpLast = false
 	}
 }
 
@@ -135,19 +139,109 @@ type lineReader struct {
 	r *bufio.Reader
 }
 
+type scanner struct {
+	depth  []rune // (){}[] depth stack
+	state  scanState
+	done   bool
+	escape bool
+}
+
+type scanState int
+
+const (
+	scanNormal scanState = iota
+	scanRawString
+	scanString
+	scanRegexp
+)
+
 func (lr lineReader) readLine() (string, error) {
+	s := scanner{}
 	sb := strings.Builder{}
 	for {
 		r, _, err := lr.r.ReadRune()
 		if err != nil {
 			return sb.String(), err
 		}
-		if r == '\n' {
-			return sb.String(), nil
-		}
-		if r != '\r' {
+		switch r {
+		case '\r':
+			continue
+		default:
 			sb.WriteRune(r)
 		}
+		switch s.state {
+		case scanNormal:
+			switch r {
+			case '\n':
+				if len(s.depth) == 0 || s.done {
+					return sb.String(), nil
+				}
+			case '"':
+				s.state = scanString
+			case '`':
+				s.state = scanRawString
+			case '/':
+				if strings.HasSuffix(sb.String(), "rx/") {
+					s.state = scanRegexp
+				}
+			case '{', '(', '[':
+				s.depth = append(s.depth, r)
+			case '}', ')', ']':
+				if len(s.depth) > 0 && s.depth[len(s.depth)-1] == opening(r) {
+					s.depth = s.depth[:len(s.depth)-1]
+				} else {
+					// error, so return on next \n
+					s.done = true
+				}
+			}
+		case scanRegexp:
+			switch r {
+			case '\n':
+				// non terminated string
+				return sb.String(), nil
+			case '\\':
+				s.escape = !s.escape
+			case '/':
+				if !s.escape {
+					s.state = scanNormal
+				}
+				s.escape = false
+			default:
+				s.escape = false
+			}
+		case scanString:
+			switch r {
+			case '\n':
+				// non terminated regexp
+				return sb.String(), nil
+			case '\\':
+				s.escape = !s.escape
+			case '"':
+				if !s.escape {
+					s.state = scanNormal
+				}
+				s.escape = false
+			default:
+				s.escape = false
+			}
+		case scanRawString:
+			if r == '`' {
+				s.state = scanNormal
+			}
+		}
+	}
+}
+
+func opening(r rune) rune {
+	switch r {
+	case ')':
+		return '('
+	case ']':
+		return '['
+	case '}':
+		return '{'
+	default:
+		return r
 	}
 }
 
