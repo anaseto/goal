@@ -53,7 +53,7 @@ func VXXXX(ctx *Context, args []V) V {
         }
 }
 `
-dotpl:{sub[ftpl;"XXXX" "YYYY";(x;y)]}
+dotpl:{sub["XXXX" "YYYY";(x;y)] ftpl}
 funcs:+/({dotpl . x}'(
   ("Acos";"acos")
   ("Asin";"asin")
