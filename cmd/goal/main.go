@@ -5,7 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"goal"
-	gio "goal/io"
+	gos "goal/os"
 	"log"
 	"os"
 	"runtime/debug"
@@ -196,11 +196,11 @@ func usageError(usage bool, msgs ...interface{}) {
 }
 
 func registerVariadics(ctx *goal.Context) {
-	ctx.RegisterDyad("import", gio.VImport)
-	ctx.RegisterDyad("print", gio.VPrint)
-	ctx.RegisterDyad("say", gio.VSay)
-	ctx.RegisterMonad("shell", gio.VShell)
-	ctx.RegisterMonad("slurp", gio.VSlurp)
+	ctx.RegisterDyad("import", gos.VImport)
+	ctx.RegisterDyad("print", gos.VPrint)
+	ctx.RegisterDyad("say", gos.VSay)
+	ctx.RegisterMonad("shell", gos.VShell)
+	ctx.RegisterMonad("slurp", gos.VSlurp)
 }
 
 const helpTopics = `
