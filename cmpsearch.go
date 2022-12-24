@@ -210,7 +210,7 @@ func classify(ctx *Context, x V) V {
 			var sb strings.Builder
 			for i, xi := range xv.Slice {
 				sb.Reset()
-				xi.Sprint(ctx, &sb)
+				xi.Fprint(ctx, &sb)
 				ss[i] = sb.String()
 			}
 			return classifyStrings(ss)
@@ -310,7 +310,7 @@ func uniq(ctx *Context, x V) V {
 			var sb strings.Builder
 			for i, xi := range xv.Slice {
 				sb.Reset()
-				xi.Sprint(ctx, &sb)
+				xi.Fprint(ctx, &sb)
 				ss[i] = sb.String()
 			}
 			m := map[string]struct{}{}
@@ -388,7 +388,7 @@ func markFirsts(ctx *Context, x V) V {
 			var sb strings.Builder
 			for i, xi := range xv.Slice {
 				sb.Reset()
-				xi.Sprint(ctx, &sb)
+				xi.Fprint(ctx, &sb)
 				ss[i] = sb.String()
 			}
 			return markFirstsStrings(ctx, ss)
@@ -685,7 +685,7 @@ func occurrenceCount(ctx *Context, x V) V {
 			var sb strings.Builder
 			for i, xi := range xv.Slice {
 				sb.Reset()
-				xi.Sprint(ctx, &sb)
+				xi.Fprint(ctx, &sb)
 				ss[i] = sb.String()
 			}
 			return occurrenceCountStrings(ctx, ss)

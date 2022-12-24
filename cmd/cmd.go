@@ -271,6 +271,6 @@ func runCommand(ctx *goal.Context, cmd string, name string) {
 
 func echo(ctx *goal.Context, x goal.V) {
 	if x != (goal.V{}) {
-		fmt.Printf("%s\n", x.Format(ctx))
+		fmt.Printf("%s\n", x.Sprint(ctx))
 	}
 }

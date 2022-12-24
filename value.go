@@ -27,7 +27,7 @@ const (
 	valPanic              // boxed value (Value field)
 )
 
-// ValueWriter is the interface used when formatting values with Sprint.
+// ValueWriter is the interface used when formatting values with Fprint.
 type ValueWriter interface {
 	io.Writer
 	io.ByteWriter
@@ -40,8 +40,8 @@ type Value interface {
 	// Matches returns true if the value matches another (in the sense of
 	// the ~ operator).
 	Matches(x Value) bool
-	// Sprint writes a unique program string representation of the value.
-	Sprint(*Context, ValueWriter)
+	// Fprint writes a unique program string representation of the value.
+	Fprint(*Context, ValueWriter)
 	// Type returns the name of the value's type.
 	Type() string
 }

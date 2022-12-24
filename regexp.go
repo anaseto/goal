@@ -13,9 +13,9 @@ func (r *rx) Matches(x Value) bool {
 	return ok && r.Regexp.String() == xv.Regexp.String()
 }
 
-func (r *rx) Sprint(ctx *Context, w ValueWriter) {
+func (r *rx) Fprint(ctx *Context, w ValueWriter) {
 	w.WriteString("rx[")
-	S(r.Regexp.String()).Sprint(ctx, w)
+	S(r.Regexp.String()).Fprint(ctx, w)
 	w.WriteByte(']')
 }
 
@@ -33,11 +33,11 @@ func (r *rxReplacer) Matches(x Value) bool {
 	return ok && r.r.Matches(xv.r) && Match(r.repl, xv.repl)
 }
 
-func (r *rxReplacer) Sprint(ctx *Context, w ValueWriter) {
+func (r *rxReplacer) Fprint(ctx *Context, w ValueWriter) {
 	w.WriteString("sub[")
-	r.r.Sprint(ctx, w)
+	r.r.Fprint(ctx, w)
 	w.WriteByte(';')
-	r.repl.Sprint(ctx, w)
+	r.repl.Fprint(ctx, w)
 	w.WriteByte(']')
 }
 
@@ -65,7 +65,7 @@ func (r *rxReplacer) replace(ctx *Context, s string) string {
 			case S:
 				return string(rv)
 			default:
-				return r.Format(ctx)
+				return r.Sprint(ctx)
 			}
 		}
 		r.repl.rcincr()
