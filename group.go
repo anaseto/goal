@@ -122,11 +122,11 @@ func groupBy(x, y V) V {
 	if x.IsPanic() {
 		return panics("f=y : f[y] not an integer array")
 	}
-	avx := x.value.(*AV) // group should always return AV or errV
+	xav := x.value.(*AV) // group should always return *AV or panicV
 	switch yv := y.value.(type) {
 	case array:
-		r := make([]V, avx.Len())
-		for i, xi := range avx.Slice {
+		r := make([]V, xav.Len())
+		for i, xi := range xav.Slice {
 			r[i] = yv.atIndices(xi.value.(*AI).Slice)
 		}
 		return NewAV(r)

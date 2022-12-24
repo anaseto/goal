@@ -44,20 +44,20 @@ func (ctx *Context) amend3array(x array, y, f V) V {
 	switch yv := y.value.(type) {
 	case *AI:
 		for _, yi := range yv.Slice {
-			ax := ctx.amend3arrayI(x, yi, f)
-			if ax.IsPanic() {
-				return ax
+			xa := ctx.amend3arrayI(x, yi, f)
+			if xa.IsPanic() {
+				return xa
 			}
-			x = ax.value.(array)
+			x = xa.value.(array)
 		}
 		return NewV(x)
 	case *AV:
 		for _, yi := range yv.Slice {
-			ax := ctx.amend3array(x, yi, f)
-			if ax.IsPanic() {
-				return ax
+			xa := ctx.amend3array(x, yi, f)
+			if xa.IsPanic() {
+				return xa
 			}
-			x = ax.value.(array)
+			x = xa.value.(array)
 		}
 		return NewV(x)
 	default:
@@ -109,53 +109,53 @@ func (ctx *Context) amend4array(x array, y, f, z V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AI:
-		az, ok := z.value.(array)
+		za, ok := z.value.(array)
 		if !ok {
 			for _, yi := range yv.Slice {
-				ax := ctx.amend4arrayI(x, yi, f, z)
-				if ax.IsPanic() {
-					return ax
+				xa := ctx.amend4arrayI(x, yi, f, z)
+				if xa.IsPanic() {
+					return xa
 				}
-				x = ax.value.(array)
+				x = xa.value.(array)
 			}
 			return NewV(x)
 		}
-		if az.Len() != yv.Len() {
+		if za.Len() != yv.Len() {
 			return Panicf("@[x;y;f;z] : length mismatch between y and z (%d vs %d)",
-				yv.Len(), az.Len())
+				yv.Len(), za.Len())
 
 		}
 		for i, yi := range yv.Slice {
-			ax := ctx.amend4arrayI(x, yi, f, az.at(i))
-			if ax.IsPanic() {
-				return ax
+			xa := ctx.amend4arrayI(x, yi, f, za.at(i))
+			if xa.IsPanic() {
+				return xa
 			}
-			x = ax.value.(array)
+			x = xa.value.(array)
 		}
 		return NewV(x)
 	case *AV:
-		az, ok := z.value.(array)
+		za, ok := z.value.(array)
 		if !ok {
 			for _, yi := range yv.Slice {
-				ax := ctx.amend4array(x, yi, f, z)
-				if ax.IsPanic() {
-					return ax
+				xa := ctx.amend4array(x, yi, f, z)
+				if xa.IsPanic() {
+					return xa
 				}
-				x = ax.value.(array)
+				x = xa.value.(array)
 			}
 			return NewV(x)
 		}
-		if az.Len() != yv.Len() {
+		if za.Len() != yv.Len() {
 			return Panicf("@[x;y;f;z] : length mismatch between y and z (%d vs %d)",
-				yv.Len(), az.Len())
+				yv.Len(), za.Len())
 
 		}
 		for i, yi := range yv.Slice {
-			ax := ctx.amend4array(x, yi, f, az.at(i))
-			if ax.IsPanic() {
-				return ax
+			xa := ctx.amend4array(x, yi, f, za.at(i))
+			if xa.IsPanic() {
+				return xa
 			}
-			x = ax.value.(array)
+			x = xa.value.(array)
 		}
 		return NewV(x)
 	default:
@@ -200,7 +200,7 @@ func amendrAI(x array, yv *AI, z V) V {
 			return Panicf("@[x;y;:;z] : out of bounds index (%d)", yi)
 		}
 	}
-	az, ok := z.value.(array)
+	za, ok := z.value.(array)
 	if !ok {
 		if isEltType(x, z) {
 			for _, yi := range yv.Slice {
@@ -217,34 +217,34 @@ func amendrAI(x array, yv *AI, z V) V {
 		}
 		return NewAV(r)
 	}
-	if az.Len() != yv.Len() {
+	if za.Len() != yv.Len() {
 		return Panicf("@[x;y;:;z] : length mismatch between y and z (%d vs %d)",
-			yv.Len(), az.Len())
+			yv.Len(), za.Len())
 	}
-	if sameType(x, az) {
+	if sameType(x, za) {
 		switch xv := x.(type) {
 		case *AB:
-			zv := az.(*AB)
+			zv := za.(*AB)
 			for i, yi := range yv.Slice {
 				xv.Slice[yi] = zv.Slice[i]
 			}
 		case *AI:
-			zv := az.(*AI)
+			zv := za.(*AI)
 			for i, yi := range yv.Slice {
 				xv.Slice[yi] = zv.Slice[i]
 			}
 		case *AF:
-			zv := az.(*AF)
+			zv := za.(*AF)
 			for i, yi := range yv.Slice {
 				xv.Slice[yi] = zv.Slice[i]
 			}
 		case *AS:
-			zv := az.(*AS)
+			zv := za.(*AS)
 			for i, yi := range yv.Slice {
 				xv.Slice[yi] = zv.Slice[i]
 			}
 		case *AV:
-			zv := az.(*AV)
+			zv := za.(*AV)
 			for i, yi := range yv.Slice {
 				xv.Slice[yi] = zv.Slice[i]
 			}
@@ -252,7 +252,7 @@ func amendrAI(x array, yv *AI, z V) V {
 		return NewV(x)
 	}
 	for i := range yv.Slice {
-		if !isEltType(x, az.at(i)) {
+		if !isEltType(x, za.at(i)) {
 			r := make([]V, xlen)
 			for i := range r {
 				r[i] = x.at(i)
@@ -262,34 +262,34 @@ func amendrAI(x array, yv *AI, z V) V {
 		}
 	}
 	for i, yi := range yv.Slice {
-		x.set(int(yi), az.at(i))
+		x.set(int(yi), za.at(i))
 	}
 	return NewV(x)
 }
 
 func amendrAV(x array, yv *AV, z V) V {
-	az, ok := z.value.(array)
+	za, ok := z.value.(array)
 	if !ok {
 		for _, yi := range yv.Slice {
-			ax := amendr(x, yi, z)
-			if ax.IsPanic() {
-				return ax
+			xa := amendr(x, yi, z)
+			if xa.IsPanic() {
+				return xa
 			}
-			x = ax.value.(array)
+			x = xa.value.(array)
 		}
 		return NewV(x)
 	}
-	if az.Len() != yv.Len() {
+	if za.Len() != yv.Len() {
 		return Panicf("@[x;y;:;z] : length mismatch between y and z (%d vs %d)",
-			yv.Len(), az.Len())
+			yv.Len(), za.Len())
 
 	}
 	for i, yi := range yv.Slice {
-		ax := amendr(x, yi, az.at(i))
-		if ax.IsPanic() {
-			return ax
+		xa := amendr(x, yi, za.at(i))
+		if xa.IsPanic() {
+			return xa
 		}
-		x = ax.value.(array)
+		x = xa.value.(array)
 	}
 	return NewV(x)
 }

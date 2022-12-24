@@ -146,9 +146,9 @@ func (x *AS) String() string {
 
 // sprintV returns a string for a V deep in an AV.
 func sprintV(ctx *Context, x V) string {
-	avx, ok := x.value.(*AV)
+	xav, ok := x.value.(*AV)
 	if ok {
-		return avx.sprint(ctx, true)
+		return xav.sprint(ctx, true)
 	}
 	return x.Sprint(ctx)
 }
