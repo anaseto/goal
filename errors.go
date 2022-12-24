@@ -28,6 +28,10 @@ func (e *PanicError) Error() string {
 	if len(e.positions) == 0 {
 		return e.Msg
 	}
+	const maxErrorStack = 50
+	if len(e.positions) > maxErrorStack {
+		e.positions = e.positions[:maxErrorStack]
+	}
 	sb := strings.Builder{}
 	sources := e.sources
 	for i, pos := range e.positions {
