@@ -22,6 +22,7 @@ func Match(x, y V) bool {
 	case valVariadic:
 		return y.kind == valVariadic && x.n == y.n
 	case valLambda:
+		// TODO: match lambdas: match the string representations?
 		return y.kind == valLambda && x.n == y.n
 	case valPanic:
 		return y.kind == valPanic && x.value.Matches(y.value)
@@ -141,12 +142,13 @@ func matchAF(x, y *AF) bool {
 	return true
 }
 
+const bruteForceN = 8
+
 // classify returns %x.
-func classify(x V) V {
+func classify(ctx *Context, x V) V {
 	if Length(x) == 0 {
 		return NewAI(nil)
 	}
-	//assertCanonical(x)
 	switch xv := x.value.(type) {
 	case *AB:
 		if !xv.At(0) {
@@ -201,23 +203,18 @@ func classify(x V) V {
 		}
 		return NewAI(r)
 	case *AS:
-		r := make([]int64, xv.Len())
-		m := map[string]int64{}
-		n := int64(0)
-		for i, xi := range xv.Slice {
-			c, ok := m[xi]
-			if !ok {
-				r[i] = n
-				m[xi] = n
-				n++
-				continue
-			}
-			r[i] = c
-		}
-		return NewAI(r)
+		return classifyStrings(xv.Slice)
 	case *AV:
-		// NOTE: quadratic algorithm, worst case complexity could be
-		// improved by sorting or string hashing.
+		if xv.Len() > bruteForceN {
+			ss := make([]string, xv.Len())
+			var sb strings.Builder
+			for i, xi := range xv.Slice {
+				sb.Reset()
+				xi.Sprint(ctx, &sb)
+				ss[i] = sb.String()
+			}
+			return classifyStrings(ss)
+		}
 		r := make([]int64, xv.Len())
 		n := int64(0)
 	loop:
@@ -237,12 +234,28 @@ func classify(x V) V {
 	}
 }
 
+func classifyStrings(ss []string) V {
+	r := make([]int64, len(ss))
+	m := map[string]int64{}
+	n := int64(0)
+	for i, s := range ss {
+		c, ok := m[s]
+		if !ok {
+			r[i] = n
+			m[s] = n
+			n++
+			continue
+		}
+		r[i] = c
+	}
+	return NewAI(r)
+}
+
 // uniq returns ?x.
-func uniq(x V) V {
+func uniq(ctx *Context, x V) V {
 	if Length(x) == 0 {
 		return x
 	}
-	//assertCanonical(xv)
 	switch xv := x.value.(type) {
 	case *AB:
 		if xv.Len() == 0 {
@@ -291,9 +304,26 @@ func uniq(x V) V {
 		}
 		return NewAS(r)
 	case *AV:
-		// NOTE: quadratic algorithm, worst case complexity could be
-		// improved by sorting or string hashing.
 		r := []V{}
+		if xv.Len() > bruteForceN {
+			ss := make([]string, xv.Len())
+			var sb strings.Builder
+			for i, xi := range xv.Slice {
+				sb.Reset()
+				xi.Sprint(ctx, &sb)
+				ss[i] = sb.String()
+			}
+			m := map[string]struct{}{}
+			for i, s := range ss {
+				_, ok := m[s]
+				if !ok {
+					r = append(r, xv.At(i))
+					m[s] = struct{}{}
+					continue
+				}
+			}
+			return Canonical(NewAV(r))
+		}
 	loop:
 		for i, xi := range xv.Slice {
 			for j := range xv.Slice[:i] {
@@ -305,17 +335,15 @@ func uniq(x V) V {
 		}
 		return Canonical(NewAV(r))
 	default:
-		// NOTE: ?atom could be used for something.
-		return Panicf("?x : x not an array (%s)", x.Type())
+		return panicType("?x", "x", x)
 	}
 }
 
 // Mark Firsts returns firsts x.
-func markFirsts(x V) V {
+func markFirsts(ctx *Context, x V) V {
 	if Length(x) == 0 {
 		return NewAB(nil)
 	}
-	//assertCanonical(xv)
 	switch xv := x.value.(type) {
 	case *AB:
 		r := make([]bool, xv.Len())
@@ -353,20 +381,18 @@ func markFirsts(x V) V {
 		}
 		return NewAB(r)
 	case *AS:
-		r := make([]bool, xv.Len())
-		m := map[string]struct{}{}
-		for i, xi := range xv.Slice {
-			_, ok := m[xi]
-			if !ok {
-				r[i] = true
-				m[xi] = struct{}{}
-				continue
-			}
-		}
-		return NewAB(r)
+		return markFirstsStrings(ctx, xv.Slice)
 	case *AV:
-		// NOTE: quadratic algorithm, worst case complexity could be
-		// improved by sorting or string hashing.
+		if xv.Len() > bruteForceN {
+			ss := make([]string, xv.Len())
+			var sb strings.Builder
+			for i, xi := range xv.Slice {
+				sb.Reset()
+				xi.Sprint(ctx, &sb)
+				ss[i] = sb.String()
+			}
+			return markFirstsStrings(ctx, ss)
+		}
 		r := make([]bool, xv.Len())
 	loop:
 		for i, xi := range xv.Slice {
@@ -383,6 +409,20 @@ func markFirsts(x V) V {
 	}
 }
 
+func markFirstsStrings(ctx *Context, ss []string) V {
+	r := make([]bool, len(ss))
+	m := map[string]struct{}{}
+	for i, s := range ss {
+		_, ok := m[s]
+		if !ok {
+			r[i] = true
+			m[s] = struct{}{}
+			continue
+		}
+	}
+	return NewAB(r)
+}
+
 // memberOf returns x in y.
 func memberOf(x, y V) V {
 	if Length(y) == 0 {
@@ -397,8 +437,6 @@ func memberOf(x, y V) V {
 	if Length(x) == 0 {
 		return NewAB(nil)
 	}
-	//assertCanonical(x)
-	//assertCanonical(yv)
 	switch yv := y.value.(type) {
 	case S:
 		return containedInS(x, string(yv))
@@ -595,11 +633,10 @@ func memberOfArray(x, y array) V {
 }
 
 // OccurrenceCount returns ⊒x.
-func occurrenceCount(x V) V {
+func occurrenceCount(ctx *Context, x V) V {
 	if Length(x) == 0 {
 		return NewAB(nil)
 	}
-	//assertCanonical(x)
 	switch xv := x.value.(type) {
 	case *AB:
 		r := make([]int64, xv.Len())
@@ -641,21 +678,18 @@ func occurrenceCount(x V) V {
 		}
 		return NewAI(r)
 	case *AS:
-		r := make([]int64, xv.Len())
-		m := map[string]int64{}
-		for i, xi := range xv.Slice {
-			c, ok := m[xi]
-			if !ok {
-				m[xi] = 0
-				continue
-			}
-			m[xi] = c + 1
-			r[i] = c + 1
-		}
-		return NewAI(r)
+		return occurrenceCountStrings(ctx, xv.Slice)
 	case *AV:
-		// NOTE: quadratic algorithm, worst case complexity could be
-		// improved by sorting or string hashing.
+		if xv.Len() > bruteForceN {
+			ss := make([]string, xv.Len())
+			var sb strings.Builder
+			for i, xi := range xv.Slice {
+				sb.Reset()
+				xi.Sprint(ctx, &sb)
+				ss[i] = sb.String()
+			}
+			return occurrenceCountStrings(ctx, ss)
+		}
 		r := make([]int64, xv.Len())
 	loop:
 		for i, xi := range xv.Slice {
@@ -670,6 +704,21 @@ func occurrenceCount(x V) V {
 	default:
 		return Panicf("⊒x : x not an array (%s)", x.Type())
 	}
+}
+
+func occurrenceCountStrings(ctx *Context, ss []string) V {
+	r := make([]int64, len(ss))
+	m := map[string]int64{}
+	for i, s := range ss {
+		c, ok := m[s]
+		if !ok {
+			m[s] = 0
+			continue
+		}
+		m[s] = c + 1
+		r[i] = c + 1
+	}
+	return NewAI(r)
 }
 
 // without returns x^y.
@@ -716,8 +765,6 @@ func intersection(x, y V) V {
 
 // find returns x?y.
 func find(x, y V) V {
-	//assertCanonical(y)
-	//assertCanonical(xv)
 	switch xv := x.value.(type) {
 	case S:
 		return findS(xv, y)

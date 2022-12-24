@@ -160,7 +160,6 @@ func drop(x, y V) V {
 		}
 		return drop(z, y)
 	case array:
-		//assertCanonical(x)
 		return panics("x_y : x non-integer array")
 	default:
 		return panicType("x_y", "x", x)

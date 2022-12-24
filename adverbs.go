@@ -68,7 +68,6 @@ func fold2Join(sep S, x V) V {
 	case *AS:
 		return NewS(strings.Join([]string(xv.Slice), string(sep)))
 	case *AV:
-		//assertCanonical(xv)
 		return Panicf("s/x : x not a string array (%s)", x.Type())
 	default:
 		return Panicf("s/x : x not a string array (%s)", x.Type())

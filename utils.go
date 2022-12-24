@@ -167,7 +167,6 @@ func toIndices(x V) V {
 }
 
 func toIndicesRec(x V) V {
-	//assertCanonical(x)
 	if x.IsI() {
 		return x
 	}

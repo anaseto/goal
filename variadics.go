@@ -226,7 +226,7 @@ func VMultiply(ctx *Context, args []V) V {
 func VDivide(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return classify(args[0])
+		return classify(ctx, args[0])
 	case 2:
 		return divide(args[1], args[0])
 	default:
@@ -424,7 +424,7 @@ func VFind(ctx *Context, args []V) V {
 		if x.IsI() || x.IsF() {
 			return uniform(ctx, x)
 		}
-		return uniq(x)
+		return uniq(ctx, x)
 	case 2:
 		x, y := args[1], args[0]
 		if x.IsI() || x.IsF() {
@@ -612,7 +612,7 @@ func VEval(ctx *Context, args []V) V {
 func VFirsts(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return markFirsts(args[0])
+		return markFirsts(ctx, args[0])
 	default:
 		return panicRank("firsts")
 	}
@@ -644,7 +644,7 @@ func VIn(ctx *Context, args []V) V {
 func VOCount(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return occurrenceCount(args[0])
+		return occurrenceCount(ctx, args[0])
 	default:
 		return panicRank("ocount")
 	}

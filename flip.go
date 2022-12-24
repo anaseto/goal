@@ -2,7 +2,6 @@ package goal
 
 // flip returns +x.
 func flip(x V) V {
-	//assertCanonical(x)
 	x = toArray(x)
 	switch xv := x.value.(type) {
 	case *AV:

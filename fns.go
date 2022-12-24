@@ -131,7 +131,6 @@ func where(x V) V {
 		}
 		return NewAI(r)
 	case array:
-		// assertCanonical(xv)
 		return panics("&x : x non-integer array")
 	default:
 		return Panicf("&x : x non-integer (type %s)", x.Type())
@@ -172,7 +171,6 @@ func replicate(x, y V) V {
 		}
 		return replicate(ix, y)
 	case *AV:
-		//assertCanonical(xv)
 		return Panicf("f#y : f[y] non-integer (%s)", x.Type())
 	default:
 		return Panicf("f#y : f[y] non-integer (%s)", x.Type())
@@ -393,7 +391,6 @@ func weedOut(x, y V) V {
 		}
 		return weedOut(ix, y)
 	case *AV:
-		//assertCanonical(xv)
 		return Panicf("f#y : f[y] non-integer (%s)", x.Type())
 	default:
 		return Panicf("f_y : f[y] non-integer (%s)", x.Type())
