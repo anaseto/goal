@@ -97,7 +97,7 @@ func (ctx *Context) programString() string {
 	}
 	fmt.Fprintln(&sb, "Constants:")
 	for id, ci := range ctx.constants {
-		fmt.Fprintf(&sb, "\t%d\t%s\n", id, ci.Sprint(ctx))
+		fmt.Fprintf(&sb, "\t%d\t%s\n", id, ci.Format(ctx))
 	}
 	for id, lc := range ctx.lambdas {
 		fmt.Fprintf(&sb, "---- Lambda %d (Rank: %d) -----\n", id, lc.Rank)

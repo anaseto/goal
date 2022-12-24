@@ -117,9 +117,9 @@ func TestEval(t *testing.T) {
 				t.Log(ps)
 				t.Log(matchString)
 				if vLeft != (V{}) {
-					t.Logf("results: %s vs %s\n", vLeft.Sprint(ctxLeft), vRight.Sprint(ctxRight))
+					t.Logf("results: %s vs %s\n", vLeft.Format(ctxLeft), vRight.Format(ctxRight))
 				} else {
-					t.Logf("results: %v vs %s\n", vLeft, vRight.Sprint(ctxRight))
+					t.Logf("results: %v vs %s\n", vLeft, vRight.Format(ctxRight))
 				}
 				//t.Logf("results (go): %#v vs %#v", vLeft, vRight)
 				t.Fail()

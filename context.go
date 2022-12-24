@@ -2,6 +2,7 @@ package goal
 
 import (
 	"errors"
+	"fmt"
 	"math/rand"
 	"strings"
 )
@@ -30,13 +31,14 @@ type Context struct {
 	gPrefix string         // current name prefix
 
 	// parsing, scanning
-	scanner  *Scanner
-	compiler *compiler
-	fname    string              // filename
-	sources  map[string]string   // filename: source
-	assigned bool                // last instruction was opAssignGlobal
-	keywords map[string]NameType // special keyword names
-	vNames   map[string]variadic // variadic keywords
+	scanner       *Scanner
+	compiler      *compiler
+	fname         string              // filename
+	sources       map[string]string   // filename: source
+	assigned      bool                // last instruction was opAssignGlobal
+	sprintCompact bool                // value sprint formatting
+	keywords      map[string]NameType // special keyword names
+	vNames        map[string]variadic // variadic keywords
 
 	// error positions stack
 	errPos []position
@@ -57,15 +59,6 @@ func NewContext() *Context {
 	return ctx
 }
 
-// RegisterVariadic adds a variadic function to the context, and returns it, so
-// that it can be assigned to a global variable.
-func (ctx *Context) RegisterVariadic(name string, vf VariadicFun) V {
-	id := len(ctx.variadics)
-	ctx.variadics = append(ctx.variadics, vf)
-	ctx.variadicsNames = append(ctx.variadicsNames, name)
-	return newVariadic(variadic(id))
-}
-
 // RegisterMonad adds a variadic function to the context, and generates a new
 // monadic keyword for that variadic (parsing will not search for a left
 // argument). The variadic is also returned.
@@ -74,6 +67,10 @@ func (ctx *Context) RegisterVariadic(name string, vf VariadicFun) V {
 // indexing, like for any value.
 func (ctx *Context) RegisterMonad(name string, vf VariadicFun) V {
 	id := len(ctx.variadics)
+	_, ok := ctx.keywords[name]
+	if ok {
+		panic(fmt.Sprintf("RegisterMonad: keyword %s already in use", name))
+	}
 	ctx.variadics = append(ctx.variadics, vf)
 	ctx.variadicsNames = append(ctx.variadicsNames, name)
 	ctx.keywords[name] = NameMonad
@@ -86,6 +83,10 @@ func (ctx *Context) RegisterMonad(name string, vf VariadicFun) V {
 // The variadic is also returned.
 func (ctx *Context) RegisterDyad(name string, vf VariadicFun) V {
 	id := len(ctx.variadics)
+	_, ok := ctx.keywords[name]
+	if ok {
+		panic(fmt.Sprintf("RegisterMonad: keyword %s already in use", name))
+	}
 	ctx.variadics = append(ctx.variadics, vf)
 	ctx.variadicsNames = append(ctx.variadicsNames, name)
 	ctx.keywords[name] = NameDyad
@@ -113,6 +114,7 @@ func (ctx *Context) GetGlobal(name string) (V, bool) {
 // Compile parses and compiles code from the given source string. The name
 // argument is used for error reporting and represents, usually, the filename.
 func (ctx *Context) Compile(name string, s string) error {
+	s = strings.Trim(s, " \n")
 	if len(ctx.gCode.Body) > 0 {
 		ctx.gCode.Body = ctx.gCode.Body[:0]
 		ctx.gCode.Pos = ctx.gCode.Pos[:0]

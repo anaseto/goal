@@ -3,6 +3,7 @@ package goal
 //go:generate stringer -type=TokenType,astTokenType,opcode -output stringer.go
 
 import (
+	"strings"
 	"unsafe"
 )
 
@@ -31,8 +32,11 @@ type Value interface {
 	// Matches returns true if the value matches another (in the sense of
 	// the ~ operator).
 	Matches(x Value) bool
-	// Sprint returns a prettified string representation of the value.
-	Sprint(*Context) string
+	// Sprint writes a matching program string representation of the value,
+	// meaning it could be evaluated into a matching value whenever
+	// possible. It's not necessarily unique, meaning other string
+	// representations could produce a matching value too.
+	Sprint(*Context, *strings.Builder)
 	// Type returns the name of the value's type.
 	Type() string
 }

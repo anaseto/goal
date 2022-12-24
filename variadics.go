@@ -397,7 +397,7 @@ func VDrop(ctx *Context, args []V) V {
 func VCast(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return NewS(args[0].Sprint(ctx))
+		return NewS(args[0].Format(ctx))
 	case 2:
 		x, y := args[1], args[0]
 		if x.IsI() || x.IsF() {

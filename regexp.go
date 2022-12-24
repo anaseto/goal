@@ -1,8 +1,8 @@
 package goal
 
 import (
-	"fmt"
 	"regexp"
+	"strings"
 )
 
 type rx struct {
@@ -14,8 +14,10 @@ func (r *rx) Matches(x Value) bool {
 	return ok && r.Regexp.String() == xv.Regexp.String()
 }
 
-func (r *rx) Sprint(ctx *Context) string {
-	return "rx[" + S(r.Regexp.String()).Sprint(ctx) + "]"
+func (r *rx) Sprint(ctx *Context, sb *strings.Builder) {
+	sb.WriteString("rx[")
+	S(r.Regexp.String()).Sprint(ctx, sb)
+	sb.WriteByte(']')
 }
 
 func (r *rx) Type() string {
@@ -32,8 +34,12 @@ func (r *rxReplacer) Matches(x Value) bool {
 	return ok && r.r.Matches(xv.r) && Match(r.repl, xv.repl)
 }
 
-func (r *rxReplacer) Sprint(ctx *Context) string {
-	return fmt.Sprintf("sub[%s;%s]", r.r.Sprint(ctx), r.repl.Sprint(ctx))
+func (r *rxReplacer) Sprint(ctx *Context, sb *strings.Builder) {
+	sb.WriteString("sub[")
+	r.r.Sprint(ctx, sb)
+	sb.WriteByte(';')
+	r.repl.Sprint(ctx, sb)
+	sb.WriteByte(']')
 }
 
 func (r *rxReplacer) Type() string {
@@ -60,7 +66,7 @@ func (r *rxReplacer) replace(ctx *Context, s string) string {
 			case S:
 				return string(rv)
 			default:
-				return r.Sprint(ctx)
+				return r.Format(ctx)
 			}
 		}
 		r.repl.rcincr()
