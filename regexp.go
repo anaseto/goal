@@ -2,7 +2,6 @@ package goal
 
 import (
 	"regexp"
-	"strings"
 )
 
 type rx struct {
@@ -14,10 +13,10 @@ func (r *rx) Matches(x Value) bool {
 	return ok && r.Regexp.String() == xv.Regexp.String()
 }
 
-func (r *rx) Sprint(ctx *Context, sb *strings.Builder) {
-	sb.WriteString("rx[")
-	S(r.Regexp.String()).Sprint(ctx, sb)
-	sb.WriteByte(']')
+func (r *rx) Sprint(ctx *Context, w ValueWriter) {
+	w.WriteString("rx[")
+	S(r.Regexp.String()).Sprint(ctx, w)
+	w.WriteByte(']')
 }
 
 func (r *rx) Type() string {
@@ -34,12 +33,12 @@ func (r *rxReplacer) Matches(x Value) bool {
 	return ok && r.r.Matches(xv.r) && Match(r.repl, xv.repl)
 }
 
-func (r *rxReplacer) Sprint(ctx *Context, sb *strings.Builder) {
-	sb.WriteString("sub[")
-	r.r.Sprint(ctx, sb)
-	sb.WriteByte(';')
-	r.repl.Sprint(ctx, sb)
-	sb.WriteByte(']')
+func (r *rxReplacer) Sprint(ctx *Context, w ValueWriter) {
+	w.WriteString("sub[")
+	r.r.Sprint(ctx, w)
+	w.WriteByte(';')
+	r.repl.Sprint(ctx, w)
+	w.WriteByte(']')
 }
 
 func (r *rxReplacer) Type() string {

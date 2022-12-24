@@ -3,7 +3,7 @@ package goal
 //go:generate stringer -type=TokenType,astTokenType,opcode -output stringer.go
 
 import (
-	"strings"
+	"io"
 	"unsafe"
 )
 
@@ -27,13 +27,21 @@ const (
 	valPanic              // boxed value (Value field)
 )
 
+// ValueWriter is the interface used when formatting values with Sprint.
+type ValueWriter interface {
+	io.Writer
+	io.ByteWriter
+	io.StringWriter
+	WriteRune(rune) (int, error)
+}
+
 // Value is the interface satisfied by all boxed values.
 type Value interface {
 	// Matches returns true if the value matches another (in the sense of
 	// the ~ operator).
 	Matches(x Value) bool
 	// Sprint writes a unique program string representation of the value.
-	Sprint(*Context, *strings.Builder)
+	Sprint(*Context, ValueWriter)
 	// Type returns the name of the value's type.
 	Type() string
 }

@@ -21,14 +21,14 @@ func (r *nReplacer) Matches(x Value) bool {
 	return ok && r.olds == xv.olds && r.news == xv.news && r.n == xv.n
 }
 
-func (r *nReplacer) Sprint(ctx *Context, sb *strings.Builder) {
-	sb.WriteString("sub[")
-	r.olds.Sprint(ctx, sb)
-	sb.WriteByte(';')
-	r.news.Sprint(ctx, sb)
-	sb.WriteByte(';')
-	fmt.Fprintf(sb, "%d", r.n)
-	sb.WriteByte(']')
+func (r *nReplacer) Sprint(ctx *Context, w ValueWriter) {
+	w.WriteString("sub[")
+	r.olds.Sprint(ctx, w)
+	w.WriteByte(';')
+	r.news.Sprint(ctx, w)
+	w.WriteByte(';')
+	fmt.Fprintf(w, "%d", r.n)
+	w.WriteByte(']')
 }
 
 func (r *nReplacer) Type() string {
@@ -49,10 +49,10 @@ func (r *replacer) Matches(x Value) bool {
 	return ok && r.oldnew.Matches(xv.oldnew)
 }
 
-func (r *replacer) Sprint(ctx *Context, sb *strings.Builder) {
-	sb.WriteString("sub[")
-	r.oldnew.Sprint(ctx, sb)
-	sb.WriteByte(']')
+func (r *replacer) Sprint(ctx *Context, w ValueWriter) {
+	w.WriteString("sub[")
+	r.oldnew.Sprint(ctx, w)
+	w.WriteByte(']')
 }
 
 func (r *replacer) Type() string {

@@ -7,18 +7,18 @@ import (
 	"strings"
 )
 
-func sprintFloat(sb *strings.Builder, f float64) {
+func sprintFloat(w ValueWriter, f float64) {
 	switch {
 	case math.IsInf(f, 0):
 		if f >= 0 {
-			sb.WriteString("0w")
+			w.WriteString("0w")
 		} else {
-			sb.WriteString("-0w")
+			w.WriteString("-0w")
 		}
 	case math.IsNaN(f):
-		sb.WriteString("0n")
+		w.WriteString("0n")
 	default:
-		fmt.Fprintf(sb, "%g", f)
+		fmt.Fprintf(w, "%g", f)
 	}
 }
 
@@ -30,121 +30,121 @@ func (v V) Format(ctx *Context) string {
 }
 
 // Sprint writes a matching program string representation of the value.
-func (v V) Sprint(ctx *Context, sb *strings.Builder) {
+func (v V) Sprint(ctx *Context, w ValueWriter) {
 	switch v.kind {
 	case valInt:
-		fmt.Fprintf(sb, "%d", v.n)
+		fmt.Fprintf(w, "%d", v.n)
 	case valFloat:
-		sprintFloat(sb, v.F())
+		sprintFloat(w, v.F())
 	case valVariadic:
 		// v.n < len(ctx.variadicsNames)
-		sb.WriteString(ctx.variadicsNames[v.n])
+		w.WriteString(ctx.variadicsNames[v.n])
 	case valLambda:
 		// v.n < len(ctx.lambdas)
-		sb.WriteString(ctx.lambdas[v.n].Source)
+		w.WriteString(ctx.lambdas[v.n].Source)
 	case valBoxed:
-		v.value.Sprint(ctx, sb)
+		v.value.Sprint(ctx, w)
 	}
 }
 
-func (e *errV) Sprint(ctx *Context, sb *strings.Builder) {
-	sb.WriteString("error[")
-	e.V.Sprint(ctx, sb)
-	sb.WriteByte(']')
+func (e *errV) Sprint(ctx *Context, w ValueWriter) {
+	w.WriteString("error[")
+	e.V.Sprint(ctx, w)
+	w.WriteByte(']')
 }
 
-func (e panicV) Sprint(ctx *Context, sb *strings.Builder) {
-	sb.WriteString("panic[")
-	sb.WriteString(strconv.Quote(string(e)))
-	sb.WriteByte(']')
+func (e panicV) Sprint(ctx *Context, w ValueWriter) {
+	w.WriteString("panic[")
+	w.WriteString(strconv.Quote(string(e)))
+	w.WriteByte(']')
 }
 
 // Sprint returns a properly quoted string.
-func (s S) Sprint(ctx *Context, sb *strings.Builder) { fmt.Fprintf(sb, "%q", string(s)) }
+func (s S) Sprint(ctx *Context, w ValueWriter) { fmt.Fprintf(w, "%q", string(s)) }
 
-func (x *AB) Sprint(ctx *Context, sb *strings.Builder) {
+func (x *AB) Sprint(ctx *Context, w ValueWriter) {
 	if x.Len() == 0 {
-		sb.WriteString(`!0`)
+		w.WriteString(`!0`)
 		return
 	}
 	if x.Len() == 1 {
-		sb.WriteRune(',')
-		fmt.Fprintf(sb, "%d", b2i(x.At(0)))
+		w.WriteRune(',')
+		fmt.Fprintf(w, "%d", b2i(x.At(0)))
 		return
 	}
 	for i, xi := range x.Slice {
-		fmt.Fprintf(sb, "%d", b2i(xi))
+		fmt.Fprintf(w, "%d", b2i(xi))
 		if i < x.Len()-1 {
-			sb.WriteRune(' ')
+			w.WriteRune(' ')
 		}
 	}
 }
 
-func (x *AI) Sprint(ctx *Context, sb *strings.Builder) {
+func (x *AI) Sprint(ctx *Context, w ValueWriter) {
 	if x.Len() == 0 {
-		sb.WriteString(`!0`)
+		w.WriteString(`!0`)
 		return
 	}
 	if x.Len() == 1 {
-		sb.WriteRune(',')
-		fmt.Fprintf(sb, "%d", x.At(0))
+		w.WriteRune(',')
+		fmt.Fprintf(w, "%d", x.At(0))
 		return
 	}
 	for i, xi := range x.Slice {
-		fmt.Fprintf(sb, "%d", xi)
+		fmt.Fprintf(w, "%d", xi)
 		if i < x.Len()-1 {
-			sb.WriteRune(' ')
+			w.WriteRune(' ')
 		}
 	}
 }
 
-func (x *AF) Sprint(ctx *Context, sb *strings.Builder) {
+func (x *AF) Sprint(ctx *Context, w ValueWriter) {
 	if x.Len() == 0 {
-		sb.WriteString(`!0`)
+		w.WriteString(`!0`)
 		return
 	}
 	if x.Len() == 1 {
-		sb.WriteRune(',')
-		sprintFloat(sb, x.At(0))
+		w.WriteRune(',')
+		sprintFloat(w, x.At(0))
 		return
 	}
 	for i, xi := range x.Slice {
-		sprintFloat(sb, xi)
+		sprintFloat(w, xi)
 		if i < x.Len()-1 {
-			sb.WriteRune(' ')
+			w.WriteRune(' ')
 		}
 	}
 }
 
-func (x *AS) Sprint(ctx *Context, sb *strings.Builder) {
+func (x *AS) Sprint(ctx *Context, w ValueWriter) {
 	if x.Len() == 0 {
-		sb.WriteString(`0#""`)
+		w.WriteString(`0#""`)
 		return
 	}
 	if x.Len() == 1 {
-		sb.WriteRune(',')
-		fmt.Fprintf(sb, "%q", x.At(0))
+		w.WriteRune(',')
+		fmt.Fprintf(w, "%q", x.At(0))
 		return
 	}
 	for i, xi := range x.Slice {
-		fmt.Fprintf(sb, "%q", xi)
+		fmt.Fprintf(w, "%q", xi)
 		if i < x.Len()-1 {
-			sb.WriteRune(' ')
+			w.WriteRune(' ')
 		}
 	}
 }
 
-func (x *AV) Sprint(ctx *Context, sb *strings.Builder) {
+func (x *AV) Sprint(ctx *Context, w ValueWriter) {
 	if x.Len() == 0 {
-		sb.WriteString(`()`)
+		w.WriteString(`()`)
 		return
 	}
 	if x.Len() == 1 {
-		sb.WriteRune(',')
-		x.At(0).Sprint(ctx, sb)
+		w.WriteRune(',')
+		x.At(0).Sprint(ctx, w)
 		return
 	}
-	sb.WriteRune('(')
+	w.WriteRune('(')
 	var sep string
 	if ctx.sprintCompact {
 		sep = ";"
@@ -158,43 +158,43 @@ func (x *AV) Sprint(ctx *Context, sb *strings.Builder) {
 	}()
 	for i, xi := range x.Slice {
 		if xi.kind != valNil {
-			xi.Sprint(ctx, sb)
+			xi.Sprint(ctx, w)
 		}
 		if i < x.Len()-1 {
-			sb.WriteString(sep)
+			w.WriteString(sep)
 		}
 	}
-	sb.WriteRune(')')
+	w.WriteRune(')')
 }
 
-func (p projection) Sprint(ctx *Context, sb *strings.Builder) {
-	p.Fun.Sprint(ctx, sb)
-	sb.WriteRune('[')
+func (p projection) Sprint(ctx *Context, w ValueWriter) {
+	p.Fun.Sprint(ctx, w)
+	w.WriteRune('[')
 	for i := len(p.Args) - 1; i >= 0; i-- {
 		arg := p.Args[i]
 		if arg.kind != valNil {
-			arg.Sprint(ctx, sb)
+			arg.Sprint(ctx, w)
 		}
 		if i > 0 {
-			sb.WriteRune(';')
+			w.WriteRune(';')
 		}
 	}
-	sb.WriteRune(']')
+	w.WriteRune(']')
 }
 
-func (p projectionFirst) Sprint(ctx *Context, sb *strings.Builder) {
-	p.Fun.Sprint(ctx, sb)
-	sb.WriteByte('[')
-	p.Arg.Sprint(ctx, sb)
-	sb.WriteString(";]")
+func (p projectionFirst) Sprint(ctx *Context, w ValueWriter) {
+	p.Fun.Sprint(ctx, w)
+	w.WriteByte('[')
+	p.Arg.Sprint(ctx, w)
+	w.WriteString(";]")
 }
 
-func (p projectionMonad) Sprint(ctx *Context, sb *strings.Builder) {
-	p.Fun.Sprint(ctx, sb)
-	sb.WriteString("[]")
+func (p projectionMonad) Sprint(ctx *Context, w ValueWriter) {
+	p.Fun.Sprint(ctx, w)
+	w.WriteString("[]")
 }
 
-func (r derivedVerb) Sprint(ctx *Context, sb *strings.Builder) {
-	r.Arg.Sprint(ctx, sb)
-	sb.WriteString(ctx.variadicsNames[r.Fun])
+func (r derivedVerb) Sprint(ctx *Context, w ValueWriter) {
+	r.Arg.Sprint(ctx, w)
+	w.WriteString(ctx.variadicsNames[r.Fun])
 }
