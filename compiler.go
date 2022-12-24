@@ -2,6 +2,7 @@ package goal
 
 import (
 	"fmt"
+	"io"
 	"math"
 	"regexp"
 	"strconv"
@@ -141,7 +142,7 @@ func (c *compiler) ParseCompile() error {
 	for {
 		err := c.ParseCompileNext()
 		if err != nil {
-			if _, ok := err.(errEOF); ok {
+			if err == io.EOF {
 				//c = nil
 				return nil
 			}
@@ -151,7 +152,7 @@ func (c *compiler) ParseCompile() error {
 }
 
 // Parse builds on the context program using input from the current scanner
-// until the end of a whole expression is found. It returns ErrEOF on EOF.
+// until the end of a whole expression is found. It returns io.EOF on EOF.
 func (c *compiler) ParseCompileNext() error {
 	ctx := c.ctx
 	if c.drop {
@@ -161,7 +162,7 @@ func (c *compiler) ParseCompileNext() error {
 	expr, err := c.p.Next()
 	//fmt.Printf("expr: %v\n", expr)
 	if err != nil {
-		_, eof = err.(errEOF)
+		eof = err == io.EOF
 		if !eof {
 			ctx.compiler = newCompiler(ctx)
 			return err
@@ -174,7 +175,7 @@ func (c *compiler) ParseCompileNext() error {
 	}
 	c.drop = nonEmpty(expr)
 	if eof {
-		return errEOF{}
+		return io.EOF
 	}
 	return nil
 }

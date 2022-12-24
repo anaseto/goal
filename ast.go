@@ -142,13 +142,8 @@ func nonEmpty(e expr) bool {
 	}
 }
 
-type parseEOF struct {
-	Pos int
-}
-
 type parseCLOSE struct {
 	Pos int
 }
 
-func (p parseEOF) Error() string   { return "EOF" }
 func (p parseCLOSE) Error() string { return "CLOSE" }

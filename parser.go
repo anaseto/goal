@@ -2,6 +2,7 @@ package goal
 
 import (
 	"fmt"
+	"io"
 	"strings"
 )
 
@@ -19,13 +20,6 @@ func newParser(ctx *Context) *parser {
 	return p
 }
 
-// errEOF signals the end of the input file.
-type errEOF struct{}
-
-func (e errEOF) Error() string {
-	return "EOF"
-}
-
 // Next returns a whole expression, in stack-based order.
 func (p *parser) Next() (expr, error) {
 	es, err := p.expr(exprs{})
@@ -35,7 +29,7 @@ func (p *parser) Next() (expr, error) {
 	}
 	pDoExprs(es)
 	if p.token.Type == EOF {
-		return es, errEOF{}
+		return es, io.EOF
 	}
 	return es, nil
 }
