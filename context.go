@@ -61,7 +61,7 @@ func NewContext() *Context {
 
 // RegisterMonad adds a variadic function to the context, and generates a new
 // monadic keyword for that variadic (parsing will not search for a left
-// argument). The variadic is also returned.
+// argument). The variadic is also returned as a value.
 // Note that while that a keyword defined in such a way will not take a left
 // argument, it is still possible to pass several arguments to it with bracket
 // indexing, like for any value.
@@ -80,12 +80,12 @@ func (ctx *Context) RegisterMonad(name string, vf VariadicFun) V {
 
 // RegisterDyad adds a variadic function to the context, and generates a new
 // dyadic keyword for that variadic (parsing will search for a left argument).
-// The variadic is also returned.
+// The variadic is also returned as a value.
 func (ctx *Context) RegisterDyad(name string, vf VariadicFun) V {
 	id := len(ctx.variadics)
 	_, ok := ctx.keywords[name]
 	if ok {
-		panic(fmt.Sprintf("RegisterMonad: keyword %s already in use", name))
+		panic(fmt.Sprintf("RegisterDyad: keyword %s already in use", name))
 	}
 	ctx.variadics = append(ctx.variadics, vf)
 	ctx.variadicsNames = append(ctx.variadicsNames, name)
