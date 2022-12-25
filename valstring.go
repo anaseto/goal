@@ -258,7 +258,7 @@ func (x *AV) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
 	return
 }
 
-func (p projection) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
+func (p *projection) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
 	var m int
 	m, err = p.Fun.Fprint(ctx, w)
 	n += m
@@ -295,7 +295,7 @@ func (p projection) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
 	return
 }
 
-func (p projectionFirst) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
+func (p *projectionFirst) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
 	var m int
 	m, err = p.Fun.Fprint(ctx, w)
 	n += m
@@ -317,7 +317,7 @@ func (p projectionFirst) Fprint(ctx *Context, w ValueWriter) (n int, err error) 
 	return
 }
 
-func (p projectionMonad) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
+func (p *projectionMonad) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
 	var m int
 	n, err = p.Fun.Fprint(ctx, w)
 	if err != nil {
@@ -328,7 +328,7 @@ func (p projectionMonad) Fprint(ctx *Context, w ValueWriter) (n int, err error) 
 	return
 }
 
-func (r derivedVerb) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
+func (r *derivedVerb) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
 	var m int
 	n, err = r.Arg.Fprint(ctx, w)
 	if err != nil {

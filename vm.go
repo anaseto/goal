@@ -81,7 +81,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ip++
 		case opDerive:
 			v := variadic(ops[ip])
-			ctx.push(NewV(derivedVerb{Fun: v, Arg: ctx.pop()}))
+			ctx.push(NewV(&derivedVerb{Fun: v, Arg: ctx.pop()}))
 			ip++
 		case opApply2:
 			x := ctx.pop()

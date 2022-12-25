@@ -19,12 +19,12 @@ type valueKind int8
 
 const (
 	valNil      valueKind = iota
-	valInt                // unboxed int64 (N field)
-	valFloat              // unboxed float64 (N field)
-	valVariadic           // unboxed int32 (N field)
-	valLambda             // unboxed int32 (N field)
-	valBoxed              // boxed value (Value field)
-	valPanic              // boxed value (Value field)
+	valInt                // unboxed int64 (n field)
+	valFloat              // unboxed float64 (n field)
+	valVariadic           // unboxed int32 (n field)
+	valLambda             // unboxed int32 (n field)
+	valBoxed              // boxed value (value field)
+	valPanic              // boxed value (value field)
 )
 
 // ValueWriter is the interface used when formatting values with Fprint.
@@ -530,10 +530,10 @@ type projectionMonad struct {
 	Fun V
 }
 
-func (p projection) Type() string      { return "f" }
-func (p projectionFirst) Type() string { return "f" }
-func (p projectionMonad) Type() string { return "f" }
-func (r derivedVerb) Type() string     { return "f" }
+func (p *projection) Type() string      { return "f" }
+func (p *projectionFirst) Type() string { return "f" }
+func (p *projectionMonad) Type() string { return "f" }
+func (r *derivedVerb) Type() string     { return "f" }
 
 // function interface is satisfied by the different kind of functions. A
 // function is a value thas has a default rank. The default rank is used in
@@ -546,19 +546,19 @@ type function interface {
 }
 
 // Rank for a projection is the number of nil arguments.
-func (p projection) rank(ctx *Context) int { return countNils(p.Args) }
+func (p *projection) rank(ctx *Context) int { return countNils(p.Args) }
 
 // Rank for a 1-arg projection is 1.
-func (p projectionFirst) rank(ctx *Context) int { return 1 }
+func (p *projectionFirst) rank(ctx *Context) int { return 1 }
 
 // Rank for a curryfied function is 1.
-func (p projectionMonad) rank(ctx *Context) int { return 1 }
+func (p *projectionMonad) rank(ctx *Context) int { return 1 }
 
 // Rank returns 2 for derived verbs.
-func (r derivedVerb) rank(ctx *Context) int { return 2 }
+func (r *derivedVerb) rank(ctx *Context) int { return 2 }
 
-func (p projection) Matches(x Value) bool {
-	xp, ok := x.(projection)
+func (p *projection) Matches(x Value) bool {
+	xp, ok := x.(*projection)
 	if !ok || !Match(p.Fun, xp.Fun) {
 		return false
 	}
@@ -573,18 +573,18 @@ func (p projection) Matches(x Value) bool {
 	return true
 }
 
-func (p projectionFirst) Matches(x Value) bool {
-	xp, ok := x.(projectionFirst)
+func (p *projectionFirst) Matches(x Value) bool {
+	xp, ok := x.(*projectionFirst)
 	return ok && Match(p.Fun, xp.Fun) && Match(p.Arg, xp.Arg)
 }
 
-func (p projectionMonad) Matches(x Value) bool {
-	xp, ok := x.(projectionMonad)
+func (p *projectionMonad) Matches(x Value) bool {
+	xp, ok := x.(*projectionMonad)
 	return ok && Match(p.Fun, xp.Fun)
 }
 
-func (r derivedVerb) Matches(x Value) bool {
-	xr, ok := x.(derivedVerb)
+func (r *derivedVerb) Matches(x Value) bool {
+	xr, ok := x.(*derivedVerb)
 	return ok && r.Fun == xr.Fun && Match(r.Arg, xr.Arg)
 }
 
@@ -610,23 +610,23 @@ func (x *AV) rcincr() {
 	}
 }
 
-func (r derivedVerb) rcincr() {
+func (r *derivedVerb) rcincr() {
 	r.Arg.rcincr()
 }
 
-func (p projection) rcincr() {
+func (p *projection) rcincr() {
 	p.Fun.rcincr()
 	for _, arg := range p.Args {
 		arg.rcincr()
 	}
 }
 
-func (p projectionFirst) rcincr() {
+func (p *projectionFirst) rcincr() {
 	p.Fun.rcincr()
 	p.Arg.rcincr()
 }
 
-func (p projectionMonad) rcincr() {
+func (p *projectionMonad) rcincr() {
 	p.Fun.rcincr()
 }
 
@@ -663,22 +663,22 @@ func (x *AV) rcdecr() {
 	}
 }
 
-func (r derivedVerb) rcdecr() {
+func (r *derivedVerb) rcdecr() {
 	r.Arg.rcdecr()
 }
 
-func (p projection) rcdecr() {
+func (p *projection) rcdecr() {
 	p.Fun.rcdecr()
 	for _, arg := range p.Args {
 		arg.rcdecr()
 	}
 }
 
-func (p projectionFirst) rcdecr() {
+func (p *projectionFirst) rcdecr() {
 	p.Fun.rcdecr()
 	p.Arg.rcdecr()
 }
 
-func (p projectionMonad) rcdecr() {
+func (p *projectionMonad) rcdecr() {
 	p.Fun.rcdecr()
 }

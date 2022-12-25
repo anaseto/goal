@@ -86,20 +86,20 @@ func less(x, y V) bool {
 			return Length(y) > 0
 		}
 		return lessAV(x, y)
-	case derivedVerb:
-		yv, ok := y.value.(derivedVerb)
+	case *derivedVerb:
+		yv, ok := y.value.(*derivedVerb)
 		return ok && xv.Fun < yv.Fun ||
 			xv.Fun == yv.Fun && less(xv.Arg, yv.Arg)
-	case projection:
-		yv, ok := y.value.(projection)
+	case *projection:
+		yv, ok := y.value.(*projection)
 		return ok && less(xv.Fun, yv.Fun) ||
 			Match(xv.Fun, yv.Fun) && less(NewAV(xv.Args), NewAV(yv.Args))
-	case projectionFirst:
-		yv, ok := y.value.(projectionFirst)
+	case *projectionFirst:
+		yv, ok := y.value.(*projectionFirst)
 		return ok && less(xv.Fun, yv.Fun) ||
 			Match(xv.Fun, yv.Fun) && less(xv.Arg, yv.Arg)
-	case projectionMonad:
-		yv, ok := y.value.(projectionMonad)
+	case *projectionMonad:
+		yv, ok := y.value.(*projectionMonad)
 		return ok && less(xv.Fun, yv.Fun)
 	case *errV:
 		yv, ok := y.value.(*errV)
