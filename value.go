@@ -598,8 +598,8 @@ func (r *derivedVerb) Matches(x Value) bool {
 // than one, then the value is considered reusable.
 //
 // When defining a new type implementing the Value interface, it is only
-// necessary to also implement RefCounter if the type's value contains a type
-// implementing it (for example an array type or a generic V).
+// necessary to also implement RefCounter if the type definition contains makes
+// use of a type implementing it (for example an array type or a generic V).
 type RefCounter interface {
 	IncrRC() // IncrRC increments the reference count by one.
 	DecrRC() // DecrRC decrements the reference count by one.
