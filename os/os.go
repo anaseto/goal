@@ -153,12 +153,12 @@ func printV(ctx *goal.Context, x goal.V, newline bool) error {
 		}
 		return buf.Flush()
 	default:
+		buf := bufio.NewWriter(os.Stdout)
+		x.Fprint(ctx, buf)
 		if newline {
-			_, err := fmt.Println(x.Sprint(ctx))
-			return err
+			buf.WriteByte('\n')
 		}
-		_, err := fmt.Print(x.Sprint(ctx))
-		return err
+		return buf.Flush()
 	}
 }
 
@@ -172,7 +172,7 @@ func fprintV(ctx *goal.Context, w io.Writer, x goal.V, newline bool) error {
 			buf.WriteString(s)
 		}
 	default:
-		fmt.Fprint(buf, x.Sprint(ctx))
+		x.Fprint(ctx, buf)
 	}
 	if newline {
 		buf.WriteRune('\n')
