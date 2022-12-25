@@ -22,7 +22,12 @@ func Match(x, y V) bool {
 	case valVariadic:
 		return y.kind == valVariadic && x.n == y.n
 	case valLambda:
-		// TODO: match lambdas: match the string representations?
+		// XXX: match lambdas: match the string representations?
+		// Currently, self-search operations may use a more tolerant
+		// comparison for lambdas by using stringification. Adding
+		// context information in Match would be a bit inconvenient.
+		// Comparing lambdas is not a common thing, so it does not
+		// matter much in practice.
 		return y.kind == valLambda && x.n == y.n
 	case valPanic:
 		return y.kind == valPanic && x.value.Matches(y.value)

@@ -105,6 +105,8 @@ func less(x, y V) bool {
 		yv, ok := y.value.(*errV)
 		return ok && less(xv.V, yv.V)
 	default:
+		// XXX: There should probably be an interface for less, so that
+		// new kind of sortable values could be defined.
 		return false
 	}
 }
