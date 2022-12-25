@@ -197,7 +197,7 @@ func (lr lineReader) readLine() (string, error) {
 		case scanRegexp:
 			switch r {
 			case '\n':
-				// non terminated string
+				// non terminated regexp
 				return sb.String(), nil
 			case '\\':
 				s.escape = !s.escape
@@ -212,7 +212,7 @@ func (lr lineReader) readLine() (string, error) {
 		case scanString:
 			switch r {
 			case '\n':
-				// non terminated regexp
+				// non terminated string
 				return sb.String(), nil
 			case '\\':
 				s.escape = !s.escape
