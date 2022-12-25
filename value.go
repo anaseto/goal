@@ -601,8 +601,8 @@ func (r *derivedVerb) Matches(x Value) bool {
 // necessary to also implement RefCounter if the type's value contains a type
 // implementing it (for example an array type or a generic V).
 type RefCounter interface {
-	IncrRC()
-	DecrRC()
+	IncrRC() // IncrRC increments the reference count by one.
+	DecrRC() // DecrRC decrements the reference count by one.
 }
 
 func (e *errV) IncrRC()       { e.V.IncrRC() }
