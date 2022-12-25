@@ -41,7 +41,7 @@ type Value interface {
 	// the ~ operator).
 	Matches(x Value) bool
 	// Fprint writes a unique program string representation of the value.
-	Fprint(*Context, ValueWriter)
+	Fprint(*Context, ValueWriter) (n int, err error)
 	// Type returns the name of the value's type.
 	Type() string
 }

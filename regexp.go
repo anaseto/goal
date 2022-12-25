@@ -13,10 +13,23 @@ func (r *rx) Matches(x Value) bool {
 	return ok && r.Regexp.String() == xv.Regexp.String()
 }
 
-func (r *rx) Fprint(ctx *Context, w ValueWriter) {
-	w.WriteString("rx[")
-	S(r.Regexp.String()).Fprint(ctx, w)
-	w.WriteByte(']')
+func (r *rx) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
+	var m int
+	n, err = w.WriteString("rx[")
+	if err != nil {
+		return
+	}
+	m, err = S(r.Regexp.String()).Fprint(ctx, w)
+	n += m
+	if err != nil {
+		return
+	}
+	err = w.WriteByte(']')
+	if err != nil {
+		return
+	}
+	n++
+	return
 }
 
 func (r *rx) Type() string {
@@ -33,12 +46,33 @@ func (r *rxReplacer) Matches(x Value) bool {
 	return ok && r.r.Matches(xv.r) && Match(r.repl, xv.repl)
 }
 
-func (r *rxReplacer) Fprint(ctx *Context, w ValueWriter) {
-	w.WriteString("sub[")
-	r.r.Fprint(ctx, w)
-	w.WriteByte(';')
-	r.repl.Fprint(ctx, w)
-	w.WriteByte(']')
+func (r *rxReplacer) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
+	var m int
+	n, err = w.WriteString("sub[")
+	if err != nil {
+		return
+	}
+	m, err = r.r.Fprint(ctx, w)
+	n += m
+	if err != nil {
+		return
+	}
+	err = w.WriteByte(';')
+	if err != nil {
+		return
+	}
+	n++
+	m, err = r.repl.Fprint(ctx, w)
+	n += m
+	if err != nil {
+		return
+	}
+	err = w.WriteByte(']')
+	if err != nil {
+		return
+	}
+	n++
+	return
 }
 
 func (r *rxReplacer) Type() string {

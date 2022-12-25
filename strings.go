@@ -21,14 +21,43 @@ func (r *nReplacer) Matches(x Value) bool {
 	return ok && r.olds == xv.olds && r.news == xv.news && r.n == xv.n
 }
 
-func (r *nReplacer) Fprint(ctx *Context, w ValueWriter) {
-	w.WriteString("sub[")
-	r.olds.Fprint(ctx, w)
-	w.WriteByte(';')
-	r.news.Fprint(ctx, w)
-	w.WriteByte(';')
-	fmt.Fprintf(w, "%d", r.n)
-	w.WriteByte(']')
+func (r *nReplacer) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
+	n, err = w.WriteString("sub[")
+	if err != nil {
+		return
+	}
+	var m int
+	m, err = r.olds.Fprint(ctx, w)
+	n += m
+	if err != nil {
+		return
+	}
+	err = w.WriteByte(';')
+	if err != nil {
+		return
+	}
+	n++
+	m, err = r.news.Fprint(ctx, w)
+	n += m
+	if err != nil {
+		return
+	}
+	err = w.WriteByte(';')
+	if err != nil {
+		return
+	}
+	n++
+	m, err = fmt.Fprintf(w, "%d", r.n)
+	n += m
+	if err != nil {
+		return
+	}
+	err = w.WriteByte(']')
+	if err != nil {
+		return
+	}
+	n++
+	return
 }
 
 func (r *nReplacer) Type() string {
@@ -49,10 +78,23 @@ func (r *replacer) Matches(x Value) bool {
 	return ok && r.oldnew.Matches(xv.oldnew)
 }
 
-func (r *replacer) Fprint(ctx *Context, w ValueWriter) {
-	w.WriteString("sub[")
-	r.oldnew.Fprint(ctx, w)
-	w.WriteByte(']')
+func (r *replacer) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
+	n, err = w.WriteString("sub[")
+	if err != nil {
+		return
+	}
+	var m int
+	m, err = r.oldnew.Fprint(ctx, w)
+	n += m
+	if err != nil {
+		return
+	}
+	err = w.WriteByte(']')
+	if err != nil {
+		return
+	}
+	n++
+	return
 }
 
 func (r *replacer) Type() string {
