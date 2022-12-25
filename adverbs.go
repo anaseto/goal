@@ -48,13 +48,13 @@ func fold2(ctx *Context, args []V) V {
 			return NewI(0)
 		}
 		r := xv.at(0)
-		f.rcincr()
+		f.IncrRC()
 		for i := 1; i < xv.Len(); i++ {
 			ctx.push(xv.at(i))
 			ctx.push(r)
 			r = ctx.applyN(f, 2)
 		}
-		f.rcdecr()
+		f.DecrRC()
 		return r
 	default:
 		return x
@@ -210,17 +210,17 @@ func fold3(ctx *Context, args []V) V {
 		if yv.Len() == 0 {
 			return r
 		}
-		f.rcincr()
+		f.IncrRC()
 		for i := 0; i < yv.Len(); i++ {
 			ctx.push(yv.at(i))
 			ctx.push(r)
 			r = ctx.applyN(f, 2)
 			if r.IsPanic() {
-				f.rcdecr()
+				f.DecrRC()
 				return r
 			}
 		}
-		f.rcdecr()
+		f.DecrRC()
 		return Canonical(r)
 	default:
 		ctx.push(y)
@@ -243,28 +243,28 @@ func fold3While(ctx *Context, args []V) V {
 		return fold3doTimes(ctx, int64(x.F()), f, y)
 	}
 	if x.IsFunction() {
-		f.rcincr()
-		x.rcincr()
+		f.IncrRC()
+		x.IncrRC()
 		for {
 			ctx.push(y)
-			y.rcincr()
+			y.IncrRC()
 			cond := ctx.applyN(x, 1)
-			y.rcdecr()
+			y.DecrRC()
 			if cond.IsPanic() {
-				x.rcdecr()
-				f.rcdecr()
+				x.DecrRC()
+				f.DecrRC()
 				return cond
 			}
 			if !isTrue(cond) {
-				x.rcdecr()
-				f.rcdecr()
+				x.DecrRC()
+				f.DecrRC()
 				return y
 			}
 			ctx.push(y)
 			y = ctx.applyN(f, 1)
 			if y.IsPanic() {
-				x.rcdecr()
-				f.rcdecr()
+				x.DecrRC()
+				f.DecrRC()
 				return y
 			}
 		}
@@ -273,16 +273,16 @@ func fold3While(ctx *Context, args []V) V {
 }
 
 func fold3doTimes(ctx *Context, n int64, f, y V) V {
-	f.rcincr()
+	f.IncrRC()
 	for i := int64(0); i < n; i++ {
 		ctx.push(y)
 		y = ctx.applyN(f, 1)
 		if y.IsPanic() {
-			f.rcdecr()
+			f.DecrRC()
 			return y
 		}
 	}
-	f.rcdecr()
+	f.DecrRC()
 	return y
 }
 
@@ -315,21 +315,21 @@ func scan2(ctx *Context, f, x V) V {
 			return NewAV(nil)
 		}
 		r := []V{xv.at(0)}
-		f.rcincr()
+		f.IncrRC()
 		for i := 1; i < xv.Len(); i++ {
 			ctx.push(xv.at(i))
 			last := r[len(r)-1]
 			ctx.push(last)
-			last.rcincr()
+			last.IncrRC()
 			next := ctx.applyN(f, 2)
-			last.rcdecr()
+			last.DecrRC()
 			if next.IsPanic() {
-				f.rcdecr()
+				f.DecrRC()
 				return next
 			}
 			r = append(r, next)
 		}
-		f.rcdecr()
+		f.DecrRC()
 		return Canonical(NewAV(r))
 	default:
 		return x
@@ -540,10 +540,10 @@ func scan3(ctx *Context, args []V) V {
 		}
 		ctx.push(yv.at(0))
 		ctx.push(x)
-		f.rcincr()
+		f.IncrRC()
 		first := ctx.applyN(f, 2)
 		if first.IsPanic() {
-			f.rcdecr()
+			f.DecrRC()
 			return first
 		}
 		r := []V{first}
@@ -551,16 +551,16 @@ func scan3(ctx *Context, args []V) V {
 			ctx.push(yv.at(i))
 			last := r[len(r)-1]
 			ctx.push(last)
-			last.rcincr()
+			last.IncrRC()
 			next := ctx.applyN(f, 2)
-			last.rcdecr()
+			last.DecrRC()
 			if next.IsPanic() {
-				f.rcdecr()
+				f.DecrRC()
 				return next
 			}
 			r = append(r, next)
 		}
-		f.rcdecr()
+		f.DecrRC()
 		return Canonical(NewAV(r))
 	default:
 		ctx.push(y)
@@ -584,28 +584,28 @@ func scan3While(ctx *Context, args []V) V {
 	}
 	if x.IsFunction() {
 		r := []V{y}
-		f.rcincr()
-		x.rcincr()
+		f.IncrRC()
+		x.IncrRC()
 		for {
 			ctx.push(y)
-			y.rcincr()
+			y.IncrRC()
 			cond := ctx.applyN(x, 1)
-			y.rcdecr()
+			y.DecrRC()
 			if cond.IsPanic() {
-				f.rcdecr()
-				x.rcdecr()
+				f.DecrRC()
+				x.DecrRC()
 				return cond
 			}
 			if !isTrue(cond) {
-				f.rcdecr()
-				x.rcdecr()
+				f.DecrRC()
+				x.DecrRC()
 				return Canonical(NewAV(r))
 			}
 			ctx.push(y)
 			y = ctx.applyN(f, 1)
 			if y.IsPanic() {
-				f.rcdecr()
-				x.rcdecr()
+				f.DecrRC()
+				x.DecrRC()
 				return y
 			}
 			r = append(r, y)
@@ -616,17 +616,17 @@ func scan3While(ctx *Context, args []V) V {
 
 func scan3doTimes(ctx *Context, n int64, f, y V) V {
 	r := []V{y}
-	f.rcincr()
+	f.IncrRC()
 	for i := int64(0); i < n; i++ {
 		ctx.push(y)
 		y = ctx.applyN(f, 1)
 		if y.IsPanic() {
-			f.rcdecr()
+			f.DecrRC()
 			return y
 		}
 		r = append(r, y)
 	}
-	f.rcdecr()
+	f.DecrRC()
 	return Canonical(NewAV(r))
 }
 
@@ -639,17 +639,17 @@ func each2(ctx *Context, args []V) V {
 	switch xv := x.value.(type) {
 	case array:
 		r := make([]V, 0, xv.Len())
-		f.rcincr()
+		f.IncrRC()
 		for i := 0; i < xv.Len(); i++ {
 			ctx.push(xv.at(i))
 			next := ctx.applyN(f, 1)
 			if next.IsPanic() {
-				f.rcdecr()
+				f.DecrRC()
 				return next
 			}
 			r = append(r, next)
 		}
-		f.rcdecr()
+		f.DecrRC()
 		return Canonical(NewAV(r))
 	default:
 		// should not happen
@@ -672,35 +672,35 @@ func each3(ctx *Context, args []V) V {
 	if !okax {
 		ylen := ya.Len()
 		r := make([]V, 0, ylen)
-		f.rcincr()
+		f.IncrRC()
 		for i := 0; i < ylen; i++ {
 			ctx.push(ya.at(i))
 			ctx.push(x)
 			next := ctx.applyN(f, 2)
 			if next.IsPanic() {
-				f.rcdecr()
+				f.DecrRC()
 				return next
 			}
 			r = append(r, next)
 		}
-		f.rcdecr()
+		f.DecrRC()
 		return Canonical(NewAV(r))
 	}
 	if !okay {
 		xlen := xa.Len()
 		r := make([]V, 0, xlen)
-		f.rcincr()
+		f.IncrRC()
 		for i := 0; i < xlen; i++ {
 			ctx.push(y)
 			ctx.push(xa.at(i))
 			next := ctx.applyN(f, 2)
 			if next.IsPanic() {
-				f.rcdecr()
+				f.DecrRC()
 				return next
 			}
 			r = append(r, next)
 		}
-		f.rcdecr()
+		f.DecrRC()
 		return Canonical(NewAV(r))
 	}
 	xlen := xa.Len()
@@ -708,17 +708,17 @@ func each3(ctx *Context, args []V) V {
 		return Panicf("x f'y : length mismatch: %d (#x) vs %d (#y)", xa.Len(), ya.Len())
 	}
 	r := make([]V, 0, xlen)
-	f.rcincr()
+	f.IncrRC()
 	for i := 0; i < xlen; i++ {
 		ctx.push(ya.at(i))
 		ctx.push(xa.at(i))
 		next := ctx.applyN(f, 2)
 		if next.IsPanic() {
-			f.rcdecr()
+			f.DecrRC()
 			return next
 		}
 		r = append(r, next)
 	}
-	f.rcdecr()
+	f.DecrRC()
 	return Canonical(NewAV(r))
 }

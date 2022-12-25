@@ -215,30 +215,32 @@ func (x V) Rank(ctx *Context) int {
 	}
 }
 
-func (x V) rcincr() {
+// IncrRC increments the value reference count (if it has any).
+func (x V) IncrRC() {
 	if x.kind != valBoxed {
 		return
 	}
-	xrc, ok := x.value.(refCounter)
+	xrc, ok := x.value.(RefCounter)
 	if ok {
-		xrc.rcincr()
+		xrc.IncrRC()
 	}
 }
 
-func (x V) rcdecr() {
+// IncrRC increments the value reference count (if it has any).
+func (x V) DecrRC() {
 	if x.kind != valBoxed {
 		return
 	}
-	xrc, ok := x.value.(refCounter)
+	xrc, ok := x.value.(RefCounter)
 	if ok {
-		xrc.rcdecr()
+		xrc.DecrRC()
 	}
 }
 
 func (x V) rcdecrRefCounter() {
-	xrc, ok := x.value.(refCounter)
+	xrc, ok := x.value.(RefCounter)
 	if ok {
-		xrc.rcdecr()
+		xrc.DecrRC()
 	}
 }
 
@@ -402,7 +404,7 @@ func (x *AV) Type() string { return "A" }
 // Typical implementation is given in comments.
 type array interface {
 	Value
-	refCounter
+	RefCounter
 	reusable() bool
 	Len() int
 	at(i int) V            // x[i]
@@ -588,97 +590,108 @@ func (r *derivedVerb) Matches(x Value) bool {
 	return ok && r.Fun == xr.Fun && Match(r.Arg, xr.Arg)
 }
 
-// refCounter is implemented by values that use a reference count. In goal the
-// refcount is not use for memory management, but only for optimization of
+// RefCounter is implemented by values that use a reference count. In goal the
+// refcount is not used for memory management, but only for optimization of
 // memory allocations.  Refcount is increased by each assignement, and each use
 // in an operation. It is reduced after each operation, and for each last use
 // of a variable (as approximated conservatively). If refcount is equal or less
-// than one, then the value is reusable.
-type refCounter interface {
-	rcincr()
-	rcdecr()
+// than one, then the value is considered reusable.
+//
+// When defining a new type implementing the Value interface, it is only
+// necessary to also implement RefCounter if the type's value contains a type
+// implementing it (for example an array type or a generic V).
+type RefCounter interface {
+	IncrRC()
+	DecrRC()
 }
 
-func (x *AB) rcincr() { x.rc++ }
-func (x *AI) rcincr() { x.rc++ }
-func (x *AF) rcincr() { x.rc++ }
-func (x *AS) rcincr() { x.rc++ }
-func (x *AV) rcincr() {
+func (e *errV) IncrRC()       { e.V.IncrRC() }
+func (e *errV) DecrRC()       { e.V.DecrRC() }
+func (r *replacer) IncrRC()   { r.oldnew.IncrRC() }
+func (r *replacer) DecrRC()   { r.oldnew.DecrRC() }
+func (r *rxReplacer) IncrRC() { r.repl.IncrRC() }
+func (r *rxReplacer) DecrRC() { r.repl.DecrRC() }
+
+func (x *AB) IncrRC() { x.rc++ }
+func (x *AI) IncrRC() { x.rc++ }
+func (x *AF) IncrRC() { x.rc++ }
+func (x *AS) IncrRC() { x.rc++ }
+func (x *AV) IncrRC() {
 	x.rc++
 	for _, xi := range x.Slice {
-		xi.rcincr()
+		xi.IncrRC()
 	}
 }
 
-func (r *derivedVerb) rcincr() {
-	r.Arg.rcincr()
+func (r *derivedVerb) IncrRC() {
+	r.Arg.IncrRC()
 }
 
-func (p *projection) rcincr() {
-	p.Fun.rcincr()
+func (p *projection) IncrRC() {
+	p.Fun.IncrRC()
 	for _, arg := range p.Args {
-		arg.rcincr()
+		arg.IncrRC()
 	}
 }
 
-func (p *projectionFirst) rcincr() {
-	p.Fun.rcincr()
-	p.Arg.rcincr()
+func (p *projectionFirst) IncrRC() {
+	p.Fun.IncrRC()
+	p.Arg.IncrRC()
 }
 
-func (p *projectionMonad) rcincr() {
-	p.Fun.rcincr()
+func (p *projectionMonad) IncrRC() {
+	p.Fun.IncrRC()
 }
 
-func (x *AB) rcdecr() {
+func (x *AB) DecrRC() {
 	if x.rc > 0 {
 		x.rc--
 	}
 }
 
-func (x *AI) rcdecr() {
+func (x *AI) DecrRC() {
 	if x.rc > 0 {
 		x.rc--
 	}
 }
 
-func (x *AF) rcdecr() {
+func (x *AF) DecrRC() {
 	if x.rc > 0 {
 		x.rc--
 	}
 }
 
-func (x *AS) rcdecr() {
+func (x *AS) DecrRC() {
 	if x.rc > 0 {
 		x.rc--
 	}
 }
 
-func (x *AV) rcdecr() {
+func (x *AV) DecrRC() {
 	if x.rc > 0 {
 		x.rc--
 	}
 	for _, xi := range x.Slice {
-		xi.rcdecr()
+		xi.DecrRC()
 	}
 }
 
-func (r *derivedVerb) rcdecr() {
-	r.Arg.rcdecr()
+func (r *derivedVerb) DecrRC() {
+	r.Arg.DecrRC()
 }
 
-func (p *projection) rcdecr() {
-	p.Fun.rcdecr()
+func (p *projection) DecrRC() {
+	p.Fun.DecrRC()
 	for _, arg := range p.Args {
-		arg.rcdecr()
+		arg.DecrRC()
 	}
 }
 
-func (p *projectionFirst) rcdecr() {
-	p.Fun.rcdecr()
-	p.Arg.rcdecr()
+func (p *projectionFirst) DecrRC() {
+	p.Fun.DecrRC()
+	p.Arg.DecrRC()
 }
 
-func (p *projectionMonad) rcdecr() {
-	p.Fun.rcdecr()
+func (p *projectionMonad) DecrRC() {
+	p.Fun.DecrRC()
 }

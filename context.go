@@ -97,7 +97,7 @@ func (ctx *Context) RegisterDyad(name string, vf VariadicFun) V {
 // AssignGlobal assigns a value to a global variable name.
 func (ctx *Context) AssignGlobal(name string, x V) {
 	id := ctx.global(name)
-	x.rcincr()
+	x.IncrRC()
 	ctx.globals[id] = x
 }
 
@@ -287,7 +287,7 @@ func (ctx *Context) Show() string {
 
 func (ctx *Context) storeConst(x V) int {
 	if ctx.compiler.scope() != nil {
-		x.rcincr()
+		x.IncrRC()
 	}
 	ctx.constants = append(ctx.constants, x)
 	return len(ctx.constants) - 1

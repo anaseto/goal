@@ -79,14 +79,6 @@ func (r *rxReplacer) Type() string {
 	return "f"
 }
 
-func (r *rxReplacer) rcincr() {
-	r.repl.rcincr()
-}
-
-func (r *rxReplacer) rcdecr() {
-	r.repl.rcdecr()
-}
-
 func (r *rxReplacer) replace(ctx *Context, s string) string {
 	switch zv := r.repl.value.(type) {
 	case S:
@@ -102,9 +94,9 @@ func (r *rxReplacer) replace(ctx *Context, s string) string {
 				return r.Sprint(ctx)
 			}
 		}
-		r.repl.rcincr()
+		r.repl.IncrRC()
 		rs := r.r.Regexp.ReplaceAllStringFunc(string(s), f)
-		r.repl.rcdecr()
+		r.repl.DecrRC()
 		return rs
 	}
 }

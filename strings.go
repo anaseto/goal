@@ -105,14 +105,6 @@ func (r *replacer) replace(ctx *Context, s string) string {
 	return r.r.Replace(s)
 }
 
-func (r *replacer) rcincr() {
-	r.oldnew.rcincr()
-}
-
-func (r *replacer) rcdecr() {
-	r.oldnew.rcdecr()
-}
-
 func applyS(s S, x V) V {
 	if x.IsI() {
 		xv := x.I()

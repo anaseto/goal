@@ -50,12 +50,12 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ip++
 		case opAssignGlobal:
 			x := ctx.top()
-			x.rcincr()
+			x.IncrRC()
 			ctx.globals[ops[ip]] = x
 			ip++
 		case opAssignLocal:
 			x := ctx.top()
-			x.rcincr()
+			x.IncrRC()
 			ctx.stack[ctx.frameIdx-int32(ops[ip])] = x
 			ip++
 		case opVariadic:
@@ -150,7 +150,7 @@ func (ctx *Context) swap() {
 }
 
 func (ctx *Context) push(x V) {
-	x.rcincr()
+	x.IncrRC()
 	ctx.stack = append(ctx.stack, x)
 }
 
@@ -159,7 +159,7 @@ func (ctx *Context) pushNoRC(x V) {
 }
 
 func (ctx *Context) pushArgs(args []V) {
-	rcincr(args)
+	rcincrArgs(args)
 	ctx.stack = append(ctx.stack, args...)
 }
 
@@ -244,8 +244,8 @@ func (ctx *Context) dropNnoRC(n int) {
 	ctx.stack = ctx.stack[:len(ctx.stack)-n]
 }
 
-func rcincr(args []V) {
+func rcincrArgs(args []V) {
 	for _, v := range args {
-		v.rcincr()
+		v.IncrRC()
 	}
 }
