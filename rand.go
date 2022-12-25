@@ -55,19 +55,39 @@ func roll(ctx *Context, x, y V) V {
 
 func deal(ctx *Context, n int64, y V) V {
 	if y.IsI() {
-		if y.I() <= 0 {
-			return Panicf("(-i)?y : y non-positive (%d)", y.I())
+		yv := y.I()
+		if yv <= 0 {
+			return Panicf("(-i)?y : y non-positive (%d)", yv)
 		}
-		if n > y.I() {
-			return Panicf("(-i)?y : i > y (%d vs %d)", n, y.I())
+		if n > yv {
+			return Panicf("(-i)?y : i > y (%d vs %d)", n, yv)
 		}
-		r := make([]int64, y.I())
+		if n == 0 {
+			return NewAI(nil)
+		}
+		if n*4+8 < yv {
+			// For small n, we use hashing, not the fastest
+			// algorithm, but not too bad either.
+			r := make([]int64, n)
+			m := map[int64]struct{}{}
+			var i int64
+			for i < n {
+				k := ctx.rand.Int63n(yv)
+				_, ok := m[k]
+				if ok {
+					continue
+				}
+				m[k] = struct{}{}
+				r[i] = k
+				i++
+			}
+			return NewAI(r)
+		}
+		r := make([]int64, yv)
 		for i := range r {
 			r[i] = int64(i)
 		}
-		// TODO: deal can be improved in cases where n is much smaller
-		// than y, by using a more involved algorithm.
-		ctx.rand.Shuffle(int(y.I()), func(i, j int) {
+		ctx.rand.Shuffle(int(yv), func(i, j int) {
 			r[i], r[j] = r[j], r[i]
 		})
 		r = r[:n]
