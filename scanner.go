@@ -371,11 +371,12 @@ func scanMultiLineComment(s *Scanner) stateFn {
 
 func scanString(s *Scanner) stateFn {
 	for {
-		// XXX: catch invalid newline here?
 		r := s.next()
 		switch r {
 		case eof:
 			return s.emitError("non terminated string: unexpected EOF")
+		case '\n':
+			return s.emitError("non terminated string: unexpected newline")
 		case '\\':
 			nr := s.peek()
 			if nr == '"' {
