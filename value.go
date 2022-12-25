@@ -32,7 +32,6 @@ type ValueWriter interface {
 	io.Writer
 	io.ByteWriter
 	io.StringWriter
-	WriteRune(rune) (int, error)
 }
 
 // Value is the interface satisfied by all boxed values.
