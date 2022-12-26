@@ -2,9 +2,11 @@ Features:
 - some kind of object/interface thing
 - more general io (open/read/write/close/defer?)
 - split i$s, and cut x_s and maybe amend string @[s;I;s]
+- more utf8 and unicode functions
+- maybe some kind of templating/interpolation
+- maybe add functions for handling text blobs of bytes
 - maybe bitwise operations
 - maybe triadic amend with .
-- maybe some kind of templating/interpolation
 - maybe a switch/match
 - maybe add converge f/ and f\
 - maybe add splice

@@ -5,16 +5,16 @@ written in Go. It provides both a command line intepreter (that can be used in
 the REPL), and a library interface. Though the language is still in
 development, its core features are mostly there and tested, so it is usable
 both for writing useful scripts and playing with the REPL. The library
-interface may still experiment some changes.
+interface might still experiment some minor changes.
 
 It's main distinctive features are as follows:
 
 * Syntax inspired mainly from the K language, but with quite a few deviations.
-  For example, backquotes produce raw strings instead of symbols, rx/[a-z]/ is
-  a regular expression literal (checked and processed at compile-time), and
-  there are no tacit compositions, no tables nor dictionnaries, and digraph
-  operator verbs and adverbs are gone or done differently (except for global
-  assignment with ::).
+  For example, backquotes produce Go-like raw strings instead of symbols,
+  rx/[a-z]/ is a regular expression literal (checked and processed at
+  compile-time), and there are no tacit compositions, no tables nor
+  dictionnaries, and digraph operator verbs and adverbs are gone or done
+  differently (except for global assignment with ::).
 * Primitive semantics are both inspired from the
   [ngn/k](https://codeberg.org/ngn/k) variant of the K language and BQN. For
   example, group, classify, shifts, windows, find (index of) and ocurrence
@@ -68,7 +68,8 @@ goal`.
 
 Writing a reference documentation for the language is still in the TODO list.
 Currently, documentation consists of the REPL help system with usage summary and
-examples for all implemented features. The full contents are replicated below.
+examples for all implemented features, so some prior knowledge of another array
+language can be useful. The full contents are replicated below.
 
 ```
 TOPICS HELP
