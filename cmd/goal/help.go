@@ -121,12 +121,12 @@ x shift y   shift	"a" "b" shift 1 2 3 -> 3 "a" "b"
 sub[r;s]    regsub  	sub[rx/[a-z]/;"Z"] "aBc" -> "ZBZ"
 sub[r;f]    regsub  	sub[rx/[A-Z]/;_] "aBc" -> "abc"
 sub[s;s]    replace	sub["b";"B"] "abc" -> "aBc"
-sub[s;s;z]  replace n	sub["a";"b";2] "aaa" -> "bba"
+sub[s;s;i]  replace n	sub["a";"b";2] "aaa" -> "bba"
 sub[S]      replace	sub["b" "d" "c" "e"] "abc" -> "ade"
 sub[S;S]    replace	sub["b" "c";"d" "e"] "abc" -> "ade"
 
-eval[x;y;z] eval	like eval x, but provide name y for errors and prefix z
-			for globals
+eval[x;y;z] eval	like eval x, but provide name y as location and prefix
+			z for globals
 
 MATH: acos, asin, atan, cos, exp, log, round, sin, sqrt, tan, nan
 `
@@ -159,6 +159,9 @@ slurp s		read file named s	lines:"\n"\slurp["/path/to/file"]
 pfx import name	import package with prefix pfx for globals
 w print x	print to writer or filename	"filename" print "content"
 w say x		same as print, but appends a newline
+
+os.ARGS		command-line arguments, starting with script name
+os.ENV		"key=value" array of strings representing environment
 `
 const helpTime = `
 TIME HELP
@@ -197,7 +200,7 @@ regexps		rx/[a-z]/	(see https://pkg.go.dev/regexp/syntax for syntax)
 variables	a:2 (assign)	a+:1 (same as a:a+1)	a+3 (use)
 		a::2 (assign global)	a+::2 (same as a::a+2)
 expressions	2*3+4 -> 14	1+|1 2 3 -> 4 3 2	+/1 2 3 -> 6
-index array	1 2 3[1] -> 2 (same as x@1) (1 2;3 4)[0;1] -> 2 (same as x.(0;1))
+index array	1 2 3[1] -> 2 (same as x@1) (1 2;3 4)[0;1] -> 2 (same as x . (0;1))
 index string	"abc"[1] -> "bcde"	"abcde"[1;2] -> "bc"	(s[offset;len])
 lambdas		{x+y+z}[2;3;0] -> 5	{[a;b;c]a+b+c}[1;2;3] -> 6
 projections	{x+y}[2;] 3 -> 5	(2+) 3 -> 5

@@ -25,7 +25,7 @@ type Config struct {
 func Cmd(ctx *goal.Context, cfg Config) {
 	cpuprofile := flag.String("cpuprofile", "", "write cpu profile to `file`")
 	optE := flag.String("e", "", "execute command")
-	optD := flag.Bool("d", false, "debug info")
+	optD := flag.Bool("d", false, "debug info (for scripts)")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [-e command] [path]\n", os.Args[0])
 		flag.PrintDefaults()
@@ -45,6 +45,7 @@ func Cmd(ctx *goal.Context, cfg Config) {
 		defer pprof.StopCPUProfile()
 	}
 	args := flag.Args()
+	ctx.AssignGlobal("os.ARGS", goal.NewAS(args))
 	if *optD {
 		defer runDebug(ctx, cfg)
 	}
@@ -59,7 +60,6 @@ func Cmd(ctx *goal.Context, cfg Config) {
 		return
 	}
 	fname := args[0]
-	ctx.AssignGlobal("ARGS", goal.NewAS(args[1:]))
 	bs, err := os.ReadFile(fname)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s: %v", cfg.ProgramName, err)

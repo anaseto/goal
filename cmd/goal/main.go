@@ -4,6 +4,7 @@ import (
 	"goal"
 	"goal/cmd"
 	gos "goal/os"
+	"os"
 )
 
 func main() {
@@ -18,6 +19,7 @@ func registerVariadics(ctx *goal.Context) {
 	ctx.RegisterDyad("say", gos.VSay)
 	ctx.RegisterMonad("shell", gos.VShell)
 	ctx.RegisterMonad("slurp", gos.VSlurp)
+	ctx.AssignGlobal("os.ENV", goal.NewAS(os.Environ()))
 }
 
 func getHelp() map[string]string {
