@@ -2,18 +2,19 @@
 
 Goal is an embeddable array programming language with a bytecode interpreter,
 written in Go. It provides both a command line intepreter (that can be used in
-the REPL), and a library. Though the language is still in development, its core
-features are mostly there and tested, so it is usable for writing scripts and
-playing with the REPL.
+the REPL), and a library interface. Though the language is still in
+development, its core features are mostly there and tested, so it is usable
+both for writing useful scripts and playing with the REPL. The library
+interface may still experiment some changes.
 
 It's main distinctive features are as follows:
 
 * Syntax inspired mainly from the K language, but with quite a few deviations.
   For example, backquotes produce raw strings instead of symbols, rx/[a-z]/ is
   a regular expression literal (checked and processed at compile-time), and
-  there are no tacit compositions, no tables nor dictionnaries, and
-  two-character operator verbs and adverbs are gone or done differently (except
-  for global assignment with ::).
+  there are no tacit compositions, no tables nor dictionnaries, and digraph
+  operator verbs and adverbs are gone or done differently (except for global
+  assignment with ::).
 * Primitive semantics are both inspired from the
   [ngn/k](https://codeberg.org/ngn/k) variant of the K language and BQN. For
   example, group, classify, shifts, windows, find (index of) and ocurrence
@@ -26,16 +27,20 @@ It's main distinctive features are as follows:
   primitives, including regular expression functions.
 * Error handling makes a distinction between fatal errors (panics) and
   recoverable errors which are handled as values.
-* Easily embeddable and extensible in Go.
+* Easily embeddable and extensible in Go, meaning easy access to the standard
+  library.
 * Integrated support for csv and time handling.
 * Array performance is unsurprising and good enough most of the time, with
   basic (but good in code with limited branching) variable liveness analysis to
-  reduce cloning by reusing dead immutable arrays, though it is not
-  state-of-the-art (no SIMD, and there is room for more special code and
-  specialized algorithms). Scalar performance is typical for a
-  bytecode-compiled interpreter, somewhat slower than a state-of-the art C
+  reduce cloning by reusing dead immutable arrays, though it is not a goal to
+  reach state-of-the-art (no SIMD, and there is still room for more special
+  code and specialized algorithms). Scalar performance is typical for a
+  bytecode-compiled interpreter, somewhat slower than a state-of-the-art C
   bytecode interpreter (value representation in Go is somewhat less compact
   than how it can be done in C).
+
+If this list is not enough to satisfy your curiosity, there's also a
+[Why.md](Why.md) text for you.
 
 # Install
 
