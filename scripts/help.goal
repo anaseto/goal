@@ -1,0 +1,4 @@
+#!/usr/bin/env goal
+help:slurp"../cmd/goal/help.go"
+helps:rx/const \w+ = `([^`]*)`/[help;-1]
+say {x[1]}'helps

@@ -4,18 +4,48 @@ const helpTopics = `
 TOPICS HELP
 Type help TOPIC or h TOPIC where TOPIC is one of:
 
+"syn"   syntax
+"types" types
 "+"	verbs (like +*-%,)
 "nv"	named verbs (like in, sign)
 "'"	adverbs ('/\)
 "io"	io functions (slurp, say)
 "time"	time functions
-"syn"   syntax
-"types" types
 
 Notations:
 	s (string) f (function) F (2-args function)
 	n (number) i (integer) r (regexp)
 	x,y (any other)
+`
+
+const helpSyntax = `
+SYNTAX HELP
+atoms		1	1.5	"text"
+arrays		1 2 -3 4	1 "a" -2 "b"	(1 2;"a";(3;"b"))
+regexps		rx/[a-z]/	(see https://pkg.go.dev/regexp/syntax for syntax)
+variables	a:2 (assign)	a+:1 (same as a:a+1)	a+3 (use)
+		a::2 (assign global)	a+::2 (same as a::a+2)
+expressions	2*3+4 -> 14	1+|1 2 3 -> 4 3 2	+/1 2 3 -> 6
+index array	1 2 3[1] -> 2 (same as x@1) (1 2;3 4)[0;1] -> 2 (same as x . (0;1))
+index string	"abc"[1] -> "bcde"	"abcde"[1;2] -> "bc"	(s[offset;len])
+lambdas		{x+y+z}[2;3;0] -> 5	{[a;b;c]a+b+c}[1;2;3] -> 6
+projections	{x+y}[2;] 3 -> 5	(2+) 3 -> 5
+cond		?[1;2;3] -> 2	?[0;2;3] -> 3	?[0;2;"";3;4] -> 4
+and/or		and[1;2] -> 2   and[1;0;3] -> 0   or[0;2] -> 2   or[0;0;0] -> 0
+sequence	[a:2;b:a+3;a+10] -> 12 (bracket block [] at start of expression)
+return		[1;:2;3] -> 2 (a : at start of expression)
+try		'error "msg" (same as :error "msg")	'4+3 (same as 4+3)
+`
+
+const helpTypes = `
+TYPES HELP
+atom	array	name		examples
+n	N	number		0	1.5	!5	1.2 3 1.8
+s	S	string		"abc"	"a" "b" "c"
+r		regexp		rx/[a-z]/
+f		function	+	{x*2}	(1-)	%[;2]
+e		error		error "msg"
+	A	generic array	("a" 1;"b" 2;"c" 3)	(+;-;*;"any")
 `
 
 const helpVERBS = `
@@ -152,7 +182,7 @@ I\x	decode	24 60 60\3723 -> 1 2 3	2\6 -> 1 1 0
 `
 
 const helpIO = `
-IO HELP
+IO/OS HELP
 import name	import package 		import "package" (imports "package.goal")
 print x		print value		print "Hello, world!\n"
 say x		same as print, but appends a newline
@@ -195,34 +225,4 @@ Currently available commands:
 	"week"		year, week (I)
 	"weekday"	0-7 weekday (starts from Sunday) (i)
 	format (s)	format time using given layout (s)
-`
-
-const helpSyntax = `
-SYNTAX HELP
-atoms		1	1.5	"text"
-arrays		1 2 -3 4	1 "a" -2 "b"	(1 2;"a";(3;"b"))
-regexps		rx/[a-z]/	(see https://pkg.go.dev/regexp/syntax for syntax)
-variables	a:2 (assign)	a+:1 (same as a:a+1)	a+3 (use)
-		a::2 (assign global)	a+::2 (same as a::a+2)
-expressions	2*3+4 -> 14	1+|1 2 3 -> 4 3 2	+/1 2 3 -> 6
-index array	1 2 3[1] -> 2 (same as x@1) (1 2;3 4)[0;1] -> 2 (same as x . (0;1))
-index string	"abc"[1] -> "bcde"	"abcde"[1;2] -> "bc"	(s[offset;len])
-lambdas		{x+y+z}[2;3;0] -> 5	{[a;b;c]a+b+c}[1;2;3] -> 6
-projections	{x+y}[2;] 3 -> 5	(2+) 3 -> 5
-cond		?[1;2;3] -> 2	?[0;2;3] -> 3	?[0;2;"";3;4] -> 4
-and/or		and[1;2] -> 2   and[1;0;3] -> 0   or[0;2] -> 2   or[0;0;0] -> 0
-sequence	[a:2;b:a+3;a+10] -> 12 (bracket block [] at start of expression)
-return		[1;:2;3] -> 2 (a : at start of expression)
-try		'error "msg" (same as :error "msg")	'4+3 (same as 4+3)
-`
-
-const helpTypes = `
-TYPES HELP
-atom	array	name		examples
-n	N	number		0	1.5	!5	1.2 3 1.8
-s	S	string		"abc"	"a" "b" "c"
-r		regexp		rx/[a-z]/
-f		function	+	{x*2}	(1-)	%[;2]
-e		error		error "msg"
-	A	generic array	("a" 1;"b" 2;"c" 3)	(+;-;*;"any")
 `
