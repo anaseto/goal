@@ -1,3 +1,4 @@
+// Package cmd provides a quick way to create derived interpreters.
 package cmd
 
 import (
@@ -12,6 +13,8 @@ import (
 	"strings"
 )
 
+// Config describes the possible configuration options when running a
+// *goal.Context through Cmd.
 type Config struct {
 	Help        map[string]string
 	ProgramName string
