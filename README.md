@@ -16,12 +16,12 @@ It's main distinctive features are as follows:
   dictionnaries, and digraph operator verbs and adverbs are gone or done
   differently (except for global assignment with ::).
 * Primitive semantics are both inspired from the
-  [ngn/k](https://codeberg.org/ngn/k) variant of the K language and BQN. For
-  example, group, classify, shifts, windows, find (index of) and ocurrence
-  count take after BQN's semantics. Multi-dimensional versions, when present in
-  BQN, have been left out, though, as goal has only free-form arrays, like K.
-  Some primitives use words instead of symbols (like ocount for occurrence
-  count).
+  [ngn/k](https://codeberg.org/ngn/k) variant of the K language and
+  [BQN](https://mlochbaum.github.io/BQN/index.html). For example, group,
+  classify, shifts, windows, find (index of) and ocurrence count take after
+  BQN's semantics. Multi-dimensional versions, when present in BQN, have been
+  left out, though, as goal has only free-form arrays, like K.  Some primitives
+  use words instead of symbols (like ocount for occurrence count).
 * Unlike in typical array languages, strings are atoms, and common string
   handling functions (like index, substr or trim) have been integrated into the
   primitives, including regular expression functions.
@@ -40,7 +40,8 @@ It's main distinctive features are as follows:
   than how it can be done in C).
 
 If this list is not enough to satisfy your curiosity, there's also a
-[Why.md](Why.md) text for you.
+[Why.md](Why.md) text for you. You can also read the [Credits.md](Credits.md)
+to know about main inspiration sources for the language.
 
 # Install
 

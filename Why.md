@@ -10,7 +10,7 @@ The long answer is:
   and provides us with good garbage collection out of the box, which is handy.
 + I've had a strong liking for array programming languages since quite a few
   years, but I never managed to like array-based string handling, which is kind
-  of an essential issue for many common scripting purposes.  Unicode and UTF8
+  of an essential issue for many common scripting purposes.  Unicode and UTF-8
   don't play that well with the array vision. Sure, array-based text-handling
   provides very smart solutions for some specific kinds of tasks (BQN's a good
   example of that), but that's it. Text is complicated, there is no
