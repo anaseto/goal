@@ -37,6 +37,7 @@ func mathm(x V, f func(float64) float64) V {
 	}
 }
 
+// VAcos implements the acos variadic.
 func VAcos(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
@@ -50,6 +51,7 @@ func VAcos(ctx *Context, args []V) V {
 	}
 }
 
+// VAsin implements the asin variadic.
 func VAsin(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
@@ -63,6 +65,7 @@ func VAsin(ctx *Context, args []V) V {
 	}
 }
 
+// VAtan implements the atan variadic.
 func VAtan(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
@@ -76,6 +79,7 @@ func VAtan(ctx *Context, args []V) V {
 	}
 }
 
+// VCos implements the cos variadic.
 func VCos(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
@@ -89,6 +93,7 @@ func VCos(ctx *Context, args []V) V {
 	}
 }
 
+// VExp implements the exp variadic.
 func VExp(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
@@ -102,6 +107,7 @@ func VExp(ctx *Context, args []V) V {
 	}
 }
 
+// VLog implements the log variadic.
 func VLog(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
@@ -115,6 +121,7 @@ func VLog(ctx *Context, args []V) V {
 	}
 }
 
+// VRoundToEven implements the round variadic.
 func VRoundToEven(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
@@ -128,6 +135,7 @@ func VRoundToEven(ctx *Context, args []V) V {
 	}
 }
 
+// VSin implements the sin variadic.
 func VSin(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
@@ -141,6 +149,7 @@ func VSin(ctx *Context, args []V) V {
 	}
 }
 
+// VSqrt implements the sqrt variadic.
 func VSqrt(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
@@ -154,6 +163,7 @@ func VSqrt(ctx *Context, args []V) V {
 	}
 }
 
+// VTan implements the tan variadic.
 func VTan(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:

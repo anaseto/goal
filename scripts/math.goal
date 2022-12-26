@@ -40,6 +40,7 @@ func mathm(x V, f func(float64) float64) V {
 }
 `
 ftpl:`
+// VXXXX implements the YYYY variadic.
 func VXXXX(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
