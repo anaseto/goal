@@ -2,12 +2,6 @@ package goal
 
 import "strings"
 
-// Matcher is implemented by types that can be matched againts other objects
-// (typically a struct of the same type with fields that match).
-type Matcher interface {
-	Matches(x V) bool
-}
-
 // Match returns true if the two values match like in x~y.
 func Match(x, y V) bool {
 	switch x.kind {
