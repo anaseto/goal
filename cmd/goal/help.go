@@ -1,6 +1,7 @@
 package main
 
 const helpTopics = `
+TOPICS HELP
 Type help TOPIC or h TOPIC where TOPIC is one of:
 
 "+"	verbs (like +*-%,)
@@ -16,8 +17,9 @@ Notations:
 	n (number) i (integer) r (regexp)
 	x,y (any other)
 `
+
 const helpVERBS = `
-VERBS
+VERBS HELP
 :x  return	:3 -> return 3 prematurely
 x:y right	2:3 -> 3
 +x  flip	+(1 2;3 4) -> (1 3;2 4)
@@ -95,7 +97,7 @@ x.y applyN	{x+y}.2 3 -> 5    {x+y}[2;3] -> 5    (1 2;3 4)[0;1] -> 2
 `
 
 const helpNAMEDVERBS = `
-NAMED VERBS
+NAMED VERBS HELP
 abs x     abs value	abs -3 -1.5 2 -> 3 1.5 2
 bytes x	  byte-count	bytes "abc" -> 3
 ceil x	  ceil		ceil 1.5 -> 2	ceil "ab" -> "AB"
@@ -132,7 +134,7 @@ MATH: acos, asin, atan, cos, exp, log, round, sin, sqrt, tan, nan
 `
 
 const helpADVERBS = `
-ADVERBS
+ADVERBS HELP
 f'x	each	#'(4 5;6 7 8) -> 2 3	
 x F'y   each	2 3#'1 2 -> (1 1;2 2 2)
 F/x	fold	+/!10 -> 45
@@ -148,6 +150,7 @@ s\x	split	","\"a,b,c" -> "a" "b" "c"
 I/x	encode	24 60 60/1 2 3 -> 3723	2/1 1 0 -> 6
 I\x	decode	24 60 60\3723 -> 1 2 3	2\6 -> 1 1 0
 `
+
 const helpIO = `
 IO HELP
 import name	import package 		import "package" (imports "package.goal")
@@ -163,6 +166,7 @@ w say x		same as print, but appends a newline
 os.ARGS		command-line arguments, starting with script name
 os.ENV		"key=value" array of strings representing environment
 `
+
 const helpTime = `
 TIME HELP
 time cmd		time command with current time
@@ -192,6 +196,7 @@ Currently available commands:
 	"weekday"	0-7 weekday (starts from Sunday) (i)
 	format (s)	format time using given layout (s)
 `
+
 const helpSyntax = `
 SYNTAX HELP
 atoms		1	1.5	"text"
