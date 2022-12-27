@@ -1,4 +1,5 @@
 #!/usr/bin/env goal
 help:slurp"../cmd/goal/help.go"
-helps:rx/const \w+ = `([^`]*)`/[help;-1]
-say {x[1]}'helps
+helps:""/{x[1]}'rx/const \w+ = `([^`]*)`/[help;-1]
+readme:slurp"../README.md"
+"../README.md"print sub[rx/```[^`]*```/;"```"+helps+"```"] readme
