@@ -140,7 +140,6 @@ x!y mod		3!5 4 3 -> 2 1 0
 x&y min		2&3 -> 2	4&3 -> 3
 |x  reverse	|!5 -> 4 3 2 1 0
 x|y max		2|3 -> 3	4|3 -> 4
-f|y rotate	{2}|1 2 3 4 -> 3 4 1 2
 <x  ascend	<2 4 3 -> 0 2 1
 x<y less	2<3 -> 1
 >x  descend	>2 4 3 -> 1 2 0
@@ -197,7 +196,7 @@ x.y applyN	{x+y}.2 3 -> 5    {x+y}[2;3] -> 5    (1 2;3 4)[0;1] -> 2
 
 NAMED VERBS HELP
 abs x     abs value	abs -3 -1.5 2 -> 3 1.5 2
-bytes x	  byte-count	bytes "abc" -> 3
+bytes x   byte-count	bytes "abc" -> 3
 ceil x	  ceil		ceil 1.5 -> 2	ceil "ab" -> "AB"
 error x	  error		r:{?[~x=0;1%x;error "zero"]}0;?["e"~@r;.r;r] -> "zero"
 eval x    eval		a:5;eval "a+2" -> 7 (unrestricted eval)
@@ -206,7 +205,7 @@ icount x  index-count	icount 0 0 1 -1 0 1 2 3 2 -> 3 2 2 1 (same as #'=x)
 ocount x  occur-count	ocount 3 2 5 3 2 2 7 -> 0 0 0 1 1 2 0
 panic x   panic		panic "msg" (for fatal programming-errors) 
 rshift x  right shift	rshift 1 2 -> 0 1	rshift "a" "b" -> "" "a"
-seed x	  rand seed	seed 42 (for non-secure pseudo-rand with ?)
+seed x    rand seed	seed 42 (for non-secure pseudo-rand with ?)
 shift x   shift	shift	shift 1 2 -> 2 0	shift "a" "b" -> "b" ""
 sign x    sign		sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
 
@@ -215,6 +214,7 @@ x csv y	    csv r/w	csv "1,2,3" -> ,"1" "2" "3"	" " csv "1 2 3" -> ,"1" "2" "3"
 x in s      contained	"bc" "ac" in "abcd" -> 1 0
 x in y      member of	2 3 in 0 2 4 -> 1 0
 x nan y     fill NaNs	42 nan (1.5;sqrt -1) -> 1.5 42
+x rotate y  rotate	2 rotate 1 2 3 4 -> 3 4 1 2
 x rshift y  right shift	"a" "b" rshift 1 2 3 -> "a" "b" 1
 x shift y   shift	"a" "b" shift 1 2 3 -> 3 "a" "b"
 

@@ -70,7 +70,6 @@ x!y mod		3!5 4 3 -> 2 1 0
 x&y min		2&3 -> 2	4&3 -> 3
 |x  reverse	|!5 -> 4 3 2 1 0
 x|y max		2|3 -> 3	4|3 -> 4
-f|y rotate	{2}|1 2 3 4 -> 3 4 1 2
 <x  ascend	<2 4 3 -> 0 2 1
 x<y less	2<3 -> 1
 >x  descend	>2 4 3 -> 1 2 0
@@ -147,6 +146,7 @@ x csv y	    csv r/w	csv "1,2,3" -> ,"1" "2" "3"	" " csv "1 2 3" -> ,"1" "2" "3"
 x in s      contained	"bc" "ac" in "abcd" -> 1 0
 x in y      member of	2 3 in 0 2 4 -> 1 0
 x nan y     fill NaNs	42 nan (1.5;sqrt -1) -> 1.5 42
+x rotate y  rotate	2 rotate 1 2 3 4 -> 3 4 1 2
 x rshift y  right shift	"a" "b" rshift 1 2 3 -> "a" "b" 1
 x shift y   shift	"a" "b" shift 1 2 3 -> 3 "a" "b"
 
