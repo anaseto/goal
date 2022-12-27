@@ -20,7 +20,7 @@ It's main distinctive features are as follows:
   [BQN](https://mlochbaum.github.io/BQN/index.html). For example, group,
   classify, shifts, windows, find (index of) and ocurrence count take after
   BQN's semantics. Multi-dimensional versions, when present in BQN, have been
-  left out, though, as goal has only free-form arrays, like K.  Some primitives
+  left out, though, as Goal has only free-form arrays, like K.  Some primitives
   use words instead of symbols (like ocount for occurrence count).
 * Unlike in typical array languages, strings are atoms, and common string
   handling functions (like index, substr or trim) have been integrated into the
@@ -64,6 +64,10 @@ Typing just `goal` opens the REPL. For a better experience using the REPL (to
 get typical keyboard shortcuts), you can install the readline wrapper `rlwrap`
 program (available as a package in most systems), and then use instead `rlwrap
 goal`.
+
+# Editor support
+
+- [vim-goal](https://codeberg.org/anaseto/vim-goal) : vim files for Goal.
 
 # Documentation
 
