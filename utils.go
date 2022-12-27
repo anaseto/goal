@@ -516,7 +516,7 @@ func isCanonicalAV(x *AV) (vType, bool) {
 		return t, false
 	case tV:
 		for _, xi := range x.Slice {
-			if isCanonical(xi) {
+			if !isCanonical(xi) {
 				return t, false
 			}
 		}
@@ -526,12 +526,12 @@ func isCanonicalAV(x *AV) (vType, bool) {
 	}
 }
 
-func assertCanonical(x V) {
+func (ctx *Context) assertCanonical(x V) {
 	switch xv := x.value.(type) {
 	case *AV:
 		_, ok := isCanonicalAV(xv)
 		if !ok {
-			panic(fmt.Sprintf("not canonical: %#v", x))
+			panic(fmt.Sprintf("not canonical: %#v: %s", xv.Slice, x.Sprint(ctx)))
 		}
 	}
 }
