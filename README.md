@@ -166,11 +166,11 @@ i_x drop        2_3 4 5 6 -> 5 6
 s_x trim prefix "pref-"_"pref-name" -> "name"
 x_y cut         2 5_!10 -> (2 3 4;5 6 7 8 9)
 f_x weed out    {0 1 1 0}_4 1 5 3 -> 4 3    {x>0}_2 -3 1 -> ,-3
-  string       3 -> "2 3"
-i split       2$!6 -> (0 1;2 3;4 5)   2$"a" "b" "c" -> ("a" "b";,"c")
-s cast        "i".3 -> 2    "i"$"ab" -> 97 98   "s" 98 -> "ab"
-s parse num   "n"$"1.5" -> 1.5
-x binsearch   2 3 5 7 2 7 5 5.5 3 0 -> 4 1 4 3 3 2 0
+$x  string      $2 3 -> "2 3"
+i$x split       2$!6 -> (0 1;2 3;4 5)   2$"a" "b" "c" -> ("a" "b";,"c")
+s$y cast        "i"$2.3 -> 2    "i"$"ab" -> 97 98   "s"$97 98 -> "ab"
+s$y parse num   "n"$"1.5" -> 1.5
+x$y binsearch   2 3 5 7$8 2 7 5 5.5 3 0 -> 4 1 4 3 3 2 0
 ?i  uniform     ?2 -> 0.6046602879796196 0.9405090880450124
 ?x  uniq        ?2 2 3 4 3 3 -> 2 3 4
 i?y roll        5?100 -> 10 51 21 51 37
