@@ -87,7 +87,6 @@ type Scanner struct {
 	pr      rune                // peeked rune
 	psize   int                 // size of last peeked rune
 	r       rune                // current rune
-	size    int                 // size of current rune
 	start   bool                // at line start
 	exprEnd bool                // at expression start
 	delimOp bool                // at list start
@@ -156,7 +155,6 @@ func (s *Scanner) next() {
 		s.r = eof
 	}
 	//fmt.Printf("[%c]", r)
-	return
 }
 
 func (s *Scanner) emit(t TokenType) stateFn {

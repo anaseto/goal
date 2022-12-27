@@ -140,7 +140,7 @@ func TestErrors(t *testing.T) {
 	for _, mt := range append(mts, smts...) {
 		mt := mt
 		name := fmt.Sprintf("%s:%d", mt.Fname, mt.Line)
-		matchString := fmt.Sprintf("%s", mt.Left)
+		matchString := mt.Left
 		t.Run(name, func(t *testing.T) {
 			ctx := NewContext()
 			err := ctx.Compile("", mt.Left)

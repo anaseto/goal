@@ -497,50 +497,26 @@ func minAF(x *AF) float64 {
 	return min
 }
 
-func minMaxB(x *AB) (int64, int64) {
-	if x.Len() == 0 {
-		return 0, 0
-	}
-	min := true
-	max := false
-	for _, xi := range x.Slice {
-		max, min = max || xi, min && !xi
-		if max && !min {
-			break
-		}
-	}
-	return b2i(min), b2i(max)
-}
-
-func maxAB(x *AB) bool {
-	for _, xi := range x.Slice {
-		if xi {
-			return true
-		}
-	}
-	return false
-}
-
-func isCanonicalV(x V) bool {
+func isCanonical(x V) bool {
 	switch xv := x.value.(type) {
 	case *AV:
-		_, ok := isCanonical(xv)
+		_, ok := isCanonicalAV(xv)
 		return ok
 	default:
 		return true
 	}
 }
 
-// isCanonical returns true if the given generic array is in canonical form,
+// isCanonicalAV returns true if the given generic array is in canonical form,
 // that is, it uses the most specialized representation.
-func isCanonical(x *AV) (vType, bool) {
+func isCanonicalAV(x *AV) (vType, bool) {
 	t := aType(x)
 	switch t {
 	case tB, tI, tF, tS:
 		return t, false
 	case tV:
 		for _, xi := range x.Slice {
-			if isCanonicalV(xi) {
+			if isCanonical(xi) {
 				return t, false
 			}
 		}
@@ -553,7 +529,7 @@ func isCanonical(x *AV) (vType, bool) {
 func assertCanonical(x V) {
 	switch xv := x.value.(type) {
 	case *AV:
-		_, ok := isCanonical(xv)
+		_, ok := isCanonicalAV(xv)
 		if !ok {
 			panic(fmt.Sprintf("not canonical: %#v", x))
 		}

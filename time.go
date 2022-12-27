@@ -8,8 +8,7 @@ import (
 
 // VTime implements the time variadic verb.
 func VTime(ctx *Context, args []V) V {
-	var x V
-	x = args[len(args)-1]
+	x := args[len(args)-1]
 	var cmd string
 	switch xv := x.value.(type) {
 	case S:

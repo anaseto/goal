@@ -113,21 +113,6 @@ func (x V) F() float64 {
 	return f
 }
 
-// getAB retrieves the *getAB value. It assumes Value type is *getAB.
-func (x V) getAB() *AB {
-	return x.value.(*AB)
-}
-
-// getAI retrieves the *getAI value. It assumes Value type is *getAI.
-func (x V) getAI() *AI {
-	return x.value.(*AI)
-}
-
-// getAF retrieves the *getAF value. It assumes Value type is *getAF.
-func (x V) getAF() *AF {
-	return x.value.(*AF)
-}
-
 // Value retrieves the boxed value, or nil if the value is not boxed. You can
 // check whether the value is boxed with IsValue(v).
 func (x V) Value() Value {
@@ -294,8 +279,8 @@ type flags int32
 
 const (
 	flagNone      flags = 0b00
-	flagAscending       = 0b01
-	flagUnique          = 0b10 // unused for now
+	flagAscending flags = 0b01
+	flagUnique    flags = 0b10 // unused for now
 )
 
 func (f flags) Has(ff flags) bool {

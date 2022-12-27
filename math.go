@@ -16,7 +16,7 @@ func VNaN(ctx *Context, args []V) V {
 
 func isNaN(x V) V {
 	if x.IsI() {
-		return NewI(b2i(math.IsNaN(float64(x.I()))))
+		return NewI(b2i(false))
 	}
 	if x.IsF() {
 		return NewF(b2f(math.IsNaN(x.F())))

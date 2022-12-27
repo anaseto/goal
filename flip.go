@@ -58,6 +58,11 @@ func flip(x V) V {
 	}
 }
 
+// getAB retrieves the *getAB value. It assumes Value type is *getAB.
+func (x V) getAB() *AB {
+	return x.value.(*AB)
+}
+
 func flipAB(x *AV) V {
 	r := make([]bool, x.Len())
 	for i, xi := range x.Slice {

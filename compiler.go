@@ -122,7 +122,6 @@ func (ctx *Context) lambdaString(lc *lambdaCode) string {
 type compiler struct {
 	ctx        *Context      // main execution and compilation context
 	p          *parser       // parsing into text-based non-resolved AST
-	arglist    bool          // whether current expression has an argument list
 	scopeStack []*lambdaCode // scope information
 	pos        int           // last token position
 	drop       bool          // whether to add a drop at the end

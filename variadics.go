@@ -156,11 +156,6 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterDyad("time", VTime)
 }
 
-type zeroFun interface {
-	function
-	zero() V
-}
-
 func (v variadic) zero() V {
 	switch v {
 	case vMultiply:
