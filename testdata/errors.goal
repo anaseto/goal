@@ -192,3 +192,7 @@ panic["msg"] / msg
 csv (1 2;3) / not an array of records
 csv 3 / type
 "\t" csv 3 / type
+utf8.valid 1 / type
+utf8.valid[1;2] / too many arguments
+utf8.rcount 1 / type
+utf8.rcount[1;2] / too many arguments

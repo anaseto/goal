@@ -438,8 +438,9 @@ func scanNumber(s *Scanner) stateFn {
 			return s.emitString(NUMBER)
 		case s.r == '.':
 		case s.r == 'e':
-			s.next()
-			if s.r == '+' || s.r == '-' {
+			r := s.peek()
+			if r == '+' || r == '-' {
+				s.next()
 				return scanExponent
 			}
 		case !isAlphaNum(s.r):

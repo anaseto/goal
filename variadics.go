@@ -131,6 +131,8 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterMonad("seed", VSeed)
 	ctx.RegisterMonad("sign", VSign)
 	ctx.RegisterMonad("sub", VSub)
+	ctx.RegisterMonad("utf8.rcount", VUTF8RCount)
+	ctx.RegisterMonad("utf8.valid", VUTF8Valid)
 
 	// math monads
 	ctx.RegisterMonad("acos", VAcos)
@@ -561,7 +563,7 @@ func VBytes(ctx *Context, args []V) V {
 	case 1:
 		return bytes(args[0])
 	default:
-		return panicRank("icount")
+		return panicRank("bytes")
 	}
 }
 

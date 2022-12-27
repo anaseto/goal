@@ -161,6 +161,7 @@ eval[x;y;z] eval	like eval x, but provide name y as location and prefix
 			z for globals
 
 MATH: acos, asin, atan, cos, exp, log, round, sin, sqrt, tan, nan
+UTF-8: utf8.rcount (number of code points), utf8.valid
 `
 
 const helpADVERBS = `

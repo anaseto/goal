@@ -1,0 +1,8 @@
+utf8.rcount "a" / 1
+utf8.rcount "é" / 1
+utf8.rcount "a" "bc" "è" / 1 2 1
+utf8.rcount ("ê" "bc";"世界" "d" "efg") / (1 2;2 1 3)
+utf8.valid "a" / 1
+utf8.valid "é" / 1
+utf8.valid "a" "bc" "è" / 1 1 1
+utf8.valid ("ê" "bc";"世界" "d" "efg") / (1 1;1 1 1)
