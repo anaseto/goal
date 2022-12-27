@@ -1,9 +1,9 @@
 package main
 
 import (
-	"goal"
-	"goal/cmd"
-	gos "goal/os"
+	"codeberg.org/anaseto/goal"
+	"codeberg.org/anaseto/goal/cmd"
+	gos "codeberg.org/anaseto/goal/os"
 	"os"
 )
 

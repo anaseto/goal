@@ -2,8 +2,8 @@ package os
 
 import (
 	"bufio"
+	"codeberg.org/anaseto/goal"
 	"fmt"
-	"goal"
 	"io"
 	"os"
 	"os/exec"

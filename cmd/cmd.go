@@ -3,9 +3,9 @@ package cmd
 
 import (
 	"bufio"
+	"codeberg.org/anaseto/goal"
 	"flag"
 	"fmt"
-	"goal"
 	"log"
 	"os"
 	"runtime/debug"
