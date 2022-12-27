@@ -82,9 +82,12 @@ type Scanner struct {
 	err     error               // scanning error (if any)
 	peeked  bool                // peeked next
 	npos    int                 // position of next rune in the input
-	tpos    int                 // current token start position
+	epos    int                 // next token end position
+	tpos    int                 // next token start position
 	pr      rune                // peeked rune
 	psize   int                 // size of last peeked rune
+	r       rune                // current rune
+	size    int                 // size of current rune
 	start   bool                // at line start
 	exprEnd bool                // at expression start
 	delimOp bool                // at list start
@@ -100,6 +103,7 @@ func NewScanner(names map[string]NameType, source string) *Scanner {
 	s.source = source
 	s.reader = strings.NewReader(source)
 	s.start = true
+	s.next()
 	return s
 }
 
@@ -133,22 +137,26 @@ func (s *Scanner) peek() rune {
 	return s.pr
 }
 
-func (s *Scanner) next() rune {
+func (s *Scanner) next() {
 	if s.peeked {
 		s.peeked = false
+		s.r = s.pr
+		s.epos = s.npos
 		s.npos += s.psize
-		return s.pr
+		return
 	}
 	r, sz, err := s.reader.ReadRune()
+	s.r = r
+	s.epos = s.npos
 	s.npos += sz
 	if err != nil {
 		if err != io.EOF {
 			s.err = err
 		}
-		return eof
+		s.r = eof
 	}
 	//fmt.Printf("[%c]", r)
-	return r
+	return
 }
 
 func (s *Scanner) emit(t TokenType) stateFn {
@@ -172,7 +180,7 @@ func (s *Scanner) emitError(err string) stateFn {
 }
 
 func (s *Scanner) emitString(t TokenType) stateFn {
-	s.token = Token{Type: t, Pos: s.tpos, Text: s.source[s.tpos:s.npos]}
+	s.token = Token{Type: t, Pos: s.tpos, Text: s.source[s.tpos:s.epos]}
 	s.start = false
 	s.delimOp = false
 	s.exprEnd = true
@@ -188,7 +196,7 @@ func (s *Scanner) emitRegexp(text string) stateFn {
 }
 
 func (s *Scanner) emitIDENT() stateFn {
-	switch s.names[s.source[s.tpos:s.npos]] {
+	switch s.names[s.source[s.tpos:s.epos]] {
 	case NameDyad:
 		return s.emitOp(DYAD)
 	case NameMonad:
@@ -199,7 +207,7 @@ func (s *Scanner) emitIDENT() stateFn {
 }
 
 func (s *Scanner) emitOp(t TokenType) stateFn {
-	s.token = Token{Type: t, Pos: s.tpos, Text: s.source[s.tpos:s.npos]}
+	s.token = Token{Type: t, Pos: s.tpos, Text: s.source[s.tpos:s.epos]}
 	s.start = false
 	s.delimOp = false
 	s.exprEnd = false
@@ -214,12 +222,12 @@ func (s *Scanner) emitEOF() stateFn {
 }
 
 func scanAny(s *Scanner) stateFn {
-	s.tpos = s.npos
-	r := s.next()
-	switch r {
+	s.tpos = s.epos
+	switch s.r {
 	case eof:
 		return s.emitEOF()
 	case '\n':
+		s.next()
 		if !s.start {
 			if !s.delimOp {
 				return s.emit(NEWLINE)
@@ -233,65 +241,58 @@ func scanAny(s *Scanner) stateFn {
 		if s.start {
 			return scanCommentLine
 		}
+		s.next()
 		return s.emitOp(ADVERB)
 	case '\'', '\\':
+		s.next()
 		return s.emitOp(ADVERB)
 	case '{':
+		s.next()
 		return s.emit(LEFTBRACE)
 	case '[':
+		s.next()
 		return s.emit(LEFTBRACKET)
 	case '(':
+		s.next()
 		return s.emit(LEFTPAREN)
 	case '}':
+		s.next()
 		return s.emit(RIGHTBRACE)
 	case ']':
+		s.next()
 		return s.emit(RIGHTBRACKET)
 	case ')':
+		s.next()
 		return s.emit(RIGHTPAREN)
 	case ';':
+		s.next()
 		return s.emit(SEMICOLON)
 	case '-':
 		if !s.exprEnd {
 			return scanMinus
 		}
-		r := s.peek()
-		if r == ':' {
-			s.next()
-			if s.peek() == ':' {
-				s.next()
-			}
-			return s.emitOp(DYADASSIGN)
-		}
-		return s.emitOp(DYAD)
+		return scanDyadOp
 	case ':':
-		r := s.peek()
-		if r == ':' {
+		s.next()
+		if s.r == ':' {
 			s.next()
 		}
 		return s.emitOp(DYAD)
 	case '+', '*', '%', '!', '&', '|', '<', '>',
 		'=', '~', ',', '^', '#', '_', '$', '?', '@', '.':
-		r := s.peek()
-		if r == ':' {
-			s.next()
-			if s.peek() == ':' {
-				s.next()
-			}
-			return s.emitOp(DYADASSIGN)
-		}
-		return s.emitOp(DYAD)
+		return scanDyadOp
 	case '"':
 		return scanString
 	case '`':
 		return scanRawString
 	}
 	switch {
-	case isDigit(r):
+	case isDigit(s.r):
 		return scanNumber
-	case isAlpha(r):
+	case isAlpha(s.r):
 		return scanIdent
 	default:
-		return s.emitError(fmt.Sprintf("unexpected character: %c", r))
+		return s.emitError(fmt.Sprintf("unexpected character: %c", s.r))
 	}
 }
 
@@ -307,20 +308,27 @@ func isAlphaNum(r rune) bool {
 	return isAlpha(r) || isDigit(r)
 }
 
+func scanDyadOp(s *Scanner) stateFn {
+	s.next()
+	if s.r == ':' {
+		s.next()
+		if s.r == ':' {
+			s.next()
+		}
+		return s.emitOp(DYADASSIGN)
+	}
+	return s.emitOp(DYAD)
+}
+
 func scanSpace(s *Scanner) stateFn {
 	for {
-		r := s.peek()
-		switch r {
-		case eof:
-			return scanAny
+		s.next()
+		switch s.r {
 		case '/':
-			s.next()
 			return scanComment
 		case ' ', '\t':
-			s.next()
 		case '-':
-			s.tpos = s.npos
-			s.next()
+			s.tpos = s.epos
 			return scanMinus
 		default:
 			return scanAny
@@ -330,11 +338,12 @@ func scanSpace(s *Scanner) stateFn {
 
 func scanComment(s *Scanner) stateFn {
 	for {
-		r := s.next()
-		switch r {
+		s.next()
+		switch s.r {
 		case eof:
 			return s.emitEOF()
 		case '\n':
+			s.next()
 			if !s.start {
 				if !s.delimOp {
 					return s.emit(NEWLINE)
@@ -347,8 +356,8 @@ func scanComment(s *Scanner) stateFn {
 }
 
 func scanCommentLine(s *Scanner) stateFn {
-	r := s.peek()
-	if r == '\n' {
+	s.next()
+	if s.r == '\n' {
 		return scanMultiLineComment
 	}
 	return scanComment
@@ -356,13 +365,14 @@ func scanCommentLine(s *Scanner) stateFn {
 
 func scanMultiLineComment(s *Scanner) stateFn {
 	for {
-		r := s.next()
+		s.next()
 		switch {
-		case r == eof:
+		case s.r == eof:
 			return s.emitEOF()
-		case r == '\\' && s.start:
-			r := s.next()
-			if r == '\n' {
+		case s.r == '\\' && s.start:
+			s.next()
+			if s.r == '\n' {
+				s.next()
 				return scanAny
 			}
 		}
@@ -371,18 +381,16 @@ func scanMultiLineComment(s *Scanner) stateFn {
 
 func scanString(s *Scanner) stateFn {
 	for {
-		r := s.next()
-		switch r {
+		s.next()
+		switch s.r {
 		case eof:
 			return s.emitError("non terminated string: unexpected EOF")
 		case '\n':
 			return s.emitError("non terminated string: unexpected newline")
 		case '\\':
-			nr := s.peek()
-			if nr == '"' {
-				s.next()
-			}
+			s.next()
 		case '"':
+			s.next()
 			return s.emitString(STRING)
 		}
 	}
@@ -390,21 +398,22 @@ func scanString(s *Scanner) stateFn {
 
 func scanRawString(s *Scanner) stateFn {
 	for {
-		r := s.next()
-		switch r {
+		s.next()
+		switch s.r {
 		case eof:
 			return s.emitError("non terminated string: unexpected EOF")
 		case '`':
+			s.next()
 			return s.emitString(STRING)
 		}
 	}
 }
 
 func scanRegexp(s *Scanner) stateFn {
-	sb := strings.Builder{}
+	var sb strings.Builder
 	for {
-		r := s.next()
-		switch r {
+		s.next()
+		switch s.r {
 		case eof:
 			return s.emitError("non terminated regexp: unexpected EOF")
 		case '\\':
@@ -412,56 +421,50 @@ func scanRegexp(s *Scanner) stateFn {
 			if nr == '/' {
 				s.next()
 			} else {
-				sb.WriteRune(r)
+				sb.WriteRune(s.r)
 			}
 		case '/':
+			s.next()
 			return s.emitRegexp(sb.String())
 		default:
-			sb.WriteRune(r)
+			sb.WriteRune(s.r)
 		}
 	}
 }
 
 func scanNumber(s *Scanner) stateFn {
 	for {
-		r := s.peek()
+		s.next()
 		switch {
-		case r == eof:
+		case s.r == eof:
 			return s.emitString(NUMBER)
-		case r == '.':
+		case s.r == '.':
+		case s.r == 'e':
 			s.next()
-		case r == 'e':
-			s.next()
-			r = s.peek()
-			if r == '+' || r == '-' {
-				s.next()
+			if s.r == '+' || s.r == '-' {
 				return scanExponent
 			}
-		case !isAlphaNum(r):
+		case !isAlphaNum(s.r):
 			return s.emitString(NUMBER)
-		default:
-			s.next()
 		}
 	}
 }
 
 func scanExponent(s *Scanner) stateFn {
 	for {
-		r := s.peek()
+		s.next()
 		switch {
-		case r == eof:
+		case s.r == eof:
 			return s.emitString(NUMBER)
-		case !isDigit(r):
+		case !isDigit(s.r):
 			return s.emitString(NUMBER)
-		default:
-			s.next()
 		}
 	}
 }
 
 func scanMinus(s *Scanner) stateFn {
-	r := s.peek()
-	if isDigit(r) {
+	s.next()
+	if isDigit(s.r) {
 		return scanNumber
 	}
 	return s.emitOp(DYAD)
@@ -470,28 +473,25 @@ func scanMinus(s *Scanner) stateFn {
 func scanIdent(s *Scanner) stateFn {
 	dots := 0
 	for {
-		r := s.peek()
+		s.next()
 		switch {
-		case r == eof:
+		case s.r == eof:
 			return s.emitIDENT()
-		case r == '/':
-			if s.source[s.tpos:s.npos] == "rx" {
-				s.next()
+		case s.r == '/':
+			if s.source[s.tpos:s.npos] == "rx/" {
 				return scanRegexp
 			}
 			return s.emitIDENT()
-		case r == '.':
-			s.next()
-			r = s.peek()
+		case s.r == '.':
+			r := s.peek()
 			if !isAlpha(r) {
-				return s.emitError(s.source[s.tpos:s.npos] + " : invalid prefixed identifier")
+				return s.emitIDENT()
 			}
 			if dots > 0 {
-				return s.emitError("field of prefixed identifier not implemented yet")
+				return s.emitError("identifiers cannot have more than one dot prefix")
 			}
 			dots++
-		case isAlphaNum(r):
-			s.next()
+		case isAlphaNum(s.r):
 		default:
 			return s.emitIDENT()
 		}
