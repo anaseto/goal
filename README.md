@@ -1,5 +1,8 @@
 # Goal
 
+[![pkg.go.dev](https://pkg.go.dev/badge/codeberg.org/anaseto/goal.svg)](https://pkg.go.dev/codeberg.org/anaseto/goal)
+[![godocs.io](https://godocs.io/codeberg.org/anaseto/goal?status.svg)](https://godocs.io/codeberg.org/anaseto/goal)
+
 Goal is an embeddable array programming language with a bytecode interpreter,
 written in Go. It provides both a command line intepreter (that can be used in
 the REPL), and a library interface. Though the language is still in
