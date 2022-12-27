@@ -35,9 +35,9 @@ It's main distinctive features are as follows:
   reduce cloning by reusing dead immutable arrays, though it is not a goal to
   reach state-of-the-art (no SIMD, and there is still room for more special
   code and specialized algorithms). Scalar performance is typical for a
-  bytecode-compiled interpreter, somewhat slower than a state-of-the-art C
-  bytecode interpreter (value representation in Go is somewhat less compact
-  than how it can be done in C).
+  bytecode-compiled interpreter (without JIT), somewhat slower than a
+  state-of-the-art C bytecode interpreter (value representation in Go is
+  somewhat less compact than how it can be done in C).
 
 If this list is not enough to satisfy your curiosity, there's also a
 [Why.md](Why.md) text for you. You can also read the [Credits.md](Credits.md)
