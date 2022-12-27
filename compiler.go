@@ -403,9 +403,11 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 		c.doLocal(tok, n)
 		return nil
 	case astDYAD:
-		return c.doVariadic(tok, n)
+		c.doVariadic(tok, n)
+		return nil
 	case astMONAD:
-		return c.doVariadic(tok, n)
+		c.doVariadic(tok, n)
+		return nil
 	case astREGEXP:
 		r, err := regexp.Compile(tok.Text)
 		if err != nil {
@@ -473,18 +475,17 @@ func (c *compiler) doAdverb(tok *astToken) {
 	c.pos = opos
 }
 
-func (c *compiler) doVariadic(tok *astToken, n int) error {
-	return c.doVariadicAt(tok.Text, tok.Pos, n)
+func (c *compiler) doVariadic(tok *astToken, n int) {
+	c.doVariadicAt(tok.Text, tok.Pos, n)
 }
 
-func (c *compiler) doVariadicAt(s string, pos, n int) error {
+func (c *compiler) doVariadicAt(s string, pos, n int) {
 	// tok.Type either MONAD, DYAD or ADVERB
 	v := c.parseVariadic(s)
 	opos := c.pos
 	c.pos = pos
 	c.pushVariadic(v, n)
 	c.pos = opos
-	return nil
 }
 
 func (c *compiler) pushVariadic(v variadic, n int) {
@@ -631,7 +632,8 @@ func (c *compiler) parseVariadic(s string) variadic {
 
 func (c *compiler) doDerivedVerb(dv *astDerivedVerb, n int) error {
 	if dv.Verb == nil {
-		return c.doVariadic(dv.Adverb, n)
+		c.doVariadic(dv.Adverb, n)
+		return nil
 	}
 	err := c.doExpr(dv.Verb, 0)
 	if err != nil {
