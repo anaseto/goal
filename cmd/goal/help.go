@@ -108,7 +108,7 @@ i?y deal        -5?100 -> 19 26 0 73 94 (always distinct)
 s?r rindex      "abcde"?rx/b../ -> 1 4
 s?s index       "a = a + 1"?"=" "+" -> 2 6
 x?y find        3 2 1?2 -> 1    3 2 1?0 -> 3
-@x  type        @2 -> "i"    @"ab" -> "s"    @2 3 -> "I"
+@x  type        @2 -> "n"    @"ab" -> "s"    @2 3 -> "N"
 s@y substr      "012345"[2] -> "2345"   "012345"[2;3] -> "234"
 r@y match       rx/[a-z]/"abc" -> 1
 r@y find        rx/[a-z](.)/"abc" -> "ab" "b"   rx/[a-z]/["abc";2] -> "a" "b"
