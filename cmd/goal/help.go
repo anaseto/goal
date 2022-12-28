@@ -82,7 +82,7 @@ x~y match       3~3 -> 1        2 3~3 2 -> 0
 ,x  enlist      ,1 -> ,1 (list with one element)
 x,y join        1,2 -> 1 2
 ^x  sort        ^3 5 0 -> 0 3 5
-i^y windows     2^!4 -> (1 2;2 3;3 4)
+i^y windows     2^!4 -> (0 1;1 2;2 3)
 s^y trim        " []"^"  [text]  " -> "text"
 x^y without     2 3^1 1 2 3 3 4 -> 1 1 4
 #x  length      #2 4 5 -> 3
