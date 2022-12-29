@@ -5,10 +5,15 @@
 
 Goal is an embeddable array programming language with a bytecode interpreter,
 written in Go. It provides both a command line intepreter (that can be used in
-the REPL), and a library interface. Though the language is still in
-development, its core features are mostly there and tested, so it is usable
-both for writing useful scripts and playing with the REPL. The library
-interface might still experiment some minor changes.
+the REPL), and a library interface. Though the language is still in young, its
+core features are mostly there and tested, so it is usable both for writing
+useful scripts and playing with the REPL. The library interface might still
+experiment some changes.
+
+Like in most array programming languages, Goal's builtins vectorize operations
+on immutable arrays, and encourage a functional style for control and data
+transformations, supported by a simple dynamic type system with little
+abstraction, and mutable variables (but no mutable values).
 
 It's main distinctive features are as follows:
 
@@ -23,8 +28,8 @@ It's main distinctive features are as follows:
   [BQN](https://mlochbaum.github.io/BQN/index.html). For example, group,
   classify, shifts, windows, find (index of) and ocurrence count take after
   BQN's semantics. Multi-dimensional versions, when present in BQN, have been
-  left out, though, as Goal has only free-form arrays, like K.  Some primitives
-  use words instead of symbols (like ocount for occurrence count).
+  left out, though, as Goal has only free-form immutable arrays, like K.  Some
+  primitives use words instead of symbols (like ocount for occurrence count).
 * Unlike in typical array languages, strings are atoms, and common string
   handling functions (like index, substr or trim) have been integrated into the
   primitives, including regular expression functions.
