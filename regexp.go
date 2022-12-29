@@ -79,6 +79,10 @@ func (r *rxReplacer) Type() string {
 	return "f"
 }
 
+func (r *rxReplacer) rank(ctx *Context) int {
+	return 1
+}
+
 func (r *rxReplacer) replace(ctx *Context, s string) string {
 	switch zv := r.repl.value.(type) {
 	case S:

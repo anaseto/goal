@@ -64,6 +64,10 @@ func (r *nReplacer) Type() string {
 	return "f"
 }
 
+func (r *nReplacer) rank(ctx *Context) int {
+	return 1
+}
+
 func (r *nReplacer) replace(ctx *Context, s string) string {
 	return strings.Replace(s, string(r.olds), string(r.news), r.n)
 }
@@ -99,6 +103,10 @@ func (r *replacer) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
 
 func (r *replacer) Type() string {
 	return "f"
+}
+
+func (r *replacer) rank(ctx *Context) int {
+	return 1
 }
 
 func (r *replacer) replace(ctx *Context, s string) string {
