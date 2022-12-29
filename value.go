@@ -9,7 +9,7 @@ import (
 
 // V contains a boxed or unboxed value.
 type V struct {
-	kind  valueKind // int, boxed
+	kind  valueKind // valInt, valFloat, valBoxed, ...
 	n     int64     // unboxed integer or float value
 	value Value     // boxed value
 }

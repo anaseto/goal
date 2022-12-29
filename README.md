@@ -43,8 +43,9 @@ It's main distinctive features are as follows:
   somewhat less compact than how it can be done in C).
 
 If this list is not enough to satisfy your curiosity, there's also a
-[Why.md](Why.md) text for you. You can also read the [Credits.md](Credits.md)
-to know about main inspiration sources for the language.
+[Why.md](docs/Why.md) text for you. You can also read the [Credits.md](Credits.md)
+to know about main inspiration sources for the language. Last, but not least,
+there are some [implementation notes](docs/Implementation.md) too.
 
 # Install
 

@@ -9,7 +9,7 @@ using backquotes, as well as using the same semantics and syntax for number and
 string literals.
 
 I wrote the bytecode implementation after reading the one for
-[goawk](https://benhoyt.com/writings/goawk/), and it still shows. I wrote the
+[GoAWK](https://benhoyt.com/writings/goawk/), and it still shows. I wrote the
 scanner after reading [ivy's](https://pkg.go.dev/robpike.io/ivy). Vim syntax
 highlighting is based on [ngn/k's](https://codeberg.org/ngn/k).
 
