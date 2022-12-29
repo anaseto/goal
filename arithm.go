@@ -35,7 +35,11 @@ func negate(x V) V {
 	case *AV:
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
-			r.Slice[i] = negate(xi)
+			ri := negate(xi)
+			if ri.IsPanic() {
+				return ri
+			}
+			r.Slice[i] = ri
 		}
 		return NewV(r)
 	default:
@@ -91,7 +95,11 @@ func sign(x V) V {
 	case *AV:
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
-			r.Slice[i] = sign(xi)
+			ri := sign(xi)
+			if ri.IsPanic() {
+				return ri
+			}
+			r.Slice[i] = ri
 		}
 		return NewV(r)
 	default:
@@ -131,7 +139,11 @@ func floor(x V) V {
 	case *AV:
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
-			r.Slice[i] = floor(xi)
+			ri := floor(xi)
+			if ri.IsPanic() {
+				return ri
+			}
+			r.Slice[i] = ri
 		}
 		return NewV(r)
 	default:
@@ -169,7 +181,11 @@ func ceil(x V) V {
 	case *AV:
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
-			r.Slice[i] = ceil(xi)
+			ri := ceil(xi)
+			if ri.IsPanic() {
+				return ri
+			}
+			r.Slice[i] = ri
 		}
 		return NewV(r)
 	default:
@@ -209,7 +225,11 @@ func not(x V) V {
 	case *AV:
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
-			r.Slice[i] = not(xi)
+			ri := not(xi)
+			if ri.IsPanic() {
+				return ri
+			}
+			r.Slice[i] = ri
 		}
 		return NewV(r)
 	default:
@@ -243,7 +263,11 @@ func abs(x V) V {
 	case *AV:
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
-			r.Slice[i] = abs(xi)
+			ri := abs(xi)
+			if ri.IsPanic() {
+				return ri
+			}
+			r.Slice[i] = ri
 		}
 		return NewV(r)
 	default:
