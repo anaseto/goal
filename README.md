@@ -103,14 +103,14 @@ Notations:
         x,y (any other)
 
 SYNTAX HELP
-atoms           1       1.5     "text"		+
+atoms           1       1.5     "text"          +
 regexps         rx/[a-z]/       (see https://pkg.go.dev/regexp/syntax for syntax)
 arrays          1 2 -3 4        1 "ab" -2 "cd"    (1 2;"a";3 "b";(4 2;"c");*)
 variables       a:2 (assign)    a+:1 (same as a:a+1)    a+3 (use)
                 a::2 (assign global)    a+::2 (same as a::a+2)
 expressions     2*3+4 -> 14     1+|1 2 3 -> 4 3 2       +/1 2 3 -> 6
 index array     1 2 3[1] -> 2 (same as x@1) (1 2;3 4)[0;1] -> 2 (same as x . (0;1))
-		a:1 2 3;a[1]:0 -> 1 0 3		a:1 2 3;a[1]+:2 -> 1 4 3
+                a:1 2 3;a[1]:0 -> 1 0 3         a:1 2 3;a[1]+:2 -> 1 4 3
 index string    "abc"[1] -> "bcde"      "abcde"[1;2] -> "bc"    (s[offset;len])
 lambdas         {x+y+z}[2;3;0] -> 5     {[a;b;c]a+b+c}[1;2;3] -> 6
 projections     {x+y}[2;] 3 -> 5        (2+) 3 -> 5
@@ -151,28 +151,28 @@ x&y min         2&3 -> 2        4&3 -> 3
 |x  reverse     |!5 -> 4 3 2 1 0
 x|y max         2|3 -> 3        4|3 -> 4
 <x  ascend      <2 4 3 -> 0 2 1 (index permutation for ascending order)
-x<y less        2<3 -> 1	"c" < "a" -> 0
+x<y less        2<3 -> 1        "c" < "a" -> 0
 >x  descend     >2 4 3 -> 1 2 0 (index permutation for descending order)
-x>y greater     2>3 -> 0	"c" > "a" -> 1
+x>y greater     2>3 -> 0        "c" > "a" -> 1
 =x  group       =1 0 2 1 2 -> (,1;0 3;2 4)      =-1 2 -1 2 -> (!0;!0;1 3)
 f=x group by    {1=2!x}=!10 -> (0 2 4 6 8;1 3 5 7 9)
-x=y equal       2 3 4=3 -> 0 1 0	"ab" = "ba" -> 0
+x=y equal       2 3 4=3 -> 0 1 0        "ab" = "ba" -> 0
 ~x  not         ~0 1 2 -> 1 0 0
 x~y match       3~3 -> 1        2 3~3 2 -> 0
 ,x  enlist      ,1 -> ,1 (list with one element)
-x,y join        1,2 -> 1 2	"ab" "c","d" -> "ab" "c" "d"
+x,y join        1,2 -> 1 2      "ab" "c","d" -> "ab" "c" "d"
 ^x  sort        ^3 5 0 -> 0 3 5
 i^y windows     2^!4 -> (0 1;1 2;2 3)
 s^y trim        " []"^"  [text]  " -> "text"
 x^y without     2 3^1 1 2 3 3 4 -> 1 1 4
-#x  length      #2 4 5 -> 3	#"ab" "cd" -> 2
+#x  length      #2 4 5 -> 3     #"ab" "cd" -> 2
 i#y take        2#4 1 5 -> 4 1      4#3 1 5 -> 3 1 5 3 (cyclic)
 s#y count       "ab"#"cabdab" "cd" "deab" -> 2 0 1
 f#y replicate   {0 1 1 0}#4 1 5 3 -> 1 5    {x>0}#2 -3 1 -> 2 1
 x#y keep only   2 3^1 1 2 3 3 4 -> 2 3 3
 _N  floor       _2.3 -> 2     _1.5 3.7 -> 1 3
 _S  to lower    _"ABC" -> "abc"     _"AB" "CD" -> "ab" "cd"
-i_x drop        2_3 4 5 6 -> 5 6	-2_3 4 5 6 -> 3 4
+i_x drop        2_3 4 5 6 -> 5 6        -2_3 4 5 6 -> 3 4
 s_x trim prefix "pref-"_"pref-name" -> "name"
 x_y cut         2 5_!10 -> (2 3 4;5 6 7 8 9)
 f_x weed out    {0 1 1 0}_4 1 5 3 -> 4 3    {x>0}_2 -3 1 -> ,-3
@@ -216,7 +216,7 @@ ocount x  occur-count   ocount 3 2 5 3 2 2 7 -> 0 0 0 1 1 2 0
 panic x   panic         panic "msg" (for fatal programming-errors) 
 rshift x  right shift   rshift 1 2 -> 0 1       rshift "a" "b" -> "" "a"
 seed x    rand seed     seed 42 (for non-secure pseudo-rand with ?)
-shift x   shift shift   shift 1 2 -> 2 0        shift "a" "b" -> "b" ""
+shift x   shift         shift 1 2 -> 2 0        shift "a" "b" -> "b" ""
 sign x    sign          sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
 
 x csv y     csv r/w     csv "1,2,3" -> ,"1" "2" "3"     " " csv "1 2 3" -> ,"1" "2" "3"
@@ -258,10 +258,10 @@ I/x     encode  24 60 60/1 2 3 -> 3723  2/1 1 0 -> 6
 I\x     decode  24 60 60\3723 -> 1 2 3  2\6 -> 1 1 0
 
 IO/OS HELP
-import s     	eval file s+".goal" and import globals with prefix s+"."
+import s        eval file s+".goal" and import globals with prefix s+"."
 print x         print "Hello, world!\n"
-say x           same as print, but appends a newline	say !5
-shell s      	run a command string s as-is through the shell
+say x           same as print, but appends a newline    say !5
+shell s         run a command string s as-is through the shell
 slurp s         read file named s       lines:"\n"\slurp["/path/to/file"]
 
 pfx import name import package with prefix pfx for globals
