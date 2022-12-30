@@ -1,4 +1,4 @@
-*Last updated: 2022-12-29*
+*Last updated: 2022-12-30*
 
 # Implementation notes
 
@@ -6,7 +6,7 @@ This document talks about Goal's implementation. It's intended to be a kind of
 starting point before digging into the code or extending it, while telling as
 well how some things ended up in a way or another.
 
-# Chosing the implementation language
+# Choosing the implementation language
 
 That was the first choice.  To be honest, among suitable languages, I probably
 mainly chose Go because I know it very well and feel comfortable with it. It
@@ -20,7 +20,7 @@ does a good job at it, and has quite a few good points:
 * Low-level enough that things go fast.
 
 Among languages I know well, I could have chosen OCaml too, which is
-well-suited for compilation, though less for the intepretation part. That said,
+well-suited for compilation, though less for the interpretation part. That said,
 I haven't used it lately, and I never really liked its standard library, nor
 its mutable array support. I mean, Goal has only immutable arrays, but
 for implementing them you want friendly support for mutable arrays or even
@@ -119,7 +119,7 @@ are represented by the `VariadicFun` type as follows:
 type VariadicFun func(*Context, []V) V
 ```
 
-In other words, then take a context and a list of arguments, and they return a
+In other words, they take a context and a list of arguments, and they return a
 new value. Each variadic function inspects dynamically its arguments types, and
 process them accordingly. One gotcha, though: arguments are in reverse order,
 because the slice comes from the VM's stack.
@@ -216,7 +216,7 @@ in C, because in Go type conversions have to be explicit all the time, and
 there are no macros, meaning more code duplication for the various numeric
 types.  In the end, it was not as bad as expected, and for extreme cases, like
 arithmetic primitives, I used some code generation, which is similar to how
-they're usually done in C array language intepreters by using macros. The
+they're usually done in C array language interpreters by using macros. The
 somewhat unsightly result is in `arithd.go`.
 
 Other than that, some array primitives do require some algorithmic work, in
