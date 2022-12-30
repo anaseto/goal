@@ -5,7 +5,7 @@
 
 Goal is an embeddable array programming language with a bytecode interpreter,
 written in Go. It provides both a command line intepreter (that can be used in
-the REPL), and a library interface. Though the language is still in young, its
+the REPL), and a library interface. Though the language is still young, its
 core features are mostly there and tested, so it is usable both for writing
 useful scripts and playing with the REPL. The library interface might still
 experiment some changes.
