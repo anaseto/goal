@@ -111,7 +111,7 @@ variables       a:2 (assign)    a+:1 (same as a:a+1)    a+3 (use)
 expressions     2*3+4 -> 14     1+|1 2 3 -> 4 3 2       +/1 2 3 -> 6
 index array     1 2 3[1] -> 2 (same as x@1) (1 2;3 4)[0;1] -> 2 (same as x . (0;1))
                 a:1 2 3;a[1]:0 -> 1 0 3         a:1 2 3;a[1]+:2 -> 1 4 3
-index string    "abc"[1] -> "bcde"      "abcde"[1;2] -> "bc"    (s[offset;len])
+index string    "abcde"[1] -> "bcde"      "abcde"[1;2] -> "bc"    (s[offset;len])
 lambdas         {x+y+z}[2;3;0] -> 5     {[a;b;c]a+b+c}[1;2;3] -> 6
 projections     {x+y}[2;] 3 -> 5        (2+) 3 -> 5
 cond            ?[1;2;3] -> 2   ?[0;2;3] -> 3   ?[0;2;"";3;4] -> 4
