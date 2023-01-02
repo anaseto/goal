@@ -218,13 +218,14 @@ abs x     abs value     abs -3 -1.5 2 -> 3 1.5 2
 bytes x   byte-count    bytes "abc" -> 3
 ceil x    ceil          ceil 1.5 -> 2   ceil "ab" -> "AB"
 error x   error         r:{?[~x=0;1%x;error "zero"]}0;?["e"~@r;.r;r] -> "zero"
-eval x    eval          a:5;eval "a+2" -> 7 (unrestricted eval)
+eval s    eval          a:5;eval "a+2" -> 7 (unrestricted eval)
 firsts x  mark firsts   firsts 0 0 2 3 0 2 3 4 -> 1 0 1 1 0 0 0 1
 icount x  index-count   icount 0 0 1 -1 0 1 2 3 2 -> 3 2 2 1 (same as #'=x)
 ocount x  occur-count   ocount 3 2 5 3 2 2 7 -> 0 0 0 1 1 2 0
-panic x   panic         panic "msg" (for fatal programming-errors)
+panic s   panic         panic "msg" (for fatal programming-errors)
 rshift x  right shift   rshift 1 2 -> 0 1       rshift "a" "b" -> "" "a"
-seed x    rand seed     seed 42 (for non-secure pseudo-rand with ?)
+rx s      comp. regex   rx["[a-z]"] (like rx/[a-z]/ but compiled at runtime)
+seed i    rand seed     seed 42 (for non-secure pseudo-rand with ?)
 shift x   shift         shift 1 2 -> 2 0        shift "a" "b" -> "b" ""
 sign x    sign          sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
 
