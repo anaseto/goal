@@ -137,7 +137,7 @@ e               error           error "msg"
         A       generic array   ("a" 1;"b" 2;"c" 3)     (+;-;*;"any")
 
 VERBS HELP
-:x  return      :3 -> return 3 early
+:x  identity    :[42] -> 42 (recall that : is also syntax for return)
 x:y right       2:3 -> 3
 +x  flip        +(1 2;3 4) -> (1 3;2 4)
 x+y add         2+3 -> 5
