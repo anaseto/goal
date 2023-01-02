@@ -276,8 +276,8 @@ say x           same as print, but appends a newline    say !5
 shell s         run a command string s as-is through the shell
 slurp s         read file named s       lines:"\n"\slurp["/path/to/file"]
 
-pfx import name import package with prefix pfx for globals
-w print x       print to writer or filename     "filename" print "content"
+pfx import s    like import s but with prefix pfx+"." for globals
+w print x       print x to writer or filename     "filename" print "content"
 w say x         same as print, but appends a newline
 
 os.ARGS         command-line arguments, starting with script name
