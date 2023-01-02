@@ -20,22 +20,23 @@ Notations:
 
 const helpSyntax = `
 SYNTAX HELP
-atoms           1       1.5     "text"          +
-regexps         rx/[a-z]/       (see https://pkg.go.dev/regexp/syntax for syntax)
-arrays          1 2 -3 4        1 "ab" -2 "cd"    (1 2;"a";3 "b";(4 2;"c");*)
-variables       a:2 (assign)    a+:1 (same as a:a+1)    a+3 (use)
-                a::2 (assign global)    a+::2 (same as a::a+2)
-expressions     2*3+4 -> 14     1+|1 2 3 -> 4 3 2       +/1 2 3 -> 6
-index array     1 2 3[1] -> 2 (same as x@1) (1 2;3 4)[0;1] -> 2 (same as x . (0;1))
-                a:1 2 3;a[1]:0 -> 1 0 3         a:1 2 3;a[1]+:2 -> 1 4 3
-index string    "abcde"[1] -> "bcde"      "abcde"[1;2] -> "bc"    (s[offset;len])
+atoms           1     1.5     "text"      +
+regexps         rx/[a-z]/     (see https://pkg.go.dev/regexp/syntax for syntax)
+arrays          1 2 -3 4      1 "ab" -2 "cd"      (1 2;"a";3 "b";(4 2;"c");*)
+variables       a:2 (assign)    a+:1 (sugar for a:a+1)    a+3 (use)
+                a::2 (assign global)    a+::2 (sugar for a::a+2)
+expressions     2*3+4 -> 14 (no priority)    1+|1 2 3 -> 4 3 2     +/1 2 3 -> 6
+index           x[y] is sugar for x@y (apply)
+index deep      x[y;z;...] is sugar for x.(y;z;...) (except for x in (?;and;or))
+index assign    x[y]:z is sugar for x:@[x;y;:;z]
+index op assign x[y]op:z is sugar for x:@[x;y;op;z] (for symbol operator)
 lambdas         {x+y+z}[2;3;0] -> 5     {[a;b;c]a+b+c}[1;2;3] -> 6
 projections     {x+y}[2;] 3 -> 5        (2+) 3 -> 5
-cond            ?[1;2;3] -> 2   ?[0;2;3] -> 3   ?[0;2;"";3;4] -> 4
+cond            ?[1;2;3] -> 2     ?[0;2;3] -> 3    ?[0;2;"";3;4] -> 4
 and/or          and[1;2] -> 2   and[1;0;3] -> 0   or[0;2] -> 2   or[0;0;0] -> 0
 sequence        [a:2;b:a+3;a+10] -> 12 (bracket block [] at start of expression)
 return          [1;:2;3] -> 2 (a : at start of expression)
-try             'error "msg" (same as :error "msg")     '4+3 (same as 4+3)
+try             'x is sugar for ?["e"~@x;:x;x] (return if it's an error)
 `
 
 const helpTypes = `
@@ -66,7 +67,7 @@ s*x repeat      "a"*3 2 1 0 -> "aaa" "aa" "a" ""
 x%y divide      3%2 -> 1.5
 !i  enum        !5 -> 0 1 2 3 4
 !x  odometer    !2 3 -> (0 0 0 1 1 1;0 1 2 0 1 2)
-x!y mod         3!5 4 3 -> 2 1 0        
+x!y mod         3!5 4 3 -> 2 1 0
 &x  where       &0 0 1 0 0 0 1 -> 2 6
 x&y min         2&3 -> 2        4&3 -> 3
 |x  reverse     |!5 -> 4 3 2 1 0
@@ -110,13 +111,15 @@ s?r rindex      "abcde"?rx/b../ -> 1 4
 s?s index       "a = a + 1"?"=" "+" -> 2 6
 x?y find        3 2 1?2 -> 1    3 2 1?0 -> 3
 @x  type        @2 -> "n"    @"ab" -> "s"    @2 3 -> "N"
-s@y substr      "012345"[2] -> "2345"   "012345"[2;3] -> "234"
+s@y substr      "abcdef"@2  -> "cdef" (s[offset])
 r@y match       rx/[a-z]/"abc" -> 1
-r@y find        rx/[a-z](.)/"abc" -> "ab" "b"   rx/[a-z]/["abc";2] -> "a" "b"
+r@y find        rx/[a-z](.)/"abc" -> "ab" "b"
 f@y apply       (|)@1 2 -> 2 1 (like |[1 2] -> 2 1 or |1 2)
 x@y at          1 2 3@2 -> 3    1 2 3[2] -> 3
 .s  reval       ."2+3" -> 5     a:1;."a" -> panic ".s : undefined global: a"
 .e  get error   .error "msg" -> "msg"
+s.y substr      "abcdef"[2;3] -> "cde" (s[offset;length])
+r.y find n      rx/[a-z]/["abc";2] -> "a" "b" (stop at 2 matches; -1 for all)
 x.y applyN      {x+y}.2 3 -> 5    {x+y}[2;3] -> 5    (1 2;3 4)[0;1] -> 2
 
 ::x         get global  a:3;::"a" -> 3
@@ -136,14 +139,16 @@ eval x    eval          a:5;eval "a+2" -> 7 (unrestricted eval)
 firsts x  mark firsts   firsts 0 0 2 3 0 2 3 4 -> 1 0 1 1 0 0 0 1
 icount x  index-count   icount 0 0 1 -1 0 1 2 3 2 -> 3 2 2 1 (same as #'=x)
 ocount x  occur-count   ocount 3 2 5 3 2 2 7 -> 0 0 0 1 1 2 0
-panic x   panic         panic "msg" (for fatal programming-errors) 
+panic x   panic         panic "msg" (for fatal programming-errors)
 rshift x  right shift   rshift 1 2 -> 0 1       rshift "a" "b" -> "" "a"
 seed x    rand seed     seed 42 (for non-secure pseudo-rand with ?)
 shift x   shift         shift 1 2 -> 2 0        shift "a" "b" -> "b" ""
 sign x    sign          sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
 
-x csv y     csv r/w     csv "1,2,3" -> ,"1" "2" "3"     " " csv "1 2 3" -> ,"1" "2" "3"
-                        csv ,"1" "2" "3" -> "1,2,3\n"   " " csv ,"1" "2" "3" -> "1 2 3\n"
+x csv y     csv read    csv "1,2,3" -> ,"1" "2" "3"
+                        " " csv "1 2 3" -> ,"1" "2" "3" (" " as separator)
+            csv write   csv ,"1" "2" "3" -> "1,2,3\n"
+                        " " csv ,"1" "2" "3" -> "1 2 3\n"
 x in s      contained   "bc" "ac" in "abcd" -> 1 0
 x in y      member of   2 3 in 0 2 4 -> 1 0
 x nan y     fill NaNs   42 nan (1.5;sqrt -1) -> 1.5 42
@@ -154,7 +159,7 @@ x shift y   shift       "a" "b" shift 1 2 3 -> 3 "a" "b"
 sub[r;s]    regsub      sub[rx/[a-z]/;"Z"] "aBc" -> "ZBZ"
 sub[r;f]    regsub      sub[rx/[A-Z]/;_] "aBc" -> "abc"
 sub[s;s]    replace     sub["b";"B"] "abc" -> "aBc"
-sub[s;s;i]  replace n   sub["a";"b";2] "aaa" -> "bba"
+sub[s;s;i]  replace n   sub["a";"b";2] "aaa" -> "bba" (stop after 2 times)
 sub[S]      replace     sub["b" "d" "c" "e"] "abc" -> "ade"
 sub[S;S]    replace     sub["b" "c";"d" "e"] "abc" -> "ade"
 
@@ -167,7 +172,7 @@ UTF-8: utf8.rcount (number of code points), utf8.valid
 
 const helpADVERBS = `
 ADVERBS HELP
-f'x     each    #'(4 5;6 7 8) -> 2 3    
+f'x     each    #'(4 5;6 7 8) -> 2 3
 x F'y   each    2 3#'1 2 -> (1 1;2 2 2)
 F/x     fold    +/!10 -> 45
 F\x     scan    +\!10 -> 0 1 3 6 10 15 21 28 36 45
