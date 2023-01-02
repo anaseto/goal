@@ -224,7 +224,7 @@ icount x  index-count   icount 0 0 1 -1 0 1 2 3 2 -> 3 2 2 1 (same as #'=x)
 ocount x  occur-count   ocount 3 2 5 3 2 2 7 -> 0 0 0 1 1 2 0
 panic s   panic         panic "msg" (for fatal programming-errors)
 rshift x  right shift   rshift 1 2 -> 0 1       rshift "a" "b" -> "" "a"
-rx s      comp. regex   rx["[a-z]"] (like rx/[a-z]/ but compiled at runtime)
+rx s      comp. regex   rx "[a-z]"  (like rx/[a-z]/ but compiled at runtime)
 seed i    rand seed     seed 42 (for non-secure pseudo-rand with ?)
 shift x   shift         shift 1 2 -> 2 0        shift "a" "b" -> "b" ""
 sign x    sign          sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
