@@ -78,6 +78,12 @@ goal`.
 
 - [vim-goal](https://codeberg.org/anaseto/vim-goal) : vim files for Goal.
 
+# Examples
+
+A few short examples can be found in the `testdata/scripts` directory. Because
+they're used for testing, they come along an expected result after a `/RESULT:`
+comment.
+
 # Documentation
 
 Writing a reference documentation for the language is still in the TODO list.
