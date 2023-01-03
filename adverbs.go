@@ -35,8 +35,7 @@ func fold2(ctx *Context, args []V) V {
 		}
 	}
 	if f.Rank(ctx) != 2 {
-		// TODO: converge
-		return Panicf("F/x : F rank is %d (expected 2)", f.Rank(ctx))
+		return fold2converge(ctx, f, args[0])
 	}
 	x := args[0]
 	switch xv := x.value.(type) {
@@ -195,6 +194,32 @@ func fold2Decode(f V, x V) V {
 	}
 }
 
+const maxConvergeIters = 1_000_000
+
+func fold2converge(ctx *Context, f, x V) V {
+	n := 0
+	f.IncrRC()
+	for {
+		x.IncrRC()
+		ctx.push(x)
+		r := ctx.applyN(f, 1)
+		x.DecrRC()
+		if r.IsPanic() {
+			f.DecrRC()
+			return r
+		}
+		if Match(r, x) {
+			f.DecrRC()
+			return r
+		}
+		x = r
+		n++
+		if n > maxConvergeIters {
+			return panics("f/x : too many iterations")
+		}
+	}
+}
+
 func fold3(ctx *Context, args []V) V {
 	f := args[1]
 	if !f.IsFunction() {
@@ -306,8 +331,7 @@ func scan2(ctx *Context, f, x V) V {
 		}
 	}
 	if f.Rank(ctx) != 2 {
-		// TODO: converge
-		return Panicf("f\\x : f rank is %d (expected 2)", f.Rank(ctx))
+		return scan2converge(ctx, f, x)
 	}
 	switch xv := x.value.(type) {
 	case array:
@@ -333,6 +357,36 @@ func scan2(ctx *Context, f, x V) V {
 		return Canonical(NewAV(r))
 	default:
 		return x
+	}
+}
+
+func scan2converge(ctx *Context, f, x V) V {
+	n := 0
+	r := []V{}
+	defer func() {
+		for _, ri := range r {
+			ri.DecrRC()
+		}
+	}()
+	f.IncrRC()
+	for {
+		x.IncrRC()
+		r = append(r, x)
+		ctx.push(x)
+		y := ctx.applyN(f, 1)
+		if y.IsPanic() {
+			f.DecrRC()
+			return y
+		}
+		if Match(y, x) {
+			f.DecrRC()
+			return Canonical(NewAV(r))
+		}
+		x = y
+		n++
+		if n > maxConvergeIters {
+			return panics(`f\x : too many iterations`)
+		}
 	}
 }
 

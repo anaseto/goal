@@ -175,20 +175,22 @@ UTF-8: utf8.rcount (number of code points), utf8.valid
 
 const helpADVERBS = `
 ADVERBS HELP
-f'x     each    #'(4 5;6 7 8) -> 2 3
-x F'y   each    2 3#'1 2 -> (1 1;2 2 2)
-F/x     fold    +/!10 -> 45
-F\x     scan    +\!10 -> 0 1 3 6 10 15 21 28 36 45
-x F/y   fold    1 2+/!10 -> 46 47
-x F\y   scan    5 6+\1 2 3 -> (6 7;8 9;11 12)
-n f/x   do      3{x*2}/4 -> 32
-n f\x   dos     3{x*2}\4 -> 4 8 16 32
-f f/x   while   {x<100}{x*2}/4 -> 128
-f f\x   whiles  {x<100}{x*2}\4 -> 4 8 16 32 64 128
-s/x     join    ","/"a" "b" "c" -> "a,b,c"
-s\x     split   ","\"a,b,c" -> "a" "b" "c"
-I/x     encode  24 60 60/1 2 3 -> 3723  2/1 1 0 -> 6
-I\x     decode  24 60 60\3723 -> 1 2 3  2\6 -> 1 1 0
+f'x    each      #'(4 5;6 7 8) -> 2 3
+x F'y  each      2 3#'1 2 -> (1 1;2 2 2)
+F/x    fold      +/!10 -> 45
+F\x    scan      +\!10 -> 0 1 3 6 10 15 21 28 36 45
+x F/y  fold      1 2+/!10 -> 46 47
+x F\y  scan      5 6+\1 2 3 -> (6 7;8 9;11 12)
+n f/x  do        3{x*2}/4 -> 32
+n f\x  dos       3{x*2}\4 -> 4 8 16 32
+f f/x  while     {x<100}{x*2}/4 -> 128
+f f\x  whiles    {x<100}{x*2}\4 -> 4 8 16 32 64 128
+f/x    converge  {1+1.0%x}/1 -> 1.618033988749895
+f\x    converges {_x%2}\10 -> 10 5 2 1 0
+s/x    join      ","/"a" "b" "c" -> "a,b,c"
+s\x    split     ","\"a,b,c" -> "a" "b" "c"
+I/x    encode    24 60 60/1 2 3 -> 3723  2/1 1 0 -> 6
+I\x    decode    24 60 60\3723 -> 1 2 3  2\6 -> 1 1 0
 `
 
 const helpIO = `
