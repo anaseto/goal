@@ -297,17 +297,22 @@ func amendrAV(x array, yv *AV, z V) V {
 // try implements .[f1;x;f2].
 func try(ctx *Context, f1, x, f2 V) V {
 	av := toArray(x).value.(array)
+	if av.Len() == 0 {
+		return panics(".[f1;x;f2] : empty x")
+	}
 	for i := av.Len() - 1; i >= 0; i-- {
 		ctx.push(av.at(i))
 	}
 	r := ctx.applyN(f1, av.Len())
 	if r.IsPanic() {
 		r = NewS(string(r.value.(panicV)))
-		ctx.push(r)
+		ctx.replaceTop(r)
 		r = ctx.applyN(f2, 1)
 		if r.IsPanic() {
+			ctx.drop()
 			return Panicf("f2 call in .[f1;x;f2] : %v", r)
 		}
 	}
+	ctx.drop()
 	return r
 }

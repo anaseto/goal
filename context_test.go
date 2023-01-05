@@ -303,21 +303,3 @@ func BenchmarkAppend2(b *testing.B) {
 		ctx.Eval("500 {x:x,1;x,1}/a")
 	}
 }
-
-func BenchmarkDrop2(b *testing.B) {
-	ctx := NewContext()
-	for n := 0; n < b.N; n++ {
-		ctx.stack = append(ctx.stack, V{})
-		ctx.stack = append(ctx.stack, V{})
-		ctx.drop2()
-	}
-}
-
-func BenchmarkDropN2(b *testing.B) {
-	ctx := NewContext()
-	for n := 0; n < b.N; n++ {
-		ctx.stack = append(ctx.stack, V{})
-		ctx.stack = append(ctx.stack, V{})
-		ctx.dropN(2)
-	}
-}

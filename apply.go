@@ -6,6 +6,7 @@ package goal
 func (ctx *Context) Apply(x, y V) V {
 	ctx.push(y)
 	r := ctx.applyN(x, 1)
+	ctx.drop()
 	return r
 }
 
@@ -14,6 +15,7 @@ func (ctx *Context) Apply2(x, y, z V) V {
 	ctx.push(z)
 	ctx.push(y)
 	r := ctx.applyN(x, 2)
+	ctx.drop()
 	return r
 }
 
@@ -26,12 +28,19 @@ func (ctx *Context) ApplyN(x V, args []V) V {
 	}
 	ctx.pushArgs(args)
 	r := ctx.applyN(x, len(args))
+	ctx.drop()
 	return r
 }
 
-// applyN applies x with the top n arguments in the stack. It consumes the
-// arguments, but does not push the result, returing it instead.
+// applyN applies x with the top n arguments in the stack. It consumes only n-1
+// arguments, but does not replace top with the result.
 func (ctx *Context) applyN(x V, n int) V {
+	//slen := len(ctx.stack)
+	//defer func() {
+	//if len(ctx.stack)+n-1 != slen {
+	//panic(fmt.Sprintf("bad stack len: %d vs %d (x: %s, n: %d)", len(ctx.stack)+n-1, slen, x.Sprint(ctx), n))
+	//}
+	//}()
 	switch x.kind {
 	case valLambda:
 		return ctx.applyLambda(x.lambda(), n)
@@ -50,24 +59,26 @@ func (ctx *Context) applyN(x V, n int) V {
 		ctx.push(xv.Arg)
 		args := ctx.peekN(n + 1)
 		if hasNil(args) {
-			ctx.drop()
-			return NewV(&projection{Fun: x, Args: ctx.popN(n)})
+			args := cloneArgs(args[:len(args)-1])
+			ctx.dropN(n)
+			return NewV(&projection{Fun: x, Args: args})
 		}
 		if n > 1 {
 			ctx.swap()
 		}
 		r := ctx.variadics[xv.Fun](ctx, args)
-		ctx.dropN(n + 1)
+		ctx.dropN(n)
 		return r
 	case *projectionFirst:
 		if n > 1 {
+			ctx.dropN(n - 1)
 			return Panicf("too many arguments: got %d, expected 1", n)
 		}
 		ctx.push(xv.Arg)
-		r := ctx.applyN(xv.Fun, 2)
-		return r
+		return ctx.applyN(xv.Fun, 2)
 	case *projectionMonad:
 		if n > 1 {
+			ctx.dropN(n - 1)
 			return Panicf("too many arguments: got %d, expected 1", n)
 		}
 		return ctx.applyN(xv.Fun, 1)
@@ -76,47 +87,49 @@ func (ctx *Context) applyN(x V, n int) V {
 	case S:
 		switch n {
 		case 1:
-			r := applyS(xv, ctx.top())
-			ctx.drop()
-			return r
+			return applyS(xv, ctx.top())
 		case 2:
 			args := ctx.peekN(n)
 			r := applyS2(xv, args[1], args[0])
-			ctx.dropN(n)
+			ctx.dropN(n - 1)
 			return r
 		default:
+			ctx.dropN(n - 1)
 			return Panicf("string got too many arguments")
 		}
 	case array:
 		switch n {
 		case 1:
-			return ctx.applyArray(x, ctx.pop())
+			return ctx.applyArray(x, ctx.top())
 		default:
 			args := ctx.peekN(n)
 			r := ctx.applyArrayArgs(x, args[len(args)-1], args[:len(args)-1])
-			ctx.dropN(n)
+			ctx.dropN(n - 1)
 			return r
 		}
 	case *rx:
 		switch n {
 		case 1:
-			return applyRx(xv, ctx.pop())
+			return applyRx(xv, ctx.top())
 		case 2:
 			args := ctx.peekN(2)
 			r := applyRx2(xv, args[1], args[0])
-			ctx.drop2()
+			ctx.drop()
 			return r
 		default:
+			ctx.dropN(n - 1)
 			return Panicf("regexp got too many arguments")
 		}
 	case stringReplacer:
 		if n > 1 {
+			ctx.dropN(n - 1)
 			return Panicf("substitution got too many arguments")
 		}
-		r := ctx.replace(xv, ctx.top())
-		ctx.drop()
-		return r
+		return ctx.replace(xv, ctx.top())
 	default:
+		if n > 1 {
+			ctx.dropN(n - 1)
+		}
 		return Panicf("type %s cannot be applied", x.Type())
 	}
 }
@@ -211,12 +224,9 @@ func (ctx *Context) applyVariadic(v variadic) V {
 	args := ctx.peek()
 	x := args[0]
 	if x.kind == valNil {
-		ctx.dropNoRC()
 		return NewV(&projectionMonad{Fun: newVariadic(v)})
 	}
-	r := ctx.variadics[v](ctx, args)
-	ctx.drop()
-	return r
+	return ctx.variadics[v](ctx, args)
 }
 
 func (ctx *Context) apply2Variadic(v variadic) V {
@@ -224,25 +234,32 @@ func (ctx *Context) apply2Variadic(v variadic) V {
 	if args[0].kind == valNil {
 		if args[1].kind != valNil {
 			arg := args[1]
-			ctx.drop2()
+			ctx.drop()
 			return NewV(&projectionFirst{Fun: newVariadic(v), Arg: arg})
 		}
-		return NewV(&projection{Fun: newVariadic(v), Args: ctx.popN(2)})
-	} else if args[1].kind == valNil {
-		return NewV(&projection{Fun: newVariadic(v), Args: ctx.popN(2)})
+		args := cloneArgs(args)
+		ctx.drop()
+		return NewV(&projection{Fun: newVariadic(v), Args: args})
+	}
+	if args[1].kind == valNil {
+		args := cloneArgs(args)
+		ctx.drop()
+		return NewV(&projection{Fun: newVariadic(v), Args: args})
 	}
 	r := ctx.variadics[v](ctx, args)
-	ctx.drop2()
+	ctx.drop()
 	return r
 }
 
 func (ctx *Context) applyNVariadic(v variadic, n int) V {
 	args := ctx.peekN(n)
 	if hasNil(args) {
-		return NewV(&projection{Fun: newVariadic(v), Args: ctx.popN(n)})
+		args := cloneArgs(args)
+		ctx.dropN(n - 1)
+		return NewV(&projection{Fun: newVariadic(v), Args: args})
 	}
 	r := ctx.variadics[v](ctx, args)
-	ctx.dropN(n)
+	ctx.dropN(n - 1)
 	return r
 }
 
@@ -251,6 +268,9 @@ func (ctx *Context) applyProjection(p *projection, n int) V {
 	nNils := countNils(p.Args)
 	switch {
 	case len(args) > nNils:
+		if n > 1 {
+			ctx.dropN(n - 1)
+		}
 		return panics("too many arguments")
 	case len(args) == nNils:
 		nilc := 0
@@ -278,43 +298,55 @@ func (ctx *Context) applyProjection(p *projection, n int) V {
 				nilc++
 			}
 		}
-		ctx.dropN(n)
+		if n > 1 {
+			ctx.dropN(n - 1)
+		}
 		return NewV(&projection{Fun: NewV(p), Args: vargs})
 	}
 }
 
 func (ctx *Context) applyLambda(id lambda, n int) V {
 	if ctx.callDepth > maxCallDepth {
+		if n > 1 {
+			ctx.dropN(n - 1)
+		}
 		return panics("lambda: exceeded maximum call depth")
 	}
 	lc := ctx.lambdas[int(id)]
 	if lc.Rank < n {
+		if n > 1 {
+			ctx.dropN(n - 1)
+		}
 		return Panicf("lambda: too many arguments: got %d, expected %d", n, lc.Rank)
 	}
 	args := ctx.peekN(n)
 	if lc.Rank > n || hasNil(args) {
 		if n == 1 {
 			if args[0].kind == valNil {
-				ctx.dropNoRC() // drop nil
 				return NewV(&projectionMonad{Fun: newLambda(id)})
 			}
-			return NewV(&projectionFirst{Fun: newLambda(id), Arg: ctx.pop()})
+			return NewV(&projectionFirst{Fun: newLambda(id), Arg: ctx.top()})
 		}
 		if n == 2 && args[1].kind != valNil && args[0].kind == valNil {
 			x := args[1]
-			ctx.drop2() // drop nil
+			ctx.drop() // drop nil
 			return NewV(&projectionFirst{Fun: newLambda(id), Arg: x})
 		}
-		return NewV(&projection{Fun: newLambda(id), Args: ctx.popN(n)})
+		args := cloneArgs(args)
+		ctx.dropN(n - 1)
+		return NewV(&projection{Fun: newLambda(id), Args: args})
 	}
+	unusedFirst := false
 	for _, i := range lc.UnusedArgs {
 		if v := args[i]; v.kind == valBoxed {
 			v.rcdecrRefCounter()
 			v.value = nil
+			if i == 0 {
+				unusedFirst = true
+			}
 		}
 	}
 	nVars := lc.nVars
-	olen := len(ctx.stack)
 	for i := 0; i < nVars; i++ {
 		ctx.stack = append(ctx.stack, V{})
 	}
@@ -327,32 +359,35 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 	ip, err := ctx.execute(lc.Body)
 	ctx.callDepth--
 	ctx.lambda = olambda
+	ctx.frameIdx = oframeIdx
 
-	if err != nil {
-		ctx.updateErrPos(ip, lc)
-		return panics(err.Error())
-	}
-	var r V
-	switch len(ctx.stack) {
-	case olen + nVars + 1:
-		r = ctx.stack[len(ctx.stack)-1]
-		ctx.drop()
-	default:
-		ctx.updateErrPos(ip, lc)
-		// should not happen
-		return Panicf("lambda %d: bad len %d vs old %d (depth: %d): %v", id, len(ctx.stack), olen, ctx.callDepth, ctx.stack)
-	}
-	if nVars > 0 {
-		ctx.dropNnoRC(nVars)
-	}
 	for _, i := range lc.UsedArgs {
+		if i == 0 {
+			continue
+		}
 		if v := args[i]; v.kind == valBoxed {
 			v.rcdecrRefCounter()
 			v.value = nil
 		}
 	}
-	ctx.stack = ctx.stack[:len(ctx.stack)-n]
-	ctx.frameIdx = oframeIdx
+	var r V
+	switch {
+	case err != nil:
+		ctx.updateErrPos(ip, lc)
+		r = panics(err.Error())
+	default:
+		r = ctx.stack[len(ctx.stack)-1]
+	}
+	ctx.drop()
+	if nVars > 0 {
+		ctx.dropNnoRC(nVars)
+	}
+	if n > 1 {
+		ctx.stack = ctx.stack[:len(ctx.stack)-n+1]
+	}
+	if unusedFirst {
+		ctx.stack[len(ctx.stack)-1].IncrRC()
+	}
 	return r
 }
 

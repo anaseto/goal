@@ -47,13 +47,15 @@ func fold2(ctx *Context, args []V) V {
 			return NewI(0)
 		}
 		r := xv.at(0)
+		ctx.pushNoRC(V{})
 		f.IncrRC()
 		for i := 1; i < xv.Len(); i++ {
-			ctx.push(xv.at(i))
+			ctx.replaceTop(xv.at(i))
 			ctx.push(r)
 			r = ctx.applyN(f, 2)
 		}
 		f.DecrRC()
+		ctx.drop()
 		return r
 	default:
 		return x
@@ -199,22 +201,26 @@ const maxConvergeIters = 1_000_000
 func fold2converge(ctx *Context, f, x V) V {
 	n := 0
 	f.IncrRC()
+	ctx.push(x)
 	for {
 		x.IncrRC()
-		ctx.push(x)
 		r := ctx.applyN(f, 1)
 		x.DecrRC()
 		if r.IsPanic() {
 			f.DecrRC()
+			ctx.drop()
 			return r
 		}
 		if Match(r, x) {
 			f.DecrRC()
+			ctx.drop()
 			return r
 		}
+		ctx.replaceTop(r)
 		x = r
 		n++
 		if n > maxConvergeIters {
+			ctx.drop()
 			return panics("f/x : too many iterations")
 		}
 	}
@@ -236,21 +242,26 @@ func fold3(ctx *Context, args []V) V {
 			return r
 		}
 		f.IncrRC()
+		ctx.pushNoRC(V{})
 		for i := 0; i < yv.Len(); i++ {
-			ctx.push(yv.at(i))
+			ctx.replaceTop(yv.at(i))
 			ctx.push(r)
 			r = ctx.applyN(f, 2)
 			if r.IsPanic() {
 				f.DecrRC()
+				ctx.drop()
 				return r
 			}
 		}
 		f.DecrRC()
+		ctx.drop()
 		return Canonical(r)
 	default:
 		ctx.push(y)
 		ctx.push(args[2])
-		return ctx.applyN(f, 2)
+		r := ctx.applyN(f, 2)
+		ctx.drop()
+		return r
 	}
 }
 
@@ -270,28 +281,31 @@ func fold3While(ctx *Context, args []V) V {
 	if x.IsFunction() {
 		f.IncrRC()
 		x.IncrRC()
+		ctx.push(y)
 		for {
-			ctx.push(y)
 			y.IncrRC()
 			cond := ctx.applyN(x, 1)
 			y.DecrRC()
 			if cond.IsPanic() {
 				x.DecrRC()
 				f.DecrRC()
+				ctx.drop()
 				return cond
 			}
 			if !isTrue(cond) {
 				x.DecrRC()
 				f.DecrRC()
+				ctx.drop()
 				return y
 			}
-			ctx.push(y)
 			y = ctx.applyN(f, 1)
 			if y.IsPanic() {
 				x.DecrRC()
 				f.DecrRC()
+				ctx.drop()
 				return y
 			}
+			ctx.replaceTop(y)
 		}
 	}
 	return panicType("x f/y", "x", x)
@@ -299,15 +313,18 @@ func fold3While(ctx *Context, args []V) V {
 
 func fold3doTimes(ctx *Context, n int64, f, y V) V {
 	f.IncrRC()
+	ctx.push(y)
 	for i := int64(0); i < n; i++ {
-		ctx.push(y)
 		y = ctx.applyN(f, 1)
 		if y.IsPanic() {
 			f.DecrRC()
+			ctx.drop()
 			return y
 		}
+		ctx.replaceTop(y)
 	}
 	f.DecrRC()
+	ctx.drop()
 	return y
 }
 
@@ -340,8 +357,9 @@ func scan2(ctx *Context, f, x V) V {
 		}
 		r := []V{xv.at(0)}
 		f.IncrRC()
+		ctx.pushNoRC(V{})
 		for i := 1; i < xv.Len(); i++ {
-			ctx.push(xv.at(i))
+			ctx.replaceTop(xv.at(i))
 			last := r[len(r)-1]
 			ctx.push(last)
 			last.IncrRC()
@@ -349,11 +367,13 @@ func scan2(ctx *Context, f, x V) V {
 			last.DecrRC()
 			if next.IsPanic() {
 				f.DecrRC()
+				ctx.drop()
 				return next
 			}
 			r = append(r, next)
 		}
 		f.DecrRC()
+		ctx.drop()
 		return Canonical(NewAV(r))
 	default:
 		return x
@@ -369,22 +389,26 @@ func scan2converge(ctx *Context, f, x V) V {
 		}
 	}()
 	f.IncrRC()
+	ctx.push(x)
 	for {
 		x.IncrRC()
 		r = append(r, x)
-		ctx.push(x)
 		y := ctx.applyN(f, 1)
 		if y.IsPanic() {
 			f.DecrRC()
+			ctx.drop()
 			return y
 		}
 		if Match(y, x) {
 			f.DecrRC()
+			ctx.drop()
 			return Canonical(NewAV(r))
 		}
+		ctx.replaceTop(y)
 		x = y
 		n++
 		if n > maxConvergeIters {
+			ctx.drop()
 			return panics(`f\x : too many iterations`)
 		}
 	}
@@ -598,11 +622,12 @@ func scan3(ctx *Context, args []V) V {
 		first := ctx.applyN(f, 2)
 		if first.IsPanic() {
 			f.DecrRC()
+			ctx.drop()
 			return first
 		}
 		r := []V{first}
 		for i := 1; i < yv.Len(); i++ {
-			ctx.push(yv.at(i))
+			ctx.replaceTop(yv.at(i))
 			last := r[len(r)-1]
 			ctx.push(last)
 			last.IncrRC()
@@ -610,16 +635,20 @@ func scan3(ctx *Context, args []V) V {
 			last.DecrRC()
 			if next.IsPanic() {
 				f.DecrRC()
+				ctx.drop()
 				return next
 			}
 			r = append(r, next)
 		}
 		f.DecrRC()
+		ctx.drop()
 		return Canonical(NewAV(r))
 	default:
 		ctx.push(y)
 		ctx.push(x)
-		return ctx.applyN(f, 2)
+		r := ctx.applyN(f, 2)
+		ctx.drop()
+		return r
 	}
 }
 
@@ -640,28 +669,31 @@ func scan3While(ctx *Context, args []V) V {
 		r := []V{y}
 		f.IncrRC()
 		x.IncrRC()
+		ctx.push(y)
 		for {
-			ctx.push(y)
 			y.IncrRC()
 			cond := ctx.applyN(x, 1)
 			y.DecrRC()
 			if cond.IsPanic() {
 				f.DecrRC()
 				x.DecrRC()
+				ctx.drop()
 				return cond
 			}
 			if !isTrue(cond) {
 				f.DecrRC()
 				x.DecrRC()
+				ctx.drop()
 				return Canonical(NewAV(r))
 			}
-			ctx.push(y)
 			y = ctx.applyN(f, 1)
 			if y.IsPanic() {
 				f.DecrRC()
 				x.DecrRC()
+				ctx.drop()
 				return y
 			}
+			ctx.replaceTop(y)
 			r = append(r, y)
 		}
 	}
@@ -671,16 +703,19 @@ func scan3While(ctx *Context, args []V) V {
 func scan3doTimes(ctx *Context, n int64, f, y V) V {
 	r := []V{y}
 	f.IncrRC()
+	ctx.push(y)
 	for i := int64(0); i < n; i++ {
-		ctx.push(y)
 		y = ctx.applyN(f, 1)
 		if y.IsPanic() {
 			f.DecrRC()
+			ctx.drop()
 			return y
 		}
+		ctx.replaceTop(y)
 		r = append(r, y)
 	}
 	f.DecrRC()
+	ctx.drop()
 	return Canonical(NewAV(r))
 }
 
@@ -694,16 +729,19 @@ func each2(ctx *Context, args []V) V {
 	case array:
 		r := make([]V, 0, xv.Len())
 		f.IncrRC()
+		ctx.pushNoRC(V{})
 		for i := 0; i < xv.Len(); i++ {
-			ctx.push(xv.at(i))
+			ctx.replaceTop(xv.at(i))
 			next := ctx.applyN(f, 1)
 			if next.IsPanic() {
 				f.DecrRC()
+				ctx.drop()
 				return next
 			}
 			r = append(r, next)
 		}
 		f.DecrRC()
+		ctx.drop()
 		return Canonical(NewAV(r))
 	default:
 		// should not happen
@@ -727,34 +765,46 @@ func each3(ctx *Context, args []V) V {
 		ylen := ya.Len()
 		r := make([]V, 0, ylen)
 		f.IncrRC()
+		x.IncrRC()
+		ctx.pushNoRC(V{})
 		for i := 0; i < ylen; i++ {
-			ctx.push(ya.at(i))
+			ctx.replaceTop(ya.at(i))
 			ctx.push(x)
 			next := ctx.applyN(f, 2)
 			if next.IsPanic() {
 				f.DecrRC()
+				x.DecrRC()
+				ctx.drop()
 				return next
 			}
 			r = append(r, next)
 		}
 		f.DecrRC()
+		x.DecrRC()
+		ctx.drop()
 		return Canonical(NewAV(r))
 	}
 	if !okay {
 		xlen := xa.Len()
 		r := make([]V, 0, xlen)
 		f.IncrRC()
+		y.IncrRC()
+		ctx.pushNoRC(V{})
 		for i := 0; i < xlen; i++ {
-			ctx.push(y)
+			ctx.replaceTop(y)
 			ctx.push(xa.at(i))
 			next := ctx.applyN(f, 2)
 			if next.IsPanic() {
 				f.DecrRC()
+				y.DecrRC()
+				ctx.drop()
 				return next
 			}
 			r = append(r, next)
 		}
 		f.DecrRC()
+		y.DecrRC()
+		ctx.drop()
 		return Canonical(NewAV(r))
 	}
 	xlen := xa.Len()
@@ -763,16 +813,19 @@ func each3(ctx *Context, args []V) V {
 	}
 	r := make([]V, 0, xlen)
 	f.IncrRC()
+	ctx.pushNoRC(V{})
 	for i := 0; i < xlen; i++ {
-		ctx.push(ya.at(i))
+		ctx.replaceTop(ya.at(i))
 		ctx.push(xa.at(i))
 		next := ctx.applyN(f, 2)
 		if next.IsPanic() {
 			f.DecrRC()
+			ctx.drop()
 			return next
 		}
 		r = append(r, next)
 	}
 	f.DecrRC()
+	ctx.drop()
 	return Canonical(NewAV(r))
 }

@@ -70,18 +70,18 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			if r.IsPanic() {
 				return ip - 1, newExecError(r)
 			}
-			ctx.push(r)
+			ctx.replaceTop(r)
 		case opApplyV:
 			v := variadic(ops[ip])
 			r := ctx.applyVariadic(v)
 			if r.IsPanic() {
 				return ip - 1, newExecError(r)
 			}
-			ctx.push(r)
+			ctx.replaceTop(r)
 			ip++
 		case opDerive:
 			v := variadic(ops[ip])
-			ctx.push(NewV(&derivedVerb{Fun: v, Arg: ctx.pop()}))
+			ctx.stack[len(ctx.stack)-1] = NewV(&derivedVerb{Fun: v, Arg: ctx.top()})
 			ip++
 		case opApply2:
 			x := ctx.pop()
@@ -89,14 +89,14 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			if r.IsPanic() {
 				return ip - 1, newExecError(r)
 			}
-			ctx.push(r)
+			ctx.replaceTop(r)
 		case opApply2V:
 			v := variadic(ops[ip])
 			r := ctx.apply2Variadic(v)
 			if r.IsPanic() {
 				return ip - 1, newExecError(r)
 			}
-			ctx.push(r)
+			ctx.replaceTop(r)
 			ip++
 		case opApplyN:
 			x := ctx.pop()
@@ -104,7 +104,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			if r.IsPanic() {
 				return ip - 1, newExecError(r)
 			}
-			ctx.push(r)
+			ctx.replaceTop(r)
 			ip++
 		case opApplyNV:
 			v := variadic(ops[ip])
@@ -113,7 +113,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			if r.IsPanic() {
 				return ip - 2, newExecError(r)
 			}
-			ctx.push(r)
+			ctx.replaceTop(r)
 			ip++
 		case opDrop:
 			ctx.drop()
@@ -177,17 +177,13 @@ func (ctx *Context) top() V {
 	return ctx.stack[len(ctx.stack)-1]
 }
 
-func (ctx *Context) popN(n int) []V {
-	topN := ctx.stack[len(ctx.stack)-n:]
-	args := cloneArgs(topN)
-	for i, v := range topN {
-		if v.kind == valBoxed {
-			v.rcdecrRefCounter()
-			topN[i].value = nil
-		}
+func (ctx *Context) replaceTop(x V) {
+	v := &ctx.stack[len(ctx.stack)-1]
+	if v.kind == valBoxed {
+		v.rcdecrRefCounter()
 	}
-	ctx.stack = ctx.stack[:len(ctx.stack)-n]
-	return args
+	*v = x
+	x.IncrRC()
 }
 
 func (ctx *Context) peek() []V {
@@ -201,26 +197,9 @@ func (ctx *Context) peekN(n int) []V {
 func (ctx *Context) drop() {
 	if v := ctx.stack[len(ctx.stack)-1]; v.kind == valBoxed {
 		v.rcdecrRefCounter()
-		//ctx.stack[len(ctx.stack)-1].value = nil
+		v.value = nil
 	}
 	ctx.stack = ctx.stack[:len(ctx.stack)-1]
-}
-
-func (ctx *Context) dropNoRC() {
-	ctx.stack = ctx.stack[:len(ctx.stack)-1]
-}
-
-func (ctx *Context) drop2() {
-	if v := ctx.stack[len(ctx.stack)-2]; v.kind == valBoxed {
-		v.rcdecrRefCounter()
-		//ctx.stack[len(ctx.stack)-2].value = nil
-	}
-	last := len(ctx.stack) - 1
-	if ctx.stack[last].kind == valBoxed {
-		ctx.stack[last].rcdecrRefCounter()
-		ctx.stack[last].value = nil
-	}
-	ctx.stack = ctx.stack[:len(ctx.stack)-2]
 }
 
 func (ctx *Context) dropN(n int) {
