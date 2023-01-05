@@ -195,7 +195,7 @@ func (ctx *Context) peekN(n int) []V {
 }
 
 func (ctx *Context) drop() {
-	if v := ctx.stack[len(ctx.stack)-1]; v.kind == valBoxed {
+	if v := &ctx.stack[len(ctx.stack)-1]; v.kind == valBoxed {
 		v.rcdecrRefCounter()
 		v.value = nil
 	}
