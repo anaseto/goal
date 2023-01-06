@@ -1,7 +1,6 @@
 package goal
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -94,13 +93,6 @@ var vStrings = [...]string{
 	vEach:     "'",
 	vFold:     "/",
 	vScan:     "\\",
-}
-
-func (v variadic) String() string {
-	if int(v) <= len(vStrings)-1 {
-		return vStrings[v]
-	}
-	return fmt.Sprintf("{Variadic %d}", v)
 }
 
 func (ctx *Context) initVariadics() {
