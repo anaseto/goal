@@ -338,7 +338,7 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 	}
 	unusedFirst := false
 	for _, i := range lc.UnusedArgs {
-		if v := args[i]; v.kind == valBoxed {
+		if v := &args[i]; v.kind == valBoxed {
 			v.rcdecrRefCounter()
 			v.value = nil
 			if i == 0 {
@@ -362,7 +362,7 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 	ctx.frameIdx = oframeIdx
 
 	for _, i := range lc.UsedArgs {
-		if v := args[i]; v.kind == valBoxed {
+		if v := &args[i]; v.kind == valBoxed {
 			if i == 0 {
 				v.IncrRC()
 				continue
