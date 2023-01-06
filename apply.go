@@ -362,11 +362,11 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 	ctx.frameIdx = oframeIdx
 
 	for _, i := range lc.UsedArgs {
-		if i == 0 {
-			continue
-		}
 		if v := args[i]; v.kind == valBoxed {
-			v.rcdecrRefCounter()
+			if i == 0 {
+				v.IncrRC()
+				continue
+			}
 			v.value = nil
 		}
 	}
