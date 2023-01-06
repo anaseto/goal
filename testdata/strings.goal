@@ -48,8 +48,16 @@ sub["a";"b"]"aaa" / "bbb"
 sub["a";"b"]',"aaa" / ,"bbb"
 sub["a";"b";2]"aaa" / "bba"
 2 sub["a";"b";1]/"aaa" / "bba"
+$sub["a";"b";2] / `sub["a";"b";2]`
+$sub["a";"b"] / `sub["a";"b";-1]`
+sub["a";"b"]~sub["a";"c"] / 0
+sub["a";"b"]~sub["a";"b"] / 1
+sub["a";"b";2]~sub["a";"b";2] / 1
+sub["a";"b";3]~sub["a";"b";2] / 0
 sub["a";"b";2]',"aaa" / ,"bba"
 sub["b" "d" "c" "e"]"abc" / "ade"
+$sub["b" "d" "c" "e"] / `sub["b" "d" "c" "e"]`
+sub["b" "d" "c" "e"]~ sub["b" "c";"d" "e"] / 1
 sub["b" "c";"d" "e"]"abc" / "ade"
 sub["b";"d"]"abc" "dbe" / "adc" "dde"
 sub["b";"d"]("abc" "dbe";"bac") / ("adc" "dde";"dac")

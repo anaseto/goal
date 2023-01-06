@@ -236,3 +236,5 @@ sign[1;2] / too many arguments
 rotate[1;2;3] / too many arguments
 shift[1;2;3] / too many arguments
 rshift[1;2;3] / too many arguments
+"pkg" eval `1+"a"` / type
+"pkg" eval `f:{1+"a"};f 0` / type
