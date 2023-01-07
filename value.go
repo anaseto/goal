@@ -183,7 +183,15 @@ func (x V) IsFunction() bool {
 }
 
 // Rank returns the default rank of the value, that is the number of arguments
-// it normally takes. It returns 0 for non-function values.
+// it normally takes. It returns 0 for non-function values. This default rank
+// is used when a function is used in an adverbial expression that has
+// different semantics depending on the function arity. Currently, ranks are as
+// follows:
+//
+//	variadic	2
+//	projections	number of nils
+//	lambda		number of arguments
+//	derived verb	1
 func (x V) Rank(ctx *Context) int {
 	switch x.kind {
 	case valVariadic:
@@ -541,8 +549,8 @@ func (p *projectionFirst) rank(ctx *Context) int { return 1 }
 // Rank for a curryfied function is 1.
 func (p *projectionMonad) rank(ctx *Context) int { return 1 }
 
-// Rank returns 2 for derived verbs.
-func (r *derivedVerb) rank(ctx *Context) int { return 2 }
+// Rank returns 1 for derived verbs.
+func (r *derivedVerb) rank(ctx *Context) int { return 1 }
 
 func (p *projection) Matches(x Value) bool {
 	xp, ok := x.(*projection)
