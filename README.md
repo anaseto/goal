@@ -21,8 +21,8 @@ It's main distinctive features are as follows:
   For example, backquotes produce Go-like raw strings instead of symbols,
   rx/[a-z]/ is a regular expression literal (checked and processed at
   compile-time), and there are no tacit compositions, no tables nor
-  dictionnaries, and digraph operator verbs and adverbs are gone or done
-  differently (except for global assignment with ::).
+  dictionnaries (at least yet!), and digraph operator verbs and adverbs are
+  gone or done differently (except for global assignment with ::).
 * Primitive semantics are both inspired from the
   [ngn/k](https://codeberg.org/ngn/k) variant of the K language and
   [BQN](https://mlochbaum.github.io/BQN/index.html). For example, group,
