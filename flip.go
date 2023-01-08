@@ -18,7 +18,7 @@ func flip(x V) V {
 			switch {
 			case lines < 0:
 				lines = nl
-			case nl >= 1 && nl != lines:
+			case nl != lines:
 				return Panicf("line length mismatch: %d vs %d", nl, lines)
 			}
 		}
