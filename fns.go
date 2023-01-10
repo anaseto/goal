@@ -90,13 +90,13 @@ func where(x V) V {
 		for _, xi := range xv.Slice {
 			n += b2i(xi)
 		}
-		r := make([]int64, 0, n)
+		r := make([]int64, n+1)
+		j := int64(0)
 		for i, xi := range xv.Slice {
-			if xi {
-				r = append(r, int64(i))
-			}
+			r[j] = int64(i)
+			j += b2i(xi)
 		}
-		return NewAI(r)
+		return NewAI(r[:len(r)-1])
 	case *AI:
 		n := int64(0)
 		for _, xi := range xv.Slice {

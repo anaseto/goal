@@ -7,19 +7,25 @@ import (
 )
 
 // b2i converts a boolean to an integer.
-func b2i(b bool) (i int64) {
+func b2i(b bool) int64 {
+	var i int64
 	if b {
 		i = 1
+	} else {
+		i = 0
 	}
-	return
+	return i
 }
 
 // b2i converts a boolean to a float.
-func b2f(b bool) (f float64) {
+func b2f(b bool) float64 {
+	var f float64
 	if b {
 		f = 1
+	} else {
+		f = 0
 	}
-	return
+	return f
 }
 
 // divideF divides two floats, returning infinity with appropriate sign when
