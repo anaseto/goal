@@ -5,7 +5,7 @@ package goal
 // Apply calls a value with a single argument.
 func (ctx *Context) Apply(x, y V) V {
 	ctx.push(y)
-	r := ctx.applyN(x, 1)
+	r := x.applyN(ctx, 1)
 	ctx.drop()
 	return r
 }
@@ -14,7 +14,7 @@ func (ctx *Context) Apply(x, y V) V {
 func (ctx *Context) Apply2(x, y, z V) V {
 	ctx.push(z)
 	ctx.push(y)
-	r := ctx.applyN(x, 2)
+	r := x.applyN(ctx, 2)
 	ctx.drop()
 	return r
 }
@@ -27,20 +27,25 @@ func (ctx *Context) ApplyN(x V, args []V) V {
 		panic("ApplyN: len(args) should be > 0")
 	}
 	ctx.pushArgs(args)
-	r := ctx.applyN(x, len(args))
+	r := x.applyN(ctx, len(args))
 	ctx.drop()
 	return r
 }
 
-// applicable represents values than can be applied.
+// applicable represents boxed values than can be applied.
 type applicable interface {
 	Value
-	apply(*Context, int) V
+
+	// applyN applies the value with the top n arguments in the stack and
+	// returns the result. It consumes only n-1 arguments, but does not
+	// replace top with the result.
+	applyN(*Context, int) V
 }
 
-// applyN applies x with the top n arguments in the stack. It consumes only n-1
-// arguments, but does not replace top with the result.
-func (ctx *Context) applyN(x V, n int) V {
+// applyN applies x with the top n arguments in the stack and returns the
+// result. It consumes only n-1 arguments, but does not replace top with the
+// result.
+func (x V) applyN(ctx *Context, n int) V {
 	//slen := len(ctx.stack)
 	//defer func() {
 	//if len(ctx.stack)+n-1 != slen {
@@ -49,20 +54,20 @@ func (ctx *Context) applyN(x V, n int) V {
 	//}()
 	switch x.kind {
 	case valLambda:
-		return ctx.applyLambda(x.lambda(), n)
+		return x.lambda().applyN(ctx, n)
 	case valVariadic:
 		switch n {
 		case 1:
-			return ctx.applyVariadic(x.variadic())
+			return x.variadic().apply(ctx)
 		case 2:
-			return ctx.apply2Variadic(x.variadic())
+			return x.variadic().apply2(ctx)
 		default:
-			return ctx.applyNVariadic(x.variadic(), n)
+			return x.variadic().applyN(ctx, n)
 		}
 	}
 	switch xv := x.value.(type) {
 	case applicable:
-		return xv.apply(ctx, n)
+		return xv.applyN(ctx, n)
 	default:
 		if n > 1 {
 			ctx.dropN(n - 1)
@@ -71,7 +76,7 @@ func (ctx *Context) applyN(x V, n int) V {
 	}
 }
 
-func (ctx *Context) applyVariadic(v variadic) V {
+func (v variadic) apply(ctx *Context) V {
 	args := ctx.peek()
 	x := args[0]
 	if x.kind == valNil {
@@ -80,7 +85,7 @@ func (ctx *Context) applyVariadic(v variadic) V {
 	return ctx.variadics[v](ctx, args)
 }
 
-func (ctx *Context) apply2Variadic(v variadic) V {
+func (v variadic) apply2(ctx *Context) V {
 	args := ctx.peekN(2)
 	if args[0].kind == valNil {
 		if args[1].kind != valNil {
@@ -102,7 +107,7 @@ func (ctx *Context) apply2Variadic(v variadic) V {
 	return r
 }
 
-func (ctx *Context) applyNVariadic(v variadic, n int) V {
+func (v variadic) applyN(ctx *Context, n int) V {
 	args := ctx.peekN(n)
 	if hasNil(args) {
 		args := cloneArgs(args)
@@ -114,7 +119,7 @@ func (ctx *Context) applyNVariadic(v variadic, n int) V {
 	return r
 }
 
-func (ctx *Context) applyLambda(id lambda, n int) V {
+func (id lambda) applyN(ctx *Context, n int) V {
 	if ctx.callDepth > maxCallDepth {
 		if n > 1 {
 			ctx.dropN(n - 1)
@@ -200,7 +205,7 @@ func (ctx *Context) applyLambda(id lambda, n int) V {
 	return r
 }
 
-func (dv *derivedVerb) apply(ctx *Context, n int) V {
+func (dv *derivedVerb) applyN(ctx *Context, n int) V {
 	ctx.push(dv.Arg)
 	args := ctx.peekN(n + 1)
 	if hasNil(args) {
@@ -216,24 +221,24 @@ func (dv *derivedVerb) apply(ctx *Context, n int) V {
 	return r
 }
 
-func (p *projectionFirst) apply(ctx *Context, n int) V {
+func (p *projectionFirst) applyN(ctx *Context, n int) V {
 	if n > 1 {
 		ctx.dropN(n - 1)
 		return Panicf("too many arguments: got %d, expected 1", n)
 	}
 	ctx.push(p.Arg)
-	return ctx.applyN(p.Fun, 2)
+	return p.Fun.applyN(ctx, 2)
 }
 
-func (p *projectionMonad) apply(ctx *Context, n int) V {
+func (p *projectionMonad) applyN(ctx *Context, n int) V {
 	if n > 1 {
 		ctx.dropN(n - 1)
 		return Panicf("too many arguments: got %d, expected 1", n)
 	}
-	return ctx.applyN(p.Fun, 1)
+	return p.Fun.applyN(ctx, 1)
 }
 
-func (p *projection) apply(ctx *Context, n int) V {
+func (p *projection) applyN(ctx *Context, n int) V {
 	args := ctx.peekN(n)
 	nNils := countNils(p.Args)
 	switch {
@@ -253,7 +258,7 @@ func (p *projection) apply(ctx *Context, n int) V {
 				nilc++
 			}
 		}
-		r := ctx.applyN(p.Fun, len(p.Args))
+		r := p.Fun.applyN(ctx, len(p.Args))
 		ctx.dropN(n)
 		return r
 	default:
@@ -275,7 +280,7 @@ func (p *projection) apply(ctx *Context, n int) V {
 	}
 }
 
-func (s S) apply(ctx *Context, n int) V {
+func (s S) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
 		return applyS(s, ctx.top())
@@ -290,7 +295,7 @@ func (s S) apply(ctx *Context, n int) V {
 	}
 }
 
-func (re *rx) apply(ctx *Context, n int) V {
+func (re *rx) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
 		return applyRx(re, ctx.top())
@@ -305,7 +310,7 @@ func (re *rx) apply(ctx *Context, n int) V {
 	}
 }
 
-func (x *AB) apply(ctx *Context, n int) V {
+func (x *AB) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
 		return applyArray(x, ctx.top())
@@ -317,7 +322,7 @@ func (x *AB) apply(ctx *Context, n int) V {
 	}
 }
 
-func (x *AI) apply(ctx *Context, n int) V {
+func (x *AI) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
 		return applyArray(x, ctx.top())
@@ -329,7 +334,7 @@ func (x *AI) apply(ctx *Context, n int) V {
 	}
 }
 
-func (x *AF) apply(ctx *Context, n int) V {
+func (x *AF) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
 		return applyArray(x, ctx.top())
@@ -341,7 +346,7 @@ func (x *AF) apply(ctx *Context, n int) V {
 	}
 }
 
-func (x *AS) apply(ctx *Context, n int) V {
+func (x *AS) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
 		return applyArray(x, ctx.top())
@@ -353,7 +358,7 @@ func (x *AS) apply(ctx *Context, n int) V {
 	}
 }
 
-func (x *AV) apply(ctx *Context, n int) V {
+func (x *AV) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
 		return applyArray(x, ctx.top())
@@ -524,7 +529,7 @@ func (x *AS) atIndices(y []int64) V {
 	return NewAS(r)
 }
 
-func (r *nReplacer) apply(ctx *Context, n int) V {
+func (r *nReplacer) applyN(ctx *Context, n int) V {
 	if n > 1 {
 		ctx.dropN(n - 1)
 		return Panicf("substitution got too many arguments")
@@ -532,7 +537,7 @@ func (r *nReplacer) apply(ctx *Context, n int) V {
 	return ctx.replace(r, ctx.top())
 }
 
-func (r *replacer) apply(ctx *Context, n int) V {
+func (r *replacer) applyN(ctx *Context, n int) V {
 	if n > 1 {
 		ctx.dropN(n - 1)
 		return Panicf("substitution got too many arguments")
@@ -540,7 +545,7 @@ func (r *replacer) apply(ctx *Context, n int) V {
 	return ctx.replace(r, ctx.top())
 }
 
-func (r *rxReplacer) apply(ctx *Context, n int) V {
+func (r *rxReplacer) applyN(ctx *Context, n int) V {
 	if n > 1 {
 		ctx.dropN(n - 1)
 		return Panicf("substitution got too many arguments")

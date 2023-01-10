@@ -292,7 +292,7 @@ func VEqual(ctx *Context, args []V) V {
 		x, y := args[1], args[0]
 		if x.IsFunction() {
 			ctx.push(y)
-			r := ctx.applyN(x, 1)
+			r := x.applyN(ctx, 1)
 			ctx.drop()
 			if r.IsPanic() {
 				return r
@@ -350,7 +350,7 @@ func VTake(ctx *Context, args []V) V {
 		x, y := args[1], args[0]
 		if x.IsFunction() {
 			ctx.push(y)
-			r := ctx.applyN(x, 1)
+			r := x.applyN(ctx, 1)
 			ctx.drop()
 			if r.IsPanic() {
 				return r
@@ -372,7 +372,7 @@ func VDrop(ctx *Context, args []V) V {
 		x, y := args[1], args[0]
 		if x.IsFunction() {
 			ctx.push(y)
-			r := ctx.applyN(x, 1)
+			r := x.applyN(ctx, 1)
 			ctx.drop()
 			if r.IsPanic() {
 				return r
@@ -436,7 +436,7 @@ func VApply(ctx *Context, args []V) V {
 	case 2:
 		x := args[1]
 		ctx.push(args[0])
-		r := ctx.applyN(x, 1)
+		r := x.applyN(ctx, 1)
 		ctx.drop()
 		return r
 	case 3:
@@ -459,7 +459,7 @@ func VApplyN(ctx *Context, args []V) V {
 		for i := av.Len() - 1; i >= 0; i-- {
 			ctx.push(av.at(i))
 		}
-		r := ctx.applyN(x, av.Len())
+		r := x.applyN(ctx, av.Len())
 		ctx.drop()
 		return r
 	case 3:
