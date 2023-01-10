@@ -310,3 +310,11 @@ func BenchmarkAppend2(b *testing.B) {
 		ctx.Eval("500 {x:x,1;x,1}/a")
 	}
 }
+
+func BenchmarkIndex(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:!10000")
+	for n := 0; n < b.N; n++ {
+		ctx.Eval("1000 {a[42]}/1")
+	}
+}
