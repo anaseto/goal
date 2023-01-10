@@ -204,10 +204,11 @@ func (ctx *Context) drop() {
 
 func (ctx *Context) dropN(n int) {
 	topN := ctx.stack[len(ctx.stack)-n:]
-	for i, v := range topN {
+	for i := range topN {
+		v := &topN[i]
 		if v.kind == valBoxed {
 			v.rcdecrRefCounter()
-			topN[i].value = nil
+			v.value = nil
 		}
 	}
 	ctx.stack = ctx.stack[:len(ctx.stack)-n]
@@ -215,9 +216,10 @@ func (ctx *Context) dropN(n int) {
 
 func (ctx *Context) dropNnoRC(n int) {
 	topN := ctx.stack[len(ctx.stack)-n:]
-	for i, v := range topN {
+	for i := range topN {
+		v := &topN[i]
 		if v.kind == valBoxed {
-			topN[i].value = nil
+			v.value = nil
 		}
 	}
 	ctx.stack = ctx.stack[:len(ctx.stack)-n]
