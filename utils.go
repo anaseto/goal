@@ -73,6 +73,13 @@ func maxI(x, y int64) int64 {
 	return x
 }
 
+func maxInt(x, y int) int {
+	if x < y {
+		return y
+	}
+	return x
+}
+
 func minS(x, y S) S {
 	if x < y {
 		return x

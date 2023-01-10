@@ -549,8 +549,19 @@ func (p *projectionFirst) rank(ctx *Context) int { return 1 }
 // Rank for a curryfied function is 1.
 func (p *projectionMonad) rank(ctx *Context) int { return 1 }
 
-// Rank returns 1 for derived verbs.
-func (r *derivedVerb) rank(ctx *Context) int { return 1 }
+// Rank returns the rank of a derived verb.
+func (r *derivedVerb) rank(ctx *Context) int {
+	switch r.Fun {
+	case vEach:
+		// f' has same rank as f
+		return r.Arg.Rank(ctx)
+	default:
+		// f/ and f\ have rank derived from f, except that by default
+		// it's one less, because we consider as default case the
+		// non-seeded case.
+		return maxInt(0, r.Arg.Rank(ctx)-1)
+	}
+}
 
 func (p *projection) Matches(x Value) bool {
 	xp, ok := x.(*projection)
