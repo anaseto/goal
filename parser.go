@@ -241,7 +241,7 @@ loop:
 			return es, nil
 		}
 	case *astDerivedVerb:
-		e, err = p.apply2(e, es[len(es)-1])
+		e, err = p.apply2Adverb(e, es[len(es)-1])
 		es[len(es)-1] = e
 		if err != nil {
 			return es, err
@@ -433,6 +433,16 @@ func (p *parser) assignAmendOp(identok *astToken, args []expr,
 
 func (p *parser) apply2(verb, left expr) (expr, error) {
 	a := &astApply2{
+		Verb: verb,
+		Left: left,
+	}
+	es, err := p.subExpr()
+	a.Right = es
+	return a, err
+}
+
+func (p *parser) apply2Adverb(verb, left expr) (expr, error) {
+	a := &astApply2Adverb{
 		Verb: verb,
 		Left: left,
 	}

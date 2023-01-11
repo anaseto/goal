@@ -87,7 +87,13 @@ type astParen struct {
 }
 
 type astApply2 struct {
-	Verb  expr // dyad or derived verb
+	Verb  expr // dyad
+	Left  expr
+	Right expr
+}
+
+type astApply2Adverb struct {
+	Verb  expr // derived verb
 	Left  expr
 	Right expr
 }
@@ -128,6 +134,7 @@ func (st *astStrand) node()       {}
 func (dv *astDerivedVerb) node()  {}
 func (p *astParen) node()         {}
 func (a *astApply2) node()        {}
+func (a *astApply2Adverb) node()  {}
 func (a *astApplyN) node()        {}
 func (l *astList) node()          {}
 func (b *astSeq) node()           {}

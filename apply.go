@@ -213,9 +213,6 @@ func (dv *derivedVerb) applyN(ctx *Context, n int) V {
 		ctx.dropN(n)
 		return NewV(&projection{Fun: NewV(dv), Args: args})
 	}
-	if n > 1 {
-		ctx.swap()
-	}
 	r := ctx.variadics[dv.Fun](ctx, args)
 	ctx.dropN(n)
 	return r

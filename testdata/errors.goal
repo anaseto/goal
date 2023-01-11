@@ -217,7 +217,7 @@ $[1;2;3] / too many arguments
 ,[1;2;3] / too many arguments
 @[1;2;3;4;5] / too many arguments
 .[1;2;3;4;5] / too many arguments
-(')[1;2;3;4;5] / too many arguments
+(')[1;2;3;4;5] / not a function
 (/)[1;2;3;4;5] / too many arguments
 (\)[1;2;3;4;5] / too many arguments
 csv[1;2;3] / too many arguments

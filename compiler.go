@@ -332,6 +332,8 @@ func (c *compiler) doExpr(e expr, n int) error {
 		}
 	case *astApply2:
 		return c.doApply2(e, n)
+	case *astApply2Adverb:
+		return c.doApply2Adverb(e, n)
 	case *astApplyN:
 		return c.doApplyN(e, n)
 	case *astList:
@@ -909,18 +911,31 @@ func (c *compiler) doApply2(a *astApply2, n int) error {
 			return err
 		}
 		c.doVariadic(e, 2)
+	default:
+		panic(fmt.Sprintf("bad verb type for apply2: %v", e))
+	}
+	c.applyN(n)
+	return nil
+}
+
+func (c *compiler) doApply2Adverb(a *astApply2Adverb, n int) error {
+	err := c.doExpr(a.Right, 0)
+	if err != nil {
+		return err
+	}
+	switch e := a.Verb.(type) {
 	case *astDerivedVerb:
-		err = c.doExpr(e.Verb, 0)
+		err = c.doExpr(a.Left, 0)
 		if err != nil {
 			return err
 		}
-		err = c.doExpr(a.Left, 0)
+		err = c.doExpr(e.Verb, 0)
 		if err != nil {
 			return err
 		}
 		c.doVariadic(e.Adverb, 3)
 	default:
-		panic(fmt.Sprintf("bad verb type for apply2: %v", e))
+		panic(fmt.Sprintf("bad verb type for apply2adverb: %v", e))
 	}
 	c.applyN(n)
 	return nil

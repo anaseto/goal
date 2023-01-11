@@ -488,11 +488,9 @@ func VEach(ctx *Context, args []V) V {
 	case 1:
 		return panics("' : not enough arguments")
 	case 2:
-		return each2(ctx, args)
-	case 3:
-		return each3(ctx, args)
+		return each2(ctx, args[1], args[0])
 	default:
-		return panicRank("'")
+		return eachN(ctx, args)
 	}
 }
 

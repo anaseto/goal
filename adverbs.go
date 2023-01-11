@@ -227,7 +227,7 @@ func fold2converge(ctx *Context, f, x V) V {
 }
 
 func fold3(ctx *Context, args []V) V {
-	f := args[1]
+	f := args[2]
 	if !f.IsFunction() {
 		return Panicf("x F/y : F not a function (%s)", f.Type())
 	}
@@ -237,7 +237,7 @@ func fold3(ctx *Context, args []V) V {
 	y := args[0]
 	switch yv := y.value.(type) {
 	case array:
-		r := args[2]
+		r := args[1]
 		if yv.Len() == 0 {
 			return r
 		}
@@ -258,7 +258,7 @@ func fold3(ctx *Context, args []V) V {
 		return Canonical(r)
 	default:
 		ctx.push(y)
-		ctx.push(args[2])
+		ctx.push(args[1])
 		r := f.applyN(ctx, 2)
 		ctx.drop()
 		return r
@@ -266,8 +266,8 @@ func fold3(ctx *Context, args []V) V {
 }
 
 func fold3While(ctx *Context, args []V) V {
-	f := args[1]
-	x := args[2]
+	f := args[2]
+	x := args[1]
 	y := args[0]
 	if x.IsI() {
 		return fold3doTimes(ctx, x.I(), f, y)
@@ -602,7 +602,7 @@ func scan2Encode(f V, x V) V {
 }
 
 func scan3(ctx *Context, args []V) V {
-	f := args[1]
+	f := args[2]
 	if !f.IsFunction() {
 		return Panicf("x f'y : f not a function (%s)", f.Type())
 	}
@@ -610,7 +610,7 @@ func scan3(ctx *Context, args []V) V {
 		return scan3While(ctx, args)
 	}
 	y := args[0]
-	x := args[2]
+	x := args[1]
 	switch yv := y.value.(type) {
 	case array:
 		if yv.Len() == 0 {
@@ -653,8 +653,8 @@ func scan3(ctx *Context, args []V) V {
 }
 
 func scan3While(ctx *Context, args []V) V {
-	f := args[1]
-	x := args[2]
+	f := args[2]
+	x := args[1]
 	y := args[0]
 	if x.IsI() {
 		return scan3doTimes(ctx, x.I(), f, y)
@@ -719,105 +719,17 @@ func scan3doTimes(ctx *Context, n int64, f, y V) V {
 	return Canonical(NewAV(r))
 }
 
-func each2(ctx *Context, args []V) V {
-	f := args[1]
+func each2(ctx *Context, f, x V) V {
 	if !f.IsFunction() {
 		return Panicf("f'x : f not a function (%s)", f.Type())
 	}
-	x := toArray(args[0])
-	switch xv := x.value.(type) {
-	case array:
-		r := make([]V, 0, xv.Len())
-		f.IncrRC()
-		ctx.pushNoRC(V{})
-		for i := 0; i < xv.Len(); i++ {
-			ctx.replaceTop(xv.at(i))
-			next := f.applyN(ctx, 1)
-			if next.IsPanic() {
-				f.DecrRC()
-				ctx.drop()
-				return next
-			}
-			r = append(r, next)
-		}
-		f.DecrRC()
-		ctx.drop()
-		return Canonical(NewAV(r))
-	default:
-		// should not happen
-		return Panicf("f'x : x not an array (%s)", x.Type())
-	}
-}
-
-func each3(ctx *Context, args []V) V {
-	f := args[1]
-	if !f.IsFunction() {
-		return Panicf("x f'y : f not a function (%s)", f.Type())
-	}
-	x := args[2]
-	y := args[0]
-	xa, okax := x.value.(array)
-	ya, okay := y.value.(array)
-	if !okax && !okay {
-		return ctx.Apply2(f, x, y)
-	}
-	if !okax {
-		ylen := ya.Len()
-		r := make([]V, 0, ylen)
-		f.IncrRC()
-		x.IncrRC()
-		ctx.pushNoRC(V{})
-		for i := 0; i < ylen; i++ {
-			ctx.replaceTop(ya.at(i))
-			ctx.push(x)
-			next := f.applyN(ctx, 2)
-			if next.IsPanic() {
-				f.DecrRC()
-				x.DecrRC()
-				ctx.drop()
-				return next
-			}
-			r = append(r, next)
-		}
-		f.DecrRC()
-		x.DecrRC()
-		ctx.drop()
-		return Canonical(NewAV(r))
-	}
-	if !okay {
-		xlen := xa.Len()
-		r := make([]V, 0, xlen)
-		f.IncrRC()
-		y.IncrRC()
-		ctx.pushNoRC(V{})
-		for i := 0; i < xlen; i++ {
-			ctx.replaceTop(y)
-			ctx.push(xa.at(i))
-			next := f.applyN(ctx, 2)
-			if next.IsPanic() {
-				f.DecrRC()
-				y.DecrRC()
-				ctx.drop()
-				return next
-			}
-			r = append(r, next)
-		}
-		f.DecrRC()
-		y.DecrRC()
-		ctx.drop()
-		return Canonical(NewAV(r))
-	}
-	xlen := xa.Len()
-	if xlen != ya.Len() {
-		return Panicf("x f'y : length mismatch: %d (#x) vs %d (#y)", xa.Len(), ya.Len())
-	}
-	r := make([]V, 0, xlen)
+	xv := toArray(x).value.(array)
+	r := make([]V, 0, xv.Len())
 	f.IncrRC()
 	ctx.pushNoRC(V{})
-	for i := 0; i < xlen; i++ {
-		ctx.replaceTop(ya.at(i))
-		ctx.push(xa.at(i))
-		next := f.applyN(ctx, 2)
+	for i := 0; i < xv.Len(); i++ {
+		ctx.replaceTop(xv.at(i))
+		next := f.applyN(ctx, 1)
 		if next.IsPanic() {
 			f.DecrRC()
 			ctx.drop()
@@ -828,4 +740,59 @@ func each3(ctx *Context, args []V) V {
 	f.DecrRC()
 	ctx.drop()
 	return Canonical(NewAV(r))
+}
+
+func eachN(ctx *Context, args []V) V {
+	f := args[len(args)-1]
+	if !f.IsFunction() {
+		return Panicf("f'[x;y;...] : f not a function (%s)", f.Type())
+	}
+	n := len(args) - 1
+	if f.Rank(ctx) != n {
+		return Panicf("f'[x;y;...] : f expects %d arguments, but got %d", f.Rank(ctx), n)
+	}
+	mlen := -1
+	for _, x := range args[:len(args)-1] {
+		switch xv := x.value.(type) {
+		case array:
+			switch {
+			case mlen < 0:
+				mlen = xv.Len()
+			case mlen != xv.Len():
+				return Panicf("f'[x;y;...] : length mismatch (%d vs %d)", mlen, xv.Len())
+			}
+		}
+	}
+	if mlen == -1 {
+		return ctx.ApplyN(f, args[:len(args)-1])
+	}
+	x := args[0]
+	r := make([]V, 0, mlen)
+	f.IncrRC()
+	ctx.pushNoRC(V{})
+	for i := 0; i < mlen; i++ {
+		ctx.replaceTop(x.at(i))
+		for j := 1; j < len(args)-1; j++ {
+			ctx.push(args[j].at(i))
+		}
+		next := f.applyN(ctx, n)
+		if next.IsPanic() {
+			f.DecrRC()
+			ctx.drop()
+			return next
+		}
+		r = append(r, next)
+	}
+	f.DecrRC()
+	ctx.drop()
+	return Canonical(NewAV(r))
+}
+
+func (x V) at(i int) V {
+	switch xv := x.value.(type) {
+	case array:
+		return xv.at(i)
+	default:
+		return x
+	}
 }
