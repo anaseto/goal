@@ -723,7 +723,10 @@ func each2(ctx *Context, f, x V) V {
 	if !f.IsFunction() {
 		return Panicf("f'x : f not a function (%s)", f.Type())
 	}
-	xv := toArray(x).value.(array)
+	xv, ok := x.value.(array)
+	if !ok {
+		return ctx.Apply(f, x)
+	}
 	r := make([]V, 0, xv.Len())
 	f.IncrRC()
 	ctx.pushNoRC(V{})
