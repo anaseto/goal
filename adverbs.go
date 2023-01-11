@@ -355,12 +355,13 @@ func scan2(ctx *Context, f, x V) V {
 		if xv.Len() == 0 {
 			return NewAV(nil)
 		}
-		r := []V{xv.at(0)}
+		r := make([]V, xv.Len())
+		r[0] = xv.at(0)
 		f.IncrRC()
 		ctx.pushNoRC(V{})
 		for i := 1; i < xv.Len(); i++ {
 			ctx.replaceTop(xv.at(i))
-			last := r[len(r)-1]
+			last := r[i-1]
 			ctx.push(last)
 			last.IncrRC()
 			next := f.applyN(ctx, 2)
@@ -370,7 +371,7 @@ func scan2(ctx *Context, f, x V) V {
 				ctx.drop()
 				return next
 			}
-			r = append(r, next)
+			r[i] = next
 		}
 		f.DecrRC()
 		ctx.drop()
@@ -625,10 +626,11 @@ func scan3(ctx *Context, args []V) V {
 			ctx.drop()
 			return first
 		}
-		r := []V{first}
+		r := make([]V, yv.Len())
+		r[0] = first
 		for i := 1; i < yv.Len(); i++ {
 			ctx.replaceTop(yv.at(i))
-			last := r[len(r)-1]
+			last := r[i-1]
 			ctx.push(last)
 			last.IncrRC()
 			next := f.applyN(ctx, 2)
@@ -638,7 +640,7 @@ func scan3(ctx *Context, args []V) V {
 				ctx.drop()
 				return next
 			}
-			r = append(r, next)
+			r[i] = next
 		}
 		f.DecrRC()
 		ctx.drop()
@@ -701,10 +703,11 @@ func scan3While(ctx *Context, args []V) V {
 }
 
 func scan3doTimes(ctx *Context, n int64, f, y V) V {
-	r := []V{y}
+	r := make([]V, n+1)
+	r[0] = y
 	f.IncrRC()
 	ctx.push(y)
-	for i := int64(0); i < n; i++ {
+	for i := int64(1); i <= n; i++ {
 		y = f.applyN(ctx, 1)
 		if y.IsPanic() {
 			f.DecrRC()
@@ -712,7 +715,7 @@ func scan3doTimes(ctx *Context, n int64, f, y V) V {
 			return y
 		}
 		ctx.replaceTop(y)
-		r = append(r, y)
+		r[i] = y
 	}
 	f.DecrRC()
 	ctx.drop()
@@ -727,10 +730,10 @@ func each2(ctx *Context, f, x V) V {
 	if !ok {
 		return ctx.Apply(f, x)
 	}
-	r := make([]V, 0, xv.Len())
+	r := make([]V, xv.Len())
 	f.IncrRC()
 	ctx.pushNoRC(V{})
-	for i := 0; i < xv.Len(); i++ {
+	for i := range r {
 		ctx.replaceTop(xv.at(i))
 		next := f.applyN(ctx, 1)
 		if next.IsPanic() {
@@ -738,7 +741,7 @@ func each2(ctx *Context, f, x V) V {
 			ctx.drop()
 			return next
 		}
-		r = append(r, next)
+		r[i] = next
 	}
 	f.DecrRC()
 	ctx.drop()
@@ -770,10 +773,10 @@ func eachN(ctx *Context, args []V) V {
 		return ctx.ApplyN(f, args[:len(args)-1])
 	}
 	x := args[0]
-	r := make([]V, 0, mlen)
+	r := make([]V, mlen)
 	f.IncrRC()
 	ctx.pushNoRC(V{})
-	for i := 0; i < mlen; i++ {
+	for i := range r {
 		ctx.replaceTop(x.at(i))
 		for j := 1; j < len(args)-1; j++ {
 			ctx.push(args[j].at(i))
@@ -784,7 +787,7 @@ func eachN(ctx *Context, args []V) V {
 			ctx.drop()
 			return next
 		}
-		r = append(r, next)
+		r[i] = next
 	}
 	f.DecrRC()
 	ctx.drop()
