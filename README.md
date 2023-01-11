@@ -255,7 +255,7 @@ UTF-8: utf8.rcount (number of code points), utf8.valid
 
 ADVERBS HELP
 f'x    each      #'(4 5;6 7 8) -> 2 3
-x F'y  each      2 3#'1 2 -> (1 1;2 2 2)
+x F'y  each      2 3#'1 2 -> (1 1;2 2 2)    {(x;y;z)}'[1;2 4;3] -> (1 2 3;1 4 3)
 F/x    fold      +/!10 -> 45
 F\x    scan      +\!10 -> 0 1 3 6 10 15 21 28 36 45
 x F/y  fold      1 2+/!10 -> 46 47
