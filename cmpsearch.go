@@ -764,6 +764,7 @@ func intersection(x, y V) V {
 
 // find returns x?y.
 func find(x, y V) V {
+	// TODO: optimization: for small x, use brute force
 	switch xv := x.value.(type) {
 	case S:
 		return findS(xv, y)
@@ -1010,14 +1011,41 @@ func findAI(x *AI, y V) V {
 		}
 		return NewAI(r)
 	case *AI:
-		m := imapAI(x)
 		r := make([]int64, yv.Len())
+		xlen := int64(x.Len())
+		min, max := minMax(x)
+		if max-min+1 < 2*(xlen+8) {
+			// fast path avoiding hash table
+			offset := -min
+			m := make([]int64, max-min+1)
+			for i, xi := range x.Slice {
+				c := m[xi+offset]
+				if c == 0 {
+					m[xi+offset] = int64(i) + 1
+					continue
+				}
+			}
+			for i, yi := range yv.Slice {
+				if yi < min || yi > max {
+					r[i] = xlen
+					continue
+				}
+				j := m[yi+offset]
+				if j > 0 {
+					r[i] = j - 1
+				} else {
+					r[i] = xlen
+				}
+			}
+			return NewAI(r)
+		}
+		m := imapAI(x)
 		for i, yi := range yv.Slice {
 			j, ok := m[yi]
 			if ok {
 				r[i] = j
 			} else {
-				r[i] = int64(x.Len())
+				r[i] = xlen
 			}
 		}
 		return NewAI(r)
