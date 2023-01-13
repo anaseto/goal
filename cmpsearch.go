@@ -547,6 +547,15 @@ func memberOfAB(x V, y *AB) V {
 	}
 	if t && f {
 		switch xv := x.value.(type) {
+		case *AB:
+			r := make([]bool, xv.Len())
+			for i := range r {
+				r[i] = true
+			}
+			return NewAB(r)
+		case *AS:
+			r := make([]bool, xv.Len())
+			return NewAB(r)
 		case array:
 			r := make([]bool, xv.Len())
 			for i := 0; i < xv.Len(); i++ {
@@ -562,9 +571,53 @@ func memberOfAB(x V, y *AB) V {
 		}
 	}
 	if t {
-		return equal(x, NewI(b2i(true)))
+		switch xv := x.value.(type) {
+		case *AB:
+			r := make([]bool, xv.Len())
+			for i, xi := range xv.Slice {
+				r[i] = xi
+			}
+			return NewAB(r)
+		case *AS:
+			r := make([]bool, xv.Len())
+			return NewAB(r)
+		case array:
+			r := make([]bool, xv.Len())
+			for i := 0; i < xv.Len(); i++ {
+				xi := xv.at(i)
+				r[i] = xi.IsI() && xi.n == 1 ||
+					xi.IsF() && xi.F() == 1
+			}
+			return NewAB(r)
+		default:
+			b := x.IsI() && x.n == 1 ||
+				x.IsF() && x.F() == 1
+			return NewI(b2i(b))
+		}
 	}
-	return equal(x, NewI(b2i(false)))
+	switch xv := x.value.(type) {
+	case *AB:
+		r := make([]bool, xv.Len())
+		for i, xi := range xv.Slice {
+			r[i] = !xi
+		}
+		return NewAB(r)
+	case *AS:
+		r := make([]bool, xv.Len())
+		return NewAB(r)
+	case array:
+		r := make([]bool, xv.Len())
+		for i := 0; i < xv.Len(); i++ {
+			xi := xv.at(i)
+			r[i] = xi.IsI() && xi.n == 0 ||
+				xi.IsF() && xi.F() == 0
+		}
+		return NewAB(r)
+	default:
+		b := x.IsI() && x.n == 0 ||
+			x.IsF() && x.F() == 0
+		return NewI(b2i(b))
+	}
 }
 
 func bmapAF(x *AF) map[float64]struct{} {
