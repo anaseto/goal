@@ -1,3 +1,8 @@
+// NOTE: Some code duplication could be avoided in this file by using generics.
+// Before doing that, we should check it doesn't impact performance, as Go's
+// generics are somewhat recent. It's probably not worth the work (already
+// written, and should not require much maintenance work anyway).
+
 package goal
 
 import "strings"
