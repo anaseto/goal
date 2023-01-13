@@ -46,7 +46,7 @@ func VXXXX(ctx *Context, args []V) V {
 	case 1:
 		r := mathm(args[0], math.XXXX)
                 if r.IsPanic() {
-                        return NewPanic("YYYY x : "+string(r.value.(panicV)))
+                        return ppanic("YYYY x : ", r)
                 }
                 return r
         default:

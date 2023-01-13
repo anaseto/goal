@@ -43,7 +43,7 @@ func VAcos(ctx *Context, args []V) V {
 	case 1:
 		r := mathm(args[0], math.Acos)
 		if r.IsPanic() {
-			return NewPanic("acos x : " + string(r.value.(panicV)))
+			return ppanic("acos x : ", r)
 		}
 		return r
 	default:
@@ -57,7 +57,7 @@ func VAsin(ctx *Context, args []V) V {
 	case 1:
 		r := mathm(args[0], math.Asin)
 		if r.IsPanic() {
-			return NewPanic("asin x : " + string(r.value.(panicV)))
+			return ppanic("asin x : ", r)
 		}
 		return r
 	default:
@@ -71,7 +71,7 @@ func VAtan(ctx *Context, args []V) V {
 	case 1:
 		r := mathm(args[0], math.Atan)
 		if r.IsPanic() {
-			return NewPanic("atan x : " + string(r.value.(panicV)))
+			return ppanic("atan x : ", r)
 		}
 		return r
 	default:
@@ -85,7 +85,7 @@ func VCos(ctx *Context, args []V) V {
 	case 1:
 		r := mathm(args[0], math.Cos)
 		if r.IsPanic() {
-			return NewPanic("cos x : " + string(r.value.(panicV)))
+			return ppanic("cos x : ", r)
 		}
 		return r
 	default:
@@ -99,7 +99,7 @@ func VExp(ctx *Context, args []V) V {
 	case 1:
 		r := mathm(args[0], math.Exp)
 		if r.IsPanic() {
-			return NewPanic("exp x : " + string(r.value.(panicV)))
+			return ppanic("exp x : ", r)
 		}
 		return r
 	default:
@@ -113,7 +113,7 @@ func VLog(ctx *Context, args []V) V {
 	case 1:
 		r := mathm(args[0], math.Log)
 		if r.IsPanic() {
-			return NewPanic("log x : " + string(r.value.(panicV)))
+			return ppanic("log x : ", r)
 		}
 		return r
 	default:
@@ -127,7 +127,7 @@ func VRoundToEven(ctx *Context, args []V) V {
 	case 1:
 		r := mathm(args[0], math.RoundToEven)
 		if r.IsPanic() {
-			return NewPanic("round x : " + string(r.value.(panicV)))
+			return ppanic("round x : ", r)
 		}
 		return r
 	default:
@@ -141,7 +141,7 @@ func VSin(ctx *Context, args []V) V {
 	case 1:
 		r := mathm(args[0], math.Sin)
 		if r.IsPanic() {
-			return NewPanic("sin x : " + string(r.value.(panicV)))
+			return ppanic("sin x : ", r)
 		}
 		return r
 	default:
@@ -155,7 +155,7 @@ func VSqrt(ctx *Context, args []V) V {
 	case 1:
 		r := mathm(args[0], math.Sqrt)
 		if r.IsPanic() {
-			return NewPanic("sqrt x : " + string(r.value.(panicV)))
+			return ppanic("sqrt x : ", r)
 		}
 		return r
 	default:
@@ -169,7 +169,7 @@ func VTan(ctx *Context, args []V) V {
 	case 1:
 		r := mathm(args[0], math.Tan)
 		if r.IsPanic() {
-			return NewPanic("tan x : " + string(r.value.(panicV)))
+			return ppanic("tan x : ", r)
 		}
 		return r
 	default:

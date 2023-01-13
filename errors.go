@@ -102,6 +102,10 @@ func newExecError(x V) error {
 	return errors.New(string(x.value.(panicV)))
 }
 
+func ppanic(pfx string, x V) V {
+	return panics(pfx + string(x.value.(panicV)))
+}
+
 func panics(s string) V {
 	return V{kind: valPanic, value: panicV(s)}
 }

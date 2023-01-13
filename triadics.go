@@ -8,7 +8,7 @@ func (ctx *Context) amend3(x, y, f V) V {
 	case array:
 		y = toIndices(y)
 		if y.IsPanic() {
-			return y
+			return ppanic("@[x;y;f] : y ", y)
 		}
 		return Canonical(ctx.amend3array(cloneShallowArray(xv), y, f))
 	default:
@@ -71,7 +71,7 @@ func (ctx *Context) amend4(x, y, f, z V) V {
 	case array:
 		y = toIndices(y)
 		if y.IsPanic() {
-			return y
+			return ppanic("@[x;y;f;z] : y ", y)
 		}
 		if f.kind == valVariadic && variadic(f.n) == vRight {
 			return Canonical(amendr(cloneShallowArray(xv), y, z))
