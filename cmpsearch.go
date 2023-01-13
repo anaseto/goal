@@ -171,6 +171,21 @@ func classify(ctx *Context, x V) V {
 		return NewAI(r)
 	case *AI:
 		r := make([]int64, xv.Len())
+		if xv.Len() <= bruteForceN {
+			n := int64(0)
+		loopAI:
+			for i, xi := range xv.Slice {
+				for j, xj := range xv.Slice[:i] {
+					if xi == xj {
+						r[i] = r[j]
+						continue loopAI
+					}
+				}
+				r[i] = n
+				n++
+			}
+			return NewAI(r)
+		}
 		min, max := minMax(xv)
 		n := int64(0)
 		if max-min+1 < int64(xv.Len())+8 {
@@ -235,6 +250,21 @@ func classify(ctx *Context, x V) V {
 
 func classifyStrings(ss []string) V {
 	r := make([]int64, len(ss))
+	if len(ss) <= bruteForceN {
+		n := int64(0)
+	loopAS:
+		for i, xi := range ss {
+			for j, xj := range ss[:i] {
+				if xi == xj {
+					r[i] = r[j]
+					continue loopAS
+				}
+			}
+			r[i] = n
+			n++
+		}
+		return NewAI(r)
+	}
 	m := map[string]int64{}
 	n := int64(0)
 	for i, s := range ss {
@@ -280,7 +310,7 @@ func uniq(ctx *Context, x V) V {
 		return NewAF(r)
 	case *AI:
 		r := []int64{}
-		if xv.Len() < bruteForceN {
+		if xv.Len() <= bruteForceN {
 		loopAI:
 			for i, xi := range xv.Slice {
 				for _, xj := range xv.Slice[:i] {
@@ -304,7 +334,7 @@ func uniq(ctx *Context, x V) V {
 		return NewAI(r)
 	case *AS:
 		r := []string{}
-		if xv.Len() < bruteForceN {
+		if xv.Len() <= bruteForceN {
 		loopAS:
 			for i, xi := range xv.Slice {
 				for _, xj := range xv.Slice[:i] {
@@ -393,6 +423,18 @@ func markFirsts(ctx *Context, x V) V {
 		return NewAB(r)
 	case *AI:
 		r := make([]bool, xv.Len())
+		if xv.Len() <= bruteForceN {
+		loopAI:
+			for i, xi := range xv.Slice {
+				for _, xj := range xv.Slice[:i] {
+					if xi == xj {
+						continue loopAI
+					}
+				}
+				r[i] = true
+			}
+			return NewAB(r)
+		}
 		m := map[int64]struct{}{}
 		for i, xi := range xv.Slice {
 			_, ok := m[xi]
@@ -434,6 +476,18 @@ func markFirsts(ctx *Context, x V) V {
 
 func markFirstsStrings(ctx *Context, ss []string) V {
 	r := make([]bool, len(ss))
+	if len(ss) <= bruteForceN {
+	loopAS:
+		for i, xi := range ss {
+			for _, xj := range ss[:i] {
+				if xi == xj {
+					continue loopAS
+				}
+			}
+			r[i] = true
+		}
+		return NewAB(r)
+	}
 	m := map[string]struct{}{}
 	for i, s := range ss {
 		_, ok := m[s]
@@ -608,6 +662,17 @@ func memberOfAI(x V, y *AI) V {
 		return NewAB(r)
 	case *AI:
 		r := make([]bool, xv.Len())
+		if xv.Len() <= bruteForceN {
+			for i, xi := range xv.Slice {
+				for _, yi := range y.Slice {
+					if xi == yi {
+						r[i] = true
+						break
+					}
+				}
+			}
+			return NewAB(r)
+		}
 		m := bmapAI(y)
 		for i, xi := range xv.Slice {
 			_, r[i] = m[xi]
@@ -650,7 +715,7 @@ func memberOfAS(x V, y *AS) V {
 		return NewI(b2i(ok))
 	case *AS:
 		r := make([]bool, xv.Len())
-		if xv.Len() < bruteForceN {
+		if xv.Len() <= bruteForceN {
 			for i, xi := range xv.Slice {
 				for _, yi := range y.Slice {
 					if xi == yi {
@@ -1084,7 +1149,7 @@ func findAI(x *AI, y V) V {
 	case *AI:
 		r := make([]int64, yv.Len())
 		xlen := int64(x.Len())
-		if yv.Len() < bruteForceN {
+		if yv.Len() <= bruteForceN {
 			for i, yi := range yv.Slice {
 				r[i] = xlen
 				for j, xi := range x.Slice {
@@ -1167,7 +1232,7 @@ func findAS(x *AS, y V) V {
 	case *AS:
 		r := make([]int64, yv.Len())
 		xlen := int64(x.Len())
-		if yv.Len() < bruteForceN {
+		if yv.Len() <= bruteForceN {
 			for i, yi := range yv.Slice {
 				r[i] = xlen
 				for j, xi := range x.Slice {
