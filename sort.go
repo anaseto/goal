@@ -450,19 +450,19 @@ func sortUp(x V) V {
 	x = cloneShallow(x)
 	switch xv := x.value.(type) {
 	case *AB:
-		sort.Stable(sortAB(xv.Slice))
+		sort.Sort(sortAB(xv.Slice))
 		xv.flags |= flagAscending
 		return NewV(xv)
 	case *AF:
-		sort.Stable(sort.Float64Slice(xv.Slice))
+		sort.Float64s(xv.Slice)
 		xv.flags |= flagAscending
 		return NewV(xv)
 	case *AI:
-		sort.Stable(sortAI(xv.Slice))
+		sort.Sort(sortAI(xv.Slice))
 		xv.flags |= flagAscending
 		return NewV(xv)
 	case *AS:
-		sort.Stable(sort.StringSlice(xv.Slice))
+		sort.Strings(xv.Slice)
 		xv.flags |= flagAscending
 		return NewV(xv)
 	case *AV:
