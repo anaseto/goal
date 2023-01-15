@@ -415,7 +415,8 @@ func (ctx *Context) deepAmend3array(x array, y, f V) (array, error) {
 }
 
 func (ctx *Context) deepAmend3rec(x array, y0 V, y array, f V) (array, error) {
-	if y0.kind == valNil {
+	y0v, ok := y0.value.(array)
+	if ok && y0v.Len() == 0 {
 		return ctx.deepAmend3rec(x, rangeI(int64(x.Len())), y, f)
 	}
 	if y.Len() == 0 {
@@ -437,7 +438,6 @@ func (ctx *Context) deepAmend3rec(x array, y0 V, y array, f V) (array, error) {
 		return amendArrayAt(x, int(y0.I()), NewV(repl)), nil
 	}
 	var err error
-	y0v := y0.value.(array)
 	for i := 0; i < y0v.Len(); i++ {
 		y0i := y0v.at(i)
 		x, err = ctx.deepAmend3rec(x, y0i, y, f)
@@ -479,7 +479,8 @@ func (ctx *Context) deepAmend4array(x array, y, f, z V) (array, error) {
 }
 
 func (ctx *Context) deepAmend4rec(x array, y0 V, y array, f, z V) (array, error) {
-	if y0.kind == valNil {
+	y0v, ok := y0.value.(array)
+	if ok && y0v.Len() == 0 {
 		return ctx.deepAmend4rec(x, rangeI(int64(x.Len())), y, f, z)
 	}
 	if y.Len() == 0 {
@@ -501,7 +502,6 @@ func (ctx *Context) deepAmend4rec(x array, y0 V, y array, f, z V) (array, error)
 		return amendArrayAt(x, int(y0.I()), NewV(repl)), nil
 	}
 	var err error
-	y0v := y0.value.(array)
 	for i := 0; i < y0v.Len(); i++ {
 		y0i := y0v.at(i)
 		x, err = ctx.deepAmend4rec(x, y0i, y, f, z)

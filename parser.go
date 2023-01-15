@@ -383,11 +383,17 @@ loop:
 		}
 		p.next()
 		global := strings.HasSuffix(ntok.Text, "::")
+		if len(a.Args) > 1 {
+			return p.assignDeepAmendOp(identok, a, ":", global)
+		}
 		return p.assignAmendOp(identok, a.Args, ":", global)
 	case DYADASSIGN:
 		p.next()
 		dyad := strings.TrimRight(ntok.Text, ":")
 		global := strings.HasSuffix(ntok.Text, "::")
+		if len(a.Args) > 1 {
+			return p.assignDeepAmendOp(identok, a, dyad, global)
+		}
 		return p.assignAmendOp(identok, a.Args, dyad, global)
 	default:
 		return a, nil
@@ -410,16 +416,32 @@ func isAmend(e expr) bool {
 func (p *parser) assignAmendOp(identok *astToken, args []expr,
 	dyad string, global bool) (expr, error) {
 	a := &astAssignAmendOp{
-		Name:   identok.Text,
-		Global: global,
-		Dyad:   dyad,
-		Pos:    identok.Pos,
+		Name:    identok.Text,
+		Global:  global,
+		Indices: args[0], // len(args) == 1
+		Dyad:    dyad,
+		Pos:     identok.Pos,
 	}
-	if len(args) > 1 {
-		return a, p.errorf("assignement with deep amend NYI")
+	es, err := p.subExpr()
+	a.Right = es
+	if err != nil {
+		return a, err
 	}
-	// len(args) == 1
-	a.Indices = args[0]
+	if len(es) == 0 {
+		return a, p.errorf("assignment operation without expression right")
+	}
+	return a, nil
+}
+
+func (p *parser) assignDeepAmendOp(identok *astToken, an *astApplyN,
+	dyad string, global bool) (expr, error) {
+	a := &astAssignDeepAmendOp{
+		Name:    identok.Text,
+		Global:  global,
+		Indices: &astList{StartPos: an.StartPos, Args: an.Args, EndPos: an.EndPos},
+		Dyad:    dyad,
+		Pos:     identok.Pos,
+	}
 	es, err := p.subExpr()
 	a.Right = es
 	if err != nil {

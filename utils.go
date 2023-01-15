@@ -206,7 +206,7 @@ func toIndicesRec(x V) V {
 	case array:
 		return panics("non-integer indices")
 	default:
-		return panics("non-integer index")
+		return Panicf("non-integer index (type %s)", x.Type())
 	}
 }
 

@@ -81,10 +81,15 @@ func NewContext() *Context {
 	ctx.gIDs = map[string]int{}
 	ctx.stack = make([]V, 0, 32)
 	ctx.sources = map[string]string{}
+	ctx.constants = []V{constAV: NewV(&AV{Slice: nil, rc: 1})}
 	ctx.rand = rand.New(rand.NewSource(1))
 	ctx.initVariadics()
 	return ctx
 }
+
+const (
+	constAV = iota
+)
 
 // RegisterMonad adds a variadic function to the context, and generates a new
 // monadic keyword for that variadic (parsing will not search for a left
@@ -340,6 +345,7 @@ func (ctx *Context) derive() *Context {
 	nctx.gCode = &globalCode{}
 	nctx.stack = make([]V, 0, 32)
 
+	nctx.constants = ctx.constants
 	nctx.variadics = ctx.variadics
 	nctx.variadicsNames = ctx.variadicsNames
 	nctx.keywords = ctx.keywords
@@ -357,6 +363,7 @@ func (ctx *Context) derive() *Context {
 
 // merge integrates changes from a context created with derive.
 func (ctx *Context) merge(nctx *Context) {
+	ctx.constants = nctx.constants
 	ctx.lambdas = nctx.lambdas
 	ctx.globals = nctx.globals
 	ctx.gNames = nctx.gNames

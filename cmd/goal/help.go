@@ -30,7 +30,7 @@ variables       a:2 (assign)    a+:1 (sugar for a:a+1)    a+3 (use)
 expressions     2*3+4 -> 14 (no priority)    1+|1 2 3 -> 4 3 2     +/1 2 3 -> 6
 index           x[y] is sugar for x@y (apply)
 index deep      x[y;z;...] is sugar for x.(y;z;...) (except for x in (?;and;or))
-index assign    x[y]:z is sugar for x:@[x;y;:;z]
+index assign    x[y]:z is sugar for x:@[x;y;:;z]    (or . for x[y;...]:z)
 index op assign x[y]op:z is sugar for x:@[x;y;op;z] (for symbol operator)
 lambdas         {x+y+z}[2;3;0] -> 5     {[a;b;c]a+b+c}[1;2;3] -> 6
 projections     {x+y}[2;] 3 -> 5        (2+) 3 -> 5

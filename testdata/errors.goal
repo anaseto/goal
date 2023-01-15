@@ -175,7 +175,7 @@ time["unix";10000;"RFC3339";42] / non-string location
 a[1]:2 / undefined global
 {a[1]:2}0 / undefined local
 a:!10;a[]:2 / no indices
-a:!10;a[1;2]:2 / NYI
+a:!10;a[1;2]:2 / out of depth
 a:!10;a[1]: / without expression right
 nan[1;2;3] / too many arguments
 nan "a" / type

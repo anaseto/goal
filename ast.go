@@ -68,6 +68,17 @@ type astAssignAmendOp struct {
 	Pos     int
 }
 
+// astAssinDeepAmendOp represents an assign-amend call with a built-in operator, of
+// the form x[y;...]op: z, semantically equivalent to x: .[x;y;op;z].
+type astAssignDeepAmendOp struct {
+	Name    string   // x
+	Global  bool     // whether :: or not
+	Dyad    string   // op
+	Indices *astList // y
+	Right   expr     // z
+	Pos     int
+}
+
 // astStrand represents a stranding of literals, like 1 23 456
 type astStrand struct {
 	Lits []astToken
@@ -124,21 +135,22 @@ type astLambda struct {
 	EndPos   int
 }
 
-func (es exprs) node()            {}
-func (t *astToken) node()         {}
-func (a *astReturn) node()        {}
-func (a *astAssign) node()        {}
-func (a *astAssignOp) node()      {}
-func (a *astAssignAmendOp) node() {}
-func (st *astStrand) node()       {}
-func (dv *astDerivedVerb) node()  {}
-func (p *astParen) node()         {}
-func (a *astApply2) node()        {}
-func (a *astApply2Adverb) node()  {}
-func (a *astApplyN) node()        {}
-func (l *astList) node()          {}
-func (b *astSeq) node()           {}
-func (b *astLambda) node()        {}
+func (es exprs) node()                {}
+func (t *astToken) node()             {}
+func (a *astReturn) node()            {}
+func (a *astAssign) node()            {}
+func (a *astAssignOp) node()          {}
+func (a *astAssignAmendOp) node()     {}
+func (a *astAssignDeepAmendOp) node() {}
+func (st *astStrand) node()           {}
+func (dv *astDerivedVerb) node()      {}
+func (p *astParen) node()             {}
+func (a *astApply2) node()            {}
+func (a *astApply2Adverb) node()      {}
+func (a *astApplyN) node()            {}
+func (l *astList) node()              {}
+func (b *astSeq) node()               {}
+func (b *astLambda) node()            {}
 
 func nonEmpty(e expr) bool {
 	switch e := e.(type) {

@@ -314,6 +314,11 @@ func (c *compiler) doExpr(e expr, n int) error {
 		if err != nil {
 			return err
 		}
+	case *astAssignDeepAmendOp:
+		err := c.doAssignDeepAmendOp(e, n)
+		if err != nil {
+			return err
+		}
 	case *astDerivedVerb:
 		err := c.doDerivedVerb(e, n)
 		if err != nil {
@@ -419,8 +424,7 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 		c.applyN(n)
 		return nil
 	case astEMPTYLIST:
-		id := c.ctx.storeConst(NewAV(nil))
-		c.push2(opConst, opcode(id))
+		c.push2(opConst, opcode(constAV))
 		c.applyN(n)
 		return nil
 	default:
@@ -617,6 +621,46 @@ func (c *compiler) doAssignAmendOp(e *astAssignAmendOp, n int) error {
 	c.push2(opLocalLast, opArg)
 	lc.opIdxLocal[len(lc.Body)-1] = local
 	c.doVariadicAt("@", e.Pos-1, 4)
+	c.push2(opAssignLocal, opArg)
+	lc.opIdxLocal[len(lc.Body)-1] = local
+	c.applyN(n)
+	return nil
+}
+
+func (c *compiler) doAssignDeepAmendOp(e *astAssignDeepAmendOp, n int) error {
+	err := c.doExpr(e.Right, 0)
+	if err != nil {
+		return err
+	}
+	c.doVariadicAt(e.Dyad, e.Pos-1, 0)
+	err = c.doList(e.Indices, 0)
+	if err != nil {
+		return err
+	}
+	lc := c.scope()
+	if lc == nil || e.Global {
+		id, ok := c.ctx.gIDs[e.Name]
+		if !ok {
+			if lc == nil {
+				return c.perrorf(e.Pos,
+					"undefined global in assignement amend operation: %s", e.Name)
+			}
+			id = c.ctx.global(e.Name)
+		}
+		c.push2(opGlobalLast, opcode(id))
+		c.doVariadicAt(".", e.Pos-1, 4)
+		c.push2(opAssignGlobal, opcode(id))
+		c.applyN(n)
+		return nil
+	}
+	local, ok := lc.local(e.Name)
+	if !ok {
+		return c.perrorf(e.Pos,
+			"undefined local in assignement amend operation: %s", e.Name)
+	}
+	c.push2(opLocalLast, opArg)
+	lc.opIdxLocal[len(lc.Body)-1] = local
+	c.doVariadicAt(".", e.Pos-1, 4)
 	c.push2(opAssignLocal, opArg)
 	lc.opIdxLocal[len(lc.Body)-1] = local
 	c.applyN(n)
@@ -1115,13 +1159,16 @@ func (c *compiler) doList(l *astList, n int) error {
 	body := l.Args
 	for i := len(body) - 1; i >= 0; i-- {
 		ei := body[i]
-		err := c.doExpr(ei, 0)
-		if err != nil {
-			return err
+		if nonEmpty(ei) {
+			err := c.doExpr(ei, 0)
+			if err != nil {
+				return err
+			}
+		} else {
+			c.push2(opConst, opcode(constAV))
 		}
 	}
-	c.push2(opVariadic, opcode(vList))
-	c.push2(opApplyN, opcode(len(body)))
+	c.pushVariadic(vList, len(body))
 	c.applyN(n)
 	return nil
 }
