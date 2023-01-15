@@ -467,7 +467,9 @@ func VApplyN(ctx *Context, args []V) V {
 		if x.IsFunction() {
 			return try(ctx, x, args[1], args[0])
 		}
-		return ctx.drill3(x, args[1], args[0])
+		return ctx.deepAmend3(x, args[1], args[0])
+	case 4:
+		return ctx.deepAmend4(args[3], args[2], args[1], args[0])
 	default:
 		return panicRank(".")
 	}

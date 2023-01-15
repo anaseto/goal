@@ -384,8 +384,8 @@ func (x *AS) set(i int, y V) {
 	x.Slice[i] = string(y.value.(S))
 }
 
-// drill3 implements .[x;y;f].
-func (ctx *Context) drill3(x, y, f V) V {
+// deepAmend3 implements .[x;y;f].
+func (ctx *Context) deepAmend3(x, y, f V) V {
 	x = clone(x)
 	switch xv := x.value.(type) {
 	case array:
@@ -393,7 +393,7 @@ func (ctx *Context) drill3(x, y, f V) V {
 		if y.IsPanic() {
 			return ppanic(".[x;y;f] : y ", y)
 		}
-		x, err := ctx.drill3array(xv, y, f)
+		x, err := ctx.deepAmend3array(xv, y, f)
 		if err != nil {
 			return Panicf(".[x;y;f] : %v", err)
 		}
@@ -403,20 +403,20 @@ func (ctx *Context) drill3(x, y, f V) V {
 	}
 }
 
-func (ctx *Context) drill3array(x array, y, f V) (array, error) {
+func (ctx *Context) deepAmend3array(x array, y, f V) (array, error) {
 	if y.IsI() {
 		return ctx.amend3arrayI(x, y.I(), f)
 	}
 	yv := y.value.(array)
 	if yv.Len() == 0 {
-		return ctx.drill3rec(x, rangeI(int64(x.Len())), yv, f)
+		return ctx.deepAmend3rec(x, rangeI(int64(x.Len())), yv, f)
 	}
-	return ctx.drill3rec(x, yv.at(0), yv.slice(1, yv.Len()), f)
+	return ctx.deepAmend3rec(x, yv.at(0), yv.slice(1, yv.Len()), f)
 }
 
-func (ctx *Context) drill3rec(x array, y0 V, y array, f V) (array, error) {
+func (ctx *Context) deepAmend3rec(x array, y0 V, y array, f V) (array, error) {
 	if y0.kind == valNil {
-		return ctx.drill3rec(x, rangeI(int64(x.Len())), y, f)
+		return ctx.deepAmend3rec(x, rangeI(int64(x.Len())), y, f)
 	}
 	if y.Len() == 0 {
 		return ctx.amend3array(x, y0, f)
@@ -430,7 +430,7 @@ func (ctx *Context) drill3rec(x array, y0 V, y array, f V) (array, error) {
 		if !ok {
 			return x, errors.New("y out of depth")
 		}
-		repl, err := ctx.drill3rec(xy0v, y.at(0), y.slice(1, y.Len()), f)
+		repl, err := ctx.deepAmend3rec(xy0v, y.at(0), y.slice(1, y.Len()), f)
 		if err != nil {
 			return x, err
 		}
@@ -440,7 +440,71 @@ func (ctx *Context) drill3rec(x array, y0 V, y array, f V) (array, error) {
 	y0v := y0.value.(array)
 	for i := 0; i < y0v.Len(); i++ {
 		y0i := y0v.at(i)
-		x, err = ctx.drill3rec(x, y0i, y, f)
+		x, err = ctx.deepAmend3rec(x, y0i, y, f)
+		if err != nil {
+			return x, err
+		}
+	}
+	return x, nil
+}
+
+// deepAmend4 implements .[x;y;f].
+func (ctx *Context) deepAmend4(x, y, f, z V) V {
+	x = clone(x)
+	switch xv := x.value.(type) {
+	case array:
+		y = toIndices(y)
+		if y.IsPanic() {
+			return ppanic(".[x;y;f] : y ", y)
+		}
+		x, err := ctx.deepAmend4array(xv, y, f, z)
+		if err != nil {
+			return Panicf(".[x;y;f] : %v", err)
+		}
+		return Canonical(NewV(x))
+	default:
+		return panicType(".[x;y;f]", "x", x)
+	}
+}
+
+func (ctx *Context) deepAmend4array(x array, y, f, z V) (array, error) {
+	if y.IsI() {
+		return ctx.amend4arrayI(x, y.I(), f, z)
+	}
+	yv := y.value.(array)
+	if yv.Len() == 0 {
+		return ctx.deepAmend4rec(x, rangeI(int64(x.Len())), yv, f, z)
+	}
+	return ctx.deepAmend4rec(x, yv.at(0), yv.slice(1, yv.Len()), f, z)
+}
+
+func (ctx *Context) deepAmend4rec(x array, y0 V, y array, f, z V) (array, error) {
+	if y0.kind == valNil {
+		return ctx.deepAmend4rec(x, rangeI(int64(x.Len())), y, f, z)
+	}
+	if y.Len() == 0 {
+		return ctx.amend4array(x, y0, f, z)
+	}
+	if y0.IsI() {
+		if outOfBounds(y0.I(), x.Len()) {
+			return x, fmt.Errorf("y out of bounds (%d)", y0.I())
+		}
+		xy0 := x.at(int(y0.I()))
+		xy0v, ok := xy0.value.(array)
+		if !ok {
+			return x, errors.New("y out of depth")
+		}
+		repl, err := ctx.deepAmend4rec(xy0v, y.at(0), y.slice(1, y.Len()), f, z)
+		if err != nil {
+			return x, err
+		}
+		return amendArrayAt(x, int(y0.I()), NewV(repl)), nil
+	}
+	var err error
+	y0v := y0.value.(array)
+	for i := 0; i < y0v.Len(); i++ {
+		y0i := y0v.at(i)
+		x, err = ctx.deepAmend4rec(x, y0i, y, f, z)
 		if err != nil {
 			return x, err
 		}
