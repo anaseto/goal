@@ -1,6 +1,9 @@
 package goal
 
-//import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 // amend3 implements @[x;y;f].
 func (ctx *Context) amend3(x, y, f V) V {
@@ -10,62 +13,66 @@ func (ctx *Context) amend3(x, y, f V) V {
 		if y.IsPanic() {
 			return ppanic("@[x;y;f] : y ", y)
 		}
-		return Canonical(ctx.amend3array(cloneShallowArray(xv), y, f))
+		r, err := ctx.amend3array(cloneShallowArray(xv), y, f)
+		if err != nil {
+			return Panicf("@[x;y;f] : %v", err)
+		}
+		return Canonical(NewV(r))
 	default:
 		return panicType("@[x;y;f]", "x", x)
 	}
 }
 
-func (ctx *Context) amendArrayAt(x array, y int, z V) V {
+func (ctx *Context) amendArrayAt(x array, y int, z V) array {
 	if isEltType(x, z) {
 		x.set(y, z)
-		return NewV(x)
+		return x
 	}
 	a := make([]V, x.Len())
 	for i := range a {
 		a[i] = x.at(i)
 	}
 	a[y] = z
-	return NewAV(a)
+	return &AV{Slice: a}
 }
 
-func (ctx *Context) amend3arrayI(x array, y int64, f V) V {
+func (ctx *Context) amend3arrayI(x array, y int64, f V) (array, error) {
 	if outOfBounds(y, x.Len()) {
-		return Panicf("@[x;y;f] : y out of bounds (%d)", y)
+		return x, fmt.Errorf("y out of bounds (%d)", y)
 	}
 	xy := x.at(int(y))
 	repl := ctx.Apply(f, xy)
 	if repl.IsPanic() {
-		return Panicf("f call in @[x;y;f] : %v", repl)
+		return x, fmt.Errorf("f call: %v", repl)
 	}
-	return ctx.amendArrayAt(x, int(y), repl)
+	return ctx.amendArrayAt(x, int(y), repl), nil
 }
 
-func (ctx *Context) amend3array(x array, y, f V) V {
+func (ctx *Context) amend3array(x array, y, f V) (array, error) {
 	if y.IsI() {
 		return ctx.amend3arrayI(x, y.I(), f)
 	}
 	switch yv := y.value.(type) {
 	case *AI:
+		var err error
 		for _, yi := range yv.Slice {
-			xa := ctx.amend3arrayI(x, yi, f)
-			if xa.IsPanic() {
-				return xa
+			x, err = ctx.amend3arrayI(x, yi, f)
+			if err != nil {
+				return x, err
 			}
-			x = xa.value.(array)
 		}
-		return NewV(x)
+		return x, nil
 	case *AV:
+		var err error
 		for _, yi := range yv.Slice {
-			xa := ctx.amend3array(x, yi, f)
-			if xa.IsPanic() {
-				return xa
+			x, err = ctx.amend3array(x, yi, f)
+			if err != nil {
+				return x, err
 			}
-			x = xa.value.(array)
 		}
-		return NewV(x)
+		return x, nil
 	default:
-		return panicType("@[x;y;f]", "y", y)
+		panic("amend3array: y bad type")
 	}
 }
 
@@ -78,83 +85,89 @@ func (ctx *Context) amend4(x, y, f, z V) V {
 			return ppanic("@[x;y;f;z] : y ", y)
 		}
 		if f.kind == valVariadic && variadic(f.n) == vRight {
-			return Canonical(amendr(cloneShallowArray(xv), y, z))
+			r, err := amendr(cloneShallowArray(xv), y, z)
+			if err != nil {
+				return Panicf("@[x;y;:;z] : %v", err)
+			}
+			return Canonical(NewV(r))
 		}
-		return Canonical(ctx.amend4array(cloneShallowArray(xv), y, f, z))
+		r, err := ctx.amend4array(cloneShallowArray(xv), y, f, z)
+		if err != nil {
+			return Panicf("@[x;y;f;z] : %v", err)
+		}
+		return Canonical(NewV(r))
 	default:
 		return panicType("@[x;y;f;z]", "x", x)
 	}
 }
 
-func (ctx *Context) amend4arrayI(x array, y int64, f, z V) V {
+func (ctx *Context) amend4arrayI(x array, y int64, f, z V) (array, error) {
 	if y < 0 || y >= int64(x.Len()) {
-		return Panicf("@[x;y;f;z] : x out of bounds (%d)", y)
+		return x, fmt.Errorf("x out of bounds (%d)", y)
 	}
 	xy := x.at(int(y))
 	repl := ctx.Apply2(f, xy, z)
 	if repl.IsPanic() {
-		return Panicf("f call in @[x;y;f;z] : %v", repl)
+		return x, fmt.Errorf("f call: %v", repl)
 	}
-	return ctx.amendArrayAt(x, int(y), repl)
+	return ctx.amendArrayAt(x, int(y), repl), nil
 }
 
-func (ctx *Context) amend4array(x array, y, f, z V) V {
+func (ctx *Context) amend4array(x array, y, f, z V) (array, error) {
 	if y.IsI() {
 		return ctx.amend4arrayI(x, y.I(), f, z)
 	}
 	switch yv := y.value.(type) {
 	case *AI:
+		var err error
 		za, ok := z.value.(array)
 		if !ok {
 			for _, yi := range yv.Slice {
-				xa := ctx.amend4arrayI(x, yi, f, z)
-				if xa.IsPanic() {
-					return xa
+				x, err = ctx.amend4arrayI(x, yi, f, z)
+				if err != nil {
+					return x, err
 				}
-				x = xa.value.(array)
 			}
-			return NewV(x)
+			return x, nil
 		}
 		if za.Len() != yv.Len() {
-			return Panicf("@[x;y;f;z] : length mismatch between y and z (%d vs %d)",
+			return x, fmt.Errorf("length mismatch between y and z (%d vs %d)",
 				yv.Len(), za.Len())
 
 		}
 		for i, yi := range yv.Slice {
-			xa := ctx.amend4arrayI(x, yi, f, za.at(i))
-			if xa.IsPanic() {
-				return xa
+			x, err = ctx.amend4arrayI(x, yi, f, za.at(i))
+			if err != nil {
+				return x, err
 			}
-			x = xa.value.(array)
 		}
-		return NewV(x)
+		return x, nil
 	case *AV:
+		var err error
 		za, ok := z.value.(array)
 		if !ok {
 			for _, yi := range yv.Slice {
-				xa := ctx.amend4array(x, yi, f, z)
-				if xa.IsPanic() {
-					return xa
+				x, err = ctx.amend4array(x, yi, f, z)
+				if err != nil {
+					return x, err
 				}
-				x = xa.value.(array)
 			}
-			return NewV(x)
+			return x, nil
 		}
 		if za.Len() != yv.Len() {
-			return Panicf("@[x;y;f;z] : length mismatch between y and z (%d vs %d)",
+			return x, fmt.Errorf("length mismatch between y and z (%d vs %d)",
 				yv.Len(), za.Len())
 
 		}
 		for i, yi := range yv.Slice {
-			xa := ctx.amend4array(x, yi, f, za.at(i))
-			if xa.IsPanic() {
-				return xa
+			x, err = ctx.amend4array(x, yi, f, za.at(i))
+			if err != nil {
+				return x, err
 			}
-			x = xa.value.(array)
 		}
-		return NewV(x)
+		return x, nil
 	default:
-		return panicType("@[x;y;f;z]", "y", y)
+		panic("amend4array: y bad type")
 	}
 }
 
@@ -162,21 +175,21 @@ func outOfBounds(y int64, l int) bool {
 	return y < 0 || y >= int64(l)
 }
 
-func amendr(x array, y, z V) V {
+func amendr(x array, y, z V) (array, error) {
 	if y.IsI() {
 		if outOfBounds(y.I(), x.Len()) {
-			return Panicf("@[x;y;:;z] : y out of bounds (%d)", y.I())
+			return x, fmt.Errorf("y out of bounds (%d)", y.I())
 		}
 		if isEltType(x, z) {
 			x.set(int(y.I()), z)
-			return NewV(x)
+			return x, nil
 		}
 		r := make([]V, x.Len())
 		for i := range r {
 			r[i] = x.at(i)
 		}
 		r[y.I()] = z
-		return NewAV(r)
+		return &AV{Slice: r}, nil
 	}
 	switch yv := y.value.(type) {
 	case *AI:
@@ -184,15 +197,15 @@ func amendr(x array, y, z V) V {
 	case *AV:
 		return amendrAV(x, yv, z)
 	default:
-		return panicType("@[x;y;:;z]", "y", y)
+		panic("amendr: y bad type")
 	}
 }
 
-func amendrAI(x array, yv *AI, z V) V {
+func amendrAI(x array, yv *AI, z V) (array, error) {
 	xlen := x.Len()
 	for _, yi := range yv.Slice {
 		if outOfBounds(yi, xlen) {
-			return Panicf("@[x;y;:;z] : out of bounds index (%d)", yi)
+			return x, fmt.Errorf("out of bounds index (%d)", yi)
 		}
 	}
 	za, ok := z.value.(array)
@@ -201,7 +214,7 @@ func amendrAI(x array, yv *AI, z V) V {
 			for _, yi := range yv.Slice {
 				x.set(int(yi), z)
 			}
-			return NewV(x)
+			return x, nil
 		}
 		r := make([]V, xlen)
 		for i := range r {
@@ -210,10 +223,10 @@ func amendrAI(x array, yv *AI, z V) V {
 		for _, yi := range yv.Slice {
 			r[yi] = z
 		}
-		return NewAV(r)
+		return &AV{Slice: r}, nil
 	}
 	if za.Len() != yv.Len() {
-		return Panicf("@[x;y;:;z] : length mismatch between y and z (%d vs %d)",
+		return x, fmt.Errorf("length mismatch between y and z (%d vs %d)",
 			yv.Len(), za.Len())
 	}
 	if sameType(x, za) {
@@ -244,7 +257,7 @@ func amendrAI(x array, yv *AI, z V) V {
 				xv.Slice[yi] = zv.Slice[i]
 			}
 		}
-		return NewV(x)
+		return x, nil
 	}
 	for i := range yv.Slice {
 		if !isEltType(x, za.at(i)) {
@@ -259,34 +272,33 @@ func amendrAI(x array, yv *AI, z V) V {
 	for i, yi := range yv.Slice {
 		x.set(int(yi), za.at(i))
 	}
-	return NewV(x)
+	return x, nil
 }
 
-func amendrAV(x array, yv *AV, z V) V {
+func amendrAV(x array, yv *AV, z V) (array, error) {
+	var err error
 	za, ok := z.value.(array)
 	if !ok {
 		for _, yi := range yv.Slice {
-			xa := amendr(x, yi, z)
-			if xa.IsPanic() {
-				return xa
+			x, err = amendr(x, yi, z)
+			if err != nil {
+				return x, err
 			}
-			x = xa.value.(array)
 		}
-		return NewV(x)
+		return x, nil
 	}
 	if za.Len() != yv.Len() {
-		return Panicf("@[x;y;:;z] : length mismatch between y and z (%d vs %d)",
+		return x, fmt.Errorf("length mismatch between y and z (%d vs %d)",
 			yv.Len(), za.Len())
 
 	}
 	for i, yi := range yv.Slice {
-		xa := amendr(x, yi, za.at(i))
-		if xa.IsPanic() {
-			return xa
+		x, err = amendr(x, yi, za.at(i))
+		if err != nil {
+			return x, err
 		}
-		x = xa.value.(array)
 	}
-	return NewV(x)
+	return x, nil
 }
 
 // set changes x at i with y (in place).
@@ -335,28 +347,28 @@ func (ctx *Context) drill3(x, y, f V) V {
 		if y.IsPanic() {
 			return ppanic(".[x;y;f] : y ", y)
 		}
-		x = ctx.drill3mut(xv, y, f)
-		if x.IsPanic() {
-			return x
+		x, err := ctx.drill3array(xv, y, f)
+		if err != nil {
+			return Panicf(".[x;y;f] : %v", err)
 		}
-		return Canonical(x)
+		return Canonical(NewV(x))
 	default:
 		return panicType(".[x;y;f]", "x", x)
 	}
 }
 
-func (ctx *Context) drill3mut(x array, y, f V) V {
+func (ctx *Context) drill3array(x array, y, f V) (array, error) {
 	if y.IsI() {
 		return ctx.amend3arrayI(x, y.I(), f)
 	}
 	yv := y.value.(array)
 	if yv.Len() == 0 {
-		return ctx.Apply(f, NewV(x))
+		return ctx.drill3rec(x, rangeI(int64(x.Len())), yv, f)
 	}
 	return ctx.drill3rec(x, yv.at(0), yv.slice(1, yv.Len()), f)
 }
 
-func (ctx *Context) drill3rec(x array, y0 V, y array, f V) V {
+func (ctx *Context) drill3rec(x array, y0 V, y array, f V) (array, error) {
 	if y0.kind == valNil {
 		return ctx.drill3rec(x, rangeI(int64(x.Len())), y, f)
 	}
@@ -365,32 +377,29 @@ func (ctx *Context) drill3rec(x array, y0 V, y array, f V) V {
 	}
 	if y0.IsI() {
 		if outOfBounds(y0.I(), x.Len()) {
-			return Panicf(".[x;y;f] : y out of bounds (%d)", y0.I())
+			return x, fmt.Errorf("y out of bounds (%d)", y0.I())
 		}
 		xy0 := x.at(int(y0.I()))
 		xy0v, ok := xy0.value.(array)
 		if !ok {
-			return panics(".[x;y;f] : y out of depth")
+			return x, errors.New("y out of depth")
 		}
-		if y.Len() == 0 {
-			return panics(".[x;y;f] : y out of depth")
+		repl, err := ctx.drill3rec(xy0v, y.at(0), y.slice(1, y.Len()), f)
+		if err != nil {
+			return x, err
 		}
-		repl := ctx.drill3rec(xy0v, y.at(0), y.slice(1, y.Len()), f)
-		if repl.IsPanic() {
-			return repl
-		}
-		return ctx.amendArrayAt(x, int(y0.I()), repl)
+		return ctx.amendArrayAt(x, int(y0.I()), NewV(repl)), nil
 	}
+	var err error
 	y0v := y0.value.(array)
 	for i := 0; i < y0v.Len(); i++ {
 		y0i := y0v.at(i)
-		xa := ctx.drill3rec(x, y0i, y, f)
-		if xa.IsPanic() {
-			return xa
+		x, err = ctx.drill3rec(x, y0i, y, f)
+		if err != nil {
+			return x, err
 		}
-		x = xa.value.(array)
 	}
-	return NewV(x)
+	return x, nil
 }
 
 // try implements .[f1;x;f2].
@@ -409,7 +418,7 @@ func try(ctx *Context, f1, x, f2 V) V {
 		r = f2.applyN(ctx, 1)
 		if r.IsPanic() {
 			ctx.drop()
-			return Panicf("f2 call in .[f1;x;f2] : %v", r)
+			return Panicf(".[f1;x;f2] : f2 call: %v", r)
 		}
 	}
 	ctx.drop()

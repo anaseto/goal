@@ -140,3 +140,7 @@ func panicDomain(op, s string) V {
 func panicRank(op string) V {
 	return panics(op + " got too many arguments")
 }
+
+func panic2error(v V) error {
+	return errors.New(string(v.value.(panicV)))
+}
