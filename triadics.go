@@ -23,7 +23,7 @@ func (ctx *Context) amend3(x, y, f V) V {
 	}
 }
 
-func (ctx *Context) amendArrayAt(x array, y int, z V) array {
+func amendArrayAt(x array, y int, z V) array {
 	if isEltType(x, z) {
 		x.set(y, z)
 		return x
@@ -45,7 +45,7 @@ func (ctx *Context) amend3arrayI(x array, y int64, f V) (array, error) {
 	if repl.IsPanic() {
 		return x, fmt.Errorf("f call: %v", repl)
 	}
-	return ctx.amendArrayAt(x, int(y), repl), nil
+	return amendArrayAt(x, int(y), repl), nil
 }
 
 func (ctx *Context) amend3array(x array, y, f V) (array, error) {
@@ -110,7 +110,7 @@ func (ctx *Context) amend4arrayI(x array, y int64, f, z V) (array, error) {
 	if repl.IsPanic() {
 		return x, fmt.Errorf("f call: %v", repl)
 	}
-	return ctx.amendArrayAt(x, int(y), repl), nil
+	return amendArrayAt(x, int(y), repl), nil
 }
 
 func (ctx *Context) amend4array(x array, y, f, z V) (array, error) {
@@ -211,9 +211,7 @@ func amendrAI(x array, yv *AI, z V) (array, error) {
 	za, ok := z.value.(array)
 	if !ok {
 		if isEltType(x, z) {
-			for _, yi := range yv.Slice {
-				x.set(int(yi), z)
-			}
+			amendrAIatomMut(x, yv, z)
 			return x, nil
 		}
 		r := make([]V, xlen)
@@ -230,33 +228,7 @@ func amendrAI(x array, yv *AI, z V) (array, error) {
 			yv.Len(), za.Len())
 	}
 	if sameType(x, za) {
-		switch xv := x.(type) {
-		case *AB:
-			zv := za.(*AB)
-			for i, yi := range yv.Slice {
-				xv.Slice[yi] = zv.Slice[i]
-			}
-		case *AI:
-			zv := za.(*AI)
-			for i, yi := range yv.Slice {
-				xv.Slice[yi] = zv.Slice[i]
-			}
-		case *AF:
-			zv := za.(*AF)
-			for i, yi := range yv.Slice {
-				xv.Slice[yi] = zv.Slice[i]
-			}
-		case *AS:
-			zv := za.(*AS)
-			for i, yi := range yv.Slice {
-				xv.Slice[yi] = zv.Slice[i]
-			}
-		case *AV:
-			zv := za.(*AV)
-			for i, yi := range yv.Slice {
-				xv.Slice[yi] = zv.Slice[i]
-			}
-		}
+		amendrAIarrayMut(x, yv, za)
 		return x, nil
 	}
 	for i := range yv.Slice {
@@ -273,6 +245,80 @@ func amendrAI(x array, yv *AI, z V) (array, error) {
 		x.set(int(yi), za.at(i))
 	}
 	return x, nil
+}
+
+func amendrAIatomMut(x array, yv *AI, z V) {
+	switch xv := x.(type) {
+	case *AB:
+		var zb bool
+		if z.IsI() {
+			zb = z.I() != 0
+		} else {
+			zb = z.F() != 0
+		}
+		for _, yi := range yv.Slice {
+			xv.Slice[int(yi)] = zb
+		}
+	case *AI:
+		var zi int64
+		if z.IsI() {
+			zi = z.I()
+		} else {
+			zi = int64(z.F())
+		}
+		for _, yi := range yv.Slice {
+			xv.Slice[yi] = zi
+		}
+	case *AF:
+		var zf float64
+		if z.IsI() {
+			zf = float64(z.I())
+		} else {
+			zf = z.F()
+		}
+		for _, yi := range yv.Slice {
+			xv.Slice[yi] = zf
+		}
+	case *AS:
+		zs := string(z.value.(S))
+		for _, yi := range yv.Slice {
+			xv.Slice[yi] = zs
+		}
+	case *AV:
+		for _, yi := range yv.Slice {
+			xv.Slice[yi] = z
+		}
+	}
+}
+
+func amendrAIarrayMut(x array, yv *AI, za array) {
+	switch xv := x.(type) {
+	case *AB:
+		zv := za.(*AB)
+		for i, yi := range yv.Slice {
+			xv.Slice[yi] = zv.Slice[i]
+		}
+	case *AI:
+		zv := za.(*AI)
+		for i, yi := range yv.Slice {
+			xv.Slice[yi] = zv.Slice[i]
+		}
+	case *AF:
+		zv := za.(*AF)
+		for i, yi := range yv.Slice {
+			xv.Slice[yi] = zv.Slice[i]
+		}
+	case *AS:
+		zv := za.(*AS)
+		for i, yi := range yv.Slice {
+			xv.Slice[yi] = zv.Slice[i]
+		}
+	case *AV:
+		zv := za.(*AV)
+		for i, yi := range yv.Slice {
+			xv.Slice[yi] = zv.Slice[i]
+		}
+	}
 }
 
 func amendrAV(x array, yv *AV, z V) (array, error) {
@@ -388,7 +434,7 @@ func (ctx *Context) drill3rec(x array, y0 V, y array, f V) (array, error) {
 		if err != nil {
 			return x, err
 		}
-		return ctx.amendArrayAt(x, int(y0.I()), NewV(repl)), nil
+		return amendArrayAt(x, int(y0.I()), NewV(repl)), nil
 	}
 	var err error
 	y0v := y0.value.(array)
