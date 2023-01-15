@@ -6,7 +6,6 @@ Features:
 - maybe some kind of templating/interpolation
 - maybe add functions for handling text blobs of bytes
 - maybe bitwise operations
-- maybe triadic amend with .
 - maybe a switch/match
 - maybe add splice
 - improve error locations for adverbs and some other special cases
