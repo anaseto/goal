@@ -463,7 +463,11 @@ func VApplyN(ctx *Context, args []V) V {
 		ctx.drop()
 		return r
 	case 3:
-		return try(ctx, args[2], args[1], args[0])
+		x := args[2]
+		if x.IsFunction() {
+			return try(ctx, x, args[1], args[0])
+		}
+		return ctx.drill3(x, args[1], args[0])
 	default:
 		return panicRank(".")
 	}

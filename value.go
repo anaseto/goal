@@ -445,11 +445,11 @@ func (x *AS) At(i int) string { return x.Slice[i] }
 // At returns array value at the given index.
 func (x *AV) At(i int) V { return x.Slice[i] }
 
-func (x *AB) slice(i, j int) array { return &AB{rc: x.rc, Slice: x.Slice[i:j]} }
-func (x *AI) slice(i, j int) array { return &AI{rc: x.rc, Slice: x.Slice[i:j]} }
-func (x *AF) slice(i, j int) array { return &AF{rc: x.rc, Slice: x.Slice[i:j]} }
-func (x *AS) slice(i, j int) array { return &AS{rc: x.rc, Slice: x.Slice[i:j]} }
-func (x *AV) slice(i, j int) array { return &AV{rc: x.rc, Slice: x.Slice[i:j]} }
+func (x *AB) slice(i, j int) array { return &AB{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
+func (x *AI) slice(i, j int) array { return &AI{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
+func (x *AF) slice(i, j int) array { return &AF{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
+func (x *AS) slice(i, j int) array { return &AS{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
+func (x *AV) slice(i, j int) array { return &AV{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
 
 func (x *AB) reusable() bool { return x.rc <= 1 }
 func (x *AI) reusable() bool { return x.rc <= 1 }

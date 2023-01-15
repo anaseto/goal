@@ -16,25 +16,29 @@ func (ctx *Context) amend3(x, y, f V) V {
 	}
 }
 
-func (ctx *Context) amend3arrayI(x array, y int64, f V) V {
-	if y < 0 || y >= int64(x.Len()) {
-		return Panicf("@[x;y;f] : x out of bounds (%d)", y)
-	}
-	xy := x.at(int(y))
-	repl := ctx.Apply(f, xy)
-	if repl.IsPanic() {
-		return Panicf("f call in @[x;y;f] : %v", repl)
-	}
-	if isEltType(x, repl) {
-		x.set(int(y), repl)
+func (ctx *Context) amendArrayAt(x array, y int, z V) V {
+	if isEltType(x, z) {
+		x.set(y, z)
 		return NewV(x)
 	}
 	a := make([]V, x.Len())
 	for i := range a {
 		a[i] = x.at(i)
 	}
-	a[y] = repl
+	a[y] = z
 	return NewAV(a)
+}
+
+func (ctx *Context) amend3arrayI(x array, y int64, f V) V {
+	if outOfBounds(y, x.Len()) {
+		return Panicf("@[x;y;f] : y out of bounds (%d)", y)
+	}
+	xy := x.at(int(y))
+	repl := ctx.Apply(f, xy)
+	if repl.IsPanic() {
+		return Panicf("f call in @[x;y;f] : %v", repl)
+	}
+	return ctx.amendArrayAt(x, int(y), repl)
 }
 
 func (ctx *Context) amend3array(x array, y, f V) V {
@@ -91,16 +95,7 @@ func (ctx *Context) amend4arrayI(x array, y int64, f, z V) V {
 	if repl.IsPanic() {
 		return Panicf("f call in @[x;y;f;z] : %v", repl)
 	}
-	if isEltType(x, repl) {
-		x.set(int(y), repl)
-		return NewV(x)
-	}
-	r := make([]V, x.Len())
-	for i := range r {
-		r[i] = x.at(i)
-	}
-	r[y] = repl
-	return NewAV(r)
+	return ctx.amendArrayAt(x, int(y), repl)
 }
 
 func (ctx *Context) amend4array(x array, y, f, z V) V {
@@ -329,6 +324,73 @@ func (x *AF) set(i int, y V) {
 // set changes x at i with y (in place).
 func (x *AS) set(i int, y V) {
 	x.Slice[i] = string(y.value.(S))
+}
+
+// drill3 implements .[x;y;f].
+func (ctx *Context) drill3(x, y, f V) V {
+	x = clone(x)
+	switch xv := x.value.(type) {
+	case array:
+		y = toIndices(y)
+		if y.IsPanic() {
+			return ppanic(".[x;y;f] : y ", y)
+		}
+		x = ctx.drill3mut(xv, y, f)
+		if x.IsPanic() {
+			return x
+		}
+		return Canonical(x)
+	default:
+		return panicType(".[x;y;f]", "x", x)
+	}
+}
+
+func (ctx *Context) drill3mut(x array, y, f V) V {
+	if y.IsI() {
+		return ctx.amend3arrayI(x, y.I(), f)
+	}
+	yv := y.value.(array)
+	if yv.Len() == 0 {
+		return ctx.Apply(f, NewV(x))
+	}
+	return ctx.drill3rec(x, yv.at(0), yv.slice(1, yv.Len()), f)
+}
+
+func (ctx *Context) drill3rec(x array, y0 V, y array, f V) V {
+	if y0.kind == valNil {
+		return ctx.drill3rec(x, rangeI(int64(x.Len())), y, f)
+	}
+	if y.Len() == 0 {
+		return ctx.amend3array(x, y0, f)
+	}
+	if y0.IsI() {
+		if outOfBounds(y0.I(), x.Len()) {
+			return Panicf(".[x;y;f] : y out of bounds (%d)", y0.I())
+		}
+		xy0 := x.at(int(y0.I()))
+		xy0v, ok := xy0.value.(array)
+		if !ok {
+			return panics(".[x;y;f] : y out of depth")
+		}
+		if y.Len() == 0 {
+			return panics(".[x;y;f] : y out of depth")
+		}
+		repl := ctx.drill3rec(xy0v, y.at(0), y.slice(1, y.Len()), f)
+		if repl.IsPanic() {
+			return repl
+		}
+		return ctx.amendArrayAt(x, int(y0.I()), repl)
+	}
+	y0v := y0.value.(array)
+	for i := 0; i < y0v.Len(); i++ {
+		y0i := y0v.at(i)
+		xa := ctx.drill3rec(x, y0i, y, f)
+		if xa.IsPanic() {
+			return xa
+		}
+		x = xa.value.(array)
+	}
+	return NewV(x)
 }
 
 // try implements .[f1;x;f2].
