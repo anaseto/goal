@@ -605,7 +605,12 @@ func scan2Encode(f V, x V) V {
 func scan3(ctx *Context, args []V) V {
 	f := args[2]
 	if !f.IsFunction() {
-		return Panicf("x f'y : f not a function (%s)", f.Type())
+		switch fv := f.value.(type) {
+		case S:
+			return scan3Split(args[1], fv, args[0])
+		default:
+			return panicType("x f'y", "f", f)
+		}
 	}
 	if f.Rank(ctx) != 2 {
 		return scan3While(ctx, args)
@@ -651,6 +656,46 @@ func scan3(ctx *Context, args []V) V {
 		r := f.applyN(ctx, 2)
 		ctx.drop()
 		return r
+	}
+}
+
+func scan3Split(x V, sep S, y V) V {
+	var n int
+	if x.IsI() {
+		n = int(x.I())
+	} else if x.IsF() {
+		if !isI(x.F()) {
+			return Panicf("x s/y : x non-integer (%g)", x.F())
+		}
+		n = int(x.F())
+	} else {
+		return Panicf("x s/y : x bad type (%s)", x.Type())
+	}
+	return scan3SplitRec(n, sep, y)
+}
+
+func scan3SplitRec(n int, sep S, y V) V {
+	switch yv := y.value.(type) {
+	case S:
+		return NewAS(strings.SplitN(string(yv), string(sep), n))
+	case *AS:
+		r := make([]V, yv.Len())
+		for i := range r {
+			r[i] = NewAS(strings.SplitN(yv.At(i), string(sep), n))
+		}
+		return NewAV(r)
+	case *AV:
+		r := yv.reuse()
+		for i, yi := range yv.Slice {
+			ri := scan3SplitRec(n, sep, yi)
+			if ri.IsPanic() {
+				return ri
+			}
+			r.Slice[i] = ri
+		}
+		return NewV(r)
+	default:
+		return Panicf("n s/y : y not a string atom or array (%s)", y.Type())
 	}
 }
 

@@ -106,7 +106,7 @@ a: / assignment without expression right
 2 1/5 3 5 / length mismatch
 2 1/(+) / type
 "a"{x}/"a" / type
-("a")"b"\"a" / not a function
+("a")"b"\"a" / bad type
 ("a")"b"/"a" / not a function
 " "\1 2 3 / not a string
 " "\(1 2 3;1) / not a string

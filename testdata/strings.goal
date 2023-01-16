@@ -73,6 +73,10 @@ sub["b" "c";"d" "e"]"abc" "dbe" / "ade" "dde"
 $0w / "0w"
 $-0w / "-0w"
 ","\(("a,b";"c,d");"e,f") / (("a" "b";"c" "d");"e" "f")
+(3) ","\"a,b,c,d" / "a" "b" "c,d"
+(2) ","\"a,b,c,d" / "a" "b,c,d"
+(1) ","\"a,b,c,d" / ,"a,b,c,d"
+(0) ","\"a,b,c,d" / ()
 "ab"#"acababdab" / 3
 "ab"#"acababdab" "ab" "cd" / 3 1 0
 "ab"#("acababdab" "ab" "cd";"cdab") / (3 1 0;1)

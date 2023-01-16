@@ -123,7 +123,7 @@ x@y at          1 2 3@2 -> 3    1 2 3[2 0] -> 3 1
 .s  reval       ."2+3" -> 5     a:1;."a" -> panic ".s : undefined global: a"
 .e  get error   .error "msg" -> "msg"
 s.y substr      "abcdef"[2;3] -> "cde" (s[offset;length])
-r.y find n      rx/[a-z]/["abc";2] -> "a" "b" (stop at 2 matches; -1 for all)
+r.y findN       rx/[a-z]/["abc";2] -> "a" "b" (stop at 2 matches; -1 for all)
 x.y applyN      {x+y}.2 3 -> 5    {x+y}[2;3] -> 5    (1 2;3 4)[0;1] -> 2
 
 ::x         get global  a:3;::"a" -> 3
@@ -167,7 +167,7 @@ x shift y   shift       "a" "b" shift 1 2 3 -> 3 "a" "b"
 sub[r;s]    regsub      sub[rx/[a-z]/;"Z"] "aBc" -> "ZBZ"
 sub[r;f]    regsub      sub[rx/[A-Z]/;_] "aBc" -> "abc"
 sub[s;s]    replace     sub["b";"B"] "abc" -> "aBc"
-sub[s;s;i]  replace n   sub["a";"b";2] "aaa" -> "bba" (stop after 2 times)
+sub[s;s;i]  replaceN    sub["a";"b";2] "aaa" -> "bba" (stop after 2 times)
 sub[S]      replace     sub["b" "d" "c" "e"] "abc" -> "ade"
 sub[S;S]    replace     sub["b" "c";"d" "e"] "abc" -> "ade"
 
@@ -194,6 +194,7 @@ f/x    converge  {1+1.0%x}/1 -> 1.618033988749895
 f\x    converges {_x%2}\10 -> 10 5 2 1 0
 s/x    join      ","/"a" "b" "c" -> "a,b,c"
 s\x    split     ","\"a,b,c" -> "a" "b" "c"
+i s\x  splitN    (2) ","\"a,b,c" -> "a" "b,c"
 I/x    encode    24 60 60/1 2 3 -> 3723  2/1 1 0 -> 6
 I\x    decode    24 60 60\3723 -> 1 2 3  2\6 -> 1 1 0
 `
