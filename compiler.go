@@ -1165,7 +1165,7 @@ func (c *compiler) doList(l *astList, n int) error {
 				return err
 			}
 		} else {
-			c.push2(opConst, opcode(constAV))
+			c.push2(opVariadic, opcode(vMultiply))
 		}
 	}
 	c.pushVariadic(vList, len(body))

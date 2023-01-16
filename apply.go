@@ -312,10 +312,8 @@ func (x *AB) applyN(ctx *Context, n int) V {
 	case 1:
 		return applyArray(x, ctx.top())
 	default:
-		args := ctx.peekN(n)
-		r := ctx.applyArrayArgs(x, args[len(args)-1], args[:len(args)-1])
 		ctx.dropN(n - 1)
-		return r
+		return Panicf("x[y] : out of depth")
 	}
 }
 
@@ -324,10 +322,8 @@ func (x *AI) applyN(ctx *Context, n int) V {
 	case 1:
 		return applyArray(x, ctx.top())
 	default:
-		args := ctx.peekN(n)
-		r := ctx.applyArrayArgs(x, args[len(args)-1], args[:len(args)-1])
 		ctx.dropN(n - 1)
-		return r
+		return Panicf("x[y] : out of depth")
 	}
 }
 
@@ -336,10 +332,8 @@ func (x *AF) applyN(ctx *Context, n int) V {
 	case 1:
 		return applyArray(x, ctx.top())
 	default:
-		args := ctx.peekN(n)
-		r := ctx.applyArrayArgs(x, args[len(args)-1], args[:len(args)-1])
 		ctx.dropN(n - 1)
-		return r
+		return Panicf("x[y] : out of depth")
 	}
 }
 
@@ -396,7 +390,12 @@ func applyArray(x array, y V) V {
 		}
 		return x.at(int(i))
 	}
+	if isStar(y) {
+		return NewV(x)
+	}
 	switch yv := y.value.(type) {
+	case *AI:
+		return x.atIndices(yv.Slice)
 	case *AV:
 		r := make([]V, yv.Len())
 		for i, yi := range yv.Slice {

@@ -52,6 +52,16 @@ func (ctx *Context) amend3array(x array, y, f V) (array, error) {
 	if y.IsI() {
 		return ctx.amend3arrayI(x, y.I(), f)
 	}
+	if isStar(y) {
+		var err error
+		for i := 0; i < x.Len(); i++ {
+			x, err = ctx.amend3arrayI(x, int64(i), f)
+			if err != nil {
+				return x, err
+			}
+		}
+		return x, nil
+	}
 	switch yv := y.value.(type) {
 	case *AI:
 		var err error
@@ -116,6 +126,9 @@ func (ctx *Context) amend4arrayI(x array, y int64, f, z V) (array, error) {
 func (ctx *Context) amend4array(x array, y, f, z V) (array, error) {
 	if y.IsI() {
 		return ctx.amend4arrayI(x, y.I(), f, z)
+	}
+	if isStar(y) {
+		y = rangeI(int64(x.Len()))
 	}
 	switch yv := y.value.(type) {
 	case *AI:
@@ -190,6 +203,9 @@ func amendr(x array, y, z V) (array, error) {
 		}
 		r[y.I()] = z
 		return &AV{Slice: r}, nil
+	}
+	if isStar(y) {
+		y = rangeI(int64(x.Len()))
 	}
 	switch yv := y.value.(type) {
 	case *AI:
@@ -409,15 +425,21 @@ func (ctx *Context) deepAmend3array(x array, y, f V) (array, error) {
 	}
 	yv := y.value.(array)
 	if yv.Len() == 0 {
-		return ctx.deepAmend3rec(x, rangeI(int64(x.Len())), yv, f, false)
+		return ctx.amend3array(x, rangeI(int64(x.Len())), f)
 	}
-	return ctx.deepAmend3rec(x, yv.at(0), yv.slice(1, yv.Len()), f, false)
+	return ctx.deepAmend3rec(x, yv.at(0), yv.slice(1, yv.Len()), f)
 }
 
-func (ctx *Context) deepAmend3rec(x array, y0 V, y array, f V, depth bool) (array, error) {
-	y0v, ok := y0.value.(array)
-	if ok && y0v.Len() == 0 && !depth {
-		return ctx.deepAmend3rec(x, rangeI(int64(x.Len())), y, f, depth)
+func (ctx *Context) deepAmend3rec(x array, y0 V, y array, f V) (array, error) {
+	var err error
+	if isStar(y0) {
+		for i := 0; i < x.Len(); i++ {
+			x, err = ctx.deepAmend3rec(x, NewI(int64(i)), y, f)
+			if err != nil {
+				return x, err
+			}
+		}
+		return x, nil
 	}
 	if y.Len() == 0 {
 		return ctx.amend3array(x, y0, f)
@@ -431,16 +453,16 @@ func (ctx *Context) deepAmend3rec(x array, y0 V, y array, f V, depth bool) (arra
 		if !ok {
 			return x, errors.New("y out of depth")
 		}
-		repl, err := ctx.deepAmend3rec(xy0v, y.at(0), y.slice(1, y.Len()), f, false)
+		repl, err := ctx.deepAmend3rec(xy0v, y.at(0), y.slice(1, y.Len()), f)
 		if err != nil {
 			return x, err
 		}
 		return amendArrayAt(x, int(y0.I()), NewV(repl)), nil
 	}
-	var err error
+	y0v := y0.value.(array)
 	for i := 0; i < y0v.Len(); i++ {
 		y0i := y0v.at(i)
-		x, err = ctx.deepAmend3rec(x, y0i, y, f, true)
+		x, err = ctx.deepAmend3rec(x, y0i, y, f)
 		if err != nil {
 			return x, err
 		}
@@ -473,15 +495,21 @@ func (ctx *Context) deepAmend4array(x array, y, f, z V) (array, error) {
 	}
 	yv := y.value.(array)
 	if yv.Len() == 0 {
-		return ctx.deepAmend4rec(x, rangeI(int64(x.Len())), yv, f, z, false)
+		return ctx.amend4array(x, rangeI(int64(x.Len())), f, z)
 	}
-	return ctx.deepAmend4rec(x, yv.at(0), yv.slice(1, yv.Len()), f, z, false)
+	return ctx.deepAmend4rec(x, yv.at(0), yv.slice(1, yv.Len()), f, z)
 }
 
-func (ctx *Context) deepAmend4rec(x array, y0 V, y array, f, z V, depth bool) (array, error) {
-	y0v, ok := y0.value.(array)
-	if ok && y0v.Len() == 0 && !depth {
-		return ctx.deepAmend4rec(x, rangeI(int64(x.Len())), y, f, z, depth)
+func (ctx *Context) deepAmend4rec(x array, y0 V, y array, f, z V) (array, error) {
+	var err error
+	if isStar(y0) {
+		for i := 0; i < x.Len(); i++ {
+			x, err = ctx.deepAmend4rec(x, NewI(int64(i)), y, f, z)
+			if err != nil {
+				return x, err
+			}
+		}
+		return x, nil
 	}
 	if y.Len() == 0 {
 		return ctx.amend4array(x, y0, f, z)
@@ -495,16 +523,16 @@ func (ctx *Context) deepAmend4rec(x array, y0 V, y array, f, z V, depth bool) (a
 		if !ok {
 			return x, errors.New("y out of depth")
 		}
-		repl, err := ctx.deepAmend4rec(xy0v, y.at(0), y.slice(1, y.Len()), f, z, false)
+		repl, err := ctx.deepAmend4rec(xy0v, y.at(0), y.slice(1, y.Len()), f, z)
 		if err != nil {
 			return x, err
 		}
 		return amendArrayAt(x, int(y0.I()), NewV(repl)), nil
 	}
-	var err error
+	y0v := y0.value.(array)
 	for i := 0; i < y0v.Len(); i++ {
 		y0i := y0v.at(i)
-		x, err = ctx.deepAmend4rec(x, y0i, y, f, z, true)
+		x, err = ctx.deepAmend4rec(x, y0i, y, f, z)
 		if err != nil {
 			return x, err
 		}

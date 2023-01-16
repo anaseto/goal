@@ -28,7 +28,7 @@ arrays          1 2 -3 4      1 "ab" -2 "cd"      (1 2;"a";3 "b";(4 2;"c");*)
 variables       a:2 (assign)    a+:1 (sugar for a:a+1)    a+3 (use)
                 a::2 (assign global)    a+::2 (sugar for a::a+2)
 expressions     2*3+4 -> 14 (no priority)    1+|1 2 3 -> 4 3 2     +/1 2 3 -> 6
-index           x[y] is sugar for x@y (apply)
+index           x[y] is sugar for x@y (apply); x[] ~ x[*] ~ x[!#x] ~ x (arrays)
 index deep      x[y;z;...] is sugar for x.(y;z;...) (except for x in (?;and;or))
 index assign    x[y]:z is sugar for x:@[x;y;:;z]    (or . for x[y;...]:z)
 index op assign x[y]op:z is sugar for x:@[x;y;op;z] (for symbol operator)
@@ -130,6 +130,7 @@ x.y applyN      {x+y}.2 3 -> 5    {x+y}[2;3] -> 5    (1 2;3 4)[0;1] -> 2
 @[x;y;F;z]  amend       @[8 4 5;(1 2;0);+;(10 5;-2)] -> 6 14 10
 .[x;y;f]    deep amend  .[(1 2;3 4);0 1;-] -> (1 -2;3 4)
 .[x;y;F;z]  deep amend  .[(1 2;3 4);(0 1 0;1);+;1] -> (1 4;3 5)
+                        .[(1 2;3 4);(*;1);:;42] -> (1 42;3 42)
 .[f;x;f]    try         .[+;2 3;{"msg"}] -> 5   .[+;2 "a";{"msg"}] -> "msg"
 `
 

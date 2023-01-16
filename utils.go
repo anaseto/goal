@@ -151,10 +151,17 @@ func cloneShallowArray(x array) array {
 	}
 }
 
+func isStar(x V) bool {
+	return x.kind == valVariadic && x.variadic() == vMultiply
+}
+
 // isIndices returns true if we have indices in canonical form, that is,
 // using types I, AI and AV of thoses.
 func isIndices(x V) bool {
 	if x.IsI() {
+		return true
+	}
+	if isStar(x) {
 		return true
 	}
 	switch xv := x.value.(type) {
@@ -188,6 +195,9 @@ func toIndicesRec(x V) V {
 			return Panicf("non-integer index (%g)", x.F())
 		}
 		return NewI(int64(x.F()))
+	}
+	if isStar(x) {
+		return x
 	}
 	switch xv := x.value.(type) {
 	case *AB:

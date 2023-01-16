@@ -13,6 +13,9 @@ func enum(x V) V {
 	case *AI:
 		return rangeArray(xv)
 	default:
+		if isStar(x) {
+			return panics("!x : x non-integer")
+		}
 		return panics("!x : x nested array")
 	}
 }
