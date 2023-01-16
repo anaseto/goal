@@ -109,7 +109,9 @@ Notations:
         x,y (any other)
 
 SYNTAX HELP
-atoms           1     1.5     "text"      +
+numbers         1     1.5     0b0110     1.7e-3
+strings         "text\xff\u00F\n"  "\""  "\u65e5"  (backquotes for raw strings)
+operators       :  +  -  *  %  !  &  |  ^  #  _  $  ?  @  .  ::
 regexps         rx/[a-z]/     (see https://pkg.go.dev/regexp/syntax for syntax)
 arrays          1 2 -3 4      1 "ab" -2 "cd"      (1 2;"a";3 "b";(4 2;"c");*)
 variables       a:2 (assign)    a+:1 (sugar for a:a+1)    a+3 (use)
@@ -129,9 +131,9 @@ try             'x is sugar for ?["e"~@x;:x;x] (return if it's an error)
 
 TYPES HELP
 atom    array   name            examples
-n       N       number          0      1.5     !5      1.2 3 1.8
+n       N       number          0      1.5      !5      1.2 3 1.8
 s       S       string          "abc"   "d"     "a" "b" "c"
-r               regexp          rx/[a-z]/
+r               regexp          rx/[a-z]/       rx/\s+/
 f               function        +      {x*2}   (1-)    %[;2]
 e               error           error "msg"
         A       generic array   ("a" 1;"b" 2;"c" 3)     (+;-;*;"any")
@@ -140,16 +142,16 @@ VERBS HELP
 :x  identity    :[42] -> 42 (recall that : is also syntax for return)
 x:y right       2:3 -> 3
 +x  flip        +(1 2;3 4) -> (1 3;2 4)
-x+y add         2+3 -> 5
-s+s concat      "a"+"b" -> "ab"
--x  negate      - 2 3 -> -2 -3
-x-y subtract    5-3 -> 2
+x+y add         2+3 -> 5            2+3 4 -> 5 6
+s+s concat      "a"+"b" -> "ab"     "a" "b"+"c" -> "ac" "bc"
+-x  negate      - 2 3 -> -2 -3      -(1 2.5;3 4) -> (-1 -2.5;-3 -4)
+x-y subtract    5-3 -> 2            5 4-3 -> 2 1
 s-s trim suffix "file.txt"-".txt" -> "file"
-*x  first       *3 2 4 -> 3
-x*y multiply    2*3 -> 6
+*x  first       *3 2 4 -> 3     *"ab" -> "ab"    *(+;*) -> +
+x*y multiply    2*3 -> 6            1 2 3*3 -> 3 6 9
 s*x repeat      "a"*3 2 1 0 -> "aaa" "aa" "a" ""
 %x  classify    %1 2 3 1 2 3 -> 0 1 2 0 1 2     %"a" "b" "a" -> 0 1 0
-x%y divide      3%2 -> 1.5
+x%y divide      3%2 -> 1.5          3 4%2 -> 2 1.5
 !i  enum        !5 -> 0 1 2 3 4
 !x  odometer    !2 3 -> (0 0 0 1 1 1;0 1 2 0 1 2)
 x!y mod         3!5 4 3 -> 2 1 0
@@ -164,26 +166,26 @@ x>y greater     2>3 -> 0        "c" > "a" -> 1
 =x  group       =1 0 2 1 2 -> (,1;0 3;2 4)      =-1 2 -1 2 -> (!0;!0;1 3)
 f=x group by    {1=2!x}=!10 -> (0 2 4 6 8;1 3 5 7 9)
 x=y equal       2 3 4=3 -> 0 1 0        "ab" = "ba" -> 0
-~x  not         ~0 1 2 -> 1 0 0
-x~y match       3~3 -> 1        2 3~3 2 -> 0
+~x  not         ~0 1 2 -> 1 0 0         ~"a" "" "0" -> 0 1 0
+x~y match       3~3 -> 1        2 3~3 2 -> 0       ("a";%)~("b";%) -> 0 1
 ,x  enlist      ,1 -> ,1 (list with one element)
 x,y join        1,2 -> 1 2      "ab" "c","d" -> "ab" "c" "d"
-^x  sort        ^3 5 0 -> 0 3 5
+^x  sort        ^3 5 0 -> 0 3 5       ^"ca" "ab" "bc" -> "ab" "bc" "ca"
 i^y windows     2^!4 -> (0 1;1 2;2 3)
-s^y trim        " []"^"  [text]  " -> "text"
+s^y trim        " []"^"  [text]  " -> "text"    "\n"^"\nline\n" -> "line"
 x^y without     2 3^1 1 2 3 3 4 -> 1 1 4
-#x  length      #2 4 5 -> 3     #"ab" "cd" -> 2
+#x  length      #2 4 5 -> 3         #"ab" "cd" -> 2
 i#y take        2#4 1 5 -> 4 1      4#3 1 5 -> 3 1 5 3 (cyclic)
 s#y count       "ab"#"cabdab" "cd" "deab" -> 2 0 1
 f#y replicate   {0 1 1 0}#4 1 5 3 -> 1 5    {x>0}#2 -3 1 -> 2 1
 x#y keep only   2 3^1 1 2 3 3 4 -> 2 3 3
-_N  floor       _2.3 -> 2     _1.5 3.7 -> 1 3
+_N  floor       _2.3 -> 2           _1.5 3.7 -> 1 3
 _S  to lower    _"ABC" -> "abc"     _"AB" "CD" -> "ab" "cd"
-i_x drop        2_3 4 5 6 -> 5 6        -2_3 4 5 6 -> 3 4
+i_x drop        2_3 4 5 6 -> 5 6    -2_3 4 5 6 -> 3 4
 s_x trim prefix "pref-"_"pref-name" -> "name"
 x_y cut         2 5_!10 -> (2 3 4;5 6 7 8 9)
 f_x weed out    {0 1 1 0}_4 1 5 3 -> 4 3    {x>0}_2 -3 1 -> ,-3
-$x  string      $2 3 -> "2 3"
+$x  string      $2 3 -> "2 3"     $"text" -> "\"text\""
 i$x split       2$!6 -> (0 1;2 3;4 5)   2$"a" "b" "c" -> ("a" "b";,"c")
 s$y cast        "i"$2.3 -> 2    "i"$"ab" -> 97 98   "s"$97 98 -> "ab"
 s$y parse num   "n"$"1.5" -> 1.5
@@ -197,10 +199,10 @@ s?s index       "a = a + 1"?"=" "+" -> 2 6
 x?y find        3 2 1?2 -> 1    3 2 1?0 -> 3
 @x  type        @2 -> "n"    @"ab" -> "s"    @2 3 -> "N"
 s@y substr      "abcdef"@2  -> "cdef" (s[offset])
-r@y match       rx/[a-z]/"abc" -> 1
+r@y match       rx/[a-z]/"abc" -> 1     rx/\s/"abc" -> 0
 r@y find        rx/[a-z](.)/"abc" -> "ab" "b"
 f@y apply       (|)@1 2 -> 2 1 (like |[1 2] -> 2 1 or |1 2)
-x@y at          1 2 3@2 -> 3    1 2 3[2] -> 3
+x@y at          1 2 3@2 -> 3    1 2 3[2 0] -> 3 1
 .s  reval       ."2+3" -> 5     a:1;."a" -> panic ".s : undefined global: a"
 .e  get error   .error "msg" -> "msg"
 s.y substr      "abcdef"[2;3] -> "cde" (s[offset;length])
