@@ -335,24 +335,6 @@ const (
 	tAV vType = 0b10000
 )
 
-// mergeArrayTypes returns the most specialized type that can represent
-// both array types, or tV if any of them is not an array type. For example,
-// merging 1 2 and 2 3 gives tAI, but merging 4 and 2 3 gives tV.
-func mergeArrayTypes(t, s vType) vType {
-	if t&tAV == s&tAV {
-		return t & s
-	}
-	return tV
-}
-
-// mergeEltTypes returns the most specialized type that can represent both
-// types elements (for arrays) or themselves (for atoms). For example, merging
-// 4 and 2 3 gives tI. It is identical to mergeArrayTypes if both are array
-// types.
-func mergeEltTypes(t, s vType) vType {
-	return t & s
-}
-
 // getType returns the vType of x.
 func getType(x V) vType {
 	if x.IsI() {
@@ -393,7 +375,11 @@ func aType(x *AV) vType {
 	}
 	t := getType(x.Slice[0])
 	for i := 1; i < x.Len(); i++ {
-		t = mergeArrayTypes(t, getType(x.At(i)))
+		s := getType(x.At(i))
+		if t&tAV != s&tAV {
+			return tV
+		}
+		t &= s
 	}
 	return t
 }
@@ -406,7 +392,10 @@ func eType(x *AV) vType {
 	}
 	t := getType(x.Slice[0])
 	for i := 1; i < x.Len(); i++ {
-		t = mergeEltTypes(t, getType(x.At(i)))
+		t &= getType(x.At(i))
+		if t == tV {
+			return tV
+		}
 	}
 	return t
 }
@@ -537,7 +526,7 @@ func isCanonicalAV(x *AV) (vType, bool) {
 	switch t {
 	case tB, tI, tF, tS:
 		return t, false
-	case tV:
+	case tV, tAV:
 		for _, xi := range x.Slice {
 			if !isCanonical(xi) {
 				return t, false
@@ -592,13 +581,12 @@ func normalize(x *AV) (array, bool) {
 			r[i] = string(xi.value.(S))
 		}
 		return &AS{Slice: r}, true
-	case tV:
+	case tV, tAV:
 		for i, xi := range x.Slice {
 			x.Slice[i] = Canonical(xi)
 		}
 		return x, false
 	default:
-		// should not happen
 		return x, false
 	}
 }
