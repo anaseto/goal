@@ -7,8 +7,8 @@ Goal is an embeddable array programming language with a bytecode interpreter,
 written in Go. It provides both a command line intepreter (that can be used in
 the REPL), and a library interface. Though the language is still young, its
 core features are mostly there and tested, so it is usable both for writing
-useful scripts and playing with the REPL. The library interface might still
-experiment some changes.
+useful short scripts and playing with the REPL. The library interface might
+still experiment some changes.
 
 Like in most array programming languages, Goal's builtins vectorize operations
 on immutable arrays, and encourage a functional style for control and data
@@ -43,9 +43,9 @@ It's main distinctive features are as follows:
   reduce cloning by reusing dead immutable arrays, though it is not a goal to
   reach state-of-the-art (no SIMD, and there is still room for more special
   code and specialized algorithms). Scalar performance is typical for a
-  bytecode-compiled interpreter (without JIT), somewhat slower than a
-  state-of-the-art C bytecode interpreter (value representation in Go is
-  somewhat less compact than how it can be done in C).
+  bytecode-compiled interpreter (without JIT), somewhat slower than a C
+  bytecode interpreter (value representation in Go is somewhat less compact
+  than how it can be done in C).
 
 If this list is not enough to satisfy your curiosity, there's also a
 [Why.md](docs/Why.md) text for you. You can also read the [Credits.md](Credits.md)

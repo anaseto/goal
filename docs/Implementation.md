@@ -237,8 +237,8 @@ change a lot from one system to another and are not representative of real
 world applications. That said, to give an order of magnitude, on my OpenBSD
 machine, things like the naive fibonacci (fib 35) function completed faster
 than Perl, more or less like Python, though I'm not going to celebrate because
-on a Linux machine Python ran about twice as fast for this same micro-benchmark
-(but Perl rank like Goal).
+on a Linux machine Python ran more than twice as fast for this same
+micro-benchmark (but Perl ran like Goal).
 
 Whatever, I would say that Goal's scalar performance is decent. Quite a few
 array programming languages (like J) have done well without that. You're indeed

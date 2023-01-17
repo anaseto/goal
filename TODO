@@ -1,5 +1,5 @@
 Features:
-- some kind of object/interface thing
+- some kind of object/struct/dict thing
 - more general io (open/read/write/close/defer?)
 - split i$s, and cut x_s and maybe amend string @[s;I;s]
 - more utf8 and unicode functions
@@ -10,7 +10,7 @@ Features:
 - maybe add splice
 - improve error locations for adverbs and some other special cases
 - implement cycle detection in converge
-- maybe implement extensions to '/\ for more than 2 arguments
+- implement extensions to /\ for more than 2 arguments (like for ')
 
 Tests:
 - improve test coverage for error messages and refactor and improve them along
