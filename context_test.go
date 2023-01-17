@@ -261,29 +261,49 @@ func BenchmarkNewContext(b *testing.B) {
 
 func BenchmarkWhileN(b *testing.B) {
 	ctx := NewContext()
+	ctx.Eval("a:!10000")
 	for n := 0; n < b.N; n++ {
-		ctx.Eval("100 {x+1}/!10000")
+		ctx.Eval("100 {x+1}/a")
 	}
 }
 
-func BenchmarkWhileNAtDef(b *testing.B) {
+func BenchmarkDosAtDef(b *testing.B) {
 	ctx := NewContext()
+	ctx.Eval("a:!10000")
 	for n := 0; n < b.N; n++ {
-		ctx.Eval("100 {x[2]+:1}/!10000")
+		ctx.Eval("100 {x[2]+:1}/a")
 	}
 }
 
-func BenchmarkWhileNAt(b *testing.B) {
+func BenchmarkDosAtDefAV(b *testing.B) {
 	ctx := NewContext()
+	ctx.Eval(`a:(!10000),"a"`)
 	for n := 0; n < b.N; n++ {
-		ctx.Eval("100 {@[x;2;+;1]}/!10000")
+		ctx.Eval("100 {x[2]+:1}/a")
+	}
+}
+
+func BenchmarkDosAt(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:!10000")
+	for n := 0; n < b.N; n++ {
+		ctx.Eval("100 {@[x;2;+;1]}/a")
+	}
+}
+
+func BenchmarkDosAtAV(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval(`a:(!10000),"a"`)
+	for n := 0; n < b.N; n++ {
+		ctx.Eval("100 {@[x;2;+;1]}/a")
 	}
 }
 
 func BenchmarkReverse(b *testing.B) {
 	ctx := NewContext()
+	ctx.Eval("a:!10000")
 	for n := 0; n < b.N; n++ {
-		ctx.Eval("100 {|x}/!10000")
+		ctx.Eval("100 {|x}/a")
 	}
 }
 
