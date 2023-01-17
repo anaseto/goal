@@ -326,3 +326,67 @@ func BenchmarkWhere(b *testing.B) {
 		ctx.Eval("&a")
 	}
 }
+
+func BenchmarkUniq10(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:10?10000")
+	for n := 0; n < b.N; n++ {
+		ctx.Eval("100 {?a}/0")
+	}
+}
+
+func BenchmarkUniq50(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:50?10000")
+	for n := 0; n < b.N; n++ {
+		ctx.Eval("20 {?a}/0")
+	}
+}
+
+func BenchmarkUniq100(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:100?10000")
+	for n := 0; n < b.N; n++ {
+		ctx.Eval("10 {?a}/0")
+	}
+}
+
+func BenchmarkUniq256(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:256?10000")
+	for n := 0; n < b.N; n++ {
+		ctx.Eval("4 {?a}/0")
+	}
+}
+
+func BenchmarkUniq1000(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:1000?10000")
+	for n := 0; n < b.N; n++ {
+		ctx.Eval("?a")
+	}
+}
+
+func BenchmarkSearch100In1000(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:1000?10000;b:100?10000")
+	for n := 0; n < b.N; n++ {
+		ctx.Eval("a?b")
+	}
+}
+
+func BenchmarkSearch200In500(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:500?10000;b:200?10000")
+	for n := 0; n < b.N; n++ {
+		ctx.Eval("a?b")
+	}
+}
+
+func BenchmarkSearch10In10000(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:10000?10000;b:10?10000")
+	for n := 0; n < b.N; n++ {
+		ctx.Eval("a?b")
+	}
+}

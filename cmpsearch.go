@@ -146,7 +146,8 @@ func matchAF(x, y *AF) bool {
 	return true
 }
 
-const bruteForceN = 16
+const bruteForceN = 32
+const bruteForceNAI = 128
 
 // classify returns %x.
 func classify(ctx *Context, x V) V {
@@ -176,7 +177,7 @@ func classify(ctx *Context, x V) V {
 		return NewAI(r)
 	case *AI:
 		r := make([]int64, xv.Len())
-		if xv.Len() <= bruteForceN {
+		if xv.Len() <= bruteForceNAI {
 			n := int64(0)
 		loopAI:
 			for i, xi := range xv.Slice {
@@ -315,7 +316,7 @@ func uniq(ctx *Context, x V) V {
 		return NewAF(r)
 	case *AI:
 		r := []int64{}
-		if xv.Len() <= bruteForceN {
+		if xv.Len() <= bruteForceNAI {
 		loopAI:
 			for i, xi := range xv.Slice {
 				for _, xj := range xv.Slice[:i] {
@@ -428,7 +429,7 @@ func markFirsts(ctx *Context, x V) V {
 		return NewAB(r)
 	case *AI:
 		r := make([]bool, xv.Len())
-		if xv.Len() <= bruteForceN {
+		if xv.Len() <= bruteForceNAI {
 		loopAI:
 			for i, xi := range xv.Slice {
 				for _, xj := range xv.Slice[:i] {
@@ -720,7 +721,7 @@ func memberOfAI(x V, y *AI) V {
 		return NewAB(r)
 	case *AI:
 		r := make([]bool, xv.Len())
-		if xv.Len() <= bruteForceN {
+		if xv.Len() <= bruteForceNAI || y.Len() <= bruteForceNAI {
 			for i, xi := range xv.Slice {
 				for _, yi := range y.Slice {
 					if xi == yi {
@@ -773,7 +774,7 @@ func memberOfAS(x V, y *AS) V {
 		return NewI(b2i(ok))
 	case *AS:
 		r := make([]bool, xv.Len())
-		if xv.Len() <= bruteForceN {
+		if xv.Len() <= bruteForceN || y.Len() <= bruteForceN {
 			for i, xi := range xv.Slice {
 				for _, yi := range y.Slice {
 					if xi == yi {
@@ -1207,7 +1208,7 @@ func findAI(x *AI, y V) V {
 	case *AI:
 		r := make([]int64, yv.Len())
 		xlen := int64(x.Len())
-		if yv.Len() <= bruteForceN {
+		if yv.Len() <= bruteForceNAI || x.Len() <= bruteForceNAI {
 			for i, yi := range yv.Slice {
 				r[i] = xlen
 				for j, xi := range x.Slice {
@@ -1290,7 +1291,7 @@ func findAS(x *AS, y V) V {
 	case *AS:
 		r := make([]int64, yv.Len())
 		xlen := int64(x.Len())
-		if yv.Len() <= bruteForceN {
+		if yv.Len() <= bruteForceN || x.Len() <= bruteForceN {
 			for i, yi := range yv.Slice {
 				r[i] = xlen
 				for j, xi := range x.Slice {
