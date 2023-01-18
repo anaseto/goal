@@ -259,7 +259,7 @@ func applyRxFindAll(x *rx, y V, n int64) V {
 	}
 }
 
-func scan2SplitRx(f *rx, x V) V {
+func splitRx(f *rx, x V) V {
 	switch xv := x.value.(type) {
 	case S:
 		r := f.Regexp.Split(string(xv), -1)
@@ -273,7 +273,7 @@ func scan2SplitRx(f *rx, x V) V {
 	case *AV:
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
-			ri := scan2SplitRx(f, xi)
+			ri := splitRx(f, xi)
 			if ri.IsPanic() {
 				return ri
 			}

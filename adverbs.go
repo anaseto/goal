@@ -20,24 +20,28 @@ func fold2(ctx *Context, args []V) V {
 	}
 	if !f.IsFunction() {
 		if f.IsI() {
-			return fold2Decode(f, args[0])
+			return decode(f, args[0])
 		}
 		if f.IsF() {
-			return fold2Decode(f, args[0])
+			return decode(f, args[0])
 		}
 		switch fv := f.value.(type) {
 		case S:
-			return fold2Join(fv, args[0])
+			return joinS(fv, args[0])
 		case *AB, *AI, *AF:
-			return fold2Decode(f, args[0])
+			return decode(f, args[0])
 		default:
 			return panicType("F/x", "F", f)
 		}
 	}
 	if f.Rank(ctx) != 2 {
-		return fold2converge(ctx, f, args[0])
+		return converge(ctx, f, args[0])
 	}
 	x := args[0]
+	return foldfx(ctx, f, x)
+}
+
+func foldfx(ctx *Context, f, x V) V {
 	switch xv := x.value.(type) {
 	case array:
 		if xv.Len() == 0 {
@@ -62,7 +66,7 @@ func fold2(ctx *Context, args []V) V {
 	}
 }
 
-func fold2Join(sep S, x V) V {
+func joinS(sep S, x V) V {
 	switch xv := x.value.(type) {
 	case S:
 		return x
@@ -75,7 +79,7 @@ func fold2Join(sep S, x V) V {
 	}
 }
 
-func fold2Decode(f V, x V) V {
+func decode(f V, x V) V {
 	if f.IsI() {
 		if f.I() <= 0 {
 			return panics("i/x : base i is not positive")
@@ -109,11 +113,11 @@ func fold2Decode(f V, x V) V {
 			if aix.IsPanic() {
 				return aix
 			}
-			return fold2Decode(f, aix)
+			return decode(f, aix)
 		case *AV:
 			r := make([]V, xv.Len())
 			for i, xi := range xv.Slice {
-				r[i] = fold2Decode(f, xi)
+				r[i] = decode(f, xi)
 				if r[i].IsPanic() {
 					return r[i]
 				}
@@ -128,11 +132,11 @@ func fold2Decode(f V, x V) V {
 		if !isI(f.F()) {
 			return Panicf("i/x : i non-integer (%g)", f.F())
 		}
-		return fold2Decode(NewI(int64(f.F())), x)
+		return decode(NewI(int64(f.F())), x)
 	}
 	switch fv := f.value.(type) {
 	case *AB:
-		return fold2Decode(fromABtoAI(fv), x)
+		return decode(fromABtoAI(fv), x)
 	case *AI:
 		for _, b := range fv.Slice {
 			if b <= 0 {
@@ -151,7 +155,7 @@ func fold2Decode(f V, x V) V {
 			if !isI(x.F()) {
 				return Panicf("I/x : x non-integer (%g)", x.F())
 			}
-			return fold2Decode(f, NewI(int64(x.F())))
+			return decode(f, NewI(int64(x.F())))
 		}
 		switch xv := x.value.(type) {
 		case *AI:
@@ -165,17 +169,17 @@ func fold2Decode(f V, x V) V {
 			}
 			return NewI(r)
 		case *AB:
-			return fold2Decode(f, fromABtoAI(xv))
+			return decode(f, fromABtoAI(xv))
 		case *AF:
 			aix := toAI(xv)
 			if aix.IsPanic() {
 				return aix
 			}
-			return fold2Decode(f, aix)
+			return decode(f, aix)
 		case *AV:
 			r := make([]V, xv.Len())
 			for i, xi := range xv.Slice {
-				r[i] = fold2Decode(f, xi)
+				r[i] = decode(f, xi)
 				if r[i].IsPanic() {
 					return r[i]
 				}
@@ -189,7 +193,7 @@ func fold2Decode(f V, x V) V {
 		if aif.IsPanic() {
 			return aif
 		}
-		return fold2Decode(aif, x)
+		return decode(aif, x)
 	default:
 		// should not happen
 		return panicType("I/x", "I", f)
@@ -198,7 +202,7 @@ func fold2Decode(f V, x V) V {
 
 const maxConvergeIters = 1_000_000
 
-func fold2converge(ctx *Context, f, x V) V {
+func converge(ctx *Context, f, x V) V {
 	n := 0
 	f.IncrRC()
 	ctx.push(x)
@@ -232,7 +236,7 @@ func fold3(ctx *Context, args []V) V {
 		return Panicf("x F/y : F not a function (%s)", f.Type())
 	}
 	if f.Rank(ctx) != 2 {
-		return fold3While(ctx, args)
+		return doWhile(ctx, args)
 	}
 	y := args[0]
 	switch yv := y.value.(type) {
@@ -265,18 +269,18 @@ func fold3(ctx *Context, args []V) V {
 	}
 }
 
-func fold3While(ctx *Context, args []V) V {
+func doWhile(ctx *Context, args []V) V {
 	f := args[2]
 	x := args[1]
 	y := args[0]
 	if x.IsI() {
-		return fold3doTimes(ctx, x.I(), f, y)
+		return doTimes(ctx, x.I(), f, y)
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
 			return Panicf("n f/y : non-integer n (%g)", x.F())
 		}
-		return fold3doTimes(ctx, int64(x.F()), f, y)
+		return doTimes(ctx, int64(x.F()), f, y)
 	}
 	if x.IsFunction() {
 		f.IncrRC()
@@ -311,7 +315,7 @@ func fold3While(ctx *Context, args []V) V {
 	return panicType("x f/y", "x", x)
 }
 
-func fold3doTimes(ctx *Context, n int64, f, y V) V {
+func doTimes(ctx *Context, n int64, f, y V) V {
 	f.IncrRC()
 	ctx.push(y)
 	for i := int64(0); i < n; i++ {
@@ -331,24 +335,24 @@ func fold3doTimes(ctx *Context, n int64, f, y V) V {
 func scan2(ctx *Context, f, x V) V {
 	if !f.IsFunction() {
 		if f.IsI() {
-			return scan2Encode(f, x)
+			return encode(f, x)
 		}
 		if f.IsF() {
-			return scan2Encode(f, x)
+			return encode(f, x)
 		}
 		switch fv := f.value.(type) {
 		case S:
-			return scan2Split(fv, x)
+			return splitS(fv, x)
 		case *rx:
-			return scan2SplitRx(fv, x)
+			return splitRx(fv, x)
 		case *AB, *AI, *AF:
-			return scan2Encode(f, x)
+			return encode(f, x)
 		default:
 			return panicType("f\\x", "f", f)
 		}
 	}
 	if f.Rank(ctx) != 2 {
-		return scan2converge(ctx, f, x)
+		return converges(ctx, f, x)
 	}
 	switch xv := x.value.(type) {
 	case array:
@@ -381,7 +385,7 @@ func scan2(ctx *Context, f, x V) V {
 	}
 }
 
-func scan2converge(ctx *Context, f, x V) V {
+func converges(ctx *Context, f, x V) V {
 	n := 0
 	r := []V{}
 	defer func() {
@@ -415,7 +419,7 @@ func scan2converge(ctx *Context, f, x V) V {
 	}
 }
 
-func scan2Split(sep S, x V) V {
+func splitS(sep S, x V) V {
 	r := splitN(-1, sep, x)
 	if r.IsPanic() {
 		return ppanic("s/x : x ", r)
@@ -438,7 +442,7 @@ func encodeBaseDigits(b int64, x int64) int {
 	return n
 }
 
-func scan2Encode(f V, x V) V {
+func encode(f V, x V) V {
 	if f.IsI() {
 		if f.I() <= 0 {
 			return panics("i\\x : base i is not positive")
@@ -456,7 +460,7 @@ func scan2Encode(f V, x V) V {
 			if !isI(x.F()) {
 				return Panicf("i\\x : x non-integer (%g)", x.F())
 			}
-			return scan2Encode(f, NewI(int64(x.F())))
+			return encode(f, NewI(int64(x.F())))
 		}
 		switch xv := x.value.(type) {
 		case *AI:
@@ -480,17 +484,17 @@ func scan2Encode(f V, x V) V {
 			}
 			return NewAV(r)
 		case *AB:
-			return scan2Encode(f, fromABtoAI(xv))
+			return encode(f, fromABtoAI(xv))
 		case *AF:
 			aix := toAI(xv)
 			if aix.IsPanic() {
 				return aix
 			}
-			return scan2Encode(f, aix)
+			return encode(f, aix)
 		case *AV:
 			r := make([]V, xv.Len())
 			for i, xi := range xv.Slice {
-				r[i] = scan2Encode(f, xi)
+				r[i] = encode(f, xi)
 				if r[i].IsPanic() {
 					return r[i]
 				}
@@ -505,11 +509,11 @@ func scan2Encode(f V, x V) V {
 		if !isI(f.F()) {
 			return Panicf("i\\x : i non-integer (%g)", f.F())
 		}
-		return scan2Encode(NewI(int64(f.F())), x)
+		return encode(NewI(int64(f.F())), x)
 	}
 	switch fv := f.value.(type) {
 	case *AB:
-		return scan2Encode(fromABtoAI(fv), x)
+		return encode(fromABtoAI(fv), x)
 	case *AI:
 		for _, b := range fv.Slice {
 			if b <= 0 {
@@ -531,7 +535,7 @@ func scan2Encode(f V, x V) V {
 			if !isI(x.F()) {
 				return Panicf("I/x : x non-integer (%g)", x.F())
 			}
-			return scan2Encode(f, NewI(int64(x.F())))
+			return encode(f, NewI(int64(x.F())))
 		}
 		switch xv := x.value.(type) {
 		case *AI:
@@ -554,17 +558,17 @@ func scan2Encode(f V, x V) V {
 			}
 			return NewAV(r)
 		case *AB:
-			return scan2Encode(f, fromABtoAI(xv))
+			return encode(f, fromABtoAI(xv))
 		case *AF:
 			aix := toAI(xv)
 			if aix.IsPanic() {
 				return aix
 			}
-			return scan2Encode(f, aix)
+			return encode(f, aix)
 		case *AV:
 			r := make([]V, xv.Len())
 			for i, xi := range xv.Slice {
-				r[i] = scan2Encode(f, xi)
+				r[i] = encode(f, xi)
 				if r[i].IsPanic() {
 					return r[i]
 				}
@@ -578,7 +582,7 @@ func scan2Encode(f V, x V) V {
 		if aif.IsPanic() {
 			return aif
 		}
-		return scan2Encode(aif, x)
+		return encode(aif, x)
 	default:
 		// should not happen
 		return panicType("I\\x", "I", f)
@@ -590,13 +594,13 @@ func scan3(ctx *Context, args []V) V {
 	if !f.IsFunction() {
 		switch fv := f.value.(type) {
 		case S:
-			return scan3Split(args[1], fv, args[0])
+			return splitNS(args[1], fv, args[0])
 		default:
 			return panicType("x f'y", "f", f)
 		}
 	}
 	if f.Rank(ctx) != 2 {
-		return scan3While(ctx, args)
+		return doWhiles(ctx, args)
 	}
 	y := args[0]
 	x := args[1]
@@ -642,7 +646,7 @@ func scan3(ctx *Context, args []V) V {
 	}
 }
 
-func scan3Split(x V, sep S, y V) V {
+func splitNS(x V, sep S, y V) V {
 	var n int
 	if x.IsI() {
 		n = int(x.I())
@@ -661,18 +665,18 @@ func scan3Split(x V, sep S, y V) V {
 	return r
 }
 
-func scan3While(ctx *Context, args []V) V {
+func doWhiles(ctx *Context, args []V) V {
 	f := args[2]
 	x := args[1]
 	y := args[0]
 	if x.IsI() {
-		return scan3doTimes(ctx, x.I(), f, y)
+		return dosTimes(ctx, x.I(), f, y)
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
 			return Panicf("n f\\y : non-integer n (%g)", x.F())
 		}
-		return scan3doTimes(ctx, int64(x.F()), f, y)
+		return dosTimes(ctx, int64(x.F()), f, y)
 	}
 	if x.IsFunction() {
 		r := []V{y}
@@ -709,7 +713,7 @@ func scan3While(ctx *Context, args []V) V {
 	return panicType("x f\\y", "x", x)
 }
 
-func scan3doTimes(ctx *Context, n int64, f, y V) V {
+func dosTimes(ctx *Context, n int64, f, y V) V {
 	r := make([]V, n+1)
 	r[0] = y
 	f.IncrRC()
