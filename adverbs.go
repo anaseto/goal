@@ -1,7 +1,7 @@
 package goal
 
 import (
-	//"fmt"
+	"fmt"
 	"strings"
 )
 
@@ -34,7 +34,7 @@ func fold2(ctx *Context, args []V) V {
 			return panicType("F/x", "F", f)
 		}
 	}
-	if f.Rank(ctx) != 2 {
+	if f.Rank(ctx) == 1 {
 		return converge(ctx, f, args[0])
 	}
 	x := args[0]
@@ -235,13 +235,20 @@ func fold3(ctx *Context, args []V) V {
 	if !f.IsFunction() {
 		return Panicf("x F/y : F not a function (%s)", f.Type())
 	}
-	if f.Rank(ctx) != 2 {
+	rank := f.Rank(ctx)
+	if rank == 1 {
 		return doWhile(ctx, args)
 	}
-	y := args[0]
+	if rank == 2 {
+		return foldSeedfy(ctx, f, args[1], args[0])
+	}
+	return Panicf("x F/y : F expects %d arguments, but got %d", rank, len(args)-1)
+}
+
+func foldSeedfy(ctx *Context, f, x, y V) V {
 	switch yv := y.value.(type) {
 	case array:
-		r := args[1]
+		r := x
 		if yv.Len() == 0 {
 			return r
 		}
@@ -262,11 +269,71 @@ func fold3(ctx *Context, args []V) V {
 		return Canonical(r)
 	default:
 		ctx.push(y)
-		ctx.push(args[1])
+		ctx.push(x)
 		r := f.applyN(ctx, 2)
 		ctx.drop()
 		return r
 	}
+}
+
+func getIterLen(args []V) (int, error) {
+	mlen := -1
+	for _, x := range args {
+		switch xv := x.value.(type) {
+		case array:
+			switch {
+			case mlen < 0:
+				mlen = xv.Len()
+			case mlen != xv.Len():
+				return mlen, fmt.Errorf("length mismatch (%d vs %d)", mlen, xv.Len())
+			}
+		}
+	}
+	return mlen, nil
+}
+
+func foldN(ctx *Context, args []V) V {
+	f := args[len(args)-1]
+	if !f.IsFunction() {
+		return Panicf("f/[x;y;...] : f not a function (%s)", f.Type())
+	}
+	n := len(args) - 1
+	if f.Rank(ctx) != n {
+		return Panicf("f/[x;y;...] : f expects %d arguments, but got %d", f.Rank(ctx), n)
+	}
+	mlen, err := getIterLen(args[:len(args)-2])
+	if err != nil {
+		return Panicf("f/[x;y;...] : %v", err)
+	}
+	if mlen == -1 {
+		return ctx.ApplyN(f, args[:len(args)-1])
+	}
+	x := args[len(args)-2]
+	if mlen == 0 {
+		return x
+	}
+	x.IncrRC()
+	f.IncrRC()
+	ctx.pushNoRC(V{})
+	r := x
+	for i := 0; i < mlen; i++ {
+		ctx.replaceTop(args[0].at(i))
+		for j := 1; j < len(args)-2; j++ {
+			ctx.push(args[j].at(i))
+		}
+		ctx.push(r)
+		r = f.applyN(ctx, n)
+		if r.IsPanic() {
+			f.DecrRC()
+			x.DecrRC()
+			ctx.drop()
+			return r
+		}
+	}
+	f.DecrRC()
+	x.DecrRC()
+	ctx.drop()
+	return r
 }
 
 func doWhile(ctx *Context, args []V) V {
@@ -768,27 +835,19 @@ func eachN(ctx *Context, args []V) V {
 	if f.Rank(ctx) != n {
 		return Panicf("f'[x;y;...] : f expects %d arguments, but got %d", f.Rank(ctx), n)
 	}
-	mlen := -1
-	for _, x := range args[:len(args)-1] {
-		switch xv := x.value.(type) {
-		case array:
-			switch {
-			case mlen < 0:
-				mlen = xv.Len()
-			case mlen != xv.Len():
-				return Panicf("f'[x;y;...] : length mismatch (%d vs %d)", mlen, xv.Len())
-			}
-		}
+	mlen, err := getIterLen(args[:len(args)-1])
+	if err != nil {
+		return Panicf("f'[x;y;...] : %v", err)
 	}
 	if mlen == -1 {
 		return ctx.ApplyN(f, args[:len(args)-1])
 	}
-	x := args[0]
+	y := args[0]
 	r := make([]V, mlen)
 	f.IncrRC()
 	ctx.pushNoRC(V{})
 	for i := range r {
-		ctx.replaceTop(x.at(i))
+		ctx.replaceTop(y.at(i))
 		for j := 1; j < len(args)-1; j++ {
 			ctx.push(args[j].at(i))
 		}

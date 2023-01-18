@@ -510,7 +510,7 @@ func VFold(ctx *Context, args []V) V {
 	case 3:
 		return fold3(ctx, args)
 	default:
-		return panicRank("/")
+		return foldN(ctx, args)
 	}
 }
 
