@@ -628,3 +628,28 @@ func scount(s S, y V) V {
 		return panicType("s#y", "y", y)
 	}
 }
+
+func splitN(n int, sep S, y V) V {
+	switch yv := y.value.(type) {
+	case S:
+		return NewAS(strings.SplitN(string(yv), string(sep), n))
+	case *AS:
+		r := make([]V, yv.Len())
+		for i := range r {
+			r[i] = NewAS(strings.SplitN(yv.At(i), string(sep), n))
+		}
+		return NewAV(r)
+	case *AV:
+		r := yv.reuse()
+		for i, yi := range yv.Slice {
+			ri := splitN(n, sep, yi)
+			if ri.IsPanic() {
+				return ri
+			}
+			r.Slice[i] = ri
+		}
+		return NewV(r)
+	default:
+		return Panicf("y not a string atom or array (%s)", y.Type())
+	}
+}

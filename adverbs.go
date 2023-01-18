@@ -416,28 +416,11 @@ func scan2converge(ctx *Context, f, x V) V {
 }
 
 func scan2Split(sep S, x V) V {
-	switch xv := x.value.(type) {
-	case S:
-		return NewAS(strings.Split(string(xv), string(sep)))
-	case *AS:
-		r := make([]V, xv.Len())
-		for i := range r {
-			r[i] = NewAS(strings.Split(xv.At(i), string(sep)))
-		}
-		return NewAV(r)
-	case *AV:
-		r := xv.reuse()
-		for i, xi := range xv.Slice {
-			ri := scan2Split(sep, xi)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.Slice[i] = ri
-		}
-		return NewV(r)
-	default:
-		return Panicf("s/x : x not a string atom or array (%s)", x.Type())
+	r := splitN(-1, sep, x)
+	if r.IsPanic() {
+		return ppanic("s/x : ", r)
 	}
+	return r
 }
 
 func encodeBaseDigits(b int64, x int64) int {
@@ -665,38 +648,17 @@ func scan3Split(x V, sep S, y V) V {
 		n = int(x.I())
 	} else if x.IsF() {
 		if !isI(x.F()) {
-			return Panicf("x s/y : x non-integer (%g)", x.F())
+			return Panicf("i s/y : i non-integer (%g)", x.F())
 		}
 		n = int(x.F())
 	} else {
-		return Panicf("x s/y : x bad type (%s)", x.Type())
+		return Panicf("i s/y : i bad type (%s)", x.Type())
 	}
-	return scan3SplitRec(n, sep, y)
-}
-
-func scan3SplitRec(n int, sep S, y V) V {
-	switch yv := y.value.(type) {
-	case S:
-		return NewAS(strings.SplitN(string(yv), string(sep), n))
-	case *AS:
-		r := make([]V, yv.Len())
-		for i := range r {
-			r[i] = NewAS(strings.SplitN(yv.At(i), string(sep), n))
-		}
-		return NewAV(r)
-	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.Slice {
-			ri := scan3SplitRec(n, sep, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.Slice[i] = ri
-		}
-		return NewV(r)
-	default:
-		return Panicf("n s/y : y not a string atom or array (%s)", y.Type())
+	r := splitN(n, sep, y)
+	if r.IsPanic() {
+		return ppanic("i s/y : ", r)
 	}
+	return r
 }
 
 func scan3While(ctx *Context, args []V) V {
