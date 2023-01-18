@@ -24,3 +24,4 @@ Optimizations:
 - more special code for common op/ and op\
 - improve some special and general cases in self-search functions
 - maybe improve liveness analysis (though simple, already good enough)
+- many functions have deep Canonical calls in generic case when a shallow version would suffice

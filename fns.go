@@ -520,23 +520,54 @@ func reval(ctx *Context, s S) V {
 	if err != nil {
 		return Panicf(".s : %v", err)
 	}
-	return r
+	return recompileLambdas(ctx, nctx, r)
+}
+
+func recompileLambdas(ctx, nctx *Context, x V) V {
+	if x.kind == valLambda {
+		return evalString(ctx, x.Sprint(nctx))
+	}
+	switch xv := x.value.(type) {
+	case *AV:
+		for i, xi := range xv.Slice {
+			xv.Slice[i] = recompileLambdas(ctx, nctx, xi)
+		}
+		return x
+	default:
+		return x
+	}
 }
 
 // eval implements eval x.
 func eval(ctx *Context, x V) V {
 	switch xv := x.value.(type) {
 	case S:
-		nctx := ctx.derive()
-		r, err := nctx.Eval(string(xv))
-		if err != nil {
-			return Panicf(".s : %v", err)
+		return evalString(ctx, string(xv))
+	case *AS:
+		r := make([]V, xv.Len())
+		for i, xi := range xv.Slice {
+			r[i] = evalString(ctx, string(xi))
 		}
-		ctx.merge(nctx)
-		return r
+		return Canonical(NewAV(r))
+	case *AV:
+		r := make([]V, xv.Len())
+		for i, xi := range xv.Slice {
+			r[i] = eval(ctx, xi)
+		}
+		return Canonical(NewAV(r))
 	default:
 		return Panicf("eval x : x not a string (%s)", x.Type())
 	}
+}
+
+func evalString(ctx *Context, s string) V {
+	nctx := ctx.derive()
+	r, err := nctx.Eval(s)
+	if err != nil {
+		return Panicf("eval s : %v", err)
+	}
+	ctx.merge(nctx)
+	return r
 }
 
 // evalPackage implements eval[x;y;z].
