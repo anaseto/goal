@@ -418,7 +418,7 @@ func scan2converge(ctx *Context, f, x V) V {
 func scan2Split(sep S, x V) V {
 	r := splitN(-1, sep, x)
 	if r.IsPanic() {
-		return ppanic("s/x : ", r)
+		return ppanic("s/x : x ", r)
 	}
 	return r
 }
@@ -656,7 +656,7 @@ func scan3Split(x V, sep S, y V) V {
 	}
 	r := splitN(n, sep, y)
 	if r.IsPanic() {
-		return ppanic("i s/y : ", r)
+		return ppanic("i s/y : y ", r)
 	}
 	return r
 }

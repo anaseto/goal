@@ -650,6 +650,6 @@ func splitN(n int, sep S, y V) V {
 		}
 		return NewV(r)
 	default:
-		return Panicf("y not a string atom or array (%s)", y.Type())
+		return Panicf("not a string atom or array (%s)", y.Type())
 	}
 }
