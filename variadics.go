@@ -524,7 +524,7 @@ func VScan(ctx *Context, args []V) V {
 	case 3:
 		return scan3(ctx, args)
 	default:
-		return panicRank("\\")
+		return scanN(ctx, args)
 	}
 }
 

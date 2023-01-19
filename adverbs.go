@@ -312,7 +312,6 @@ func foldN(ctx *Context, args []V) V {
 	if mlen == 0 {
 		return x
 	}
-	x.IncrRC()
 	f.IncrRC()
 	ctx.pushNoRC(V{})
 	r := x
@@ -325,13 +324,11 @@ func foldN(ctx *Context, args []V) V {
 		r = f.applyN(ctx, n)
 		if r.IsPanic() {
 			f.DecrRC()
-			x.DecrRC()
 			ctx.drop()
 			return r
 		}
 	}
 	f.DecrRC()
-	x.DecrRC()
 	ctx.drop()
 	return r
 }
@@ -666,7 +663,7 @@ func scan3(ctx *Context, args []V) V {
 			return panicType("x f'y", "f", f)
 		}
 	}
-	if f.Rank(ctx) != 2 {
+	if f.Rank(ctx) == 1 {
 		return doWhiles(ctx, args)
 	}
 	y := args[0]
@@ -676,30 +673,22 @@ func scan3(ctx *Context, args []V) V {
 		if yv.Len() == 0 {
 			return NewAV(nil)
 		}
-		ctx.push(yv.at(0))
-		ctx.push(x)
 		f.IncrRC()
-		first := f.applyN(ctx, 2)
-		if first.IsPanic() {
-			f.DecrRC()
-			ctx.drop()
-			return first
-		}
+		ctx.pushNoRC(V{})
 		r := make([]V, yv.Len())
-		r[0] = first
-		for i := 1; i < yv.Len(); i++ {
+		for i := 0; i < yv.Len(); i++ {
 			ctx.replaceTop(yv.at(i))
-			last := r[i-1]
-			ctx.push(last)
-			last.IncrRC()
+			ctx.push(x)
+			x.IncrRC()
 			next := f.applyN(ctx, 2)
-			last.DecrRC()
+			x.DecrRC()
 			if next.IsPanic() {
 				f.DecrRC()
 				ctx.drop()
 				return next
 			}
-			r[i] = next
+			x = next
+			r[i] = x
 		}
 		f.DecrRC()
 		ctx.drop()
@@ -711,6 +700,51 @@ func scan3(ctx *Context, args []V) V {
 		ctx.drop()
 		return r
 	}
+}
+
+func scanN(ctx *Context, args []V) V {
+	f := args[len(args)-1]
+	if !f.IsFunction() {
+		return Panicf("f\\[x;y;...] : f not a function (%s)", f.Type())
+	}
+	n := len(args) - 1
+	if f.Rank(ctx) != n {
+		return Panicf("f\\[x;y;...] : f expects %d arguments, but got %d", f.Rank(ctx), n)
+	}
+	mlen, err := getIterLen(args[:len(args)-2])
+	if err != nil {
+		return Panicf("f\\[x;y;...] : %v", err)
+	}
+	if mlen == -1 {
+		return toArray(ctx.ApplyN(f, args[:len(args)-1]))
+	}
+	x := args[len(args)-2]
+	if mlen == 0 {
+		return NewAV(nil)
+	}
+	f.IncrRC()
+	ctx.pushNoRC(V{})
+	r := make([]V, mlen)
+	for i := 0; i < mlen; i++ {
+		ctx.replaceTop(args[0].at(i))
+		for j := 1; j < len(args)-2; j++ {
+			ctx.push(args[j].at(i))
+		}
+		ctx.push(x)
+		x.IncrRC()
+		next := f.applyN(ctx, n)
+		x.DecrRC()
+		if next.IsPanic() {
+			f.DecrRC()
+			ctx.drop()
+			return next
+		}
+		x = next
+		r[i] = x
+	}
+	f.DecrRC()
+	ctx.drop()
+	return Canonical(NewAV(r))
 }
 
 func splitNS(x V, sep S, y V) V {

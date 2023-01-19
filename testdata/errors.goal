@@ -219,7 +219,7 @@ $[1;2;3] / too many arguments
 .[1;2;3;4;5] / too many arguments
 (')[1;2;3;4;5] / not a function
 (/)[1;2;3;4;5] / not a function
-(\)[1;2;3;4;5] / too many arguments
+(\)[1;2;3;4;5] / not a function
 csv[1;2;3] / too many arguments
 abs[1;2] / too many arguments
 bytes[1;2] / too many arguments

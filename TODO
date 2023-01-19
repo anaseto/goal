@@ -10,7 +10,6 @@ Features:
 - maybe add splice
 - improve error locations for adverbs and some other special cases
 - implement cycle detection in converge
-- implement extensions to /\ for more than 2 arguments (like for ')
 
 Tests:
 - improve test coverage for error messages and refactor and improve them along

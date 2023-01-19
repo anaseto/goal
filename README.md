@@ -261,10 +261,10 @@ UTF-8: utf8.rcount (number of code points), utf8.valid
 ADVERBS HELP
 f'x    each      #'(4 5;6 7 8) -> 2 3
 x F'y  each      2 3#'1 2 -> (1 1;2 2 2)    {(x;y;z)}'[1;2 4;3] -> (1 2 3;1 4 3)
-F/x    fold      +/!10 -> 45
+F/x    fold      +/!10 -> 45                         
 F\x    scan      +\!10 -> 0 1 3 6 10 15 21 28 36 45
-x F/y  fold      1 2+/!10 -> 46 47
-x F\y  scan      5 6+\1 2 3 -> (6 7;8 9;11 12)
+x F/y  fold      1 2+/!10 -> 46 47                 {x+y-z}/[9;3 4;2 7] -> 7
+x F\y  scan      5 6+\1 2 3 -> (6 7;8 9;11 12)     {x+y-z}\[9;3 4;2 7] -> 10 7
 i f/x  do        3{x*2}/4 -> 32
 i f\x  dos       3{x*2}\4 -> 4 8 16 32
 f f/x  while     {x<100}{x*2}/4 -> 128
