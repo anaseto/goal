@@ -25,3 +25,9 @@ Optimizations:
 - maybe improve liveness analysis (though simple, already good enough)
 - many functions have deep Canonical calls in generic case when a shallow version would suffice
 - refcounting of generic arrays is currently inefficient
+
+Bugs:
+- There's currently an immutability bug with slices obtained from take
+  and drop, that can incorrectly share memory with their parent; I'm
+  going to fix this in an upcomming overhaul of refcounting stuff, that
+  will also fix performance issues with generic arrays.
