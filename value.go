@@ -398,7 +398,7 @@ func (x *AV) Type() string { return "A" }
 type array interface {
 	Value
 	RefCounter
-	reusable() bool
+	RC() int32
 	Len() int
 	at(i int) V            // x[i]
 	slice(i, j int) array  // x[i:j]
@@ -451,11 +451,11 @@ func (x *AF) slice(i, j int) array { return &AF{rc: x.rc, flags: x.flags, Slice:
 func (x *AS) slice(i, j int) array { return &AS{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
 func (x *AV) slice(i, j int) array { return &AV{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
 
-func (x *AB) reusable() bool { return x.rc <= 1 }
-func (x *AI) reusable() bool { return x.rc <= 1 }
-func (x *AF) reusable() bool { return x.rc <= 1 }
-func (x *AS) reusable() bool { return x.rc <= 1 }
-func (x *AV) reusable() bool { return x.rc <= 1 }
+func (x *AB) RC() int32 { return x.rc }
+func (x *AI) RC() int32 { return x.rc }
+func (x *AF) RC() int32 { return x.rc }
+func (x *AS) RC() int32 { return x.rc }
+func (x *AV) RC() int32 { return x.rc }
 
 func (x *AB) reuse() *AB {
 	if x.rc <= 1 {

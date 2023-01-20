@@ -118,7 +118,7 @@ func cloneShallow(x V) V {
 // clone creates an identical shallow copy of an array, or the value itself if
 // it is reusable.
 func cloneShallowArray(x array) array {
-	if x.reusable() {
+	if x.RC() <= 1 {
 		// We're asking for a clone, so we usually are going to modify
 		// it afterwards and invalidate the flags (safe approximation).
 		x.setFlags(flagNone)
