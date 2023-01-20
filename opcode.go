@@ -22,10 +22,12 @@ const (
 	opAssignLocal
 	opApply
 	opApplyV
+	opApplyGlobal
 	opDerive
 	opApply2
 	opApply2V
 	opApplyN
+	opApplyNGlobal
 	opApplyNV
 	opDrop
 	opJump
@@ -41,7 +43,7 @@ func (opc opcode) argc() int {
 	switch opc {
 	case opNop, opNil, opApply, opApply2, opDrop, opReturn, opTry:
 		return 0
-	case opApplyNV:
+	case opApplyNV, opApplyNGlobal:
 		return 2
 	default:
 		return 1

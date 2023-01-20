@@ -79,6 +79,18 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			}
 			ctx.replaceTop(r)
 			ip++
+		case opApplyGlobal:
+			x := ctx.globals[ops[ip]]
+			if x.kind == valNil {
+				return ip - 1, fmt.Errorf("undefined global: %s",
+					ctx.gNames[ops[ip]])
+			}
+			r := x.applyN(ctx, 1)
+			if r.IsPanic() {
+				return ip - 1, newExecError(r)
+			}
+			ctx.replaceTop(r)
+			ip++
 		case opDerive:
 			v := variadic(ops[ip])
 			ctx.stack[len(ctx.stack)-1] = NewV(&derivedVerb{Fun: v, Arg: ctx.top()})
@@ -110,6 +122,19 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			v := variadic(ops[ip])
 			ip++
 			r := v.applyN(ctx, int(ops[ip]))
+			if r.IsPanic() {
+				return ip - 2, newExecError(r)
+			}
+			ctx.replaceTop(r)
+			ip++
+		case opApplyNGlobal:
+			x := ctx.globals[ops[ip]]
+			if x.kind == valNil {
+				return ip - 1, fmt.Errorf("undefined global: %s",
+					ctx.gNames[ops[ip]])
+			}
+			ip++
+			r := x.applyN(ctx, int(ops[ip]))
 			if r.IsPanic() {
 				return ip - 2, newExecError(r)
 			}

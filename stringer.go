@@ -81,22 +81,24 @@ func _() {
 	_ = x[opAssignLocal-11]
 	_ = x[opApply-12]
 	_ = x[opApplyV-13]
-	_ = x[opDerive-14]
-	_ = x[opApply2-15]
-	_ = x[opApply2V-16]
-	_ = x[opApplyN-17]
-	_ = x[opApplyNV-18]
-	_ = x[opDrop-19]
-	_ = x[opJump-20]
-	_ = x[opJumpFalse-21]
-	_ = x[opJumpTrue-22]
-	_ = x[opReturn-23]
-	_ = x[opTry-24]
+	_ = x[opApplyGlobal-14]
+	_ = x[opDerive-15]
+	_ = x[opApply2-16]
+	_ = x[opApply2V-17]
+	_ = x[opApplyN-18]
+	_ = x[opApplyNGlobal-19]
+	_ = x[opApplyNV-20]
+	_ = x[opDrop-21]
+	_ = x[opJump-22]
+	_ = x[opJumpFalse-23]
+	_ = x[opJumpTrue-24]
+	_ = x[opReturn-25]
+	_ = x[opTry-26]
 }
 
-const _opcode_name = "opNopopNilopConstopIntopVariadicopLambdaopLocalopLocalLastopGlobalopGlobalLastopAssignGlobalopAssignLocalopApplyopApplyVopDeriveopApply2opApply2VopApplyNopApplyNVopDropopJumpopJumpFalseopJumpTrueopReturnopTry"
+const _opcode_name = "opNopopNilopConstopIntopVariadicopLambdaopLocalopLocalLastopGlobalopGlobalLastopAssignGlobalopAssignLocalopApplyopApplyVopApplyGlobalopDeriveopApply2opApply2VopApplyNopApplyNGlobalopApplyNVopDropopJumpopJumpFalseopJumpTrueopReturnopTry"
 
-var _opcode_index = [...]uint8{0, 5, 10, 17, 22, 32, 40, 47, 58, 66, 78, 92, 105, 112, 120, 128, 136, 145, 153, 162, 168, 174, 185, 195, 203, 208}
+var _opcode_index = [...]uint8{0, 5, 10, 17, 22, 32, 40, 47, 58, 66, 78, 92, 105, 112, 120, 133, 141, 149, 158, 166, 180, 189, 195, 201, 212, 222, 230, 235}
 
 func (i opcode) String() string {
 	if i < 0 || i >= opcode(len(_opcode_index)-1) {

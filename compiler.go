@@ -456,8 +456,14 @@ func parseNumber(s string) (V, error) {
 
 func (c *compiler) doGlobal(tok *astToken, n int) {
 	id := c.ctx.global(tok.Text)
-	c.push2(opGlobal, opcode(id))
-	c.applyN(n)
+	switch n {
+	case 0:
+		c.push2(opGlobal, opcode(id))
+	case 1:
+		c.push2(opApplyGlobal, opcode(id))
+	default:
+		c.push3(opApplyNGlobal, opcode(id), opcode(n))
+	}
 }
 
 func (c *compiler) doLocal(tok *astToken, n int) {
