@@ -64,8 +64,10 @@ func (ctx *Context) opcodesString(ops []opcode, lc *lambdaCode) string {
 		switch op {
 		case opConst, opInt, opLambda, opApplyN:
 			fmt.Fprintf(&sb, "%d", ops[i+1])
-		case opGlobal, opGlobalLast, opAssignGlobal:
+		case opGlobal, opGlobalLast, opAssignGlobal, opApplyGlobal:
 			fmt.Fprintf(&sb, "%d (%s)", ops[i+1], ctx.gNames[int(ops[i+1])])
+		case opApplyNGlobal:
+			fmt.Fprintf(&sb, "%d (%s)\t%d", ops[i+1], ctx.gNames[int(ops[i+1])], ops[i+2])
 		case opLocal, opLocalLast, opAssignLocal:
 			fmt.Fprintf(&sb, "%d (%s)", ops[i+1], lc.Names[int(ops[i+1])])
 		case opVariadic, opApplyV, opApply2V:
