@@ -58,6 +58,22 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			x.IncrRC()
 			ctx.stack[ctx.frameIdx-int32(ops[ip])] = x
 			ip++
+		case opListAssignGlobal:
+			x := ctx.top()
+			ids := ctx.gAssignLists[ops[ip]]
+			err := ctx.assignGlobals(ids, x)
+			if err != nil {
+				return ip - 1, err
+			}
+			ip++
+		case opListAssignLocal:
+			x := ctx.top()
+			ids := ctx.lambdas[ctx.lambda].AssignLists[ops[ip]]
+			err := ctx.assignLocals(ids, x)
+			if err != nil {
+				return ip - 1, err
+			}
+			ip++
 		case opVariadic:
 			ctx.pushNoRC(newVariadic(variadic(ops[ip])))
 			ip++
@@ -244,6 +260,40 @@ func (ctx *Context) dropNnoRC(n int) {
 		}
 	}
 	ctx.stack = ctx.stack[:len(ctx.stack)-n]
+}
+
+func (ctx *Context) assignGlobals(ids []int, x V) error {
+	switch xv := x.value.(type) {
+	case array:
+		if len(ids) > xv.Len() {
+			return fmt.Errorf("length error in list assignment (%d > %d)", len(ids), xv.Len())
+		}
+		for i, id := range ids {
+			xi := xv.at(i)
+			xi.IncrRC()
+			ctx.globals[id] = xi
+		}
+		return nil
+	default:
+		return fmt.Errorf("non-array value in list assignment (%s)", x.Type())
+	}
+}
+
+func (ctx *Context) assignLocals(ids []int32, x V) error {
+	switch xv := x.value.(type) {
+	case array:
+		if len(ids) > xv.Len() {
+			return fmt.Errorf("length error in list assignment (%d > %d)", len(ids), xv.Len())
+		}
+		for i, id := range ids {
+			xi := xv.at(i)
+			xi.IncrRC()
+			ctx.stack[ctx.frameIdx-id] = xi
+		}
+		return nil
+	default:
+		return fmt.Errorf("non-array value in list assignment (%s)", x.Type())
+	}
 }
 
 func rcincrArgs(args []V) {

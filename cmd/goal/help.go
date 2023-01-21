@@ -27,8 +27,10 @@ strings         "text\xff\u00F\n"  "\""  "\u65e5"  (backquotes for raw strings)
 operators       :  +  -  *  %  !  &  |  ^  #  _  $  ?  @  .  ::
 regexps         rx/[a-z]/     (see https://pkg.go.dev/regexp/syntax for syntax)
 arrays          1 2 -3 4      1 "ab" -2 "cd"      (1 2;"a";3 "b";(4 2;"c");*)
-variables       a:2 (assign)    a+:1 (sugar for a:a+1)    a+3 (use)
-                a::2 (assign global)    a+::2 (sugar for a::a+2)
+variables       a   b   f   data    (any word matching rx/[a-zA-Z][a-zA-Z0-9]*/)
+assign          a:2 (local within lambda, global otherwise)    a::2 (global)    
+op assign       a+:1 (sugar for a:a+1)       a+::2 (sugar for a::a+2)
+list assign     (a;b;c):x   (where 2<#x)     (a;b):1 2;b -> 2
 expressions     2*3+4 -> 14 (no priority)    1+|1 2 3 -> 4 3 2     +/1 2 3 -> 6
 index           x[y] is sugar for x@y (apply); x[] ~ x[*] ~ x[!#x] ~ x (arrays)
 index deep      x[y;z;...] is sugar for x.(y;z;...) (except for x in (?;and;or))

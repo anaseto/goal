@@ -20,22 +20,24 @@ type globalCode struct {
 
 // lambdaCode represents a compiled user defined function.
 type lambdaCode struct {
-	Body       []opcode // object code of the function
-	Pos        []int    // position associated to opcode of same index
-	Names      []string // local arguments and variables names
-	Rank       int      // number of arguments
-	Source     string   // source code of the function
-	Filename   string   // filename of the file containing the source (if any)
-	StartPos   int      // starting position in the source
-	UnusedArgs []int32  // reversed indices of unused arguments
-	UsedArgs   []int32  // reversed indices of used arguments
+	Body        []opcode  // object code of the function
+	Pos         []int     // position associated to opcode of same index
+	Names       []string  // local arguments and variables names
+	Rank        int       // number of arguments
+	Source      string    // source code of the function
+	Filename    string    // filename of the file containing the source (if any)
+	StartPos    int       // starting position in the source
+	UnusedArgs  []int32   // reversed indices of unused arguments
+	UsedArgs    []int32   // reversed indices of used arguments
+	AssignLists [][]int32 // assignement lists (resolved)
 
-	namedArgs  bool                   // uses named parameters like {[a;b;c]....}
-	lastUses   []lastUse              // opcode index and block number of variable last use
-	joinPoints []int32                // number of jumps ending at a given opcode index
-	locals     map[string]lambdaLocal // arguments and variables
-	opIdxLocal map[int]lambdaLocal    // opcode index -> local variable
-	nVars      int                    // number of non-argument variables
+	namedArgs   bool                   // uses named parameters like {[a;b;c]....}
+	lastUses    []lastUse              // opcode index and block number of variable last use
+	joinPoints  []int32                // number of jumps ending at a given opcode index
+	assignLists [][]lambdaLocal        // assignement lists (locals)
+	locals      map[string]lambdaLocal // arguments and variables
+	opIdxLocal  map[int]lambdaLocal    // opcode index -> local variable
+	nVars       int                    // number of non-argument variables
 }
 
 // lambdaLocal represents either an argument or a local variable. IDs are
@@ -304,6 +306,11 @@ func (c *compiler) doExpr(e expr, n int) error {
 		if err != nil {
 			return err
 		}
+	case *astListAssign:
+		err := c.doListAssign(e, n)
+		if err != nil {
+			return err
+		}
 	case *astAssignOp:
 		err := c.doAssignOp(e, n)
 		if err != nil {
@@ -540,17 +547,48 @@ func (c *compiler) doAssign(e *astAssign, n int) error {
 		return nil
 	}
 	local, ok := lc.local(e.Name)
-	if ok {
-		c.push2(opAssignLocal, opArg)
-		lc.opIdxLocal[len(lc.Body)-1] = local
+	if !ok {
+		local = lambdaLocal{Type: localVar, ID: lc.nVars}
+		lc.locals[e.Name] = local
+		lc.nVars++
+	}
+	c.push2(opAssignLocal, opArg)
+	lc.opIdxLocal[len(lc.Body)-1] = local
+	c.applyN(n)
+	return nil
+}
+
+func (c *compiler) doListAssign(e *astListAssign, n int) error {
+	err := c.doExpr(e.Right, 0)
+	if err != nil {
+		return err
+	}
+	lc := c.scope()
+	if lc == nil || e.Global {
+		lid := len(c.ctx.gAssignLists)
+		idList := make([]int, len(e.Names))
+		for i, name := range e.Names {
+			id := c.ctx.global(name)
+			idList[i] = id
+		}
+		c.ctx.gAssignLists = append(c.ctx.gAssignLists, idList)
+		c.push2(opListAssignGlobal, opcode(lid))
 		c.applyN(n)
 		return nil
 	}
-	local = lambdaLocal{Type: localVar, ID: lc.nVars}
-	lc.locals[e.Name] = local
-	c.push2(opAssignLocal, opArg)
-	lc.opIdxLocal[len(lc.Body)-1] = local
-	lc.nVars++
+	lid := len(lc.assignLists)
+	localList := make([]lambdaLocal, len(e.Names))
+	for i, name := range e.Names {
+		local, ok := lc.local(name)
+		if !ok {
+			local = lambdaLocal{Type: localVar, ID: lc.nVars}
+			lc.locals[name] = local
+			lc.nVars++
+		}
+		localList[i] = local
+	}
+	lc.assignLists = append(lc.assignLists, localList)
+	c.push2(opListAssignLocal, opcode(lid))
 	c.applyN(n)
 	return nil
 }
@@ -814,6 +852,9 @@ func (ctx *Context) resolveLambda(lc *lambdaCode) {
 		names[getID(local)] = k
 	}
 	lc.Names = names
+	if len(lc.assignLists) > 0 {
+		lc.AssignLists = make([][]int32, len(lc.assignLists))
+	}
 	for ip := 0; ip < len(lc.Body); {
 		op := lc.Body[ip]
 		ip++
@@ -822,12 +863,21 @@ func (ctx *Context) resolveLambda(lc *lambdaCode) {
 			lc.Body[ip] = opcode(getID(lc.opIdxLocal[ip]))
 		case opAssignLocal:
 			lc.Body[ip] = opcode(getID(lc.opIdxLocal[ip]))
+		case opListAssignLocal:
+			i := lc.Body[ip]
+			locals := lc.assignLists[i]
+			ids := make([]int32, len(locals))
+			for j, local := range locals {
+				ids[j] = int32(getID(local))
+			}
+			lc.AssignLists[i] = ids
 		}
 		ip += op.argc()
 	}
 	// free unused data after this resolving pass
 	lc.locals = nil
 	lc.opIdxLocal = nil
+	lc.assignLists = nil
 }
 
 type lastUse struct {
@@ -900,18 +950,23 @@ func (ctx *Context) analyzeLambdaLiveness(lc *lambdaCode) {
 				break
 			}
 			lc.Body[lu.opIdx] = opLocalLast
+		case opListAssignLocal:
+			ids := lc.AssignLists[lc.Body[ip]]
+			for _, i := range ids {
+				lu := lc.lastUses[i]
+				if branch > 0 && lu.bn != bn || lu.bn == 0 {
+					continue
+				}
+				lc.Body[lu.opIdx] = opLocalLast
+			}
 		}
 		ip += op.argc()
-	}
-	if lc.joinPoints != nil {
-		lc.joinPoints = nil // unused after this pass
 	}
 	for i, lu := range lc.lastUses {
 		if lu.bn == 0 {
 			if i >= lc.nVars {
 				lc.UnusedArgs = append(lc.UnusedArgs, int32(len(lc.Names)-i-1))
 			}
-			// unused variable
 			continue
 		}
 		if i >= lc.nVars {
@@ -919,6 +974,8 @@ func (ctx *Context) analyzeLambdaLiveness(lc *lambdaCode) {
 		}
 		lc.Body[lu.opIdx] = opLocalLast
 	}
+	// free unused data after this pass
+	lc.joinPoints = nil
 	lc.lastUses = nil
 }
 

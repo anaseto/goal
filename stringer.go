@@ -77,28 +77,30 @@ func _() {
 	_ = x[opLocalLast-7]
 	_ = x[opGlobal-8]
 	_ = x[opGlobalLast-9]
-	_ = x[opAssignGlobal-10]
-	_ = x[opAssignLocal-11]
-	_ = x[opApply-12]
-	_ = x[opApplyV-13]
-	_ = x[opApplyGlobal-14]
-	_ = x[opDerive-15]
-	_ = x[opApply2-16]
-	_ = x[opApply2V-17]
-	_ = x[opApplyN-18]
-	_ = x[opApplyNGlobal-19]
-	_ = x[opApplyNV-20]
-	_ = x[opDrop-21]
-	_ = x[opJump-22]
-	_ = x[opJumpFalse-23]
-	_ = x[opJumpTrue-24]
-	_ = x[opReturn-25]
-	_ = x[opTry-26]
+	_ = x[opAssignLocal-10]
+	_ = x[opAssignGlobal-11]
+	_ = x[opListAssignLocal-12]
+	_ = x[opListAssignGlobal-13]
+	_ = x[opApply-14]
+	_ = x[opApplyV-15]
+	_ = x[opApplyGlobal-16]
+	_ = x[opDerive-17]
+	_ = x[opApply2-18]
+	_ = x[opApply2V-19]
+	_ = x[opApplyN-20]
+	_ = x[opApplyNGlobal-21]
+	_ = x[opApplyNV-22]
+	_ = x[opDrop-23]
+	_ = x[opJump-24]
+	_ = x[opJumpFalse-25]
+	_ = x[opJumpTrue-26]
+	_ = x[opReturn-27]
+	_ = x[opTry-28]
 }
 
-const _opcode_name = "opNopopNilopConstopIntopVariadicopLambdaopLocalopLocalLastopGlobalopGlobalLastopAssignGlobalopAssignLocalopApplyopApplyVopApplyGlobalopDeriveopApply2opApply2VopApplyNopApplyNGlobalopApplyNVopDropopJumpopJumpFalseopJumpTrueopReturnopTry"
+const _opcode_name = "opNopopNilopConstopIntopVariadicopLambdaopLocalopLocalLastopGlobalopGlobalLastopAssignLocalopAssignGlobalopListAssignLocalopListAssignGlobalopApplyopApplyVopApplyGlobalopDeriveopApply2opApply2VopApplyNopApplyNGlobalopApplyNVopDropopJumpopJumpFalseopJumpTrueopReturnopTry"
 
-var _opcode_index = [...]uint8{0, 5, 10, 17, 22, 32, 40, 47, 58, 66, 78, 92, 105, 112, 120, 133, 141, 149, 158, 166, 180, 189, 195, 201, 212, 222, 230, 235}
+var _opcode_index = [...]uint16{0, 5, 10, 17, 22, 32, 40, 47, 58, 66, 78, 91, 105, 122, 140, 147, 155, 168, 176, 184, 193, 201, 215, 224, 230, 236, 247, 257, 265, 270}
 
 func (i opcode) String() string {
 	if i < 0 || i >= opcode(len(_opcode_index)-1) {

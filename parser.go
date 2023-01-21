@@ -142,6 +142,21 @@ func (p *parser) expr(es exprs) (exprs, error) {
 			e = &astToken{Type: astEMPTYLIST, Pos: tok.Pos, Text: tok.Text}
 		} else {
 			e, err = p.list()
+			if err != nil {
+				return es, err
+			}
+			switch ntok := p.peek(); ntok.Type {
+			case DYAD:
+				if ntok.Text != ":" && ntok.Text != "::" {
+					break
+				}
+				if !isAssignList(e) {
+					break
+				}
+				p.next()
+				e, err = p.listAssign(ntok.Pos, getAssignList(e), strings.HasSuffix(ntok.Text, "::"))
+				return append(es, e), err
+			}
 		}
 	case NUMBER, STRING:
 		switch p.peek().Type {
@@ -504,6 +519,23 @@ func (p *parser) assign(tok Token, global bool) (expr, error) {
 	return a, nil
 }
 
+func (p *parser) listAssign(pos int, names []string, global bool) (expr, error) {
+	a := &astListAssign{
+		Names:  names,
+		Global: global,
+		Pos:    pos,
+	}
+	es, err := p.subExpr()
+	a.Right = es
+	if err != nil {
+		return a, err
+	}
+	if len(es) == 0 {
+		return a, p.errorf("assignment without expression right")
+	}
+	return a, nil
+}
+
 func (p *parser) assignOp(tok Token, dyad string, global bool) (expr, error) {
 	a := &astAssignOp{
 		Name:   tok.Text,
@@ -564,6 +596,34 @@ func (p *parser) list() (expr, error) {
 			return l, err
 		}
 	}
+}
+
+func isAssignList(e expr) bool {
+	le, ok := e.(*astList)
+	if !ok || len(le.Args) == 0 {
+		return false
+	}
+	for _, arg := range le.Args {
+		es, ok := arg.(exprs)
+		if !ok || len(es) != 1 {
+			return false
+		}
+		tok, ok := es[0].(*astToken)
+		if !ok || tok.Type != astIDENT {
+			return false
+		}
+	}
+	return true
+}
+
+func getAssignList(e expr) []string {
+	le := e.(*astList)
+	names := make([]string, len(le.Args))
+	for i, arg := range le.Args {
+		tok := arg.(exprs)[0].(*astToken)
+		names[i] = tok.Text
+	}
+	return names
 }
 
 func (p *parser) derivedVerb(e expr) *astDerivedVerb {

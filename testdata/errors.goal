@@ -240,3 +240,5 @@ rshift[1;2;3] / too many arguments
 "pkg" eval `f:{1+"a"};f 0` / type
 >2 / not an array
 +(1 2;!0) / length mismatch
+(a;b):,1 / length
+(a;b):2 / non-array

@@ -53,9 +53,10 @@ type Context struct {
 	variadicsNames []string
 
 	// symbol handling
-	gNames  []string       // ID: name
-	gIDs    map[string]int // name: ID
-	gPrefix string         // current name prefix
+	gNames       []string       // ID: name
+	gIDs         map[string]int // name: ID
+	gPrefix      string         // current name prefix
+	gAssignLists [][]int        // index: assign list ids
 
 	// parsing, scanning
 	scanner       *Scanner

@@ -47,6 +47,14 @@ type astAssign struct {
 	Pos    int
 }
 
+// astListAssign represents an assignment (x0;...):y.
+type astListAssign struct {
+	Names  []string // (x0;...)
+	Global bool     // whether :: or not
+	Right  expr     // y
+	Pos    int
+}
+
 // astAssignOp represents a variable assignment with a built-in operator, of
 // the form x op: y, semantically equivalent to x: x op y.
 type astAssignOp struct {
@@ -139,6 +147,7 @@ func (es exprs) node()                {}
 func (t *astToken) node()             {}
 func (a *astReturn) node()            {}
 func (a *astAssign) node()            {}
+func (a *astListAssign) node()        {}
 func (a *astAssignOp) node()          {}
 func (a *astAssignAmendOp) node()     {}
 func (a *astAssignDeepAmendOp) node() {}
