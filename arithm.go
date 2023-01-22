@@ -19,7 +19,7 @@ func negate(x V) V {
 		for i, xi := range xv.Slice {
 			r[i] = -b2i(xi)
 		}
-		return NewAI(r)
+		return NewAIRC(r, xv.rc)
 	case *AI:
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
@@ -91,7 +91,7 @@ func sign(x V) V {
 		for i, xi := range xv.Slice {
 			r[i] = int64(signF(xi))
 		}
-		return NewAI(r)
+		return NewAIRC(r, xv.rc)
 	case *AV:
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
@@ -215,13 +215,13 @@ func not(x V) V {
 		for i, xi := range xv.Slice {
 			r[i] = xi == 0
 		}
-		return NewAB(r)
+		return NewABRC(r, xv.rc)
 	case *AF:
 		r := make([]bool, xv.Len())
 		for i, xi := range xv.Slice {
 			r[i] = xi == 0
 		}
-		return NewAB(r)
+		return NewABRC(r, xv.rc)
 	case *AV:
 		r := xv.reuse()
 		for i, xi := range xv.Slice {

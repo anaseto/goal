@@ -94,61 +94,32 @@ func maxS(x, y S) S {
 	return x
 }
 
-// clone creates an identical deep copy of a value, or the value itself if it
-// is reusable.
-func clone(x V) V {
-	x = cloneShallow(x)
-	if xv, ok := x.value.(*AV); ok {
-		for i, xi := range xv.Slice {
-			xv.Slice[i] = clone(xi)
-		}
+// reuseV creates an identical deep copy of a value, or the value itself if it
+// is reusable. It initializes refcount if necessary.
+func reuseV(x V) V {
+	if x.kind != valBoxed {
+		return x
 	}
-	return x
+	switch xv := x.value.(type) {
+	case array:
+		return NewV(reuseArray(xv))
+	default:
+		var n int32
+		return x.Clone(&n)
+	}
 }
 
-// cloneShallow creates an identical shallow copy of a value, or the value
-// itself if it is reusable.
-func cloneShallow(x V) V {
-	if xv, ok := x.value.(array); ok {
-		x.value = cloneShallowArray(xv)
-	}
-	return x
-}
-
-// clone creates an identical shallow copy of an array, or the value itself if
-// it is reusable.
-func cloneShallowArray(x array) array {
+// reuseArray creates an identical copy of an array, or the value itself if it
+// is reusable. It initializes refcount if necessary.
+func reuseArray(x array) Value {
 	if x.RC() <= 1 {
 		// We're asking for a clone, so we usually are going to modify
 		// it afterwards and invalidate the flags (safe approximation).
 		x.setFlags(flagNone)
 		return x
 	}
-	switch xv := x.(type) {
-	case *AB:
-		r := &AB{Slice: make([]bool, xv.Len())}
-		copy(r.Slice, xv.Slice)
-		return r
-	case *AI:
-		r := &AI{Slice: make([]int64, xv.Len())}
-		copy(r.Slice, xv.Slice)
-		return r
-	case *AF:
-		r := &AF{Slice: make([]float64, xv.Len())}
-		copy(r.Slice, xv.Slice)
-		return r
-	case *AS:
-		r := &AS{Slice: make([]string, xv.Len())}
-		copy(r.Slice, xv.Slice)
-		return r
-	case *AV:
-		r := &AV{Slice: make([]V, xv.Len())}
-		copy(r.Slice, xv.Slice)
-		return r
-	default:
-		// should not happen
-		panic("cloneShallowArray: x not a clonable array")
-	}
+	var n int32
+	return x.Clone(&n)
 }
 
 func isStar(x V) bool {
@@ -183,7 +154,7 @@ func toIndices(x V) V {
 	if isIndices(x) {
 		return x
 	}
-	return toIndicesRec(x)
+	return Canonical(toIndicesRec(x))
 }
 
 func toIndicesRec(x V) V {
@@ -212,7 +183,7 @@ func toIndicesRec(x V) V {
 				return r[i]
 			}
 		}
-		return Canonical(NewAV(r))
+		return NewAV(r)
 	case array:
 		return panics("non-integer indices")
 	default:
@@ -558,13 +529,13 @@ func normalize(x *AV) (array, bool) {
 		for i, xi := range x.Slice {
 			r[i] = xi.I() != 0
 		}
-		return &AB{Slice: r}, true
+		return &AB{Slice: r, rc: x.rc}, true
 	case tI:
 		r := make([]int64, x.Len())
 		for i, xi := range x.Slice {
 			r[i] = xi.I()
 		}
-		return &AI{Slice: r}, true
+		return &AI{Slice: r, rc: x.rc}, true
 	case tF:
 		r := make([]float64, x.Len())
 		for i, xi := range x.Slice {
@@ -574,13 +545,13 @@ func normalize(x *AV) (array, bool) {
 				r[i] = float64(xi.F())
 			}
 		}
-		return &AF{Slice: r}, true
+		return &AF{Slice: r, rc: x.rc}, true
 	case tS:
 		r := make([]string, x.Len())
 		for i, xi := range x.Slice {
 			r[i] = string(xi.value.(S))
 		}
-		return &AS{Slice: r}, true
+		return &AS{Slice: r, rc: x.rc}, true
 	case tV, tAV:
 		for i, xi := range x.Slice {
 			x.Slice[i] = Canonical(xi)

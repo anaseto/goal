@@ -447,7 +447,7 @@ func lessAV(x V, y V) bool {
 
 // sortUp returns ^x.
 func sortUp(x V) V {
-	x = cloneShallow(x)
+	x = reuseV(x)
 	switch xv := x.value.(type) {
 	case *AB:
 		sort.Sort(sortAB(xv.Slice))

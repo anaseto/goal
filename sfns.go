@@ -50,9 +50,9 @@ func reverseMut(x V) {
 
 // reverse returns |x.
 func reverse(x V) V {
-	switch xv := x.value.(type) {
+	x = reuseV(x)
+	switch x.value.(type) {
 	case array:
-		x.value = cloneShallowArray(xv)
 		reverseMut(x)
 		return x
 	default:

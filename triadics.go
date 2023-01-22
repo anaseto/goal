@@ -7,13 +7,14 @@ import (
 
 // amend3 implements @[x;y;f].
 func (ctx *Context) amend3(x, y, f V) V {
+	x = reuseV(x)
 	switch xv := x.value.(type) {
 	case array:
 		y = toIndices(y)
 		if y.IsPanic() {
 			return ppanic("@[x;y;f] : y ", y)
 		}
-		r, err := ctx.amend3array(cloneShallowArray(xv), y, f)
+		r, err := ctx.amend3array(xv, y, f)
 		if err != nil {
 			return Panicf("@[x;y;f] : %v", err)
 		}
@@ -88,6 +89,7 @@ func (ctx *Context) amend3array(x array, y, f V) (array, error) {
 
 // amend4 implements @[x;y;f;z].
 func (ctx *Context) amend4(x, y, f, z V) V {
+	x = reuseV(x)
 	switch xv := x.value.(type) {
 	case array:
 		y = toIndices(y)
@@ -95,13 +97,13 @@ func (ctx *Context) amend4(x, y, f, z V) V {
 			return ppanic("@[x;y;f;z] : y ", y)
 		}
 		if f.kind == valVariadic && variadic(f.n) == vRight {
-			r, err := amendr(cloneShallowArray(xv), y, z)
+			r, err := amendr(xv, y, z)
 			if err != nil {
 				return Panicf("@[x;y;:;z] : %v", err)
 			}
 			return Canonical(NewV(r))
 		}
-		r, err := ctx.amend4array(cloneShallowArray(xv), y, f, z)
+		r, err := ctx.amend4array(xv, y, f, z)
 		if err != nil {
 			return Panicf("@[x;y;f;z] : %v", err)
 		}
@@ -402,7 +404,7 @@ func (x *AS) set(i int, y V) {
 
 // deepAmend3 implements .[x;y;f].
 func (ctx *Context) deepAmend3(x, y, f V) V {
-	x = clone(x)
+	x = reuseV(x)
 	switch xv := x.value.(type) {
 	case array:
 		y = toIndices(y)
@@ -472,7 +474,7 @@ func (ctx *Context) deepAmend3rec(x array, y0 V, y array, f V) (array, error) {
 
 // deepAmend4 implements .[x;y;f].
 func (ctx *Context) deepAmend4(x, y, f, z V) V {
-	x = clone(x)
+	x = reuseV(x)
 	switch xv := x.value.(type) {
 	case array:
 		y = toIndices(y)
