@@ -23,17 +23,20 @@ func isNaN(x V) V {
 	}
 	switch xv := x.value.(type) {
 	case *AB:
-		r := make([]bool, xv.Len())
-		return NewAB(r)
+		r := xv.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = false
+		}
+		return NewV(r)
 	case *AI:
 		r := make([]bool, xv.Len())
-		return NewAB(r)
+		return NewABRC(r, xv.rc)
 	case *AF:
 		r := make([]bool, xv.Len())
 		for i, xi := range xv.Slice {
 			r[i] = math.IsNaN(xi)
 		}
-		return NewAB(r)
+		return NewABRC(r, xv.rc)
 	case *AV:
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
@@ -78,8 +81,10 @@ func fillNaNf(fill float64, y V) V {
 		return y
 	case *AF:
 		var r []float64
+		var rc *int32
 		if reuseRCp(yv.RC()) {
 			r = yv.Slice
+			rc = yv.rc
 		} else {
 			r = make([]float64, yv.Len())
 			copy(r, yv.Slice)
@@ -89,7 +94,7 @@ func fillNaNf(fill float64, y V) V {
 				r[i] = fill
 			}
 		}
-		return NewAF(r)
+		return NewAFRC(r, rc)
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {

@@ -109,15 +109,24 @@ func (p *projection) CloneWithRC(rc *int32) Value {
 }
 
 func (p *projectionFirst) CloneWithRC(rc *int32) Value {
-	return &projectionFirst{Fun: p.Fun.CloneWithRC(rc), Arg: p.Arg.CloneWithRC(rc)}
+	if p.Fun.HasRC() || p.Arg.HasRC() {
+		return &projectionFirst{Fun: p.Fun.CloneWithRC(rc), Arg: p.Arg.CloneWithRC(rc)}
+	}
+	return p
 }
 
 func (p *projectionMonad) CloneWithRC(rc *int32) Value {
-	return &projectionMonad{Fun: p.Fun.CloneWithRC(rc)}
+	if p.Fun.HasRC() {
+		return &projectionMonad{Fun: p.Fun.CloneWithRC(rc)}
+	}
+	return p
 }
 
 func (r *derivedVerb) CloneWithRC(rc *int32) Value {
-	return &derivedVerb{Fun: r.Fun, Arg: r.Arg.CloneWithRC(rc)}
+	if r.Arg.HasRC() {
+		return &derivedVerb{Fun: r.Fun, Arg: r.Arg.CloneWithRC(rc)}
+	}
+	return r
 }
 
 func (r *nReplacer) CloneWithRC(rc *int32) Value {
@@ -125,10 +134,7 @@ func (r *nReplacer) CloneWithRC(rc *int32) Value {
 }
 
 func (r *replacer) CloneWithRC(rc *int32) Value {
-	if r.oldnew.rc == rc {
-		return r
-	}
-	if r.oldnew.rc == nil || *r.oldnew.rc <= 1 {
+	if r.oldnew.rc == nil || *r.oldnew.rc <= 1 || r.oldnew.rc == rc {
 		r.oldnew.rc = rc
 		return r
 	}
@@ -142,5 +148,8 @@ func (r *rx) CloneWithRC(rc *int32) Value {
 }
 
 func (r *rxReplacer) CloneWithRC(rc *int32) Value {
-	return &rxReplacer{r: r.r, repl: r.repl.CloneWithRC(rc)}
+	if r.repl.HasRC() {
+		return &rxReplacer{r: r.r, repl: r.repl.CloneWithRC(rc)}
+	}
+	return r
 }

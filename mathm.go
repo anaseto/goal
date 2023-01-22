@@ -13,9 +13,9 @@ func mathm(x V, f func(float64) float64) V {
 	}
 	switch xv := x.value.(type) {
 	case *AB:
-		return mathm(fromABtoAF(xv), f)
+		return mathm(fromABtoAFRC(xv), f)
 	case *AI:
-		return mathm(toAF(xv), f)
+		return mathm(toAFRC(xv), f)
 	case *AF:
 		r := xv.reuse()
 		for i, xi := range xv.Slice {

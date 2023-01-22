@@ -581,7 +581,7 @@ func containedInS(x V, s string) V {
 		for i, xi := range xv.Slice {
 			r[i] = strings.Contains(s, xi)
 		}
-		return NewAB(r)
+		return NewABRC(r, xv.rc)
 	case *AV:
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
@@ -638,7 +638,7 @@ func splitN(n int, sep S, y V) V {
 		for i := range r {
 			r[i] = NewAS(strings.SplitN(yv.At(i), string(sep), n))
 		}
-		return NewAV(r)
+		return NewAVRC(r, yv.rc)
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {

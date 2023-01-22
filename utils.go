@@ -207,6 +207,15 @@ func toAF(x *AI) V {
 	return NewAF(r)
 }
 
+// toAFRC converts AI into AF with same RC if reusable.
+func toAFRC(x *AI) V {
+	r := make([]float64, x.Len())
+	for i, xi := range x.Slice {
+		r[i] = float64(xi)
+	}
+	return NewAFRC(r, x.rc)
+}
+
 // fromABtoAF converts AB into AF.
 func fromABtoAF(x *AB) V {
 	r := make([]float64, x.Len())
@@ -214,6 +223,15 @@ func fromABtoAF(x *AB) V {
 		r[i] = float64(b2i(xi))
 	}
 	return NewAF(r)
+}
+
+// fromABtoAF converts AB into AF with same RC if reusable.
+func fromABtoAFRC(x *AB) V {
+	r := make([]float64, x.Len())
+	for i, xi := range x.Slice {
+		r[i] = float64(b2i(xi))
+	}
+	return NewAFRC(r, x.rc)
 }
 
 // fromABtoAI converts AB into AI (for simplifying code, used only for

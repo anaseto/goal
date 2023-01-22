@@ -1,5 +1,14 @@
 package goal
 
+// HasRC returns true if the value is boxed and implements RefCounter.
+func (x V) HasRC() bool {
+	if x.kind != valBoxed {
+		return false
+	}
+	_, ok := x.value.(RefCounter)
+	return ok
+}
+
 // IncrRC increments the value reference count (if it has any).
 func (x V) IncrRC() {
 	if x.kind != valBoxed {
@@ -79,6 +88,14 @@ func (x *AS) reuse() *AS {
 }
 
 func (x *AV) reuse() *AV {
+	if reuseRCp(x.rc) {
+		x.flags = flagNone
+		return x
+	}
+	return &AV{Slice: make([]V, x.Len())}
+}
+
+func (x *AV) reuseNoRC() *AV {
 	if reuseRCp(x.rc) {
 		x.flags = flagNone
 		return x
