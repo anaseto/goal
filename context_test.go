@@ -347,6 +347,14 @@ func BenchmarkIndexAV(b *testing.B) {
 	}
 }
 
+func BenchmarkCountAV(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval(`a:(!10000),"a"`)
+	for n := 0; n < b.N; n++ {
+		ctx.Eval("1000 {#a}/1")
+	}
+}
+
 func BenchmarkWhere(b *testing.B) {
 	ctx := NewContext()
 	ctx.Eval("a:0=30!!10000")
