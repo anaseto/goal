@@ -14,6 +14,8 @@ Features:
 Tests:
 - improve test coverage for error messages and refactor and improve them along
   the way
+- add more immutability tests to catch any possible regressions after the
+  refcount overhaul, because refcounting is hard.
 
 Documentation:
 - write reference docs and maybe some introductory guide (in addition to the
@@ -24,11 +26,3 @@ Optimizations:
 - some remaining special cases in self-search functions
 - maybe improve liveness analysis (though simple, already good enough)
 - many functions have deep Canonical calls in generic case when a shallow version would suffice
-- refcounting of generic arrays is currently inefficient, because linear in
-  size: it could be improved, though refcounting is hard, so it's not sure it's
-  worth it.  The current system is correct (excluding any programming error
-  bugs), but we could think of a system that doesn't require recursive
-  refcounting of generic arrays, by making things like indexing (and other
-  functions that do not return new values) always return values with
-  non-reusable refcount (even in cases were we could have know otherwise that
-  the parent value will not be used again).
