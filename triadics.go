@@ -7,7 +7,7 @@ import (
 
 // amend3 implements @[x;y;f].
 func (ctx *Context) amend3(x, y, f V) V {
-	x = reuseV(x)
+	x = x.Clone()
 	switch xv := x.value.(type) {
 	case array:
 		y = toIndices(y)
@@ -89,7 +89,7 @@ func (ctx *Context) amend3array(x array, y, f V) (array, error) {
 
 // amend4 implements @[x;y;f;z].
 func (ctx *Context) amend4(x, y, f, z V) V {
-	x = reuseV(x)
+	x = x.Clone()
 	switch xv := x.value.(type) {
 	case array:
 		y = toIndices(y)
@@ -404,7 +404,7 @@ func (x *AS) set(i int, y V) {
 
 // deepAmend3 implements .[x;y;f].
 func (ctx *Context) deepAmend3(x, y, f V) V {
-	x = reuseV(x)
+	x = x.Clone()
 	switch xv := x.value.(type) {
 	case array:
 		y = toIndices(y)
@@ -474,7 +474,7 @@ func (ctx *Context) deepAmend3rec(x array, y0 V, y array, f V) (array, error) {
 
 // deepAmend4 implements .[x;y;f].
 func (ctx *Context) deepAmend4(x, y, f, z V) V {
-	x = reuseV(x)
+	x = x.Clone()
 	switch xv := x.value.(type) {
 	case array:
 		y = toIndices(y)

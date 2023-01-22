@@ -43,8 +43,11 @@ type Value interface {
 	Fprint(*Context, ValueWriter) (n int, err error)
 	// Type returns the name of the value's type.
 	Type() string
-	// Clone returns a clone of the value, with rc as new refcount pointer.
-	Clone(rc *int32) Value
+	// CloneWithRC returns a clone of the value, with rc as new refcount
+	// pointer.  If the current value's current refcount pointer is nil or
+	// equal to the passed one, the same value is returned after updating
+	// the refcount pointer as needed, instead of doing a full clone.
+	CloneWithRC(rc *int32) Value
 }
 
 // newVariadic returns a new variadic value.
@@ -411,7 +414,7 @@ func (x *AV) Type() string { return "A" }
 type array interface {
 	Value
 	RefCounter
-	RC() int32
+	RC() *int32
 	Len() int
 	at(i int) V            // x[i]
 	slice(i, j int) array  // x[i:j]

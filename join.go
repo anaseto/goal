@@ -118,7 +118,7 @@ func joinToAB(x *AB, y V, left bool) V {
 				copy(r[1:], x.Slice)
 				return NewAB(r)
 			}
-			if x.RC() <= 1 {
+			if reuseRCp(x.RC()) {
 				x.Slice = append(x.Slice, y.I() == 1)
 				x.flags = flagNone
 				return NewV(x)
@@ -184,7 +184,7 @@ func joinToAI(x *AI, y V, left bool) V {
 			copy(r[1:], x.Slice)
 			return NewAI(r)
 		}
-		if x.RC() <= 1 {
+		if reuseRCp(x.RC()) {
 			x.Slice = append(x.Slice, y.I())
 			x.flags = flagNone
 			return NewV(x)
@@ -236,7 +236,7 @@ func joinToAF(x *AF, y V, left bool) V {
 			copy(r[1:], x.Slice)
 			return NewAF(r)
 		}
-		if x.RC() <= 1 {
+		if reuseRCp(x.RC()) {
 			x.Slice = append(x.Slice, float64(y.I()))
 			x.flags = flagNone
 			return NewV(x)
@@ -253,7 +253,7 @@ func joinToAF(x *AF, y V, left bool) V {
 			copy(r[1:], x.Slice)
 			return NewAF(r)
 		}
-		if x.RC() <= 1 {
+		if reuseRCp(x.RC()) {
 			x.Slice = append(x.Slice, y.F())
 			x.flags = flagNone
 			return NewV(x)
@@ -282,7 +282,7 @@ func joinToAF(x *AF, y V, left bool) V {
 }
 
 func joinABAB(x *AB, y *AB) V {
-	if x.RC() <= 1 {
+	if reuseRCp(x.RC()) {
 		x.Slice = append(x.Slice, y.Slice...)
 		x.flags = flagNone
 		return NewV(x)
@@ -294,7 +294,7 @@ func joinABAB(x *AB, y *AB) V {
 }
 
 func joinAIAI(x *AI, y *AI) V {
-	if x.RC() <= 1 {
+	if reuseRCp(x.RC()) {
 		x.Slice = append(x.Slice, y.Slice...)
 		x.flags = flagNone
 		return NewV(x)
@@ -306,7 +306,7 @@ func joinAIAI(x *AI, y *AI) V {
 }
 
 func joinAFAF(x *AF, y *AF) V {
-	if x.RC() <= 1 {
+	if reuseRCp(x.RC()) {
 		x.Slice = append(x.Slice, y.Slice...)
 		x.flags = flagNone
 		return NewV(x)
@@ -327,7 +327,7 @@ func joinABAI(x *AB, y *AI) V {
 }
 
 func joinAIAB(x *AI, y *AB) V {
-	if x.RC() <= 1 {
+	if reuseRCp(x.RC()) {
 		for _, yi := range y.Slice {
 			x.Slice = append(x.Slice, b2i(yi))
 		}
@@ -352,7 +352,7 @@ func joinABAF(x *AB, y *AF) V {
 }
 
 func joinAFAB(x *AF, y *AB) V {
-	if x.RC() <= 1 {
+	if reuseRCp(x.RC()) {
 		for _, yi := range y.Slice {
 			x.Slice = append(x.Slice, float64(b2i(yi)))
 		}
@@ -377,7 +377,7 @@ func joinAIAF(x *AI, y *AF) V {
 }
 
 func joinAFAI(x *AF, y *AI) V {
-	if x.RC() <= 1 {
+	if reuseRCp(x.RC()) {
 		for _, yi := range y.Slice {
 			x.Slice = append(x.Slice, float64(yi))
 		}
@@ -401,7 +401,7 @@ func joinToAS(x *AS, y V, left bool) V {
 			copy(r[1:], x.Slice)
 			return NewAS(r)
 		}
-		if x.RC() <= 1 {
+		if reuseRCp(x.RC()) {
 			x.Slice = append(x.Slice, string(yv))
 			x.flags = flagNone
 			return NewV(x)
@@ -412,7 +412,7 @@ func joinToAS(x *AS, y V, left bool) V {
 		return NewAS(r)
 	case *AS:
 		// left == false
-		if x.RC() <= 1 {
+		if reuseRCp(x.RC()) {
 			x.Slice = append(x.Slice, yv.Slice...)
 			x.flags = flagNone
 			return NewV(x)
@@ -433,7 +433,7 @@ func joinToAV(x *AV, y V, left bool) V {
 	switch yv := y.value.(type) {
 	case *AV:
 		// left == false
-		if x.RC() <= 1 {
+		if reuseRCp(x.RC()) {
 			x.Slice = append(x.Slice, yv.Slice...)
 			x.flags = flagNone
 			return NewV(x)
@@ -449,7 +449,7 @@ func joinToAV(x *AV, y V, left bool) V {
 			copy(r[1:], x.Slice)
 			return NewAV(r)
 		}
-		if x.RC() <= 1 {
+		if reuseRCp(x.RC()) {
 			x.Slice = append(x.Slice, y)
 			x.flags = flagNone
 			return NewV(x)

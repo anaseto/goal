@@ -50,7 +50,7 @@ func reverseMut(x V) {
 
 // reverse returns |x.
 func reverse(x V) V {
-	x = reuseV(x)
+	x = x.Clone()
 	switch x.value.(type) {
 	case array:
 		reverseMut(x)
@@ -174,18 +174,12 @@ func dropi(i int64, y V) V {
 			if i > int64(yv.Len()) {
 				i = int64(yv.Len())
 			}
-			if yv.RC() > 1 {
-				yv.IncrRC()
-			}
 			y.value = yv.slice(int(i), yv.Len())
 			return Canonical(y)
 		default:
 			i = int64(yv.Len()) + i
 			if i < 0 {
 				i = 0
-			}
-			if yv.RC() > 1 {
-				yv.IncrRC()
 			}
 			y.value = yv.slice(0, int(i))
 			return Canonical(y)
@@ -298,16 +292,10 @@ func take(x, y V) V {
 		if i > int64(yv.Len()) {
 			return takeCyclic(yv, i)
 		}
-		if yv.RC() > 1 {
-			yv.IncrRC()
-		}
 		return Canonical(NewV(yv.slice(0, int(i))))
 	default:
 		if i < int64(-yv.Len()) {
 			return takeCyclic(yv, i)
-		}
-		if yv.RC() > 1 {
-			yv.IncrRC()
 		}
 		return Canonical(NewV(yv.slice(yv.Len()+int(i), yv.Len())))
 	}
@@ -1032,14 +1020,12 @@ func windows(i int64, y V) V {
 			return Panicf("i^y : i out of range !%d (%d)", yv.Len()+1, i)
 		}
 		r := make([]V, 1+yv.Len()-int(i))
-		yv.IncrRC()
-		yv.IncrRC()
 		for j := range r {
 			yc := y
 			yc.value = yv.slice(j, j+int(i))
 			r[j] = Canonical(yc)
 		}
-		return NewAV(r)
+		return NewAVRC(r, yv.RC())
 	default:
 		return panics("i^y : y not an array")
 	}
@@ -1065,15 +1051,13 @@ func shapeSplit(x V, y V) V {
 			return Panicf("i$y : i not positive (%d)", i)
 		}
 		if i >= int64(ylen) {
-			return NewAV([]V{y})
+			return NewAVRC([]V{y}, yv.RC())
 		}
 		n := ylen / int(i)
 		if ylen%int(i) != 0 {
 			n++
 		}
 		r := make([]V, n)
-		yv.IncrRC()
-		yv.IncrRC()
 		for j := 0; j < n; j++ {
 			yc := y
 			from := j * int(i)
@@ -1081,7 +1065,7 @@ func shapeSplit(x V, y V) V {
 			yc.value = yv.slice(from, to)
 			r[j] = Canonical(yc)
 		}
-		return NewAV(r)
+		return NewAVRC(r, yv.RC())
 	default:
 		return panics("i$y : y not an array")
 	}

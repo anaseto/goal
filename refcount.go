@@ -29,36 +29,11 @@ func (x V) rcdecrRefCounter() {
 	}
 }
 
-func (x *AB) RC() int32 {
-	if x.rc == nil {
-		return 0
-	}
-	return *x.rc
-}
-func (x *AI) RC() int32 {
-	if x.rc == nil {
-		return 0
-	}
-	return *x.rc
-}
-func (x *AF) RC() int32 {
-	if x.rc == nil {
-		return 0
-	}
-	return *x.rc
-}
-func (x *AS) RC() int32 {
-	if x.rc == nil {
-		return 0
-	}
-	return *x.rc
-}
-func (x *AV) RC() int32 {
-	if x.rc == nil {
-		return 0
-	}
-	return *x.rc
-}
+func (x *AB) RC() *int32 { return x.rc }
+func (x *AI) RC() *int32 { return x.rc }
+func (x *AF) RC() *int32 { return x.rc }
+func (x *AS) RC() *int32 { return x.rc }
+func (x *AV) RC() *int32 { return x.rc }
 
 func reuseRCp(p *int32) bool {
 	if p == nil {
@@ -122,16 +97,13 @@ func (x *AV) reuse() *AV {
 // necessary to also implement RefCounter if the type definition contains makes
 // use of a type implementing it (for example an array type or a generic V).
 type RefCounter interface {
+	Value
+
 	// IncrRC increments the reference count by one.
 	IncrRC()
 
 	// DecrRC decrements the reference count by one.
 	DecrRC()
-
-	// InitRC recursively initializes the reference counter for the value
-	// (if it needs any). It should not be called on values that already have
-	// an RC.
-	InitRC(rc *int32)
 }
 
 func zeroRCp(p *int32) {
@@ -162,7 +134,10 @@ func (x *AS) IncrRC() { incrRCp(&x.rc) }
 func (x *AV) IncrRC() {
 	if x.rc == nil {
 		var rc int32 = 1
-		x.InitRC(&rc)
+		x.rc = &rc
+		for i, xi := range x.Slice {
+			x.Slice[i] = xi.CloneWithRC(x.rc)
+		}
 		return
 	}
 	*x.rc++
@@ -215,66 +190,3 @@ func (r *replacer) IncrRC()   { r.oldnew.IncrRC() }
 func (r *replacer) DecrRC()   { r.oldnew.DecrRC() }
 func (r *rxReplacer) IncrRC() { r.repl.IncrRC() }
 func (r *rxReplacer) DecrRC() { r.repl.DecrRC() }
-
-func (x V) InitRC(rc *int32) {
-	if x.kind != valBoxed {
-		return
-	}
-	xrc, ok := x.value.(RefCounter)
-	if ok {
-		xrc.InitRC()
-	}
-}
-
-func (e *errV) InitRC(rc *int32) { e.V.InitRC(rc) }
-
-func (x *AB) InitRC(rc *int32) {
-	x.rc = rc
-}
-
-func (x *AI) InitRC(rc *int32) {
-	x.rc = rc
-}
-
-func (x *AF) InitRC(rc *int32) {
-	x.rc = rc
-}
-
-func (x *AS) InitRC(rc *int32) {
-	x.rc = rc
-}
-
-func (x *AV) InitRC(rc *int32) {
-	x.rc = rc
-	for _, xi := range x.Slice {
-		xi.InitRC(rc)
-	}
-}
-
-func (p *projection) InitRC(rc *int32) {
-	p.Fun.InitRC(rc)
-	for _, arg := range p.Args {
-		arg.InitRC(rc)
-	}
-}
-
-func (p *projectionFirst) InitRC(rc *int32) {
-	p.Fun.InitRC(rc)
-	p.Arg.InitRC(rc)
-}
-
-func (p *projectionMonad) InitRC(rc *int32) {
-	p.Fun.InitRC(rc)
-}
-
-func (r *derivedVerb) InitRC(rc *int32) {
-	r.Arg.InitRC(rc)
-}
-
-func (r *replacer) InitRC(rc *int32) {
-	r.oldnew.InitRC(rc)
-}
-
-func (r *rxReplacer) InitRC(rc *int32) {
-	r.repl.InitRC(rc)
-}

@@ -94,34 +94,6 @@ func maxS(x, y S) S {
 	return x
 }
 
-// reuseV creates an identical deep copy of a value, or the value itself if it
-// is reusable. It initializes refcount if necessary.
-func reuseV(x V) V {
-	if x.kind != valBoxed {
-		return x
-	}
-	switch xv := x.value.(type) {
-	case array:
-		return NewV(reuseArray(xv))
-	default:
-		var n int32
-		return x.Clone(&n)
-	}
-}
-
-// reuseArray creates an identical copy of an array, or the value itself if it
-// is reusable. It initializes refcount if necessary.
-func reuseArray(x array) Value {
-	if x.RC() <= 1 {
-		// We're asking for a clone, so we usually are going to modify
-		// it afterwards and invalidate the flags (safe approximation).
-		x.setFlags(flagNone)
-		return x
-	}
-	var n int32
-	return x.Clone(&n)
-}
-
 func isStar(x V) bool {
 	return x.kind == valVariadic && x.variadic() == vMultiply
 }
