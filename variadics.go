@@ -477,7 +477,8 @@ func VApplyN(ctx *Context, args []V) V {
 
 // VList implements (x;y;...) array constructor variadic verb.
 func VList(ctx *Context, args []V) V {
-	xv, cloned := normalize(&AV{Slice: args})
+	xav := &AV{Slice: args}
+	xv, cloned := normalize(xav)
 	if cloned {
 		r := NewV(xv)
 		reverseMut(r)

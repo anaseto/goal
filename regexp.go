@@ -144,7 +144,7 @@ func applyRxMatch(x *rx, y V) V {
 		for i, s := range yv.Slice {
 			r[i] = x.Regexp.MatchString(s)
 		}
-		return NewABRC(r, yv.rc)
+		return NewAB(r)
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -169,7 +169,7 @@ func applyRxFindSubmatch(x *rx, y V) V {
 		for i, yi := range yv.Slice {
 			r[i] = applyRxFindSubmatch(x, NewS(yi))
 		}
-		return NewAVRC(r, yv.rc)
+		return NewAV(r)
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -217,7 +217,7 @@ func applyRxFindAllSubmatch(x *rx, y V, n int64) V {
 		for i, yi := range yv.Slice {
 			r[i] = applyRxFindAllSubmatch(x, NewS(yi), n)
 		}
-		return NewAVRC(r, yv.rc)
+		return NewAV(r)
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -243,7 +243,7 @@ func applyRxFindAll(x *rx, y V, n int64) V {
 		for i, yi := range yv.Slice {
 			r[i] = applyRxFindAll(x, NewS(yi), n)
 		}
-		return NewAVRC(r, yv.rc)
+		return NewAV(r)
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -269,7 +269,7 @@ func splitRx(f *rx, x V) V {
 		for i, xi := range xv.Slice {
 			r[i] = NewAS(f.Regexp.Split(string(xi), -1))
 		}
-		return NewAVRC(r, xv.rc)
+		return NewAV(r)
 	case *AV:
 		r := xv.reuse()
 		for i, xi := range xv.Slice {

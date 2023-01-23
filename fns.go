@@ -28,7 +28,7 @@ func rangeI(n int64) V {
 	for i := range r {
 		r[i] = int64(i)
 	}
-	return newAscUniqAI(r)
+	return NewV(&AI{Slice: r, flags: flagAscending | flagUnique})
 }
 
 func rangeArray(x *AI) V {
@@ -253,7 +253,7 @@ func repeat(x V, n int64) V {
 				r[in+j] = xi
 			}
 		}
-		return NewAV(r)
+		return NewV(&AV{Slice: r, rc: xv.rc})
 	default:
 		r := make([]V, n)
 		for i := range r {
@@ -308,7 +308,7 @@ func repeatAB(x *AB, y V) V {
 				r = append(r, yv.at(i))
 			}
 		}
-		return Canonical(NewAV(r))
+		return Canonical(NewV(&AV{Slice: r, rc: yv.rc}))
 	default:
 		return Panicf("f#y : y not an array (%s)", y.Type())
 	}
@@ -362,7 +362,7 @@ func repeatAI(x *AI, y V) V {
 				r = append(r, yv.At(i))
 			}
 		}
-		return Canonical(NewAV(r))
+		return Canonical(NewV(&AV{Slice: r, rc: yv.rc}))
 	default:
 		return Panicf("f#y : y not an array (%s)", y.Type())
 	}
@@ -445,7 +445,7 @@ func weedOutAB(x *AB, y V) V {
 				r = append(r, yv.at(i))
 			}
 		}
-		return Canonical(NewAV(r))
+		return Canonical(NewV(&AV{Slice: r, rc: yv.rc}))
 	default:
 		return Panicf("f_y : y not an array (%s)", y.Type())
 	}
@@ -496,7 +496,7 @@ func weedOutAI(x *AI, y V) V {
 				r = append(r, yv.At(i))
 			}
 		}
-		return Canonical(NewAV(r))
+		return Canonical(NewV(&AV{Slice: r, rc: yv.rc}))
 	default:
 		return Panicf("f_y : y not an array (%s)", y.Type())
 	}

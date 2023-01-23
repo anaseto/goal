@@ -129,7 +129,7 @@ func groupBy(x, y V) V {
 		for i, xi := range xav.Slice {
 			r[i] = yv.atIndices(xi.value.(*AI).Slice)
 		}
-		return NewAV(r)
+		return NewV(&AV{Slice: r, rc: yv.RC()})
 	default:
 		return Panicf("f=y : y not array (%s)", y.Type())
 	}

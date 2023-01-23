@@ -285,7 +285,7 @@ EOS
                         if yv.Len() != xv.Len() {
                                 return Panicf("x${errOp}y : length mismatch: %d vs %d", xv.Len(), yv.Len())
                         }
-                        r := xv.reuseNoRC()
+                        r := xv.reuse()
                         for i, xi := range xv.Slice {
                                 ri := ${name}(xi, yv.at(i))
                                 if ri.IsPanic() {
@@ -295,7 +295,7 @@ EOS
                         }
                         return NewV(r) 
                 }
-                r := xv.reuseNoRC()
+                r := xv.reuse()
                 for i, xi := range xv.Slice {
                         ri := ${name}(xi, y)
                         if ri.IsPanic() {
@@ -413,13 +413,13 @@ EOS
 		for i := range r {
 			r[i] = $rtype($iexpr)
 		}
-		return NewA${type}RC(r, yv.rc)
+		return NewA${type}(r)
 EOS
         }
     }
     print $out <<EOS if $t !~ /^A/;
 	case *AV:
-		r := yv.reuseNoRC()
+		r := yv.reuse()
 		for i, yi := range yv.Slice {
 			ri := ${name}${t}V(x, yi)
                         if ri.IsPanic() {
@@ -466,7 +466,7 @@ EOS
             for i := range r {
                     r[i] = $rtype($iexpr)
             }
-            return NewA${type}RC(r, x.rc)
+            return NewA${type}(r)
         }
 EOS
         }
@@ -493,7 +493,7 @@ EOS
             for i := range r {
                     r[i] = $rtype($iexpr)
             }
-            return NewA${type}RC(r, x.rc)
+            return NewA${type}(r)
         }
 EOS
         }
@@ -523,7 +523,7 @@ EOS
 		for i := range r {
 			r[i] = $rtype($iexpr)
 		}
-		return NewA${type}RC(r, x.rc)
+		return NewA${type}(r)
 EOS
         }
     }
@@ -585,14 +585,14 @@ EOS
         $reuse = <<EOS;
                 var r *AV
                 if x.reusable() {
-                    r = x.reuseNoRC()
+                    r = x.reuse()
                 } else {
-                    r = yv.reuseNoRC()
+                    r = yv.reuse()
                 }
 EOS
     } else {
         $reuse = <<EOS;
-                r := yv.reuseNoRC()
+                r := yv.reuse()
 EOS
     }
     print $out <<EOS if $t !~ /^A/;

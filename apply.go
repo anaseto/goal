@@ -82,7 +82,9 @@ func (v variadic) apply(ctx *Context) V {
 	if x.kind == valNil {
 		return NewV(&projectionMonad{Fun: newVariadic(v)})
 	}
-	return ctx.variadics[v](ctx, args)
+	r := ctx.variadics[v](ctx, args)
+	r.InitRC()
+	return r
 }
 
 func (v variadic) apply2(ctx *Context) V {
@@ -103,6 +105,7 @@ func (v variadic) apply2(ctx *Context) V {
 		return NewV(&projection{Fun: newVariadic(v), Args: args})
 	}
 	r := ctx.variadics[v](ctx, args)
+	r.InitRC()
 	ctx.drop()
 	return r
 }
@@ -115,6 +118,7 @@ func (v variadic) applyN(ctx *Context, n int) V {
 		return NewV(&projection{Fun: newVariadic(v), Args: args})
 	}
 	r := ctx.variadics[v](ctx, args)
+	r.InitRC()
 	ctx.dropN(n - 1)
 	return r
 }
@@ -214,6 +218,7 @@ func (dv *derivedVerb) applyN(ctx *Context, n int) V {
 		return NewV(&projection{Fun: NewV(dv), Args: args})
 	}
 	r := ctx.variadics[dv.Fun](ctx, args)
+	r.InitRC()
 	ctx.dropN(n)
 	return r
 }
@@ -280,10 +285,13 @@ func (p *projection) applyN(ctx *Context, n int) V {
 func (s S) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
-		return applyS(s, ctx.top())
+		r := applyS(s, ctx.top())
+		r.InitRC()
+		return r
 	case 2:
 		args := ctx.peekN(n)
 		r := applyS2(s, args[1], args[0])
+		r.InitRC()
 		ctx.dropN(n - 1)
 		return r
 	default:
@@ -295,10 +303,13 @@ func (s S) applyN(ctx *Context, n int) V {
 func (re *rx) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
-		return applyRx(re, ctx.top())
+		r := applyRx(re, ctx.top())
+		r.InitRC()
+		return r
 	case 2:
 		args := ctx.peekN(2)
 		r := applyRx2(re, args[1], args[0])
+		r.InitRC()
 		ctx.drop()
 		return r
 	default:
@@ -344,6 +355,7 @@ func (x *AS) applyN(ctx *Context, n int) V {
 	default:
 		args := ctx.peekN(n)
 		r := ctx.applyArrayArgs(x, args[len(args)-1], args[:len(args)-1])
+		r.InitRC()
 		ctx.dropN(n - 1)
 		return r
 	}
@@ -356,6 +368,7 @@ func (x *AV) applyN(ctx *Context, n int) V {
 	default:
 		args := ctx.peekN(n)
 		r := ctx.applyArrayArgs(x, args[len(args)-1], args[:len(args)-1])
+		r.InitRC()
 		ctx.dropN(n - 1)
 		return r
 	}
@@ -404,7 +417,7 @@ func applyArray(x array, y V) V {
 				return r[i]
 			}
 		}
-		return Canonical(NewAV(r))
+		return Canonical(NewV(&AV{Slice: r, rc: x.RC()}))
 	case array:
 		iy := toIndices(y)
 		if iy.IsPanic() {
@@ -462,7 +475,7 @@ func (x *AV) atIndices(y []int64) V {
 		}
 		r[i] = x.At(int(yi))
 	}
-	return Canonical(NewAV(r))
+	return Canonical(NewV(&AV{Slice: r, rc: x.rc}))
 }
 
 func (x *AB) atIndices(y []int64) V {
@@ -477,7 +490,7 @@ func (x *AB) atIndices(y []int64) V {
 		}
 		r[i] = x.At(int(yi))
 	}
-	return NewAB(r)
+	return NewV(&AB{Slice: r, rc: x.rc})
 }
 
 func (x *AI) atIndices(y []int64) V {
@@ -492,7 +505,7 @@ func (x *AI) atIndices(y []int64) V {
 		}
 		r[i] = x.At(int(yi))
 	}
-	return NewAI(r)
+	return NewV(&AI{Slice: r, rc: x.rc})
 }
 
 func (x *AF) atIndices(y []int64) V {
@@ -507,7 +520,7 @@ func (x *AF) atIndices(y []int64) V {
 		}
 		r[i] = x.At(int(yi))
 	}
-	return NewAF(r)
+	return NewV(&AF{Slice: r, rc: x.rc})
 }
 
 func (x *AS) atIndices(y []int64) V {
@@ -522,7 +535,7 @@ func (x *AS) atIndices(y []int64) V {
 		}
 		r[i] = x.At(int(yi))
 	}
-	return NewAS(r)
+	return NewV(&AS{Slice: r, rc: x.rc})
 }
 
 func (r *nReplacer) applyN(ctx *Context, n int) V {
@@ -530,7 +543,9 @@ func (r *nReplacer) applyN(ctx *Context, n int) V {
 		ctx.dropN(n - 1)
 		return Panicf("substitution got too many arguments")
 	}
-	return ctx.replace(r, ctx.top())
+	nr := ctx.replace(r, ctx.top())
+	nr.InitRC()
+	return nr
 }
 
 func (r *replacer) applyN(ctx *Context, n int) V {
@@ -538,7 +553,9 @@ func (r *replacer) applyN(ctx *Context, n int) V {
 		ctx.dropN(n - 1)
 		return Panicf("substitution got too many arguments")
 	}
-	return ctx.replace(r, ctx.top())
+	nr := ctx.replace(r, ctx.top())
+	nr.InitRC()
+	return nr
 }
 
 func (r *rxReplacer) applyN(ctx *Context, n int) V {
@@ -546,5 +563,7 @@ func (r *rxReplacer) applyN(ctx *Context, n int) V {
 		ctx.dropN(n - 1)
 		return Panicf("substitution got too many arguments")
 	}
-	return ctx.replace(r, ctx.top())
+	nr := ctx.replace(r, ctx.top())
+	nr.InitRC()
+	return nr
 }

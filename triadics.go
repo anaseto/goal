@@ -33,8 +33,8 @@ func amendArrayAt(x array, y int, z V) array {
 	for i := range a {
 		a[i] = x.at(i)
 	}
-	a[y] = z
-	return &AV{Slice: a}
+	a[y] = z.CloneWithRC(x.RC())
+	return &AV{Slice: a, rc: x.RC()}
 }
 
 func (ctx *Context) amend3arrayI(x array, y int64, f V) (array, error) {
@@ -203,8 +203,8 @@ func amendr(x array, y, z V) (array, error) {
 		for i := range r {
 			r[i] = x.at(i)
 		}
-		r[y.I()] = z
-		return &AV{Slice: r}, nil
+		r[y.I()] = z.CloneWithRC(x.RC())
+		return &AV{Slice: r, rc: x.RC()}, nil
 	}
 	if isStar(y) {
 		y = rangeI(int64(x.Len()))
@@ -237,9 +237,9 @@ func amendrAI(x array, yv *AI, z V) (array, error) {
 			r[i] = x.at(i)
 		}
 		for _, yi := range yv.Slice {
-			r[yi] = z
+			r[yi] = z.CloneWithRC(x.RC())
 		}
-		return &AV{Slice: r}, nil
+		return &AV{Slice: r, rc: x.RC()}, nil
 	}
 	if za.Len() != yv.Len() {
 		return x, fmt.Errorf("length mismatch between y and z (%d vs %d)",
@@ -255,7 +255,7 @@ func amendrAI(x array, yv *AI, z V) (array, error) {
 			for i := range r {
 				r[i] = x.at(i)
 			}
-			x = &AV{Slice: r}
+			x = &AV{Slice: r, rc: x.RC()}
 			break
 		}
 	}

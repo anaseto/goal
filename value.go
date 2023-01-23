@@ -48,6 +48,10 @@ type Value interface {
 	// equal to the passed one, the same value is returned after updating
 	// the refcount pointer as needed, instead of doing a full clone.
 	CloneWithRC(rc *int32) Value
+	// InitWithRC recursively sets the refcount pointer for reusable
+	// values, and increments by 2 the refcount of non-reusable values (to
+	// ensure immutability).
+	InitWithRC(rc *int32)
 }
 
 // newVariadic returns a new variadic value.
@@ -283,14 +287,6 @@ func NewAB(x []bool) V {
 	return NewV(&AB{Slice: x})
 }
 
-// NewABRC returns a new boolean array, reusing RC.
-func NewABRC(x []bool, rc *int32) V {
-	if !reuseRCp(rc) {
-		rc = nil
-	}
-	return NewV(&AB{Slice: x, rc: rc})
-}
-
 // AI represents an array of integers.
 type AI struct {
 	rc    *int32
@@ -301,19 +297,6 @@ type AI struct {
 // NewAI returns a new int array.
 func NewAI(x []int64) V {
 	return NewV(&AI{Slice: x})
-}
-
-// NewAIRC returns a new int array, reusing RC.
-func NewAIRC(x []int64, rc *int32) V {
-	if !reuseRCp(rc) {
-		rc = nil
-	}
-	return NewV(&AI{Slice: x, rc: rc})
-}
-
-// newAscUniqAI returns a new sorted int array.
-func newAscUniqAI(x []int64) V {
-	return NewV(&AI{Slice: x, flags: flagAscending | flagUnique})
 }
 
 // AF represents an array of reals.
@@ -328,14 +311,6 @@ func NewAF(x []float64) V {
 	return NewV(&AF{Slice: x})
 }
 
-// NewAFRC returns a new array of reals, reusing RC.
-func NewAFRC(x []float64, rc *int32) V {
-	if !reuseRCp(rc) {
-		rc = nil
-	}
-	return NewV(&AF{Slice: x, rc: rc})
-}
-
 // AS represents an array of strings.
 type AS struct {
 	rc    *int32
@@ -348,14 +323,6 @@ func NewAS(x []string) V {
 	return NewV(&AS{Slice: x})
 }
 
-// NewASRC returns a new array of strings, reusing RC.
-func NewASRC(x []string, rc *int32) V {
-	if !reuseRCp(rc) {
-		rc = nil
-	}
-	return NewV(&AS{Slice: x, rc: rc})
-}
-
 // AV represents a generic array.
 type AV struct {
 	rc    *int32
@@ -366,14 +333,6 @@ type AV struct {
 // NewAV returns a new generic array.
 func NewAV(x []V) V {
 	return NewV(&AV{Slice: x})
-}
-
-// NewAVRC returns a new generic array, reusing RC.
-func NewAVRC(x []V, rc *int32) V {
-	if !reuseRCp(rc) {
-		rc = nil
-	}
-	return NewV(&AV{Slice: x, rc: rc})
 }
 
 func (x *AB) Matches(y Value) bool { return matchArray(x, y) }

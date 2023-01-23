@@ -447,7 +447,7 @@ func joinToAV(x *AV, y V, left bool) V {
 			r := make([]V, x.Len()+1)
 			r[0] = y
 			copy(r[1:], x.Slice)
-			return NewAV(r)
+			return NewV(&AV{Slice: r})
 		}
 		if reuseRCp(x.RC()) {
 			x.Slice = append(x.Slice, y)
@@ -457,7 +457,7 @@ func joinToAV(x *AV, y V, left bool) V {
 		r := make([]V, x.Len()+1)
 		r[len(r)-1] = y
 		copy(r[:len(r)-1], x.Slice)
-		return NewAV(r)
+		return NewV(&AV{Slice: r})
 	}
 }
 
@@ -469,7 +469,7 @@ func joinArrays(x, y array) V {
 	for i := x.Len(); i < len(r); i++ {
 		r[i] = y.at(i - x.Len())
 	}
-	return NewAV(r)
+	return NewV(&AV{Slice: r})
 }
 
 func joinAtomToArray(x V, y array, left bool) V {
@@ -489,7 +489,7 @@ func joinAtomToArray(x V, y array, left bool) V {
 			r[i] = y.at(i)
 		}
 	}
-	return NewAV(r)
+	return NewV(&AV{Slice: r})
 }
 
 // enlist returns ,x.

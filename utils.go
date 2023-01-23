@@ -237,21 +237,31 @@ func toArray(x V) V {
 	if x.IsI() {
 		switch x.I() {
 		case 0, 1:
-			return NewAB([]bool{x.I() == 1})
+			var n int32
+			r := &AB{Slice: []bool{x.I() == 1}, rc: &n}
+			return NewV(r)
 		default:
-			return NewAI([]int64{x.I()})
+			var n int32
+			r := &AI{Slice: []int64{x.I()}, rc: &n}
+			return NewV(r)
 		}
 	}
 	if x.IsF() {
-		return NewAF([]float64{float64(x.F())})
+		var n int32
+		r := &AF{Slice: []float64{float64(x.F())}, rc: &n}
+		return NewV(r)
 	}
 	switch xv := x.value.(type) {
 	case S:
-		return NewAS([]string{string(xv)})
+		var n int32
+		r := &AS{Slice: []string{string(xv)}, rc: &n}
+		return NewV(r)
 	case array:
 		return x
 	default:
-		return NewAV([]V{x})
+		var n int32
+		r := &AV{Slice: []V{x}, rc: &n}
+		return NewV(r)
 	}
 }
 
@@ -276,15 +286,6 @@ func toAF(x *AI) V {
 	return NewAF(r)
 }
 
-// toAFRC converts AI into AF with same RC if reusable.
-func toAFRC(x *AI) V {
-	r := make([]float64, x.Len())
-	for i, xi := range x.Slice {
-		r[i] = float64(xi)
-	}
-	return NewAFRC(r, x.rc)
-}
-
 // fromABtoAF converts AB into AF.
 func fromABtoAF(x *AB) V {
 	r := make([]float64, x.Len())
@@ -292,15 +293,6 @@ func fromABtoAF(x *AB) V {
 		r[i] = float64(b2i(xi))
 	}
 	return NewAF(r)
-}
-
-// fromABtoAF converts AB into AF with same RC if reusable.
-func fromABtoAFRC(x *AB) V {
-	r := make([]float64, x.Len())
-	for i, xi := range x.Slice {
-		r[i] = float64(b2i(xi))
-	}
-	return NewAFRC(r, x.rc)
 }
 
 // fromABtoAI converts AB into AI (for simplifying code, used only for

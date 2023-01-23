@@ -381,7 +381,7 @@ func uniq(ctx *Context, x V) V {
 					continue
 				}
 			}
-			return Canonical(NewAV(r))
+			return Canonical(NewV(&AV{Slice: r, rc: xv.rc}))
 		}
 	loop:
 		for i, xi := range xv.Slice {
@@ -392,7 +392,7 @@ func uniq(ctx *Context, x V) V {
 			}
 			r = append(r, xi)
 		}
-		return Canonical(NewAV(r))
+		return Canonical(NewV(&AV{Slice: r, rc: xv.rc}))
 	default:
 		return panicType("?x", "x", x)
 	}
@@ -941,8 +941,7 @@ func without(x, y V) V {
 				bres.Slice[i] = !b
 			}
 		}
-		r = replicate(r, y)
-		return r
+		return replicate(r, y)
 	default:
 		return panicType("x^y", "x", x)
 	}

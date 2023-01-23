@@ -6,7 +6,8 @@ import "math"
 func VNaN(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return isNaN(args[0])
+		r := isNaN(args[0])
+		return r
 	case 2:
 		return fillNaN(args[1], args[0])
 	default:
@@ -30,13 +31,13 @@ func isNaN(x V) V {
 		return NewV(r)
 	case *AI:
 		r := make([]bool, xv.Len())
-		return NewABRC(r, xv.rc)
+		return NewAB(r)
 	case *AF:
 		r := make([]bool, xv.Len())
 		for i, xi := range xv.Slice {
 			r[i] = math.IsNaN(xi)
 		}
-		return NewABRC(r, xv.rc)
+		return NewAB(r)
 	case *AV:
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
@@ -61,7 +62,8 @@ func fillNaN(x V, y V) V {
 	} else {
 		return panicType("x NaN y", "x", x)
 	}
-	return fillNaNf(fill, y)
+	r := fillNaNf(fill, y)
+	return r
 }
 
 func fillNaNf(fill float64, y V) V {
@@ -81,10 +83,8 @@ func fillNaNf(fill float64, y V) V {
 		return y
 	case *AF:
 		var r []float64
-		var rc *int32
 		if reuseRCp(yv.RC()) {
 			r = yv.Slice
-			rc = yv.rc
 		} else {
 			r = make([]float64, yv.Len())
 			copy(r, yv.Slice)
@@ -94,7 +94,7 @@ func fillNaNf(fill float64, y V) V {
 				r[i] = fill
 			}
 		}
-		return NewAFRC(r, rc)
+		return NewAF(r)
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {

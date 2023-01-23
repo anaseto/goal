@@ -1,5 +1,10 @@
 package goal
 
+import (
+	"fmt"
+	"log"
+)
+
 // HasRC returns true if the value is boxed and implements RefCounter.
 func (x V) HasRC() bool {
 	if x.kind != valBoxed {
@@ -95,14 +100,6 @@ func (x *AV) reuse() *AV {
 	return &AV{Slice: make([]V, x.Len())}
 }
 
-func (x *AV) reuseNoRC() *AV {
-	if reuseRCp(x.rc) {
-		x.flags = flagNone
-		return x
-	}
-	return &AV{Slice: make([]V, x.Len())}
-}
-
 // RefCounter is implemented by values that use a reference count. In goal the
 // refcount is not used for memory management, but only for optimization of
 // memory allocations.  Refcount is increased by each assignement, and each use
@@ -144,21 +141,11 @@ func decrRCp(p *int32) {
 	}
 }
 
-func (x *AB) IncrRC() { incrRCp(&x.rc) }
-func (x *AI) IncrRC() { incrRCp(&x.rc) }
-func (x *AF) IncrRC() { incrRCp(&x.rc) }
-func (x *AS) IncrRC() { incrRCp(&x.rc) }
-func (x *AV) IncrRC() {
-	if x.rc == nil {
-		var rc int32 = 1
-		x.rc = &rc
-		for i, xi := range x.Slice {
-			x.Slice[i] = xi.CloneWithRC(x.rc)
-		}
-		return
-	}
-	*x.rc++
-}
+func (x *AB) IncrRC() { *x.rc++ }
+func (x *AI) IncrRC() { *x.rc++ }
+func (x *AF) IncrRC() { *x.rc++ }
+func (x *AS) IncrRC() { *x.rc++ }
+func (x *AV) IncrRC() { *x.rc++ }
 
 func (x *AB) DecrRC() { decrRCp(x.rc) }
 func (x *AI) DecrRC() { decrRCp(x.rc) }
@@ -207,3 +194,175 @@ func (r *replacer) IncrRC()   { r.oldnew.IncrRC() }
 func (r *replacer) DecrRC()   { r.oldnew.DecrRC() }
 func (r *rxReplacer) IncrRC() { r.repl.IncrRC() }
 func (r *rxReplacer) DecrRC() { r.repl.DecrRC() }
+
+// wellformedRC checks that RCs of the value are properly shared among
+// subarrays. It is for testing purposes.
+func wellformedRC(x V) bool {
+	switch xv := x.value.(type) {
+	case *AV:
+		return sharesRC(x, xv.rc)
+	default:
+		return true
+	}
+}
+
+func getRC(rc *int32) int32 {
+	if rc != nil {
+		return *rc
+	}
+	return 0
+}
+
+func sharesRC(x V, rc *int32) bool {
+	switch xv := x.value.(type) {
+	case *AV:
+		if xv.RC() != rc {
+			log.Printf("%p vs %p (%d vs %d)", xv.RC(), rc, getRC(xv.RC()), getRC(rc))
+			return false
+		}
+		for _, xi := range xv.Slice {
+			if !sharesRC(xi, rc) {
+				return false
+			}
+		}
+		return true
+	case array:
+		if xv.RC() != rc {
+			log.Printf("%p vs %p (%d vs %d)", xv.RC(), rc, getRC(xv.RC()), getRC(rc))
+			return false
+		}
+		return true
+	default:
+		return true
+	}
+}
+
+func (ctx *Context) assertWellformedRC(x V) {
+	if !wellformedRC(x) {
+		panic(fmt.Sprintf("unshared rc: %s (%s)", x.Sprint(ctx), x.Type()))
+	}
+}
+
+// InitRC initializes refcount if necessary.
+func (x V) InitRC() {
+	if x.kind != valBoxed {
+		return
+	}
+	var p *int32
+	switch xv := x.value.(type) {
+	case array:
+		p = xv.RC()
+		if p == nil {
+			var n int32
+			p = &n
+		}
+	default:
+		var n int32
+		p = &n
+	}
+	x.value.InitWithRC(p)
+}
+
+func (x V) InitWithRC(rc *int32) {
+	if x.kind != valBoxed {
+		return
+	}
+	x.value.InitWithRC(rc)
+}
+
+func (s S) InitWithRC(rc *int32) {}
+
+func (e panicV) InitWithRC(rc *int32) {}
+
+func (e *errV) InitWithRC(rc *int32) {
+	e.V.InitWithRC(rc)
+}
+
+func (x *AB) InitWithRC(rc *int32) {
+	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
+		x.rc = rc
+		return
+	}
+	*x.rc += 2
+}
+
+func (x *AI) InitWithRC(rc *int32) {
+	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
+		x.rc = rc
+		return
+	}
+	*x.rc += 2
+}
+
+func (x *AF) InitWithRC(rc *int32) {
+	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
+		x.rc = rc
+		return
+	}
+	*x.rc += 2
+}
+
+func (x *AS) InitWithRC(rc *int32) {
+	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
+		x.rc = rc
+		return
+	}
+	*x.rc += 2
+}
+
+func (x *AV) InitWithRC(rc *int32) {
+	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
+		x.rc = rc
+		for _, xi := range x.Slice {
+			xi.InitWithRC(rc)
+		}
+		return
+	}
+	*x.rc += 2
+}
+
+func (p *projection) InitWithRC(rc *int32) {
+	p.Fun.InitWithRC(rc)
+	for _, arg := range p.Args {
+		arg.InitWithRC(rc)
+	}
+}
+
+func (p *projectionFirst) InitWithRC(rc *int32) {
+	p.Fun.InitWithRC(rc)
+	p.Arg.InitWithRC(rc)
+}
+
+func (p *projectionMonad) InitWithRC(rc *int32) {
+	p.Fun.InitWithRC(rc)
+}
+
+func (r *derivedVerb) InitWithRC(rc *int32) {
+	r.Arg.InitWithRC(rc)
+}
+
+func (r *nReplacer) InitWithRC(rc *int32) {}
+
+func (r *replacer) InitWithRC(rc *int32) {
+	if r.oldnew.rc == nil || *r.oldnew.rc <= 1 || r.oldnew.rc == rc {
+		r.oldnew.rc = rc
+		return
+	}
+	*r.oldnew.rc += 2
+}
+
+func (r *rx) InitWithRC(rc *int32) {}
+
+func (r *rxReplacer) InitWithRC(rc *int32) {
+	r.repl.InitWithRC(rc)
+}
+
+func (x *AV) initRC() {
+	if x.rc == nil {
+		var n int32
+		x.rc = &n
+	}
+	for _, xi := range x.Slice {
+		xi.InitWithRC(x.rc)
+	}
+}

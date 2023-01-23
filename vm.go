@@ -188,10 +188,12 @@ const maxCallDepth = 100000
 
 func (ctx *Context) push(x V) {
 	x.IncrRC()
+	//ctx.assertWellformedRC(x)
 	ctx.stack = append(ctx.stack, x)
 }
 
 func (ctx *Context) pushNoRC(x V) {
+	//ctx.assertWellformedRC(x)
 	ctx.stack = append(ctx.stack, x)
 }
 
