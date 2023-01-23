@@ -94,6 +94,75 @@ func maxS(x, y S) S {
 	return x
 }
 
+func minMax(x *AI) (min, max int64) {
+	if x.Len() == 0 {
+		return
+	}
+	min = x.At(0)
+	max = min
+	for _, xi := range x.Slice[1:] {
+		switch {
+		case xi > max:
+			max = xi
+		case xi < min:
+			min = xi
+		}
+	}
+	return
+}
+
+func maxAI(x *AI) int64 {
+	max := int64(math.MinInt64)
+	if x.Len() == 0 {
+		return max
+	}
+	for _, xi := range x.Slice {
+		if xi > max {
+			max = xi
+		}
+	}
+	return max
+}
+
+func minAI(x *AI) int64 {
+	min := int64(math.MaxInt64)
+	if x.Len() == 0 {
+		return min
+	}
+	for _, xi := range x.Slice {
+		if xi < min {
+			min = xi
+		}
+	}
+	return min
+}
+
+func maxAF(x *AF) float64 {
+	max := math.Inf(-1)
+	if x.Len() == 0 {
+		return max
+	}
+	for _, xi := range x.Slice {
+		if xi > max {
+			max = xi
+		}
+	}
+	return max
+}
+
+func minAF(x *AF) float64 {
+	min := math.Inf(1)
+	if x.Len() == 0 {
+		return min
+	}
+	for _, xi := range x.Slice {
+		if xi < min {
+			min = xi
+		}
+	}
+	return min
+}
+
 func isStar(x V) bool {
 	return x.kind == valVariadic && x.variadic() == vMultiply
 }
@@ -126,7 +195,7 @@ func toIndices(x V) V {
 	if isIndices(x) {
 		return x
 	}
-	return Canonical(toIndicesRec(x))
+	return CanonicalRec(toIndicesRec(x))
 }
 
 func toIndicesRec(x V) V {
@@ -401,75 +470,6 @@ func isBF(x float64) bool {
 	return x == 0 || x == 1
 }
 
-func minMax(x *AI) (min, max int64) {
-	if x.Len() == 0 {
-		return
-	}
-	min = x.At(0)
-	max = min
-	for _, xi := range x.Slice[1:] {
-		switch {
-		case xi > max:
-			max = xi
-		case xi < min:
-			min = xi
-		}
-	}
-	return
-}
-
-func maxAI(x *AI) int64 {
-	max := int64(math.MinInt64)
-	if x.Len() == 0 {
-		return max
-	}
-	for _, xi := range x.Slice {
-		if xi > max {
-			max = xi
-		}
-	}
-	return max
-}
-
-func minAI(x *AI) int64 {
-	min := int64(math.MaxInt64)
-	if x.Len() == 0 {
-		return min
-	}
-	for _, xi := range x.Slice {
-		if xi < min {
-			min = xi
-		}
-	}
-	return min
-}
-
-func maxAF(x *AF) float64 {
-	max := math.Inf(-1)
-	if x.Len() == 0 {
-		return max
-	}
-	for _, xi := range x.Slice {
-		if xi > max {
-			max = xi
-		}
-	}
-	return max
-}
-
-func minAF(x *AF) float64 {
-	min := math.Inf(1)
-	if x.Len() == 0 {
-		return min
-	}
-	for _, xi := range x.Slice {
-		if xi < min {
-			min = xi
-		}
-	}
-	return min
-}
-
 func isCanonical(x V) bool {
 	switch xv := x.value.(type) {
 	case *AV:
@@ -509,9 +509,9 @@ func (ctx *Context) assertCanonical(x V) {
 	}
 }
 
-// normalize returns a canonical form of an AV array. It returns true if a
+// normalizeRec returns a canonical form of an AV array. It returns true if a
 // shallow clone was made.
-func normalize(x *AV) (array, bool) {
+func normalizeRec(x *AV) (array, bool) {
 	t := aType(x)
 	switch t {
 	case tB:
@@ -544,7 +544,7 @@ func normalize(x *AV) (array, bool) {
 		return &AS{Slice: r, rc: x.rc}, true
 	case tV, tAV:
 		for i, xi := range x.Slice {
-			x.Slice[i] = Canonical(xi)
+			x.Slice[i] = CanonicalRec(xi)
 		}
 		return x, false
 	default:
@@ -552,17 +552,75 @@ func normalize(x *AV) (array, bool) {
 	}
 }
 
-// canonicalAV returns the canonicalAV form of a given generic array.
+// normalize returns a canonical form of an AV array, assuming it's
+// elements themselves are canonical. It returns true if a shallow clone was
+// made.
+func normalize(x *AV) (array, bool) {
+	t := aType(x)
+	switch t {
+	case tB:
+		r := make([]bool, x.Len())
+		for i, xi := range x.Slice {
+			r[i] = xi.I() != 0
+		}
+		return &AB{Slice: r, rc: x.rc}, true
+	case tI:
+		r := make([]int64, x.Len())
+		for i, xi := range x.Slice {
+			r[i] = xi.I()
+		}
+		return &AI{Slice: r, rc: x.rc}, true
+	case tF:
+		r := make([]float64, x.Len())
+		for i, xi := range x.Slice {
+			if xi.IsI() {
+				r[i] = float64(xi.I())
+			} else {
+				r[i] = float64(xi.F())
+			}
+		}
+		return &AF{Slice: r, rc: x.rc}, true
+	case tS:
+		r := make([]string, x.Len())
+		for i, xi := range x.Slice {
+			r[i] = string(xi.value.(S))
+		}
+		return &AS{Slice: r, rc: x.rc}, true
+	default:
+		return x, false
+	}
+}
+
+// canonicalAV returns the canonical form of a given generic array.
 func canonicalAV(x *AV) Value {
-	r, _ := normalize(x)
+	r, _ := normalizeRec(x)
 	return r
 }
 
-// Canonical returns the canonical form of a given value, that is the most
+// CanonicalRec returns the canonical form of a given value, that is the most
 // specialized form. In practice, if the value is a generic array, but a more
 // specialized version could represent the value, it returns the specialized
 // value. All goal variadic functions have to return results in canonical
 // form, so this function can be used to ensure that.
+func CanonicalRec(x V) V {
+	switch xv := x.value.(type) {
+	case *AV:
+		r, b := normalizeRec(xv)
+		if b {
+			x.value = r
+		}
+		return x
+	default:
+		return x
+	}
+}
+
+// Canonical returns the canonical form of a given value, that is the
+// most specialized form, assuming it's already canonical at depth > 1. In
+// practice, if the value is a generic array, but a more specialized version
+// could represent the value, it returns the specialized value. All goal
+// variadic functions have to return results in canonical form, so this
+// function can be used to ensure that.
 func Canonical(x V) V {
 	switch xv := x.value.(type) {
 	case *AV:

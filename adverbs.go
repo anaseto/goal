@@ -266,7 +266,7 @@ func foldSeedfy(ctx *Context, f, x, y V) V {
 		}
 		f.DecrRC()
 		ctx.drop()
-		return Canonical(r)
+		return r
 	default:
 		ctx.push(y)
 		ctx.push(x)

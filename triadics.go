@@ -304,7 +304,7 @@ func amendrAIatomMut(x array, yv *AI, z V) {
 		}
 	case *AV:
 		for _, yi := range yv.Slice {
-			xv.Slice[yi] = z
+			xv.Slice[yi] = z.CloneWithRC(xv.rc)
 		}
 	}
 }
@@ -334,7 +334,7 @@ func amendrAIarrayMut(x array, yv *AI, za array) {
 	case *AV:
 		zv := za.(*AV)
 		for i, yi := range yv.Slice {
-			xv.Slice[yi] = zv.Slice[i]
+			xv.Slice[yi] = zv.Slice[i].CloneWithRC(xv.rc)
 		}
 	}
 }
@@ -367,7 +367,7 @@ func amendrAV(x array, yv *AV, z V) (array, error) {
 
 // set changes x at i with y (in place).
 func (x *AV) set(i int, y V) {
-	x.Slice[i] = y
+	x.Slice[i] = y.CloneWithRC(x.rc)
 }
 
 // set changes x at i with y (in place).
@@ -415,7 +415,7 @@ func (ctx *Context) deepAmend3(x, y, f V) V {
 		if err != nil {
 			return Panicf(".[x;y;f] : %v", err)
 		}
-		return Canonical(NewV(x))
+		return CanonicalRec(NewV(x))
 	default:
 		return panicType(".[x;y;f]", "x", x)
 	}
@@ -485,7 +485,7 @@ func (ctx *Context) deepAmend4(x, y, f, z V) V {
 		if err != nil {
 			return Panicf(".[x;y;f] : %v", err)
 		}
-		return Canonical(NewV(x))
+		return CanonicalRec(NewV(x))
 	default:
 		return panicType(".[x;y;f]", "x", x)
 	}

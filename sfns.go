@@ -253,7 +253,7 @@ func cutAI(x *AI, y V) V {
 			}
 			r[i] = NewAV(yv.Slice[from:to])
 		}
-		return Canonical(NewAV(r))
+		return CanonicalRec(NewAV(r))
 	default:
 		return Panicf("x_y : y not an array (%s)", y.Type())
 	}
