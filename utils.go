@@ -235,16 +235,9 @@ func toIndicesRec(x V) V {
 // toArray converts atoms into 1-length arrays. It returns arrays as-is.
 func toArray(x V) V {
 	if x.IsI() {
-		switch x.I() {
-		case 0, 1:
-			var n int
-			r := &AB{Slice: []bool{x.I() == 1}, rc: &n}
-			return NewV(r)
-		default:
-			var n int
-			r := &AI{Slice: []int64{x.I()}, rc: &n}
-			return NewV(r)
-		}
+		var n int
+		r := &AI{Slice: []int64{x.I()}, rc: &n}
+		return NewV(r)
 	}
 	if x.IsF() {
 		var n int
