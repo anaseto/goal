@@ -237,29 +237,29 @@ func toArray(x V) V {
 	if x.IsI() {
 		switch x.I() {
 		case 0, 1:
-			var n int32
+			var n int
 			r := &AB{Slice: []bool{x.I() == 1}, rc: &n}
 			return NewV(r)
 		default:
-			var n int32
+			var n int
 			r := &AI{Slice: []int64{x.I()}, rc: &n}
 			return NewV(r)
 		}
 	}
 	if x.IsF() {
-		var n int32
+		var n int
 		r := &AF{Slice: []float64{float64(x.F())}, rc: &n}
 		return NewV(r)
 	}
 	switch xv := x.value.(type) {
 	case S:
-		var n int32
+		var n int
 		r := &AS{Slice: []string{string(xv)}, rc: &n}
 		return NewV(r)
 	case array:
 		return x
 	default:
-		var n int32
+		var n int
 		r := &AV{Slice: []V{x}, rc: &n}
 		return NewV(r)
 	}

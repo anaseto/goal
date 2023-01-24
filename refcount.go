@@ -28,13 +28,13 @@ type RefCounter interface {
 	// InitWithRC recursively sets the refcount pointer for reusable
 	// values, and increments by 2 the refcount of non-reusable values, to
 	// ensure immutability of non-reusable children without cloning them.
-	InitWithRC(rc *int32)
+	InitWithRC(rc *int)
 
 	// CloneWithRC returns a clone of the value, with rc as new refcount
 	// pointer.  If the current value's current refcount pointer is nil or
 	// equal to the passed one, the same value is returned after updating
 	// the refcount pointer as needed, instead of doing a full clone.
-	CloneWithRC(rc *int32) Value
+	CloneWithRC(rc *int) Value
 }
 
 // RefCountHolder is a RefCounter that has a root refcount pointer.
@@ -42,7 +42,7 @@ type RefCountHolder interface {
 	RefCounter
 
 	// RC returns the value's root reference count pointer.
-	RC() *int32
+	RC() *int
 }
 
 // HasRC returns true if the value is boxed and implements RefCounter.
@@ -84,29 +84,29 @@ func (x V) rcdecrRefCounter() {
 }
 
 // RC returns the array's reference count pointer.
-func (x *AB) RC() *int32 { return x.rc }
+func (x *AB) RC() *int { return x.rc }
 
 // RC returns the array's reference count pointer.
-func (x *AI) RC() *int32 { return x.rc }
+func (x *AI) RC() *int { return x.rc }
 
 // RC returns the array's reference count pointer.
-func (x *AF) RC() *int32 { return x.rc }
+func (x *AF) RC() *int { return x.rc }
 
 // RC returns the array's reference count pointer.
-func (x *AS) RC() *int32 { return x.rc }
+func (x *AS) RC() *int { return x.rc }
 
 // RC returns the array's reference count pointer.
-func (x *AV) RC() *int32 { return x.rc }
+func (x *AV) RC() *int { return x.rc }
 
-func reuseRCp(p *int32) *int32 {
+func reuseRCp(p *int) *int {
 	if !reusableRCp(p) {
-		var n int32
+		var n int
 		p = &n
 	}
 	return p
 }
 
-func reusableRCp(p *int32) bool {
+func reusableRCp(p *int) bool {
 	if p == nil {
 		return true
 	}
@@ -158,22 +158,22 @@ func (x *AV) reuse() *AV {
 	return &AV{Slice: make([]V, x.Len())}
 }
 
-func zeroRCp(p *int32) {
+func zeroRCp(p *int) {
 	if p != nil {
 		*p = 0
 	}
 }
 
-func incrRCp(p **int32) {
+func incrRCp(p **int) {
 	if *p == nil {
-		var rc int32 = 1
+		var rc int = 1
 		*p = &rc
 		return
 	}
 	**p++
 }
 
-func decrRCp(p *int32) {
+func decrRCp(p *int) {
 	if p != nil && *p > 0 {
 		*p--
 	}
@@ -241,13 +241,13 @@ func (x V) InitRC() {
 	}
 	xrch, ok := x.value.(RefCountHolder)
 	if ok && xrch.RC() == nil {
-		var n int32
+		var n int
 		xrch.InitWithRC(&n)
 	}
 }
 
 // InitWithRC calls the method of the same name on boxed values.
-func (x V) InitWithRC(rc *int32) {
+func (x V) InitWithRC(rc *int) {
 	if x.kind != valBoxed {
 		return
 	}
@@ -257,11 +257,11 @@ func (x V) InitWithRC(rc *int32) {
 	}
 }
 
-func (e *errV) InitWithRC(rc *int32) {
+func (e *errV) InitWithRC(rc *int) {
 	e.V.InitWithRC(rc)
 }
 
-func (x *AB) InitWithRC(rc *int32) {
+func (x *AB) InitWithRC(rc *int) {
 	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
 		x.rc = rc
 		return
@@ -269,7 +269,7 @@ func (x *AB) InitWithRC(rc *int32) {
 	*x.rc += 2
 }
 
-func (x *AI) InitWithRC(rc *int32) {
+func (x *AI) InitWithRC(rc *int) {
 	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
 		x.rc = rc
 		return
@@ -277,7 +277,7 @@ func (x *AI) InitWithRC(rc *int32) {
 	*x.rc += 2
 }
 
-func (x *AF) InitWithRC(rc *int32) {
+func (x *AF) InitWithRC(rc *int) {
 	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
 		x.rc = rc
 		return
@@ -285,7 +285,7 @@ func (x *AF) InitWithRC(rc *int32) {
 	*x.rc += 2
 }
 
-func (x *AS) InitWithRC(rc *int32) {
+func (x *AS) InitWithRC(rc *int) {
 	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
 		x.rc = rc
 		return
@@ -293,7 +293,7 @@ func (x *AS) InitWithRC(rc *int32) {
 	*x.rc += 2
 }
 
-func (x *AV) InitWithRC(rc *int32) {
+func (x *AV) InitWithRC(rc *int) {
 	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
 		x.rc = rc
 		for _, xi := range x.Slice {
@@ -304,27 +304,27 @@ func (x *AV) InitWithRC(rc *int32) {
 	*x.rc += 2
 }
 
-func (p *projection) InitWithRC(rc *int32) {
+func (p *projection) InitWithRC(rc *int) {
 	p.Fun.InitWithRC(rc)
 	for _, arg := range p.Args {
 		arg.InitWithRC(rc)
 	}
 }
 
-func (p *projectionFirst) InitWithRC(rc *int32) {
+func (p *projectionFirst) InitWithRC(rc *int) {
 	p.Fun.InitWithRC(rc)
 	p.Arg.InitWithRC(rc)
 }
 
-func (p *projectionMonad) InitWithRC(rc *int32) {
+func (p *projectionMonad) InitWithRC(rc *int) {
 	p.Fun.InitWithRC(rc)
 }
 
-func (r *derivedVerb) InitWithRC(rc *int32) {
+func (r *derivedVerb) InitWithRC(rc *int) {
 	r.Arg.InitWithRC(rc)
 }
 
-func (r *replacer) InitWithRC(rc *int32) {
+func (r *replacer) InitWithRC(rc *int) {
 	if r.oldnew.rc == nil || *r.oldnew.rc <= 1 || r.oldnew.rc == rc {
 		r.oldnew.rc = rc
 		return
@@ -332,7 +332,7 @@ func (r *replacer) InitWithRC(rc *int32) {
 	*r.oldnew.rc += 2
 }
 
-func (r *rxReplacer) InitWithRC(rc *int32) {
+func (r *rxReplacer) InitWithRC(rc *int) {
 	r.repl.InitWithRC(rc)
 }
 
@@ -347,14 +347,14 @@ func wellformedRC(x V) bool {
 	}
 }
 
-func getRC(rc *int32) int32 {
+func getRC(rc *int) int {
 	if rc != nil {
 		return *rc
 	}
 	return 0
 }
 
-func sharesRC(x V, rc *int32) bool {
+func sharesRC(x V, rc *int) bool {
 	switch xv := x.value.(type) {
 	case *AV:
 		if xv.RC() != rc {

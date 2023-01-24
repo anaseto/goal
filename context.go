@@ -82,7 +82,7 @@ func NewContext() *Context {
 	ctx.gIDs = map[string]int{}
 	ctx.stack = make([]V, 0, 32)
 	ctx.sources = map[string]string{}
-	var n int32 = 2
+	var n int = 2
 	ctx.constants = []V{constAV: NewV(&AV{Slice: nil, rc: &n})}
 	ctx.rand = rand.New(rand.NewSource(1))
 	ctx.initVariadics()

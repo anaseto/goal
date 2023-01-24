@@ -268,7 +268,7 @@ func (f flags) Has(ff flags) bool {
 
 // AB represents an array of booleans.
 type AB struct {
-	rc    *int32
+	rc    *int
 	flags flags
 	Slice []bool
 }
@@ -280,7 +280,7 @@ func NewAB(x []bool) V {
 
 // AI represents an array of integers.
 type AI struct {
-	rc    *int32
+	rc    *int
 	flags flags
 	Slice []int64
 }
@@ -292,7 +292,7 @@ func NewAI(x []int64) V {
 
 // AF represents an array of reals.
 type AF struct {
-	rc    *int32
+	rc    *int
 	flags flags
 	Slice []float64
 }
@@ -304,7 +304,7 @@ func NewAF(x []float64) V {
 
 // AS represents an array of strings.
 type AS struct {
-	rc    *int32
+	rc    *int
 	flags flags
 	Slice []string // string array
 }
@@ -316,7 +316,7 @@ func NewAS(x []string) V {
 
 // AV represents a generic array.
 type AV struct {
-	rc    *int32
+	rc    *int
 	flags flags
 	Slice []V
 }
@@ -421,7 +421,7 @@ func (x *AB) shallowClone() array {
 		x.setFlags(flagNone)
 		return x
 	}
-	var n int32
+	var n int
 	r := &AB{Slice: make([]bool, x.Len()), rc: &n}
 	copy(r.Slice, x.Slice)
 	return r
@@ -432,7 +432,7 @@ func (x *AI) shallowClone() array {
 		x.setFlags(flagNone)
 		return x
 	}
-	var n int32
+	var n int
 	r := &AI{Slice: make([]int64, x.Len()), rc: &n}
 	copy(r.Slice, x.Slice)
 	return r
@@ -443,7 +443,7 @@ func (x *AF) shallowClone() array {
 		x.setFlags(flagNone)
 		return x
 	}
-	var n int32
+	var n int
 	r := &AF{Slice: make([]float64, x.Len()), rc: &n}
 	copy(r.Slice, x.Slice)
 	return r
@@ -454,7 +454,7 @@ func (x *AS) shallowClone() array {
 		x.setFlags(flagNone)
 		return x
 	}
-	var n int32
+	var n int
 	r := &AS{Slice: make([]string, x.Len()), rc: &n}
 	copy(r.Slice, x.Slice)
 	return r
@@ -465,7 +465,7 @@ func (x *AV) shallowClone() array {
 		x.setFlags(flagNone)
 		return x
 	}
-	var n int32
+	var n int
 	r := &AV{Slice: make([]V, x.Len()), rc: &n}
 	copy(r.Slice, x.Slice)
 	return r
