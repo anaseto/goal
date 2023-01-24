@@ -350,15 +350,10 @@ const (
 	tAV vType = 0b10000
 )
 
-// getType returns the vType of x.
-func getType(x V) vType {
+// getTypeForArray returns the vType of x (without tB).
+func getTypeForArray(x V) vType {
 	if x.IsI() {
-		switch x.I() {
-		case 0, 1:
-			return tB
-		default:
-			return tI
-		}
+		return tI
 	}
 	if x.IsF() {
 		return tF
@@ -390,13 +385,44 @@ func aType(x *AV) vType {
 	}
 	t := getType(x.Slice[0])
 	for i := 1; i < x.Len(); i++ {
-		s := getType(x.At(i))
+		s := getTypeForArray(x.At(i))
 		if t&tAV != s&tAV {
 			return tV
 		}
 		t &= s
 	}
 	return t
+}
+
+// getType returns the vType of x.
+func getType(x V) vType {
+	if x.IsI() {
+		switch x.I() {
+		case 0, 1:
+			return tB
+		default:
+			return tI
+		}
+	}
+	if x.IsF() {
+		return tF
+	}
+	switch x.value.(type) {
+	case S:
+		return tS
+	case *AB:
+		return tAB
+	case *AF:
+		return tAF
+	case *AI:
+		return tAI
+	case *AS:
+		return tAS
+	case *AV:
+		return tAV
+	default:
+		return tV
+	}
 }
 
 // eType returns the most specific element type common to the the elements of a
@@ -470,7 +496,7 @@ func isCanonical(x V) bool {
 func isCanonicalAV(x *AV) (vType, bool) {
 	t := aType(x)
 	switch t {
-	case tB, tI, tF, tS:
+	case tI, tF, tS:
 		return t, false
 	case tV, tAV:
 		for _, xi := range x.Slice {
@@ -499,12 +525,6 @@ func (ctx *Context) assertCanonical(x V) {
 func normalizeRec(x *AV) (array, bool) {
 	t := aType(x)
 	switch t {
-	case tB:
-		r := make([]bool, x.Len())
-		for i, xi := range x.Slice {
-			r[i] = xi.I() != 0
-		}
-		return &AB{Slice: r, rc: x.rc}, true
 	case tI:
 		r := make([]int64, x.Len())
 		for i, xi := range x.Slice {
@@ -543,12 +563,6 @@ func normalizeRec(x *AV) (array, bool) {
 func normalize(x *AV) (array, bool) {
 	t := aType(x)
 	switch t {
-	case tB:
-		r := make([]bool, x.Len())
-		for i, xi := range x.Slice {
-			r[i] = xi.I() != 0
-		}
-		return &AB{Slice: r, rc: reuseRCp(x.rc)}, true
 	case tI:
 		r := make([]int64, x.Len())
 		for i, xi := range x.Slice {
