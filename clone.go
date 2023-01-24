@@ -10,7 +10,7 @@ func (x V) Clone() V {
 	switch xv := x.value.(type) {
 	case RefCountHolder:
 		p = xv.RC()
-		if !reuseRCp(p) {
+		if !reusableRCp(p) {
 			var n int32
 			p = &n
 		}

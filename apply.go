@@ -476,14 +476,7 @@ func (x *AV) atIndices(y []int64) V {
 		r[i] = x.At(int(yi))
 	}
 	nr := &AV{Slice: r}
-	var rc *int32
-	if reuseRCp(x.rc) {
-		rc = x.rc
-	} else {
-		var n int32
-		rc = &n
-	}
-	nr.InitWithRC(rc)
+	nr.InitWithRC(reuseRCp(x.rc))
 	return NewV(canonicalAV(nr))
 }
 
@@ -499,14 +492,7 @@ func (x *AB) atIndices(y []int64) V {
 		}
 		r[i] = x.At(int(yi))
 	}
-	var rc *int32
-	if reuseRCp(x.rc) {
-		rc = x.rc
-	} else {
-		var n int32
-		rc = &n
-	}
-	return NewV(&AB{Slice: r, rc: rc})
+	return NewV(&AB{Slice: r, rc: reuseRCp(x.rc)})
 }
 
 func (x *AI) atIndices(y []int64) V {
@@ -521,14 +507,7 @@ func (x *AI) atIndices(y []int64) V {
 		}
 		r[i] = x.At(int(yi))
 	}
-	var rc *int32
-	if reuseRCp(x.rc) {
-		rc = x.rc
-	} else {
-		var n int32
-		rc = &n
-	}
-	return NewV(&AI{Slice: r, rc: rc})
+	return NewV(&AI{Slice: r, rc: reuseRCp(x.rc)})
 }
 
 func (x *AF) atIndices(y []int64) V {
@@ -543,14 +522,7 @@ func (x *AF) atIndices(y []int64) V {
 		}
 		r[i] = x.At(int(yi))
 	}
-	var rc *int32
-	if reuseRCp(x.rc) {
-		rc = x.rc
-	} else {
-		var n int32
-		rc = &n
-	}
-	return NewV(&AF{Slice: r, rc: rc})
+	return NewV(&AF{Slice: r, rc: reuseRCp(x.rc)})
 }
 
 func (x *AS) atIndices(y []int64) V {
@@ -565,14 +537,7 @@ func (x *AS) atIndices(y []int64) V {
 		}
 		r[i] = x.At(int(yi))
 	}
-	var rc *int32
-	if reuseRCp(x.rc) {
-		rc = x.rc
-	} else {
-		var n int32
-		rc = &n
-	}
-	return NewV(&AS{Slice: r, rc: rc})
+	return NewV(&AS{Slice: r, rc: reuseRCp(x.rc)})
 }
 
 func (r *nReplacer) applyN(ctx *Context, n int) V {

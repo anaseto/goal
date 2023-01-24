@@ -98,7 +98,15 @@ func (x *AS) RC() *int32 { return x.rc }
 // RC returns the array's reference count pointer.
 func (x *AV) RC() *int32 { return x.rc }
 
-func reuseRCp(p *int32) bool {
+func reuseRCp(p *int32) *int32 {
+	if !reusableRCp(p) {
+		var n int32
+		p = &n
+	}
+	return p
+}
+
+func reusableRCp(p *int32) bool {
 	if p == nil {
 		return true
 	}
@@ -110,7 +118,7 @@ func reuseRCp(p *int32) bool {
 }
 
 func (x *AB) reuse() *AB {
-	if reuseRCp(x.rc) {
+	if reusableRCp(x.rc) {
 		x.flags = flagNone
 		return x
 	}
@@ -118,7 +126,7 @@ func (x *AB) reuse() *AB {
 }
 
 func (x *AI) reuse() *AI {
-	if reuseRCp(x.rc) {
+	if reusableRCp(x.rc) {
 		x.flags = flagNone
 		return x
 	}
@@ -126,7 +134,7 @@ func (x *AI) reuse() *AI {
 }
 
 func (x *AF) reuse() *AF {
-	if reuseRCp(x.rc) {
+	if reusableRCp(x.rc) {
 		x.flags = flagNone
 		return x
 	}
@@ -134,7 +142,7 @@ func (x *AF) reuse() *AF {
 }
 
 func (x *AS) reuse() *AS {
-	if reuseRCp(x.rc) {
+	if reusableRCp(x.rc) {
 		x.flags = flagNone
 		return x
 	}
@@ -142,7 +150,7 @@ func (x *AS) reuse() *AS {
 }
 
 func (x *AV) reuse() *AV {
-	if reuseRCp(x.rc) {
+	if reusableRCp(x.rc) {
 		x.flags = flagNone
 		x.rc = nil // NOTE: not always necessary, maybe use two functions
 		return x

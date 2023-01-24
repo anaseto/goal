@@ -555,27 +555,13 @@ func normalize(x *AV) (array, bool) {
 		for i, xi := range x.Slice {
 			r[i] = xi.I() != 0
 		}
-		var rc *int32
-		if reuseRCp(x.rc) {
-			rc = x.rc
-		} else {
-			var n int32
-			rc = &n
-		}
-		return &AB{Slice: r, rc: rc}, true
+		return &AB{Slice: r, rc: reuseRCp(x.rc)}, true
 	case tI:
 		r := make([]int64, x.Len())
 		for i, xi := range x.Slice {
 			r[i] = xi.I()
 		}
-		var rc *int32
-		if reuseRCp(x.rc) {
-			rc = x.rc
-		} else {
-			var n int32
-			rc = &n
-		}
-		return &AI{Slice: r, rc: rc}, true
+		return &AI{Slice: r, rc: reuseRCp(x.rc)}, true
 	case tF:
 		r := make([]float64, x.Len())
 		for i, xi := range x.Slice {
@@ -585,27 +571,13 @@ func normalize(x *AV) (array, bool) {
 				r[i] = float64(xi.F())
 			}
 		}
-		var rc *int32
-		if reuseRCp(x.rc) {
-			rc = x.rc
-		} else {
-			var n int32
-			rc = &n
-		}
-		return &AF{Slice: r, rc: rc}, true
+		return &AF{Slice: r, rc: reuseRCp(x.rc)}, true
 	case tS:
 		r := make([]string, x.Len())
 		for i, xi := range x.Slice {
 			r[i] = string(xi.value.(S))
 		}
-		var rc *int32
-		if reuseRCp(x.rc) {
-			rc = x.rc
-		} else {
-			var n int32
-			rc = &n
-		}
-		return &AS{Slice: r, rc: rc}, true
+		return &AS{Slice: r, rc: reuseRCp(x.rc)}, true
 	default:
 		return x, false
 	}

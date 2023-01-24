@@ -417,7 +417,7 @@ func (x *AS) slice(i, j int) array { return &AS{rc: x.rc, flags: x.flags, Slice:
 func (x *AV) slice(i, j int) array { return &AV{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
 
 func (x *AB) shallowClone() array {
-	if reuseRCp(x.rc) {
+	if reusableRCp(x.rc) {
 		x.setFlags(flagNone)
 		return x
 	}
@@ -428,7 +428,7 @@ func (x *AB) shallowClone() array {
 }
 
 func (x *AI) shallowClone() array {
-	if reuseRCp(x.rc) {
+	if reusableRCp(x.rc) {
 		x.setFlags(flagNone)
 		return x
 	}
@@ -439,7 +439,7 @@ func (x *AI) shallowClone() array {
 }
 
 func (x *AF) shallowClone() array {
-	if reuseRCp(x.rc) {
+	if reusableRCp(x.rc) {
 		x.setFlags(flagNone)
 		return x
 	}
@@ -450,7 +450,7 @@ func (x *AF) shallowClone() array {
 }
 
 func (x *AS) shallowClone() array {
-	if reuseRCp(x.rc) {
+	if reusableRCp(x.rc) {
 		x.setFlags(flagNone)
 		return x
 	}
@@ -461,7 +461,7 @@ func (x *AS) shallowClone() array {
 }
 
 func (x *AV) shallowClone() array {
-	if reuseRCp(x.rc) {
+	if reusableRCp(x.rc) {
 		x.setFlags(flagNone)
 		return x
 	}
