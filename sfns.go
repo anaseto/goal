@@ -643,14 +643,16 @@ func shiftArrayBeforeArray(xv, yv array) V {
 	ylen := yv.Len()
 	max := minInt(xv.Len(), ylen)
 	r := make([]V, ylen)
+	rc := yv.RC()
 	for i := max; i < ylen; i++ {
 		r[i] = yv.at(i - max)
 	}
 	for i := 0; i < max; i++ {
-		r[i] = xv.at(i)
+		xi := xv.at(i)
+		xi.InitWithRC(rc)
+		r[i] = xi
 	}
-	ra := &AV{Slice: r}
-	ra.InitWithRC(yv.RC())
+	ra := &AV{Slice: r, rc: rc}
 	return NewV(ra)
 }
 

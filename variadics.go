@@ -484,9 +484,9 @@ func VList(ctx *Context, args []V) V {
 		reverseMut(r)
 		return r
 	}
-	r := cloneArgs(args)
-	reverseArgs(r)
-	return NewAV(r)
+	xav.Slice = cloneArgs(args)
+	reverseArgs(xav.Slice)
+	return NewV(xav)
 }
 
 // VEach implements the ' variadic adverb.
