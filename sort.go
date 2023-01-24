@@ -447,8 +447,12 @@ func lessAV(x V, y V) bool {
 
 // sortUp returns ^x.
 func sortUp(x V) V {
-	x = x.Clone()
-	switch xv := x.value.(type) {
+	xa, ok := x.value.(array)
+	if !ok {
+		return Panicf("^x : x not an array (%s)", x.Type())
+	}
+	xa = xa.shallowClone()
+	switch xv := xa.(type) {
 	case *AB:
 		sort.Sort(sortAB(xv.Slice))
 		xv.flags |= flagAscending
@@ -470,7 +474,7 @@ func sortUp(x V) V {
 		xv.flags |= flagAscending
 		return NewV(xv)
 	default:
-		return Panicf("^x : x not an array (%s)", x.Type())
+		panic("sortUp")
 	}
 }
 

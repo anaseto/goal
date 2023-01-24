@@ -8,7 +8,7 @@ func (x V) Clone() V {
 	}
 	var p *int32
 	switch xv := x.value.(type) {
-	case array:
+	case RefCountHolder:
 		p = xv.RC()
 		if !reuseRCp(p) {
 			var n int32
@@ -21,23 +21,22 @@ func (x V) Clone() V {
 	return x.CloneWithRC(p)
 }
 
-func (v V) CloneWithRC(rc *int32) V {
-	if v.kind != valBoxed {
-		return v
+func (x V) CloneWithRC(rc *int32) V {
+	if x.kind != valBoxed {
+		return x
 	}
-	return NewV(v.value.CloneWithRC(rc))
-}
-
-func (s S) CloneWithRC(rc *int32) Value {
-	return s
-}
-
-func (e panicV) CloneWithRC(rc *int32) Value {
-	return e
+	xc, ok := x.value.(RefCounter)
+	if ok {
+		return NewV(xc.CloneWithRC(rc))
+	}
+	return x
 }
 
 func (e *errV) CloneWithRC(rc *int32) Value {
-	return &errV{V: e.V.CloneWithRC(rc)}
+	if e.V.HasRC() {
+		return &errV{V: e.V.CloneWithRC(rc)}
+	}
+	return e
 }
 
 func (x *AB) CloneWithRC(rc *int32) Value {
@@ -129,10 +128,6 @@ func (r *derivedVerb) CloneWithRC(rc *int32) Value {
 	return r
 }
 
-func (r *nReplacer) CloneWithRC(rc *int32) Value {
-	return r
-}
-
 func (r *replacer) CloneWithRC(rc *int32) Value {
 	if r.oldnew.rc == nil || *r.oldnew.rc <= 1 || r.oldnew.rc == rc {
 		r.oldnew.rc = rc
@@ -141,10 +136,6 @@ func (r *replacer) CloneWithRC(rc *int32) Value {
 	olnew := &AS{Slice: make([]string, r.oldnew.Len()), rc: rc}
 	copy(olnew.Slice, r.oldnew.Slice)
 	return &replacer{r: r.r, oldnew: olnew}
-}
-
-func (r *rx) CloneWithRC(rc *int32) Value {
-	return r
 }
 
 func (r *rxReplacer) CloneWithRC(rc *int32) Value {

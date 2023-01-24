@@ -271,7 +271,7 @@ func BenchmarkDosAtDef(b *testing.B) {
 	ctx := NewContext()
 	ctx.Eval("a:!10000")
 	for n := 0; n < b.N; n++ {
-		ctx.Eval("100 {x[2]+:1}/a")
+		ctx.Eval("100 {x[2]+:1;x}/a")
 	}
 }
 
@@ -279,7 +279,7 @@ func BenchmarkDosAtDefAV(b *testing.B) {
 	ctx := NewContext()
 	ctx.Eval(`a:(!10000),"a"`)
 	for n := 0; n < b.N; n++ {
-		ctx.Eval("100 {x[2]+:1}/a")
+		ctx.Eval("100 {x[2]+:1;x}/a")
 	}
 }
 

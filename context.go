@@ -132,6 +132,7 @@ func (ctx *Context) RegisterDyad(name string, vf VariadicFun) V {
 // AssignGlobal assigns a value to a global variable name.
 func (ctx *Context) AssignGlobal(name string, x V) {
 	id := ctx.global(name)
+	x.InitRC()
 	x.IncrRC()
 	ctx.globals[id] = x
 }

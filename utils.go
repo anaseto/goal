@@ -555,13 +555,27 @@ func normalize(x *AV) (array, bool) {
 		for i, xi := range x.Slice {
 			r[i] = xi.I() != 0
 		}
-		return &AB{Slice: r, rc: x.rc}, true
+		var rc *int32
+		if reuseRCp(x.rc) {
+			rc = x.rc
+		} else {
+			var n int32
+			rc = &n
+		}
+		return &AB{Slice: r, rc: rc}, true
 	case tI:
 		r := make([]int64, x.Len())
 		for i, xi := range x.Slice {
 			r[i] = xi.I()
 		}
-		return &AI{Slice: r, rc: x.rc}, true
+		var rc *int32
+		if reuseRCp(x.rc) {
+			rc = x.rc
+		} else {
+			var n int32
+			rc = &n
+		}
+		return &AI{Slice: r, rc: rc}, true
 	case tF:
 		r := make([]float64, x.Len())
 		for i, xi := range x.Slice {
@@ -571,22 +585,30 @@ func normalize(x *AV) (array, bool) {
 				r[i] = float64(xi.F())
 			}
 		}
-		return &AF{Slice: r, rc: x.rc}, true
+		var rc *int32
+		if reuseRCp(x.rc) {
+			rc = x.rc
+		} else {
+			var n int32
+			rc = &n
+		}
+		return &AF{Slice: r, rc: rc}, true
 	case tS:
 		r := make([]string, x.Len())
 		for i, xi := range x.Slice {
 			r[i] = string(xi.value.(S))
 		}
-		return &AS{Slice: r, rc: x.rc}, true
+		var rc *int32
+		if reuseRCp(x.rc) {
+			rc = x.rc
+		} else {
+			var n int32
+			rc = &n
+		}
+		return &AS{Slice: r, rc: rc}, true
 	default:
 		return x, false
 	}
-}
-
-// canonicalAV returns the canonical form of a given generic array.
-func canonicalAV(x *AV) Value {
-	r, _ := normalizeRec(x)
-	return r
 }
 
 // CanonicalRec returns the canonical form of a given value, that is the most
@@ -605,6 +627,12 @@ func CanonicalRec(x V) V {
 	default:
 		return x
 	}
+}
+
+// canonicalAV returns the canonical form of a given generic array.
+func canonicalAV(x *AV) Value {
+	r, _ := normalize(x)
+	return r
 }
 
 // Canonical returns the canonical form of a given value, that is the

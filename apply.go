@@ -417,7 +417,7 @@ func applyArray(x array, y V) V {
 				return r[i]
 			}
 		}
-		return Canonical(NewV(&AV{Slice: r, rc: x.RC()}))
+		return NewV(canonicalAV(&AV{Slice: r, rc: x.RC()}))
 	case array:
 		iy := toIndices(y)
 		if iy.IsPanic() {
@@ -475,7 +475,16 @@ func (x *AV) atIndices(y []int64) V {
 		}
 		r[i] = x.At(int(yi))
 	}
-	return Canonical(NewV(&AV{Slice: r, rc: x.rc}))
+	nr := &AV{Slice: r}
+	var rc *int32
+	if reuseRCp(x.rc) {
+		rc = x.rc
+	} else {
+		var n int32
+		rc = &n
+	}
+	nr.InitWithRC(rc)
+	return NewV(canonicalAV(nr))
 }
 
 func (x *AB) atIndices(y []int64) V {
@@ -490,7 +499,14 @@ func (x *AB) atIndices(y []int64) V {
 		}
 		r[i] = x.At(int(yi))
 	}
-	return NewV(&AB{Slice: r, rc: x.rc})
+	var rc *int32
+	if reuseRCp(x.rc) {
+		rc = x.rc
+	} else {
+		var n int32
+		rc = &n
+	}
+	return NewV(&AB{Slice: r, rc: rc})
 }
 
 func (x *AI) atIndices(y []int64) V {
@@ -505,7 +521,14 @@ func (x *AI) atIndices(y []int64) V {
 		}
 		r[i] = x.At(int(yi))
 	}
-	return NewV(&AI{Slice: r, rc: x.rc})
+	var rc *int32
+	if reuseRCp(x.rc) {
+		rc = x.rc
+	} else {
+		var n int32
+		rc = &n
+	}
+	return NewV(&AI{Slice: r, rc: rc})
 }
 
 func (x *AF) atIndices(y []int64) V {
@@ -520,7 +543,14 @@ func (x *AF) atIndices(y []int64) V {
 		}
 		r[i] = x.At(int(yi))
 	}
-	return NewV(&AF{Slice: r, rc: x.rc})
+	var rc *int32
+	if reuseRCp(x.rc) {
+		rc = x.rc
+	} else {
+		var n int32
+		rc = &n
+	}
+	return NewV(&AF{Slice: r, rc: rc})
 }
 
 func (x *AS) atIndices(y []int64) V {
@@ -535,7 +565,14 @@ func (x *AS) atIndices(y []int64) V {
 		}
 		r[i] = x.At(int(yi))
 	}
-	return NewV(&AS{Slice: r, rc: x.rc})
+	var rc *int32
+	if reuseRCp(x.rc) {
+		rc = x.rc
+	} else {
+		var n int32
+		rc = &n
+	}
+	return NewV(&AS{Slice: r, rc: rc})
 }
 
 func (r *nReplacer) applyN(ctx *Context, n int) V {

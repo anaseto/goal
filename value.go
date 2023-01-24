@@ -43,11 +43,6 @@ type Value interface {
 	Fprint(*Context, ValueWriter) (n int, err error)
 	// Type returns the name of the value's type.
 	Type() string
-	// CloneWithRC returns a clone of the value, with rc as new refcount
-	// pointer.  If the current value's current refcount pointer is nil or
-	// equal to the passed one, the same value is returned after updating
-	// the refcount pointer as needed, instead of doing a full clone.
-	CloneWithRC(rc *int32) Value
 }
 
 // newVariadic returns a new variadic value.
@@ -367,9 +362,7 @@ func (x *AV) Type() string { return "A" }
 // array interface is satisfied by the different kind of supported arrays.
 // Typical implementation is given in comments.
 type array interface {
-	Value
-	RefCounter
-	RC() *int32
+	RefCountHolder
 	Len() int
 	at(i int) V            // x[i]
 	slice(i, j int) array  // x[i:j]
@@ -377,6 +370,7 @@ type array interface {
 	set(i int, y V)
 	getFlags() flags
 	setFlags(flags)
+	shallowClone() array
 	//setIndices(y AI, z V) error
 }
 
@@ -421,6 +415,61 @@ func (x *AI) slice(i, j int) array { return &AI{rc: x.rc, flags: x.flags, Slice:
 func (x *AF) slice(i, j int) array { return &AF{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
 func (x *AS) slice(i, j int) array { return &AS{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
 func (x *AV) slice(i, j int) array { return &AV{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
+
+func (x *AB) shallowClone() array {
+	if reuseRCp(x.rc) {
+		x.setFlags(flagNone)
+		return x
+	}
+	var n int32
+	r := &AB{Slice: make([]bool, x.Len()), rc: &n}
+	copy(r.Slice, x.Slice)
+	return r
+}
+
+func (x *AI) shallowClone() array {
+	if reuseRCp(x.rc) {
+		x.setFlags(flagNone)
+		return x
+	}
+	var n int32
+	r := &AI{Slice: make([]int64, x.Len()), rc: &n}
+	copy(r.Slice, x.Slice)
+	return r
+}
+
+func (x *AF) shallowClone() array {
+	if reuseRCp(x.rc) {
+		x.setFlags(flagNone)
+		return x
+	}
+	var n int32
+	r := &AF{Slice: make([]float64, x.Len()), rc: &n}
+	copy(r.Slice, x.Slice)
+	return r
+}
+
+func (x *AS) shallowClone() array {
+	if reuseRCp(x.rc) {
+		x.setFlags(flagNone)
+		return x
+	}
+	var n int32
+	r := &AS{Slice: make([]string, x.Len()), rc: &n}
+	copy(r.Slice, x.Slice)
+	return r
+}
+
+func (x *AV) shallowClone() array {
+	if reuseRCp(x.rc) {
+		x.setFlags(flagNone)
+		return x
+	}
+	var n int32
+	r := &AV{Slice: make([]V, x.Len()), rc: &n}
+	copy(r.Slice, x.Slice)
+	return r
+}
 
 // derivedVerb represents values modified by an adverb. This kind value is not
 // manipulable within the program, as it is only produced as an intermediary

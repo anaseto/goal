@@ -7,9 +7,9 @@ import (
 
 // amend3 implements @[x;y;f].
 func (ctx *Context) amend3(x, y, f V) V {
-	x = x.Clone()
 	switch xv := x.value.(type) {
 	case array:
+		xv = xv.shallowClone()
 		y = toIndices(y)
 		if y.IsPanic() {
 			return ppanic("@[x;y;f] : y ", y)
@@ -33,8 +33,10 @@ func amendArrayAt(x array, y int, z V) array {
 	for i := range a {
 		a[i] = x.at(i)
 	}
-	a[y] = z.CloneWithRC(x.RC())
-	return &AV{Slice: a, rc: x.RC()}
+	rc := x.RC()
+	z.InitWithRC(rc)
+	a[y] = z
+	return &AV{Slice: a, rc: rc}
 }
 
 func (ctx *Context) amend3arrayI(x array, y int64, f V) (array, error) {
@@ -89,9 +91,9 @@ func (ctx *Context) amend3array(x array, y, f V) (array, error) {
 
 // amend4 implements @[x;y;f;z].
 func (ctx *Context) amend4(x, y, f, z V) V {
-	x = x.Clone()
 	switch xv := x.value.(type) {
 	case array:
+		xv = xv.shallowClone()
 		y = toIndices(y)
 		if y.IsPanic() {
 			return ppanic("@[x;y;f;z] : y ", y)
@@ -203,8 +205,10 @@ func amendr(x array, y, z V) (array, error) {
 		for i := range r {
 			r[i] = x.at(i)
 		}
-		r[y.I()] = z.CloneWithRC(x.RC())
-		return &AV{Slice: r, rc: x.RC()}, nil
+		rc := x.RC()
+		z.InitWithRC(rc)
+		r[y.I()] = z
+		return &AV{Slice: r, rc: rc}, nil
 	}
 	if isStar(y) {
 		y = rangeI(int64(x.Len()))
@@ -236,10 +240,12 @@ func amendrAI(x array, yv *AI, z V) (array, error) {
 		for i := range r {
 			r[i] = x.at(i)
 		}
+		rc := x.RC()
+		z.InitWithRC(rc)
 		for _, yi := range yv.Slice {
-			r[yi] = z.CloneWithRC(x.RC())
+			r[yi] = z
 		}
-		return &AV{Slice: r, rc: x.RC()}, nil
+		return &AV{Slice: r, rc: rc}, nil
 	}
 	if za.Len() != yv.Len() {
 		return x, fmt.Errorf("length mismatch between y and z (%d vs %d)",
@@ -303,8 +309,10 @@ func amendrAIatomMut(x array, yv *AI, z V) {
 			xv.Slice[yi] = zs
 		}
 	case *AV:
+		rc := x.RC()
+		z.InitWithRC(rc)
 		for _, yi := range yv.Slice {
-			xv.Slice[yi] = z.CloneWithRC(xv.rc)
+			xv.Slice[yi] = z
 		}
 	}
 }
@@ -333,8 +341,11 @@ func amendrAIarrayMut(x array, yv *AI, za array) {
 		}
 	case *AV:
 		zv := za.(*AV)
+		rc := x.RC()
 		for i, yi := range yv.Slice {
-			xv.Slice[yi] = zv.Slice[i].CloneWithRC(xv.rc)
+			zi := zv.Slice[i]
+			zi.InitWithRC(rc)
+			xv.Slice[yi] = zi
 		}
 	}
 }
@@ -367,7 +378,8 @@ func amendrAV(x array, yv *AV, z V) (array, error) {
 
 // set changes x at i with y (in place).
 func (x *AV) set(i int, y V) {
-	x.Slice[i] = y.CloneWithRC(x.rc)
+	y.InitWithRC(x.rc)
+	x.Slice[i] = y
 }
 
 // set changes x at i with y (in place).

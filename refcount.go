@@ -29,6 +29,20 @@ type RefCounter interface {
 	// values, and increments by 2 the refcount of non-reusable values, to
 	// ensure immutability of non-reusable children without cloning them.
 	InitWithRC(rc *int32)
+
+	// CloneWithRC returns a clone of the value, with rc as new refcount
+	// pointer.  If the current value's current refcount pointer is nil or
+	// equal to the passed one, the same value is returned after updating
+	// the refcount pointer as needed, instead of doing a full clone.
+	CloneWithRC(rc *int32) Value
+}
+
+// RefCountHolder is a RefCounter that has a root refcount pointer.
+type RefCountHolder interface {
+	RefCounter
+
+	// RC returns the value's root reference count pointer.
+	RC() *int32
 }
 
 // HasRC returns true if the value is boxed and implements RefCounter.
@@ -211,15 +225,16 @@ func (r *replacer) DecrRC()   { r.oldnew.DecrRC() }
 func (r *rxReplacer) IncrRC() { r.repl.IncrRC() }
 func (r *rxReplacer) DecrRC() { r.repl.DecrRC() }
 
-// InitRC initializes refcount if the value is an array with nil refcount.
+// InitRC initializes refcount if the value is a RefCountHolder with nil
+// refcount.
 func (x V) InitRC() {
 	if x.kind != valBoxed {
 		return
 	}
-	xa, ok := x.value.(array)
-	if ok && xa.RC() == nil {
+	xrch, ok := x.value.(RefCountHolder)
+	if ok && xrch.RC() == nil {
 		var n int32
-		xa.InitWithRC(&n)
+		xrch.InitWithRC(&n)
 	}
 }
 
