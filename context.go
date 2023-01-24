@@ -44,8 +44,7 @@ type Context struct {
 	stack     []V
 	frameIdx  int32
 	callDepth int32
-	lambda    int   // currently executed lambda (if any)
-	cRC       int32 // refcount for constants
+	lambda    int // currently executed lambda (if any)
 
 	// values
 	globals        []V
@@ -83,8 +82,8 @@ func NewContext() *Context {
 	ctx.gIDs = map[string]int{}
 	ctx.stack = make([]V, 0, 32)
 	ctx.sources = map[string]string{}
-	ctx.cRC = 2
-	ctx.constants = []V{constAV: NewV(&AV{Slice: nil, rc: &ctx.cRC})}
+	var n int32 = 2
+	ctx.constants = []V{constAV: NewV(&AV{Slice: nil, rc: &n})}
 	ctx.rand = rand.New(rand.NewSource(1))
 	ctx.initVariadics()
 	return ctx
@@ -349,7 +348,6 @@ func (ctx *Context) derive() *Context {
 	nctx.gCode = &globalCode{}
 	nctx.stack = make([]V, 0, 32)
 
-	nctx.cRC = 2
 	nctx.constants = ctx.constants
 	nctx.variadics = ctx.variadics
 	nctx.variadicsNames = ctx.variadicsNames
