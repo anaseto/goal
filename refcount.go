@@ -95,6 +95,7 @@ func (x *AS) reuse() *AS {
 func (x *AV) reuse() *AV {
 	if reuseRCp(x.rc) {
 		x.flags = flagNone
+		x.rc = nil // NOTE: not always necessary, maybe use two functions
 		return x
 	}
 	return &AV{Slice: make([]V, x.Len())}
@@ -118,6 +119,11 @@ type RefCounter interface {
 
 	// DecrRC decrements the reference count by one.
 	DecrRC()
+
+	// InitWithRC recursively sets the refcount pointer for reusable
+	// values, and increments by 2 the refcount of non-reusable values (to
+	// ensure immutability).
+	InitWithRC(rc *int32)
 }
 
 func zeroRCp(p *int32) {
@@ -218,6 +224,7 @@ func sharesRC(x V, rc *int32) bool {
 	case *AV:
 		if xv.RC() != rc {
 			log.Printf("%p vs %p (%d vs %d)", xv.RC(), rc, getRC(xv.RC()), getRC(rc))
+			// actually, %d > %d is ok
 			return false
 		}
 		for _, xi := range xv.Slice {
@@ -248,26 +255,21 @@ func (x V) InitRC() {
 	if x.kind != valBoxed {
 		return
 	}
-	var p *int32
-	switch xv := x.value.(type) {
-	case array:
-		p = xv.RC()
-		if p == nil {
-			var n int32
-			p = &n
-		}
-	default:
+	xa, ok := x.value.(array)
+	if ok && xa.RC() == nil {
 		var n int32
-		p = &n
+		xa.InitWithRC(&n)
 	}
-	x.value.InitWithRC(p)
 }
 
 func (x V) InitWithRC(rc *int32) {
 	if x.kind != valBoxed {
 		return
 	}
-	x.value.InitWithRC(rc)
+	xrc, ok := x.value.(RefCounter)
+	if ok {
+		xrc.InitWithRC(rc)
+	}
 }
 
 func (s S) InitWithRC(rc *int32) {}

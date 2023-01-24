@@ -48,10 +48,6 @@ type Value interface {
 	// equal to the passed one, the same value is returned after updating
 	// the refcount pointer as needed, instead of doing a full clone.
 	CloneWithRC(rc *int32) Value
-	// InitWithRC recursively sets the refcount pointer for reusable
-	// values, and increments by 2 the refcount of non-reusable values (to
-	// ensure immutability).
-	InitWithRC(rc *int32)
 }
 
 // newVariadic returns a new variadic value.

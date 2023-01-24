@@ -509,7 +509,8 @@ func sub2(x, y V) V {
 			oldnew[2*i] = xi
 			oldnew[2*i+1] = yv.Slice[i]
 		}
-		return NewV(&replacer{r: strings.NewReplacer(oldnew...), oldnew: &AS{Slice: oldnew}})
+		var n int32
+		return NewV(&replacer{r: strings.NewReplacer(oldnew...), oldnew: &AS{Slice: oldnew, rc: &n}})
 	case *rx:
 		switch y.value.(type) {
 		case S:
