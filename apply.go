@@ -408,7 +408,7 @@ func applyArray(x array, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AI:
-		return x.atIndices(yv.Slice)
+		return x.atIndices(yv)
 	case *AV:
 		r := make([]V, yv.Len())
 		for i, yi := range yv.Slice {
@@ -423,7 +423,7 @@ func applyArray(x array, y V) V {
 		if iy.IsPanic() {
 			return Panicf("x[y] : %v", iy.value)
 		}
-		r := x.atIndices(iy.value.(*AI).Slice)
+		r := x.atIndices(iy.value.(*AI))
 		return r
 	default:
 		return Panicf("x[y] : y non-integer (%s)", y.Type())

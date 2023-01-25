@@ -87,31 +87,31 @@ func rotate(x, y V) V {
 		for j := int64(0); j < ylen; j++ {
 			r[j] = yv.At(int((j + i) % ylen))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AF:
 		r := make([]float64, ylen)
 		for j := int64(0); j < ylen; j++ {
 			r[j] = yv.At(int((j + i) % ylen))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		r := make([]int64, ylen)
 		for j := int64(0); j < ylen; j++ {
 			r[j] = yv.At(int((j + i) % ylen))
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AS:
 		r := make([]string, ylen)
 		for j := int64(0); j < ylen; j++ {
 			r[j] = yv.At(int((j + i) % ylen))
 		}
-		return NewAS(r)
+		return NewASWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		r := make([]V, ylen)
 		for j := int64(0); j < ylen; j++ {
 			r[j] = yv.At(int((j + i) % ylen))
 		}
-		return NewV(&AV{Slice: r, rc: yv.rc})
+		return NewAVWithRC(r, yv.rc)
 	default:
 		return Panicf("x rotate y : y not an array (%s)", y.Type())
 	}
@@ -202,7 +202,7 @@ func cutAI(x *AI, y V) V {
 	}
 	xlen := x.Len()
 	if xlen == 0 {
-		return NewAV(nil)
+		return NewAVWithRC(nil, x.rc)
 	}
 	switch yv := y.value.(type) {
 	case array:
@@ -216,8 +216,7 @@ func cutAI(x *AI, y V) V {
 			}
 			r[i] = Canonical(NewV(yv.slice(int(from), int(to))))
 		}
-		var n int
-		return NewV(&AV{Slice: r, rc: &n})
+		return NewAVWithRC(r, reuseRCp(x.rc))
 	default:
 		return Panicf("x_y : y not an array (%s)", y.Type())
 	}
@@ -249,7 +248,7 @@ func take(x, y V) V {
 			i = -i
 		}
 		r := make([]bool, i)
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(yv.RC()))
 	}
 	switch {
 	case i >= 0:
@@ -290,7 +289,7 @@ func takeCyclic(y array, n int64) V {
 		if !neg && i < n {
 			copy(r[i:n], ys[:n-i])
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		ys := yv.Slice
 		r := make([]int64, n)
@@ -308,7 +307,7 @@ func takeCyclic(y array, n int64) V {
 		if !neg && i < n {
 			copy(r[i:n], ys[:n-i])
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AF:
 		ys := yv.Slice
 		r := make([]float64, n)
@@ -326,7 +325,7 @@ func takeCyclic(y array, n int64) V {
 		if !neg && i < n {
 			copy(r[i:n], ys[:n-i])
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AS:
 		ys := yv.Slice
 		r := make([]string, n)
@@ -344,7 +343,7 @@ func takeCyclic(y array, n int64) V {
 		if !neg && i < n {
 			copy(r[i:n], ys[:n-i])
 		}
-		return NewAS(r)
+		return NewASWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		ys := yv.Slice
 		r := make([]V, n)
@@ -362,7 +361,7 @@ func takeCyclic(y array, n int64) V {
 		if !neg && i < n {
 			copy(r[i:n], ys[:n-i])
 		}
-		return NewV(&AV{Slice: r, rc: yv.rc})
+		return NewAVWithRC(r, yv.rc)
 	default:
 		panic("takeCyclic: y not an array")
 	}
@@ -404,8 +403,9 @@ func shiftBeforeAB(x V, yv *AB) V {
 			r[i] = b2i(yv.At(i - max))
 		}
 		r[0] = x.I()
-		return NewAI(r)
-	} else if x.IsF() {
+		return NewAIWithRC(r, reuseRCp(yv.rc))
+	}
+	if x.IsF() {
 		if isBF(x.F()) {
 			r := yv.reuse()
 			copy(r.Slice[max:], ys[:len(ys)-max])
@@ -417,7 +417,7 @@ func shiftBeforeAB(x V, yv *AB) V {
 			r[i] = b2f(yv.At(i - max))
 		}
 		r[0] = x.F()
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	}
 	switch xv := x.value.(type) {
 	case *AB:
@@ -431,14 +431,14 @@ func shiftBeforeAB(x V, yv *AB) V {
 			r[i] = b2f(ys[i-max])
 		}
 		copy(r[:max], xv.Slice)
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		r := make([]int64, len(ys))
 		for i := max; i < len(ys); i++ {
 			r[i] = b2i(yv.At(i - max))
 		}
 		copy(r[:max], xv.Slice)
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		return shiftAVBeforeArray(xv, yv)
 	case array:
@@ -471,7 +471,7 @@ func shiftBeforeAI(x V, yv *AI) V {
 			r[i] = float64(yv.At(i - max))
 		}
 		r[0] = x.F()
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	}
 	switch xv := x.value.(type) {
 	case *AB:
@@ -487,7 +487,7 @@ func shiftBeforeAI(x V, yv *AI) V {
 			r[i] = float64(ys[i-max])
 		}
 		copy(r[:max], xv.Slice)
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		r := yv.reuse()
 		copy(r.Slice[max:], ys[:len(ys)-max])
@@ -712,7 +712,7 @@ func shiftAfterAB(x V, yv *AB) V {
 			r[i-max] = b2i(yv.At(i))
 		}
 		r[len(ys)-1] = x.I()
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(yv.rc))
 	} else if x.IsF() {
 		if isBF(x.F()) {
 			r := yv.reuse()
@@ -725,7 +725,7 @@ func shiftAfterAB(x V, yv *AB) V {
 			r[i-max] = b2f(yv.At(i))
 		}
 		r[len(ys)-1] = x.F()
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	}
 	switch xv := x.value.(type) {
 	case *AB:
@@ -739,14 +739,14 @@ func shiftAfterAB(x V, yv *AB) V {
 			r[i-max] = b2f(ys[i])
 		}
 		copy(r[len(ys)-max:], xv.Slice)
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		r := make([]int64, len(ys))
 		for i := max; i < len(ys); i++ {
 			r[i-max] = b2i(yv.At(i))
 		}
 		copy(r[len(ys)-max:], xv.Slice)
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		return shiftAVAfterArray(xv, yv)
 	case array:
@@ -779,7 +779,7 @@ func shiftAfterAI(x V, yv *AI) V {
 			r[i-max] = float64(yv.At(i))
 		}
 		r[len(ys)-1] = x.F()
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	}
 	switch xv := x.value.(type) {
 	case *AB:
@@ -795,7 +795,7 @@ func shiftAfterAI(x V, yv *AI) V {
 			r[i-max] = float64(ys[i])
 		}
 		copy(r[len(ys)-max:], xv.Slice)
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		r := yv.reuse()
 		copy(r.Slice[:len(ys)-max], ys[max:])
@@ -996,7 +996,7 @@ func windows(i int64, y V) V {
 			r[j] = Canonical(yc)
 		}
 		var n int
-		return NewV(&AV{Slice: r, rc: &n})
+		return NewAVWithRC(r, &n)
 	default:
 		return panics("i^y : y not an array")
 	}
@@ -1022,7 +1022,7 @@ func shapeSplit(x V, y V) V {
 			return Panicf("i$y : i not positive (%d)", i)
 		}
 		if i >= int64(ylen) {
-			return NewV(&AV{Slice: []V{y}, rc: yv.RC()})
+			return NewAVWithRC([]V{y}, yv.RC())
 		}
 		n := ylen / int(i)
 		if ylen%int(i) != 0 {
@@ -1039,7 +1039,7 @@ func shapeSplit(x V, y V) V {
 			r[j] = Canonical(yc)
 		}
 		var rcn int
-		return NewV(&AV{Slice: r, rc: &rcn})
+		return NewAVWithRC(r, &rcn)
 	default:
 		return panics("i$y : y not an array")
 	}

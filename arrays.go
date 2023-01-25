@@ -10,7 +10,7 @@ type array interface {
 	getFlags() flags
 	setFlags(flags)
 	set(i int, y V)
-	atIndices(y []int64) V // x[y] (goal code)
+	atIndices(y *AI) V // x[y] (goal code)
 	shallowClone() array
 }
 
@@ -106,10 +106,70 @@ func (x *AV) set(i int, y V) {
 	x.Slice[i] = y
 }
 
-func (x *AV) atIndices(y []int64) V {
-	r := make([]V, len(y))
+func (x *AB) atIndices(y *AI) V {
+	r := make([]bool, y.Len())
 	xlen := int64(x.Len())
-	for i, yi := range y {
+	for i, yi := range y.Slice {
+		if yi < 0 {
+			yi += xlen
+		}
+		if yi < 0 || yi >= xlen {
+			return Panicf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
+		}
+		r[i] = x.At(int(yi))
+	}
+	return NewABWithRC(r, reuseRCp(y.rc))
+}
+
+func (x *AI) atIndices(y *AI) V {
+	r := make([]int64, y.Len())
+	xlen := int64(x.Len())
+	for i, yi := range y.Slice {
+		if yi < 0 {
+			yi += xlen
+		}
+		if yi < 0 || yi >= xlen {
+			return Panicf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
+		}
+		r[i] = x.At(int(yi))
+	}
+	return NewAIWithRC(r, reuseRCp(y.rc))
+}
+
+func (x *AF) atIndices(y *AI) V {
+	r := make([]float64, y.Len())
+	xlen := int64(x.Len())
+	for i, yi := range y.Slice {
+		if yi < 0 {
+			yi += xlen
+		}
+		if yi < 0 || yi >= xlen {
+			return Panicf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
+		}
+		r[i] = x.At(int(yi))
+	}
+	return NewAFWithRC(r, reuseRCp(y.rc))
+}
+
+func (x *AS) atIndices(y *AI) V {
+	r := make([]string, y.Len())
+	xlen := int64(x.Len())
+	for i, yi := range y.Slice {
+		if yi < 0 {
+			yi += xlen
+		}
+		if yi < 0 || yi >= xlen {
+			return Panicf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
+		}
+		r[i] = x.At(int(yi))
+	}
+	return NewASWithRC(r, reuseRCp(y.rc))
+}
+
+func (x *AV) atIndices(y *AI) V {
+	r := make([]V, y.Len())
+	xlen := int64(x.Len())
+	for i, yi := range y.Slice {
 		if yi < 0 {
 			yi += xlen
 		}
@@ -121,66 +181,6 @@ func (x *AV) atIndices(y []int64) V {
 	nr := &AV{Slice: r}
 	nr.InitWithRC(reuseRCp(x.rc))
 	return NewV(canonicalAV(nr))
-}
-
-func (x *AB) atIndices(y []int64) V {
-	r := make([]bool, len(y))
-	xlen := int64(x.Len())
-	for i, yi := range y {
-		if yi < 0 {
-			yi += xlen
-		}
-		if yi < 0 || yi >= xlen {
-			return Panicf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
-		}
-		r[i] = x.At(int(yi))
-	}
-	return NewV(&AB{Slice: r, rc: reuseRCp(x.rc)})
-}
-
-func (x *AI) atIndices(y []int64) V {
-	r := make([]int64, len(y))
-	xlen := int64(x.Len())
-	for i, yi := range y {
-		if yi < 0 {
-			yi += xlen
-		}
-		if yi < 0 || yi >= xlen {
-			return Panicf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
-		}
-		r[i] = x.At(int(yi))
-	}
-	return NewV(&AI{Slice: r, rc: reuseRCp(x.rc)})
-}
-
-func (x *AF) atIndices(y []int64) V {
-	r := make([]float64, len(y))
-	xlen := int64(x.Len())
-	for i, yi := range y {
-		if yi < 0 {
-			yi += xlen
-		}
-		if yi < 0 || yi >= xlen {
-			return Panicf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
-		}
-		r[i] = x.At(int(yi))
-	}
-	return NewV(&AF{Slice: r, rc: reuseRCp(x.rc)})
-}
-
-func (x *AS) atIndices(y []int64) V {
-	r := make([]string, len(y))
-	xlen := int64(x.Len())
-	for i, yi := range y {
-		if yi < 0 {
-			yi += xlen
-		}
-		if yi < 0 || yi >= xlen {
-			return Panicf("x[y] : index out of bounds: %d (length %d)", yi, xlen)
-		}
-		r[i] = x.At(int(yi))
-	}
-	return NewV(&AS{Slice: r, rc: reuseRCp(x.rc)})
 }
 
 func (x *AB) shallowClone() array {

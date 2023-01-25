@@ -267,7 +267,7 @@ func toAI(x *AF) V {
 		}
 		r[i] = int64(xi)
 	}
-	return NewAI(r)
+	return NewAIWithRC(r, reuseRCp(x.rc))
 }
 
 // toAF converts AI into AF.
@@ -276,7 +276,7 @@ func toAF(x *AI) V {
 	for i, xi := range x.Slice {
 		r[i] = float64(xi)
 	}
-	return NewAF(r)
+	return NewAFWithRC(r, reuseRCp(x.rc))
 }
 
 // fromABtoAF converts AB into AF.
@@ -285,7 +285,7 @@ func fromABtoAF(x *AB) V {
 	for i, xi := range x.Slice {
 		r[i] = float64(b2i(xi))
 	}
-	return NewAF(r)
+	return NewAFWithRC(r, reuseRCp(x.rc))
 }
 
 // fromABtoAI converts AB into AI (for simplifying code, used only for
@@ -295,7 +295,7 @@ func fromABtoAI(x *AB) V {
 	for i := range r {
 		r[i] = b2i(x.At(i))
 	}
-	return NewAI(r)
+	return NewAIWithRC(r, reuseRCp(x.rc))
 }
 
 // isFalse returns true for false values.

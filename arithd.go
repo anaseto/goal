@@ -75,13 +75,13 @@ func equalFV(x float64, y V) V {
 		for i := range r {
 			r[i] = bool(x == yv.At(i))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		r := make([]bool, yv.Len())
 		for i := range r {
 			r[i] = bool(x == float64(yv.At(i)))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -116,13 +116,13 @@ func equalIV(x int64, y V) V {
 		for i := range r {
 			r[i] = bool(float64(x) == yv.At(i))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		r := make([]bool, yv.Len())
 		for i := range r {
 			r[i] = bool(x == yv.At(i))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -147,7 +147,7 @@ func equalSV(x S, y V) V {
 		for i := range r {
 			r[i] = bool(S(x) == S(yv.At(i)))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -231,14 +231,14 @@ func equalAFV(x *AF, y V) V {
 		for i := range r {
 			r[i] = bool(x.At(i) == float64(int64(y.I())))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	}
 	if y.IsF() {
 		r := make([]bool, x.Len())
 		for i := range r {
 			r[i] = bool(x.At(i) == float64(y.F()))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -258,7 +258,7 @@ func equalAFV(x *AF, y V) V {
 		for i := range r {
 			r[i] = bool(x.At(i) == yv.At(i))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	case *AI:
 		if x.Len() != yv.Len() {
 			return Panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -267,7 +267,7 @@ func equalAFV(x *AF, y V) V {
 		for i := range r {
 			r[i] = bool(x.At(i) == float64(yv.At(i)))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -293,14 +293,14 @@ func equalAIV(x *AI, y V) V {
 		for i := range r {
 			r[i] = bool(x.At(i) == int64(y.I()))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	}
 	if y.IsF() {
 		r := make([]bool, x.Len())
 		for i := range r {
 			r[i] = bool(float64(x.At(i)) == float64(y.F()))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -320,7 +320,7 @@ func equalAIV(x *AI, y V) V {
 		for i := range r {
 			r[i] = bool(float64(x.At(i)) == yv.At(i))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	case *AI:
 		if x.Len() != yv.Len() {
 			return Panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -329,7 +329,7 @@ func equalAIV(x *AI, y V) V {
 		for i := range r {
 			r[i] = bool(x.At(i) == yv.At(i))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -356,7 +356,7 @@ func equalASV(x *AS, y V) V {
 		for i := range r {
 			r[i] = bool(S(x.At(i)) == S(yv))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	case *AS:
 		if x.Len() != yv.Len() {
 			return Panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -365,7 +365,7 @@ func equalASV(x *AS, y V) V {
 		for i := range r {
 			r[i] = bool(S(x.At(i)) == S(yv.At(i)))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -453,13 +453,13 @@ func lesserFV(x float64, y V) V {
 		for i := range r {
 			r[i] = bool(x < yv.At(i))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		r := make([]bool, yv.Len())
 		for i := range r {
 			r[i] = bool(x < float64(yv.At(i)))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -494,13 +494,13 @@ func lesserIV(x int64, y V) V {
 		for i := range r {
 			r[i] = bool(float64(x) < yv.At(i))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		r := make([]bool, yv.Len())
 		for i := range r {
 			r[i] = bool(x < yv.At(i))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -525,7 +525,7 @@ func lesserSV(x S, y V) V {
 		for i := range r {
 			r[i] = bool(S(x) < S(yv.At(i)))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -609,14 +609,14 @@ func lesserAFV(x *AF, y V) V {
 		for i := range r {
 			r[i] = bool(x.At(i) < float64(int64(y.I())))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	}
 	if y.IsF() {
 		r := make([]bool, x.Len())
 		for i := range r {
 			r[i] = bool(x.At(i) < float64(y.F()))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -636,7 +636,7 @@ func lesserAFV(x *AF, y V) V {
 		for i := range r {
 			r[i] = bool(x.At(i) < yv.At(i))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	case *AI:
 		if x.Len() != yv.Len() {
 			return Panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -645,7 +645,7 @@ func lesserAFV(x *AF, y V) V {
 		for i := range r {
 			r[i] = bool(x.At(i) < float64(yv.At(i)))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -671,14 +671,14 @@ func lesserAIV(x *AI, y V) V {
 		for i := range r {
 			r[i] = bool(x.At(i) < int64(y.I()))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	}
 	if y.IsF() {
 		r := make([]bool, x.Len())
 		for i := range r {
 			r[i] = bool(float64(x.At(i)) < float64(y.F()))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -698,7 +698,7 @@ func lesserAIV(x *AI, y V) V {
 		for i := range r {
 			r[i] = bool(float64(x.At(i)) < yv.At(i))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	case *AI:
 		if x.Len() != yv.Len() {
 			return Panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -707,7 +707,7 @@ func lesserAIV(x *AI, y V) V {
 		for i := range r {
 			r[i] = bool(x.At(i) < yv.At(i))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -734,7 +734,7 @@ func lesserASV(x *AS, y V) V {
 		for i := range r {
 			r[i] = bool(S(x.At(i)) < S(yv))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	case *AS:
 		if x.Len() != yv.Len() {
 			return Panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -743,7 +743,7 @@ func lesserASV(x *AS, y V) V {
 		for i := range r {
 			r[i] = bool(S(x.At(i)) < S(yv.At(i)))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -831,13 +831,13 @@ func greaterFV(x float64, y V) V {
 		for i := range r {
 			r[i] = bool(x > yv.At(i))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		r := make([]bool, yv.Len())
 		for i := range r {
 			r[i] = bool(x > float64(yv.At(i)))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -872,13 +872,13 @@ func greaterIV(x int64, y V) V {
 		for i := range r {
 			r[i] = bool(float64(x) > yv.At(i))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		r := make([]bool, yv.Len())
 		for i := range r {
 			r[i] = bool(x > yv.At(i))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -903,7 +903,7 @@ func greaterSV(x S, y V) V {
 		for i := range r {
 			r[i] = bool(S(x) > S(yv.At(i)))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -987,14 +987,14 @@ func greaterAFV(x *AF, y V) V {
 		for i := range r {
 			r[i] = bool(x.At(i) > float64(int64(y.I())))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	}
 	if y.IsF() {
 		r := make([]bool, x.Len())
 		for i := range r {
 			r[i] = bool(x.At(i) > float64(y.F()))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -1014,7 +1014,7 @@ func greaterAFV(x *AF, y V) V {
 		for i := range r {
 			r[i] = bool(x.At(i) > yv.At(i))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	case *AI:
 		if x.Len() != yv.Len() {
 			return Panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -1023,7 +1023,7 @@ func greaterAFV(x *AF, y V) V {
 		for i := range r {
 			r[i] = bool(x.At(i) > float64(yv.At(i)))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -1049,14 +1049,14 @@ func greaterAIV(x *AI, y V) V {
 		for i := range r {
 			r[i] = bool(x.At(i) > int64(y.I()))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	}
 	if y.IsF() {
 		r := make([]bool, x.Len())
 		for i := range r {
 			r[i] = bool(float64(x.At(i)) > float64(y.F()))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -1076,7 +1076,7 @@ func greaterAIV(x *AI, y V) V {
 		for i := range r {
 			r[i] = bool(float64(x.At(i)) > yv.At(i))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	case *AI:
 		if x.Len() != yv.Len() {
 			return Panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -1085,7 +1085,7 @@ func greaterAIV(x *AI, y V) V {
 		for i := range r {
 			r[i] = bool(x.At(i) > yv.At(i))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -1112,7 +1112,7 @@ func greaterASV(x *AS, y V) V {
 		for i := range r {
 			r[i] = bool(S(x.At(i)) > S(yv))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	case *AS:
 		if x.Len() != yv.Len() {
 			return Panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -1121,7 +1121,7 @@ func greaterASV(x *AS, y V) V {
 		for i := range r {
 			r[i] = bool(S(x.At(i)) > S(yv.At(i)))
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -1203,7 +1203,7 @@ func addFV(x float64, y V) V {
 		for i := range r {
 			r[i] = float64(x + b2f(yv.At(i)))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AF:
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -1215,7 +1215,7 @@ func addFV(x float64, y V) V {
 		for i := range r {
 			r[i] = float64(x + float64(yv.At(i)))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -1244,7 +1244,7 @@ func addIV(x int64, y V) V {
 		for i := range r {
 			r[i] = int64(x + b2i(yv.At(i)))
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AF:
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -1303,14 +1303,14 @@ func addABV(x *AB, y V) V {
 		for i := range r {
 			r[i] = int64(b2i(x.At(i)) + int64(y.I()))
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(x.rc))
 	}
 	if y.IsF() {
 		r := make([]float64, x.Len())
 		for i := range r {
 			r[i] = float64(b2f(x.At(i)) + float64(y.F()))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(x.rc))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -1321,7 +1321,7 @@ func addABV(x *AB, y V) V {
 		for i := range r {
 			r[i] = int64(b2i(x.At(i)) + b2i(yv.At(i)))
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(x.rc))
 	case *AF:
 		if x.Len() != yv.Len() {
 			return Panicf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -1434,7 +1434,7 @@ func addAIV(x *AI, y V) V {
 		for i := range r {
 			r[i] = float64(float64(x.At(i)) + float64(y.F()))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(x.rc))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -1581,7 +1581,7 @@ func subtractFV(x float64, y V) V {
 		for i := range r {
 			r[i] = float64(x - b2f(yv.At(i)))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AF:
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -1593,7 +1593,7 @@ func subtractFV(x float64, y V) V {
 		for i := range r {
 			r[i] = float64(x - float64(yv.At(i)))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -1622,7 +1622,7 @@ func subtractIV(x int64, y V) V {
 		for i := range r {
 			r[i] = int64(x - b2i(yv.At(i)))
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AF:
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -1681,14 +1681,14 @@ func subtractABV(x *AB, y V) V {
 		for i := range r {
 			r[i] = int64(b2i(x.At(i)) - int64(y.I()))
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(x.rc))
 	}
 	if y.IsF() {
 		r := make([]float64, x.Len())
 		for i := range r {
 			r[i] = float64(b2f(x.At(i)) - float64(y.F()))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(x.rc))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -1699,7 +1699,7 @@ func subtractABV(x *AB, y V) V {
 		for i := range r {
 			r[i] = int64(b2i(x.At(i)) - b2i(yv.At(i)))
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(x.rc))
 	case *AF:
 		if x.Len() != yv.Len() {
 			return Panicf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -1812,7 +1812,7 @@ func subtractAIV(x *AI, y V) V {
 		for i := range r {
 			r[i] = float64(float64(x.At(i)) - float64(y.F()))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(x.rc))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -1961,7 +1961,7 @@ func multiplyFV(x float64, y V) V {
 		for i := range r {
 			r[i] = float64(x * b2f(yv.At(i)))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AF:
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -1973,7 +1973,7 @@ func multiplyFV(x float64, y V) V {
 		for i := range r {
 			r[i] = float64(x * float64(yv.At(i)))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AS:
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -2010,7 +2010,7 @@ func multiplyIV(x int64, y V) V {
 		for i := range r {
 			r[i] = int64(x * b2i(yv.At(i)))
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AF:
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -2057,19 +2057,19 @@ func multiplySV(x S, y V) V {
 		for i := range r {
 			r[i] = string(srepeat(S(x), b2i(yv.At(i))))
 		}
-		return NewAS(r)
+		return NewASWithRC(r, reuseRCp(yv.rc))
 	case *AF:
 		r := make([]string, yv.Len())
 		for i := range r {
 			r[i] = string(srepeat(S(x), int64(yv.At(i))))
 		}
-		return NewAS(r)
+		return NewASWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		r := make([]string, yv.Len())
 		for i := range r {
 			r[i] = string(srepeat(S(x), yv.At(i)))
 		}
-		return NewAS(r)
+		return NewASWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -2091,14 +2091,14 @@ func multiplyABV(x *AB, y V) V {
 		for i := range r {
 			r[i] = int64(b2i(x.At(i)) * int64(y.I()))
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(x.rc))
 	}
 	if y.IsF() {
 		r := make([]float64, x.Len())
 		for i := range r {
 			r[i] = float64(b2f(x.At(i)) * float64(y.F()))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(x.rc))
 	}
 	switch yv := y.value.(type) {
 	case S:
@@ -2106,7 +2106,7 @@ func multiplyABV(x *AB, y V) V {
 		for i := range r {
 			r[i] = string(srepeat(S(yv), b2i(x.At(i))))
 		}
-		return NewAS(r)
+		return NewASWithRC(r, reuseRCp(x.rc))
 	case *AB:
 		if x.Len() != yv.Len() {
 			return Panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -2183,7 +2183,7 @@ func multiplyAFV(x *AF, y V) V {
 		for i := range r {
 			r[i] = string(srepeat(S(yv), int64(x.At(i))))
 		}
-		return NewAS(r)
+		return NewASWithRC(r, reuseRCp(x.rc))
 	case *AB:
 		if x.Len() != yv.Len() {
 			return Panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -2252,7 +2252,7 @@ func multiplyAIV(x *AI, y V) V {
 		for i := range r {
 			r[i] = float64(float64(x.At(i)) * float64(y.F()))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(x.rc))
 	}
 	switch yv := y.value.(type) {
 	case S:
@@ -2260,7 +2260,7 @@ func multiplyAIV(x *AI, y V) V {
 		for i := range r {
 			r[i] = string(srepeat(S(yv), x.At(i)))
 		}
-		return NewAS(r)
+		return NewASWithRC(r, reuseRCp(x.rc))
 	case *AB:
 		if x.Len() != yv.Len() {
 			return Panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -2436,7 +2436,7 @@ func divideFV(x float64, y V) V {
 		for i := range r {
 			r[i] = float64(divideF(x, b2f(yv.At(i))))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AF:
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -2448,7 +2448,7 @@ func divideFV(x float64, y V) V {
 		for i := range r {
 			r[i] = float64(divideF(x, float64(yv.At(i))))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -2477,7 +2477,7 @@ func divideIV(x int64, y V) V {
 		for i := range r {
 			r[i] = float64(divideF(float64(x), b2f(yv.At(i))))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AF:
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -2489,7 +2489,7 @@ func divideIV(x int64, y V) V {
 		for i := range r {
 			r[i] = float64(divideF(float64(x), float64(yv.At(i))))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -2511,14 +2511,14 @@ func divideABV(x *AB, y V) V {
 		for i := range r {
 			r[i] = float64(divideF(b2f(x.At(i)), float64(int64(y.I()))))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(x.rc))
 	}
 	if y.IsF() {
 		r := make([]float64, x.Len())
 		for i := range r {
 			r[i] = float64(divideF(b2f(x.At(i)), float64(y.F())))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(x.rc))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -2529,7 +2529,7 @@ func divideABV(x *AB, y V) V {
 		for i := range r {
 			r[i] = float64(divideF(b2f(x.At(i)), b2f(yv.At(i))))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(x.rc))
 	case *AF:
 		if x.Len() != yv.Len() {
 			return Panicf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -2547,7 +2547,7 @@ func divideABV(x *AB, y V) V {
 		for i := range r {
 			r[i] = float64(divideF(b2f(x.At(i)), float64(yv.At(i))))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(x.rc))
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -2635,14 +2635,14 @@ func divideAIV(x *AI, y V) V {
 		for i := range r {
 			r[i] = float64(divideF(float64(x.At(i)), float64(int64(y.I()))))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(x.rc))
 	}
 	if y.IsF() {
 		r := make([]float64, x.Len())
 		for i := range r {
 			r[i] = float64(divideF(float64(x.At(i)), float64(y.F())))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(x.rc))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -2653,7 +2653,7 @@ func divideAIV(x *AI, y V) V {
 		for i := range r {
 			r[i] = float64(divideF(float64(x.At(i)), b2f(yv.At(i))))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(x.rc))
 	case *AF:
 		if x.Len() != yv.Len() {
 			return Panicf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -2671,7 +2671,7 @@ func divideAIV(x *AI, y V) V {
 		for i := range r {
 			r[i] = float64(divideF(float64(x.At(i)), float64(yv.At(i))))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(x.rc))
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -2753,7 +2753,7 @@ func minimumFV(x float64, y V) V {
 		for i := range r {
 			r[i] = float64(math.Min(x, b2f(yv.At(i))))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AF:
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -2765,7 +2765,7 @@ func minimumFV(x float64, y V) V {
 		for i := range r {
 			r[i] = float64(math.Min(x, float64(yv.At(i))))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -2794,7 +2794,7 @@ func minimumIV(x int64, y V) V {
 		for i := range r {
 			r[i] = int64(minI(x, b2i(yv.At(i))))
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AF:
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -2853,14 +2853,14 @@ func minimumABV(x *AB, y V) V {
 		for i := range r {
 			r[i] = int64(minI(b2i(x.At(i)), int64(y.I())))
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(x.rc))
 	}
 	if y.IsF() {
 		r := make([]float64, x.Len())
 		for i := range r {
 			r[i] = float64(math.Min(b2f(x.At(i)), float64(y.F())))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(x.rc))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -2984,7 +2984,7 @@ func minimumAIV(x *AI, y V) V {
 		for i := range r {
 			r[i] = float64(math.Min(float64(x.At(i)), float64(y.F())))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(x.rc))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -3131,7 +3131,7 @@ func maximumFV(x float64, y V) V {
 		for i := range r {
 			r[i] = float64(math.Max(x, b2f(yv.At(i))))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AF:
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -3143,7 +3143,7 @@ func maximumFV(x float64, y V) V {
 		for i := range r {
 			r[i] = float64(math.Max(x, float64(yv.At(i))))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -3172,7 +3172,7 @@ func maximumIV(x int64, y V) V {
 		for i := range r {
 			r[i] = int64(maxI(x, b2i(yv.At(i))))
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AF:
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -3231,14 +3231,14 @@ func maximumABV(x *AB, y V) V {
 		for i := range r {
 			r[i] = int64(maxI(b2i(x.At(i)), int64(y.I())))
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(x.rc))
 	}
 	if y.IsF() {
 		r := make([]float64, x.Len())
 		for i := range r {
 			r[i] = float64(math.Max(b2f(x.At(i)), float64(y.F())))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(x.rc))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -3362,7 +3362,7 @@ func maximumAIV(x *AI, y V) V {
 		for i := range r {
 			r[i] = float64(math.Max(float64(x.At(i)), float64(y.F())))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(x.rc))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -3505,7 +3505,7 @@ func modulusFV(x float64, y V) V {
 		for i := range r {
 			r[i] = float64(modF(x, b2f(yv.At(i))))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AF:
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -3517,7 +3517,7 @@ func modulusFV(x float64, y V) V {
 		for i := range r {
 			r[i] = float64(modF(x, float64(yv.At(i))))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -3546,7 +3546,7 @@ func modulusIV(x int64, y V) V {
 		for i := range r {
 			r[i] = int64(modI(x, b2i(yv.At(i))))
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AF:
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -3580,14 +3580,14 @@ func modulusABV(x *AB, y V) V {
 		for i := range r {
 			r[i] = int64(modI(b2i(x.At(i)), int64(y.I())))
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(x.rc))
 	}
 	if y.IsF() {
 		r := make([]float64, x.Len())
 		for i := range r {
 			r[i] = float64(modF(b2f(x.At(i)), float64(y.F())))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(x.rc))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -3598,7 +3598,7 @@ func modulusABV(x *AB, y V) V {
 		for i := range r {
 			r[i] = int64(modI(b2i(x.At(i)), b2i(yv.At(i))))
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(x.rc))
 	case *AF:
 		if x.Len() != yv.Len() {
 			return Panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -3711,7 +3711,7 @@ func modulusAIV(x *AI, y V) V {
 		for i := range r {
 			r[i] = float64(modF(float64(x.At(i)), float64(y.F())))
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(x.rc))
 	}
 	switch yv := y.value.(type) {
 	case *AB:

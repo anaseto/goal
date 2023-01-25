@@ -99,7 +99,7 @@ func where(x V) V {
 			r[j] = int64(i)
 			j += b2i(xi)
 		}
-		return NewAI(r[:len(r)-1])
+		return NewAIWithRC(r[:len(r)-1], reuseRCp(xv.rc))
 	case *AI:
 		n := int64(0)
 		for _, xi := range xv.Slice {
@@ -114,7 +114,7 @@ func where(x V) V {
 				r = append(r, int64(i))
 			}
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(xv.rc))
 	case *AF:
 		n := int64(0)
 		for _, xi := range xv.Slice {
@@ -132,7 +132,7 @@ func where(x V) V {
 				r = append(r, int64(i))
 			}
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(xv.rc))
 	case array:
 		return panics("&x : x non-integer array")
 	default:
@@ -217,7 +217,7 @@ func repeat(x V, n int64) V {
 				r[in+j] = xi
 			}
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(xv.rc))
 	case *AI:
 		r := make([]int64, n*int64(xv.Len()))
 		for i, xi := range xv.Slice {
@@ -226,7 +226,7 @@ func repeat(x V, n int64) V {
 				r[in+j] = xi
 			}
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(xv.rc))
 	case *AF:
 		r := make([]float64, n*int64(xv.Len()))
 		for i, xi := range xv.Slice {
@@ -235,7 +235,7 @@ func repeat(x V, n int64) V {
 				r[in+j] = xi
 			}
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(xv.rc))
 	case *AS:
 		r := make([]string, n*int64(xv.Len()))
 		for i, xi := range xv.Slice {
@@ -244,7 +244,7 @@ func repeat(x V, n int64) V {
 				r[in+j] = xi
 			}
 		}
-		return NewAS(r)
+		return NewASWithRC(r, reuseRCp(xv.rc))
 	case *AV:
 		r := make([]V, n*int64(xv.Len()))
 		for i, xi := range xv.Slice {
@@ -253,7 +253,7 @@ func repeat(x V, n int64) V {
 				r[in+j] = xi
 			}
 		}
-		return NewV(&AV{Slice: r, rc: xv.rc})
+		return NewAVWithRC(r, reuseRCp(xv.rc))
 	default:
 		r := make([]V, n)
 		for i := range r {
@@ -276,7 +276,7 @@ func repeatAB(x *AB, y V) V {
 				r = append(r, yv.At(i))
 			}
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	case *AF:
 		r := make([]float64, 0, n)
 		for i, xi := range x.Slice {
@@ -284,7 +284,7 @@ func repeatAB(x *AB, y V) V {
 				r = append(r, yv.At(i))
 			}
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(x.rc))
 	case *AI:
 		r := make([]int64, 0, n)
 		for i, xi := range x.Slice {
@@ -292,7 +292,7 @@ func repeatAB(x *AB, y V) V {
 				r = append(r, yv.At(i))
 			}
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(x.rc))
 	case *AS:
 		r := make([]string, 0, n)
 		for i, xi := range x.Slice {
@@ -300,7 +300,7 @@ func repeatAB(x *AB, y V) V {
 				r = append(r, yv.At(i))
 			}
 		}
-		return NewAS(r)
+		return NewASWithRC(r, reuseRCp(x.rc))
 	case *AV:
 		r := make([]V, 0, n)
 		for i, xi := range x.Slice {
@@ -330,7 +330,7 @@ func repeatAI(x *AI, y V) V {
 				r = append(r, yv.At(i))
 			}
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	case *AF:
 		r := make([]float64, 0, n)
 		for i, xi := range x.Slice {
@@ -338,7 +338,7 @@ func repeatAI(x *AI, y V) V {
 				r = append(r, yv.At(i))
 			}
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(x.rc))
 	case *AI:
 		r := make([]int64, 0, n)
 		for i, xi := range x.Slice {
@@ -346,7 +346,7 @@ func repeatAI(x *AI, y V) V {
 				r = append(r, yv.At(i))
 			}
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(x.rc))
 	case *AS:
 		r := make([]string, 0, n)
 		for i, xi := range x.Slice {
@@ -354,7 +354,7 @@ func repeatAI(x *AI, y V) V {
 				r = append(r, yv.At(i))
 			}
 		}
-		return NewAS(r)
+		return NewASWithRC(r, reuseRCp(x.rc))
 	case *AV:
 		r := make([]V, 0, n)
 		for i, xi := range x.Slice {
@@ -413,7 +413,7 @@ func weedOutAB(x *AB, y V) V {
 				r = append(r, yv.At(i))
 			}
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	case *AF:
 		r := make([]float64, 0, n)
 		for i, xi := range x.Slice {
@@ -421,7 +421,7 @@ func weedOutAB(x *AB, y V) V {
 				r = append(r, yv.At(i))
 			}
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(x.rc))
 	case *AI:
 		r := make([]int64, 0, n)
 		for i, xi := range x.Slice {
@@ -429,7 +429,7 @@ func weedOutAB(x *AB, y V) V {
 				r = append(r, yv.At(i))
 			}
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(x.rc))
 	case *AS:
 		r := make([]string, 0, n)
 		for i, xi := range x.Slice {
@@ -437,7 +437,7 @@ func weedOutAB(x *AB, y V) V {
 				r = append(r, yv.At(i))
 			}
 		}
-		return NewAS(r)
+		return NewASWithRC(r, reuseRCp(x.rc))
 	case *AV:
 		r := make([]V, 0, n)
 		for i, xi := range x.Slice {
@@ -464,7 +464,7 @@ func weedOutAI(x *AI, y V) V {
 				r = append(r, yv.At(i))
 			}
 		}
-		return NewAB(r)
+		return NewABWithRC(r, reuseRCp(x.rc))
 	case *AF:
 		r := make([]float64, 0, n)
 		for i, xi := range x.Slice {
@@ -472,7 +472,7 @@ func weedOutAI(x *AI, y V) V {
 				r = append(r, yv.At(i))
 			}
 		}
-		return NewAF(r)
+		return NewAFWithRC(r, reuseRCp(x.rc))
 	case *AI:
 		r := make([]int64, 0, n)
 		for i, xi := range x.Slice {
@@ -480,7 +480,7 @@ func weedOutAI(x *AI, y V) V {
 				r = append(r, yv.At(i))
 			}
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(x.rc))
 	case *AS:
 		r := make([]string, 0, n)
 		for i, xi := range x.Slice {
@@ -488,7 +488,7 @@ func weedOutAI(x *AI, y V) V {
 				r = append(r, yv.At(i))
 			}
 		}
-		return NewAS(r)
+		return NewASWithRC(r, reuseRCp(x.rc))
 	case *AV:
 		r := make([]V, 0, n)
 		for i, xi := range x.Slice {

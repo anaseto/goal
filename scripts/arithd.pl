@@ -413,7 +413,7 @@ EOS
 		for i := range r {
 			r[i] = $rtype($iexpr)
 		}
-		return NewA${type}(r)
+		return NewA${type}WithRC(r, reuseRCp(yv.rc))
 EOS
         }
     }
@@ -466,7 +466,7 @@ EOS
             for i := range r {
                     r[i] = $rtype($iexpr)
             }
-            return NewA${type}(r)
+            return NewA${type}WithRC(r, reuseRCp(x.rc))
         }
 EOS
         }
@@ -493,7 +493,7 @@ EOS
             for i := range r {
                     r[i] = $rtype($iexpr)
             }
-            return NewA${type}(r)
+            return NewA${type}WithRC(r, reuseRCp(x.rc))
         }
 EOS
         }
@@ -523,7 +523,7 @@ EOS
 		for i := range r {
 			r[i] = $rtype($iexpr)
 		}
-		return NewA${type}(r)
+		return NewA${type}WithRC(r, reuseRCp(x.rc))
 EOS
         }
     }
@@ -566,7 +566,7 @@ EOS
 		for i := range r {
 			r[i] = $rtype($iexpr)
 		}
-		return NewA$type(r)
+		return NewA${type}WithRC(r, reuseRCp(x.rc))
 EOS
         }
     }

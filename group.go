@@ -127,9 +127,9 @@ func groupBy(x, y V) V {
 	case array:
 		r := make([]V, xav.Len())
 		for i, xi := range xav.Slice {
-			r[i] = yv.atIndices(xi.value.(*AI).Slice)
+			r[i] = yv.atIndices(xi.value.(*AI))
 		}
-		return NewV(&AV{Slice: r, rc: yv.RC()})
+		return NewAV(r)
 	default:
 		return Panicf("f=y : y not array (%s)", y.Type())
 	}

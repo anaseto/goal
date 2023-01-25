@@ -381,7 +381,7 @@ func uniq(ctx *Context, x V) V {
 					continue
 				}
 			}
-			return Canonical(NewV(&AV{Slice: r, rc: xv.rc}))
+			return Canonical(NewAVWithRC(r, xv.rc))
 		}
 	loop:
 		for i, xi := range xv.Slice {
@@ -392,7 +392,7 @@ func uniq(ctx *Context, x V) V {
 			}
 			r = append(r, xi)
 		}
-		return Canonical(NewV(&AV{Slice: r, rc: xv.rc}))
+		return Canonical(NewAVWithRC(r, xv.rc))
 	default:
 		return panicType("?x", "x", x)
 	}
