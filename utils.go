@@ -389,8 +389,8 @@ func aType(x *AV) vType {
 		return tV
 	}
 	t := getType(x.Slice[0])
-	for i := 1; i < x.Len(); i++ {
-		s := getType(x.At(i))
+	for _, xi := range x.Slice[1:] {
+		s := getType(xi)
 		if t&tAV != s&tAV {
 			return tV
 		}
@@ -406,8 +406,8 @@ func eType(x *AV) vType {
 		return tV
 	}
 	t := getType(x.Slice[0])
-	for i := 1; i < x.Len(); i++ {
-		t &= getType(x.At(i))
+	for _, xi := range x.Slice[1:] {
+		t &= getType(xi)
 		if t == tV {
 			return tV
 		}
