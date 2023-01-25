@@ -1,24 +1,21 @@
 package goal
 
-import (
-	"fmt"
-	"log"
-)
-
 // RefCounter is implemented by values that use a reference count. In goal the
 // refcount is not used for memory management, but only for optimization of
-// memory allocations.  Refcount is increased by each assignement, and each use
-// in an operation. It is reduced after each operation, and for each last use
-// of a variable (as approximated conservatively). If refcount is equal or less
-// than one, then the value is considered reusable.
+// memory allocations.  Refcount is increased by each assignement, and each
+// push operation on the stack, except for pushes corresponding to the last use
+// of a variable (as approximated conservatively). It is reduced after each
+// drop.  If refcount is equal or less than one, then the value is considered
+// reusable.
 //
 // When defining a new type implementing the Value interface, it is only
-// necessary to also implement RefCounter if the type definition contains makes
-// use of a type implementing it (for example an array type or a generic V).
+// necessary to also implement RefCounter if the type definition makes use of a
+// type implementing it (for example an array type or a generic V).
 type RefCounter interface {
 	Value
 
-	// IncrRC increments the reference count by one.
+	// IncrRC increments the reference count by one. It can panic if the
+	// value's refcount pointer has not been properly initialized.
 	IncrRC()
 
 	// DecrRC decrements the reference count by one, or zero if it is
@@ -37,7 +34,10 @@ type RefCounter interface {
 	CloneWithRC(rc *int) Value
 }
 
-// RefCountHolder is a RefCounter that has a root refcount pointer.
+// RefCountHolder is a RefCounter that has a root refcount pointer. When such
+// values are returned from a variadic function, if the refcount pointer is
+// still nil, InitWithRC is automatically called with a newly allocated
+// refcount pointer to a zero count.
 type RefCountHolder interface {
 	RefCounter
 
@@ -334,58 +334,4 @@ func (r *replacer) InitWithRC(rc *int) {
 
 func (r *rxReplacer) InitWithRC(rc *int) {
 	r.repl.InitWithRC(rc)
-}
-
-// wellformedRC checks that RCs of the value are properly shared among
-// subarrays. It is for testing purposes.
-func wellformedRC(x V) bool {
-	switch xv := x.value.(type) {
-	case *AV:
-		return sharesRC(x, xv.rc)
-	default:
-		return true
-	}
-}
-
-func getRC(rc *int) int {
-	if rc != nil {
-		return *rc
-	}
-	return 0
-}
-
-func sharesRC(x V, rc *int) bool {
-	switch xv := x.value.(type) {
-	case *AV:
-		if xv.RC() != rc {
-			xvrc := getRC(xv.RC())
-			if xvrc <= 1 && xvrc < getRC(rc) {
-				log.Printf("%p vs %p (%d vs %d)", xv.RC(), rc, getRC(xv.RC()), getRC(rc))
-				return false
-			}
-		}
-		for _, xi := range xv.Slice {
-			if !sharesRC(xi, rc) {
-				return false
-			}
-		}
-		return true
-	case array:
-		if xv.RC() != rc {
-			xvrc := getRC(xv.RC())
-			if xvrc <= 1 && xvrc < getRC(rc) {
-				log.Printf("%p vs %p (%d vs %d)", xv.RC(), rc, getRC(xv.RC()), getRC(rc))
-				return false
-			}
-		}
-		return true
-	default:
-		return true
-	}
-}
-
-func (ctx *Context) assertWellformedRC(x V) {
-	if !wellformedRC(x) {
-		panic(fmt.Sprintf("unshared rc: %s (%s)", x.Sprint(ctx), x.Type()))
-	}
 }

@@ -189,8 +189,8 @@ func (x V) IsFunction() bool {
 // follows:
 //
 //	variadic	2
-//	projections	number of nils
 //	lambda		number of arguments
+//	projections	number of gaps
 //	derived verb	1
 func (x V) Rank(ctx *Context) int {
 	switch x.kind {
@@ -268,62 +268,92 @@ func (f flags) Has(ff flags) bool {
 
 // AB represents an array of booleans.
 type AB struct {
-	rc    *int
 	flags flags
+	rc    *int
 	Slice []bool
 }
 
-// NewAB returns a new boolean array.
+// NewAB returns a new boolean array. It does not initialize the reference
+// counter.
 func NewAB(x []bool) V {
 	return NewV(&AB{Slice: x})
 }
 
+// NewABWithRC returns a new boolean array.
+func NewABWithRC(x []bool, rc *int) V {
+	return NewV(&AB{Slice: x, rc: rc})
+}
+
 // AI represents an array of integers.
 type AI struct {
-	rc    *int
 	flags flags
+	rc    *int
 	Slice []int64
 }
 
-// NewAI returns a new int array.
+// NewAI returns a new int array. It does not initialize the reference
+// counter.
 func NewAI(x []int64) V {
 	return NewV(&AI{Slice: x})
 }
 
+// NewAIWithRC returns a new int array.
+func NewAIWithRC(x []int64, rc *int) V {
+	return NewV(&AI{Slice: x, rc: rc})
+}
+
 // AF represents an array of reals.
 type AF struct {
-	rc    *int
 	flags flags
+	rc    *int
 	Slice []float64
 }
 
-// NewAF returns a new array of reals.
+// NewAF returns a new array of reals. It does not initialize the reference
+// counter.
 func NewAF(x []float64) V {
 	return NewV(&AF{Slice: x})
 }
 
+// NewAFWithRC returns a new array of reals.
+func NewAFWithRC(x []float64, rc *int) V {
+	return NewV(&AF{Slice: x, rc: rc})
+}
+
 // AS represents an array of strings.
 type AS struct {
-	rc    *int
 	flags flags
+	rc    *int
 	Slice []string // string array
 }
 
-// NewAS returns a new array of strings.
+// NewAS returns a new array of strings. It does not initialize the reference
+// counter.
 func NewAS(x []string) V {
 	return NewV(&AS{Slice: x})
 }
 
+// NewASWithRC returns a new array of strings.
+func NewASWithRC(x []string, rc *int) V {
+	return NewV(&AS{Slice: x, rc: rc})
+}
+
 // AV represents a generic array.
 type AV struct {
-	rc    *int
 	flags flags
+	rc    *int
 	Slice []V
 }
 
-// NewAV returns a new generic array.
+// NewAV returns a new generic array. It does not initialize the reference
+// counter.
 func NewAV(x []V) V {
 	return NewV(&AV{Slice: x})
+}
+
+// NewAVWithRC returns a new generic array.
+func NewAVWithRC(x []V, rc *int) V {
+	return NewV(&AV{Slice: x, rc: rc})
 }
 
 func (x *AB) Matches(y Value) bool { return matchArray(x, y) }
@@ -331,18 +361,6 @@ func (x *AI) Matches(y Value) bool { return matchArray(x, y) }
 func (x *AF) Matches(y Value) bool { return matchArray(x, y) }
 func (x *AS) Matches(y Value) bool { return matchArray(x, y) }
 func (x *AV) Matches(y Value) bool { return matchArray(x, y) }
-
-func (x *AB) getFlags() flags { return x.flags }
-func (x *AI) getFlags() flags { return x.flags }
-func (x *AF) getFlags() flags { return x.flags }
-func (x *AS) getFlags() flags { return x.flags }
-func (x *AV) getFlags() flags { return x.flags }
-
-func (x *AB) setFlags(f flags) { x.flags = f }
-func (x *AI) setFlags(f flags) { x.flags = f }
-func (x *AF) setFlags(f flags) { x.flags = f }
-func (x *AS) setFlags(f flags) { x.flags = f }
-func (x *AV) setFlags(f flags) { x.flags = f }
 
 // Type returns a string representation of the array's type.
 func (x *AB) Type() string { return "N" }
@@ -358,118 +376,6 @@ func (x *AS) Type() string { return "S" }
 
 // Type returns a string representation of the array's type.
 func (x *AV) Type() string { return "A" }
-
-// array interface is satisfied by the different kind of supported arrays.
-// Typical implementation is given in comments.
-type array interface {
-	RefCountHolder
-	Len() int
-	at(i int) V            // x[i]
-	slice(i, j int) array  // x[i:j]
-	atIndices(y []int64) V // x[y] (goal code)
-	set(i int, y V)
-	getFlags() flags
-	setFlags(flags)
-	shallowClone() array
-	//setIndices(y AI, z V) error
-}
-
-// Len returns the length of the array.
-func (x *AB) Len() int { return len(x.Slice) }
-
-// Len returns the length of the array.
-func (x *AI) Len() int { return len(x.Slice) }
-
-// Len returns the length of the array.
-func (x *AF) Len() int { return len(x.Slice) }
-
-// Len returns the length of the array.
-func (x *AS) Len() int { return len(x.Slice) }
-
-// Len returns the length of the array.
-func (x *AV) Len() int { return len(x.Slice) }
-
-func (x *AB) at(i int) V { return NewI(b2i(x.Slice[i])) }
-func (x *AI) at(i int) V { return NewI(x.Slice[i]) }
-func (x *AF) at(i int) V { return NewF(x.Slice[i]) }
-func (x *AS) at(i int) V { return NewS(x.Slice[i]) }
-func (x *AV) at(i int) V { return x.Slice[i] }
-
-// At returns array value at the given index.
-func (x *AB) At(i int) bool { return x.Slice[i] }
-
-// At returns array value at the given index.
-func (x *AI) At(i int) int64 { return x.Slice[i] }
-
-// At returns array value at the given index.
-func (x *AF) At(i int) float64 { return x.Slice[i] }
-
-// At returns array value at the given index.
-func (x *AS) At(i int) string { return x.Slice[i] }
-
-// At returns array value at the given index.
-func (x *AV) At(i int) V { return x.Slice[i] }
-
-func (x *AB) slice(i, j int) array { return &AB{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
-func (x *AI) slice(i, j int) array { return &AI{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
-func (x *AF) slice(i, j int) array { return &AF{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
-func (x *AS) slice(i, j int) array { return &AS{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
-func (x *AV) slice(i, j int) array { return &AV{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
-
-func (x *AB) shallowClone() array {
-	if reusableRCp(x.rc) {
-		x.setFlags(flagNone)
-		return x
-	}
-	var n int
-	r := &AB{Slice: make([]bool, x.Len()), rc: &n}
-	copy(r.Slice, x.Slice)
-	return r
-}
-
-func (x *AI) shallowClone() array {
-	if reusableRCp(x.rc) {
-		x.setFlags(flagNone)
-		return x
-	}
-	var n int
-	r := &AI{Slice: make([]int64, x.Len()), rc: &n}
-	copy(r.Slice, x.Slice)
-	return r
-}
-
-func (x *AF) shallowClone() array {
-	if reusableRCp(x.rc) {
-		x.setFlags(flagNone)
-		return x
-	}
-	var n int
-	r := &AF{Slice: make([]float64, x.Len()), rc: &n}
-	copy(r.Slice, x.Slice)
-	return r
-}
-
-func (x *AS) shallowClone() array {
-	if reusableRCp(x.rc) {
-		x.setFlags(flagNone)
-		return x
-	}
-	var n int
-	r := &AS{Slice: make([]string, x.Len()), rc: &n}
-	copy(r.Slice, x.Slice)
-	return r
-}
-
-func (x *AV) shallowClone() array {
-	if reusableRCp(x.rc) {
-		x.setFlags(flagNone)
-		return x
-	}
-	var n int
-	r := &AV{Slice: make([]V, x.Len()), rc: &n}
-	copy(r.Slice, x.Slice)
-	return r
-}
 
 // derivedVerb represents values modified by an adverb. This kind value is not
 // manipulable within the program, as it is only produced as an intermediary

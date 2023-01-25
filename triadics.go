@@ -376,44 +376,6 @@ func amendrAV(x array, yv *AV, z V) (array, error) {
 	return x, nil
 }
 
-// set changes x at i with y (in place).
-func (x *AV) set(i int, y V) {
-	y.InitWithRC(x.rc)
-	x.Slice[i] = y
-}
-
-// set changes x at i with y (in place).
-func (x *AB) set(i int, y V) {
-	if y.IsI() {
-		x.Slice[i] = y.n != 0
-	} else {
-		x.Slice[i] = y.F() != 0
-	}
-}
-
-// set changes x at i with y (in place).
-func (x *AI) set(i int, y V) {
-	if y.IsI() {
-		x.Slice[i] = y.n
-	} else {
-		x.Slice[i] = int64(y.F())
-	}
-}
-
-// set changes x at i with y (in place).
-func (x *AF) set(i int, y V) {
-	if y.IsI() {
-		x.Slice[i] = float64(y.I())
-	} else {
-		x.Slice[i] = y.F()
-	}
-}
-
-// set changes x at i with y (in place).
-func (x *AS) set(i int, y V) {
-	x.Slice[i] = string(y.value.(S))
-}
-
 // deepAmend3 implements .[x;y;f].
 func (ctx *Context) deepAmend3(x, y, f V) V {
 	x = x.Clone()
