@@ -200,61 +200,24 @@ func cutAI(x *AI, y V) V {
 			return Panicf("x_y : x contains out of bound index (%d)", i)
 		}
 	}
-	if x.Len() == 0 {
+	xlen := x.Len()
+	if xlen == 0 {
 		return NewAV(nil)
 	}
 	switch yv := y.value.(type) {
-	case *AB:
-		r := make([]V, x.Len())
+	case array:
+		r := make([]V, xlen)
+		rc := yv.RC()
+		*rc += 2
 		for i, from := range x.Slice {
-			to := int64(yv.Len())
-			if i+1 < x.Len() {
+			to := ylen
+			if i+1 < xlen {
 				to = x.At(i + 1)
 			}
-			r[i] = NewV(yv.slice(int(from), int(to)))
+			r[i] = Canonical(NewV(yv.slice(int(from), int(to))))
 		}
-		return NewV(&AV{Slice: r, rc: yv.rc})
-	case *AI:
-		r := make([]V, x.Len())
-		for i, from := range x.Slice {
-			to := int64(yv.Len())
-			if i+1 < x.Len() {
-				to = x.At(i + 1)
-			}
-			r[i] = NewV(yv.slice(int(from), int(to)))
-		}
-		return NewV(&AV{Slice: r, rc: yv.rc})
-	case *AF:
-		r := make([]V, x.Len())
-		for i, from := range x.Slice {
-			to := int64(yv.Len())
-			if i+1 < x.Len() {
-				to = x.At(i + 1)
-			}
-			r[i] = NewV(yv.slice(int(from), int(to)))
-		}
-		return NewV(&AV{Slice: r, rc: yv.rc})
-	case *AS:
-		r := make([]V, x.Len())
-		for i, from := range x.Slice {
-			to := int64(yv.Len())
-			if i+1 < x.Len() {
-				to = x.At(i + 1)
-			}
-			r[i] = NewV(yv.slice(int(from), int(to)))
-		}
-		return NewV(&AV{Slice: r, rc: yv.rc})
-	case *AV:
-		r := make([]V, x.Len())
-		for i, from := range x.Slice {
-			to := int64(yv.Len())
-			if i+1 < x.Len() {
-				to = x.At(i + 1)
-			}
-			r[i] = NewV(yv.slice(int(from), int(to)))
-		}
-		ra := &AV{Slice: r, rc: yv.rc}
-		return CanonicalRec(NewV(ra))
+		var n int
+		return NewV(&AV{Slice: r, rc: &n})
 	default:
 		return Panicf("x_y : y not an array (%s)", y.Type())
 	}
@@ -1065,6 +1028,8 @@ func shapeSplit(x V, y V) V {
 		if ylen%int(i) != 0 {
 			n++
 		}
+		rc := yv.RC()
+		*rc += 2
 		r := make([]V, n)
 		for j := 0; j < n; j++ {
 			yc := y
@@ -1073,7 +1038,8 @@ func shapeSplit(x V, y V) V {
 			yc.value = yv.slice(from, to)
 			r[j] = Canonical(yc)
 		}
-		return NewV(&AV{Slice: r, rc: yv.RC()})
+		var rcn int
+		return NewV(&AV{Slice: r, rc: &rcn})
 	default:
 		return panics("i$y : y not an array")
 	}
