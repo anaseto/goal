@@ -1025,12 +1025,15 @@ func windows(i int64, y V) V {
 			return Panicf("i^y : i out of range !%d (%d)", yv.Len()+1, i)
 		}
 		r := make([]V, 1+yv.Len()-int(i))
+		rc := yv.RC()
+		*rc += 2
 		for j := range r {
 			yc := y
 			yc.value = yv.slice(j, j+int(i))
 			r[j] = Canonical(yc)
 		}
-		return NewV(&AV{Slice: r, rc: yv.RC()})
+		var n int
+		return NewV(&AV{Slice: r, rc: &n})
 	default:
 		return panics("i^y : y not an array")
 	}
