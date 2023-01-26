@@ -151,7 +151,7 @@ func floor(x V) V {
 	}
 }
 
-// ceil returns ⌈x.
+// ceil returns ceil x.
 func ceil(x V) V {
 	if x.IsI() {
 		return x
@@ -237,7 +237,7 @@ func not(x V) V {
 	}
 }
 
-// abs returns abs[x].
+// abs returns abs x.
 func abs(x V) V {
 	if x.IsI() {
 		return NewI(absI(x.I()))
