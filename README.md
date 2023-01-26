@@ -173,11 +173,12 @@ x~y match       3~3 -> 1        2 3~3 2 -> 0       ("a";%)~("b";%) -> 0 1
 ,x  enlist      ,1 -> ,1 (list with one element)
 x,y join        1,2 -> 1 2      "ab" "c","d" -> "ab" "c" "d"
 ^x  sort        ^3 5 0 -> 0 3 5       ^"ca" "ab" "bc" -> "ab" "bc" "ca"
+i^s windows     2^"abcd" -> "ab" "bc" "cd"      (2-bytes strings)
 i^y windows     2^!4 -> (0 1;1 2;2 3)
 s^y trim        " []"^"  [text]  " -> "text"    "\n"^"\nline\n" -> "line"
 x^y without     2 3^1 1 2 3 3 4 -> 1 1 4
-#x  length      #2 4 5 -> 3         #"ab" "cd" -> 2
-i#y take        2#4 1 5 -> 4 1      4#3 1 5 -> 3 1 5 3 (cyclic)
+#x  length      #2 4 5 -> 3       #"ab" "cd" -> 2
+i#y take        2#4 1 5 -> 4 1    4#3 1 5 -> 3 1 5 3 (cyclic)    3#1 -> 1 1 1
 s#y count       "ab"#"cabdab" "cd" "deab" -> 2 0 1
 f#y replicate   {0 1 1 0}#4 1 5 3 -> 1 5    {x>0}#2 -3 1 -> 2 1
 x#y keep only   2 3^1 1 2 3 3 4 -> 2 3 3

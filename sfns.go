@@ -1025,6 +1025,15 @@ func nudgeBack(x V) V {
 // windows returns i^y.
 func windows(i int64, y V) V {
 	switch yv := y.value.(type) {
+	case S:
+		if i <= 0 || i >= int64(len(yv)+1) {
+			return Panicf("i^y : i out of range !%d (%d)", len(yv)+1, i)
+		}
+		r := make([]string, 1+len(yv)-int(i))
+		for j := range r {
+			r[j] = string(yv[j : j+int(i)])
+		}
+		return NewAS(r)
 	case array:
 		if i <= 0 || i >= int64(yv.Len()+1) {
 			return Panicf("i^y : i out of range !%d (%d)", yv.Len()+1, i)
@@ -1040,7 +1049,7 @@ func windows(i int64, y V) V {
 		var n int
 		return NewAVWithRC(r, &n)
 	default:
-		return panics("i^y : y not an array")
+		return panicType("i^y", "y", y)
 	}
 }
 
