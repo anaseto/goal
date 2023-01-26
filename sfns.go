@@ -152,7 +152,14 @@ func drop(x, y V) V {
 	case *AB:
 		return drop(fromABtoAI(xv), y)
 	case *AI:
-		return cutAI(xv, y)
+		switch yv := y.value.(type) {
+		case S:
+			return cutAIS(xv, yv)
+		case array:
+			return cutAIarray(xv, yv)
+		default:
+			return panicType("I_y", "y", y)
+		}
 	case *AF:
 		z := toAI(xv)
 		if z.IsPanic() {
@@ -168,6 +175,20 @@ func drop(x, y V) V {
 
 func dropi(i int64, y V) V {
 	switch yv := y.value.(type) {
+	case S:
+		switch {
+		case i >= 0:
+			if i > int64(len(yv)) {
+				i = int64(len(yv))
+			}
+			return NewV(yv[i:])
+		default:
+			i = int64(len(yv)) + i
+			if i < 0 {
+				i = 0
+			}
+			return NewV(yv[:i])
+		}
 	case array:
 		switch {
 		case i >= 0:
@@ -189,37 +210,58 @@ func dropi(i int64, y V) V {
 	}
 }
 
-func cutAI(x *AI, y V) V {
+func cutAIarray(x *AI, y array) V {
 	if !x.flags.Has(flagAscending) && !sort.IsSorted(sortAI(x.Slice)) {
-		return panics("x_y : x is not ascending")
+		return panics("I_y : I is not ascending")
 	}
 	x.flags |= flagAscending
-	ylen := int64(Length(y))
+	ylen := int64(y.Len())
 	for _, i := range x.Slice {
 		if i < 0 || i > ylen {
-			return Panicf("x_y : x contains out of bound index (%d)", i)
+			return Panicf("I_y : I contains out of bound index (%d)", i)
 		}
 	}
 	xlen := x.Len()
 	if xlen == 0 {
-		return NewAVWithRC(nil, x.rc)
+		return NewAVWithRC(nil, reuseRCp(x.rc))
 	}
-	switch yv := y.value.(type) {
-	case array:
-		r := make([]V, xlen)
-		rc := yv.RC()
-		*rc += 2
-		for i, from := range x.Slice {
-			to := ylen
-			if i+1 < xlen {
-				to = x.At(i + 1)
-			}
-			r[i] = Canonical(NewV(yv.slice(int(from), int(to))))
+	r := make([]V, xlen)
+	rc := y.RC()
+	*rc += 2
+	for i, from := range x.Slice {
+		to := ylen
+		if i+1 < xlen {
+			to = x.At(i + 1)
 		}
-		return NewAVWithRC(r, reuseRCp(x.rc))
-	default:
-		return Panicf("x_y : y not an array (%s)", y.Type())
+		r[i] = Canonical(NewV(y.slice(int(from), int(to))))
 	}
+	return NewAVWithRC(r, reuseRCp(x.rc))
+}
+
+func cutAIS(x *AI, y S) V {
+	if !x.flags.Has(flagAscending) && !sort.IsSorted(sortAI(x.Slice)) {
+		return panics("I_s : I is not ascending")
+	}
+	x.flags |= flagAscending
+	ylen := int64(len(y))
+	for _, i := range x.Slice {
+		if i < 0 || i > ylen {
+			return Panicf("I_s : I contains out of bound index (%d)", i)
+		}
+	}
+	xlen := x.Len()
+	if xlen == 0 {
+		return NewASWithRC(nil, reuseRCp(x.rc))
+	}
+	r := make([]string, xlen)
+	for i, from := range x.Slice {
+		to := ylen
+		if i+1 < xlen {
+			to = x.At(i + 1)
+		}
+		r[i] = string(y[from:to])
+	}
+	return NewASWithRC(r, reuseRCp(x.rc))
 }
 
 // take returns i#y.

@@ -69,10 +69,10 @@ f:{x+y};f[1;2;3] / too many arguments
 1.5_2 3 / non-integer
 "a" "b"_2 3 4 / non-integer array
 "a"_1 2 / type
-1_"a" / not an array
 2 1_!10 / is not ascending
 20 40_!10 / out of bound
-0 0_"a" / not an array
+2 0_"a" / not ascending
+0 5_"a" / out of bound
 1.5#!10 / non-integer
 1 2 3#4 / not an array
 sub["a";"b"]#4 / type

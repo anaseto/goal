@@ -144,19 +144,19 @@ VERBS HELP
 :x  identity    :[42] -> 42 (recall that : is also syntax for return)
 x:y right       2:3 -> 3
 +x  flip        +(1 2;3 4) -> (1 3;2 4)
-x+y add         2+3 -> 5            2+3 4 -> 5 6
+n+n add         2+3 -> 5            2+3 4 -> 5 6
 s+s concat      "a"+"b" -> "ab"     "a" "b"+"c" -> "ac" "bc"
 -x  negate      - 2 3 -> -2 -3      -(1 2.5;3 4) -> (-1 -2.5;-3 -4)
-x-y subtract    5-3 -> 2            5 4-3 -> 2 1
+n-n subtract    5-3 -> 2            5 4-3 -> 2 1
 s-s trim suffix "file.txt"-".txt" -> "file"
 *x  first       *3 2 4 -> 3     *"ab" -> "ab"    *(+;*) -> +
-x*y multiply    2*3 -> 6            1 2 3*3 -> 3 6 9
+n*n multiply    2*3 -> 6            1 2 3*3 -> 3 6 9
 s*x repeat      "a"*3 2 1 0 -> "aaa" "aa" "a" ""
 %x  classify    %1 2 3 1 2 3 -> 0 1 2 0 1 2     %"a" "b" "a" -> 0 1 0
 x%y divide      3%2 -> 1.5          3 4%2 -> 2 1.5
 !i  enum        !5 -> 0 1 2 3 4
 !x  odometer    !2 3 -> (0 0 0 1 1 1;0 1 2 0 1 2)
-x!y mod         3!5 4 3 -> 2 1 0
+n!n mod         3!5 4 3 -> 2 1 0
 &x  where       &0 0 1 0 0 0 1 -> 2 6
 x&y min         2&3 -> 2        4&3 -> 3
 |x  reverse     |!5 -> 4 3 2 1 0
@@ -183,9 +183,11 @@ f#y replicate   {0 1 1 0}#4 1 5 3 -> 1 5    {x>0}#2 -3 1 -> 2 1
 x#y keep only   2 3^1 1 2 3 3 4 -> 2 3 3
 _N  floor       _2.3 -> 2           _1.5 3.7 -> 1 3
 _S  to lower    _"ABC" -> "abc"     _"AB" "CD" -> "ab" "cd"
+i_s drop bytes  2_"abcde" -> "cde"  -2_"abcde" -> "abc" 
 i_x drop        2_3 4 5 6 -> 5 6    -2_3 4 5 6 -> 3 4
 s_x trim prefix "pref-"_"pref-name" -> "name"
-x_y cut         2 5_!10 -> (2 3 4;5 6 7 8 9)
+I_s cut string  1 3_"abcdef" -> "bc" "def"
+I_y cut         2 5_!10 -> (2 3 4;5 6 7 8 9)
 f_x weed out    {0 1 1 0}_4 1 5 3 -> 4 3    {x>0}_2 -3 1 -> ,-3
 $x  string      $2 3 -> "2 3"     $"text" -> "\"text\""
 i$x split       2$!6 -> (0 1;2 3;4 5)   2$"a" "b" "c" -> ("a" "b";,"c")
@@ -271,8 +273,8 @@ i f/x  do        3{x*2}/4 -> 32
 i f\x  dos       3{x*2}\4 -> 4 8 16 32
 f f/x  while     {x<100}{x*2}/4 -> 128
 f f\x  whiles    {x<100}{x*2}\4 -> 4 8 16 32 64 128
-f/x    converge  {1+1.0%x}/1 -> 1.618033988749895
-f\x    converges {_x%2}\10 -> 10 5 2 1 0
+f/x    converge  {1+1.0%x}/1 -> 1.618033988749895     {-x}/1 -> -1
+f\x    converges {_x%2}\10 -> 10 5 2 1 0              {-x}\1 -> 1 -1
 s/x    join      ","/"a" "b" "c" -> "a,b,c"
 s\x    split     ","\"a,b,c" -> "a" "b" "c"
 i s\x  splitN    (2) ","\"a,b,c" -> "a" "b,c"
