@@ -192,8 +192,8 @@ i f/x  do        3{x*2}/4 -> 32
 i f\x  dos       3{x*2}\4 -> 4 8 16 32
 f f/x  while     {x<100}{x*2}/4 -> 128
 f f\x  whiles    {x<100}{x*2}\4 -> 4 8 16 32 64 128
-f/x    converge  {1+1.0%x}/1 -> 1.618033988749895
-f\x    converges {_x%2}\10 -> 10 5 2 1 0
+f/x    converge  {1+1.0%x}/1 -> 1.618033988749895     {-x}/1 -> -1
+f\x    converges {_x%2}\10 -> 10 5 2 1 0              {-x}\1 -> 1 -1
 s/x    join      ","/"a" "b" "c" -> "a,b,c"
 s\x    split     ","\"a,b,c" -> "a" "b" "c"
 i s\x  splitN    (2) ","\"a,b,c" -> "a" "b,c"

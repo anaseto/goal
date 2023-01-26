@@ -9,7 +9,6 @@ Features:
 - maybe a switch/match
 - maybe add splice
 - improve error locations for adverbs and some other special cases
-- maybe implement cycle detection in converge
 
 Tests:
 - improve test coverage for error messages and refactor and improve them along

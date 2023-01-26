@@ -84,6 +84,8 @@ const maxConvergeIters = 1_000_000
 func converge(ctx *Context, f, x V) V {
 	n := 0
 	f.IncrRC()
+	first := x
+	first.IncrRC()
 	ctx.push(x)
 	for {
 		x.IncrRC()
@@ -91,18 +93,22 @@ func converge(ctx *Context, f, x V) V {
 		x.DecrRC()
 		if r.IsPanic() {
 			f.DecrRC()
+			first.DecrRC()
 			ctx.drop()
 			return r
 		}
-		if Match(r, x) {
+		if Match(r, x) || Match(r, first) {
 			f.DecrRC()
+			first.DecrRC()
 			ctx.drop()
-			return r
+			return x
 		}
 		ctx.replaceTop(r)
 		x = r
 		n++
 		if n > maxConvergeIters {
+			f.DecrRC()
+			first.DecrRC()
 			ctx.drop()
 			return panics("f/x : too many iterations")
 		}
@@ -337,6 +343,8 @@ func converges(ctx *Context, f, x V) V {
 		}
 	}()
 	f.IncrRC()
+	first := x
+	first.IncrRC()
 	ctx.push(x)
 	for {
 		x.IncrRC()
@@ -344,11 +352,13 @@ func converges(ctx *Context, f, x V) V {
 		y := f.applyN(ctx, 1)
 		if y.IsPanic() {
 			f.DecrRC()
+			first.DecrRC()
 			ctx.drop()
 			return y
 		}
-		if Match(y, x) {
+		if Match(y, x) || Match(y, first) {
 			f.DecrRC()
+			first.DecrRC()
 			ctx.drop()
 			return Canonical(NewAV(r))
 		}
@@ -356,6 +366,8 @@ func converges(ctx *Context, f, x V) V {
 		x = y
 		n++
 		if n > maxConvergeIters {
+			f.DecrRC()
+			first.DecrRC()
 			ctx.drop()
 			return panics(`f\x : too many iterations`)
 		}
