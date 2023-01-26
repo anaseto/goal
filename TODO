@@ -1,14 +1,14 @@
 Features:
-- some kind of object/struct/dict thing
 - more general io (open/read/write/close/defer?)
-- split i$s, and cut x_s and maybe amend string @[s;I;s]
-- more utf8 and unicode functions
+- some kind of object/struct/dict thing
+- improve error locations for adverbs and some other special cases
 - maybe some kind of templating/interpolation
+- maybe add splice
+- maybe split i$s and maybe amend string @[s;I;s]
+- maybe more utf8 and unicode functions
 - maybe add functions for handling text blobs of bytes
 - maybe bitwise operations
 - maybe a switch/match
-- maybe add splice
-- improve error locations for adverbs and some other special cases
 
 Tests:
 - improve test coverage for error messages and refactor and improve them along
