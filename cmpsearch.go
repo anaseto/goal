@@ -299,10 +299,10 @@ func uniq(ctx *Context, x V) V {
 		b := xv.At(0)
 		for i := 1; i < xv.Len(); i++ {
 			if xv.At(i) != b {
-				return NewAB([]bool{b, xv.At(i)})
+				return NewABWithRC([]bool{b, xv.At(i)}, reuseRCp(xv.rc))
 			}
 		}
-		return NewAB([]bool{b})
+		return NewABWithRC([]bool{b}, reuseRCp(xv.rc))
 	case *AF:
 		r := []float64{}
 		m := map[float64]struct{}{}
@@ -326,7 +326,7 @@ func uniq(ctx *Context, x V) V {
 				}
 				r = append(r, xi)
 			}
-			return NewAI(r)
+			return NewAIWithRC(r, reuseRCp(xv.rc))
 		}
 		m := map[int64]struct{}{}
 		for _, xi := range xv.Slice {
@@ -337,7 +337,7 @@ func uniq(ctx *Context, x V) V {
 				continue
 			}
 		}
-		return NewAI(r)
+		return NewAIWithRC(r, reuseRCp(xv.rc))
 	case *AS:
 		r := []string{}
 		if xv.Len() <= bruteForceN {
@@ -350,7 +350,7 @@ func uniq(ctx *Context, x V) V {
 				}
 				r = append(r, xi)
 			}
-			return NewAS(r)
+			return NewASWithRC(r, reuseRCp(xv.rc))
 		}
 		m := map[string]struct{}{}
 		for _, xi := range xv.Slice {
@@ -361,7 +361,7 @@ func uniq(ctx *Context, x V) V {
 				continue
 			}
 		}
-		return NewAS(r)
+		return NewASWithRC(r, reuseRCp(xv.rc))
 	case *AV:
 		r := []V{}
 		if xv.Len() > bruteForceN {
