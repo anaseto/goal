@@ -41,18 +41,6 @@ my %dyads = (
         F_F => ["x < y", "B"],
         S_S => ["x < y", "B"],
     },
-    #LesserEq =>  {
-        #B_B => ["y || !x", "B"],
-        #B_I => ["b2i(x) <= y", "B"],
-        #B_F => ["b2f(x) <= y", "B"],
-        #I_B => ["x <= b2i(y)", "B"],
-        #I_I => ["x <= y", "B"],
-        #I_F => ["float64(x) <= y", "B"],
-        #F_B => ["x <= b2f(y)", "B"],
-        #F_I => ["x <= float64(y)", "B"],
-        #F_F => ["x <= y", "B"],
-        #S_S => ["x <= y", "B"],
-    #},
     greater =>  {
         B_B => ["x && !y", "B"],
         B_I => ["b2i(x) > y", "B"],
@@ -65,18 +53,6 @@ my %dyads = (
         F_F => ["x > y", "B"],
         S_S => ["x > y", "B"],
     },
-    #GreaterEq =>  {
-        #B_B => ["x || !y", "B"],
-        #B_I => ["b2i(x) >= y", "B"],
-        #B_F => ["b2f(x) >= y", "B"],
-        #I_B => ["x >= b2i(y)", "B"],
-        #I_I => ["x >= y", "B"],
-        #I_F => ["float64(x) >= y", "B"],
-        #F_B => ["x >= b2f(y)", "B"],
-        #F_I => ["x >= float64(y)", "B"],
-        #F_F => ["x >= y", "B"],
-        #S_S => ["x >= y", "B"],
-    #},
     add =>  {
         B_B => ["b2i(x) + b2i(y)", "I"],
         B_I => ["b2i(x) + y", "I"],
@@ -101,17 +77,6 @@ my %dyads = (
         F_F => ["x - y", "F"],
         S_S => ["strings.TrimSuffix(string(x), string(y))", "S"],
     },
-    #Span =>  {
-        #B_B => ["1+ b2i(x) - b2i(y)", "I"],
-        #B_I => ["1 + b2i(x) - y", "I"],
-        #B_F => ["1 + b2f(x) - y", "F"],
-        #I_B => ["1 + x - b2i(y)", "I"],
-        #I_I => ["1 + x - y", "I"],
-        #I_F => ["1 + float64(x) - y", "F"],
-        #F_B => ["1 + x - b2f(y)", "F"],
-        #F_I => ["1 + x - float64(y)", "F"],
-        #F_F => ["1 + x - y", "F"],
-    #},
     multiply =>  {
         B_B => ["x && y", "B"],
         B_I => ["b2i(x) * y", "I"],
@@ -164,28 +129,6 @@ my %dyads = (
         F_F => ["math.Max(x, float64(y))", "F"],
         S_S => ["maxS(x, y)", "S"],
     },
-    #Or =>  {
-        #B_B => ["x || y", "B"],
-        #B_I => ["1-((1-b2i(x)) * (1-y))", "I"],
-        #B_F => ["1-((1-b2f(x)) * (1-y))", "F"],
-        #I_B => ["1-((1-x) * (1-b2i(y)))", "I"],
-        #I_I => ["1-((1-x) * (1-y))", "I"],
-        #I_F => ["1-((1-float64(x)) * (1-y))", "F"],
-        #F_B => ["1-((1-x) * (1-b2f(y)))", "F"],
-        #F_I => ["1-((1-x) * float64F(1-y))", "F"],
-        #F_F => ["1-((1-x) * (1-y))", "F"],
-    #},
-    #And =>  {
-        #B_B => ["x && y", "B"],
-        #B_I => ["b2i(x) * y", "I"],
-        #B_F => ["b2f(x) * y", "F"],
-        #I_B => ["x * b2i(y)", "I"],
-        #I_I => ["x * y", "I"],
-        #I_F => ["float64F(x) * y", "F"],
-        #F_B => ["x * b2f(y)", "F"],
-        #F_I => ["x * float64F(y)", "F"],
-        #F_F => ["x * y", "F"],
-    #},
     modulus =>  {
         B_B => ["modI(b2i(x), b2i(y))", "I"],
         B_I => ["modI(b2i(x), y)", "I"],
@@ -221,18 +164,13 @@ EOS
 genOp("equal", "=");
 #genOp("NotEqual", "≠");
 genOp("lesser", "<");
-#genOp("LesserEq", "≤");
 genOp("greater", ">");
-#genOp("GreaterEq", "≥");
 genOp("add", "+");
 genOp("subtract", "-");
-#genOp("Span", "¬");
 genOp("multiply", "*");
 genOp("divide", "%");
 genOp("minimum", "&");
 genOp("maximum", "|");
-#genOp("And", "∧"); # identical to Multiply
-#genOp("Or", "∨"); # Multiply under Not
 genOp("modulus", " mod ");
 
 sub genOp {
