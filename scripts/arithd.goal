@@ -152,37 +152,37 @@ doExpr:{[e;yt;x;y]
 }
 genOp:{
   o::x; op::y; ts::olts[::o]
-  say sub[("OO";o;"OP";op)] `// OO returns xOPy.`
-  say sub["OO",o] `func OO(x, y V) V {`
-  say'{sub[("XX";"x";"XT";x;"OO";o;"YY";"y")][
-      `if XX.IsXT() { return OOXTV(XX.XT(), YY) }`
+  say sub[("{OO}";o;"{OP}";op)] `// {OO} returns x{OP}y.`
+  say sub["{OO}",o] `func {OO}(x, y V) V {`
+  say'{sub[("{XT}";x;"{OO}";o)][
+      `if x.Is{XT}() { return {OO}{XT}V(x.{XT}(), y) }`
   ]}'utypes#ts
   say `switch xv := x.value.(type) {`
-  say'{sub[("XT";x;"OO";o)] `  case XT: return OOXTV(xv, y)`}'^(ntypes^ts)
-  say'{sub[("XT";x;"OO";o)] `  case *XT: return OOXTV(xv, y)`}'^"A"+ts
-  say sub["OP";escp op]"\n"_`
+  say'{sub[("{XT}";x;"{OO}";o)] `  case {XT}: return {OO}{XT}V(xv, y)`}'^(ntypes^ts)
+  say'{sub[("{XT}";x;"{OO}";o)] `  case *{XT}: return {OO}{XT}V(xv, y)`}'^"A"+ts
+  say sub["{OP}";escp op]"\n"_`
   case *AV:
       switch yv := y.value.(type) {
       case array:
             if yv.Len() != xv.Len() {
-                    return Panicf("xOPy : length mismatch: %d vs %d", xv.Len(), yv.Len())
+                    return Panicf("x{OP}y : length mismatch: %d vs %d", xv.Len(), yv.Len())
             }`
   tplAV:"\n"_`
   r := xv.reuse()
   for i, xi := range xv.Slice {
-          ri := OO(xi, YY)
+          ri := {OO}(xi, {YY})
           if ri.IsPanic() {
                   return ri
           }
           r.Slice[i] = ri
   }
   return NewV(r)`
-  say sub[("OO";o;"YY";"yv.at(i)")] tplAV
+  say sub[("{OO}";o;"{YY}";"yv.at(i)")] tplAV
   say `}`
-  say sub[("OO";o;"YY";"y")] tplAV
-  say sub["OP";op]"\n"_`
+  say sub[("{OO}";o;"{YY}";"y")] tplAV
+  say sub["{OP}";op]"\n"_`
   default:
-        return panicTypeElt("xOPy", "x", x)
+        return panicTypeElt("x{OP}y", "x", x)
   }
 }
 `
@@ -191,7 +191,7 @@ genOp:{
 }
 dox:{
   xt::x; rts:orts[::o;xt]; xct:nt2go xt
-  say sub[("OO";o;"XT";xt;"XCT";xct)] `func OOXTV(x XCT, y V) V {`
+  say sub[("{OO}";o;"{XT}";xt;"{XCT}";xct)] `func {OO}{XT}V(x {XCT}, y V) V {`
   say'{(e;t):getET[::o;xt;x];doxUy[x;e;t]}'utypes#rts
   say `  switch yv := y.value.(type) {`
   say'{(e;t):getET[::o;xt;x];doxBy[x;e;t]}'^ntypes^rts
@@ -204,7 +204,7 @@ doxUy:{[yt;e;t]
   e:sub[rx/\by\b/;"y."+yt+"()"]e
   t:?[t~"B";"I";t]
   e:?[t in utypes;+/("New";t;"(";e;")");+/("NewV";"(";t;"(";e;"))")]
-  sub[("YT";yt;"EE";e)] `if y.IsYT() { return EE; }`
+  sub[("{YT}";yt;"{EE}";e)] `if y.Is{YT}() { return {EE}; }`
 }
 doxBy:{[yt;e;t]
   e:?[t~"B";"b2i("+e+")";e]
@@ -212,33 +212,33 @@ doxBy:{[yt;e;t]
   e:doExpr[e;yt;"x";"yv"]
   t:nt2go t
   t:?[t~"bool";"int64";t]
-  sub[("YT";yt;"NT";nt;"RT";t;"EE";e)]`  case YT: return NewNT(RT(EE))`
+  sub[("{YT}";yt;"{NT}";nt;"{RT}";t;"{EE}";e)]`  case {YT}: return New{NT}({RT}({EE}))`
 }
 doxY:{[yt;e;t]
   e:doExpr[e;yt;"x";"yv.At(i)"]
   rt:t2go t
   ?[yt~t
-   sub[("YT";yt;"RT";rt;"EE";e)]"\n"_`
-  case *AYT:
+   sub[("{YT}";yt;"{RT}";rt;"{EE}";e)]"\n"_`
+  case *A{YT}:
       r := yv.reuse()
       for i := range r.Slice {
-              r.Slice[i] = RT(EE)
+              r.Slice[i] = {RT}({EE})
       }
       return NewV(r)`
-   sub[("YT";yt;"RT";rt;"EE";e;"TT";t)]"\n"_`
-  case *AYT:
-      r := make([]RT, yv.Len())
+   sub[("{YT}";yt;"{RT}";rt;"{EE}";e;"{TT}";t)]"\n"_`
+  case *A{YT}:
+      r := make([]{RT}, yv.Len())
       for i := range r {
-              r[i] = RT(EE)
+              r[i] = {RT}({EE})
       }
-      return NewATTWithRC(r, reuseRCp(yv.rc))`]
+      return NewA{TT}WithRC(r, reuseRCp(yv.rc))`]
 }
 doxAV:{
-  say sub[("OO";o;"XT";xt;"OP";op)]"\n"_`
+  say sub[("{OO}";o;"{XT}";xt;"{OP}";op)]"\n"_`
   case *AV:
       r := yv.reuse()
       for i, yi := range yv.Slice {
-              ri := OOXTV(x, yi)
+              ri := {OO}{XT}V(x, yi)
               if ri.IsPanic() {
                       return ri
               }
@@ -246,12 +246,12 @@ doxAV:{
       }
       return NewV(r)
   default:
-      return panicTypeElt("xOPy", "y", y)
+      return panicTypeElt("x{OP}y", "y", y)
   }`
 }
 doX:{
   xt::x; rts:orts[::o;xt]; xct:t2go xt
-  say sub[("OO";o;"XT";xt)] `func OOAXTV(x *AXT, y V) V {`
+  say sub[("{OO}";o;"{XT}";xt)] `func {OO}A{XT}V(x *A{XT}, y V) V {`
   say'{(e;t):getET[::o;xt;x];doXUy[x;e;t]}'utypes#rts
   say `  switch yv := y.value.(type) {`
   say'{(e;t):getET[::o;xt;x];doXBy[x;e;t]}'^ntypes^rts
@@ -262,63 +262,63 @@ doXUy:{[yt;e;t]
   e:doExpr[e;t2go yt;"x.At(i)";"y."+yt+"()"]
   rt:t2go t
   ?[xt~t
-    sub[("YT";yt;"RT";rt;"EE";e)]"\n"_`
-  if y.IsYT() {
+    sub[("{YT}";yt;"{RT}";rt;"{EE}";e)]"\n"_`
+  if y.Is{YT}() {
       r := x.reuse()
       for i := range r.Slice {
-              r.Slice[i] = RT(EE)
+              r.Slice[i] = {RT}({EE})
       }
       return NewV(r)
   }`
-   sub[("YT";yt;"RT";rt;"EE";e;"TT";t)]"\n"_`
-  if y.IsYT() {
-      r := make([]RT, x.Len())
+   sub[("{YT}";yt;"{RT}";rt;"{EE}";e;"{TT}";t)]"\n"_`
+  if y.Is{YT}() {
+      r := make([]{RT}, x.Len())
       for i := range r {
-              r[i] = RT(EE)
+              r[i] = {RT}({EE})
       }
-      return NewATTWithRC(r, reuseRCp(x.rc))
+      return NewA{TT}WithRC(r, reuseRCp(x.rc))
   }`]
 }
 doXBy:{[yt;e;t]
   e:doExpr[e;yt;"x.At(i)";"yv"]
   rt:t2go t
   ?[xt~t
-    sub[("YT";yt;"RT";rt;"EE";e)]"\n"_`
-  case YT:
+    sub[("{YT}";yt;"{RT}";rt;"{EE}";e)]"\n"_`
+  case {YT}:
           r := x.reuse()
           for i := range r.Slice {
-                  r.Slice[i] = RT(EE)
+                  r.Slice[i] = {RT}({EE})
           }
           return NewV(r)`
-    sub[("YT";yt;"RT";rt;"EE";e;"TT";t)]"\n"_`
-  case YT:
-          r := make([]RT, x.Len())
+    sub[("{YT}";yt;"{RT}";rt;"{EE}";e;"{TT}";t)]"\n"_`
+  case {YT}:
+          r := make([]{RT}, x.Len())
           for i := range r {
-                  r[i] = RT(EE)
+                  r[i] = {RT}({EE})
           }
-          return NewATTWithRC(r, reuseRCp(x.rc))`]
+          return NewA{TT}WithRC(r, reuseRCp(x.rc))`]
 }
 doXY:{[yt;e;t]
   e:doExpr[e;yt;"x.At(i)";"yv.At(i)"]
   rt:t2go t
-  s1:sub[("YT";yt;"OP";escp op)]"\n"_`
-  case *AYT:
+  s1:sub[("{YT}";yt;"{OP}";escp op)]"\n"_`
+  case *A{YT}:
           if x.Len() != yv.Len() {
-                  return Panicf("xOPy : length mismatch: %d vs %d", x.Len(), yv.Len())
+                  return Panicf("x{OP}y : length mismatch: %d vs %d", x.Len(), yv.Len())
           }`
   s2:?[t in xt,yt
-    sub[("RT";rt;"EE";e;"XY";?[xt~t;"x";"yv"])]"\n"_`
-          r := XY.reuse()
+    sub[("{RT}";rt;"{EE}";e;"{XY}";?[xt~t;"x";"yv"])]"\n"_`
+          r := {XY}.reuse()
           for i := range r.Slice {
-                  r.Slice[i] = RT(EE)
+                  r.Slice[i] = {RT}({EE})
           }
           return NewV(r)`
-    sub[("RT";rt;"EE";e;"TT";t)]"\n"_`
-          r := make([]RT, yv.Len())
+    sub[("{RT}";rt;"{EE}";e;"{TT}";t)]"\n"_`
+          r := make([]{RT}, yv.Len())
           for i := range r {
-                  r[i] = RT(EE)
+                  r[i] = {RT}({EE})
           }
-          return NewATTWithRC(r, reuseRCp(x.rc))`]
+          return NewA{TT}WithRC(r, reuseRCp(x.rc))`]
   "\n"/(s1;s2)
 }
 doXAV:{
@@ -332,15 +332,14 @@ doXAV:{
         r = yv.reuse()
     }`
     `r := yv.reuse()`]
-  say sub[("OPE";escp op;"OP";op;"OO";o;"XT";nxt;"XCT";xct;"REUSE";reuse)]"\n"_`
+  say sub[("{OP}E";escp op;"{OP}";op;"{OO}";o;"{XT}";nxt;"{XCT}";xct;"{REUSE}";reuse)]"\n"_`
   case *AV:
           if x.Len() != yv.Len() {
-                  return Panicf("xOPEy : length mismatch: %d vs %d", x.Len(), yv.Len())
+                  return Panicf("x{OP}Ey : length mismatch: %d vs %d", x.Len(), yv.Len())
           }
-          REUSE
-
+          {REUSE}
           for i := range r.Slice {
-                  ri := OOXTV(XCT(x.At(i)), yv.At(i))
+                  ri := {OO}{XT}V({XCT}(x.At(i)), yv.At(i))
                   if ri.IsPanic() {
                           return ri
                   }
@@ -348,7 +347,7 @@ doXAV:{
           }
           return NewV(r)
   default:
-          return panicTypeElt("xOPy", "y", y)
+          return panicTypeElt("x{OP}y", "y", y)
   }
 }
 `

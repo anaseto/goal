@@ -211,7 +211,6 @@ func equalABV(x *AB, y V) V {
 			return Panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := equalIV(b2i(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -273,7 +272,6 @@ func equalAFV(x *AF, y V) V {
 			return Panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := equalFV(float64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -335,7 +333,6 @@ func equalAIV(x *AI, y V) V {
 			return Panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := equalIV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -371,7 +368,6 @@ func equalASV(x *AS, y V) V {
 			return Panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := equalSV(S(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -589,7 +585,6 @@ func lesserABV(x *AB, y V) V {
 			return Panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := lesserIV(b2i(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -651,7 +646,6 @@ func lesserAFV(x *AF, y V) V {
 			return Panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := lesserFV(float64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -713,7 +707,6 @@ func lesserAIV(x *AI, y V) V {
 			return Panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := lesserIV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -749,7 +742,6 @@ func lesserASV(x *AS, y V) V {
 			return Panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := lesserSV(S(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -967,7 +959,6 @@ func greaterABV(x *AB, y V) V {
 			return Panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := greaterIV(b2i(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -1029,7 +1020,6 @@ func greaterAFV(x *AF, y V) V {
 			return Panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := greaterFV(float64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -1091,7 +1081,6 @@ func greaterAIV(x *AI, y V) V {
 			return Panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := greaterIV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -1127,7 +1116,6 @@ func greaterASV(x *AS, y V) V {
 			return Panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := greaterSV(S(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -1345,7 +1333,6 @@ func addABV(x *AB, y V) V {
 			return Panicf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := addIV(b2i(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -1407,7 +1394,6 @@ func addAFV(x *AF, y V) V {
 			return Panicf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := addFV(float64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -1469,7 +1455,6 @@ func addAIV(x *AI, y V) V {
 			return Panicf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := addIV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -1505,7 +1490,6 @@ func addASV(x *AS, y V) V {
 			return Panicf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := addSV(S(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -1723,7 +1707,6 @@ func subtractABV(x *AB, y V) V {
 			return Panicf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := subtractIV(b2i(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -1785,7 +1768,6 @@ func subtractAFV(x *AF, y V) V {
 			return Panicf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := subtractFV(float64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -1847,7 +1829,6 @@ func subtractAIV(x *AI, y V) V {
 			return Panicf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := subtractIV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -1883,7 +1864,6 @@ func subtractASV(x *AS, y V) V {
 			return Panicf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := subtractSV(S(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -2148,7 +2128,6 @@ func multiplyABV(x *AB, y V) V {
 			return Panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := multiplyIV(b2i(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -2225,7 +2204,6 @@ func multiplyAFV(x *AF, y V) V {
 			return Panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := multiplyFV(float64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -2302,7 +2280,6 @@ func multiplyAIV(x *AI, y V) V {
 			return Panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := multiplyIV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -2364,7 +2341,6 @@ func multiplyASV(x *AS, y V) V {
 			return Panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := multiplySV(S(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -2553,7 +2529,6 @@ func divideABV(x *AB, y V) V {
 			return Panicf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := divideIV(b2i(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -2615,7 +2590,6 @@ func divideAFV(x *AF, y V) V {
 			return Panicf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := divideFV(float64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -2677,7 +2651,6 @@ func divideAIV(x *AI, y V) V {
 			return Panicf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := divideIV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -2895,7 +2868,6 @@ func minimumABV(x *AB, y V) V {
 			return Panicf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := minimumIV(b2i(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -2957,7 +2929,6 @@ func minimumAFV(x *AF, y V) V {
 			return Panicf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := minimumFV(float64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -3019,7 +2990,6 @@ func minimumAIV(x *AI, y V) V {
 			return Panicf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := minimumIV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -3055,7 +3025,6 @@ func minimumASV(x *AS, y V) V {
 			return Panicf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := minimumSV(S(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -3273,7 +3242,6 @@ func maximumABV(x *AB, y V) V {
 			return Panicf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := maximumIV(b2i(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -3335,7 +3303,6 @@ func maximumAFV(x *AF, y V) V {
 			return Panicf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := maximumFV(float64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -3397,7 +3364,6 @@ func maximumAIV(x *AI, y V) V {
 			return Panicf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := maximumIV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -3433,7 +3399,6 @@ func maximumASV(x *AS, y V) V {
 			return Panicf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := maximumSV(S(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -3622,7 +3587,6 @@ func modulusABV(x *AB, y V) V {
 			return Panicf("x!y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := modulusIV(b2i(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -3684,7 +3648,6 @@ func modulusAFV(x *AF, y V) V {
 			return Panicf("x!y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := modulusFV(float64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
@@ -3746,7 +3709,6 @@ func modulusAIV(x *AI, y V) V {
 			return Panicf("x!y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-
 		for i := range r.Slice {
 			ri := modulusIV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
