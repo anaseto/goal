@@ -2419,7 +2419,7 @@ func divide(x, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x%%y", "x", x)
+		return panicTypeElt("x%y", "x", x)
 	}
 }
 
@@ -2460,7 +2460,7 @@ func divideFV(x float64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x%%y", "y", y)
+		return panicTypeElt("x%y", "y", y)
 	}
 }
 
@@ -2501,7 +2501,7 @@ func divideIV(x int64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x%%y", "y", y)
+		return panicTypeElt("x%y", "y", y)
 	}
 }
 
@@ -2563,7 +2563,7 @@ func divideABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x%%y", "y", y)
+		return panicTypeElt("x%y", "y", y)
 	}
 }
 
@@ -2625,7 +2625,7 @@ func divideAFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x%%y", "y", y)
+		return panicTypeElt("x%y", "y", y)
 	}
 }
 
@@ -2687,7 +2687,7 @@ func divideAIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x%%y", "y", y)
+		return panicTypeElt("x%y", "y", y)
 	}
 }
 
@@ -3447,7 +3447,7 @@ func maximumASV(x *AS, y V) V {
 	}
 }
 
-// modulus returns x mod y.
+// modulus returns x!y.
 func modulus(x, y V) V {
 	if x.IsI() {
 		return modulusIV(x.I(), y)
@@ -3466,7 +3466,7 @@ func modulus(x, y V) V {
 		switch yv := y.value.(type) {
 		case array:
 			if yv.Len() != xv.Len() {
-				return Panicf("x mod y : length mismatch: %d vs %d", xv.Len(), yv.Len())
+				return Panicf("x!y : length mismatch: %d vs %d", xv.Len(), yv.Len())
 			}
 			r := xv.reuse()
 			for i, xi := range xv.Slice {
@@ -3488,7 +3488,7 @@ func modulus(x, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x mod y", "x", x)
+		return panicTypeElt("x!y", "x", x)
 	}
 }
 
@@ -3529,7 +3529,7 @@ func modulusFV(x float64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x mod y", "y", y)
+		return panicTypeElt("x!y", "y", y)
 	}
 }
 
@@ -3570,7 +3570,7 @@ func modulusIV(x int64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x mod y", "y", y)
+		return panicTypeElt("x!y", "y", y)
 	}
 }
 
@@ -3592,7 +3592,7 @@ func modulusABV(x *AB, y V) V {
 	switch yv := y.value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return Panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return Panicf("x!y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := make([]int64, yv.Len())
 		for i := range r {
@@ -3601,7 +3601,7 @@ func modulusABV(x *AB, y V) V {
 		return NewAIWithRC(r, reuseRCp(x.rc))
 	case *AF:
 		if x.Len() != yv.Len() {
-			return Panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return Panicf("x!y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -3610,7 +3610,7 @@ func modulusABV(x *AB, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return Panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return Panicf("x!y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -3619,7 +3619,7 @@ func modulusABV(x *AB, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return Panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return Panicf("x!y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -3632,7 +3632,7 @@ func modulusABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x mod y", "y", y)
+		return panicTypeElt("x!y", "y", y)
 	}
 }
 
@@ -3654,7 +3654,7 @@ func modulusAFV(x *AF, y V) V {
 	switch yv := y.value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return Panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return Panicf("x!y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -3663,7 +3663,7 @@ func modulusAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return Panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return Panicf("x!y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -3672,7 +3672,7 @@ func modulusAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return Panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return Panicf("x!y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -3681,7 +3681,7 @@ func modulusAFV(x *AF, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return Panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return Panicf("x!y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -3694,7 +3694,7 @@ func modulusAFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x mod y", "y", y)
+		return panicTypeElt("x!y", "y", y)
 	}
 }
 
@@ -3716,7 +3716,7 @@ func modulusAIV(x *AI, y V) V {
 	switch yv := y.value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return Panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return Panicf("x!y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -3725,7 +3725,7 @@ func modulusAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return Panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return Panicf("x!y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.Slice {
@@ -3734,7 +3734,7 @@ func modulusAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return Panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return Panicf("x!y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.Slice {
@@ -3743,7 +3743,7 @@ func modulusAIV(x *AI, y V) V {
 		return NewV(r)
 	case *AV:
 		if x.Len() != yv.Len() {
-			return Panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
+			return Panicf("x!y : length mismatch: %d vs %d", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 
@@ -3756,6 +3756,6 @@ func modulusAIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x mod y", "y", y)
+		return panicTypeElt("x!y", "y", y)
 	}
 }

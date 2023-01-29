@@ -1,4 +1,4 @@
 #!/bin/sh
 
-perl arithd.pl > ../arithd.go
+goal arithd.goal > ../arithd.go
 gofmt -s -w ../arithd.go
