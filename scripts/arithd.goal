@@ -332,10 +332,10 @@ doXAV:{
         r = yv.reuse()
     }`
     `r := yv.reuse()`]
-  say sub[("{OP}E";escp op;"{OP}";op;"{OO}";o;"{XT}";nxt;"{XCT}";xct;"{REUSE}";reuse)]"\n"_`
+  say sub[("{OPE}";escp op;"{OP}";op;"{OO}";o;"{XT}";nxt;"{XCT}";xct;"{REUSE}";reuse)]"\n"_`
   case *AV:
           if x.Len() != yv.Len() {
-                  return Panicf("x{OP}Ey : length mismatch: %d vs %d", x.Len(), yv.Len())
+                  return Panicf("x{OPE}y : length mismatch: %d vs %d", x.Len(), yv.Len())
           }
           {REUSE}
           for i := range r.Slice {
