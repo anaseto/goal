@@ -8,6 +8,7 @@ import (
     "strings"
 )
 `
+
 / Line format: xt yt expr rt
 equal:(
   "B" "B" "x == y" "B"
@@ -132,11 +133,12 @@ modulus:(
   "F" "I" "modF(x, float64(y))" "F"
   "F" "F" "modF(x, y)" "F"
 )
+
 types:"B" "F" "I" "S" / atom types
 ntypes:"B" "F" "I" / numeric atom types
 itypes:"B" "I" / integer atom types
-ctypes:"bool" "float64" "int64" "string"
-cntypes:"bool" "float64" "int64" "S"
+ctypes:"bool" "float64" "int64" "string" / concrete types
+cntypes:"bool" "float64" "int64" "S" / concrete numeric types
 utypes:"F" "I" / atom unboxed types
 t2go:{ctypes[types?x]} / type to concrete go type
 nt2go:{cntypes[types?x]} / type to concrete go type
@@ -145,13 +147,13 @@ orts:{?x[&x[;0]=y][;1]} / operator x right types for left type y
 getET:{(*x[&(x[;0]=y)&x[;1]=z])[2 3]} / expression and ret type for type couple
 escp:sub["%";"%%"] / percent escape
 doExpr:{[e;yt;x;y]
-  e:?[~xt in ntypes;sub[rx/(!x|\bb2[IF]\(x\)|\bx)\b/;xt+"($1)"]e;e]
-  e:?[~yt in ntypes;sub[rx/(!x|\bb2[IF]\(y\)|\by)\b/;yt+"($1)"]e;e]
-  e:sub[rx/\bx\b/;x]e
-  e:sub[rx/\by\b/;y]e
+  e:?[~xt in ntypes;sub[rx/(!x|\bx)\b/;xt+"($1)"]e;e]
+  e:?[~yt in ntypes;sub[rx/(!x|\by)\b/;yt+"($1)"]e;e]
+  e:sub[rx/\by\b/;y]sub[rx/\bx\b/;x]e
 }
-genOp:{
-  o::x; op::y; ts::olts[::o]
+
+genOp:{[opname;opsym] / globals o,op,xt
+  o::opname; op::opsym; ts:olts[::o]
   say sub[("{OO}";o;"{OP}";op)] `// {OO} returns x{OP}y.`
   say sub["{OO}",o] `func {OO}(x, y V) V {`
   say'{sub[("{XT}";x;"{OO}";o)][
@@ -186,9 +188,10 @@ genOp:{
   }
 }
 `
-  dox'^(,"B")^ts
-  doX'^ts
+  dox'^(,"B")^ts / cases with atom x
+  doX'^ts        / cases with array x
 }
+
 dox:{
   xt::x; rts:orts[::o;xt]; xct:nt2go xt
   say sub[("{OO}";o;"{XT}";xt;"{XCT}";xct)] `func {OO}{XT}V(x {XCT}, y V) V {`
@@ -196,7 +199,7 @@ dox:{
   say `  switch yv := y.value.(type) {`
   say'{(e;t):getET[::o;xt;x];doxBy[x;e;t]}'^ntypes^rts
   say'{(e;t):getET[::o;xt;x];doxY[x;e;t]}'^rts
-  doxAV""
+  say doxAV""
   say"}\n"
 }
 doxUy:{[yt;e;t]
@@ -234,7 +237,7 @@ doxY:{[yt;e;t]
       return NewA{TT}WithRC(r, reuseRCp(yv.rc))`]
 }
 doxAV:{
-  say sub[("{OO}";o;"{XT}";xt;"{OP}";op)]"\n"_`
+  sub[("{OO}";o;"{XT}";xt;"{OP}";op)]"\n"_`
   case *AV:
       r := yv.reuse()
       for i, yi := range yv.Slice {
@@ -249,6 +252,7 @@ doxAV:{
       return panicTypeElt("x{OP}y", "y", y)
   }`
 }
+
 doX:{
   xt::x; rts:orts[::o;xt]; xct:t2go xt
   say sub[("{OO}";o;"{XT}";xt)] `func {OO}A{XT}V(x *A{XT}, y V) V {`
@@ -256,7 +260,7 @@ doX:{
   say `  switch yv := y.value.(type) {`
   say'{(e;t):getET[::o;xt;x];doXBy[x;e;t]}'^ntypes^rts
   say'{(e;t):getET[::o;xt;x];doXY[x;e;t]}'^rts
-  doXAV""
+  say doXAV""
 }
 doXUy:{[yt;e;t]
   e:doExpr[e;t2go yt;"x.At(i)";"y."+yt+"()"]
@@ -324,20 +328,12 @@ doXY:{[yt;e;t]
 doXAV:{
   nxt:?[xt~"B";"I";xt]
   xct:?[xt~"B";"b2i";xt~"I";"int64";xt~"F";"float64";xt]
-  reuse:?[xt~"V"
-    `var r *AV
-    if x.reusable() {
-        r = x.reuse()
-    } else {
-        r = yv.reuse()
-    }`
-    `r := yv.reuse()`]
-  say sub[("{OPE}";escp op;"{OP}";op;"{OO}";o;"{XT}";nxt;"{XCT}";xct;"{REUSE}";reuse)]"\n"_`
+  sub[("{OPE}";escp op;"{OP}";op;"{OO}";o;"{XT}";nxt;"{XCT}";xct)]"\n"_`
   case *AV:
           if x.Len() != yv.Len() {
                   return Panicf("x{OPE}y : length mismatch: %d vs %d", x.Len(), yv.Len())
           }
-          {REUSE}
+          r := yv.reuse()
           for i := range r.Slice {
                   ri := {OO}{XT}V({XCT}(x.At(i)), yv.At(i))
                   if ri.IsPanic() {
@@ -352,6 +348,7 @@ doXAV:{
 }
 `
 }
+
 say package
 genOp["equal";"="]
 genOp["lesser";"<"]
