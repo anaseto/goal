@@ -149,7 +149,7 @@ escp:sub["%";"%%"] / percent escape
 doExpr:{[e;yt;x;y]
   e:?[~xt in ntypes;sub[rx/(!x|\bx)\b/;xt+"($1)"]e;e]
   e:?[~yt in ntypes;sub[rx/(!x|\by)\b/;yt+"($1)"]e;e]
-  e:sub[rx/\by\b/;y]sub[rx/\bx\b/;x]e
+  sub[rx/\by\b/;y]sub[rx/\bx\b/;x]e
 }
 
 genOp:{[opname;opsym] / globals o,op,xt
