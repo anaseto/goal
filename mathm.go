@@ -13,9 +13,17 @@ func mathm(x V, f func(float64) float64) V {
 	}
 	switch xv := x.value.(type) {
 	case *AB:
-		return mathm(fromABtoAF(xv), f)
+		r := make([]float64, xv.Len())
+		for i, xi := range xv.Slice {
+			r[i] = f(b2f(xi))
+		}
+		return NewAFWithRC(r, reuseRCp(xv.rc))
 	case *AI:
-		return mathm(toAF(xv), f)
+		r := make([]float64, xv.Len())
+		for i, xi := range xv.Slice {
+			r[i] = f(float64(xi))
+		}
+		return NewAFWithRC(r, reuseRCp(xv.rc))
 	case *AF:
 		r := xv.reuse()
 		for i, xi := range xv.Slice {

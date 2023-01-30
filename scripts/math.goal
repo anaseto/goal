@@ -7,65 +7,73 @@ import "math"
 `
 mathm:`
 func mathm(x V, f func(float64) float64) V {
-	if x.IsI() {
-		return NewF(f(float64(x.I())))
-	}
-	if x.IsF() {
-		return NewF(f(x.F()))
-	}
-	switch xv := x.value.(type) {
-	case *AB:
-		return mathm(fromABtoAF(xv), f)
-	case *AI:
-		return mathm(toAF(xv), f)
-	case *AF:
-		r := xv.reuse()
-		for i, xi := range xv.Slice {
-			r.Slice[i] = f(xi)
-		}
-		return NewV(r)
-	case *AV:
-		r := xv.reuse()
-		for i, xi := range xv.Slice {
-			ri := mathm(xi, f)
-			if ri.IsPanic() {
-				return ri
-			}
-                        r.Slice[i] = ri
-		}
-		return NewV(r)
-	default:
-		return Panicf("bad type in x (%s)", x.Type())
-	}
-}
-`
-ftpl:`
-// VXXXX implements the YYYY variadic.
-func VXXXX(ctx *Context, args []V) V {
-	switch len(args) {
-	case 1:
-		r := mathm(args[0], math.XXXX)
-                if r.IsPanic() {
-                        return ppanic("YYYY x : ", r)
+        if x.IsI() {
+                return NewF(f(float64(x.I())))
+        }
+        if x.IsF() {
+                return NewF(f(x.F()))
+        }
+        switch xv := x.value.(type) {
+        case *AB:
+                r := make([]float64, xv.Len())
+                for i, xi := range xv.Slice {
+                        r[i] = f(b2f(xi))
                 }
-                return r
+                return NewAFWithRC(r, reuseRCp(xv.rc))
+        case *AI:
+                r := make([]float64, xv.Len())
+                for i, xi := range xv.Slice {
+                        r[i] = f(float64(xi))
+                }
+                return NewAFWithRC(r, reuseRCp(xv.rc))
+        case *AF:
+                r := xv.reuse()
+                for i, xi := range xv.Slice {
+                        r.Slice[i] = f(xi)
+                }
+                return NewV(r)
+        case *AV:
+                r := xv.reuse()
+                for i, xi := range xv.Slice {
+                        ri := mathm(xi, f)
+                        if ri.IsPanic() {
+                                return ri
+                        }
+                        r.Slice[i] = ri
+                }
+                return NewV(r)
         default:
-		return panicRank("YYYY")
+                return Panicf("bad type in x (%s)", x.Type())
         }
 }
 `
-dotpl:{sub["XXXX" "YYYY";(x;y)] ftpl}
+ftpl:`
+// V{NAME} implements the {name} variadic.
+func V{NAME}(ctx *Context, args []V) V {
+        switch len(args) {
+        case 1:
+                r := mathm(args[0], math.{NAME})
+                if r.IsPanic() {
+                        return ppanic("{name} x : ", r)
+                }
+                return r
+        default:
+                return panicRank("{name}")
+        }
+}
+`
+dotpl:{sub["{NAME}" "{name}";(x;y)] ftpl}
 funcs:+/({dotpl . x}'(
-  ("Acos";"acos")
-  ("Asin";"asin")
-  ("Atan";"atan")
-  ("Cos";"cos")
-  ("Exp";"exp")
-  ("Log";"log")
-  ("RoundToEven";"round")
-  ("Sin";"sin")
-  ("Sqrt";"sqrt")
-  ("Tan";"tan")
+  "Acos" "acos"
+  "Asin" "asin"
+  "Atan" "atan"
+  "Cos" "cos"
+  "Exp" "exp"
+  "Log" "log"
+  "RoundToEven" "round"
+  "Sin" "sin"
+  "Sqrt" "sqrt"
+  "Tan" "tan"
 ))
 '"../mathm.go" say package+mathm+funcs
 'shell `gofmt -s -w ../mathm.go`
