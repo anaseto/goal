@@ -50,69 +50,32 @@ func classify(ctx *Context, x V) V {
 		}
 		return not(x)
 	case *AF:
-		r := make([]int64, xv.Len())
-		m := map[float64]int64{}
-		n := int64(0)
-		for i, xi := range xv.Slice {
-			c, ok := m[xi]
-			if !ok {
-				r[i] = n
-				m[xi] = n
-				n++
-				continue
-			}
-			r[i] = c
-		}
-		return NewAI(r)
+		return NewAIWithRC(classifySlice[float64](xv.Slice, bruteForceNAI), reuseRCp(xv.rc))
 	case *AI:
-		r := make([]int64, xv.Len())
-		if xv.Len() <= bruteForceNAI {
+		if xv.Len() > bruteForceNAI {
+			min, max := minMax(xv)
 			n := int64(0)
-		loopAI:
-			for i, xi := range xv.Slice {
-				for j, xj := range xv.Slice[:i] {
-					if xi == xj {
-						r[i] = r[j]
-						continue loopAI
+			if max-min+1 < int64(xv.Len())+8 {
+				r := make([]int64, xv.Len())
+				// fast path avoiding hash table
+				offset := -min
+				m := make([]int64, max-min+1)
+				for i, xi := range xv.Slice {
+					c := m[xi+offset]
+					if c == 0 {
+						r[i] = n
+						m[xi+offset] = n + 1
+						n++
+						continue
 					}
+					r[i] = c - 1
 				}
-				r[i] = n
-				n++
+				return NewAI(r)
 			}
-			return NewAI(r)
 		}
-		min, max := minMax(xv)
-		n := int64(0)
-		if max-min+1 < int64(xv.Len())+8 {
-			// fast path avoiding hash table
-			offset := -min
-			m := make([]int64, max-min+1)
-			for i, xi := range xv.Slice {
-				c := m[xi+offset]
-				if c == 0 {
-					r[i] = n
-					m[xi+offset] = n + 1
-					n++
-					continue
-				}
-				r[i] = c - 1
-			}
-			return NewAI(r)
-		}
-		m := map[int64]int64{}
-		for i, xi := range xv.Slice {
-			c, ok := m[xi]
-			if !ok {
-				r[i] = n
-				m[xi] = n
-				n++
-				continue
-			}
-			r[i] = c
-		}
-		return NewAI(r)
+		return NewAIWithRC(classifySlice[int64](xv.Slice, bruteForceNAI), reuseRCp(xv.rc))
 	case *AS:
-		return classifyStrings(xv.Slice)
+		return NewAIWithRC(classifySlice[string](xv.Slice, bruteForceN), reuseRCp(xv.rc))
 	case *AV:
 		if xv.Len() > bruteForceN {
 			ss := make([]string, xv.Len())
@@ -122,7 +85,7 @@ func classify(ctx *Context, x V) V {
 				xi.Fprint(ctx, &sb)
 				ss[i] = sb.String()
 			}
-			return classifyStrings(ss)
+			return NewAI(classifySlice[string](ss, bruteForceN))
 		}
 		r := make([]int64, xv.Len())
 		n := int64(0)
@@ -143,36 +106,36 @@ func classify(ctx *Context, x V) V {
 	}
 }
 
-func classifyStrings(ss []string) V {
-	r := make([]int64, len(ss))
-	if len(ss) <= bruteForceN {
+func classifySlice[T comparable](xs []T, bruteForceThreshold int) []int64 {
+	r := make([]int64, len(xs))
+	if len(xs) <= bruteForceThreshold {
 		n := int64(0)
-	loopAS:
-		for i, xi := range ss {
-			for j, xj := range ss[:i] {
+	loop:
+		for i, xi := range xs {
+			for j, xj := range xs[:i] {
 				if xi == xj {
 					r[i] = r[j]
-					continue loopAS
+					continue loop
 				}
 			}
 			r[i] = n
 			n++
 		}
-		return NewAI(r)
+		return r
 	}
-	m := map[string]int64{}
+	m := map[T]int64{}
 	n := int64(0)
-	for i, s := range ss {
-		c, ok := m[s]
+	for i, xi := range xs {
+		c, ok := m[xi]
 		if !ok {
 			r[i] = n
-			m[s] = n
+			m[xi] = n
 			n++
 			continue
 		}
 		r[i] = c
 	}
-	return NewAI(r)
+	return r
 }
 
 // uniq returns ?x.
@@ -193,63 +156,13 @@ func uniq(ctx *Context, x V) V {
 		}
 		return NewABWithRC([]bool{b}, reuseRCp(xv.rc))
 	case *AF:
-		r := []float64{}
-		m := map[float64]struct{}{}
-		for _, xi := range xv.Slice {
-			_, ok := m[xi]
-			if !ok {
-				r = append(r, xi)
-				m[xi] = struct{}{}
-			}
-		}
-		return NewAF(r)
+		r := uniqSlice[float64](xv.Slice, bruteForceNAI)
+		return NewAFWithRC(r, reuseRCp(xv.rc))
 	case *AI:
-		r := []int64{}
-		if xv.Len() <= bruteForceNAI {
-		loopAI:
-			for i, xi := range xv.Slice {
-				for _, xj := range xv.Slice[:i] {
-					if xi == xj {
-						continue loopAI
-					}
-				}
-				r = append(r, xi)
-			}
-			return NewAIWithRC(r, reuseRCp(xv.rc))
-		}
-		m := map[int64]struct{}{}
-		for _, xi := range xv.Slice {
-			_, ok := m[xi]
-			if !ok {
-				r = append(r, xi)
-				m[xi] = struct{}{}
-				continue
-			}
-		}
+		r := uniqSlice[int64](xv.Slice, bruteForceNAI)
 		return NewAIWithRC(r, reuseRCp(xv.rc))
 	case *AS:
-		r := []string{}
-		if xv.Len() <= bruteForceN {
-		loopAS:
-			for i, xi := range xv.Slice {
-				for _, xj := range xv.Slice[:i] {
-					if xi == xj {
-						continue loopAS
-					}
-				}
-				r = append(r, xi)
-			}
-			return NewASWithRC(r, reuseRCp(xv.rc))
-		}
-		m := map[string]struct{}{}
-		for _, xi := range xv.Slice {
-			_, ok := m[xi]
-			if !ok {
-				r = append(r, xi)
-				m[xi] = struct{}{}
-				continue
-			}
-		}
+		r := uniqSlice[string](xv.Slice, bruteForceN)
 		return NewASWithRC(r, reuseRCp(xv.rc))
 	case *AV:
 		r := []V{}
@@ -287,6 +200,32 @@ func uniq(ctx *Context, x V) V {
 	}
 }
 
+func uniqSlice[T comparable](xs []T, bruteForceThreshold int) []T {
+	r := []T{}
+	if len(xs) <= bruteForceThreshold {
+	loop:
+		for i, xi := range xs {
+			for _, xj := range xs[:i] {
+				if xi == xj {
+					continue loop
+				}
+			}
+			r = append(r, xi)
+		}
+		return r
+	}
+	m := map[T]struct{}{}
+	for _, xi := range xs {
+		_, ok := m[xi]
+		if !ok {
+			r = append(r, xi)
+			m[xi] = struct{}{}
+			continue
+		}
+	}
+	return r
+}
+
 // Mark Firsts returns firsts x.
 func markFirsts(ctx *Context, x V) V {
 	if Length(x) == 0 {
@@ -305,43 +244,11 @@ func markFirsts(ctx *Context, x V) V {
 		}
 		return NewAB(r)
 	case *AF:
-		r := make([]bool, xv.Len())
-		m := map[float64]struct{}{}
-		for i, xi := range xv.Slice {
-			_, ok := m[xi]
-			if !ok {
-				r[i] = true
-				m[xi] = struct{}{}
-				continue
-			}
-		}
-		return NewAB(r)
+		return NewABWithRC(markFirstsSlice[float64](xv.Slice, bruteForceNAI), reuseRCp(xv.rc))
 	case *AI:
-		r := make([]bool, xv.Len())
-		if xv.Len() <= bruteForceNAI {
-		loopAI:
-			for i, xi := range xv.Slice {
-				for _, xj := range xv.Slice[:i] {
-					if xi == xj {
-						continue loopAI
-					}
-				}
-				r[i] = true
-			}
-			return NewAB(r)
-		}
-		m := map[int64]struct{}{}
-		for i, xi := range xv.Slice {
-			_, ok := m[xi]
-			if !ok {
-				r[i] = true
-				m[xi] = struct{}{}
-				continue
-			}
-		}
-		return NewAB(r)
+		return NewABWithRC(markFirstsSlice[int64](xv.Slice, bruteForceNAI), reuseRCp(xv.rc))
 	case *AS:
-		return markFirstsStrings(ctx, xv.Slice)
+		return NewABWithRC(markFirstsSlice[string](xv.Slice, bruteForceN), reuseRCp(xv.rc))
 	case *AV:
 		if xv.Len() > bruteForceN {
 			ss := make([]string, xv.Len())
@@ -351,7 +258,7 @@ func markFirsts(ctx *Context, x V) V {
 				xi.Fprint(ctx, &sb)
 				ss[i] = sb.String()
 			}
-			return markFirstsStrings(ctx, ss)
+			return NewABWithRC(markFirstsSlice[string](ss, bruteForceN), reuseRCp(xv.rc))
 		}
 		r := make([]bool, xv.Len())
 	loop:
@@ -369,22 +276,22 @@ func markFirsts(ctx *Context, x V) V {
 	}
 }
 
-func markFirstsStrings(ctx *Context, ss []string) V {
-	r := make([]bool, len(ss))
-	if len(ss) <= bruteForceN {
-	loopAS:
-		for i, xi := range ss {
-			for _, xj := range ss[:i] {
+func markFirstsSlice[T comparable](xs []T, bruteForceThreshold int) []bool {
+	r := make([]bool, len(xs))
+	if len(xs) <= bruteForceThreshold {
+	loop:
+		for i, xi := range xs {
+			for _, xj := range xs[:i] {
 				if xi == xj {
-					continue loopAS
+					continue loop
 				}
 			}
 			r[i] = true
 		}
-		return NewAB(r)
+		return r
 	}
-	m := map[string]struct{}{}
-	for i, s := range ss {
+	m := map[T]struct{}{}
+	for i, s := range xs {
 		_, ok := m[s]
 		if !ok {
 			r[i] = true
@@ -392,7 +299,7 @@ func markFirstsStrings(ctx *Context, ss []string) V {
 			continue
 		}
 	}
-	return NewAB(r)
+	return r
 }
 
 // memberOf returns x in y.
@@ -427,14 +334,18 @@ func memberOf(x, y V) V {
 	}
 }
 
-func memberOfAB(x V, y *AB) V {
-	var t, f bool
-	for _, yi := range y.Slice {
+func boolSliceMembers(xs []bool) (t bool, f bool) {
+	for _, xi := range xs {
 		if t && f {
 			break
 		}
-		t, f = t || yi, f || !yi
+		t, f = t || xi, f || !xi
 	}
+	return
+}
+
+func memberOfAB(x V, y *AB) V {
+	t, f := boolSliceMembers(y.Slice)
 	if t && f {
 		switch xv := x.value.(type) {
 		case *AB:
@@ -510,9 +421,9 @@ func memberOfAB(x V, y *AB) V {
 	}
 }
 
-func bmapAF(x *AF) map[float64]struct{} {
-	m := map[float64]struct{}{}
-	for _, xi := range x.Slice {
+func bmapSlice[T comparable](xs []T) map[T]struct{} {
+	m := map[T]struct{}{}
+	for _, xi := range xs {
 		_, ok := m[xi]
 		if !ok {
 			m[xi] = struct{}{}
@@ -520,6 +431,30 @@ func bmapAF(x *AF) map[float64]struct{} {
 		}
 	}
 	return m
+}
+
+func memberOfSlice[T comparable](xs []T, ys []T, bruteForceThreshold int) []bool {
+	r := make([]bool, len(xs))
+	if len(xs) <= bruteForceThreshold || len(ys) <= bruteForceThreshold {
+		for i, xi := range xs {
+			for _, yi := range ys {
+				if xi == yi {
+					r[i] = true
+					break
+				}
+			}
+		}
+		return r
+	}
+	m := bmapSlice[T](ys)
+	for i, xi := range xs {
+		_, r[i] = m[xi]
+	}
+	return r
+}
+
+func bmapAF(x *AF) map[float64]struct{} {
+	return bmapSlice[float64](x.Slice)
 }
 
 func memberOfAF(x V, y *AF) V {
@@ -541,26 +476,11 @@ func memberOfAF(x V, y *AF) V {
 	}
 	switch xv := x.value.(type) {
 	case *AB:
-		r := make([]bool, xv.Len())
-		m := bmapAF(y)
-		for i, xi := range xv.Slice {
-			_, r[i] = m[b2f(xi)]
-		}
-		return NewAB(r)
+		return memberOfAF(fromABtoAF(xv), y)
 	case *AI:
-		r := make([]bool, xv.Len())
-		m := bmapAF(y)
-		for i, xi := range xv.Slice {
-			_, r[i] = m[float64(xi)]
-		}
-		return NewAB(r)
+		return memberOfAF(toAF(xv), y)
 	case *AF:
-		r := make([]bool, xv.Len())
-		m := bmapAF(y)
-		for i, xi := range xv.Slice {
-			_, r[i] = m[xi]
-		}
-		return NewAB(r)
+		return NewABWithRC(memberOfSlice[float64](xv.Slice, y.Slice, bruteForceNAI), reuseRCp(xv.rc))
 	case array:
 		return memberOfArray(xv, y)
 	default:
@@ -569,15 +489,7 @@ func memberOfAF(x V, y *AF) V {
 }
 
 func bmapAI(x *AI) map[int64]struct{} {
-	m := map[int64]struct{}{}
-	for _, xi := range x.Slice {
-		_, ok := m[xi]
-		if !ok {
-			m[xi] = struct{}{}
-			continue
-		}
-	}
-	return m
+	return bmapSlice[int64](x.Slice)
 }
 
 func memberOfAI(x V, y *AI) V {
@@ -602,40 +514,11 @@ func memberOfAI(x V, y *AI) V {
 	}
 	switch xv := x.value.(type) {
 	case *AB:
-		r := make([]bool, xv.Len())
-		m := bmapAI(y)
-		for i, xi := range xv.Slice {
-			_, r[i] = m[b2i(xi)]
-		}
-		return NewAB(r)
+		return memberOfAI(fromABtoAI(xv), y)
 	case *AI:
-		r := make([]bool, xv.Len())
-		if xv.Len() <= bruteForceNAI || y.Len() <= bruteForceNAI {
-			for i, xi := range xv.Slice {
-				for _, yi := range y.Slice {
-					if xi == yi {
-						r[i] = true
-						break
-					}
-				}
-			}
-			return NewAB(r)
-		}
-		m := bmapAI(y)
-		for i, xi := range xv.Slice {
-			_, r[i] = m[xi]
-		}
-		return NewAB(r)
+		return NewABWithRC(memberOfSlice[int64](xv.Slice, y.Slice, bruteForceNAI), reuseRCp(xv.rc))
 	case *AF:
-		r := make([]bool, xv.Len())
-		m := bmapAI(y)
-		for i, xi := range xv.Slice {
-			if !isI(xi) {
-				continue
-			}
-			_, r[i] = m[int64(xi)]
-		}
-		return NewAB(r)
+		return memberOf(x, toAF(y))
 	case array:
 		return memberOfArray(xv, y)
 	default:
@@ -644,41 +527,20 @@ func memberOfAI(x V, y *AI) V {
 }
 
 func bmapAS(x *AS) map[string]struct{} {
-	m := map[string]struct{}{}
-	for _, xi := range x.Slice {
-		_, ok := m[xi]
-		if !ok {
-			m[xi] = struct{}{}
-			continue
-		}
-	}
-	return m
+	return bmapSlice[string](x.Slice)
 }
 
 func memberOfAS(x V, y *AS) V {
 	switch xv := x.value.(type) {
 	case S:
-		m := bmapAS(y)
-		_, ok := m[string(xv)]
-		return NewI(b2i(ok))
-	case *AS:
-		r := make([]bool, xv.Len())
-		if xv.Len() <= bruteForceN || y.Len() <= bruteForceN {
-			for i, xi := range xv.Slice {
-				for _, yi := range y.Slice {
-					if xi == yi {
-						r[i] = true
-						break
-					}
-				}
+		for _, yi := range y.Slice {
+			if string(xv) == yi {
+				return NewI(1)
 			}
-			return NewAB(r)
 		}
-		m := bmapAS(y)
-		for i, xi := range xv.Slice {
-			_, r[i] = m[xi]
-		}
-		return NewAB(r)
+		return NewI(0)
+	case *AS:
+		return NewABWithRC(memberOfSlice[string](xv.Slice, y.Slice, bruteForceNAI), reuseRCp(xv.rc))
 	case array:
 		return memberOfArray(xv, y)
 	default:
