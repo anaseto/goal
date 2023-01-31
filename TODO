@@ -1,7 +1,6 @@
 Features:
 - more general io (open/read/write/close/defer?)
 - some kind of object/struct/dict thing
-- improve error locations for adverbs and some other special cases
 - maybe some kind of templating/interpolation
 - maybe add splice
 - maybe split i$s and maybe amend string @[s;I;s]
@@ -15,6 +14,7 @@ Tests:
   the way
 - add more immutability tests to catch any possible regressions after the
   refcount overhaul, because refcounting is hard.
+- search for more error locations potential improvements
 
 Documentation:
 - write reference docs and maybe some introductory guide (in addition to the

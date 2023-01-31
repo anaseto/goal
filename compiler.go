@@ -729,7 +729,7 @@ func (c *compiler) doDerivedVerb(dv *astDerivedVerb, n int) error {
 		return err
 	}
 	c.doAdverb(dv.Adverb)
-	c.applyN(n)
+	c.applyAtN(dv.Adverb.Pos, n)
 	return nil
 }
 
