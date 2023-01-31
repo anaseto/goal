@@ -356,12 +356,6 @@ func NewAVWithRC(x []V, rc *int) V {
 	return NewV(&AV{Slice: x, rc: rc})
 }
 
-func (x *AB) Matches(y Value) bool { return matchArray(x, y) }
-func (x *AI) Matches(y Value) bool { return matchArray(x, y) }
-func (x *AF) Matches(y Value) bool { return matchArray(x, y) }
-func (x *AS) Matches(y Value) bool { return matchArray(x, y) }
-func (x *AV) Matches(y Value) bool { return matchArray(x, y) }
-
 // Type returns a string representation of the array's type.
 func (x *AB) Type() string { return "N" }
 

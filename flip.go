@@ -239,7 +239,7 @@ func flipAVAV(x *AV, lines int) V {
 				q[i] = xi
 			}
 		}
-		r[j] = NewAV(q)
+		r[j] = Canonical(NewAV(q))
 	}
 	return NewAV(r)
 }

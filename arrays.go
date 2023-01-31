@@ -237,3 +237,165 @@ func (x *AV) shallowClone() array {
 	copy(r.Slice, x.Slice)
 	return r
 }
+
+func (x *AB) Matches(y Value) bool {
+	if !matchArrayLen(x, y) {
+		return false
+	}
+	if x.Len() == 0 {
+		return true
+	}
+	switch yv := y.(type) {
+	case *AB:
+		return matchAB(x, yv)
+	case *AI:
+		return matchABAI(x, yv)
+	case *AF:
+		return matchABAF(x, yv)
+	default:
+		return false
+	}
+}
+
+func (x *AI) Matches(y Value) bool {
+	if !matchArrayLen(x, y) {
+		return false
+	}
+	if x.Len() == 0 {
+		return true
+	}
+	switch yv := y.(type) {
+	case *AB:
+		return matchABAI(yv, x)
+	case *AI:
+		return matchAI(x, yv)
+	case *AF:
+		return matchAIAF(x, yv)
+	default:
+		return false
+	}
+}
+
+func (x *AF) Matches(y Value) bool {
+	if !matchArrayLen(x, y) {
+		return false
+	}
+	if x.Len() == 0 {
+		return true
+	}
+	switch yv := y.(type) {
+	case *AB:
+		return matchABAF(yv, x)
+	case *AI:
+		return matchAIAF(yv, x)
+	case *AF:
+		return matchAF(x, yv)
+	default:
+		return false
+	}
+}
+
+func (x *AS) Matches(y Value) bool {
+	if !matchArrayLen(x, y) {
+		return false
+	}
+	if x.Len() == 0 {
+		return true
+	}
+	yv, ok := y.(*AS)
+	if !ok {
+		return false
+	}
+	for i, yi := range yv.Slice {
+		if yi != x.At(i) {
+			return false
+		}
+	}
+	return true
+}
+
+func (x *AV) Matches(y Value) bool {
+	if !matchArrayLen(x, y) {
+		return false
+	}
+	if x.Len() == 0 {
+		return true
+	}
+	yv, ok := y.(*AV)
+	if !ok {
+		return false
+	}
+	for i, yi := range yv.Slice {
+		if !Match(yi, x.At(i)) {
+			return false
+		}
+	}
+	return true
+}
+
+// matchArrayLen returns true if y is an array of same length as x.
+func matchArrayLen(x array, y Value) bool {
+	ya, ok := y.(array)
+	if !ok {
+		return false
+	}
+	l := x.Len()
+	if l != ya.Len() {
+		return false
+	}
+	return true
+}
+
+func matchAB(x, y *AB) bool {
+	for i, yi := range y.Slice {
+		if yi != x.At(i) {
+			return false
+		}
+	}
+	return true
+}
+
+func matchABAI(x *AB, y *AI) bool {
+	for i, yi := range y.Slice {
+		if yi != b2i(x.At(i)) {
+			return false
+		}
+	}
+	return true
+}
+
+func matchABAF(x *AB, y *AF) bool {
+	for i, yi := range y.Slice {
+		if yi != b2f(x.At(i)) {
+			return false
+		}
+	}
+	return true
+}
+
+func matchAI(x, y *AI) bool {
+	for i, yi := range y.Slice {
+		if yi != x.At(i) {
+			return false
+		}
+	}
+	return true
+}
+
+func matchAIAF(x *AI, y *AF) bool {
+	for i, yi := range y.Slice {
+		if yi != float64(x.At(i)) {
+			return false
+		}
+	}
+	return true
+}
+
+func matchAF(x, y *AF) bool {
+	for i, yi := range y.Slice {
+		if yi != x.At(i) {
+			return false
+		}
+	}
+	return true
+}
