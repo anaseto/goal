@@ -108,7 +108,6 @@ shift 0 2 / 2 0
 shift "a" "b" / "b" ""
 shift 0 2.5 / 2.5 0
 shift (+;*) / (*;0)
-// XXXX
 () rshift 0 1 / 0 1
 () rshift 1 2 / 1 2
 () rshift 1.5 2 / 1.5 2

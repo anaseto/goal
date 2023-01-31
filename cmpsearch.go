@@ -847,7 +847,7 @@ func intersection(x, y V) V {
 
 // find returns x?y.
 func find(x, y V) V {
-	// TODO: optimization: for small x, use brute force
+	// TODO: optimization: for small x, use brute force in more cases
 	switch xv := x.value.(type) {
 	case S:
 		return findS(xv, y)
