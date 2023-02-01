@@ -1,6 +1,9 @@
 package goal
 
-import "strings"
+import (
+	"sort"
+	"strings"
+)
 
 // Match returns true if the two values match like in x~y.
 func Match(x, y V) bool {
@@ -918,11 +921,12 @@ func findAIbools(xs []int64) (t int64, f int64) {
 }
 
 func findAII(x *AI, y int64) int64 {
-	i := searchAII(x, y)
-	if i > 0 && x.At(int(i)-1) == y {
-		return i - 1
+	xlen := x.Len()
+	i := int64(sort.Search(xlen, func(i int) bool { return x.At(i) >= y }))
+	if i < int64(xlen) && x.At(int(i)) == y {
+		return i
 	}
-	return int64(x.Len())
+	return int64(xlen)
 }
 
 func findAI(x *AI, y V) V {
@@ -939,8 +943,15 @@ func findAI(x *AI, y V) V {
 
 	}
 	if y.IsF() {
+		if !isI(y.F()) {
+			return NewI(int64(x.Len()))
+		}
+		yI := int64(y.F())
+		if x.flags.Has(flagAscending) {
+			return NewI(findAII(x, yI))
+		}
 		for i, xi := range x.Slice {
-			if float64(xi) == y.F() {
+			if xi == yI {
 				return NewI(int64(i))
 			}
 		}
@@ -960,11 +971,11 @@ func findAI(x *AI, y V) V {
 		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		if x.flags.Has(flagAscending) {
-			r := make([]int64, yv.Len())
+			r := yv.reuse()
 			for i, yi := range yv.Slice {
-				r[i] = findAII(x, yi)
+				r.Slice[i] = findAII(x, yi)
 			}
-			return NewAIWithRC(r, reuseRCp(yv.rc))
+			return NewV(r)
 		}
 		if yv.Len() > bruteForceNumeric && x.Len() > bruteForceNumeric {
 			xlen := int64(x.Len())
@@ -1006,9 +1017,21 @@ func findAI(x *AI, y V) V {
 	}
 }
 
+func findASS(x *AS, y S) int64 {
+	xlen := x.Len()
+	i := int64(sort.Search(xlen, func(i int) bool { return S(x.At(i)) >= y }))
+	if i < int64(xlen) && x.At(int(i)) == string(y) {
+		return i
+	}
+	return int64(xlen)
+}
+
 func findAS(x *AS, y V) V {
 	switch yv := y.value.(type) {
 	case S:
+		if x.flags.Has(flagAscending) {
+			return NewI(findASS(x, yv))
+		}
 		for i, xi := range x.Slice {
 			if S(xi) == yv {
 				return NewI(int64(i))
@@ -1016,6 +1039,13 @@ func findAS(x *AS, y V) V {
 		}
 		return NewI(int64(x.Len()))
 	case *AS:
+		if x.flags.Has(flagAscending) {
+			r := make([]int64, yv.Len())
+			for i, yi := range yv.Slice {
+				r[i] = findASS(x, S(yi))
+			}
+			return NewAIWithRC(r, reuseRCp(yv.rc))
+		}
 		return NewAIWithRC(findSlices[string](x.Slice, yv.Slice, bruteForceGeneric), reuseRCp(yv.rc))
 	case array:
 		return findArray(x, yv)
