@@ -419,9 +419,25 @@ func BenchmarkSearch200In500(b *testing.B) {
 	}
 }
 
+func BenchmarkSearchSorted200In500(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:^500?10000;b:200?10000")
+	for n := 0; n < b.N; n++ {
+		ctx.Eval("a?b")
+	}
+}
+
 func BenchmarkSearch10In10000(b *testing.B) {
 	ctx := NewContext()
 	ctx.Eval("a:10000?10000;b:10?10000")
+	for n := 0; n < b.N; n++ {
+		ctx.Eval("a?b")
+	}
+}
+
+func BenchmarkSearchSorted10In10000(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:^10000?10000;b:10?10000")
 	for n := 0; n < b.N; n++ {
 		ctx.Eval("a?b")
 	}

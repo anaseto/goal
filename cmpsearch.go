@@ -838,6 +838,25 @@ func findSlices[T comparable](xs, ys []T, bruteForceThreshold int) []int64 {
 	return r
 }
 
+func findAFbools(xs []float64) (t int64, f int64) {
+	xlen := int64(len(xs))
+	t, f = xlen, xlen
+	for i, xi := range xs {
+		if xi == 1 && t == xlen {
+			t = int64(i)
+			if f < xlen {
+				break
+			}
+		} else if xi == 0 && f == xlen {
+			f = int64(i)
+			if t < xlen {
+				break
+			}
+		}
+	}
+	return
+}
+
 func findAF(x *AF, y V) V {
 	if y.IsI() {
 		for i, xi := range x.Slice {
@@ -898,27 +917,19 @@ func findAIbools(xs []int64) (t int64, f int64) {
 	return
 }
 
-func findAFbools(xs []float64) (t int64, f int64) {
-	xlen := int64(len(xs))
-	t, f = xlen, xlen
-	for i, xi := range xs {
-		if xi == 1 && t == xlen {
-			t = int64(i)
-			if f < xlen {
-				break
-			}
-		} else if xi == 0 && f == xlen {
-			f = int64(i)
-			if t < xlen {
-				break
-			}
-		}
+func findAII(x *AI, y int64) int64 {
+	i := searchAII(x, y)
+	if i > 0 && x.At(int(i)-1) == y {
+		return i - 1
 	}
-	return
+	return int64(x.Len())
 }
 
 func findAI(x *AI, y V) V {
 	if y.IsI() {
+		if x.flags.Has(flagAscending) {
+			return NewI(findAII(x, y.I()))
+		}
 		for i, xi := range x.Slice {
 			if xi == y.I() {
 				return NewI(int64(i))
@@ -948,6 +959,13 @@ func findAI(x *AI, y V) V {
 		}
 		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AI:
+		if x.flags.Has(flagAscending) {
+			r := make([]int64, yv.Len())
+			for i, yi := range yv.Slice {
+				r[i] = findAII(x, yi)
+			}
+			return NewAIWithRC(r, reuseRCp(yv.rc))
+		}
 		if yv.Len() > bruteForceNumeric && x.Len() > bruteForceNumeric {
 			xlen := int64(x.Len())
 			r := make([]int64, yv.Len())
