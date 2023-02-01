@@ -1,5 +1,7 @@
 package goal
 
+import "sort"
+
 // array interface is satisfied by the different kind of supported arrays.
 // Typical implementation is given in comments.
 type array interface {
@@ -398,4 +400,27 @@ func matchAF(x, y *AF) bool {
 		}
 	}
 	return true
+}
+
+// initArrayFlags sets Ascending flag if x is non-generic sorted array. It is
+// used to set the flag on constants arrays.
+func initArrayFlags(x V) {
+	switch xv := x.value.(type) {
+	case *AB:
+		if !xv.flags.Has(flagAscending) && sort.IsSorted(sortAB(xv.Slice)) {
+			xv.flags |= flagAscending
+		}
+	case *AI:
+		if !xv.flags.Has(flagAscending) && sort.IsSorted(sortAI(xv.Slice)) {
+			xv.flags |= flagAscending
+		}
+	case *AF:
+		if !xv.flags.Has(flagAscending) && sort.IsSorted(sort.Float64Slice(xv.Slice)) {
+			xv.flags |= flagAscending
+		}
+	case *AS:
+		if !xv.flags.Has(flagAscending) && sort.IsSorted(sort.StringSlice(xv.Slice)) {
+			xv.flags |= flagAscending
+		}
+	}
 }

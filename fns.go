@@ -99,7 +99,7 @@ func where(x V) V {
 			r[j] = int64(i)
 			j += b2i(xi)
 		}
-		return NewAIWithRC(r[:len(r)-1], reuseRCp(xv.rc))
+		return NewV(&AI{Slice: r[:len(r)-1], rc: reuseRCp(xv.rc), flags: flagAscending})
 	case *AI:
 		n := int64(0)
 		for _, xi := range xv.Slice {
@@ -114,7 +114,7 @@ func where(x V) V {
 				r = append(r, int64(i))
 			}
 		}
-		return NewAIWithRC(r, reuseRCp(xv.rc))
+		return NewV(&AI{Slice: r, rc: reuseRCp(xv.rc), flags: flagAscending})
 	case *AF:
 		n := int64(0)
 		for _, xi := range xv.Slice {
@@ -132,7 +132,7 @@ func where(x V) V {
 				r = append(r, int64(i))
 			}
 		}
-		return NewAIWithRC(r, reuseRCp(xv.rc))
+		return NewV(&AI{Slice: r, rc: reuseRCp(xv.rc), flags: flagAscending})
 	case array:
 		return panics("&x : x non-integer array")
 	default:

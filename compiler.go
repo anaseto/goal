@@ -755,6 +755,7 @@ func (c *compiler) doStrand(st *astStrand, n int) error {
 	}
 	r := Canonical(NewAV(a))
 	r.InitRC()
+	initArrayFlags(r)
 	id := c.ctx.storeConst(r)
 	c.pos = st.Pos
 	c.push2(opConst, opcode(id))
