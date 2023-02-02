@@ -38,11 +38,19 @@ type ValueWriter interface {
 type Value interface {
 	// Matches returns true if the value matches another (in the sense of
 	// the ~ operator).
-	Matches(x Value) bool
+	Matches(Value) bool
 	// Fprint writes a unique program string representation of the value.
 	Fprint(*Context, ValueWriter) (n int, err error)
-	// Type returns the name of the value's type.
+	// Type returns the name of the value's type. It may be used by Less to
+	// sort non-comparable values using lexicographic order.  This means
+	// Type should return different values for non-comparable values.
 	Type() string
+	// Less returns true if the value should be orderer before the given
+	// one. It is used for sorting values, but not for element-wise
+	// comparison with < and >. It should produce a strict total order, so,
+	// in particular, if x < y, then we do not have y > x, and one of them
+	// should hold unless both values match.
+	Less(Value) bool
 }
 
 // newVariadic returns a new variadic value.
@@ -412,6 +420,7 @@ func (r *derivedVerb) Type() string     { return "f" }
 type function interface {
 	Value
 	rank(ctx *Context) int
+	stype() string
 }
 
 // Rank for a projection is the number of nil arguments.
@@ -436,6 +445,11 @@ func (r *derivedVerb) rank(ctx *Context) int {
 		return maxInt(0, r.Arg.Rank(ctx)-1)
 	}
 }
+
+func (p *projection) stype() string      { return "p" }
+func (p *projectionFirst) stype() string { return "pf" }
+func (p *projectionMonad) stype() string { return "pm" }
+func (r *derivedVerb) stype() string     { return "r" }
 
 func (p *projection) Matches(x Value) bool {
 	xp, ok := x.(*projection)

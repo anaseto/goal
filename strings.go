@@ -64,6 +64,10 @@ func (r *nReplacer) Type() string {
 	return "f"
 }
 
+func (r *nReplacer) stype() string {
+	return "nReplacer"
+}
+
 func (r *nReplacer) rank(ctx *Context) int {
 	return 1
 }
@@ -103,6 +107,10 @@ func (r *replacer) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
 
 func (r *replacer) Type() string {
 	return "f"
+}
+
+func (r *replacer) stype() string {
+	return "replacer"
 }
 
 func (r *replacer) rank(ctx *Context) int {

@@ -79,6 +79,10 @@ func (r *rxReplacer) Type() string {
 	return "f"
 }
 
+func (r *rxReplacer) stype() string {
+	return "rx"
+}
+
 func (r *rxReplacer) rank(ctx *Context) int {
 	return 1
 }

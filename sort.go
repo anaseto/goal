@@ -40,409 +40,11 @@ func (bs sortVSlice) Len() int {
 }
 
 func (bs sortVSlice) Less(i, j int) bool {
-	return less(bs[i], bs[j])
+	return bs[i].Less(bs[j])
 }
 
 func (bs sortVSlice) Swap(i, j int) {
 	bs[i], bs[j] = bs[j], bs[i]
-}
-
-func less(x, y V) bool {
-	switch x.kind {
-	case valInt:
-		return lessI(x, y)
-	case valFloat:
-		return lessF(x, y)
-	case valVariadic:
-		return y.kind == valVariadic && x.n < y.n
-	case valLambda:
-		return y.kind == valLambda && x.n < y.n
-	}
-	switch xv := x.value.(type) {
-	case S:
-		return lessS(x, y)
-	case *AB:
-		if xv.Len() == 0 {
-			return Length(y) > 0
-		}
-		return lessAB(x, y)
-	case *AF:
-		if xv.Len() == 0 {
-			return Length(y) > 0
-		}
-		return lessAF(x, y)
-	case *AI:
-		if xv.Len() == 0 {
-			return Length(y) > 0
-		}
-		return lessAI(x, y)
-	case *AS:
-		if xv.Len() == 0 {
-			return Length(y) > 0
-		}
-		return lessAS(x, y)
-	case *AV:
-		if xv.Len() == 0 {
-			return Length(y) > 0
-		}
-		return lessAV(x, y)
-	case *derivedVerb:
-		yv, ok := y.value.(*derivedVerb)
-		return ok && xv.Fun < yv.Fun ||
-			xv.Fun == yv.Fun && less(xv.Arg, yv.Arg)
-	case *projection:
-		yv, ok := y.value.(*projection)
-		return ok && less(xv.Fun, yv.Fun) ||
-			Match(xv.Fun, yv.Fun) && less(NewAV(xv.Args), NewAV(yv.Args))
-	case *projectionFirst:
-		yv, ok := y.value.(*projectionFirst)
-		return ok && less(xv.Fun, yv.Fun) ||
-			Match(xv.Fun, yv.Fun) && less(xv.Arg, yv.Arg)
-	case *projectionMonad:
-		yv, ok := y.value.(*projectionMonad)
-		return ok && less(xv.Fun, yv.Fun)
-	case *errV:
-		yv, ok := y.value.(*errV)
-		return ok && less(xv.V, yv.V)
-	default:
-		// XXX: There should probably be an interface for less, so that
-		// new kind of sortable values could be defined.
-		return false
-	}
-}
-
-func lessF(x V, y V) bool {
-	xv := x.F()
-	if y.IsI() {
-		return xv < float64(y.I())
-	}
-	if y.IsF() {
-		return xv < y.F()
-	}
-	switch yv := y.value.(type) {
-	case *AB:
-		if yv.Len() == 0 {
-			return false
-		}
-		return xv < b2f(yv.At(0)) || xv == b2f(yv.At(0)) && yv.Len() > 1
-	case *AF:
-		if yv.Len() == 0 {
-			return false
-		}
-		return xv < yv.At(0) || xv == yv.At(0) && yv.Len() > 1
-	case *AI:
-		if yv.Len() == 0 {
-			return false
-		}
-		return xv < float64(yv.At(0)) || xv == float64(yv.At(0)) && yv.Len() > 1
-	case *AV:
-		if yv.Len() == 0 {
-			return false
-		}
-		return lessF(x, yv.At(0)) || !less(yv.At(0), x) && yv.Len() > 1
-	default:
-		return false
-	}
-}
-
-func lessI(x V, y V) bool {
-	xv := x.I()
-	if y.IsI() {
-		return xv < y.I()
-	}
-	if y.IsF() {
-		return float64(xv) < y.F()
-	}
-	switch yv := y.value.(type) {
-	case *AB:
-		if yv.Len() == 0 {
-			return false
-		}
-		return xv < b2i(yv.At(0)) || xv == b2i(yv.At(0)) && yv.Len() > 1
-	case *AF:
-		if yv.Len() == 0 {
-			return false
-		}
-		return float64(xv) < yv.At(0) || float64(xv) == yv.At(0) && yv.Len() > 1
-	case *AI:
-		if yv.Len() == 0 {
-			return false
-		}
-		return xv < yv.At(0) || xv == yv.At(0) && yv.Len() > 1
-	case *AV:
-		if yv.Len() == 0 {
-			return false
-		}
-		return lessI(x, yv.At(0)) || !less(yv.At(0), x) && yv.Len() > 1
-	default:
-		return false
-	}
-}
-
-func lessS(x V, y V) bool {
-	xv := x.value.(S)
-	switch yv := y.value.(type) {
-	case S:
-		return xv < yv
-	case *AS:
-		if yv.Len() == 0 {
-			return false
-		}
-		return string(xv) < yv.At(0) || string(xv) == yv.At(0) && yv.Len() > 1
-	case *AV:
-		if yv.Len() == 0 {
-			return false
-		}
-		return lessS(x, yv.At(0)) || !less(yv.At(0), x) && yv.Len() > 1
-	default:
-		return false
-	}
-}
-
-func lessAB(x V, y V) bool {
-	xv := x.value.(*AB)
-	if y.IsI() {
-		return !lessI(y, x)
-	}
-	if y.IsF() {
-		return !lessF(y, x)
-	}
-	switch yv := y.value.(type) {
-	case *AB:
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if !xv.At(i) && yv.At(i) {
-				return true
-			}
-			if xv.At(i) && !yv.At(i) {
-				return false
-			}
-		}
-		return xv.Len() < yv.Len()
-	case *AF:
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if b2f(xv.At(i)) < yv.At(i) {
-				return true
-			}
-			if b2f(xv.At(i)) > yv.At(i) {
-				return false
-			}
-		}
-		return xv.Len() < yv.Len()
-	case *AI:
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if b2i(xv.At(i)) < yv.At(i) {
-				return true
-			}
-			if b2i(xv.At(i)) > yv.At(i) {
-				return false
-			}
-		}
-		return xv.Len() < yv.Len()
-	case *AV:
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if less(NewI(b2i(xv.At(i))), yv.At(i)) {
-				return true
-			}
-			if less(yv.At(i), NewI(b2i(xv.At(i)))) {
-				return false
-			}
-		}
-		return xv.Len() < yv.Len()
-	default:
-		return false
-	}
-}
-
-func lessAI(x V, y V) bool {
-	xv := x.value.(*AI)
-	if y.IsI() {
-		return !lessI(y, x)
-	}
-	if y.IsF() {
-		return !lessF(y, x)
-	}
-	switch yv := y.value.(type) {
-	case *AB:
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if xv.At(i) < b2i(yv.At(i)) {
-				return true
-			}
-			if xv.At(i) > b2i(yv.At(i)) {
-				return false
-			}
-		}
-		return xv.Len() < yv.Len()
-	case *AF:
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if float64(xv.At(i)) < yv.At(i) {
-				return true
-			}
-			if float64(xv.At(i)) > yv.At(i) {
-				return false
-			}
-		}
-		return xv.Len() < yv.Len()
-	case *AI:
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if xv.At(i) < yv.At(i) {
-				return true
-			}
-			if xv.At(i) > yv.At(i) {
-				return false
-			}
-		}
-		return xv.Len() < yv.Len()
-	case *AV:
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if less(NewI(xv.At(i)), yv.At(i)) {
-				return true
-			}
-			if less(yv.At(i), NewI(xv.At(i))) {
-				return false
-			}
-		}
-		return xv.Len() < yv.Len()
-	default:
-		return false
-	}
-}
-
-func lessAF(x V, y V) bool {
-	xv := x.value.(*AF)
-	if y.IsI() {
-		return !lessI(y, x)
-	}
-	if y.IsF() {
-		return !lessF(y, x)
-	}
-	switch yv := y.value.(type) {
-	case *AB:
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if xv.At(i) < b2f(yv.At(i)) {
-				return true
-			}
-			if xv.At(i) > b2f(yv.At(i)) {
-				return false
-			}
-		}
-		return xv.Len() < yv.Len()
-	case *AF:
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if xv.At(i) < yv.At(i) {
-				return true
-			}
-			if xv.At(i) > yv.At(i) {
-				return false
-			}
-		}
-		return xv.Len() < yv.Len()
-	case *AI:
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if xv.At(i) < float64(yv.At(i)) {
-				return true
-			}
-			if xv.At(i) > float64(yv.At(i)) {
-				return false
-			}
-		}
-		return xv.Len() < yv.Len()
-	case *AV:
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if less(NewF(xv.At(i)), yv.At(i)) {
-				return true
-			}
-			if less(yv.At(i), NewF(xv.At(i))) {
-				return false
-			}
-		}
-		return xv.Len() < yv.Len()
-	default:
-		return false
-	}
-}
-
-func lessAS(x V, y V) bool {
-	xv := x.value.(*AS)
-	switch yv := y.value.(type) {
-	case S:
-		return !lessS(y, x)
-	case *AS:
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if xv.At(i) < yv.At(i) {
-				return true
-			}
-			if xv.At(i) > yv.At(i) {
-				return false
-			}
-		}
-		return xv.Len() < yv.Len()
-	case *AV:
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if less(NewS(xv.At(i)), yv.At(i)) {
-				return true
-			}
-			if less(yv.At(i), NewS(xv.At(i))) {
-				return false
-			}
-		}
-		return xv.Len() < yv.Len()
-	default:
-		return false
-	}
-}
-
-func lessAV(x V, y V) bool {
-	xv := x.value.(*AV)
-	if y.IsI() {
-		return less(xv.At(0), y)
-	}
-	if y.IsF() {
-		return less(xv.At(0), y)
-	}
-	switch yv := y.value.(type) {
-	case *AB:
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if less(xv.At(i), NewI(b2i(yv.At(i)))) {
-				return true
-			}
-			if less(NewI(b2i(yv.At(i))), xv.At(i)) {
-				return false
-			}
-		}
-		return xv.Len() < yv.Len()
-	case *AF:
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if less(xv.At(i), NewF(yv.At(i))) {
-				return true
-			}
-			if less(NewF(yv.At(i)), xv.At(i)) {
-				return false
-			}
-		}
-		return xv.Len() < yv.Len()
-	case *AI:
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if less(xv.At(i), NewI(yv.At(i))) {
-				return true
-			}
-			if less(NewI(yv.At(i)), xv.At(i)) {
-				return false
-			}
-		}
-		return xv.Len() < yv.Len()
-	case *AV:
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if less(xv.At(i), yv.At(i)) {
-				return true
-			}
-			if less(yv.At(i), xv.At(i)) {
-				return false
-			}
-		}
-		return xv.Len() < yv.Len()
-	default:
-		return false
-	}
 }
 
 // sortUp returns ^x.
@@ -701,7 +303,7 @@ func searchAI(x *AI, y V) V {
 		r := make([]int64, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
 			r[i] = int64(sort.Search(x.Len(),
-				func(j int) bool { return less(yv.at(i), NewI(x.At(j))) }))
+				func(j int) bool { return yv.at(i).Less(NewI(x.At(j))) }))
 		}
 		return NewAI(r)
 	default:
@@ -739,7 +341,7 @@ func searchAF(x *AF, y V) V {
 		r := make([]int64, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
 			r[i] = int64(sort.Search(x.Len(),
-				func(j int) bool { return less(yv.at(i), NewF(x.At(j))) }))
+				func(j int) bool { return yv.at(i).Less(NewF(x.At(j))) }))
 		}
 		return NewAI(r)
 	default:
@@ -761,7 +363,7 @@ func searchAS(x *AS, y V) V {
 		r := make([]int64, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
 			r[i] = int64(sort.Search(x.Len(),
-				func(j int) bool { return less(yv.at(i), NewS(x.At(j))) }))
+				func(j int) bool { return yv.at(i).Less(NewS(x.At(j))) }))
 		}
 		return NewAI(r)
 	default:
@@ -775,12 +377,12 @@ func searchAV(x *AV, y V) V {
 		r := make([]int64, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
 			r[i] = int64(sort.Search(x.Len(),
-				func(j int) bool { return less(yv.at(i), x.At(j)) }))
+				func(j int) bool { return yv.at(i).Less(x.At(j)) }))
 		}
 		return NewAI(r)
 	default:
 		return NewI(int64(sort.Search(x.Len(),
-			func(i int) bool { return less(y, x.At(i)) })))
+			func(i int) bool { return y.Less(x.At(i)) })))
 
 	}
 }
