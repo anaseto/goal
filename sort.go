@@ -451,6 +451,9 @@ func sortUp(x V) V {
 	if !ok {
 		return Panicf("^x : x not an array (%s)", x.Type())
 	}
+	if xa.getFlags().Has(flagAscending) {
+		return x
+	}
 	xa = xa.shallowClone()
 	switch xv := xa.(type) {
 	case *AB:
