@@ -38,8 +38,16 @@ const bruteForceNumeric = 128
 
 // classify returns %x.
 func classify(ctx *Context, x V) V {
-	if Length(x) == 0 {
-		return NewAI(nil)
+	switch xv := x.value.(type) {
+	case array:
+		if xv.Len() == 0 {
+			return x
+		}
+		if xv.getFlags().Has(flagUnique) {
+			return rangeI(int64(xv.Len()))
+		}
+	default:
+		return Panicf("%%x : x not an array (%s)", x.Type())
 	}
 	switch xv := x.value.(type) {
 	case *AB:
@@ -100,7 +108,7 @@ func classify(ctx *Context, x V) V {
 		}
 		return NewAI(r)
 	default:
-		return Panicf("%%x : x not an array (%s)", x.Type())
+		panic("classify")
 	}
 }
 
@@ -138,8 +146,13 @@ func classifySlice[T comparable](xs []T, bruteForceThreshold int) []int64 {
 
 // uniq returns ?x.
 func uniq(ctx *Context, x V) V {
-	if Length(x) == 0 {
-		return x
+	switch xv := x.value.(type) {
+	case array:
+		if xv.Len() == 0 || xv.getFlags().Has(flagUnique) {
+			return x
+		}
+	default:
+		return panicType("?x", "x", x)
 	}
 	switch xv := x.value.(type) {
 	case *AB:
@@ -149,19 +162,19 @@ func uniq(ctx *Context, x V) V {
 		b := xv.At(0)
 		for i := 1; i < xv.Len(); i++ {
 			if xv.At(i) != b {
-				return NewABWithRC([]bool{b, xv.At(i)}, reuseRCp(xv.rc))
+				return NewV(&AB{Slice: []bool{b, xv.At(i)}, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
 			}
 		}
-		return NewABWithRC([]bool{b}, reuseRCp(xv.rc))
+		return NewV(&AB{Slice: []bool{b}, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
 	case *AF:
 		r := uniqSlice[float64](xv.Slice, bruteForceNumeric)
-		return NewAFWithRC(r, reuseRCp(xv.rc))
+		return NewV(&AF{Slice: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
 	case *AI:
 		r := uniqSlice[int64](xv.Slice, bruteForceNumeric)
-		return NewAIWithRC(r, reuseRCp(xv.rc))
+		return NewV(&AI{Slice: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
 	case *AS:
 		r := uniqSlice[string](xv.Slice, bruteForceGeneric)
-		return NewASWithRC(r, reuseRCp(xv.rc))
+		return NewV(&AS{Slice: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
 	case *AV:
 		r := []V{}
 		if xv.Len() > bruteForceGeneric {
@@ -181,7 +194,7 @@ func uniq(ctx *Context, x V) V {
 					continue
 				}
 			}
-			return Canonical(NewAVWithRC(r, xv.rc))
+			return NewV(canonicalAV(&AV{Slice: r, rc: xv.rc, flags: xv.flags | flagUnique}))
 		}
 	loop:
 		for i, xi := range xv.Slice {
@@ -192,9 +205,9 @@ func uniq(ctx *Context, x V) V {
 			}
 			r = append(r, xi)
 		}
-		return Canonical(NewAVWithRC(r, xv.rc))
+		return NewV(canonicalAV(&AV{Slice: r, rc: xv.rc, flags: xv.flags | flagUnique}))
 	default:
-		return panicType("?x", "x", x)
+		panic("uniq")
 	}
 }
 
@@ -226,8 +239,20 @@ func uniqSlice[T comparable](xs []T, bruteForceThreshold int) []T {
 
 // Mark Firsts returns firsts x.
 func markFirsts(ctx *Context, x V) V {
-	if Length(x) == 0 {
-		return NewAB(nil)
+	switch xv := x.value.(type) {
+	case array:
+		if xv.Len() == 0 {
+			return x
+		}
+		if xv.getFlags().Has(flagUnique) {
+			r := make([]bool, xv.Len())
+			for i := range r {
+				r[i] = true
+			}
+			return NewAB(r)
+		}
+	default:
+		return Panicf("firsts x : x not an array (%s)", x.Type())
 	}
 	switch xv := x.value.(type) {
 	case *AB:
@@ -270,7 +295,7 @@ func markFirsts(ctx *Context, x V) V {
 		}
 		return NewAB(r)
 	default:
-		return Panicf("firsts x : x not an array (%s)", x.Type())
+		panic("firsts")
 	}
 }
 
@@ -563,10 +588,19 @@ func memberOfArray(x, y array) V {
 	return NewAB(r)
 }
 
-// OccurrenceCount returns ⊒x.
+// OccurrenceCount returns ocount x.
 func occurrenceCount(ctx *Context, x V) V {
-	if Length(x) == 0 {
-		return NewAB(nil)
+	switch xv := x.value.(type) {
+	case array:
+		if xv.Len() == 0 {
+			return x
+		}
+		if xv.getFlags().Has(flagUnique) {
+			r := make([]bool, xv.Len())
+			return NewAB(r)
+		}
+	default:
+		return Panicf("ocount x : x not an array (%s)", x.Type())
 	}
 	switch xv := x.value.(type) {
 	case *AB:
@@ -611,7 +645,7 @@ func occurrenceCount(ctx *Context, x V) V {
 		}
 		return NewAI(r)
 	default:
-		return Panicf("⊒x : x not an array (%s)", x.Type())
+		panic("ocount")
 	}
 }
 

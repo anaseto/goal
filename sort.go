@@ -181,23 +181,33 @@ func ascend(x V) V {
 	switch xv := x.value.(type) {
 	case *AB:
 		p := &permutationAB{Perm: permRange(xv.Len()), X: sortAB(xv.Slice)}
-		sort.Stable(p)
+		if !xv.flags.Has(flagAscending) {
+			sort.Stable(p)
+		}
 		return NewAI(p.Perm)
 	case *AF:
 		p := &permutationAF{Perm: permRange(xv.Len()), X: sort.Float64Slice(xv.Slice)}
-		sort.Stable(p)
+		if !xv.flags.Has(flagAscending) {
+			sort.Stable(p)
+		}
 		return NewAI(p.Perm)
 	case *AI:
 		p := &permutationAI{Perm: permRange(xv.Len()), X: sortAI(xv.Slice)}
-		sort.Stable(p)
+		if !xv.flags.Has(flagAscending) {
+			sort.Stable(p)
+		}
 		return NewAI(p.Perm)
 	case *AS:
 		p := &permutationAS{Perm: permRange(xv.Len()), X: sort.StringSlice(xv.Slice)}
-		sort.Stable(p)
+		if !xv.flags.Has(flagAscending) {
+			sort.Stable(p)
+		}
 		return NewAI(p.Perm)
 	case *AV:
 		p := &permutationAV{Perm: permRange(xv.Len()), X: sortVSlice(xv.Slice)}
-		sort.Stable(p)
+		if !xv.flags.Has(flagAscending) {
+			sort.Stable(p)
+		}
 		return NewAI(p.Perm)
 	default:
 		return Panicf("<x : x not an array (%s)", x.Type())

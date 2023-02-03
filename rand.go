@@ -81,7 +81,7 @@ func deal(ctx *Context, n int64, y V) V {
 				r[i] = k
 				i++
 			}
-			return NewAI(r)
+			return NewV(&AI{Slice: r, flags: flagUnique})
 		}
 		r := make([]int64, yv)
 		for i := range r {
@@ -91,7 +91,7 @@ func deal(ctx *Context, n int64, y V) V {
 			r[i], r[j] = r[j], r[i]
 		})
 		r = r[:n]
-		return NewAI(r)
+		return NewV(&AI{Slice: r, flags: flagUnique})
 	}
 	if y.IsF() {
 		if !isI(y.F()) {
