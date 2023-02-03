@@ -507,8 +507,17 @@ func memberOfAF(x V, y *AF) V {
 	}
 }
 
+func memberIOfAI(x int64, y *AI) bool {
+	ylen := y.Len()
+	i := sort.Search(ylen, func(j int) bool { return y.At(j) >= x })
+	return i < ylen && y.At(i) == x
+}
+
 func memberOfAI(x V, y *AI) V {
 	if x.IsI() {
+		if y.flags.Has(flagAscending) && y.Len() > bruteForceNumeric/2 {
+			return NewI(b2i(memberIOfAI(x.I(), y)))
+		}
 		for _, yi := range y.Slice {
 			if x.I() == yi {
 				return NewI(b2i(true))
@@ -519,6 +528,9 @@ func memberOfAI(x V, y *AI) V {
 	if x.IsF() {
 		if !isI(x.F()) {
 			return NewI(b2i(false))
+		}
+		if y.flags.Has(flagAscending) && y.Len() > bruteForceNumeric/2 {
+			return NewI(b2i(memberIOfAI(int64(x.F()), y)))
 		}
 		for _, yi := range y.Slice {
 			if x.F() == float64(yi) {
@@ -531,6 +543,13 @@ func memberOfAI(x V, y *AI) V {
 	case *AB:
 		return memberOfAI(fromABtoAI(xv), y)
 	case *AI:
+		if y.flags.Has(flagAscending) && y.Len() > bruteForceNumeric/2 {
+			r := make([]bool, xv.Len())
+			for i, xi := range xv.Slice {
+				r[i] = memberIOfAI(xi, y)
+			}
+			return NewABWithRC(r, reuseRCp(xv.rc))
+		}
 		return NewABWithRC(memberOfSlice[int64](xv.Slice, y.Slice, bruteForceNumeric), reuseRCp(xv.rc))
 	case *AF:
 		return memberOf(x, toAF(y))
@@ -541,9 +560,18 @@ func memberOfAI(x V, y *AI) V {
 	}
 }
 
+func memberSOfAS(x string, y *AS) bool {
+	ylen := y.Len()
+	i := sort.Search(ylen, func(j int) bool { return y.At(j) >= x })
+	return i < ylen && y.At(i) == x
+}
+
 func memberOfAS(x V, y *AS) V {
 	switch xv := x.value.(type) {
 	case S:
+		if y.flags.Has(flagAscending) && y.Len() > bruteForceGeneric/4 {
+			return NewI(b2i(memberSOfAS(string(xv), y)))
+		}
 		for _, yi := range y.Slice {
 			if string(xv) == yi {
 				return NewI(1)
@@ -551,6 +579,13 @@ func memberOfAS(x V, y *AS) V {
 		}
 		return NewI(0)
 	case *AS:
+		if y.flags.Has(flagAscending) && y.Len() > bruteForceGeneric/4 {
+			r := make([]bool, xv.Len())
+			for i, xi := range xv.Slice {
+				r[i] = memberSOfAS(xi, y)
+			}
+			return NewABWithRC(r, reuseRCp(xv.rc))
+		}
 		return NewABWithRC(memberOfSlice[string](xv.Slice, y.Slice, bruteForceGeneric), reuseRCp(xv.rc))
 	case array:
 		return memberOfArray(xv, y)
@@ -965,7 +1000,7 @@ func findAII(x *AI, y int64) int64 {
 
 func findAI(x *AI, y V) V {
 	if y.IsI() {
-		if x.flags.Has(flagAscending) {
+		if x.flags.Has(flagAscending) && x.Len() > bruteForceNumeric/2 {
 			return NewI(findAII(x, y.I()))
 		}
 		for i, xi := range x.Slice {
@@ -981,7 +1016,7 @@ func findAI(x *AI, y V) V {
 			return NewI(int64(x.Len()))
 		}
 		yI := int64(y.F())
-		if x.flags.Has(flagAscending) {
+		if x.flags.Has(flagAscending) && x.Len() > bruteForceNumeric/2 {
 			return NewI(findAII(x, yI))
 		}
 		for i, xi := range x.Slice {
@@ -1004,7 +1039,7 @@ func findAI(x *AI, y V) V {
 		}
 		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AI:
-		if x.flags.Has(flagAscending) {
+		if x.flags.Has(flagAscending) && x.Len() > bruteForceNumeric/2 {
 			r := yv.reuse()
 			for i, yi := range yv.Slice {
 				r.Slice[i] = findAII(x, yi)
@@ -1063,7 +1098,7 @@ func findASS(x *AS, y S) int64 {
 func findAS(x *AS, y V) V {
 	switch yv := y.value.(type) {
 	case S:
-		if x.flags.Has(flagAscending) {
+		if x.flags.Has(flagAscending) && x.Len() > bruteForceGeneric/4 {
 			return NewI(findASS(x, yv))
 		}
 		for i, xi := range x.Slice {
@@ -1073,7 +1108,7 @@ func findAS(x *AS, y V) V {
 		}
 		return NewI(int64(x.Len()))
 	case *AS:
-		if x.flags.Has(flagAscending) {
+		if x.flags.Has(flagAscending) && x.Len() > bruteForceGeneric/4 {
 			r := make([]int64, yv.Len())
 			for i, yi := range yv.Slice {
 				r[i] = findASS(x, S(yi))

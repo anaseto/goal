@@ -243,3 +243,7 @@ rshift[1;2;3] / too many arguments
 +(1 2;!0) / length mismatch
 (a;b):,1 / length
 (a;b):2 / non-array
+%+ / not an array
+?+ / bad type
+ocount+ / not an array
+1.5^2 3 / non-integer

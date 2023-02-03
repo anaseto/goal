@@ -403,6 +403,22 @@ func BenchmarkUniq1000(b *testing.B) {
 	}
 }
 
+func BenchmarkSearch20000In64(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:64?10000;b:20000?10000")
+	for n := 0; n < b.N; n++ {
+		ctx.Eval("a?b")
+	}
+}
+
+func BenchmarkSearchSorted10000In128(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:^128?10000;b:10000?10000")
+	for n := 0; n < b.N; n++ {
+		ctx.Eval("a?b")
+	}
+}
+
 func BenchmarkSearch100In1000(b *testing.B) {
 	ctx := NewContext()
 	ctx.Eval("a:1000?10000;b:100?10000")
