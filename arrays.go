@@ -120,7 +120,7 @@ func (x *AB) atIndices(y *AI) V {
 		}
 		r[i] = x.At(int(yi))
 	}
-	return NewABWithRC(r, reuseRCp(y.rc))
+	return NewABWithRC(r, reuseRCp(x.rc))
 }
 
 func (x *AI) atIndices(y *AI) V {
@@ -135,7 +135,7 @@ func (x *AI) atIndices(y *AI) V {
 		}
 		r[i] = x.At(int(yi))
 	}
-	return NewAIWithRC(r, reuseRCp(y.rc))
+	return NewAIWithRC(r, reuseRCp(x.rc))
 }
 
 func (x *AF) atIndices(y *AI) V {
@@ -150,7 +150,7 @@ func (x *AF) atIndices(y *AI) V {
 		}
 		r[i] = x.At(int(yi))
 	}
-	return NewAFWithRC(r, reuseRCp(y.rc))
+	return NewAFWithRC(r, reuseRCp(x.rc))
 }
 
 func (x *AS) atIndices(y *AI) V {
@@ -165,7 +165,7 @@ func (x *AS) atIndices(y *AI) V {
 		}
 		r[i] = x.At(int(yi))
 	}
-	return NewASWithRC(r, reuseRCp(y.rc))
+	return NewASWithRC(r, reuseRCp(x.rc))
 }
 
 func (x *AV) atIndices(y *AI) V {
