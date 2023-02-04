@@ -82,7 +82,8 @@ func flipAVAB(x *AV, lines int) V {
 	r := make([]V, lines)
 	a := make([]bool, lines*x.Len())
 	xlen := x.Len()
-	rc := reuseRCp(x.rc)
+	var n int
+	rc := &n
 	for i, xi := range x.Slice {
 		if xi.IsI() {
 			b := xi.I() == 1
@@ -130,7 +131,8 @@ func flipAVAF(x *AV, lines int) V {
 	r := make([]V, lines)
 	a := make([]float64, lines*x.Len())
 	xlen := x.Len()
-	rc := reuseRCp(x.rc)
+	var n int
+	rc := &n
 	for i, xi := range x.Slice {
 		if xi.IsI() {
 			f := float64(xi.I())
@@ -191,7 +193,8 @@ func flipAVAI(x *AV, lines int) V {
 	r := make([]V, lines)
 	a := make([]int64, lines*x.Len())
 	xlen := x.Len()
-	rc := reuseRCp(x.rc)
+	var n int
+	rc := &n
 	for i, xi := range x.Slice {
 		if xi.IsI() {
 			n := xi.I()
@@ -236,7 +239,8 @@ func flipAVAS(x *AV, lines int) V {
 	r := make([]V, lines)
 	a := make([]string, lines*x.Len())
 	xlen := x.Len()
-	rc := reuseRCp(x.rc)
+	var n int
+	rc := &n
 	for i, xi := range x.Slice {
 		switch z := xi.value.(type) {
 		case S:
