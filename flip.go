@@ -82,7 +82,7 @@ func flipAVAB(x *AV, lines int) V {
 	r := make([]V, lines)
 	a := make([]bool, lines*x.Len())
 	xlen := x.Len()
-	var n int
+	var n int = 2
 	rc := &n
 	for i, xi := range x.Slice {
 		if xi.IsI() {
@@ -91,7 +91,6 @@ func flipAVAB(x *AV, lines int) V {
 				a[i+j*xlen] = b
 			}
 		} else {
-			*rc++
 			xia := xi.getAB()
 			for j := 0; j < lines; j++ {
 				a[i+j*xlen] = xia.At(j)
@@ -101,7 +100,8 @@ func flipAVAB(x *AV, lines int) V {
 	for j := range r {
 		r[j] = NewABWithRC(a[j*xlen:(j+1)*xlen], rc)
 	}
-	return NewAVWithRC(r, rc)
+	var rn int
+	return NewAVWithRC(r, &rn)
 }
 
 func flipAF(x *AV) V {
@@ -131,7 +131,7 @@ func flipAVAF(x *AV, lines int) V {
 	r := make([]V, lines)
 	a := make([]float64, lines*x.Len())
 	xlen := x.Len()
-	var n int
+	var n int = 2
 	rc := &n
 	for i, xi := range x.Slice {
 		if xi.IsI() {
@@ -150,17 +150,14 @@ func flipAVAF(x *AV, lines int) V {
 		}
 		switch z := xi.value.(type) {
 		case *AB:
-			*rc++
 			for j := 0; j < lines; j++ {
 				a[i+j*xlen] = float64(b2f(z.At(j)))
 			}
 		case *AF:
-			*rc++
 			for j := 0; j < lines; j++ {
 				a[i+j*xlen] = z.At(j)
 			}
 		case *AI:
-			*rc++
 			for j := 0; j < lines; j++ {
 				a[i+j*xlen] = float64(z.At(j))
 			}
@@ -169,7 +166,8 @@ func flipAVAF(x *AV, lines int) V {
 	for j := range r {
 		r[j] = NewAFWithRC(a[j*xlen:(j+1)*xlen], rc)
 	}
-	return NewAVWithRC(r, rc)
+	var rn int
+	return NewAVWithRC(r, &rn)
 }
 
 func flipAI(x *AV) V {
@@ -193,7 +191,7 @@ func flipAVAI(x *AV, lines int) V {
 	r := make([]V, lines)
 	a := make([]int64, lines*x.Len())
 	xlen := x.Len()
-	var n int
+	var n int = 2
 	rc := &n
 	for i, xi := range x.Slice {
 		if xi.IsI() {
@@ -205,12 +203,10 @@ func flipAVAI(x *AV, lines int) V {
 		}
 		switch z := xi.value.(type) {
 		case *AB:
-			*rc++
 			for j := 0; j < lines; j++ {
 				a[i+j*xlen] = b2i(z.At(j))
 			}
 		case *AI:
-			*rc++
 			for j := 0; j < lines; j++ {
 				a[i+j*xlen] = z.At(j)
 			}
@@ -219,7 +215,8 @@ func flipAVAI(x *AV, lines int) V {
 	for j := range r {
 		r[j] = NewAIWithRC(a[j*xlen:(j+1)*xlen], rc)
 	}
-	return NewAVWithRC(r, rc)
+	var rn int
+	return NewAVWithRC(r, &rn)
 }
 
 func flipAS(x *AV) V {
@@ -239,7 +236,7 @@ func flipAVAS(x *AV, lines int) V {
 	r := make([]V, lines)
 	a := make([]string, lines*x.Len())
 	xlen := x.Len()
-	var n int
+	var n int = 2
 	rc := &n
 	for i, xi := range x.Slice {
 		switch z := xi.value.(type) {
@@ -248,7 +245,6 @@ func flipAVAS(x *AV, lines int) V {
 				a[i+j*xlen] = string(z)
 			}
 		case *AS:
-			*rc++
 			for j := 0; j < lines; j++ {
 				a[i+j*xlen] = z.At(j)
 			}
@@ -257,7 +253,8 @@ func flipAVAS(x *AV, lines int) V {
 	for j := range r {
 		r[j] = NewASWithRC(a[j*xlen:(j+1)*xlen], rc)
 	}
-	return NewAVWithRC(r, rc)
+	var rn int
+	return NewAVWithRC(r, &rn)
 }
 
 func flipAV(x *AV) V {
@@ -270,7 +267,7 @@ func flipAV(x *AV) V {
 			r[i] = xi
 		}
 	}
-	return Canonical(NewAV(r))
+	return Canonical(NewAVWithRC(r, x.rc))
 }
 
 func flipAVAV(x *AV, lines int) V {
@@ -284,12 +281,12 @@ func flipAVAV(x *AV, lines int) V {
 				a[i+j*xlen] = z.at(j)
 			}
 		default:
-			*x.rc++
 			for j := 0; j < lines; j++ {
 				a[i+j*xlen] = xi
 			}
 		}
 	}
+	*x.rc += 2
 	for j := range r {
 		r[j] = Canonical(NewAVWithRC(a[j*xlen:(j+1)*xlen], x.rc))
 	}
