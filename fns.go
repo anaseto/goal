@@ -41,8 +41,10 @@ func rangeArray(x *AI) V {
 	}
 	r := make([]V, x.Len())
 	reps := cols
+	ua := make([]int64, int(cols)*len(r))
+	var n int = 2
 	for i := range r {
-		a := make([]int64, cols)
+		a := ua[i*int(cols) : (i+1)*int(cols)]
 		reps /= x.At(i)
 		clen := reps * x.At(i)
 		for c := int64(0); c < cols/clen; c++ {
@@ -53,9 +55,10 @@ func rangeArray(x *AI) V {
 				}
 			}
 		}
-		r[i] = NewAI(a)
+		r[i] = NewAIWithRC(a, &n)
 	}
-	return NewAV(r)
+	var rn int
+	return NewAVWithRC(r, &rn)
 }
 
 // where returns &x.
