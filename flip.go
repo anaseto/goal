@@ -11,8 +11,11 @@ func flip(x V) V {
 		}
 		lines := -1
 		for _, o := range xv.Slice {
-			nl := int(Length(o))
-			if _, ok := o.value.(array); !ok {
+			var nl int
+			switch a := o.value.(type) {
+			case array:
+				nl = a.Len()
+			default:
 				continue
 			}
 			switch {
@@ -78,16 +81,22 @@ func flipAB(x *AV) V {
 func flipAVAB(x *AV, lines int) V {
 	r := make([]V, lines)
 	a := make([]bool, lines*x.Len())
-	for j := range r {
-		q := a[j*x.Len() : (j+1)*x.Len()]
-		for i, xi := range x.Slice {
-			if xi.IsI() {
-				q[i] = xi.I() == 1
-			} else {
-				q[i] = xi.getAB().At(j)
+	xlen := x.Len()
+	for i, xi := range x.Slice {
+		if xi.IsI() {
+			b := xi.I() == 1
+			for j := 0; j < lines; j++ {
+				a[i+j*xlen] = b
+			}
+		} else {
+			xia := xi.getAB()
+			for j := 0; j < lines; j++ {
+				a[i+j*xlen] = xia.At(j)
 			}
 		}
-		r[j] = NewAB(q)
+	}
+	for j := range r {
+		r[j] = NewAB(a[j*xlen : (j+1)*xlen])
 	}
 	return NewAV(r)
 }
@@ -118,27 +127,39 @@ func flipAF(x *AV) V {
 func flipAVAF(x *AV, lines int) V {
 	r := make([]V, lines)
 	a := make([]float64, lines*x.Len())
-	for j := range r {
-		q := a[j*x.Len() : (j+1)*x.Len()]
-		for i, xi := range x.Slice {
-			if xi.IsI() {
-				q[i] = float64(xi.I())
-				continue
+	xlen := x.Len()
+	for i, xi := range x.Slice {
+		if xi.IsI() {
+			f := float64(xi.I())
+			for j := 0; j < lines; j++ {
+				a[i+j*xlen] = f
 			}
-			if xi.IsF() {
-				q[i] = float64(xi.F())
-				continue
+			continue
+		}
+		if xi.IsF() {
+			f := xi.F()
+			for j := 0; j < lines; j++ {
+				a[i+j*xlen] = f
 			}
-			switch z := xi.value.(type) {
-			case *AB:
-				q[i] = float64(b2f(z.At(j)))
-			case *AF:
-				q[i] = z.At(j)
-			case *AI:
-				q[i] = float64(z.At(j))
+			continue
+		}
+		switch z := xi.value.(type) {
+		case *AB:
+			for j := 0; j < lines; j++ {
+				a[i+j*xlen] = float64(b2f(z.At(j)))
+			}
+		case *AF:
+			for j := 0; j < lines; j++ {
+				a[i+j*xlen] = z.At(j)
+			}
+		case *AI:
+			for j := 0; j < lines; j++ {
+				a[i+j*xlen] = float64(z.At(j))
 			}
 		}
-		r[j] = NewAF(q)
+	}
+	for j := range r {
+		r[j] = NewAF(a[j*xlen : (j+1)*xlen])
 	}
 	return NewAV(r)
 }
@@ -163,21 +184,28 @@ func flipAI(x *AV) V {
 func flipAVAI(x *AV, lines int) V {
 	r := make([]V, lines)
 	a := make([]int64, lines*x.Len())
-	for j := range r {
-		q := a[j*x.Len() : (j+1)*x.Len()]
-		for i, xi := range x.Slice {
-			if xi.IsI() {
-				q[i] = xi.I()
-				continue
+	xlen := x.Len()
+	for i, xi := range x.Slice {
+		if xi.IsI() {
+			n := xi.I()
+			for j := 0; j < lines; j++ {
+				a[i+j*xlen] = n
 			}
-			switch z := xi.value.(type) {
-			case *AB:
-				q[i] = b2i(z.At(j))
-			case *AI:
-				q[i] = z.At(j)
+			continue
+		}
+		switch z := xi.value.(type) {
+		case *AB:
+			for j := 0; j < lines; j++ {
+				a[i+j*xlen] = b2i(z.At(j))
+			}
+		case *AI:
+			for j := 0; j < lines; j++ {
+				a[i+j*xlen] = z.At(j)
 			}
 		}
-		r[j] = NewAI(q)
+	}
+	for j := range r {
+		r[j] = NewAI(a[j*xlen : (j+1)*xlen])
 	}
 	return NewAV(r)
 }
@@ -198,17 +226,21 @@ func flipAS(x *AV) V {
 func flipAVAS(x *AV, lines int) V {
 	r := make([]V, lines)
 	a := make([]string, lines*x.Len())
-	for j := range r {
-		q := a[j*x.Len() : (j+1)*x.Len()]
-		for i, xi := range x.Slice {
-			switch z := xi.value.(type) {
-			case S:
-				q[i] = string(z)
-			case *AS:
-				q[i] = z.At(j)
+	xlen := x.Len()
+	for i, xi := range x.Slice {
+		switch z := xi.value.(type) {
+		case S:
+			for j := 0; j < lines; j++ {
+				a[i+j*xlen] = string(z)
+			}
+		case *AS:
+			for j := 0; j < lines; j++ {
+				a[i+j*xlen] = z.At(j)
 			}
 		}
-		r[j] = NewAS(q)
+	}
+	for j := range r {
+		r[j] = NewAS(a[j*xlen : (j+1)*xlen])
 	}
 	return NewAV(r)
 }
@@ -229,17 +261,21 @@ func flipAV(x *AV) V {
 func flipAVAV(x *AV, lines int) V {
 	r := make([]V, lines)
 	a := make([]V, lines*x.Len())
-	for j := range r {
-		q := a[j*x.Len() : (j+1)*x.Len()]
-		for i, xi := range x.Slice {
-			switch z := xi.value.(type) {
-			case array:
-				q[i] = z.at(j)
-			default:
-				q[i] = xi
+	xlen := x.Len()
+	for i, xi := range x.Slice {
+		switch z := xi.value.(type) {
+		case array:
+			for j := 0; j < lines; j++ {
+				a[i+j*xlen] = z.at(j)
+			}
+		default:
+			for j := 0; j < lines; j++ {
+				a[i+j*xlen] = xi
 			}
 		}
-		r[j] = Canonical(NewAV(q))
+	}
+	for j := range r {
+		r[j] = Canonical(NewAV(a[j*xlen : (j+1)*xlen]))
 	}
 	return NewAV(r)
 }
