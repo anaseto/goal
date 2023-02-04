@@ -120,7 +120,8 @@ func (x *AB) atIndices(y *AI) V {
 		}
 		r[i] = x.At(int(yi))
 	}
-	return NewABWithRC(r, reuseRCp(x.rc))
+	var n int
+	return NewABWithRC(r, &n)
 }
 
 func (x *AI) atIndices(y *AI) V {
@@ -135,7 +136,8 @@ func (x *AI) atIndices(y *AI) V {
 		}
 		r[i] = x.At(int(yi))
 	}
-	return NewAIWithRC(r, reuseRCp(x.rc))
+	var n int
+	return NewAIWithRC(r, &n)
 }
 
 func (x *AF) atIndices(y *AI) V {
@@ -150,7 +152,8 @@ func (x *AF) atIndices(y *AI) V {
 		}
 		r[i] = x.At(int(yi))
 	}
-	return NewAFWithRC(r, reuseRCp(x.rc))
+	var n int
+	return NewAFWithRC(r, &n)
 }
 
 func (x *AS) atIndices(y *AI) V {
@@ -165,7 +168,8 @@ func (x *AS) atIndices(y *AI) V {
 		}
 		r[i] = x.At(int(yi))
 	}
-	return NewASWithRC(r, reuseRCp(x.rc))
+	var n int
+	return NewASWithRC(r, &n)
 }
 
 func (x *AV) atIndices(y *AI) V {
@@ -181,7 +185,15 @@ func (x *AV) atIndices(y *AI) V {
 		r[i] = x.At(int(yi))
 	}
 	nr := &AV{Slice: r}
-	nr.InitWithRC(reuseRCp(x.rc))
+	var p *int
+	if !reusableRCp(p) {
+		var n int
+		p = &n
+	} else {
+		p = x.rc
+		*p++
+	}
+	nr.InitWithRC(p)
 	return NewV(canonicalAV(nr))
 }
 
