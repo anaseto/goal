@@ -89,6 +89,7 @@ func flipAVAB(x *AV, lines int) V {
 				a[i+j*xlen] = b
 			}
 		} else {
+			*x.rc++
 			xia := xi.getAB()
 			for j := 0; j < lines; j++ {
 				a[i+j*xlen] = xia.At(j)
@@ -96,7 +97,7 @@ func flipAVAB(x *AV, lines int) V {
 		}
 	}
 	for j := range r {
-		r[j] = NewAB(a[j*xlen : (j+1)*xlen])
+		r[j] = NewABWithRC(a[j*xlen:(j+1)*xlen], x.rc)
 	}
 	return NewAV(r)
 }
@@ -145,23 +146,26 @@ func flipAVAF(x *AV, lines int) V {
 		}
 		switch z := xi.value.(type) {
 		case *AB:
+			*x.rc++
 			for j := 0; j < lines; j++ {
 				a[i+j*xlen] = float64(b2f(z.At(j)))
 			}
 		case *AF:
+			*x.rc++
 			for j := 0; j < lines; j++ {
 				a[i+j*xlen] = z.At(j)
 			}
 		case *AI:
+			*x.rc++
 			for j := 0; j < lines; j++ {
 				a[i+j*xlen] = float64(z.At(j))
 			}
 		}
 	}
 	for j := range r {
-		r[j] = NewAF(a[j*xlen : (j+1)*xlen])
+		r[j] = NewAFWithRC(a[j*xlen:(j+1)*xlen], x.rc)
 	}
-	return NewAV(r)
+	return NewAVWithRC(r, x.rc)
 }
 
 func flipAI(x *AV) V {
@@ -195,19 +199,21 @@ func flipAVAI(x *AV, lines int) V {
 		}
 		switch z := xi.value.(type) {
 		case *AB:
+			*x.rc++
 			for j := 0; j < lines; j++ {
 				a[i+j*xlen] = b2i(z.At(j))
 			}
 		case *AI:
+			*x.rc++
 			for j := 0; j < lines; j++ {
 				a[i+j*xlen] = z.At(j)
 			}
 		}
 	}
 	for j := range r {
-		r[j] = NewAI(a[j*xlen : (j+1)*xlen])
+		r[j] = NewAIWithRC(a[j*xlen:(j+1)*xlen], x.rc)
 	}
-	return NewAV(r)
+	return NewAVWithRC(r, x.rc)
 }
 
 func flipAS(x *AV) V {
@@ -234,15 +240,16 @@ func flipAVAS(x *AV, lines int) V {
 				a[i+j*xlen] = string(z)
 			}
 		case *AS:
+			*x.rc++
 			for j := 0; j < lines; j++ {
 				a[i+j*xlen] = z.At(j)
 			}
 		}
 	}
 	for j := range r {
-		r[j] = NewAS(a[j*xlen : (j+1)*xlen])
+		r[j] = NewASWithRC(a[j*xlen:(j+1)*xlen], x.rc)
 	}
-	return NewAV(r)
+	return NewAVWithRC(r, x.rc)
 }
 
 func flipAV(x *AV) V {
@@ -269,13 +276,14 @@ func flipAVAV(x *AV, lines int) V {
 				a[i+j*xlen] = z.at(j)
 			}
 		default:
+			*x.rc++
 			for j := 0; j < lines; j++ {
 				a[i+j*xlen] = xi
 			}
 		}
 	}
 	for j := range r {
-		r[j] = Canonical(NewAV(a[j*xlen : (j+1)*xlen]))
+		r[j] = Canonical(NewAVWithRC(a[j*xlen:(j+1)*xlen], x.rc))
 	}
 	return NewAV(r)
 }

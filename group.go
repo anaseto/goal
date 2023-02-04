@@ -29,9 +29,11 @@ func group(x V) V {
 				iFalse++
 			}
 		}
-		r[0] = NewAI(aif)
-		r[1] = NewAI(ait)
-		return NewAV(r)
+		var nrc = 2
+		rc := &nrc
+		r[0] = NewAIWithRC(aif, rc)
+		r[1] = NewAIWithRC(ait, rc)
+		return NewAVWithRC(r, rc)
 	case *AI:
 		max := maxAI(xv)
 		if max < 0 {
@@ -56,8 +58,11 @@ func group(x V) V {
 		}
 		pj := int64(0)
 		ai := make([]int64, xv.Len()-countn)
+		var n int
+		rc := &n
 		for i := range r {
-			r[i] = NewAI(ai[pj:scounts[i]])
+			*rc++
+			r[i] = NewAIWithRC(ai[pj:scounts[i]], rc)
 			pj = scounts[i]
 		}
 		for i, j := range xv.Slice {
@@ -67,7 +72,7 @@ func group(x V) V {
 			ai[scounts[j]-counts[j]] = int64(i)
 			counts[j]--
 		}
-		return NewAV(r)
+		return NewAVWithRC(r, rc)
 	case *AF:
 		z := toAI(xv)
 		if z.IsPanic() {
