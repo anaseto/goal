@@ -137,11 +137,11 @@ modulus:(
 types:"B" "F" "I" "S" / atom types
 ntypes:"B" "F" "I" / numeric atom types
 itypes:"B" "I" / integer atom types
-ctypes:"bool" "float64" "int64" "string" / concrete types
-cntypes:"bool" "float64" "int64" "S" / concrete numeric types
+gotypes:"bool" "float64" "int64" "string" / concrete types
+gontypes:"bool" "float64" "int64" "S" / concrete numeric types
 utypes:"F" "I" / atom unboxed types
-t2go:{ctypes[types?x]} / type to concrete go type
-nt2go:{cntypes[types?x]} / type to concrete go type
+t2go:types!gotypes / type to concrete go type
+nt2go:types!gontypes / type to concrete go type
 olts:{?x[;0]} / operator x left types
 orts:{?x[&x[;0]=y][;1]} / operator x right types for left type y
 getET:{(*x[&(x[;0]=y)&x[;1]=z])[2 3]} / expression and ret type for type couple

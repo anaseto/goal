@@ -258,6 +258,22 @@ func (x *AV) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
 	return
 }
 
+func (d *Dict) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
+	m, err := d.keys.Fprint(ctx, w)
+	n += m
+	if err != nil {
+		return
+	}
+	err = w.WriteByte('!')
+	if err != nil {
+		return
+	}
+	n++
+	m, err = d.values.Fprint(ctx, w)
+	n += m
+	return
+}
+
 func (p *projection) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
 	var m int
 	m, err = p.Fun.Fprint(ctx, w)

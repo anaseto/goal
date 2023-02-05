@@ -9,7 +9,7 @@ import (
 // Length returns the length of a value like in #x.
 func Length(x V) int {
 	switch xv := x.value.(type) {
-	case array:
+	case countable:
 		return xv.Len()
 	default:
 		return 1

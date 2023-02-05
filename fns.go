@@ -2,6 +2,10 @@ package goal
 
 // enum returns !x.
 func enum(x V) V {
+	d, ok := x.value.(*Dict)
+	if ok {
+		return d.Keys()
+	}
 	x = toIndices(x)
 	if x.IsPanic() {
 		return Panicf("!x : %v", x)
@@ -511,6 +515,8 @@ func get(ctx *Context, x V) V {
 		return reval(ctx, xv)
 	case *errV:
 		return xv.V
+	case *Dict:
+		return xv.Values()
 	default:
 		return panicType(".x", "x", x)
 	}

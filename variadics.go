@@ -16,7 +16,7 @@ const (
 	vSubtract                 // -
 	vMultiply                 // *
 	vDivide                   // %
-	vMod                      // !
+	vKey                      // !
 	vMin                      // &
 	vMax                      // |
 	vLess                     // <
@@ -46,7 +46,7 @@ func init() {
 		vSubtract: VSubtract,
 		vMultiply: VMultiply,
 		vDivide:   VDivide,
-		vMod:      VMod,
+		vKey:      VKey,
 		vMin:      VMin,
 		vMax:      VMax,
 		vLess:     VLess,
@@ -74,7 +74,7 @@ var vStrings = [...]string{
 	vSubtract: "-",
 	vMultiply: "*",
 	vDivide:   "%",
-	vMod:      "!",
+	vKey:      "!",
 	vMin:      "&",
 	vMax:      "|",
 	vLess:     "<",
@@ -144,6 +144,7 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterDyad("csv", VCSV)
 	ctx.RegisterDyad("in", VIn)
 	ctx.RegisterDyad("or", VOr)
+	ctx.RegisterDyad("mod", VMod)
 	ctx.RegisterDyad("rotate", VRotate)
 	ctx.RegisterDyad("shift", VShift)
 	ctx.RegisterDyad("rshift", VRShift)
@@ -223,13 +224,14 @@ func VDivide(ctx *Context, args []V) V {
 	}
 }
 
-// VMod implements the ! variadic verb.
-func VMod(ctx *Context, args []V) V {
+// VKey implements the ! variadic verb.
+func VKey(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return enum(args[0])
 	case 2:
-		return modulus(args[1], args[0])
+		// TODO: use i!y for something like rotate or a shift variant.
+		return key(args[1], args[0])
 	default:
 		return panicRank("!")
 	}
@@ -648,6 +650,18 @@ func VOCount(ctx *Context, args []V) V {
 		return occurrenceCount(ctx, args[0])
 	default:
 		return panicRank("ocount")
+	}
+}
+
+// VMod implements the mod variadic verb.
+func VMod(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		return panics("mod : not enough arguments")
+	case 2:
+		return modulus(args[1], args[0])
+	default:
+		return panicRank("mod")
 	}
 }
 

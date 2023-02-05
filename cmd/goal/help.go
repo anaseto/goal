@@ -16,7 +16,7 @@ Type help TOPIC or h TOPIC where TOPIC is one of:
 
 Notations:
         s (string) f (function) F (2-args function)
-        n (number) i (integer) r (regexp)
+        n (number) i (integer) r (regexp) d (dict)
         x,y (any other)
 `
 
@@ -51,6 +51,7 @@ atom    array   name            examples
 n       N       number          0      1.5      !5      1.2 3 1.8
 s       S       string          "abc"   "d"     "a" "b" "c"
 r               regexp          rx/[a-z]/       rx/\s+/
+d               dictionnary     "a" "b"!1 2
 f               function        +      {x*2}   (1-)    %[;2]
 e               error           error "msg"
         A       generic array   ("a" 1;"b" 2;"c" 3)     (+;-;*;"any")
@@ -72,8 +73,9 @@ s*x repeat      "a"*3 2 1 0 -> "aaa" "aa" "a" ""
 %x  classify    %1 2 3 1 2 3 -> 0 1 2 0 1 2     %"a" "b" "a" -> 0 1 0
 x%y divide      3%2 -> 1.5          3 4%2 -> 2 1.5
 !i  enum        !5 -> 0 1 2 3 4
+!d  keys        !"a" "b"!1 2 -> "a" "b"
 !x  odometer    !2 3 -> (0 0 0 1 1 1;0 1 2 0 1 2)
-n!n mod         3!5 4 3 -> 2 1 0
+x!y dict        d:"a" "b"!1 2;d "a" -> 1
 &x  where       &0 0 1 0 0 0 1 -> 2 6
 x&y min         2&3 -> 2        4&3 -> 3
 |x  reverse     |!5 -> 4 3 2 1 0
@@ -127,6 +129,7 @@ f@y apply       (|)@1 2 -> 2 1 (like |[1 2] -> 2 1 or |1 2)
 x@y at          1 2 3@2 -> 3    1 2 3[2 0] -> 3 1
 .s  reval       ."2+3" -> 5     a:1;."a" -> panic ".s : undefined global: a"
 .e  get error   .error "msg" -> "msg"
+.d  values      ."a" "b"!1 2 -> 1 2
 s.y substr      "abcdef"[2;3] -> "cde" (s[offset;length])
 r.y findN       rx/[a-z]/["abc";2] -> "a" "b" (stop at 2 matches; -1 for all)
 x.y applyN      {x+y}.2 3 -> 5    {x+y}[2;3] -> 5    (1 2;3 4)[0;1] -> 2
@@ -165,6 +168,7 @@ x csv y     csv read    csv "1,2,3" -> ,"1" "2" "3"
 x in s      contained   "bc" "ac" in "abcd" -> 1 0
 x in y      member of   2 3 in 0 2 4 -> 1 0
 x nan y     fill NaNs   42 nan (1.5;sqrt -1) -> 1.5 42
+n mod n     modulus     3 mod 5 4 3 -> 2 1 0
 x rotate y  rotate      2 rotate 1 2 3 4 -> 3 4 1 2
 x rshift y  right shift "a" "b" rshift 1 2 3 -> "a" "b" 1
 x shift y   shift       "a" "b" shift 1 2 3 -> 3 "a" "b"

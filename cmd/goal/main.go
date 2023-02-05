@@ -5,6 +5,7 @@ import (
 	"codeberg.org/anaseto/goal/cmd"
 	gos "codeberg.org/anaseto/goal/os"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -19,7 +20,23 @@ func registerVariadics(ctx *goal.Context) {
 	ctx.RegisterDyad("say", gos.VSay)
 	ctx.RegisterMonad("shell", gos.VShell)
 	ctx.RegisterMonad("slurp", gos.VSlurp)
-	ctx.AssignGlobal("os.ENV", goal.NewAS(os.Environ()))
+	ctx.AssignGlobal("os.ENV", getEnviron())
+}
+
+func getEnviron() goal.V {
+	env := os.Environ()
+	ss := make([]string, len(env)*2)
+	for i, s := range env {
+		b, a, _ := strings.Cut(s, "=")
+		ss[i] = b
+		ss[i+len(env)] = a
+	}
+	keys := &goal.AS{Slice: ss[:len(env)]}
+	values := &goal.AS{Slice: ss[len(env):]}
+	var n int = 2
+	keys.InitWithRC(&n)
+	values.InitWithRC(&n)
+	return goal.NewDict(goal.NewV(keys), goal.NewV(values))
 }
 
 func getHelp() map[string]string {

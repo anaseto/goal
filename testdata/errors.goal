@@ -247,3 +247,5 @@ rshift[1;2;3] / too many arguments
 ?+ / bad type
 ocount+ / not an array
 1.5^2 3 / non-integer
+d:"a" "b"!1 2;d["a" "c" "b"] / not found
+d:"a" "b"!1 2;d["c"] / not found

@@ -388,6 +388,39 @@ func (x *AV) applyN(ctx *Context, n int) V {
 	}
 }
 
+func (d *Dict) applyN(ctx *Context, n int) V {
+	switch n {
+	case 1:
+		y := ctx.top()
+		dlen := d.keys.Len()
+		z := findArray(d.keys, y)
+		if z.IsI() {
+			i := z.I()
+			if i < 0 {
+				i += int64(dlen)
+			}
+			if i < 0 || i >= int64(dlen) {
+				return Panicf("d[y] : key not found (%s)", y.Sprint(ctx))
+			}
+			return d.values.at(int(i))
+		}
+		azi := z.value.(*AI)
+		_, i, ok := inBoundsInfo(azi, dlen)
+		if !ok {
+			return Panicf("d[y] : key not found (%s)", y.value.(array).at(i).Sprint(ctx))
+		}
+		r := d.values.atIndices(azi)
+		if r.RC() == nil {
+			var n int
+			r.InitWithRC(&n)
+		}
+		return NewV(r)
+	default:
+		ctx.dropN(n - 1)
+		return Panicf("x[y] : deep indexing unsupported for dict")
+	}
+}
+
 // applyArray applies an array to a value.
 func applyArray(x array, y V) V {
 	if y.kind == valNil {
@@ -422,7 +455,12 @@ func applyArray(x array, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AI:
-		return x.atIndices(yv)
+		xlen := x.Len()
+		i, ok := indicesInBounds(yv, xlen)
+		if !ok {
+			return Panicf("x[y] : index out of bounds: %d (length %d)", i, xlen)
+		}
+		return NewV(x.atIndices(yv))
 	case *AV:
 		r := make([]V, yv.Len())
 		for i, yi := range yv.Slice {
@@ -437,7 +475,13 @@ func applyArray(x array, y V) V {
 		if iy.IsPanic() {
 			return Panicf("x[y] : %v", iy.value)
 		}
-		r := x.atIndices(iy.value.(*AI))
+		ayi := iy.value.(*AI)
+		xlen := x.Len()
+		i, ok := indicesInBounds(ayi, xlen)
+		if !ok {
+			return Panicf("x[y] : index out of bounds: %d (length %d)", i, xlen)
+		}
+		r := NewV(x.atIndices(ayi))
 		return r
 	default:
 		return Panicf("x[y] : y non-integer (%s)", y.Type())

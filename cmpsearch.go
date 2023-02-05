@@ -773,6 +773,23 @@ func find(x, y V) V {
 	}
 }
 
+func findArray(x array, y V) V {
+	switch xv := x.(type) {
+	case *AB:
+		return findAB(xv, y)
+	case *AF:
+		return findAF(xv, y)
+	case *AI:
+		return findAI(xv, y)
+	case *AS:
+		return findAS(xv, y)
+	case *AV:
+		return findAV(xv, y)
+	default:
+		panic("findArray")
+	}
+}
+
 func findS(s S, y V) V {
 	switch yv := y.value.(type) {
 	case S:
@@ -877,7 +894,7 @@ func findAB(x *AB, y V) V {
 		}
 		return NewAI(r)
 	case array:
-		return findArray(x, yv)
+		return findArrays(x, yv)
 	default:
 		return NewI(int64(x.Len()))
 	}
@@ -964,7 +981,7 @@ func findAF(x *AF, y V) V {
 	case *AF:
 		return NewAIWithRC(findSlices[float64](x.Slice, yv.Slice, bruteForceNumeric), reuseRCp(yv.rc))
 	case array:
-		return findArray(x, yv)
+		return findArrays(x, yv)
 	default:
 		return NewI(int64(x.Len()))
 	}
@@ -1080,7 +1097,7 @@ func findAI(x *AI, y V) V {
 	case *AF:
 		return findAF(toAF(x).value.(*AF), y)
 	case array:
-		return findArray(x, yv)
+		return findArrays(x, yv)
 	default:
 		return NewI(int64(x.Len()))
 	}
@@ -1117,13 +1134,13 @@ func findAS(x *AS, y V) V {
 		}
 		return NewAIWithRC(findSlices[string](x.Slice, yv.Slice, bruteForceGeneric), reuseRCp(yv.rc))
 	case array:
-		return findArray(x, yv)
+		return findArrays(x, yv)
 	default:
 		return NewI(int64(x.Len()))
 	}
 }
 
-func findArray(x, y array) V {
+func findArrays(x, y array) V {
 	// NOTE: quadratic algorithm, worst case complexity could be
 	// improved by sorting or string hashing.
 	r := make([]int64, y.Len())
@@ -1144,7 +1161,7 @@ func findArray(x, y array) V {
 func findAV(x *AV, y V) V {
 	switch yv := y.value.(type) {
 	case array:
-		return findArray(x, yv)
+		return findArrays(x, yv)
 	default:
 		for i, xi := range x.Slice {
 			if Match(y, xi) {

@@ -99,6 +99,10 @@ func (x *AV) CloneWithRC(rc *int) Value {
 	return r
 }
 
+func (d *Dict) CloneWithRC(rc *int) Value {
+	return &Dict{keys: d.keys.CloneWithRC(rc).(array), values: d.values.CloneWithRC(rc).(array)}
+}
+
 func (p *projection) CloneWithRC(rc *int) Value {
 	np := &projection{Fun: p.Fun.CloneWithRC(rc), Args: make([]V, len(p.Args))}
 	for i, arg := range p.Args {

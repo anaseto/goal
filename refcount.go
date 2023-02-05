@@ -191,6 +191,16 @@ func (x *AF) DecrRC() { decrRCp(x.rc) }
 func (x *AS) DecrRC() { decrRCp(x.rc) }
 func (x *AV) DecrRC() { decrRCp(x.rc) }
 
+func (d *Dict) IncrRC() {
+	d.keys.IncrRC()
+	d.values.IncrRC()
+}
+
+func (d *Dict) DecrRC() {
+	d.keys.DecrRC()
+	d.values.DecrRC()
+}
+
 func (r *derivedVerb) IncrRC() { r.Arg.IncrRC() }
 func (r *derivedVerb) DecrRC() { r.Arg.DecrRC() }
 
@@ -302,6 +312,11 @@ func (x *AV) InitWithRC(rc *int) {
 		return
 	}
 	*x.rc += 2
+}
+
+func (d *Dict) InitWithRC(rc *int) {
+	d.keys.InitWithRC(rc)
+	d.values.InitWithRC(rc)
 }
 
 func (p *projection) InitWithRC(rc *int) {

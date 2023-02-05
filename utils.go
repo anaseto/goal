@@ -232,6 +232,30 @@ func toIndicesRec(x V) V {
 	}
 }
 
+func indicesInBounds(x *AI, l int) (int64, bool) {
+	for _, xi := range x.Slice {
+		if xi < 0 {
+			xi += int64(l)
+		}
+		if xi < 0 || xi >= int64(l) {
+			return xi, false
+		}
+	}
+	return 0, true
+}
+
+func inBoundsInfo(x *AI, l int) (int64, int, bool) {
+	for i, xi := range x.Slice {
+		if xi < 0 {
+			xi += int64(l)
+		}
+		if xi < 0 || xi >= int64(l) {
+			return xi, i, false
+		}
+	}
+	return 0, 0, true
+}
+
 // toArray converts atoms into 1-length arrays. It returns arrays as-is.
 func toArray(x V) V {
 	if x.IsI() {
