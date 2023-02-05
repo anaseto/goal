@@ -299,7 +299,7 @@ w print x       print x to writer or filename     "filename" print "content"
 w say x         same as print, but appends a newline
 
 os.ARGS         command-line arguments, starting with script name
-os.ENV          "key=value" array of strings representing environment
+os.ENV          keys!values strings dictionnary representing environment
 
 TIME HELP
 time cmd                time command with current time
