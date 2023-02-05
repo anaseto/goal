@@ -9,8 +9,8 @@ import (
 )
 `
 
-/ Line format: xt yt expr rt
-equal:(
+keys:"xt" "yt" "expr" "rt"
+equal:keys!+(
   "B" "B" "x == y" "B"
   "B" "I" "b2i(x) == y" "B"
   "B" "F" "b2f(x) == y" "B"
@@ -22,7 +22,7 @@ equal:(
   "F" "F" "x == y" "B"
   "S" "S" "x == y" "B"
 )
-lesser:(
+lesser:keys!+(
   "B" "B" "!x && y" "B"
   "B" "I" "b2i(x) < y" "B"
   "B" "F" "b2f(x) < y" "B"
@@ -34,7 +34,7 @@ lesser:(
   "F" "F" "x < y" "B"
   "S" "S" "x < y" "B"
 )
-greater:(
+greater:keys!+(
   "B" "B" "x && !y" "B"
   "B" "I" "b2i(x) > y" "B"
   "B" "F" "b2f(x) > y" "B"
@@ -46,7 +46,7 @@ greater:(
   "F" "F" "x > y" "B"
   "S" "S" "x > y" "B"
 )
-add:(
+add:keys!+(
   "B" "B" "b2i(x) + b2i(y)" "I"
   "B" "I" "b2i(x) + y" "I"
   "B" "F" "b2f(x) + y" "F"
@@ -58,7 +58,7 @@ add:(
   "F" "F" "x + y" "F"
   "S" "S" "x + y" "S"
 )
-subtract:(
+subtract:keys!+(
   "B" "B" "b2i(x) - b2i(y)" "I"
   "B" "I" "b2i(x) - y" "I"
   "B" "F" "b2f(x) - y" "F"
@@ -70,7 +70,7 @@ subtract:(
   "F" "F" "x - y" "F"
   "S" "S" "strings.TrimSuffix(string(x), string(y))" "S"
 )
-multiply:(
+multiply:keys!+(
   "B" "B" "x && y" "B"
   "B" "I" "b2i(x) * y" "I"
   "B" "F" "b2f(x) * y" "F"
@@ -87,7 +87,7 @@ multiply:(
   "S" "I" "srepeat(x, y)" "S"
   "S" "F" "srepeat(x, int64(y))" "S"
 )
-divide:(
+divide:keys!+(
   "B" "B" "divideF(b2f(x), b2f(y))" "F"
   "B" "I" "divideF(b2f(x), float64(y))" "F"
   "B" "F" "divideF(b2f(x), y)" "F"
@@ -98,7 +98,7 @@ divide:(
   "F" "I" "divideF(x, float64(y))" "F"
   "F" "F" "divideF(x, y)" "F"
 )
-minimum:(
+minimum:keys!+(
   "B" "B" "x && y" "B"
   "B" "I" "minI(b2i(x), y)" "I"
   "B" "F" "math.Min(b2f(x), y)" "F"
@@ -110,7 +110,7 @@ minimum:(
   "F" "F" "math.Min(x, float64(y))" "F"
   "S" "S" "minS(x, y)" "S"
 )
-maximum:(
+maximum:keys!+(
   "B" "B" "x || y" "B"
   "B" "I" "maxI(b2i(x), y)" "I"
   "B" "F" "math.Max(b2f(x), y)" "F"
@@ -122,7 +122,7 @@ maximum:(
   "F" "F" "math.Max(x, float64(y))" "F"
   "S" "S" "maxS(x, y)" "S"
 )
-modulus:(
+modulus:keys!+(
   "B" "B" "modI(b2i(x), b2i(y))" "I"
   "B" "I" "modI(b2i(x), y)" "I"
   "B" "F" "modF(b2f(x), y)" "F"
@@ -142,9 +142,9 @@ gontypes:"bool" "float64" "int64" "S" / concrete numeric types
 utypes:"F" "I" / atom unboxed types
 t2go:types!gotypes / type to concrete go type
 nt2go:types!gontypes / type to concrete go type
-olts:{?x[;0]} / operator x left types
-orts:{?x[&x[;0]=y][;1]} / operator x right types for left type y
-getET:{(*x[&(x[;0]=y)&x[;1]=z])[2 3]} / expression and ret type for type couple
+olts:{?x["xt"]} / operator x left types
+orts:{?x["yt"][&x["xt"]=y]} / operator x right types for left type y
+getET:{x["expr" "rt"][;*&(x["xt"]=y)&x["yt"]=z]} / expression and ret type for type couple
 escp:sub["%";"%%"] / percent escape
 doExpr:{[e;yt;x;y]
   e:?[~xt in ntypes;sub[rx/(!x|\bx)\b/;xt+"($1)"]e;e]
