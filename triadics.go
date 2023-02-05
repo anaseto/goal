@@ -8,6 +8,8 @@ import (
 // amend3 implements @[x;y;f].
 func (ctx *Context) amend3(x, y, f V) V {
 	switch xv := x.value.(type) {
+	case *Dict:
+		return amend3Dict(ctx, xv, y, f)
 	case array:
 		xv = xv.shallowClone()
 		y = toIndices(y)
@@ -22,6 +24,81 @@ func (ctx *Context) amend3(x, y, f V) V {
 	default:
 		return panicType("@[x;y;f]", "x", x)
 	}
+}
+
+func amend3Dict(ctx *Context, d *Dict, y, f V) V {
+	keys, values := d.keys.shallowClone(), d.values.shallowClone()
+	y.IncrRC()
+	z := findArray(keys, y)
+	y.DecrRC()
+	switch y.value.(type) {
+	case array:
+		zv := z.value.(*AI)
+		nkeys := keys.Len()
+		for _, zi := range zv.Slice {
+			if zi == int64(nkeys) {
+				y.IncrRC()
+				keys = uniq(ctx, joinTo(NewV(keys), y)).value.(array)
+				y.DecrRC()
+				break
+			}
+		}
+		if keys.Len() > nkeys {
+			values = padArrayMut(values, keys.Len()-nkeys)
+			y.IncrRC()
+			z = findArray(keys, y)
+			y.DecrRC()
+		}
+		r, err := ctx.amend3array(values, z, f)
+		if err != nil {
+			return Panicf("@[d;y;f] : %v", err)
+		}
+		return NewV(&Dict{keys: keys, values: canonicalArray(r)})
+	default:
+		nkeys := keys.Len()
+		if z.I() == int64(nkeys) {
+			y.IncrRC()
+			keys = uniq(ctx, joinTo(NewV(keys), y)).value.(array)
+			y.DecrRC()
+		}
+		if keys.Len() > nkeys {
+			values = padArrayMut(values, keys.Len()-nkeys)
+			y.IncrRC()
+			z = findArray(keys, y)
+			y.DecrRC()
+		}
+		r, err := ctx.amend3arrayI(values, z.I(), f)
+		if err != nil {
+			return Panicf("@[d;y;f] : %v", err)
+		}
+		return NewV(&Dict{keys: keys, values: canonicalArray(r)})
+	}
+}
+
+func padArrayMut(x array, n int) array {
+	switch xv := x.(type) {
+	case *AB:
+		for i := 0; i < n; i++ {
+			xv.Slice = append(xv.Slice, false)
+		}
+	case *AI:
+		for i := 0; i < n; i++ {
+			xv.Slice = append(xv.Slice, 0)
+		}
+	case *AF:
+		for i := 0; i < n; i++ {
+			xv.Slice = append(xv.Slice, 0)
+		}
+	case *AS:
+		for i := 0; i < n; i++ {
+			xv.Slice = append(xv.Slice, "")
+		}
+	case *AV:
+		for i := 0; i < n; i++ {
+			xv.Slice = append(xv.Slice, NewI(0))
+		}
+	}
+	return x
 }
 
 func amendArrayAt(x array, y int, z V) array {

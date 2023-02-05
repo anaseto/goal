@@ -624,6 +624,17 @@ func canonicalAV(x *AV) Value {
 	return r
 }
 
+// canonicalArray returns the canonical form of a given generic array.
+func canonicalArray(x array) array {
+	switch xv := x.(type) {
+	case *AV:
+		r, _ := normalize(xv)
+		return r
+	default:
+		return x
+	}
+}
+
 // Canonical returns the canonical form of a given value, that is the
 // most specialized form, assuming it's already canonical at depth > 1. In
 // practice, if the value is a generic array, but a more specialized version
