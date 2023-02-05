@@ -321,7 +321,9 @@ func (re *rx) applyN(ctx *Context, n int) V {
 func (x *AB) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
-		return applyArray(x, ctx.top())
+		r := applyArray(x, ctx.top())
+		r.InitRC()
+		return r
 	default:
 		ctx.dropN(n - 1)
 		return Panicf("x[y] : out of depth")
@@ -331,7 +333,9 @@ func (x *AB) applyN(ctx *Context, n int) V {
 func (x *AI) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
-		return applyArray(x, ctx.top())
+		r := applyArray(x, ctx.top())
+		r.InitRC()
+		return r
 	default:
 		ctx.dropN(n - 1)
 		return Panicf("x[y] : out of depth")
@@ -341,7 +345,9 @@ func (x *AI) applyN(ctx *Context, n int) V {
 func (x *AF) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
-		return applyArray(x, ctx.top())
+		r := applyArray(x, ctx.top())
+		r.InitRC()
+		return r
 	default:
 		ctx.dropN(n - 1)
 		return Panicf("x[y] : out of depth")
@@ -351,10 +357,14 @@ func (x *AF) applyN(ctx *Context, n int) V {
 func (x *AS) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
-		return applyArray(x, ctx.top())
+		r := applyArray(x, ctx.top())
+		r.InitRC()
+		return r
 	default:
 		args := ctx.peekN(n)
+		x.IncrRC()
 		r := ctx.applyArrayArgs(x, args[len(args)-1], args[:len(args)-1])
+		x.DecrRC()
 		r.InitRC()
 		ctx.dropN(n - 1)
 		return r
@@ -364,10 +374,14 @@ func (x *AS) applyN(ctx *Context, n int) V {
 func (x *AV) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
-		return applyArray(x, ctx.top())
+		r := applyArray(x, ctx.top())
+		r.InitRC()
+		return r
 	default:
 		args := ctx.peekN(n)
+		x.IncrRC()
 		r := ctx.applyArrayArgs(x, args[len(args)-1], args[:len(args)-1])
+		x.DecrRC()
 		r.InitRC()
 		ctx.dropN(n - 1)
 		return r
@@ -417,7 +431,7 @@ func applyArray(x array, y V) V {
 				return r[i]
 			}
 		}
-		return NewV(canonicalAV(&AV{Slice: r, rc: x.RC()}))
+		return NewV(canonicalAV(&AV{Slice: r}))
 	case array:
 		iy := toIndices(y)
 		if iy.IsPanic() {
