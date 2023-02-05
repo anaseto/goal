@@ -20,9 +20,9 @@ It's main distinctive features are as follows:
 * Syntax inspired mainly from the K language, but with quite a few deviations.
   For example, backquotes produce Go-like raw strings instead of symbols,
   rx/[a-z]/ is a regular expression literal (checked and processed at
-  compile-time), and there are no tacit compositions, no tables nor
-  dictionnaries (at least yet!), and digraph operator verbs and adverbs are
-  gone or done differently (except for global assignment with ::).
+  compile-time), and there are no tacit compositions, and digraph operator
+  verbs and adverbs are gone or done differently (except for global assignment
+  with ::).
 * Primitive semantics are both inspired from the
   [ngn/k](https://codeberg.org/ngn/k) variant of the K language and
   [BQN](https://mlochbaum.github.io/BQN/index.html). For example, group,
@@ -30,6 +30,7 @@ It's main distinctive features are as follows:
   BQN's semantics. Multi-dimensional versions, when present in BQN, have been
   left out, though, as Goal has only free-form immutable arrays, like K.  Some
   primitives use words instead of symbols (like ocount for occurrence count).
+  Also, there's only very basic support for K-like dictionnaries yet.
 * Unlike in typical array languages, strings are atoms, and common string
   handling functions (like index, substr or trim) have been integrated into the
   primitives, including regular expression functions.
