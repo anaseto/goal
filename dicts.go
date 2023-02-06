@@ -12,6 +12,11 @@ func NewDict(keys, values V) V {
 	return key(keys, values)
 }
 
+func newDict(keys array, values V) V {
+	values.InitRC()
+	return NewV(&Dict{keys: keys, values: values.value.(array)})
+}
+
 // Keys returns the keys of the dictionnary.
 func (d *Dict) Keys() V {
 	return NewV(d.keys)

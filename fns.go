@@ -140,6 +140,12 @@ func where(x V) V {
 			}
 		}
 		return NewV(&AI{Slice: r, rc: reuseRCp(xv.rc), flags: flagAscending})
+	case *Dict:
+		r := where(NewV(xv.values))
+		if r.IsPanic() {
+			return r
+		}
+		return NewV(xv.keys.atIndices(r.value.(*AI)))
 	case array:
 		return panics("&x : x non-integer array")
 	default:

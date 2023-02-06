@@ -42,6 +42,8 @@ func negate(x V) V {
 			r.Slice[i] = ri
 		}
 		return NewV(r)
+	case *Dict:
+		return newDict(xv.keys, negate(NewV(xv.values)))
 	default:
 		return panicType("-x", "x", x)
 	}
@@ -102,6 +104,8 @@ func sign(x V) V {
 			r.Slice[i] = ri
 		}
 		return NewV(r)
+	case *Dict:
+		return newDict(xv.keys, sign(NewV(xv.values)))
 	default:
 		return panicType("sign x", "x", x)
 	}
@@ -146,6 +150,8 @@ func floor(x V) V {
 			r.Slice[i] = ri
 		}
 		return NewV(r)
+	case *Dict:
+		return newDict(xv.keys, floor(NewV(xv.values)))
 	default:
 		return panicType("_N", "N", x)
 	}
@@ -188,6 +194,8 @@ func ceil(x V) V {
 			r.Slice[i] = ri
 		}
 		return NewV(r)
+	case *Dict:
+		return newDict(xv.keys, ceil(NewV(xv.values)))
 	default:
 		return panicType("ceil x", "x", x)
 	}
@@ -232,6 +240,8 @@ func not(x V) V {
 			r.Slice[i] = ri
 		}
 		return NewV(r)
+	case *Dict:
+		return newDict(xv.keys, not(NewV(xv.values)))
 	default:
 		return NewI(b2i(!isTrue(x)))
 	}
@@ -270,6 +280,8 @@ func abs(x V) V {
 			r.Slice[i] = ri
 		}
 		return NewV(r)
+	case *Dict:
+		return newDict(xv.keys, abs(NewV(xv.values)))
 	default:
 		return panicType("abs x", "x", x)
 	}
