@@ -608,3 +608,26 @@ func evalPackage(ctx *Context, x V, y V, z V) V {
 	}
 	return r
 }
+
+// try implements .[f1;x;f2].
+func try(ctx *Context, f1, x, f2 V) V {
+	av := toArray(x).value.(array)
+	if av.Len() == 0 {
+		return panics(".[f1;x;f2] : empty x")
+	}
+	for i := av.Len() - 1; i >= 0; i-- {
+		ctx.push(av.at(i))
+	}
+	r := f1.applyN(ctx, av.Len())
+	if r.IsPanic() {
+		r = NewS(string(r.value.(panicV)))
+		ctx.replaceTop(r)
+		r = f2.applyN(ctx, 1)
+		if r.IsPanic() {
+			ctx.drop()
+			return Panicf(".[f1;x;f2] : f2 call: %v", r)
+		}
+	}
+	ctx.drop()
+	return r
+}

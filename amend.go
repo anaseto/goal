@@ -29,14 +29,14 @@ func (ctx *Context) amend3(x, y, f V) V {
 func amend3Dict(ctx *Context, d *Dict, y, f V) V {
 	keys, values := d.keys.shallowClone(), d.values.shallowClone()
 	y.IncrRC()
-	z := findArray(keys, y)
+	ky := findArray(keys, y)
 	y.DecrRC()
 	switch y.value.(type) {
 	case array:
-		zv := z.value.(*AI)
+		kyv := ky.value.(*AI)
 		nkeys := keys.Len()
-		for _, zi := range zv.Slice {
-			if zi == int64(nkeys) {
+		for _, kyi := range kyv.Slice {
+			if kyi == int64(nkeys) {
 				y.IncrRC()
 				keys = uniq(ctx, joinTo(NewV(keys), y)).value.(array)
 				y.DecrRC()
@@ -46,17 +46,17 @@ func amend3Dict(ctx *Context, d *Dict, y, f V) V {
 		if keys.Len() > nkeys {
 			values = padArrayMut(values, keys.Len()-nkeys)
 			y.IncrRC()
-			z = findArray(keys, y)
+			ky = findArray(keys, y)
 			y.DecrRC()
 		}
-		r, err := ctx.amend3array(values, z, f)
+		r, err := ctx.amend3array(values, ky, f)
 		if err != nil {
 			return Panicf("@[d;y;f] : %v", err)
 		}
 		return NewV(&Dict{keys: keys, values: canonicalArray(r)})
 	default:
 		nkeys := keys.Len()
-		if z.I() == int64(nkeys) {
+		if ky.I() == int64(nkeys) {
 			y.IncrRC()
 			keys = uniq(ctx, joinTo(NewV(keys), y)).value.(array)
 			y.DecrRC()
@@ -64,10 +64,10 @@ func amend3Dict(ctx *Context, d *Dict, y, f V) V {
 		if keys.Len() > nkeys {
 			values = padArrayMut(values, keys.Len()-nkeys)
 			y.IncrRC()
-			z = findArray(keys, y)
+			ky = findArray(keys, y)
 			y.DecrRC()
 		}
-		r, err := ctx.amend3arrayI(values, z.I(), f)
+		r, err := ctx.amend3arrayI(values, ky.I(), f)
 		if err != nil {
 			return Panicf("@[d;y;f] : %v", err)
 		}
@@ -169,6 +169,8 @@ func (ctx *Context) amend3array(x array, y, f V) (array, error) {
 // amend4 implements @[x;y;f;z].
 func (ctx *Context) amend4(x, y, f, z V) V {
 	switch xv := x.value.(type) {
+	case *Dict:
+		return amend4Dict(ctx, xv, y, f, z)
 	case array:
 		xv = xv.shallowClone()
 		y = toIndices(y)
@@ -189,6 +191,55 @@ func (ctx *Context) amend4(x, y, f, z V) V {
 		return Canonical(NewV(r))
 	default:
 		return panicType("@[x;y;f;z]", "x", x)
+	}
+}
+
+func amend4Dict(ctx *Context, d *Dict, y, f, z V) V {
+	keys, values := d.keys.shallowClone(), d.values.shallowClone()
+	y.IncrRC()
+	ky := findArray(keys, y)
+	y.DecrRC()
+	switch y.value.(type) {
+	case array:
+		kyv := ky.value.(*AI)
+		nkeys := keys.Len()
+		for _, kyi := range kyv.Slice {
+			if kyi == int64(nkeys) {
+				y.IncrRC()
+				keys = uniq(ctx, joinTo(NewV(keys), y)).value.(array)
+				y.DecrRC()
+				break
+			}
+		}
+		if keys.Len() > nkeys {
+			values = padArrayMut(values, keys.Len()-nkeys)
+			y.IncrRC()
+			ky = findArray(keys, y)
+			y.DecrRC()
+		}
+		r, err := ctx.amend4array(values, ky, f, z)
+		if err != nil {
+			return Panicf("@[d;y;f;z] : %v", err)
+		}
+		return NewV(&Dict{keys: keys, values: canonicalArray(r)})
+	default:
+		nkeys := keys.Len()
+		if ky.I() == int64(nkeys) {
+			y.IncrRC()
+			keys = uniq(ctx, joinTo(NewV(keys), y)).value.(array)
+			y.DecrRC()
+		}
+		if keys.Len() > nkeys {
+			values = padArrayMut(values, keys.Len()-nkeys)
+			y.IncrRC()
+			ky = findArray(keys, y)
+			y.DecrRC()
+		}
+		r, err := ctx.amend4arrayI(values, ky.I(), f, z)
+		if err != nil {
+			return Panicf("@[d;y;f;z] : %v", err)
+		}
+		return NewV(&Dict{keys: keys, values: canonicalArray(r)})
 	}
 }
 
@@ -591,27 +642,4 @@ func (ctx *Context) deepAmend4rec(x array, y0 V, y array, f, z V) (array, error)
 		}
 	}
 	return x, nil
-}
-
-// try implements .[f1;x;f2].
-func try(ctx *Context, f1, x, f2 V) V {
-	av := toArray(x).value.(array)
-	if av.Len() == 0 {
-		return panics(".[f1;x;f2] : empty x")
-	}
-	for i := av.Len() - 1; i >= 0; i-- {
-		ctx.push(av.at(i))
-	}
-	r := f1.applyN(ctx, av.Len())
-	if r.IsPanic() {
-		r = NewS(string(r.value.(panicV)))
-		ctx.replaceTop(r)
-		r = f2.applyN(ctx, 1)
-		if r.IsPanic() {
-			ctx.drop()
-			return Panicf(".[f1;x;f2] : f2 call: %v", r)
-		}
-	}
-	ctx.drop()
-	return r
 }
