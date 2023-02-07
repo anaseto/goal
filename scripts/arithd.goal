@@ -175,9 +175,16 @@ genOp:{[opname;opsym] / globals o,op,xt
   say `switch xv := x.value.(type) {`
   say'{sub[("{XT}";x;"{O}";o)] `  case {XT}: return {O}{XT}V(xv, y)`}'^(ntypes^ts)
   say'{sub[("{XT}";x;"{O}";o)] `  case *{XT}: return {O}{XT}V(xv, y)`}'^"A"+ts
-  say sub["{OP}";escp op]"\n"_`
+  say sub[("{OP}";escp op;"{O}";o)]"\n"_`
   case *AV:
       switch yv := y.value.(type) {
+      case *Dict:
+            v := {O}(x, NewV(yv.values))
+            if v.IsPanic() {
+                    return v
+            }
+            v.InitRC()
+            return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
       case array:
             if yv.Len() != xv.Len() {
                     return Panicf("x{OP}y : length mismatch: %d vs %d", xv.Len(), yv.Len())

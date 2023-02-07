@@ -28,6 +28,13 @@ func equal(x, y V) V {
 		return equalASV(xv, y)
 	case *AV:
 		switch yv := y.value.(type) {
+		case *Dict:
+			v := equal(x, NewV(yv.values))
+			if v.IsPanic() {
+				return v
+			}
+			v.InitRC()
+			return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 		case array:
 			if yv.Len() != xv.Len() {
 				return Panicf("x=y : length mismatch: %d vs %d", xv.Len(), yv.Len())
@@ -463,6 +470,13 @@ func lesser(x, y V) V {
 		return lesserASV(xv, y)
 	case *AV:
 		switch yv := y.value.(type) {
+		case *Dict:
+			v := lesser(x, NewV(yv.values))
+			if v.IsPanic() {
+				return v
+			}
+			v.InitRC()
+			return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 		case array:
 			if yv.Len() != xv.Len() {
 				return Panicf("x<y : length mismatch: %d vs %d", xv.Len(), yv.Len())
@@ -898,6 +912,13 @@ func greater(x, y V) V {
 		return greaterASV(xv, y)
 	case *AV:
 		switch yv := y.value.(type) {
+		case *Dict:
+			v := greater(x, NewV(yv.values))
+			if v.IsPanic() {
+				return v
+			}
+			v.InitRC()
+			return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 		case array:
 			if yv.Len() != xv.Len() {
 				return Panicf("x>y : length mismatch: %d vs %d", xv.Len(), yv.Len())
@@ -1333,6 +1354,13 @@ func add(x, y V) V {
 		return addASV(xv, y)
 	case *AV:
 		switch yv := y.value.(type) {
+		case *Dict:
+			v := add(x, NewV(yv.values))
+			if v.IsPanic() {
+				return v
+			}
+			v.InitRC()
+			return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 		case array:
 			if yv.Len() != xv.Len() {
 				return Panicf("x+y : length mismatch: %d vs %d", xv.Len(), yv.Len())
@@ -1768,6 +1796,13 @@ func subtract(x, y V) V {
 		return subtractASV(xv, y)
 	case *AV:
 		switch yv := y.value.(type) {
+		case *Dict:
+			v := subtract(x, NewV(yv.values))
+			if v.IsPanic() {
+				return v
+			}
+			v.InitRC()
+			return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 		case array:
 			if yv.Len() != xv.Len() {
 				return Panicf("x-y : length mismatch: %d vs %d", xv.Len(), yv.Len())
@@ -2203,6 +2238,13 @@ func multiply(x, y V) V {
 		return multiplyASV(xv, y)
 	case *AV:
 		switch yv := y.value.(type) {
+		case *Dict:
+			v := multiply(x, NewV(yv.values))
+			if v.IsPanic() {
+				return v
+			}
+			v.InitRC()
+			return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 		case array:
 			if yv.Len() != xv.Len() {
 				return Panicf("x*y : length mismatch: %d vs %d", xv.Len(), yv.Len())
@@ -2737,6 +2779,13 @@ func divide(x, y V) V {
 		return divideAIV(xv, y)
 	case *AV:
 		switch yv := y.value.(type) {
+		case *Dict:
+			v := divide(x, NewV(yv.values))
+			if v.IsPanic() {
+				return v
+			}
+			v.InitRC()
+			return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 		case array:
 			if yv.Len() != xv.Len() {
 				return Panicf("x%%y : length mismatch: %d vs %d", xv.Len(), yv.Len())
@@ -3098,6 +3147,13 @@ func minimum(x, y V) V {
 		return minimumASV(xv, y)
 	case *AV:
 		switch yv := y.value.(type) {
+		case *Dict:
+			v := minimum(x, NewV(yv.values))
+			if v.IsPanic() {
+				return v
+			}
+			v.InitRC()
+			return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 		case array:
 			if yv.Len() != xv.Len() {
 				return Panicf("x&y : length mismatch: %d vs %d", xv.Len(), yv.Len())
@@ -3533,6 +3589,13 @@ func maximum(x, y V) V {
 		return maximumASV(xv, y)
 	case *AV:
 		switch yv := y.value.(type) {
+		case *Dict:
+			v := maximum(x, NewV(yv.values))
+			if v.IsPanic() {
+				return v
+			}
+			v.InitRC()
+			return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 		case array:
 			if yv.Len() != xv.Len() {
 				return Panicf("x|y : length mismatch: %d vs %d", xv.Len(), yv.Len())
@@ -3964,6 +4027,13 @@ func modulus(x, y V) V {
 		return modulusAIV(xv, y)
 	case *AV:
 		switch yv := y.value.(type) {
+		case *Dict:
+			v := modulus(x, NewV(yv.values))
+			if v.IsPanic() {
+				return v
+			}
+			v.InitRC()
+			return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 		case array:
 			if yv.Len() != xv.Len() {
 				return Panicf("x mod y : length mismatch: %d vs %d", xv.Len(), yv.Len())
