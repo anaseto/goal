@@ -134,6 +134,19 @@ modulus:keys!+(
   "F" "F" "modF(x, y)" "F"
 )
 
+ops:(
+  "equal" "="
+  "lesser" "<"
+  "greater" ">"
+  "add" "+"
+  "subtract" "-"
+  "multiply" "*"
+  "divide" "%"
+  "minimum" "&"
+  "maximum" "|"
+  "modulus" " mod "
+)
+
 types:"B" "F" "I" "S" / atom types
 ntypes:"B" "F" "I" / numeric atom types
 itypes:"B" "I" / integer atom types
@@ -182,6 +195,19 @@ genOp:{[opname;opsym] / globals o,op,xt
   say sub[("{O}";o;"{YY}";"yv.at(i)")] tplAV
   say `}`
   say sub[("{O}";o;"{YY}";"y")] tplAV
+  say sub[("{O}";o;"{OP}";op)]"\n"_`
+  case *Dict:
+      _, ok := y.value.(*Dict)
+      if ok {
+          return panics("d{OP}d : not yet implemented")
+      }
+      v := {O}(NewV(xv.values), y)
+      if v.IsPanic() {
+              return v
+      }
+      v.InitRC()
+      return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
+  `
   say sub["{OP}";op]"\n"_`
   default:
         return panicTypeElt("x{OP}y", "x", x)
@@ -199,7 +225,7 @@ dox:{
   say `  switch yv := y.value.(type) {`
   say'{(e;t):getET[::o;xt;x];doxBy[x;e;t]}'^ntypes^rts
   say'{(e;t):getET[::o;xt;x];doxY[x;e;t]}'^rts
-  say doxAV""
+  say doxdAV""
   say"}\n"
 }
 doxUy:{[yt;e;t]
@@ -236,8 +262,15 @@ doxY:{[yt;e;t]
       }
       return NewA{T}WithRC(r, reuseRCp(yv.rc))`]
 }
-doxAV:{
+doxdAV:{
   sub[("{O}";o;"{XT}";xt;"{OP}";op)]"\n"_`
+  case *Dict:
+      v := {O}{XT}V(x, NewV(yv.values))
+      if v.IsPanic() {
+              return v
+      }
+      v.InitRC()
+      return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
   case *AV:
       r := yv.reuse()
       for i, yi := range yv.Slice {
@@ -260,7 +293,7 @@ doX:{
   say `  switch yv := y.value.(type) {`
   say'{(e;t):getET[::o;xt;x];doXBy[x;e;t]}'^ntypes^rts
   say'{(e;t):getET[::o;xt;x];doXY[x;e;t]}'^rts
-  say doXAV""
+  say doXdAV""
 }
 doXUy:{[yt;e;t]
   e:doExpr[e;t2go yt;"x.At(i)";"y."+yt+"()"]
@@ -325,17 +358,24 @@ doXY:{[yt;e;t]
           return NewA{T}WithRC(r, reuseRCp(x.rc))`]
   "\n"/(s1;s2)
 }
-doXAV:{
+doXdAV:{
   nxt:?[xt~"B";"I";xt]
   xct:?[xt~"B";"b2i";xt~"I";"int64";xt~"F";"float64";xt]
-  sub[("{OPE}";escp op;"{OP}";op;"{O}";o;"{XT}";nxt;"{XCT}";xct)]"\n"_`
+  sub[("{OPE}";escp op;"{OP}";op;"{O}";o;"{XT}";xt;"{NXT}";nxt;"{XCT}";xct)]"\n"_`
+  case *Dict:
+          v := {O}A{XT}V(x, NewV(yv.values))
+          if v.IsPanic() {
+                  return v
+          }
+          v.InitRC()
+          return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
   case *AV:
           if x.Len() != yv.Len() {
                   return Panicf("x{OPE}y : length mismatch: %d vs %d", x.Len(), yv.Len())
           }
           r := yv.reuse()
           for i := range r.Slice {
-                  ri := {O}{XT}V({XCT}(x.At(i)), yv.At(i))
+                  ri := {O}{NXT}V({XCT}(x.At(i)), yv.At(i))
                   if ri.IsPanic() {
                           return ri
                   }
@@ -350,13 +390,4 @@ doXAV:{
 }
 
 say package
-genOp["equal";"="]
-genOp["lesser";"<"]
-genOp["greater";">"]
-genOp["add";"+"]
-genOp["subtract";"-"]
-genOp["multiply";"*"]
-genOp["divide";"%"]
-genOp["minimum";"&"]
-genOp["maximum";"|"]
-genOp["modulus";" mod "]
+{genOp . x}'ops

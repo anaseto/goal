@@ -51,6 +51,18 @@ func equal(x, y V) V {
 			r.Slice[i] = ri
 		}
 		return NewV(r)
+	case *Dict:
+		_, ok := y.value.(*Dict)
+		if ok {
+			return panics("d=d : not yet implemented")
+		}
+		v := equal(NewV(xv.values), y)
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
+
 	default:
 		return panicTypeElt("x=y", "x", x)
 	}
@@ -82,6 +94,13 @@ func equalFV(x float64, y V) V {
 			r[i] = bool(x == float64(yv.At(i)))
 		}
 		return NewABWithRC(r, reuseRCp(yv.rc))
+	case *Dict:
+		v := equalFV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -123,6 +142,13 @@ func equalIV(x int64, y V) V {
 			r[i] = bool(x == yv.At(i))
 		}
 		return NewABWithRC(r, reuseRCp(yv.rc))
+	case *Dict:
+		v := equalIV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -148,6 +174,13 @@ func equalSV(x S, y V) V {
 			r[i] = bool(S(x) == S(yv.At(i)))
 		}
 		return NewABWithRC(r, reuseRCp(yv.rc))
+	case *Dict:
+		v := equalSV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -206,6 +239,13 @@ func equalABV(x *AB, y V) V {
 			r.Slice[i] = bool(b2i(x.At(i)) == yv.At(i))
 		}
 		return NewV(r)
+	case *Dict:
+		v := equalABV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -267,6 +307,13 @@ func equalAFV(x *AF, y V) V {
 			r[i] = bool(x.At(i) == float64(yv.At(i)))
 		}
 		return NewABWithRC(r, reuseRCp(x.rc))
+	case *Dict:
+		v := equalAFV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -328,6 +375,13 @@ func equalAIV(x *AI, y V) V {
 			r[i] = bool(x.At(i) == yv.At(i))
 		}
 		return NewABWithRC(r, reuseRCp(x.rc))
+	case *Dict:
+		v := equalAIV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -363,6 +417,13 @@ func equalASV(x *AS, y V) V {
 			r[i] = bool(S(x.At(i)) == S(yv.At(i)))
 		}
 		return NewABWithRC(r, reuseRCp(x.rc))
+	case *Dict:
+		v := equalASV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x=y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -425,6 +486,18 @@ func lesser(x, y V) V {
 			r.Slice[i] = ri
 		}
 		return NewV(r)
+	case *Dict:
+		_, ok := y.value.(*Dict)
+		if ok {
+			return panics("d<d : not yet implemented")
+		}
+		v := lesser(NewV(xv.values), y)
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
+
 	default:
 		return panicTypeElt("x<y", "x", x)
 	}
@@ -456,6 +529,13 @@ func lesserFV(x float64, y V) V {
 			r[i] = bool(x < float64(yv.At(i)))
 		}
 		return NewABWithRC(r, reuseRCp(yv.rc))
+	case *Dict:
+		v := lesserFV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -497,6 +577,13 @@ func lesserIV(x int64, y V) V {
 			r[i] = bool(x < yv.At(i))
 		}
 		return NewABWithRC(r, reuseRCp(yv.rc))
+	case *Dict:
+		v := lesserIV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -522,6 +609,13 @@ func lesserSV(x S, y V) V {
 			r[i] = bool(S(x) < S(yv.At(i)))
 		}
 		return NewABWithRC(r, reuseRCp(yv.rc))
+	case *Dict:
+		v := lesserSV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -580,6 +674,13 @@ func lesserABV(x *AB, y V) V {
 			r.Slice[i] = bool(b2i(x.At(i)) < yv.At(i))
 		}
 		return NewV(r)
+	case *Dict:
+		v := lesserABV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -641,6 +742,13 @@ func lesserAFV(x *AF, y V) V {
 			r[i] = bool(x.At(i) < float64(yv.At(i)))
 		}
 		return NewABWithRC(r, reuseRCp(x.rc))
+	case *Dict:
+		v := lesserAFV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -702,6 +810,13 @@ func lesserAIV(x *AI, y V) V {
 			r[i] = bool(x.At(i) < yv.At(i))
 		}
 		return NewABWithRC(r, reuseRCp(x.rc))
+	case *Dict:
+		v := lesserAIV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -737,6 +852,13 @@ func lesserASV(x *AS, y V) V {
 			r[i] = bool(S(x.At(i)) < S(yv.At(i)))
 		}
 		return NewABWithRC(r, reuseRCp(x.rc))
+	case *Dict:
+		v := lesserASV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x<y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -799,6 +921,18 @@ func greater(x, y V) V {
 			r.Slice[i] = ri
 		}
 		return NewV(r)
+	case *Dict:
+		_, ok := y.value.(*Dict)
+		if ok {
+			return panics("d>d : not yet implemented")
+		}
+		v := greater(NewV(xv.values), y)
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
+
 	default:
 		return panicTypeElt("x>y", "x", x)
 	}
@@ -830,6 +964,13 @@ func greaterFV(x float64, y V) V {
 			r[i] = bool(x > float64(yv.At(i)))
 		}
 		return NewABWithRC(r, reuseRCp(yv.rc))
+	case *Dict:
+		v := greaterFV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -871,6 +1012,13 @@ func greaterIV(x int64, y V) V {
 			r[i] = bool(x > yv.At(i))
 		}
 		return NewABWithRC(r, reuseRCp(yv.rc))
+	case *Dict:
+		v := greaterIV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -896,6 +1044,13 @@ func greaterSV(x S, y V) V {
 			r[i] = bool(S(x) > S(yv.At(i)))
 		}
 		return NewABWithRC(r, reuseRCp(yv.rc))
+	case *Dict:
+		v := greaterSV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -954,6 +1109,13 @@ func greaterABV(x *AB, y V) V {
 			r.Slice[i] = bool(b2i(x.At(i)) > yv.At(i))
 		}
 		return NewV(r)
+	case *Dict:
+		v := greaterABV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -1015,6 +1177,13 @@ func greaterAFV(x *AF, y V) V {
 			r[i] = bool(x.At(i) > float64(yv.At(i)))
 		}
 		return NewABWithRC(r, reuseRCp(x.rc))
+	case *Dict:
+		v := greaterAFV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -1076,6 +1245,13 @@ func greaterAIV(x *AI, y V) V {
 			r[i] = bool(x.At(i) > yv.At(i))
 		}
 		return NewABWithRC(r, reuseRCp(x.rc))
+	case *Dict:
+		v := greaterAIV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -1111,6 +1287,13 @@ func greaterASV(x *AS, y V) V {
 			r[i] = bool(S(x.At(i)) > S(yv.At(i)))
 		}
 		return NewABWithRC(r, reuseRCp(x.rc))
+	case *Dict:
+		v := greaterASV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x>y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -1173,6 +1356,18 @@ func add(x, y V) V {
 			r.Slice[i] = ri
 		}
 		return NewV(r)
+	case *Dict:
+		_, ok := y.value.(*Dict)
+		if ok {
+			return panics("d+d : not yet implemented")
+		}
+		v := add(NewV(xv.values), y)
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
+
 	default:
 		return panicTypeElt("x+y", "x", x)
 	}
@@ -1204,6 +1399,13 @@ func addFV(x float64, y V) V {
 			r[i] = float64(x + float64(yv.At(i)))
 		}
 		return NewAFWithRC(r, reuseRCp(yv.rc))
+	case *Dict:
+		v := addFV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -1245,6 +1447,13 @@ func addIV(x int64, y V) V {
 			r.Slice[i] = int64(x + yv.At(i))
 		}
 		return NewV(r)
+	case *Dict:
+		v := addIV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -1270,6 +1479,13 @@ func addSV(x S, y V) V {
 			r.Slice[i] = string(S(x) + S(yv.At(i)))
 		}
 		return NewV(r)
+	case *Dict:
+		v := addSV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -1328,6 +1544,13 @@ func addABV(x *AB, y V) V {
 			r.Slice[i] = int64(b2i(x.At(i)) + yv.At(i))
 		}
 		return NewV(r)
+	case *Dict:
+		v := addABV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -1389,6 +1612,13 @@ func addAFV(x *AF, y V) V {
 			r.Slice[i] = float64(x.At(i) + float64(yv.At(i)))
 		}
 		return NewV(r)
+	case *Dict:
+		v := addAFV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -1450,6 +1680,13 @@ func addAIV(x *AI, y V) V {
 			r.Slice[i] = int64(x.At(i) + yv.At(i))
 		}
 		return NewV(r)
+	case *Dict:
+		v := addAIV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -1485,6 +1722,13 @@ func addASV(x *AS, y V) V {
 			r.Slice[i] = string(S(x.At(i)) + S(yv.At(i)))
 		}
 		return NewV(r)
+	case *Dict:
+		v := addASV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x+y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -1547,6 +1791,18 @@ func subtract(x, y V) V {
 			r.Slice[i] = ri
 		}
 		return NewV(r)
+	case *Dict:
+		_, ok := y.value.(*Dict)
+		if ok {
+			return panics("d-d : not yet implemented")
+		}
+		v := subtract(NewV(xv.values), y)
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
+
 	default:
 		return panicTypeElt("x-y", "x", x)
 	}
@@ -1578,6 +1834,13 @@ func subtractFV(x float64, y V) V {
 			r[i] = float64(x - float64(yv.At(i)))
 		}
 		return NewAFWithRC(r, reuseRCp(yv.rc))
+	case *Dict:
+		v := subtractFV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -1619,6 +1882,13 @@ func subtractIV(x int64, y V) V {
 			r.Slice[i] = int64(x - yv.At(i))
 		}
 		return NewV(r)
+	case *Dict:
+		v := subtractIV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -1644,6 +1914,13 @@ func subtractSV(x S, y V) V {
 			r.Slice[i] = string(strings.TrimSuffix(string(S(x)), string(S(yv.At(i)))))
 		}
 		return NewV(r)
+	case *Dict:
+		v := subtractSV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -1702,6 +1979,13 @@ func subtractABV(x *AB, y V) V {
 			r.Slice[i] = int64(b2i(x.At(i)) - yv.At(i))
 		}
 		return NewV(r)
+	case *Dict:
+		v := subtractABV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -1763,6 +2047,13 @@ func subtractAFV(x *AF, y V) V {
 			r.Slice[i] = float64(x.At(i) - float64(yv.At(i)))
 		}
 		return NewV(r)
+	case *Dict:
+		v := subtractAFV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -1824,6 +2115,13 @@ func subtractAIV(x *AI, y V) V {
 			r.Slice[i] = int64(x.At(i) - yv.At(i))
 		}
 		return NewV(r)
+	case *Dict:
+		v := subtractAIV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -1859,6 +2157,13 @@ func subtractASV(x *AS, y V) V {
 			r.Slice[i] = string(strings.TrimSuffix(string(S(x.At(i))), string(S(yv.At(i)))))
 		}
 		return NewV(r)
+	case *Dict:
+		v := subtractASV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x-y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -1921,6 +2226,18 @@ func multiply(x, y V) V {
 			r.Slice[i] = ri
 		}
 		return NewV(r)
+	case *Dict:
+		_, ok := y.value.(*Dict)
+		if ok {
+			return panics("d*d : not yet implemented")
+		}
+		v := multiply(NewV(xv.values), y)
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
+
 	default:
 		return panicTypeElt("x*y", "x", x)
 	}
@@ -1960,6 +2277,13 @@ func multiplyFV(x float64, y V) V {
 			r.Slice[i] = string(srepeat(S(yv.At(i)), int64(x)))
 		}
 		return NewV(r)
+	case *Dict:
+		v := multiplyFV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -2009,6 +2333,13 @@ func multiplyIV(x int64, y V) V {
 			r.Slice[i] = string(srepeat(S(yv.At(i)), x))
 		}
 		return NewV(r)
+	case *Dict:
+		v := multiplyIV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -2050,6 +2381,13 @@ func multiplySV(x S, y V) V {
 			r[i] = string(srepeat(S(x), yv.At(i)))
 		}
 		return NewASWithRC(r, reuseRCp(yv.rc))
+	case *Dict:
+		v := multiplySV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -2123,6 +2461,13 @@ func multiplyABV(x *AB, y V) V {
 			r.Slice[i] = string(srepeat(S(yv.At(i)), b2i(x.At(i))))
 		}
 		return NewV(r)
+	case *Dict:
+		v := multiplyABV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -2199,6 +2544,13 @@ func multiplyAFV(x *AF, y V) V {
 			r.Slice[i] = string(srepeat(S(yv.At(i)), int64(x.At(i))))
 		}
 		return NewV(r)
+	case *Dict:
+		v := multiplyAFV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -2275,6 +2627,13 @@ func multiplyAIV(x *AI, y V) V {
 			r.Slice[i] = string(srepeat(S(yv.At(i)), x.At(i)))
 		}
 		return NewV(r)
+	case *Dict:
+		v := multiplyAIV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -2336,6 +2695,13 @@ func multiplyASV(x *AS, y V) V {
 			r.Slice[i] = string(srepeat(S(x.At(i)), yv.At(i)))
 		}
 		return NewV(r)
+	case *Dict:
+		v := multiplyASV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x*y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -2394,6 +2760,18 @@ func divide(x, y V) V {
 			r.Slice[i] = ri
 		}
 		return NewV(r)
+	case *Dict:
+		_, ok := y.value.(*Dict)
+		if ok {
+			return panics("d%d : not yet implemented")
+		}
+		v := divide(NewV(xv.values), y)
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
+
 	default:
 		return panicTypeElt("x%y", "x", x)
 	}
@@ -2425,6 +2803,13 @@ func divideFV(x float64, y V) V {
 			r[i] = float64(divideF(x, float64(yv.At(i))))
 		}
 		return NewAFWithRC(r, reuseRCp(yv.rc))
+	case *Dict:
+		v := divideFV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -2466,6 +2851,13 @@ func divideIV(x int64, y V) V {
 			r[i] = float64(divideF(float64(x), float64(yv.At(i))))
 		}
 		return NewAFWithRC(r, reuseRCp(yv.rc))
+	case *Dict:
+		v := divideIV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -2524,6 +2916,13 @@ func divideABV(x *AB, y V) V {
 			r[i] = float64(divideF(b2f(x.At(i)), float64(yv.At(i))))
 		}
 		return NewAFWithRC(r, reuseRCp(x.rc))
+	case *Dict:
+		v := divideABV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -2585,6 +2984,13 @@ func divideAFV(x *AF, y V) V {
 			r.Slice[i] = float64(divideF(x.At(i), float64(yv.At(i))))
 		}
 		return NewV(r)
+	case *Dict:
+		v := divideAFV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -2646,6 +3052,13 @@ func divideAIV(x *AI, y V) V {
 			r[i] = float64(divideF(float64(x.At(i)), float64(yv.At(i))))
 		}
 		return NewAFWithRC(r, reuseRCp(x.rc))
+	case *Dict:
+		v := divideAIV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x%%y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -2708,6 +3121,18 @@ func minimum(x, y V) V {
 			r.Slice[i] = ri
 		}
 		return NewV(r)
+	case *Dict:
+		_, ok := y.value.(*Dict)
+		if ok {
+			return panics("d&d : not yet implemented")
+		}
+		v := minimum(NewV(xv.values), y)
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
+
 	default:
 		return panicTypeElt("x&y", "x", x)
 	}
@@ -2739,6 +3164,13 @@ func minimumFV(x float64, y V) V {
 			r[i] = float64(math.Min(x, float64(yv.At(i))))
 		}
 		return NewAFWithRC(r, reuseRCp(yv.rc))
+	case *Dict:
+		v := minimumFV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -2780,6 +3212,13 @@ func minimumIV(x int64, y V) V {
 			r.Slice[i] = int64(minI(x, yv.At(i)))
 		}
 		return NewV(r)
+	case *Dict:
+		v := minimumIV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -2805,6 +3244,13 @@ func minimumSV(x S, y V) V {
 			r.Slice[i] = string(minS(S(x), S(yv.At(i))))
 		}
 		return NewV(r)
+	case *Dict:
+		v := minimumSV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -2863,6 +3309,13 @@ func minimumABV(x *AB, y V) V {
 			r.Slice[i] = int64(minI(b2i(x.At(i)), yv.At(i)))
 		}
 		return NewV(r)
+	case *Dict:
+		v := minimumABV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -2924,6 +3377,13 @@ func minimumAFV(x *AF, y V) V {
 			r.Slice[i] = float64(math.Min(x.At(i), float64(yv.At(i))))
 		}
 		return NewV(r)
+	case *Dict:
+		v := minimumAFV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -2985,6 +3445,13 @@ func minimumAIV(x *AI, y V) V {
 			r.Slice[i] = int64(minI(x.At(i), yv.At(i)))
 		}
 		return NewV(r)
+	case *Dict:
+		v := minimumAIV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -3020,6 +3487,13 @@ func minimumASV(x *AS, y V) V {
 			r.Slice[i] = string(minS(S(x.At(i)), S(yv.At(i))))
 		}
 		return NewV(r)
+	case *Dict:
+		v := minimumASV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x&y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -3082,6 +3556,18 @@ func maximum(x, y V) V {
 			r.Slice[i] = ri
 		}
 		return NewV(r)
+	case *Dict:
+		_, ok := y.value.(*Dict)
+		if ok {
+			return panics("d|d : not yet implemented")
+		}
+		v := maximum(NewV(xv.values), y)
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
+
 	default:
 		return panicTypeElt("x|y", "x", x)
 	}
@@ -3113,6 +3599,13 @@ func maximumFV(x float64, y V) V {
 			r[i] = float64(math.Max(x, float64(yv.At(i))))
 		}
 		return NewAFWithRC(r, reuseRCp(yv.rc))
+	case *Dict:
+		v := maximumFV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -3154,6 +3647,13 @@ func maximumIV(x int64, y V) V {
 			r.Slice[i] = int64(maxI(x, yv.At(i)))
 		}
 		return NewV(r)
+	case *Dict:
+		v := maximumIV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -3179,6 +3679,13 @@ func maximumSV(x S, y V) V {
 			r.Slice[i] = string(maxS(S(x), S(yv.At(i))))
 		}
 		return NewV(r)
+	case *Dict:
+		v := maximumSV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -3237,6 +3744,13 @@ func maximumABV(x *AB, y V) V {
 			r.Slice[i] = int64(maxI(b2i(x.At(i)), yv.At(i)))
 		}
 		return NewV(r)
+	case *Dict:
+		v := maximumABV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -3298,6 +3812,13 @@ func maximumAFV(x *AF, y V) V {
 			r.Slice[i] = float64(math.Max(x.At(i), float64(yv.At(i))))
 		}
 		return NewV(r)
+	case *Dict:
+		v := maximumAFV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -3359,6 +3880,13 @@ func maximumAIV(x *AI, y V) V {
 			r.Slice[i] = int64(maxI(x.At(i), yv.At(i)))
 		}
 		return NewV(r)
+	case *Dict:
+		v := maximumAIV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -3394,6 +3922,13 @@ func maximumASV(x *AS, y V) V {
 			r.Slice[i] = string(maxS(S(x.At(i)), S(yv.At(i))))
 		}
 		return NewV(r)
+	case *Dict:
+		v := maximumASV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x|y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -3452,6 +3987,18 @@ func modulus(x, y V) V {
 			r.Slice[i] = ri
 		}
 		return NewV(r)
+	case *Dict:
+		_, ok := y.value.(*Dict)
+		if ok {
+			return panics("d mod d : not yet implemented")
+		}
+		v := modulus(NewV(xv.values), y)
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
+
 	default:
 		return panicTypeElt("x mod y", "x", x)
 	}
@@ -3483,6 +4030,13 @@ func modulusFV(x float64, y V) V {
 			r[i] = float64(modF(x, float64(yv.At(i))))
 		}
 		return NewAFWithRC(r, reuseRCp(yv.rc))
+	case *Dict:
+		v := modulusFV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -3524,6 +4078,13 @@ func modulusIV(x int64, y V) V {
 			r.Slice[i] = int64(modI(x, yv.At(i)))
 		}
 		return NewV(r)
+	case *Dict:
+		v := modulusIV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.Slice {
@@ -3582,6 +4143,13 @@ func modulusABV(x *AB, y V) V {
 			r.Slice[i] = int64(modI(b2i(x.At(i)), yv.At(i)))
 		}
 		return NewV(r)
+	case *Dict:
+		v := modulusABV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -3643,6 +4211,13 @@ func modulusAFV(x *AF, y V) V {
 			r.Slice[i] = float64(modF(x.At(i), float64(yv.At(i))))
 		}
 		return NewV(r)
+	case *Dict:
+		v := modulusAFV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
@@ -3704,6 +4279,13 @@ func modulusAIV(x *AI, y V) V {
 			r.Slice[i] = int64(modI(x.At(i), yv.At(i)))
 		}
 		return NewV(r)
+	case *Dict:
+		v := modulusAIV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return Panicf("x mod y : length mismatch: %d vs %d", x.Len(), yv.Len())
