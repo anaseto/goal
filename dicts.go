@@ -71,29 +71,40 @@ func key(x, y V) V {
 }
 
 func dictArith(xd, yd *Dict, f func(V, V) V) V {
-	keys, values := xd.keys.shallowClone(), xd.values.shallowClone()
-	y := yd.keys
-	z := yd.values
-	y.IncrRC()
-	ky := findArray(keys, NewV(y))
+	xd = xd.clone()
+	xk, xv := xd.keys, xd.values
+	yk, yv := yd.keys, yd.values
+	yk.IncrRC()
+	ky := findArray(xk, NewV(yk))
 	kyv := ky.value.(*AI)
-	nkeys := keys.Len()
+	nkeys := xk.Len()
 	for _, kyi := range kyv.Slice {
 		if kyi == int64(nkeys) {
-			keys = uniqNoContext(joinTo(NewV(keys), NewV(y))).value.(array)
+			xk.IncrRC()
+			bnk := memberOf(NewV(yk), NewV(xk))
+			xk.DecrRC()
+			bnk.IncrRC()
+			bnk.IncrRC()
+			notbnk := not(bnk)
+			bnk.DecrRC()
+			bnk.DecrRC()
+			nk := replicate(notbnk, NewV(yk))
+			yv.IncrRC()
+			nv := replicate(notbnk, NewV(yv))
+			yv.DecrRC()
+			yv = replicate(bnk, NewV(yv)).value.(array)
+			xk = joinTo(NewV(xk), nk).value.(array)
+			xv = joinTo(NewV(xv), nv).value.(array)
+			ky = without(NewAI([]int64{int64(nkeys)}), ky)
 			break
 		}
 	}
-	if keys.Len() > nkeys {
-		values = padArrayMut(values, keys.Len()-nkeys)
-		ky = findArray(keys, NewV(y))
-	}
-	y.DecrRC()
-	r, err := dictArithAmend(values, ky.value.(*AI), f, z)
+	yk.DecrRC()
+	r, err := dictArithAmend(xv, ky.value.(*AI), f, yv)
 	if err != nil {
 		return Panicf("%v", err)
 	}
-	return NewV(&Dict{keys: keys, values: canonicalArray(r)})
+	return NewV(&Dict{keys: xk, values: canonicalArray(r)})
 }
 
 func dictArithAmendI(x array, y int64, f func(V, V) V, z V) (array, error) {

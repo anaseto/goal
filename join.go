@@ -21,6 +21,15 @@ func joinTo(x, y V) V {
 		return joinToAS(xv, y, false)
 	case *AV:
 		return joinToAV(xv, y, false)
+	case *Dict:
+		switch yv := y.value.(type) {
+		case *Dict:
+			return dictArith(xv, yv, func(x, y V) V { return y })
+		case array:
+			return joinAtomToArray(x, yv, true)
+		default:
+			return NewAV([]V{x, y})
+		}
 	default:
 		switch yv := y.value.(type) {
 		case array:
