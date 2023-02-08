@@ -231,7 +231,7 @@ func VKey(ctx *Context, args []V) V {
 		return enum(args[0])
 	case 2:
 		// TODO: use i!y for something like rotate or a shift variant.
-		return key(args[1], args[0])
+		return dict(args[1], args[0])
 	default:
 		return panicRank("!")
 	}

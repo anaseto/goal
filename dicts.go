@@ -11,7 +11,7 @@ type Dict struct {
 // NewDict returns a dictionnary. Both keys and values should be arrays, and
 // they should have the same length.
 func NewDict(keys, values V) V {
-	return key(keys, values)
+	return dict(keys, values)
 }
 
 func newDict(keys array, values V) V {
@@ -55,7 +55,7 @@ func (d *Dict) Len() int {
 	return d.keys.Len()
 }
 
-func key(x, y V) V {
+func dict(x, y V) V {
 	xv, ok := x.value.(array)
 	if !ok {
 		return Panicf("x!y : not an array x (%s)", x.Type())
