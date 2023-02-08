@@ -1,5 +1,7 @@
 package goal
 
+import "fmt"
+
 // Dict represents a dictionnary.
 type Dict struct {
 	keys   array
@@ -66,4 +68,53 @@ func key(x, y V) V {
 		return Panicf("x!y : length mismatch (%d vs %d)", xv.Len(), yv.Len())
 	}
 	return NewV(&Dict{keys: xv, values: yv})
+}
+
+func dictArith(xd, yd *Dict, f func(V, V) V) V {
+	keys, values := xd.keys.shallowClone(), xd.values.shallowClone()
+	y := yd.keys
+	z := yd.values
+	y.IncrRC()
+	ky := findArray(keys, NewV(y))
+	kyv := ky.value.(*AI)
+	nkeys := keys.Len()
+	for _, kyi := range kyv.Slice {
+		if kyi == int64(nkeys) {
+			keys = uniqNoContext(joinTo(NewV(keys), NewV(y))).value.(array)
+			break
+		}
+	}
+	if keys.Len() > nkeys {
+		values = padArrayMut(values, keys.Len()-nkeys)
+		ky = findArray(keys, NewV(y))
+	}
+	y.DecrRC()
+	r, err := dictArithAmend(values, ky.value.(*AI), f, z)
+	if err != nil {
+		return Panicf("%v", err)
+	}
+	return NewV(&Dict{keys: keys, values: canonicalArray(r)})
+}
+
+func dictArithAmendI(x array, y int64, f func(V, V) V, z V) (array, error) {
+	if y < 0 || y >= int64(x.Len()) {
+		return x, fmt.Errorf("x out of bounds (%d)", y)
+	}
+	xy := x.at(int(y))
+	repl := f(xy, z)
+	if repl.IsPanic() {
+		return x, newExecError(repl)
+	}
+	return amendArrayAt(x, int(y), repl), nil
+}
+
+func dictArithAmend(x array, yv *AI, f func(V, V) V, z array) (array, error) {
+	var err error
+	for i, yi := range yv.Slice {
+		x, err = dictArithAmendI(x, yi, f, z.at(i))
+		if err != nil {
+			return x, err
+		}
+	}
+	return x, nil
 }

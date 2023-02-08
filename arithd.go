@@ -59,9 +59,13 @@ func equal(x, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		_, ok := y.value.(*Dict)
+		yv, ok := y.value.(*Dict)
 		if ok {
-			return panics("d=d : not yet implemented")
+			r := dictArith(xv, yv, equal)
+			if r.IsPanic() {
+				return ppanic("d=d", r)
+			}
+			return r
 		}
 		v := equal(NewV(xv.values), y)
 		if v.IsPanic() {
@@ -501,9 +505,13 @@ func lesser(x, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		_, ok := y.value.(*Dict)
+		yv, ok := y.value.(*Dict)
 		if ok {
-			return panics("d<d : not yet implemented")
+			r := dictArith(xv, yv, lesser)
+			if r.IsPanic() {
+				return ppanic("d<d", r)
+			}
+			return r
 		}
 		v := lesser(NewV(xv.values), y)
 		if v.IsPanic() {
@@ -943,9 +951,13 @@ func greater(x, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		_, ok := y.value.(*Dict)
+		yv, ok := y.value.(*Dict)
 		if ok {
-			return panics("d>d : not yet implemented")
+			r := dictArith(xv, yv, greater)
+			if r.IsPanic() {
+				return ppanic("d>d", r)
+			}
+			return r
 		}
 		v := greater(NewV(xv.values), y)
 		if v.IsPanic() {
@@ -1385,9 +1397,13 @@ func add(x, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		_, ok := y.value.(*Dict)
+		yv, ok := y.value.(*Dict)
 		if ok {
-			return panics("d+d : not yet implemented")
+			r := dictArith(xv, yv, add)
+			if r.IsPanic() {
+				return ppanic("d+d", r)
+			}
+			return r
 		}
 		v := add(NewV(xv.values), y)
 		if v.IsPanic() {
@@ -1827,9 +1843,13 @@ func subtract(x, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		_, ok := y.value.(*Dict)
+		yv, ok := y.value.(*Dict)
 		if ok {
-			return panics("d-d : not yet implemented")
+			r := dictArith(xv, yv, subtract)
+			if r.IsPanic() {
+				return ppanic("d-d", r)
+			}
+			return r
 		}
 		v := subtract(NewV(xv.values), y)
 		if v.IsPanic() {
@@ -2269,9 +2289,13 @@ func multiply(x, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		_, ok := y.value.(*Dict)
+		yv, ok := y.value.(*Dict)
 		if ok {
-			return panics("d*d : not yet implemented")
+			r := dictArith(xv, yv, multiply)
+			if r.IsPanic() {
+				return ppanic("d*d", r)
+			}
+			return r
 		}
 		v := multiply(NewV(xv.values), y)
 		if v.IsPanic() {
@@ -2810,9 +2834,13 @@ func divide(x, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		_, ok := y.value.(*Dict)
+		yv, ok := y.value.(*Dict)
 		if ok {
-			return panics("d%d : not yet implemented")
+			r := dictArith(xv, yv, divide)
+			if r.IsPanic() {
+				return ppanic("d%d", r)
+			}
+			return r
 		}
 		v := divide(NewV(xv.values), y)
 		if v.IsPanic() {
@@ -3178,9 +3206,13 @@ func minimum(x, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		_, ok := y.value.(*Dict)
+		yv, ok := y.value.(*Dict)
 		if ok {
-			return panics("d&d : not yet implemented")
+			r := dictArith(xv, yv, minimum)
+			if r.IsPanic() {
+				return ppanic("d&d", r)
+			}
+			return r
 		}
 		v := minimum(NewV(xv.values), y)
 		if v.IsPanic() {
@@ -3620,9 +3652,13 @@ func maximum(x, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		_, ok := y.value.(*Dict)
+		yv, ok := y.value.(*Dict)
 		if ok {
-			return panics("d|d : not yet implemented")
+			r := dictArith(xv, yv, maximum)
+			if r.IsPanic() {
+				return ppanic("d|d", r)
+			}
+			return r
 		}
 		v := maximum(NewV(xv.values), y)
 		if v.IsPanic() {
@@ -4058,9 +4094,13 @@ func modulus(x, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		_, ok := y.value.(*Dict)
+		yv, ok := y.value.(*Dict)
 		if ok {
-			return panics("d mod d : not yet implemented")
+			r := dictArith(xv, yv, modulus)
+			if r.IsPanic() {
+				return ppanic("d mod d", r)
+			}
+			return r
 		}
 		v := modulus(NewV(xv.values), y)
 		if v.IsPanic() {

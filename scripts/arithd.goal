@@ -204,9 +204,13 @@ genOp:{[opname;opsym] / globals o,op,xt
   say sub[("{O}";o;"{YY}";"y")] tplAV
   say sub[("{O}";o;"{OP}";op)]"\n"_`
   case *Dict:
-      _, ok := y.value.(*Dict)
+      yv, ok := y.value.(*Dict)
       if ok {
-          return panics("d{OP}d : not yet implemented")
+          r := dictArith(xv, yv, {O})
+          if r.IsPanic() {
+                  return ppanic("d{OP}d", r)
+          }
+          return r
       }
       v := {O}(NewV(xv.values), y)
       if v.IsPanic() {
