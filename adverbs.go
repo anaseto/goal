@@ -653,14 +653,7 @@ func eachN(ctx *Context, args []V) V {
 	}
 	f.DecrRC()
 	ctx.drop()
-	ra := Canonical(NewAV(r))
-	switch yv := y.value.(type) {
-	case *Dict:
-		ra.InitRC()
-		return NewV(&Dict{keys: yv.keys, values: ra.value.(array)})
-	default:
-		return ra
-	}
+	return Canonical(NewAV(r))
 }
 
 func (x V) at(i int) V {
