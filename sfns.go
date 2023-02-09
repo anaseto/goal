@@ -55,6 +55,12 @@ func reverse(x V) V {
 		x.value = xv.shallowClone()
 		reverseMut(x)
 		return x
+	case *Dict:
+		k := reverse(NewV(xv.keys))
+		k.InitRC()
+		v := reverse(NewV(xv.values))
+		v.InitRC()
+		return NewV(&Dict{keys: k.value.(array), values: v.value.(array)})
 	default:
 		return Panicf("|x : x not an array (%s)", x.Type())
 	}
@@ -81,37 +87,58 @@ func rotate(x, y V) V {
 	if i < 0 {
 		i += ylen
 	}
+	return rotateI(i, y)
+}
+
+func rotateI(i int64, y V) V {
 	switch yv := y.value.(type) {
 	case *AB:
+		ylen := int64(yv.Len())
 		r := make([]bool, ylen)
 		for j := int64(0); j < ylen; j++ {
 			r[j] = yv.At(int((j + i) % ylen))
 		}
 		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AF:
+		ylen := int64(yv.Len())
 		r := make([]float64, ylen)
 		for j := int64(0); j < ylen; j++ {
 			r[j] = yv.At(int((j + i) % ylen))
 		}
 		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AI:
+		ylen := int64(yv.Len())
 		r := make([]int64, ylen)
 		for j := int64(0); j < ylen; j++ {
 			r[j] = yv.At(int((j + i) % ylen))
 		}
 		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AS:
+		ylen := int64(yv.Len())
 		r := make([]string, ylen)
 		for j := int64(0); j < ylen; j++ {
 			r[j] = yv.At(int((j + i) % ylen))
 		}
 		return NewASWithRC(r, reuseRCp(yv.rc))
 	case *AV:
+		ylen := int64(yv.Len())
 		r := make([]V, ylen)
 		for j := int64(0); j < ylen; j++ {
 			r[j] = yv.At(int((j + i) % ylen))
 		}
 		return NewAVWithRC(r, yv.rc)
+	case *Dict:
+		k := rotateI(i, NewV(yv.keys))
+		if k.IsPanic() {
+			return k
+		}
+		k.InitRC()
+		v := rotateI(i, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: k.value.(array), values: v.value.(array)})
 	default:
 		return Panicf("x rotate y : y not an array (%s)", y.Type())
 	}
@@ -130,6 +157,8 @@ func first(x V) V {
 			}
 		}
 		return xv.at(0)
+	case *Dict:
+		return first(NewV(xv.values))
 	default:
 		return x
 	}
