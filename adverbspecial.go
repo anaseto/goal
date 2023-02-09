@@ -7,6 +7,8 @@ import (
 
 func fold2vAdd(x V) V {
 	switch xv := x.value.(type) {
+	case *Dict:
+		return fold2vAdd(NewV(xv.values))
 	case *AB:
 		n := int64(0)
 		for _, b := range xv.Slice {
@@ -64,6 +66,8 @@ func fold2vMax(x V) V {
 		return NewF(math.Inf(-1))
 	}
 	switch xv := x.value.(type) {
+	case *Dict:
+		return fold2vMax(NewV(xv.values))
 	case *AB:
 		for _, b := range xv.Slice {
 			if b {
@@ -99,6 +103,8 @@ func fold2vMin(x V) V {
 		return NewF(math.Inf(1))
 	}
 	switch xv := x.value.(type) {
+	case *Dict:
+		return fold2vMin(NewV(xv.values))
 	case *AB:
 		for _, b := range xv.Slice {
 			if !b {
