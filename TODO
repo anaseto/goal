@@ -1,6 +1,6 @@
 Features:
 - more general io (open/read/write/close/defer?)
-- extend operator support for dictionnaries (basic currently)
+- implement remaining operators for dicts
 - maybe some kind of templating/interpolation
 - maybe add splice
 - maybe split i$s and maybe amend string @[s;I;s]
