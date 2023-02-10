@@ -154,7 +154,14 @@ func classifySlice[T comparable](xs []T, bruteForceThreshold int) []int64 {
 func uniq(ctx *Context, x V) V {
 	switch xv := x.value.(type) {
 	case *Dict:
-		return uniq(ctx, NewV(xv.values))
+		xv.values.IncrRC()
+		mf := markFirsts(ctx, NewV(xv.values))
+		xv.values.DecrRC()
+		nk := replicate(mf, NewV(xv.keys))
+		nk.InitRC()
+		nv := replicate(mf, NewV(xv.values))
+		nv.InitRC()
+		return NewV(&Dict{keys: nk.value.(array), values: nv.value.(array)})
 	case array:
 		if xv.Len() == 0 || xv.getFlags().Has(flagUnique) {
 			return x
