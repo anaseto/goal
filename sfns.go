@@ -234,6 +234,14 @@ func dropi(i int64, y V) V {
 			y.value = yv.slice(0, int(i))
 			return Canonical(y)
 		}
+	case *Dict:
+		rk := dropi(i, NewV(yv.keys))
+		rk.InitRC()
+		rv := dropi(i, NewV(yv.values))
+		rv.InitRC()
+		return NewV(&Dict{
+			keys:   rk.value.(array),
+			values: rv.value.(array)})
 	default:
 		return panics("i_y : y not an array")
 	}
@@ -313,25 +321,41 @@ func take(x, y V) V {
 			return panicType("x#y", "x", x)
 		}
 	}
-	yv := toArray(y).value.(array)
-	if yv.Len() == 0 {
+	switch yv := y.value.(type) {
+	case *Dict:
+		rk := takei(i, yv.keys)
+		rk.InitRC()
+		rv := takei(i, yv.values)
+		rv.InitRC()
+		return NewV(&Dict{
+			keys:   rk.value.(array),
+			values: rv.value.(array)})
+	case array:
+		return takei(i, yv)
+	default:
+		return takei(i, toArray(y).value.(array))
+	}
+}
+
+func takei(i int64, y array) V {
+	if y.Len() == 0 {
 		if i < 0 {
 			i = -i
 		}
 		r := make([]bool, i)
-		return NewABWithRC(r, reuseRCp(yv.RC()))
+		return NewABWithRC(r, reuseRCp(y.RC()))
 	}
 	switch {
 	case i >= 0:
-		if i > int64(yv.Len()) {
-			return takeCyclic(yv, i)
+		if i > int64(y.Len()) {
+			return takeCyclic(y, i)
 		}
-		return Canonical(NewV(yv.slice(0, int(i))))
+		return Canonical(NewV(y.slice(0, int(i))))
 	default:
-		if i < int64(-yv.Len()) {
-			return takeCyclic(yv, i)
+		if i < int64(-y.Len()) {
+			return takeCyclic(y, i)
 		}
-		return Canonical(NewV(yv.slice(yv.Len()+int(i), yv.Len())))
+		return Canonical(NewV(y.slice(y.Len()+int(i), y.Len())))
 	}
 }
 
@@ -451,6 +475,12 @@ func shiftBefore(x, y V) V {
 		return shiftBeforeAS(x, yv)
 	case *AV:
 		return shiftBeforeAV(x, yv)
+	case *Dict:
+		r := shiftBefore(x, NewV(yv.values))
+		r.InitRC()
+		return NewV(&Dict{
+			keys:   yv.keys,
+			values: r.value.(array)})
 	default:
 		return panics("x rshift y: y not an array")
 	}
@@ -741,6 +771,12 @@ func nudge(x V) V {
 		copy(r.Slice[1:], xv.Slice[:xv.Len()-1])
 		r.Slice[0] = NewI(0)
 		return Canonical(NewV(r))
+	case *Dict:
+		r := nudge(NewV(xv.values))
+		r.InitRC()
+		return NewV(&Dict{
+			keys:   xv.keys,
+			values: r.value.(array)})
 	default:
 		return panics("rshift x : x not an array")
 	}
@@ -759,6 +795,12 @@ func shiftAfter(x, y V) V {
 		return shiftAfterAS(x, yv)
 	case *AV:
 		return shiftAfterAV(x, yv)
+	case *Dict:
+		r := shiftAfter(x, NewV(yv.values))
+		r.InitRC()
+		return NewV(&Dict{
+			keys:   yv.keys,
+			values: r.value.(array)})
 	default:
 		return panics("x shift y: y not an array")
 	}
@@ -1048,6 +1090,12 @@ func nudgeBack(x V) V {
 		copy(r.Slice[0:xv.Len()-1], xv.Slice[1:])
 		r.Slice[xv.Len()-1] = NewI(0)
 		return Canonical(NewV(r))
+	case *Dict:
+		r := nudgeBack(NewV(xv.values))
+		r.InitRC()
+		return NewV(&Dict{
+			keys:   xv.keys,
+			values: r.value.(array)})
 	default:
 		return panics("shift x : x not an array")
 	}
