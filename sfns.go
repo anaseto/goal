@@ -476,11 +476,7 @@ func shiftBefore(x, y V) V {
 	case *AV:
 		return shiftBeforeAV(x, yv)
 	case *Dict:
-		r := shiftBefore(x, NewV(yv.values))
-		r.InitRC()
-		return NewV(&Dict{
-			keys:   yv.keys,
-			values: r.value.(array)})
+		return newDict(yv.keys, shiftBefore(x, NewV(yv.values)))
 	default:
 		return panics("x rshift y: y not an array")
 	}
@@ -772,11 +768,7 @@ func nudge(x V) V {
 		r.Slice[0] = NewI(0)
 		return Canonical(NewV(r))
 	case *Dict:
-		r := nudge(NewV(xv.values))
-		r.InitRC()
-		return NewV(&Dict{
-			keys:   xv.keys,
-			values: r.value.(array)})
+		return newDict(xv.keys, nudge(NewV(xv.values)))
 	default:
 		return panics("rshift x : x not an array")
 	}
@@ -796,11 +788,7 @@ func shiftAfter(x, y V) V {
 	case *AV:
 		return shiftAfterAV(x, yv)
 	case *Dict:
-		r := shiftAfter(x, NewV(yv.values))
-		r.InitRC()
-		return NewV(&Dict{
-			keys:   yv.keys,
-			values: r.value.(array)})
+		return newDict(yv.keys, shiftAfter(x, NewV(yv.values)))
 	default:
 		return panics("x shift y: y not an array")
 	}
@@ -1091,11 +1079,7 @@ func nudgeBack(x V) V {
 		r.Slice[xv.Len()-1] = NewI(0)
 		return Canonical(NewV(r))
 	case *Dict:
-		r := nudgeBack(NewV(xv.values))
-		r.InitRC()
-		return NewV(&Dict{
-			keys:   xv.keys,
-			values: r.value.(array)})
+		return newDict(xv.keys, nudgeBack(NewV(xv.values)))
 	default:
 		return panics("shift x : x not an array")
 	}

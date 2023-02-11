@@ -302,6 +302,8 @@ func bytes(x V) V {
 			}
 		}
 		return Canonical(NewAV(r))
+	case *Dict:
+		return newDict(xv.keys, bytes(NewV(xv.values)))
 	default:
 		return panicType("bytes x", "x", x)
 	}
