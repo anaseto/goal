@@ -65,13 +65,37 @@ func (x V) IncrRC() {
 	}
 }
 
-// IncrRC increments the value reference count (if it has any).
+// incrRC2 increments by 2 the value reference count (if it has any).
+func (x V) incrRC2() {
+	if x.kind != valBoxed {
+		return
+	}
+	xrc, ok := x.value.(RefCounter)
+	if ok {
+		xrc.IncrRC()
+		xrc.IncrRC()
+	}
+}
+
+// DecrRC decrements the value reference count (if it has any).
 func (x V) DecrRC() {
 	if x.kind != valBoxed {
 		return
 	}
 	xrc, ok := x.value.(RefCounter)
 	if ok {
+		xrc.DecrRC()
+	}
+}
+
+// decrRC2 decrements by 2 the value reference count (if it has any).
+func (x V) decrRC2() {
+	if x.kind != valBoxed {
+		return
+	}
+	xrc, ok := x.value.(RefCounter)
+	if ok {
+		xrc.DecrRC()
 		xrc.DecrRC()
 	}
 }
@@ -250,9 +274,15 @@ func (x V) InitRC() {
 		return
 	}
 	xrch, ok := x.value.(RefCountHolder)
-	if ok && xrch.RC() == nil {
+	if ok {
+		initRC(xrch)
+	}
+}
+
+func initRC(x RefCountHolder) {
+	if x.RC() == nil {
 		var n int
-		xrch.InitWithRC(&n)
+		x.InitWithRC(&n)
 	}
 }
 

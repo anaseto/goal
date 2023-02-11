@@ -18,8 +18,9 @@ func newDictValues(keys array, values V) V {
 	if values.IsPanic() {
 		return values
 	}
-	values.InitRC()
-	return NewV(&Dict{keys: keys, values: values.value.(array)})
+	v := values.value.(array)
+	initRC(v)
+	return NewV(&Dict{keys: keys, values: v})
 }
 
 // Keys returns the keys of the dictionnary.
@@ -83,11 +84,9 @@ func dictArith(xd, yd *Dict, f func(V, V) V) V {
 	for _, kyi := range kyv.Slice {
 		if kyi == int64(nkeys) {
 			bnk := memberOf(NewV(yk), NewV(xk))
-			bnk.IncrRC()
-			bnk.IncrRC()
+			bnk.incrRC2()
 			notbnk := not(bnk)
-			bnk.DecrRC()
-			bnk.DecrRC()
+			bnk.decrRC2()
 			nk := replicate(notbnk, NewV(yk))
 			nv := replicate(notbnk, NewV(yv))
 			yv = replicate(bnk, NewV(yv)).value.(array)
@@ -101,6 +100,7 @@ func dictArith(xd, yd *Dict, f func(V, V) V) V {
 	if err != nil {
 		return Panicf("%v", err)
 	}
+	initRC(r)
 	return NewV(&Dict{keys: xk, values: canonicalArray(r)})
 }
 
