@@ -1166,11 +1166,11 @@ func findAI(x *AI, y V) V {
 		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		if x.flags.Has(flagAscending) && x.Len() > bruteForceNumeric/2 {
-			r := yv.reuse()
+			r := make([]int64, yv.Len())
 			for i, yi := range yv.Slice {
-				r.Slice[i] = findAII(x, yi)
+				r[i] = findAII(x, yi)
 			}
-			return NewV(r)
+			return NewAI(r)
 		}
 		if yv.Len() > bruteForceNumeric && x.Len() > bruteForceNumeric {
 			xlen := int64(x.Len())

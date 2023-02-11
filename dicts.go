@@ -14,7 +14,7 @@ func NewDict(keys, values V) V {
 	return dict(keys, values)
 }
 
-func newDict(keys array, values V) V {
+func newDictValues(keys array, values V) V {
 	if values.IsPanic() {
 		return values
 	}
@@ -77,24 +77,19 @@ func dictArith(xd, yd *Dict, f func(V, V) V) V {
 	xd = xd.clone()
 	xk, xv := xd.keys, xd.values
 	yk, yv := yd.keys, yd.values
-	yk.IncrRC()
 	ky := findArray(xk, NewV(yk))
 	kyv := ky.value.(*AI)
 	nkeys := xk.Len()
 	for _, kyi := range kyv.Slice {
 		if kyi == int64(nkeys) {
-			xk.IncrRC()
 			bnk := memberOf(NewV(yk), NewV(xk))
-			xk.DecrRC()
 			bnk.IncrRC()
 			bnk.IncrRC()
 			notbnk := not(bnk)
 			bnk.DecrRC()
 			bnk.DecrRC()
 			nk := replicate(notbnk, NewV(yk))
-			yv.IncrRC()
 			nv := replicate(notbnk, NewV(yv))
-			yv.DecrRC()
 			yv = replicate(bnk, NewV(yv)).value.(array)
 			xk = joinTo(NewV(xk), nk).value.(array)
 			xv = joinTo(NewV(xv), nv).value.(array)
@@ -102,7 +97,6 @@ func dictArith(xd, yd *Dict, f func(V, V) V) V {
 			break
 		}
 	}
-	yk.DecrRC()
 	r, err := dictArithAmend(xv, ky.value.(*AI), f, yv)
 	if err != nil {
 		return Panicf("%v", err)

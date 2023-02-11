@@ -49,7 +49,7 @@ func isNaN(x V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		return newDict(xv.keys, isNaN(NewV(xv.values)))
+		return newDictValues(xv.keys, isNaN(NewV(xv.values)))
 	default:
 		return panicType("NaN x", "x", x)
 	}
@@ -108,7 +108,7 @@ func fillNaNf(fill float64, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		return newDict(yv.keys, fillNaNf(fill, NewV(yv.values)))
+		return newDictValues(yv.keys, fillNaNf(fill, NewV(yv.values)))
 	default:
 		return panicType("x NaN y", "y", y)
 	}
