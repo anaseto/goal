@@ -30,7 +30,7 @@ It's main distinctive features are as follows:
   BQN's semantics. Multi-dimensional versions, when present in BQN, have been
   left out, though, as Goal has only free-form immutable arrays, like K.  Some
   primitives use words instead of symbols (like ocount for occurrence count).
-  Also, there's only partial support for K-like dictionnaries yet.
+  Also, K-like dictionnaries are supported, but not tables.
 * Unlike in typical array languages, strings are atoms, and common string
   handling functions (like index, substr or trim) have been integrated into the
   primitives, including regular expression functions.
