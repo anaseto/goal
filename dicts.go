@@ -15,6 +15,9 @@ func NewDict(keys, values V) V {
 }
 
 func newDict(keys array, values V) V {
+	if values.IsPanic() {
+		return values
+	}
 	values.InitRC()
 	return NewV(&Dict{keys: keys, values: values.value.(array)})
 }
