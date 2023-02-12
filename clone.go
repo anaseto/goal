@@ -112,7 +112,7 @@ func (d *Dict) clone() *Dict {
 	vrc := d.values.RC()
 	if !reusableRCp(vrc) || vrc == nil {
 		var n int
-		krc = &n
+		vrc = &n
 	}
 	return &Dict{keys: d.keys.CloneWithRC(krc).(array), values: d.values.CloneWithRC(vrc).(array)}
 }
