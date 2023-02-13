@@ -2,11 +2,11 @@ package goal
 
 // group returns =x.
 func group(x V) V {
-	if Length(x) == 0 {
-		return NewAV(nil)
-	}
 	switch xv := x.value.(type) {
 	case *AB:
+		if xv.Len() == 0 {
+			return NewAV(nil)
+		}
 		n := int(sumAB(xv))
 		r := make([]V, int(b2i(n > 0)+1))
 		ai := make([]int64, xv.Len())
@@ -34,6 +34,9 @@ func group(x V) V {
 		r[1] = NewAIWithRC(ait, &nrc)
 		return NewAVWithRC(r, &nrc)
 	case *AI:
+		if xv.Len() == 0 {
+			return NewAV(nil)
+		}
 		max := maxAI(xv)
 		if max < 0 {
 			max = -1
@@ -76,24 +79,48 @@ func group(x V) V {
 			return z
 		}
 		return group(z)
+	case *Dict:
+		gi := group(NewV(xv.values))
+		if gi.IsPanic() {
+			return gi
+		}
+		gv := gi.value.(*AV)
+		r := gv.reuse()
+		for i, gi := range gv.Slice {
+			r.Slice[i] = NewV(xv.keys.atIndices(gi.value.(*AI)))
+		}
+		if r.rc == nil {
+			var n = 2
+			r.rc = &n
+		} else {
+			*r.rc += 2
+		}
+		r.InitWithRC(r.rc)
+		return NewV(r)
 	default:
+		if Length(x) == 0 {
+			return NewAV(nil)
+		}
 		return Panicf("=x : x not an integer array (%s)", x.Type())
 	}
 }
 
 // icount efficiently returns #'=x.
 func icount(x V) V {
-	if Length(x) == 0 {
-		return NewAI(nil)
-	}
 	switch xv := x.value.(type) {
 	case *AB:
+		if xv.Len() == 0 {
+			return NewAI(nil)
+		}
 		n := sumAB(xv)
 		if n == 0 {
 			return NewAI([]int64{int64(xv.Len())})
 		}
 		return NewAI([]int64{int64(xv.Len()) - n, n})
 	case *AI:
+		if xv.Len() == 0 {
+			return NewAI(nil)
+		}
 		max := maxAI(xv)
 		if max < 0 {
 			max = -1
@@ -111,7 +138,12 @@ func icount(x V) V {
 			return z
 		}
 		return icount(z)
+	case *Dict:
+		return icount(NewV(xv.values))
 	default:
+		if Length(x) == 0 {
+			return NewAI(nil)
+		}
 		return Panicf("icount x : x not an integer array (%s)", x.Type())
 	}
 }
