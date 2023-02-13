@@ -487,7 +487,7 @@ func VList(ctx *Context, args []V) V {
 		return r
 	}
 	xav.Slice = cloneArgs(args)
-	reverseArgs(xav.Slice)
+	reverseSlice[V](xav.Slice)
 	return NewV(xav)
 }
 

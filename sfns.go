@@ -16,35 +16,24 @@ func Length(x V) int {
 	}
 }
 
+func reverseSlice[T any](xs []T) {
+	for i := 0; i < len(xs)/2; i++ {
+		xs[i], xs[len(xs)-i-1] = xs[len(xs)-i-1], xs[i]
+	}
+}
+
 func reverseMut(x V) {
 	switch xv := x.value.(type) {
 	case *AB:
-		xs := xv.Slice
-		for i := 0; i < len(xs)/2; i++ {
-			xs[i], xs[len(xs)-i-1] = xs[len(xs)-i-1], xs[i]
-		}
+		reverseSlice[bool](xv.Slice)
 	case *AF:
-		xs := xv.Slice
-		for i := 0; i < len(xs)/2; i++ {
-			xs[i], xs[len(xs)-i-1] = xs[len(xs)-i-1], xs[i]
-		}
+		reverseSlice[float64](xv.Slice)
 	case *AI:
-		xs := xv.Slice
-		for i := 0; i < len(xs)/2; i++ {
-			xs[i], xs[len(xs)-i-1] = xs[len(xs)-i-1], xs[i]
-		}
+		reverseSlice[int64](xv.Slice)
 	case *AS:
-		xs := xv.Slice
-		for i := 0; i < len(xs)/2; i++ {
-			xs[i], xs[len(xs)-i-1] = xs[len(xs)-i-1], xs[i]
-		}
+		reverseSlice[string](xv.Slice)
 	case *AV:
-		xs := xv.Slice
-		for i := 0; i < len(xs)/2; i++ {
-			xs[i], xs[len(xs)-i-1] = xs[len(xs)-i-1], xs[i]
-		}
-		//case sort.Interface:
-		//sort.Reverse(xv)
+		reverseSlice[V](xv.Slice)
 	}
 }
 
@@ -90,43 +79,27 @@ func rotate(x, y V) V {
 	return rotateI(i, y)
 }
 
+func rotateSlice[T any](i int64, ys []T) []T {
+	ylen := int64(len(ys))
+	r := make([]T, ylen)
+	for j := int64(0); j < ylen; j++ {
+		r[j] = ys[int((j+i)%ylen)]
+	}
+	return r
+}
+
 func rotateI(i int64, y V) V {
 	switch yv := y.value.(type) {
 	case *AB:
-		ylen := int64(yv.Len())
-		r := make([]bool, ylen)
-		for j := int64(0); j < ylen; j++ {
-			r[j] = yv.At(int((j + i) % ylen))
-		}
-		return NewABWithRC(r, reuseRCp(yv.rc))
+		return NewABWithRC(rotateSlice[bool](i, yv.Slice), reuseRCp(yv.rc))
 	case *AF:
-		ylen := int64(yv.Len())
-		r := make([]float64, ylen)
-		for j := int64(0); j < ylen; j++ {
-			r[j] = yv.At(int((j + i) % ylen))
-		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewAFWithRC(rotateSlice[float64](i, yv.Slice), reuseRCp(yv.rc))
 	case *AI:
-		ylen := int64(yv.Len())
-		r := make([]int64, ylen)
-		for j := int64(0); j < ylen; j++ {
-			r[j] = yv.At(int((j + i) % ylen))
-		}
-		return NewAIWithRC(r, reuseRCp(yv.rc))
+		return NewAIWithRC(rotateSlice[int64](i, yv.Slice), reuseRCp(yv.rc))
 	case *AS:
-		ylen := int64(yv.Len())
-		r := make([]string, ylen)
-		for j := int64(0); j < ylen; j++ {
-			r[j] = yv.At(int((j + i) % ylen))
-		}
-		return NewASWithRC(r, reuseRCp(yv.rc))
+		return NewASWithRC(rotateSlice[string](i, yv.Slice), reuseRCp(yv.rc))
 	case *AV:
-		ylen := int64(yv.Len())
-		r := make([]V, ylen)
-		for j := int64(0); j < ylen; j++ {
-			r[j] = yv.At(int((j + i) % ylen))
-		}
-		return NewAVWithRC(r, yv.rc)
+		return NewAVWithRC(rotateSlice[V](i, yv.Slice), yv.rc)
 	case *Dict:
 		k := rotateI(i, NewV(yv.keys))
 		if k.IsPanic() {
@@ -348,115 +321,55 @@ func takei(i int64, y array) V {
 	switch {
 	case i >= 0:
 		if i > int64(y.Len()) {
-			return takeCyclic(y, i)
+			return takeCyclic(i, y)
 		}
 		return Canonical(NewV(y.slice(0, int(i))))
 	default:
 		if i < int64(-y.Len()) {
-			return takeCyclic(y, i)
+			return takeCyclic(i, y)
 		}
 		return Canonical(NewV(y.slice(y.Len()+int(i), y.Len())))
 	}
 }
 
-func takeCyclic(y array, n int64) V {
+func takeCyclicSlice[T any](n int64, ys []T) []T {
 	neg := n < 0
 	if neg {
 		n = -n
 	}
 	i := int64(0)
-	step := int64(y.Len())
+	step := int64(len(ys))
+	r := make([]T, n)
+	if neg {
+		res := n % step
+		if res > 0 {
+			copy(r[0:res], ys[step-res:])
+			i += res
+		}
+	}
+	for i+step <= n {
+		copy(r[i:i+step], ys)
+		i += step
+	}
+	if !neg && i < n {
+		copy(r[i:n], ys[:n-i])
+	}
+	return r
+}
+
+func takeCyclic(n int64, y array) V {
 	switch yv := y.(type) {
 	case *AB:
-		ys := yv.Slice
-		r := make([]bool, n)
-		if neg {
-			res := n % step
-			if res > 0 {
-				copy(r[0:res], ys[step-res:])
-				i += res
-			}
-		}
-		for i+step <= n {
-			copy(r[i:i+step], ys)
-			i += step
-		}
-		if !neg && i < n {
-			copy(r[i:n], ys[:n-i])
-		}
-		return NewABWithRC(r, reuseRCp(yv.rc))
+		return NewABWithRC(takeCyclicSlice[bool](n, yv.Slice), reuseRCp(yv.rc))
 	case *AI:
-		ys := yv.Slice
-		r := make([]int64, n)
-		if neg {
-			res := n % step
-			if res > 0 {
-				copy(r[0:res], ys[step-res:])
-				i += res
-			}
-		}
-		for i+step <= n {
-			copy(r[i:i+step], ys)
-			i += step
-		}
-		if !neg && i < n {
-			copy(r[i:n], ys[:n-i])
-		}
-		return NewAIWithRC(r, reuseRCp(yv.rc))
+		return NewAIWithRC(takeCyclicSlice[int64](n, yv.Slice), reuseRCp(yv.rc))
 	case *AF:
-		ys := yv.Slice
-		r := make([]float64, n)
-		if neg {
-			res := n % step
-			if res > 0 {
-				copy(r[0:res], ys[step-res:])
-				i += res
-			}
-		}
-		for i+step <= n {
-			copy(r[i:i+step], ys)
-			i += step
-		}
-		if !neg && i < n {
-			copy(r[i:n], ys[:n-i])
-		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewAFWithRC(takeCyclicSlice[float64](n, yv.Slice), reuseRCp(yv.rc))
 	case *AS:
-		ys := yv.Slice
-		r := make([]string, n)
-		if neg {
-			res := n % step
-			if res > 0 {
-				copy(r[0:res], ys[step-res:])
-				i += res
-			}
-		}
-		for i+step <= n {
-			copy(r[i:i+step], ys)
-			i += step
-		}
-		if !neg && i < n {
-			copy(r[i:n], ys[:n-i])
-		}
-		return NewASWithRC(r, reuseRCp(yv.rc))
+		return NewASWithRC(takeCyclicSlice[string](n, yv.Slice), reuseRCp(yv.rc))
 	case *AV:
-		ys := yv.Slice
-		r := make([]V, n)
-		if neg {
-			res := n % step
-			if res > 0 {
-				copy(r[0:res], ys[step-res:])
-				i += res
-			}
-		}
-		for i+step <= n {
-			copy(r[i:i+step], ys)
-			i += step
-		}
-		if !neg && i < n {
-			copy(r[i:n], ys[:n-i])
-		}
-		return NewAVWithRC(r, yv.rc)
+		*yv.rc += 2
+		return NewAVWithRC(takeCyclicSlice[V](n, yv.Slice), yv.rc)
 	default:
 		panic("takeCyclic: y not an array")
 	}
