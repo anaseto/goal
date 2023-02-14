@@ -359,6 +359,8 @@ func casti(y V) V {
 			}
 		}
 		return NewAV(r)
+	case *Dict:
+		return newDictValues(yv.keys, casti(NewV(yv.values)))
 	default:
 		return panicType("\"i\"$y", "y", y)
 	}
@@ -400,6 +402,8 @@ func castn(y V) V {
 			}
 		}
 		return Canonical(NewAV(r))
+	case *Dict:
+		return newDictValues(yv.keys, castn(NewV(yv.values)))
 	default:
 		return panicType("\"n\"$y", "y", y)
 	}
@@ -456,6 +460,8 @@ func drops(s S, y V) V {
 			}
 		}
 		return NewAV(r)
+	case *Dict:
+		return newDictValues(yv.keys, drops(s, NewV(yv.values)))
 	default:
 		return panicType("s_y", "y", y)
 	}
@@ -481,6 +487,8 @@ func trim(s S, y V) V {
 			}
 		}
 		return NewAV(r)
+	case *Dict:
+		return newDictValues(yv.keys, trim(s, NewV(yv.values)))
 	default:
 		return panicType("s^y", "y", y)
 	}
@@ -577,6 +585,8 @@ func (ctx *Context) replace(f stringReplacer, x V) V {
 			r.Slice[i] = ri
 		}
 		return NewV(r)
+	case *Dict:
+		return newDictValues(xv.keys, ctx.replace(f, NewV(xv.values)))
 	default:
 		return panicType("sub[...] x", "x", x)
 	}
@@ -602,6 +612,8 @@ func containedInS(x V, s string) V {
 			r.Slice[i] = ri
 		}
 		return NewV(r)
+	case *Dict:
+		return newDictValues(xv.keys, containedInS(NewV(xv.values), s))
 	default:
 		return panicType("x in s", "x", x)
 	}
@@ -634,6 +646,8 @@ func scount(s S, y V) V {
 			r[i] = ri
 		}
 		return NewAV(r)
+	case *Dict:
+		return newDictValues(yv.keys, scount(s, NewV(yv.values)))
 	default:
 		return panicType("s#y", "y", y)
 	}
@@ -659,6 +673,8 @@ func splitN(n int, sep S, y V) V {
 			r.Slice[i] = ri
 		}
 		return NewV(r)
+	case *Dict:
+		return newDictValues(yv.keys, splitN(n, sep, NewV(yv.values)))
 	default:
 		return Panicf("not a string atom or array (%s)", y.Type())
 	}

@@ -28,13 +28,16 @@
 "abc"[-1.0;1] / "c"
 bytes "a" / 1
 bytes "a" "bc" / 1 2
+bytes "a""b"!"a" "bc" / "a""b"!1 2
 bytes ("a" "bc";"d" "efg") / (1 2;1 3)
 "i"$2 / 2
 "i"$1 0 / 1 0
 "i"$1.5 3 / 1 3
+"i"$"a""b"!1.5 3 / "a""b"!1 3
 "i"$(1.5 3;2.5) / (1 3;2)
 "n"$1 0 / 1 0
 "n"$2 0 / 2 0
+"n"$"a""b"!2 0 / "a""b"!2 0
 "n"$2.5 0 / 2.5 0
 "n"$(2.5 0;3) / (2.5 0;3)
 "n"$(2.5 0;"3") / (2.5 0;3)
@@ -44,7 +47,9 @@ bytes ("a" "bc";"d" "efg") / (1 2;1 3)
 "s"$97.0 98.0 / "ab"
 "s"$(97.0 98.0;98 99) / "ab" "bc"
 "a"_(("bc";"ad");"abc") / (("bc";"d");"bc")
+"a"_"a""b"!(("bc";"ad");"abc") / "a""b"!(("bc";"d");"bc")
 " "^(("bc ";"  ad");"abc  ") / (("bc";"ad");"abc")
+" "^"a""b"!(("bc ";"  ad");"abc  ") / "a""b"!(("bc";"ad");"abc")
 sub["b";"d"]"abc" / "adc"
 sub["a";"b"]"aaa" / "bbb"
 sub["a";"b"]',"aaa" / ,"bbb"
@@ -62,12 +67,14 @@ $sub["b" "d" "c" "e"] / `sub["b" "d" "c" "e"]`
 sub["b" "d" "c" "e"]~ sub["b" "c";"d" "e"] / 1
 sub["b" "c";"d" "e"]"abc" / "ade"
 sub["b";"d"]"abc" "dbe" / "adc" "dde"
+sub["b";"d"]"a""b"!"abc" "dbe" / "a""b"!"adc" "dde"
 sub["b";"d"]("abc" "dbe";"bac") / ("adc" "dde";"dac")
 sub["b" "d" "c" "e"]"abc" "dbe" / "ade" "dde"
 sub["b" "c";"d" "e"]"abc" "dbe" / "ade" "dde"
 2 sub["b" "c";"c" "b"]/"abc" "dbe" / "abc" "dbe"
 3 sub["b" "c";"c" "b"]/"abc" "dbe" / "acb" "dce"
 "bc" "ac" in "abcd" / 1 0
+("a""b"!"bc" "ac") in "abcd" / "a""b"!1 0
 "bc" in "abcd" / 1
 ("bc";"ab" "de") in "abcd" / (1;1 0)
 $0w / "0w"
@@ -77,6 +84,8 @@ $-0w / "-0w"
 (2) ","\"a,b,c,d" / "a" "b,c,d"
 (1) ","\"a,b,c,d" / ,"a,b,c,d"
 (0) ","\"a,b,c,d" / ()
+","\"a""b"!"a,b,c,d" "e,f,g" / "a""b"!("a""b""c""d";"e""f""g")
 "ab"#"acababdab" / 3
 "ab"#"acababdab" "ab" "cd" / 3 1 0
+"ab"#"a""b""c"!"acababdab" "ab" "cd" / "a""b""c"!3 1 0
 "ab"#("acababdab" "ab" "cd";"cdab") / (3 1 0;1)
