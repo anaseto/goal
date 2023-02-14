@@ -458,6 +458,9 @@ func VApplyN(ctx *Context, args []V) V {
 	case 2:
 		x := args[1]
 		av := toArray(args[0]).value.(array)
+		if av.Len() == 0 {
+			return x
+		}
 		for i := av.Len() - 1; i >= 0; i-- {
 			ctx.push(av.at(i))
 		}
