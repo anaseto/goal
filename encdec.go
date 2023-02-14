@@ -4,9 +4,6 @@ func encodeBaseDigits(b int64, x int64) int {
 	if x < 0 {
 		x = -x
 	}
-	if b == 1 {
-		return 0
-	}
 	n := 1
 	for x >= b {
 		x /= b
@@ -17,8 +14,8 @@ func encodeBaseDigits(b int64, x int64) int {
 
 func encode(f V, x V) V {
 	if f.IsI() {
-		if f.I() <= 0 {
-			return panics("i\\x : base i is not positive")
+		if f.I() <= 1 {
+			return panics("i\\x : base i is not > 1")
 		}
 		if x.IsI() {
 			n := encodeBaseDigits(f.I(), x.I())
@@ -89,8 +86,8 @@ func encode(f V, x V) V {
 		return encode(fromABtoAI(fv), x)
 	case *AI:
 		for _, b := range fv.Slice {
-			if b <= 0 {
-				return panics("I\\x : I contains non positive")
+			if b <= 1 {
+				return panics("I\\x : I contains base < 2")
 			}
 		}
 		if x.IsI() {

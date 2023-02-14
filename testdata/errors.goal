@@ -186,7 +186,7 @@ panic[1;2] / too many arguments
 panic[1] / type
 panic["msg"] / msg
 -60/45 / not positive
--60\45 / not positive
+-60\45 / base
 60 -60/2 42 / non positive
 2 csv "1,2,3" / not a string
 "ab" csv "1,2,3" / not a code point character
@@ -249,3 +249,5 @@ ocount+ / not an array
 1.5^2 3 / non-integer
 d:"a" "b"!1 2;d["a" "c" "b"] / not found
 d:"a" "b"!1 2;d["c"] / not found
+1 1\4 / base
+1\4 / base
