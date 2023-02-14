@@ -466,9 +466,7 @@ func isEltType(x array, y V) bool {
 }
 
 func isI(x float64) bool {
-	// NOTE: We assume no NaN or Inf: handling those special cases is left
-	// to the program. Maybe check if value is greater than MaxInt64.
-	return math.Floor(float64(x)) == float64(x)
+	return x == float64(int64(x))
 }
 
 func isBI(x int64) bool {
