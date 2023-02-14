@@ -1020,7 +1020,11 @@ func (c *compiler) doApply2(a *astApply2, n int) error {
 		if err != nil {
 			return err
 		}
-		c.doVariadic(e, 2)
+		if e.Text == "@" {
+			c.push(opApply)
+		} else {
+			c.doVariadic(e, 2)
+		}
 	default:
 		panic(fmt.Sprintf("bad verb type for apply2: %v", e))
 	}
