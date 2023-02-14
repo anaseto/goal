@@ -51,7 +51,20 @@ func (bs sortVSlice) Swap(i, j int) {
 func sortUp(x V) V {
 	xa, ok := x.value.(array)
 	if !ok {
-		return Panicf("^x : x not an array (%s)", x.Type())
+		d, ok := x.value.(*Dict)
+		if ok {
+			if d.values.getFlags().Has(flagAscending) {
+				return x
+			}
+			p := ascend(NewV(d.values)).value.(*AI)
+			nk := d.keys.atIndices(p)
+			nv := d.values.atIndices(p)
+			nv.setFlags(nv.getFlags() | flagAscending)
+			initRC(nk)
+			initRC(nv)
+			return NewV(&Dict{keys: nk, values: nv})
+		}
+		return panicType("^x", "x", x)
 	}
 	if xa.getFlags().Has(flagAscending) {
 		return x
@@ -209,6 +222,9 @@ func ascend(x V) V {
 			sort.Stable(p)
 		}
 		return NewAI(p.Perm)
+	case *Dict:
+		p := ascend(NewV(xv.values)).value.(*AI)
+		return NewV(xv.keys.atIndices(p))
 	default:
 		return Panicf("<x : x not an array (%s)", x.Type())
 	}
