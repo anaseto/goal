@@ -437,7 +437,8 @@ func scanNumber(s *Scanner) stateFn {
 		case s.r == eof:
 			return s.emitString(NUMBER)
 		case s.r == '.':
-		case s.r == 'e':
+		case s.r == 'e' || s.r == 'E' ||
+			s.r == 'p' || s.r == 'P':
 			r := s.peek()
 			if r == '+' || r == '-' {
 				s.next()
