@@ -73,7 +73,6 @@ func equal(x, y V) V {
 		}
 		v.InitRC()
 		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
-
 	default:
 		return panicTypeElt("x=y", "x", x)
 	}
@@ -519,7 +518,6 @@ func lesser(x, y V) V {
 		}
 		v.InitRC()
 		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
-
 	default:
 		return panicTypeElt("x<y", "x", x)
 	}
@@ -965,7 +963,6 @@ func greater(x, y V) V {
 		}
 		v.InitRC()
 		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
-
 	default:
 		return panicTypeElt("x>y", "x", x)
 	}
@@ -1411,7 +1408,6 @@ func add(x, y V) V {
 		}
 		v.InitRC()
 		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
-
 	default:
 		return panicTypeElt("x+y", "x", x)
 	}
@@ -1857,7 +1853,6 @@ func subtract(x, y V) V {
 		}
 		v.InitRC()
 		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
-
 	default:
 		return panicTypeElt("x-y", "x", x)
 	}
@@ -2303,7 +2298,6 @@ func multiply(x, y V) V {
 		}
 		v.InitRC()
 		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
-
 	default:
 		return panicTypeElt("x*y", "x", x)
 	}
@@ -2848,7 +2842,6 @@ func divide(x, y V) V {
 		}
 		v.InitRC()
 		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
-
 	default:
 		return panicTypeElt("x%y", "x", x)
 	}
@@ -3220,7 +3213,6 @@ func minimum(x, y V) V {
 		}
 		v.InitRC()
 		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
-
 	default:
 		return panicTypeElt("x&y", "x", x)
 	}
@@ -3666,7 +3658,6 @@ func maximum(x, y V) V {
 		}
 		v.InitRC()
 		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
-
 	default:
 		return panicTypeElt("x|y", "x", x)
 	}
@@ -4108,7 +4099,6 @@ func modulus(x, y V) V {
 		}
 		v.InitRC()
 		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
-
 	default:
 		return panicTypeElt("x mod y", "x", x)
 	}

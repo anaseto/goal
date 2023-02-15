@@ -74,9 +74,10 @@ func joinS(sep S, x V) V {
 		return x
 	case *AS:
 		return NewS(strings.Join([]string(xv.Slice), string(sep)))
-	case *AV:
-		return Panicf("s/x : x not a string array (%s)", x.Type())
 	default:
+		if Length(x) == 0 {
+			return NewS("")
+		}
 		return Panicf("s/x : x not a string array (%s)", x.Type())
 	}
 }
