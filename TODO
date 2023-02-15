@@ -1,26 +1,24 @@
 Features:
 - more general io (open/read/write/close/defer?)
-- implement remaining operators for dicts
 - maybe some kind of templating/interpolation
+- maybe some kind of printf
 - maybe add splice
 - maybe split i$s and maybe amend string @[s;I;s]
-- maybe more utf8 and unicode functions
-- maybe add functions for handling text blobs of bytes
-- maybe bitwise operations
-- maybe a switch/match
 
 Tests:
 - improve test coverage for error messages and refactor and improve them along
   the way
 - add more immutability tests to catch any possible regressions after the
   refcount overhaul, because refcounting is hard.
-- search for more error locations potential improvements
+- add more tests for dicts
+- search for locations improvements in error messages
 
 Documentation:
-- write reference docs and maybe some introductory guide (in addition to the
-  current help summary)
+- write reference docs, or at least some some introductory guide (in addition
+  to the current help summary)
 
 Optimizations:
 - more special code for common op/ and op\
-- some remaining special cases in self-search functions
-- maybe improve liveness analysis in code with branches
+- maybe improve liveness analysis for code with branches, and for global
+  variables
+- maybe some remaining special cases in self-search functions
