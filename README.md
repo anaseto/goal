@@ -85,12 +85,15 @@ A few short examples can be found in the `testdata/scripts` directory. Because
 they're used for testing, they come along an expected result after a `/RESULT:`
 comment.
 
+Also, various code generation scripts in the toplevel `scripts` directory are
+written in Goal.
+
 # Documentation
 
-Writing a reference documentation for the language is still in the TODO list.
 Currently, documentation consists of the REPL help system with usage summary and
 examples for all implemented features, so some prior knowledge of another array
-language can be useful. The full contents are replicated below.
+language, in particular K, can be useful. The full contents are replicated
+below.
 
 ```
 TOPICS HELP
