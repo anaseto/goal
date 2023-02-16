@@ -1,5 +1,7 @@
 package goal
 
+import "math/rand"
+
 func uniform(ctx *Context, x V) V {
 	var n int64
 	if x.IsI() {
@@ -12,6 +14,9 @@ func uniform(ctx *Context, x V) V {
 	}
 	if n < 0 {
 		return Panicf("?i : negative integer (%d)", n)
+	}
+	if ctx.rand == nil {
+		ctx.rand = rand.New(rand.NewSource(1))
 	}
 	r := make([]float64, n)
 	for i := range r {
@@ -30,9 +35,11 @@ func roll(ctx *Context, x, y V) V {
 		}
 		n = int64(x.F())
 	}
+	if ctx.rand == nil {
+		ctx.rand = rand.New(rand.NewSource(1))
+	}
 	if n < 0 {
 		return deal(ctx, -n, y)
-		//return Panicf("i?y : i negative integer (%d)", n)
 	}
 	if y.IsI() {
 		if y.I() <= 0 {
@@ -104,12 +111,20 @@ func deal(ctx *Context, n int64, y V) V {
 
 func seed(ctx *Context, x V) V {
 	if x.IsI() {
+		if ctx.rand == nil {
+			ctx.rand = rand.New(rand.NewSource(x.I()))
+			return x
+		}
 		ctx.rand.Seed(x.I())
 		return x
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
 			return Panicf("seed x : x not an integer (%g)", x.F())
+		}
+		if ctx.rand == nil {
+			ctx.rand = rand.New(rand.NewSource(int64(x.F())))
+			return NewI(int64(x.F()))
 		}
 		ctx.rand.Seed(int64(x.F()))
 		return NewI(int64(x.F()))

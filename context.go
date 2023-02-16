@@ -84,7 +84,6 @@ func NewContext() *Context {
 	ctx.sources = map[string]string{}
 	var n int = 2
 	ctx.constants = []V{constAV: NewAVWithRC(nil, &n)}
-	ctx.rand = rand.New(rand.NewSource(1))
 	ctx.initVariadics()
 	return ctx
 }
