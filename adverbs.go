@@ -315,6 +315,10 @@ func scanfx(ctx *Context, f, x V) V {
 		switch f.variadic() {
 		case vAdd:
 			return scan2vAdd(x)
+		case vMax:
+			return scan2vMax(x)
+		case vMin:
+			return scan2vMin(x)
 		}
 	}
 	switch xv := x.value.(type) {

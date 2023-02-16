@@ -178,6 +178,81 @@ func fold2vMax(x V) V {
 	}
 }
 
+type ordered interface {
+	float64 | int64 | string
+}
+
+func scan2vMaxSlice[T ordered](dst, xs []T) {
+	max := xs[0]
+	dst[0] = max
+	for i, xi := range xs[1:] {
+		if xi > max {
+			max = xi
+		}
+		dst[i+1] = max
+	}
+}
+
+func scan2vMax(x V) V {
+	switch xv := x.value.(type) {
+	case *Dict:
+		return newDictValues(xv.keys, scan2vMax(NewV(xv.values)))
+	case *AB:
+		r := xv.reuse()
+		for i, b := range xv.Slice {
+			if b {
+				for j := i; j < xv.Len(); j++ {
+					r.Slice[j] = true
+				}
+				break
+			}
+			r.Slice[i] = false
+		}
+		return NewV(r)
+	case *AI:
+		if xv.Len() == 0 {
+			return x
+		}
+		r := xv.reuse()
+		scan2vMaxSlice[int64](r.Slice, xv.Slice)
+		return NewV(r)
+	case *AF:
+		if xv.Len() == 0 {
+			return x
+		}
+		r := xv.reuse()
+		scan2vMaxSlice[float64](r.Slice, xv.Slice)
+		return NewV(r)
+	case *AS:
+		if xv.Len() == 0 {
+			return x
+		}
+		r := xv.reuse()
+		scan2vMaxSlice[string](r.Slice, xv.Slice)
+		return NewV(r)
+	case *AV:
+		if xv.Len() == 0 {
+			return x
+		}
+		r := xv.reuse()
+		r.Slice[0] = xv.Slice[0]
+		for i, xi := range xv.Slice[1:] {
+			last := r.Slice[i]
+			last.incrRC2()
+			next := maximum(last, xi)
+			last.decrRC2()
+			if next.IsPanic() {
+				return next
+			}
+			r.Slice[i+1] = next
+		}
+		// Will never be canonical, so normalizing is not needed.
+		return NewV(r)
+	default:
+		return x
+	}
+}
+
 func fold2vMin(x V) V {
 	if Length(x) == 0 {
 		return NewF(math.Inf(1))
@@ -213,6 +288,76 @@ func fold2vMin(x V) V {
 			}
 		}
 		return r
+	default:
+		return x
+	}
+}
+
+func scan2vMinSlice[T ordered](dst, xs []T) {
+	min := xs[0]
+	for i, xi := range xs[1:] {
+		if xi < min {
+			min = xi
+		}
+		dst[i+1] = min
+	}
+}
+
+func scan2vMin(x V) V {
+	switch xv := x.value.(type) {
+	case *Dict:
+		return newDictValues(xv.keys, scan2vMin(NewV(xv.values)))
+	case *AB:
+		r := xv.reuse()
+		for i, b := range xv.Slice {
+			if !b {
+				for j := i; j < len(r.Slice); j++ {
+					r.Slice[j] = false
+				}
+				break
+			}
+			r.Slice[i] = true
+		}
+		return NewV(r)
+	case *AI:
+		if xv.Len() == 0 {
+			return x
+		}
+		r := xv.reuse()
+		scan2vMinSlice[int64](r.Slice, xv.Slice)
+		return NewV(r)
+	case *AF:
+		if xv.Len() == 0 {
+			return x
+		}
+		r := xv.reuse()
+		scan2vMinSlice[float64](r.Slice, xv.Slice)
+		return NewV(r)
+	case *AS:
+		if xv.Len() == 0 {
+			return x
+		}
+		r := xv.reuse()
+		scan2vMinSlice[string](r.Slice, xv.Slice)
+		return NewV(r)
+	case *AV:
+		if xv.Len() == 0 {
+			return x
+		}
+		r := xv.reuse()
+		r.Slice[0] = xv.Slice[0]
+		for i, xi := range xv.Slice[1:] {
+			last := r.Slice[i]
+			last.incrRC2()
+			next := minimum(last, xi)
+			last.decrRC2()
+			if next.IsPanic() {
+				return next
+			}
+			r.Slice[i+1] = next
+		}
+		// Will never be canonical, so normalizing is not needed.
+		return NewV(r)
 	default:
 		return x
 	}
