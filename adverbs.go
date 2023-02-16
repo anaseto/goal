@@ -7,17 +7,6 @@ import (
 
 func fold2(ctx *Context, args []V) V {
 	f := args[1]
-	switch f.kind {
-	case valVariadic:
-		switch f.variadic() {
-		case vAdd:
-			return fold2vAdd(args[0])
-		case vMax:
-			return fold2vMax(args[0])
-		case vMin:
-			return fold2vMin(args[0])
-		}
-	}
 	if !f.IsFunction() {
 		if f.IsI() {
 			return decode(f, args[0])
@@ -42,6 +31,16 @@ func fold2(ctx *Context, args []V) V {
 }
 
 func foldfx(ctx *Context, f, x V) V {
+	if f.kind == valVariadic {
+		switch f.variadic() {
+		case vAdd:
+			return fold2vAdd(x)
+		case vMax:
+			return fold2vMax(x)
+		case vMin:
+			return fold2vMin(x)
+		}
+	}
 	switch xv := x.value.(type) {
 	case *Dict:
 		return foldfx(ctx, f, NewV(xv.values))
@@ -312,6 +311,12 @@ func scan2(ctx *Context, f, x V) V {
 }
 
 func scanfx(ctx *Context, f, x V) V {
+	if f.kind == valVariadic {
+		switch f.variadic() {
+		case vAdd:
+			return scan2vAdd(x)
+		}
+	}
 	switch xv := x.value.(type) {
 	case *Dict:
 		r := scanfx(ctx, f, NewV(xv.values))
