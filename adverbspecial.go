@@ -315,6 +315,7 @@ func scan2vMin(x V) V {
 				}
 				break
 			}
+			r.Slice[i] = true
 		}
 		return NewV(r)
 	case *AI:
