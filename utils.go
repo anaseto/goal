@@ -405,27 +405,81 @@ func getType(x V) vType {
 	}
 }
 
-// aType returns the most specific type common to the elements of a generic
-// array. For example, aType (1 2;2 3) returns tAI, but aType (1;2 3) returns
-// tV.
-func aType(x *AV) vType {
+// getAtomType returns the vType of x, returning tV for non-atoms or atoms that
+// cannot be packed in an unboxed array.
+func getAtomType(x V) vType {
+	if x.IsI() {
+		switch x.I() {
+		case 0, 1:
+			return tB
+		default:
+			return tI
+		}
+	}
+	if x.IsF() {
+		return tF
+	}
+	switch x.value.(type) {
+	case S:
+		return tS
+	default:
+		return tV
+	}
+}
+
+// getAtomTypeFast is like getAtomType, but returns tI for tB. It's meant to be
+// used in cases where we need to quickly get a type for canonical form, and tB
+// is not an expected outcome.
+func getAtomTypeFast(x V) vType {
+	if x.IsI() {
+		return tI
+	}
+	if x.IsF() {
+		return tF
+	}
+	switch x.value.(type) {
+	case S:
+		return tS
+	default:
+		return tV
+	}
+}
+
+// eType returns the most specific atom type common to the all elements, or tV
+// for a generic array.
+func eType(x *AV) vType {
 	if x.Len() == 0 {
 		return tV
 	}
-	t := getType(x.Slice[0])
+	t := getAtomType(x.Slice[0])
 	for _, xi := range x.Slice[1:] {
-		s := getType(xi)
-		if t&tAV != s&tAV {
+		t &= getAtomType(xi)
+		if t == tV {
 			return tV
 		}
-		t &= s
 	}
 	return t
 }
 
-// eType returns the most specific element type common to the the elements of a
-// generic array. For example, eType (1;2 3) returns tI.
-func eType(x *AV) vType {
+// eTypeFast is like eType, but returns tI in place of tB.
+func eTypeFast(x *AV) vType {
+	if x.Len() == 0 {
+		return tV
+	}
+	t := getAtomTypeFast(x.Slice[0])
+	for _, xi := range x.Slice[1:] {
+		t &= getAtomTypeFast(xi)
+		if t == tV {
+			return tV
+		}
+	}
+	return t
+}
+
+// rType returns the most specific element type common to the the elements of a
+// generic array. It handles unboxed arrays, so that, for example, rType (1;2
+// 3) returns tI, obtained from merging tI and tAI.
+func rType(x *AV) vType {
 	if x.Len() == 0 {
 		return tV
 	}
@@ -490,7 +544,7 @@ func isCanonical(x V) bool {
 // isCanonicalAV returns true if the given generic array is in canonical form,
 // that is, it uses the most specialized representation.
 func isCanonicalAV(x *AV) (vType, bool) {
-	t := aType(x)
+	t := eType(x)
 	switch t {
 	case tB, tI, tF, tS:
 		return t, false
@@ -519,7 +573,7 @@ func (ctx *Context) assertCanonical(x V) {
 // normalizeRec returns a canonical form of an AV array. It returns true if a
 // shallow clone was made.
 func normalizeRec(x *AV) (array, bool) {
-	t := aType(x)
+	t := eType(x)
 	switch t {
 	case tB:
 		r := make([]bool, x.Len())
@@ -563,20 +617,20 @@ func normalizeRec(x *AV) (array, bool) {
 // elements themselves are canonical. It returns true if a shallow clone was
 // made.
 func normalize(x *AV) (array, bool) {
-	t := aType(x)
+	t := eType(x)
 	switch t {
 	case tB:
 		r := make([]bool, x.Len())
 		for i, xi := range x.Slice {
 			r[i] = xi.I() != 0
 		}
-		return &AB{Slice: r, rc: reuseRCp(x.rc)}, true
+		return &AB{Slice: r, rc: reuseRCp(x.rc), flags: x.flags}, true
 	case tI:
 		r := make([]int64, x.Len())
 		for i, xi := range x.Slice {
 			r[i] = xi.I()
 		}
-		return &AI{Slice: r, rc: reuseRCp(x.rc)}, true
+		return &AI{Slice: r, rc: reuseRCp(x.rc), flags: x.flags}, true
 	case tF:
 		r := make([]float64, x.Len())
 		for i, xi := range x.Slice {
@@ -586,13 +640,46 @@ func normalize(x *AV) (array, bool) {
 				r[i] = float64(xi.F())
 			}
 		}
-		return &AF{Slice: r, rc: reuseRCp(x.rc)}, true
+		return &AF{Slice: r, rc: reuseRCp(x.rc), flags: x.flags}, true
 	case tS:
 		r := make([]string, x.Len())
 		for i, xi := range x.Slice {
 			r[i] = string(xi.value.(S))
 		}
-		return &AS{Slice: r, rc: reuseRCp(x.rc)}, true
+		return &AS{Slice: r, rc: reuseRCp(x.rc), flags: x.flags}, true
+	default:
+		return x, false
+	}
+}
+
+// normalizeFast returns a canonical form of an AV array (but *AI in place of
+// *AB), assuming it's elements themselves are canonical. It returns true if a
+// shallow clone was made.
+func normalizeFast(x *AV) (array, bool) {
+	t := eTypeFast(x)
+	switch t {
+	case tI:
+		r := make([]int64, x.Len())
+		for i, xi := range x.Slice {
+			r[i] = xi.I()
+		}
+		return &AI{Slice: r, rc: reuseRCp(x.rc), flags: x.flags}, true
+	case tF:
+		r := make([]float64, x.Len())
+		for i, xi := range x.Slice {
+			if xi.IsI() {
+				r[i] = float64(xi.I())
+			} else {
+				r[i] = float64(xi.F())
+			}
+		}
+		return &AF{Slice: r, rc: reuseRCp(x.rc), flags: x.flags}, true
+	case tS:
+		r := make([]string, x.Len())
+		for i, xi := range x.Slice {
+			r[i] = string(xi.value.(S))
+		}
+		return &AS{Slice: r, rc: reuseRCp(x.rc), flags: x.flags}, true
 	default:
 		return x, false
 	}
@@ -643,6 +730,19 @@ func Canonical(x V) V {
 	switch xv := x.value.(type) {
 	case *AV:
 		r, b := normalize(xv)
+		if b {
+			x.value = r
+		}
+		return x
+	default:
+		return x
+	}
+}
+
+func canonicalFast(x V) V {
+	switch xv := x.value.(type) {
+	case *AV:
+		r, b := normalizeFast(xv)
 		if b {
 			x.value = r
 		}

@@ -106,7 +106,7 @@ func doTime(cmd string, y V, layout, loc string) V {
 			}
 			r[i] = ri
 		}
-		return Canonical(NewAV(r))
+		return canonicalFast(NewAV(r))
 	case *AF:
 		y = toAI(yv)
 		if y.IsPanic() {
@@ -124,7 +124,7 @@ func doTime(cmd string, y V, layout, loc string) V {
 			}
 			r[i] = ri
 		}
-		return Canonical(NewAV(r))
+		return canonicalFast(NewAV(r))
 	case *AV:
 		r := make([]V, yv.Len())
 		for i, yi := range yv.Slice {
@@ -134,7 +134,7 @@ func doTime(cmd string, y V, layout, loc string) V {
 			}
 			r[i] = ri
 		}
-		return Canonical(NewAV(r))
+		return canonicalFast(NewAV(r))
 	default:
 		return Panicf("time[cmd;t;...] : bad type for t (%s)", y.Type())
 	}

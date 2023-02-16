@@ -30,7 +30,7 @@ func utf8rcount(x V) V {
 				return r[i]
 			}
 		}
-		return Canonical(NewAV(r))
+		return canonicalFast(NewAV(r))
 	default:
 		return panicType("utf8.rcount x", "x", x)
 	}

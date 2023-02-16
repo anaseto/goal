@@ -25,7 +25,7 @@ func flip(x V) V {
 				return Panicf("line length mismatch: %d vs %d", nl, lines)
 			}
 		}
-		t := eType(xv)
+		t := rType(xv)
 		switch {
 		case lines <= 0:
 			return NewAV([]V{x})

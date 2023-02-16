@@ -167,7 +167,7 @@ func applyS(s S, x V) V {
 				return r[i]
 			}
 		}
-		return Canonical(NewAV(r))
+		return canonicalFast(NewAV(r))
 	default:
 		return Panicf("s[x] : x non-integer (%s)", x.Type())
 	}
@@ -277,7 +277,7 @@ func applyS2(s S, x V, y V) V {
 				return r[i]
 			}
 		}
-		return Canonical(NewAV(r))
+		return canonicalFast(NewAV(r))
 	default:
 		return Panicf("s[x;y] : x non-integer (%s)", x.Type())
 	}
@@ -301,7 +301,7 @@ func bytes(x V) V {
 				return r[i]
 			}
 		}
-		return Canonical(NewAV(r))
+		return canonicalFast(NewAV(r))
 	case *Dict:
 		return newDictValues(xv.keys, bytes(NewV(xv.values)))
 	default:
@@ -435,7 +435,7 @@ func casts(y V) V {
 				return r[i]
 			}
 		}
-		return Canonical(NewAV(r))
+		return canonicalFast(NewAV(r))
 	default:
 		return panicType("\"s\"$y", "y", y)
 	}

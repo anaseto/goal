@@ -69,7 +69,7 @@ func encode(f V, x V) V {
 					return r[i]
 				}
 			}
-			return Canonical(NewAV(r))
+			return canonicalFast(NewAV(r))
 		default:
 			return panicType("i\\x", "x", x)
 		}
@@ -143,7 +143,7 @@ func encode(f V, x V) V {
 					return r[i]
 				}
 			}
-			return Canonical(NewAV(r))
+			return canonicalFast(NewAV(r))
 		default:
 			return panicType("I\\x", "x", x)
 		}
@@ -202,7 +202,7 @@ func decode(f V, x V) V {
 					return r[i]
 				}
 			}
-			return Canonical(NewAV(r))
+			return canonicalFast(NewAV(r))
 		default:
 			return panicType("i/x", "x", x)
 		}
@@ -264,7 +264,7 @@ func decode(f V, x V) V {
 					return r[i]
 				}
 			}
-			return Canonical(NewAV(r))
+			return canonicalFast(NewAV(r))
 		default:
 			return panicType("I/x", "x", x)
 		}

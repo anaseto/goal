@@ -54,7 +54,7 @@ func fCSV(comma rune, x V) V {
 		csvw.Flush()
 		return NewS(sb.String())
 	case *AV:
-		t := aType(xv)
+		t := rType(xv)
 		if t != tAS {
 			return Panicf("csv x : not an array of records")
 		}
