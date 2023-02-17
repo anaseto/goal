@@ -79,9 +79,9 @@ type Context struct {
 func NewContext() *Context {
 	ctx := &Context{}
 	ctx.gCode = &globalCode{}
-	ctx.gIDs = map[string]int{}
+	ctx.gIDs = make(map[string]int, 8)
 	ctx.stack = make([]V, 0, 32)
-	ctx.sources = map[string]string{}
+	ctx.sources = make(map[string]string, 4)
 	var n int = 2
 	ctx.constants = []V{constAV: NewAVWithRC(nil, &n)}
 	ctx.initVariadics()

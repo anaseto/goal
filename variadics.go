@@ -96,7 +96,7 @@ var vStrings = [...]string{
 }
 
 func (ctx *Context) initVariadics() {
-	const size = 32
+	const size = 64
 	ctx.variadics = make([]VariadicFun, len(vFuns), size)
 	copy(ctx.variadics, vFuns[:])
 	ctx.variadicsNames = make([]string, len(vStrings), size)
@@ -108,7 +108,7 @@ func (ctx *Context) initVariadics() {
 	ctx.variadics = append(ctx.variadics, VSet)
 	ctx.variadicsNames = append(ctx.variadicsNames, "::")
 	ctx.vNames["::"] = variadic(len(ctx.variadics) - 1)
-	ctx.keywords = map[string]NameType{}
+	ctx.keywords = make(map[string]NameType, 32)
 	// monads
 	ctx.RegisterMonad("abs", VAbs)
 	ctx.RegisterMonad("bytes", VBytes)
