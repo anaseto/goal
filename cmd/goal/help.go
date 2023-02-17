@@ -60,8 +60,8 @@ e               error           error "msg"
 const helpVERBS = `
 VERBS HELP
 :x  identity    :[42] -> 42 (recall that : is also syntax for return)
-x:y right       2:3 -> 3
-+x  flip        +(1 2;3 4) -> (1 3;2 4)
+x:y right       2:3 -> 3        "a":"b" -> "b"
++x  flip        +(1 2;3 4) -> (1 3;2 4)         +42 -> ,,42
 n+n add         2+3 -> 5            2+3 4 -> 5 6
 s+s concat      "a"+"b" -> "ab"     "a" "b"+"c" -> "ac" "bc"
 -x  negate      - 2 3 -> -2 -3      -(1 2.5;3 4) -> (-1 -2.5;-3 -4)
@@ -76,10 +76,10 @@ x%y divide      3%2 -> 1.5          3 4%2 -> 2 1.5
 !d  keys        !"a" "b"!1 2 -> "a" "b"
 !x  odometer    !2 3 -> (0 0 0 1 1 1;0 1 2 0 1 2)
 x!y dict        d:"a" "b"!1 2;d "a" -> 1
-&x  where       &0 0 1 0 0 0 1 -> 2 6
-x&y min         2&3 -> 2        4&3 -> 3
+&x  where       &0 0 1 0 0 0 1 -> 2 6           &2 3 -> 0 0 1 1 1
+x&y min         2&3 -> 2        4&3 -> 3        "b"&"a" -> "a"
 |x  reverse     |!5 -> 4 3 2 1 0
-x|y max         2|3 -> 3        4|3 -> 4
+x|y max         2|3 -> 3        4|3 -> 4        "b"|"a" -> "b"
 <x  ascend      <2 4 3 -> 0 2 1 (index permutation for ascending order)
 x<y less        2<3 -> 1        "c" < "a" -> 0
 >x  descend     >2 4 3 -> 1 2 0 (index permutation for descending order)
@@ -96,25 +96,25 @@ i^s windows     2^"abcd" -> "ab" "bc" "cd"      (2-bytes strings)
 i^y windows     2^!4 -> (0 1;1 2;2 3)
 s^y trim        " []"^"  [text]  " -> "text"    "\n"^"\nline\n" -> "line"
 x^y without     2 3^1 1 2 3 3 4 -> 1 1 4
-#x  length      #2 4 5 -> 3       #"ab" "cd" -> 2
+#x  length      #2 4 5 -> 3      #"ab" "cd" -> 2      #42 -> 1     #"ab" -> 1
 i#y take        2#4 1 5 -> 4 1    4#3 1 5 -> 3 1 5 3 (cyclic)    3#1 -> 1 1 1
 s#y count       "ab"#"cabdab" "cd" "deab" -> 2 0 1
 f#y replicate   {0 1 1 0}#4 1 5 3 -> 1 5    {x>0}#2 -3 1 -> 2 1
 x#y keep only   2 3^1 1 2 3 3 4 -> 2 3 3
-_N  floor       _2.3 -> 2           _1.5 3.7 -> 1 3
-_S  to lower    _"ABC" -> "abc"     _"AB" "CD" -> "ab" "cd"
+_n  floor       _2.3 -> 2           _1.5 3.7 -> 1 3
+_s  to lower    _"ABC" -> "abc"     _"AB" "CD" -> "ab" "cd"
 i_s drop bytes  2_"abcde" -> "cde"  -2_"abcde" -> "abc" 
 i_x drop        2_3 4 5 6 -> 5 6    -2_3 4 5 6 -> 3 4
 s_i delete      "abc"_1 -> "ac"
-x_i delete      4 3 2 1_1 -> 4 2 1
+x_i delete      4 3 2 1_1 -> 4 2 1      4 3 2 1_-3 -> 4 2 1
 s_s trim prefix "pref-"_"pref-name" -> "name"
-I_s cut string  1 3_"abcdef" -> "bc" "def"
-I_y cut         2 5_!10 -> (2 3 4;5 6 7 8 9)
+I_s cut string  1 3_"abcdef" -> "bc" "def"      (I ascending)
+I_y cut         2 5_!10 -> (2 3 4;5 6 7 8 9)    (I ascending)
 f_x weed out    {0 1 1 0}_4 1 5 3 -> 4 3    {x>0}_2 -3 1 -> ,-3
 $x  string      $2 3 -> "2 3"     $"text" -> "\"text\""
 i$x split       2$!6 -> (0 1;2 3;4 5)   2$"a" "b" "c" -> ("a" "b";,"c")
 s$y cast        "i"$2.3 -> 2    "i"$"ab" -> 97 98   "s"$97 98 -> "ab"
-s$y parse num   "n"$"1.5" -> 1.5
+s$y parse num   "n"$"1.5" -> 1.5        "n"$"2" "1e+7" "0b100" -> 2 1e+07 4
 x$y binsearch   2 3 5 7$8 2 7 5 5.5 3 0 -> 4 1 4 3 3 2 0
 ?i  uniform     ?2 -> 0.6046602879796196 0.9405090880450124
 ?x  uniq        ?2 2 3 4 3 3 -> 2 3 4
@@ -123,12 +123,12 @@ i?y deal        -5?100 -> 19 26 0 73 94 (always distinct)
 s?r rindex      "abcde"?rx/b../ -> 1 4
 s?s index       "a = a + 1"?"=" "+" -> 2 6
 x?y find        3 2 1?2 -> 1    3 2 1?0 -> 3
-@x  type        @2 -> "n"    @"ab" -> "s"    @2 3 -> "N"
+@x  type        @2 -> "n"    @"ab" -> "s"    @2 3 -> "N"       @+ -> "f"
 s@y substr      "abcdef"@2  -> "cdef" (s[offset])
 r@y match       rx/[a-z]/"abc" -> 1     rx/\s/"abc" -> 0
 r@y find        rx/[a-z](.)/"abc" -> "ab" "b"
 f@y apply       (|)@1 2 -> 2 1 (like |[1 2] -> 2 1 or |1 2)
-x@y at          1 2 3@2 -> 3    1 2 3[2 0] -> 3 1
+x@y at          1 2 3@2 -> 3    1 2 3[2 0] -> 3 1       7 8 9@-2 -> 8
 .s  reval       ."2+3" -> 5     a:1;."a" -> panic ".s : undefined global: a"
 .e  get error   .error "msg" -> "msg"
 .d  values      ."a" "b"!1 2 -> 1 2
@@ -148,9 +148,9 @@ x.y applyN      {x+y}.2 3 -> 5    {x+y}[2;3] -> 5    (1 2;3 4)[0;1] -> 2
 
 const helpNAMEDVERBS = `
 NAMED VERBS HELP
-abs x     abs value     abs -3 -1.5 2 -> 3 1.5 2
-bytes x   byte-count    bytes "abc" -> 3
-ceil x    ceil          ceil 1.5 -> 2   ceil "ab" -> "AB"
+abs n     abs value     abs -3 -1.5 2 -> 3 1.5 2
+bytes s   byte-count    bytes "abc" -> 3
+ceil n    ceil          ceil 1.5 -> 2   ceil "ab" -> "AB"
 error x   error         r:{?[~x=0;1%x;error "zero"]}0;?["e"~@r;.r;r] -> "zero"
 eval s    eval          a:5;eval "a+2" -> 7 (unrestricted eval)
 firsts x  mark firsts   firsts 0 0 2 3 0 2 3 4 -> 1 0 1 1 0 0 0 1
@@ -161,7 +161,7 @@ rshift x  right shift   rshift 1 2 -> 0 1       rshift "a" "b" -> "" "a"
 rx s      comp. regex   rx "[a-z]"  (like rx/[a-z]/ but compiled at runtime)
 seed i    rand seed     seed 42 (for non-secure pseudo-rand with ?)
 shift x   shift         shift 1 2 -> 2 0        shift "a" "b" -> "b" ""
-sign x    sign          sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
+sign n    sign          sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
 
 x csv y     csv read    csv "1,2,3" -> ,"1" "2" "3"
                         " " csv "1 2 3" -> ,"1" "2" "3" (" " as separator)
@@ -182,8 +182,8 @@ sub[s;s;i]  replaceN    sub["a";"b";2] "aaa" -> "bba" (stop after 2 times)
 sub[S]      replace     sub["b" "d" "c" "e"] "abc" -> "ade"
 sub[S;S]    replace     sub["b" "c";"d" "e"] "abc" -> "ade"
 
-eval[x;y;z] eval        like eval x, but provide name y as location and prefix
-                        z for globals
+eval[s;n;p] eval        like eval s, but provide name n as location and prefix
+                        p for globals
 
 MATH: acos, asin, atan, cos, exp, log, round, sin, sqrt, tan, nan
 UTF-8: utf8.rcount (number of code points), utf8.valid
@@ -218,7 +218,7 @@ say x           same as print, but appends a newline    say !5
 shell s         run a command string s as-is through the shell
 slurp s         read file named s       lines:"\n"\slurp["/path/to/file"]
 
-pfx import s    like import s but with prefix pfx+"." for globals
+p import s      like import s but with prefix p+"." for globals
 w print x       print x to writer or filename     "filename" print "content"
 w say x         same as print, but appends a newline
 
@@ -228,10 +228,10 @@ os.ENV          keys!values strings dictionnary representing environment
 
 const helpTime = `
 TIME HELP
-time cmd                time command with current time
-cmd time t              time command with time t
-time[cmd;t;format]      time command with time t in given format
-time[cmd;t;format;loc]  time command with time t in given format and location
+time cmd              time command with current time
+cmd time t            time command with time t
+time[cmd;t;fmt]       time command with time t in given format
+time[cmd;t;fmt;loc]   time command with time t in given format and location
 
 Time t should be either an integer representing unix epochtime, or a string
 in the given format (RFC3339 format layout "2006-01-02T15:04:05Z07:00" is the
