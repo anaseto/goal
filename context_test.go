@@ -184,11 +184,27 @@ func BenchmarkFoldMinus(b *testing.B) {
 	}
 }
 
+func BenchmarkScanMinus(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:!1000")
+	for n := 0; n < b.N; n++ {
+		ctx.Eval("-\\a")
+	}
+}
+
 func BenchmarkFoldPlus(b *testing.B) {
 	ctx := NewContext()
 	ctx.Eval("a:!1000")
 	for n := 0; n < b.N; n++ {
 		ctx.Eval("+/a")
+	}
+}
+
+func BenchmarkScanPlus(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:!1000")
+	for n := 0; n < b.N; n++ {
+		ctx.Eval("+\\a")
 	}
 }
 
