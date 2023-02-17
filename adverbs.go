@@ -337,8 +337,8 @@ func scanfx(ctx *Context, f, x V) V {
 		for i := 1; i < xv.Len(); i++ {
 			ctx.replaceTop(xv.at(i))
 			last := r[i-1]
-			ctx.push(last)
-			last.IncrRC()
+			ctx.pushNoRC(last)
+			last.incrRC2()
 			next := f.applyN(ctx, 2)
 			last.DecrRC()
 			if next.IsPanic() {
@@ -437,8 +437,8 @@ func scanxfy(ctx *Context, x, f, y V) V {
 		r := make([]V, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
 			ctx.replaceTop(yv.at(i))
-			ctx.push(x)
-			x.IncrRC()
+			ctx.pushNoRC(x)
+			x.incrRC2()
 			next := f.applyN(ctx, 2)
 			x.DecrRC()
 			if next.IsPanic() {
@@ -489,8 +489,8 @@ func scanN(ctx *Context, args []V) V {
 		for j := 1; j < len(args)-2; j++ {
 			ctx.push(args[j].at(i))
 		}
-		ctx.push(x)
-		x.IncrRC()
+		ctx.pushNoRC(x)
+		x.incrRC2()
 		next := f.applyN(ctx, n)
 		x.DecrRC()
 		if next.IsPanic() {
