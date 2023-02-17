@@ -192,7 +192,9 @@ _N  floor       _2.3 -> 2           _1.5 3.7 -> 1 3
 _S  to lower    _"ABC" -> "abc"     _"AB" "CD" -> "ab" "cd"
 i_s drop bytes  2_"abcde" -> "cde"  -2_"abcde" -> "abc" 
 i_x drop        2_3 4 5 6 -> 5 6    -2_3 4 5 6 -> 3 4
-s_x trim prefix "pref-"_"pref-name" -> "name"
+s_i delete      "abc"_1 -> "ac"
+x_i delete      4 3 2 1_1 -> 4 2 1
+s_s trim prefix "pref-"_"pref-name" -> "name"
 I_s cut string  1 3_"abcdef" -> "bc" "def"
 I_y cut         2 5_!10 -> (2 3 4;5 6 7 8 9)
 f_x weed out    {0 1 1 0}_4 1 5 3 -> 4 3    {x>0}_2 -3 1 -> ,-3
