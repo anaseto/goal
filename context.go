@@ -185,7 +185,7 @@ func (ctx *Context) Run() (V, error) {
 }
 
 // Eval calls Compile with the given string as unnamed source, and then Run.
-// You cannot call it within a variadic function, as it the evaluation is done
+// You cannot call it within a variadic function, as the evaluation is done
 // on the current context, so it would interrupt compilation of current file.
 // Use EvalPackage for that.
 func (ctx *Context) Eval(s string) (V, error) {

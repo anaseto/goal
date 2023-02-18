@@ -1,5 +1,5 @@
 Features:
-- more general io (open/read/write/close/defer?)
+- more capable io (pipes, better commands)
 - maybe some kind of templating/interpolation
 - maybe some kind of printf
 - maybe add splice

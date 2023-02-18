@@ -20,6 +20,9 @@ func registerVariadics(ctx *goal.Context) {
 	ctx.RegisterDyad("say", gos.VSay)
 	ctx.RegisterMonad("shell", gos.VShell)
 	ctx.RegisterMonad("slurp", gos.VSlurp)
+	ctx.RegisterDyad("open", gos.VOpen)
+	ctx.RegisterMonad("close", gos.VClose)
+	ctx.RegisterDyad("read", gos.VRead)
 	ctx.AssignGlobal("os.ENV", getEnviron())
 }
 

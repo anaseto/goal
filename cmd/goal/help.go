@@ -212,15 +212,20 @@ I\x    decode    24 60 60\3723 -> 1 2 3  2\6 -> 1 1 0
 
 const helpIO = `
 IO/OS HELP
+close h         close filehandle h
 import s        eval file s+".goal" and import globals with prefix s+"."
+open s          open path s for reading, returning a filehandle
 print x         print "Hello, world!\n"
+read h          read from filehandle h until EOF or an error occurs.
 say x           same as print, but appends a newline    say !5
 shell s         run a command string s as-is through the shell
 slurp s         read file named s       lines:"\n"\slurp["/path/to/file"]
 
 p import s      like import s but with prefix p+"." for globals
-w print x       print x to writer or filename     "filename" print "content"
-w say x         same as print, but appends a newline
+m open s        open path s with mode m in "r" "r+" "w" "w+" "a" "a+"
+h print x       print x to writer or filename     "filename" print "content"
+n read h        read n bytes from reader h or return an error
+h say x         same as print, but appends a newline
 
 os.ARGS         command-line arguments, starting with script name
 os.ENV          keys!values strings dictionnary representing environment
