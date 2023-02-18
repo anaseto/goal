@@ -414,8 +414,8 @@ doXdAV:{
             return panicTypeElt("x{OP}y", "y", y)`
 }
 
-h:"w" open "../arithd.go"
+'h:"w" open "../arithd.go"
 h say package
 {genOp . x}'ops
-close h
+'close h
 'shell `gofmt -s -w ../arithd.go`
