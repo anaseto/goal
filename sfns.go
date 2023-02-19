@@ -137,29 +137,29 @@ func first(x V) V {
 	}
 }
 
-// drop returns i_x and s_x.
+// drop implements i_x, s_x, I_x and x_i.
 func drop(x, y V) V {
 	if x.IsI() {
-		return dropi(x.I(), y)
+		return dropN(x.I(), y)
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
 			return Panicf("i_y : non-integer i (%g)", x.F())
 		}
-		return dropi(int64(x.F()), y)
+		return dropN(int64(x.F()), y)
 	}
 	if y.IsI() {
-		return deletei(x, y.I())
+		return deleteI(x, y.I())
 	}
 	if y.IsF() {
 		if !isI(y.F()) {
-			return Panicf("i_y : non-integer i (%g)", y.F())
+			return Panicf("x_i : non-integer i (%g)", y.F())
 		}
-		return deletei(x, int64(y.F()))
+		return deleteI(x, int64(y.F()))
 	}
 	switch xv := x.value.(type) {
 	case S:
-		return drops(xv, y)
+		return dropS(xv, y)
 	case *AB:
 		return drop(fromABtoAI(xv), y)
 	case *AI:
@@ -184,42 +184,42 @@ func drop(x, y V) V {
 	}
 }
 
-func dropi(i int64, y V) V {
+func dropN(n int64, y V) V {
 	switch yv := y.value.(type) {
 	case S:
 		switch {
-		case i >= 0:
-			if i > int64(len(yv)) {
-				i = int64(len(yv))
+		case n >= 0:
+			if n > int64(len(yv)) {
+				n = int64(len(yv))
 			}
-			return NewV(yv[i:])
+			return NewV(yv[n:])
 		default:
-			i = int64(len(yv)) + i
-			if i < 0 {
-				i = 0
+			n = int64(len(yv)) + n
+			if n < 0 {
+				n = 0
 			}
-			return NewV(yv[:i])
+			return NewV(yv[:n])
 		}
 	case array:
 		switch {
-		case i >= 0:
-			if i > int64(yv.Len()) {
-				i = int64(yv.Len())
+		case n >= 0:
+			if n > int64(yv.Len()) {
+				n = int64(yv.Len())
 			}
-			y.value = yv.slice(int(i), yv.Len())
+			y.value = yv.slice(int(n), yv.Len())
 			return Canonical(y)
 		default:
-			i = int64(yv.Len()) + i
-			if i < 0 {
-				i = 0
+			n = int64(yv.Len()) + n
+			if n < 0 {
+				n = 0
 			}
-			y.value = yv.slice(0, int(i))
+			y.value = yv.slice(0, int(n))
 			return Canonical(y)
 		}
 	case *Dict:
-		rk := dropi(i, NewV(yv.keys))
+		rk := dropN(n, NewV(yv.keys))
 		rk.InitRC()
-		rv := dropi(i, NewV(yv.values))
+		rv := dropN(n, NewV(yv.values))
 		rv.InitRC()
 		return NewV(&Dict{
 			keys:   rk.value.(array),
@@ -236,7 +236,7 @@ func deleteiSlice[T any](xs []T, i int64) []T {
 	return r
 }
 
-func deletei(x V, i int64) V {
+func deleteI(x V, i int64) V {
 	switch xv := x.value.(type) {
 	case S:
 		if i < 0 {
@@ -312,9 +312,9 @@ func deletei(x V, i int64) V {
 		r := deleteiSlice[V](xv.Slice, i)
 		return NewV(&AV{Slice: r, flags: xv.flags, rc: xv.rc})
 	case *Dict:
-		rk := deletei(NewV(xv.keys), i)
+		rk := deleteI(NewV(xv.keys), i)
 		rk.InitRC()
-		rv := deletei(NewV(xv.values), i)
+		rv := deleteI(NewV(xv.values), i)
 		rv.InitRC()
 		return NewV(&Dict{
 			keys:   rk.value.(array),
@@ -380,14 +380,14 @@ func cutAIS(x *AI, y S) V {
 
 // take returns i#y.
 func take(x, y V) V {
-	i := int64(0)
+	n := int64(0)
 	if x.IsI() {
-		i = x.I()
+		n = x.I()
 	} else if x.IsF() {
 		if !isI(x.F()) {
 			return Panicf("i#y : non-integer i (%g)", x.F())
 		}
-		i = int64(x.F())
+		n = int64(x.F())
 	} else {
 		switch xv := x.value.(type) {
 		case S:
@@ -400,39 +400,39 @@ func take(x, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *Dict:
-		rk := takei(i, yv.keys)
+		rk := takeN(n, yv.keys)
 		rk.InitRC()
-		rv := takei(i, yv.values)
+		rv := takeN(n, yv.values)
 		rv.InitRC()
 		return NewV(&Dict{
 			keys:   rk.value.(array),
 			values: rv.value.(array)})
 	case array:
-		return takei(i, yv)
+		return takeN(n, yv)
 	default:
-		return takei(i, toArray(y).value.(array))
+		return takeN(n, toArray(y).value.(array))
 	}
 }
 
-func takei(i int64, y array) V {
+func takeN(n int64, y array) V {
 	if y.Len() == 0 {
-		if i < 0 {
-			i = -i
+		if n < 0 {
+			n = -n
 		}
-		r := make([]bool, i)
+		r := make([]bool, n)
 		return NewABWithRC(r, reuseRCp(y.RC()))
 	}
 	switch {
-	case i >= 0:
-		if i > int64(y.Len()) {
-			return takeCyclic(i, y)
+	case n >= 0:
+		if n > int64(y.Len()) {
+			return takeCyclic(n, y)
 		}
-		return Canonical(NewV(y.slice(0, int(i))))
+		return Canonical(NewV(y.slice(0, int(n))))
 	default:
-		if i < int64(-y.Len()) {
-			return takeCyclic(i, y)
+		if n < int64(-y.Len()) {
+			return takeCyclic(n, y)
 		}
-		return Canonical(NewV(y.slice(y.Len()+int(i), y.Len())))
+		return Canonical(NewV(y.slice(y.Len()+int(n), y.Len())))
 	}
 }
 

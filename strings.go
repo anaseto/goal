@@ -441,7 +441,7 @@ func casts(y V) V {
 	}
 }
 
-func drops(s S, y V) V {
+func dropS(s S, y V) V {
 	switch yv := y.value.(type) {
 	case S:
 		return NewS(strings.TrimPrefix(string(yv), string(s)))
@@ -454,14 +454,14 @@ func drops(s S, y V) V {
 	case *AV:
 		r := make([]V, yv.Len())
 		for i, yi := range yv.Slice {
-			r[i] = drops(s, yi)
+			r[i] = dropS(s, yi)
 			if r[i].IsPanic() {
 				return r[i]
 			}
 		}
 		return NewAV(r)
 	case *Dict:
-		return newDictValues(yv.keys, drops(s, NewV(yv.values)))
+		return newDictValues(yv.keys, dropS(s, NewV(yv.values)))
 	default:
 		return panicType("s_y", "y", y)
 	}
