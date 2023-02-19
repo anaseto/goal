@@ -160,7 +160,7 @@ func replicate(x, y V) V {
 		case x.I() < 0:
 			return Panicf("f#y : f[y] negative integer (%d)", x.I())
 		default:
-			return repeat(y, x.I())
+			return replicateI(x.I(), y)
 		}
 	}
 	if x.IsF() {
@@ -174,26 +174,24 @@ func replicate(x, y V) V {
 		if xv.Len() != Length(y) {
 			return Panicf("f#y : length mismatch: %d (f[y]) vs %d (y)", xv.Len(), Length(y))
 		}
-		return repeatAB(xv, y)
+		return replicateAB(xv, y)
 	case *AI:
 		if xv.Len() != Length(y) {
 			return Panicf("f#y : length mismatch: %d (f[y]) vs %d (y)", xv.Len(), Length(y))
 		}
-		return repeatAI(xv, y)
+		return replicateAI(xv, y)
 	case *AF:
 		ix := toAI(xv)
 		if ix.IsPanic() {
 			return Panicf("f#y : x %v", ix)
 		}
 		return replicate(ix, y)
-	case *AV:
-		return Panicf("f#y : f[y] non-integer (%s)", x.Type())
 	default:
 		return Panicf("f#y : f[y] non-integer (%s)", x.Type())
 	}
 }
 
-func repeat(x V, n int64) V {
+func replicateI(n int64, x V) V {
 	if x.IsI() {
 		if isBI(x.I()) {
 			r := make([]bool, n)
@@ -276,7 +274,7 @@ func repeat(x V, n int64) V {
 	}
 }
 
-func repeatAB(x *AB, y V) V {
+func replicateAB(x *AB, y V) V {
 	n := int64(0)
 	for _, xi := range x.Slice {
 		n += b2i(xi)
@@ -327,7 +325,7 @@ func repeatAB(x *AB, y V) V {
 	}
 }
 
-func repeatAI(x *AI, y V) V {
+func replicateAI(x *AI, y V) V {
 	n := int64(0)
 	for _, xi := range x.Slice {
 		if xi < 0 {
@@ -406,8 +404,6 @@ func weedOut(x, y V) V {
 			return Panicf("f#y : x %v", ix)
 		}
 		return weedOut(ix, y)
-	case *AV:
-		return Panicf("f#y : f[y] non-integer (%s)", x.Type())
 	default:
 		return Panicf("f_y : f[y] non-integer (%s)", x.Type())
 	}
@@ -515,6 +511,7 @@ func weedOutAI(x *AI, y V) V {
 	}
 }
 
+// get implements .x.
 func get(ctx *Context, x V) V {
 	switch xv := x.value.(type) {
 	case S:
