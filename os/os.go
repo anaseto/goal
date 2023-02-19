@@ -63,12 +63,12 @@ func VImport(ctx *goal.Context, args []goal.V) goal.V {
 //
 // print x : outputs x to standard output. It returns a true value on success.
 //
-// w print x : outputs x to w, where w is an io.Writer or a filename (goal.S).
+// h print y : outputs y to w, where w is an io.Writer or a filename (goal.S).
 func VPrint(ctx *goal.Context, args []goal.V) goal.V {
 	switch len(args) {
 	case 1:
 		x := args[0]
-		err := printV(ctx, x, false)
+		err := printV(ctx, x)
 		if err != nil {
 			return goal.Errorf("print x : %v", err)
 		}
@@ -80,17 +80,19 @@ func VPrint(ctx *goal.Context, args []goal.V) goal.V {
 			var err error
 			wout, err = os.Create(string(wv))
 			if err != nil {
-				return goal.Errorf("w print x : %v", err)
+				return goal.Errorf("h print y : %v", err)
 			}
+		case *file:
+			wout = wv.b.Writer
 		case io.Writer:
 			wout = wv
 		default:
-			return goal.NewPanic("w print x : w should be a string or writer")
+			return goal.NewPanic("h print y : h should be a string or writer")
 		}
 		x := args[0]
-		err := fprintV(ctx, wout, x, false)
+		err := fprintV(ctx, wout, x)
 		if err != nil {
-			return goal.Errorf("w print x : %v", err)
+			return goal.Errorf("h print y : %v", err)
 		}
 	default:
 		return goal.NewPanic("print : too many arguments")
@@ -104,7 +106,7 @@ func VSay(ctx *goal.Context, args []goal.V) goal.V {
 	switch len(args) {
 	case 1:
 		x := args[0]
-		err := printV(ctx, x, true)
+		err := sayV(ctx, x)
 		if err != nil {
 			return goal.Errorf("say x : %v", err)
 		}
@@ -116,17 +118,19 @@ func VSay(ctx *goal.Context, args []goal.V) goal.V {
 			var err error
 			wout, err = os.Create(string(wv))
 			if err != nil {
-				return goal.Errorf("w say x : %v", err)
+				return goal.Errorf("h say y : %v", err)
 			}
+		case *file:
+			wout = wv.b.Writer
 		case io.Writer:
 			wout = wv
 		default:
-			return goal.NewPanic("w say x : w should be a string or writer")
+			return goal.NewPanic("h say y : h should be a string or writer")
 		}
 		x := args[0]
-		err := fprintV(ctx, wout, x, true)
+		err := fsayV(ctx, wout, x)
 		if err != nil {
-			return goal.Errorf("w say x : %v", err)
+			return goal.Errorf("h say y : %v", err)
 		}
 	default:
 		return goal.NewPanic("say : too many arguments")
@@ -134,13 +138,9 @@ func VSay(ctx *goal.Context, args []goal.V) goal.V {
 	return goal.NewI(1)
 }
 
-func printV(ctx *goal.Context, x goal.V, newline bool) error {
+func printV(ctx *goal.Context, x goal.V) error {
 	switch xv := x.Value().(type) {
 	case goal.S:
-		if newline {
-			_, err := fmt.Println(string(xv))
-			return err
-		}
 		_, err := fmt.Print(string(xv))
 		return err
 	case *goal.AS:
@@ -148,36 +148,69 @@ func printV(ctx *goal.Context, x goal.V, newline bool) error {
 		for _, s := range xv.Slice {
 			buf.WriteString(s)
 		}
-		if newline {
-			buf.WriteRune('\n')
-		}
 		return buf.Flush()
 	default:
 		buf := bufio.NewWriter(os.Stdout)
 		x.Fprint(ctx, buf)
-		if newline {
-			buf.WriteByte('\n')
-		}
 		return buf.Flush()
 	}
 }
 
-func fprintV(ctx *goal.Context, w io.Writer, x goal.V, newline bool) error {
-	buf := bufio.NewWriter(w)
+func sayV(ctx *goal.Context, x goal.V) error {
 	switch xv := x.Value().(type) {
 	case goal.S:
-		buf.WriteString(string(xv))
+		_, err := fmt.Println(string(xv))
+		return err
 	case *goal.AS:
+		buf := bufio.NewWriter(os.Stdout)
 		for _, s := range xv.Slice {
 			buf.WriteString(s)
 		}
+		buf.WriteByte('\n')
+		return buf.Flush()
 	default:
+		buf := bufio.NewWriter(os.Stdout)
 		x.Fprint(ctx, buf)
+		buf.WriteByte('\n')
+		return buf.Flush()
 	}
-	if newline {
+}
+
+func fprintV(ctx *goal.Context, w io.Writer, x goal.V) error {
+	switch xv := x.Value().(type) {
+	case goal.S:
+		_, err := fmt.Fprint(w, string(xv))
+		return err
+	case *goal.AS:
+		var err error
+		for _, s := range xv.Slice {
+			_, err = fmt.Fprint(w, s)
+		}
+		return err
+	default:
+		buf := bufio.NewWriter(w)
+		x.Fprint(ctx, buf)
+		return buf.Flush()
+	}
+}
+
+func fsayV(ctx *goal.Context, w io.Writer, x goal.V) error {
+	switch xv := x.Value().(type) {
+	case goal.S:
+		_, err := fmt.Fprintln(w, string(xv))
+		return err
+	case *goal.AS:
+		for _, s := range xv.Slice {
+			fmt.Fprint(w, s)
+		}
+		_, err := fmt.Fprint(w, '\n')
+		return err
+	default:
+		buf := bufio.NewWriter(w)
+		x.Fprint(ctx, buf)
 		buf.WriteRune('\n')
+		return buf.Flush()
 	}
-	return buf.Flush()
 }
 
 // VSlurp implements the slurp monad.

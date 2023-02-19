@@ -125,7 +125,7 @@ func VClose(ctx *goal.Context, args []goal.V) goal.V {
 	case io.Closer:
 		err := h.Close()
 		if err != nil {
-			return goal.NewError(goal.NewS("close : " + err.Error()))
+			return goal.Errorf("close : %v", err)
 		}
 		return goal.NewI(1)
 	default:
@@ -167,14 +167,14 @@ func VRead(ctx *goal.Context, args []goal.V) goal.V {
 			sb := strings.Builder{}
 			_, err := io.Copy(&sb, h)
 			if err != nil {
-				return goal.NewError(goal.NewS("read : " + err.Error()))
+				return goal.Errorf("read : %v", err)
 			}
 			return goal.NewS(sb.String())
 		}
 		sb := strings.Builder{}
 		_, err := io.CopyN(&sb, h, n)
 		if err != nil {
-			return goal.NewError(goal.NewS("read : " + err.Error()))
+			return goal.Errorf("read : %v", err)
 		}
 		return goal.NewS(sb.String())
 	default:

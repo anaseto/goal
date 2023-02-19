@@ -53,6 +53,7 @@ s       S       string          "abc"   "d"     "a" "b" "c"
 r               regexp          rx/[a-z]/       rx/\s+/
 d               dictionnary     "a" "b"!1 2
 f               function        +      {x*2}   (1-)    %[;2]
+h               handle          open "/path/to/file"    "w" open "/path/to/file"
 e               error           error "msg"
         A       generic array   ("a" 1;"b" 2;"c" 3)     (+;-;*;"any")
 `
@@ -214,18 +215,18 @@ const helpIO = `
 IO/OS HELP
 close h         close filehandle h
 import s        eval file s+".goal" and import globals with prefix s+"."
-open s          open path s for reading, returning a filehandle
-print x         print "Hello, world!\n"
+open s          open path s for reading, returning a filehandle (h)
+print s         print "Hello, world!\n" (works for non-string values too)
 read h          read from filehandle h until EOF or an error occurs.
-say x           same as print, but appends a newline    say !5
+say s           same as print, but appends a newline    say !5
 shell s         run a command string s as-is through the shell
 slurp s         read file named s       lines:"\n"\slurp["/path/to/file"]
 
 p import s      like import s but with prefix p+"." for globals
 m open s        open path s with mode m in "r" "r+" "w" "w+" "a" "a+"
-h print x       print x to writer or filename     "filename" print "content"
+h print s       print s to writer or filename h     "filename" print "content"
 n read h        read n bytes from reader h or return an error
-h say x         same as print, but appends a newline
+h say s         same as print, but appends a newline
 
 os.ARGS         command-line arguments, starting with script name
 os.ENV          keys!values strings dictionnary representing environment
