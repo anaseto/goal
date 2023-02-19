@@ -1,14 +1,14 @@
 package goal
 
 import (
+	"fmt"
+	"strings"
 	"testing"
-	 "strings"
-	 "fmt"
 )
 
-func FuzzGeneric(f *testing.F) {
+func FuzzEval(f *testing.F) {
 	f.Add("0")
-	f.Fuzz(func (t *testing.T, s string) {
+	f.Fuzz(func(t *testing.T, s string) {
 		defer func() {
 			if r := recover(); r != nil {
 				s := fmt.Sprintf("%v", r)
