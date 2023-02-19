@@ -191,84 +191,88 @@ func replicate(x, y V) V {
 	}
 }
 
-func replicateI(n int64, x V) V {
-	if x.IsI() {
-		if isBI(x.I()) {
+func replicateI(n int64, y V) V {
+	if y.IsI() {
+		if isBI(y.I()) {
 			r := make([]bool, n)
 			for i := range r {
-				r[i] = x.I() == 1
+				r[i] = y.I() == 1
 			}
 			return NewAB(r)
 		}
 		r := make([]int64, n)
 		for i := range r {
-			r[i] = x.I()
+			r[i] = y.I()
 		}
 		return NewAI(r)
 	}
-	if x.IsF() {
+	if y.IsF() {
 		r := make([]float64, n)
 		for i := range r {
-			r[i] = float64(x.F())
+			r[i] = float64(y.F())
 		}
 		return NewAF(r)
 	}
-	switch xv := x.value.(type) {
+	switch yv := y.value.(type) {
 	case S:
 		r := make([]string, n)
 		for i := range r {
-			r[i] = string(xv)
+			r[i] = string(yv)
 		}
 		return NewAS(r)
 	case *AB:
-		r := make([]bool, n*int64(xv.Len()))
-		for i, xi := range xv.Slice {
+		r := make([]bool, n*int64(yv.Len()))
+		for i, yi := range yv.Slice {
 			in := int64(i) * n
 			for j := int64(0); j < n; j++ {
-				r[in+j] = xi
+				r[in+j] = yi
 			}
 		}
-		return NewABWithRC(r, reuseRCp(xv.rc))
+		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AI:
-		r := make([]int64, n*int64(xv.Len()))
-		for i, xi := range xv.Slice {
+		r := make([]int64, n*int64(yv.Len()))
+		for i, yi := range yv.Slice {
 			in := int64(i) * n
 			for j := int64(0); j < n; j++ {
-				r[in+j] = xi
+				r[in+j] = yi
 			}
 		}
-		return NewAIWithRC(r, reuseRCp(xv.rc))
+		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AF:
-		r := make([]float64, n*int64(xv.Len()))
-		for i, xi := range xv.Slice {
+		r := make([]float64, n*int64(yv.Len()))
+		for i, yi := range yv.Slice {
 			in := int64(i) * n
 			for j := int64(0); j < n; j++ {
-				r[in+j] = xi
+				r[in+j] = yi
 			}
 		}
-		return NewAFWithRC(r, reuseRCp(xv.rc))
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AS:
-		r := make([]string, n*int64(xv.Len()))
-		for i, xi := range xv.Slice {
+		r := make([]string, n*int64(yv.Len()))
+		for i, yi := range yv.Slice {
 			in := int64(i) * n
 			for j := int64(0); j < n; j++ {
-				r[in+j] = xi
+				r[in+j] = yi
 			}
 		}
-		return NewASWithRC(r, reuseRCp(xv.rc))
+		return NewASWithRC(r, reuseRCp(yv.rc))
 	case *AV:
-		r := make([]V, n*int64(xv.Len()))
-		for i, xi := range xv.Slice {
+		r := make([]V, n*int64(yv.Len()))
+		for i, yi := range yv.Slice {
 			in := int64(i) * n
 			for j := int64(0); j < n; j++ {
-				r[in+j] = xi
+				r[in+j] = yi
 			}
 		}
-		return NewAVWithRC(r, reuseRCp(xv.rc))
+		return NewAVWithRC(r, reuseRCp(yv.rc))
+	case *Dict:
+		keys := replicateI(n, NewV(yv.keys))
+		values := replicateI(n, NewV(yv.values))
+		return NewDict(keys, values)
 	default:
 		r := make([]V, n)
 		for i := range r {
-			r[i] = x
+			r[i] = y
 		}
 		return NewAV(r)
 	}
@@ -320,6 +324,16 @@ func replicateAB(x *AB, y V) V {
 			}
 		}
 		return NewV(canonicalAV(&AV{Slice: r, rc: yv.rc}))
+	case *Dict:
+		keys := replicateAB(x, NewV(yv.keys))
+		if keys.IsPanic() {
+			return keys
+		}
+		values := replicateAB(x, NewV(yv.values))
+		if values.IsPanic() {
+			return values
+		}
+		return NewDict(keys, values)
 	default:
 		return Panicf("f#y : y not an array (%s)", y.Type())
 	}
@@ -374,6 +388,16 @@ func replicateAI(x *AI, y V) V {
 			}
 		}
 		return NewV(canonicalAV(&AV{Slice: r, rc: yv.rc}))
+	case *Dict:
+		keys := replicateAI(x, NewV(yv.keys))
+		if keys.IsPanic() {
+			return keys
+		}
+		values := replicateAI(x, NewV(yv.values))
+		if values.IsPanic() {
+			return values
+		}
+		return NewDict(keys, values)
 	default:
 		return Panicf("f#y : y not an array (%s)", y.Type())
 	}
@@ -455,6 +479,16 @@ func weedOutAB(x *AB, y V) V {
 			}
 		}
 		return NewV(canonicalAV(&AV{Slice: r, rc: yv.rc}))
+	case *Dict:
+		keys := weedOutAB(x, NewV(yv.keys))
+		if keys.IsPanic() {
+			return keys
+		}
+		values := weedOutAB(x, NewV(yv.values))
+		if values.IsPanic() {
+			return values
+		}
+		return NewDict(keys, values)
 	default:
 		return Panicf("f_y : y not an array (%s)", y.Type())
 	}
@@ -506,6 +540,16 @@ func weedOutAI(x *AI, y V) V {
 			}
 		}
 		return NewV(canonicalAV(&AV{Slice: r, rc: yv.rc}))
+	case *Dict:
+		keys := weedOutAI(x, NewV(yv.keys))
+		if keys.IsPanic() {
+			return keys
+		}
+		values := weedOutAI(x, NewV(yv.values))
+		if values.IsPanic() {
+			return values
+		}
+		return NewDict(keys, values)
 	default:
 		return Panicf("f_y : y not an array (%s)", y.Type())
 	}
