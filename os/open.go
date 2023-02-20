@@ -30,7 +30,7 @@ func (f *file) Matches(y goal.Value) bool {
 }
 
 func (f *file) Fprint(ctx *goal.Context, w goal.ValueWriter) (n int, err error) {
-	m, err := fmt.Fprintf(w, "open[\"", goal.S(f.mode), "\";")
+	m, err := fmt.Fprint(w, "open[\"", f.mode, "\";")
 	n += m
 	if err != nil {
 		return
@@ -96,7 +96,7 @@ func (cmd *command) Matches(y goal.Value) bool {
 }
 
 func (cmd *command) Fprint(ctx *goal.Context, w goal.ValueWriter) (n int, err error) {
-	m, err := fmt.Fprintf(w, "open[\"", goal.S(cmd.mode), "\";")
+	m, err := fmt.Fprint(w, "open[\"", cmd.mode, "\";")
 	n += m
 	if err != nil {
 		return
