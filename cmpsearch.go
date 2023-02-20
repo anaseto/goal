@@ -41,11 +41,7 @@ const bruteForceNumeric = 128
 func classify(ctx *Context, x V) V {
 	switch xv := x.value.(type) {
 	case *Dict:
-		r := classify(ctx, NewV(xv.values))
-		r.InitRC()
-		return NewV(&Dict{
-			keys:   xv.keys,
-			values: r.value.(array)})
+		return newDictValues(xv.keys, classify(ctx, NewV(xv.values)))
 	case array:
 		if xv.Len() == 0 {
 			return x
@@ -280,11 +276,7 @@ func uniqSlice[T comparable](xs []T, bruteForceThreshold int) []T {
 func markFirsts(ctx *Context, x V) V {
 	switch xv := x.value.(type) {
 	case *Dict:
-		r := markFirsts(ctx, NewV(xv.values))
-		r.InitRC()
-		return NewV(&Dict{
-			keys:   xv.keys,
-			values: r.value.(array)})
+		return newDictValues(xv.keys, markFirsts(ctx, NewV(xv.values)))
 	case array:
 		if xv.Len() == 0 {
 			return x
@@ -672,11 +664,7 @@ func memberOfArray(x, y array) V {
 func occurrenceCount(ctx *Context, x V) V {
 	switch xv := x.value.(type) {
 	case *Dict:
-		r := occurrenceCount(ctx, NewV(xv.values))
-		r.InitRC()
-		return NewV(&Dict{
-			keys:   xv.keys,
-			values: r.value.(array)})
+		return newDictValues(xv.keys, occurrenceCount(ctx, NewV(xv.values)))
 	case array:
 		if xv.Len() == 0 {
 			return x
