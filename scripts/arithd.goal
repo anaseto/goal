@@ -418,4 +418,4 @@ doXdAV:{
 h say package
 {genOp . x}'ops
 'close h
-'shell `gofmt -s -w ../arithd.go`
+'run "gofmt" "-s" "-w" "../arithd.go"

@@ -80,4 +80,4 @@ funcs:+/({dotpl . x}'(
   "Tan" "tan"
 ))
 '"../mathm.go" say package+mathm+funcs
-'shell `gofmt -s -w ../mathm.go`
+'run "gofmt" "-s" "-w" "../mathm.go"

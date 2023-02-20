@@ -1,5 +1,5 @@
 Features:
-- more capable io (pipes, better commands)
+- maybe more capable io (like bidirectional pipes)
 - maybe some kind of templating/interpolation
 - maybe some kind of printf
 - maybe add splice
@@ -11,7 +11,7 @@ Tests:
 - add more immutability tests to catch any possible regressions after the
   refcount overhaul, because refcounting is hard.
 - add more tests for dicts
-- search for locations improvements in error messages
+- search for location improvements in error messages
 
 Documentation:
 - write reference docs, or at least some some introductory guide (in addition

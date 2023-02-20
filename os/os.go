@@ -72,32 +72,12 @@ func VPrint(ctx *goal.Context, args []goal.V) goal.V {
 		if err != nil {
 			return goal.Errorf("print x : %v", err)
 		}
+		return goal.NewI(1)
 	case 2:
-		w := args[1]
-		var wout io.Writer
-		switch wv := w.Value().(type) {
-		case goal.S:
-			var err error
-			wout, err = os.Create(string(wv))
-			if err != nil {
-				return goal.Errorf("h print y : %v", err)
-			}
-		case *file:
-			wout = wv.b.Writer
-		case io.Writer:
-			wout = wv
-		default:
-			return goal.NewPanic("h print y : h should be a string or writer")
-		}
-		x := args[0]
-		err := fprintV(ctx, wout, x)
-		if err != nil {
-			return goal.Errorf("h print y : %v", err)
-		}
+		return fprintFunc(ctx, args[1], args[0], fprintV)
 	default:
 		return goal.NewPanic("print : too many arguments")
 	}
-	return goal.NewI(1)
 }
 
 // VSay implements the say dyad. It is the same as print, but appends a newline
@@ -110,30 +90,54 @@ func VSay(ctx *goal.Context, args []goal.V) goal.V {
 		if err != nil {
 			return goal.Errorf("say x : %v", err)
 		}
+		return goal.NewI(1)
 	case 2:
-		w := args[1]
-		var wout io.Writer
-		switch wv := w.Value().(type) {
-		case goal.S:
-			var err error
-			wout, err = os.Create(string(wv))
-			if err != nil {
-				return goal.Errorf("h say y : %v", err)
-			}
-		case *file:
-			wout = wv.b.Writer
-		case io.Writer:
-			wout = wv
-		default:
-			return goal.NewPanic("h say y : h should be a string or writer")
-		}
-		x := args[0]
-		err := fsayV(ctx, wout, x)
-		if err != nil {
-			return goal.Errorf("h say y : %v", err)
-		}
+		return fprintFunc(ctx, args[1], args[0], fsayV)
 	default:
 		return goal.NewPanic("say : too many arguments")
+	}
+}
+
+func fprintFunc(ctx *goal.Context, w, x goal.V, f func(*goal.Context, io.Writer, goal.V) error) goal.V {
+	switch wv := w.Value().(type) {
+	case goal.S:
+		file, err := os.Create(string(wv))
+		if err != nil {
+			return goal.Errorf("%v", err)
+		}
+		defer func() {
+			file.Close()
+		}()
+		b := bufio.NewWriter(file)
+		err = f(ctx, b, x)
+		if err != nil {
+			return goal.Errorf("%v", err)
+		}
+		err = b.Flush()
+		if err != nil {
+			return goal.Errorf("%v", err)
+		}
+	case *file:
+		err := f(ctx, wv.b.Writer, x)
+		if err != nil {
+			return goal.Errorf("%v", err)
+		}
+	case *command:
+		wout := wv.b.Writer
+		if wout == nil {
+			return goal.NewError(goal.NewS("read-only pipe"))
+		}
+		err := f(ctx, wout, x)
+		if err != nil {
+			return goal.Errorf("%v", err)
+		}
+	case io.Writer:
+		err := f(ctx, wv, x)
+		if err != nil {
+			return goal.Errorf("%v", err)
+		}
+	default:
+		return goal.NewPanic("h should be a string or writer")
 	}
 	return goal.NewI(1)
 }
@@ -225,22 +229,24 @@ func VSlurp(ctx *goal.Context, args []goal.V) goal.V {
 			if err != nil {
 				return goal.NewError(goal.NewS(err.Error()))
 			}
+			// TODO: avoid allocation by using Copy and
+			// strings.Builder, or maybe unsafe.
 			return goal.NewS(string(bytes))
 		default:
-			return goal.NewPanic("slurp: non-string filename")
+			return goal.NewPanic("slurp : non-string filename")
 		}
 	default:
-		return goal.NewPanic("slurp: too many arguments")
+		return goal.NewPanic("slurp : too many arguments")
 	}
 }
 
 // VShell implements the shell monad.
 //
 // shell cmd : sends cmd to the shell as-is. It returns the standard output of
-// the command, or an error.
+// the command, or an error. Standard error is inherited from the parent.
 func VShell(ctx *goal.Context, args []goal.V) goal.V {
 	if len(args) == 0 {
-		return goal.NewPanic("shell: missing command string")
+		return goal.NewPanic("shell : missing command string")
 	}
 	if len(args) > 1 {
 		return goal.Panicf("shell[cmd] : too many arguments (%d)", len(args))
@@ -259,4 +265,40 @@ func VShell(ctx *goal.Context, args []goal.V) goal.V {
 		return goal.NewError(goal.NewS(err.Error()))
 	}
 	return goal.NewS(string(bytes))
+}
+
+// VRun implements the run monad.
+//
+// run s : run command s, with arguments if s is an array.
+//
+// Standard input, output, and error are inherited from the parent.
+// It returns a true value on success, and an error otherwise.
+func VRun(ctx *goal.Context, args []goal.V) goal.V {
+	if len(args) == 0 {
+		return goal.NewPanic("run : missing command string")
+	}
+	if len(args) > 1 {
+		return goal.Panicf("run : too many arguments (%d)", len(args))
+	}
+	var cmds []string
+	switch arg := args[len(args)-1].Value().(type) {
+	case goal.S:
+		cmds = []string{string(arg)}
+	case *goal.AS:
+		cmds = arg.Slice
+	default:
+		return goal.Panicf("run s : bad type (%s)", arg.Type())
+	}
+	if len(cmds) == 0 {
+		return goal.NewPanic("run s : empty command")
+	}
+	cmd := exec.Command(cmds[0], cmds[1:]...)
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	cmd.Stdin = os.Stdin
+	err := cmd.Run()
+	if err != nil {
+		return goal.NewError(goal.NewS(err.Error()))
+	}
+	return goal.NewI(1)
 }

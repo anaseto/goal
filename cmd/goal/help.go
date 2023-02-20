@@ -213,24 +213,27 @@ I\x    decode    24 60 60\3723 -> 1 2 3  2\6 -> 1 1 0
 
 const helpIO = `
 IO/OS HELP
-close h         flush any buffered data, then close filehandle h
-import s        eval file s+".goal" and import globals with prefix s+"."
-open s          open path s for reading, returning a filehandle (h)
-print s         print "Hello, world!\n" (works for non-string values too)
-read h          read from filehandle h until EOF or an error occurs.
-say s           same as print, but appends a newline    say !5
-shell s         run a command string s as-is through the shell
-slurp s         read file named s       lines:"\n"\slurp["/path/to/file"]
+close h      flush any buffered data, then close filehandle h
+import s     eval file s+".goal" and import globals with prefix s+"."
+open s       open path s for reading, returning a filehandle (h)
+print s      print "Hello, world!\n" (works for non-string values too)
+read h       read from filehandle h until EOF or an error occurs.
+run s        run command            run "pwd"        run "ls" "-l"
+             inherits stdin, stdout, and stderr, returns true on success
+say s        same as print, but appends a newline    say !5
+shell s      run command as-is through the shell     shell "ls -l"
+             inherits stderr, returns its output
+slurp s      read file named s       lines:"\n"\slurp["/path/to/file"]
 
-p import s      like import s but with prefix p+"." for globals
-m open s        open path s with mode m in "r" "r+" "w" "w+" "a" "a+"
-                or pipe from (mode "-|") or to (mode "|-") command (s or S)
-h print s       print s to writer or filename h     "filename" print "content"
-n read h        read n bytes from reader h or return an error
-h say s         same as print, but appends a newline
+p import s   like import s but with prefix p+"." for globals
+m open s     open path s with mode m in "r" "r+" "w" "w+" "a" "a+"
+             or pipe from (mode "-|") or to (mode "|-") command (s or S)
+h print s    print s to writer or filename h     "filename" print "content"
+n read h     read n bytes from reader h or return an error
+h say s      same as print, but appends a newline
 
-os.ARGS         command-line arguments, starting with script name
-os.ENV          keys!values strings dictionnary representing environment
+os.ARGS      command-line arguments, starting with script name
+os.ENV       keys!values strings dictionnary representing environment
 `
 
 const helpTime = `
