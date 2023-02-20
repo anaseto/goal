@@ -213,7 +213,7 @@ I\x    decode    24 60 60\3723 -> 1 2 3  2\6 -> 1 1 0
 
 const helpIO = `
 IO/OS HELP
-close h         close filehandle h
+close h         flush any buffered data, then close filehandle h
 import s        eval file s+".goal" and import globals with prefix s+"."
 open s          open path s for reading, returning a filehandle (h)
 print s         print "Hello, world!\n" (works for non-string values too)
@@ -224,6 +224,7 @@ slurp s         read file named s       lines:"\n"\slurp["/path/to/file"]
 
 p import s      like import s but with prefix p+"." for globals
 m open s        open path s with mode m in "r" "r+" "w" "w+" "a" "a+"
+                or pipe from (mode "-|") or to (mode "|-") command (s or S)
 h print s       print s to writer or filename h     "filename" print "content"
 n read h        read n bytes from reader h or return an error
 h say s         same as print, but appends a newline

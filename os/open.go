@@ -2,11 +2,14 @@ package os
 
 import (
 	"bufio"
-	"codeberg.org/anaseto/goal"
+	"errors"
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"strings"
+
+	"codeberg.org/anaseto/goal"
 )
 
 type file struct {
@@ -19,13 +22,30 @@ func (f *file) Matches(y goal.Value) bool {
 	switch yv := y.(type) {
 	case *file:
 		return f.f.Fd() == yv.f.Fd()
+	case *command:
+		return false
 	default:
 		return false
 	}
 }
 
 func (f *file) Fprint(ctx *goal.Context, w goal.ValueWriter) (n int, err error) {
-	return fmt.Fprintf(w, "open[", goal.S(f.mode), ",", goal.S(f.f.Name()), "]")
+	m, err := fmt.Fprintf(w, "open[\"", goal.S(f.mode), "\";")
+	n += m
+	if err != nil {
+		return
+	}
+	m, err = goal.S(f.f.Name()).Fprint(ctx, w)
+	n += m
+	if err != nil {
+		return
+	}
+	err = w.WriteByte(']')
+	if err != nil {
+		return
+	}
+	n++
+	return
 }
 
 func (f *file) Type() string {
@@ -50,10 +70,90 @@ func (f *file) Write(p []byte) (n int, err error) {
 }
 
 func (f *file) Close() error {
-	if f.b.Writer.Buffered() > 0 {
-		f.b.Writer.Flush()
-	}
+	f.b.Writer.Flush()
 	return f.f.Close()
+}
+
+type command struct {
+	c      *exec.Cmd
+	b      *bufio.ReadWriter
+	mode   string // -| or |-
+	stdin  io.WriteCloser
+	stdout io.ReadCloser
+}
+
+func cmdToAS(cmd *command) goal.V {
+	return goal.NewAS(cmd.c.Args)
+}
+
+func (cmd *command) Matches(y goal.Value) bool {
+	switch yv := y.(type) {
+	case *command:
+		return cmd.mode == yv.mode && goal.Match(cmdToAS(cmd), cmdToAS(yv))
+	default:
+		return false
+	}
+}
+
+func (cmd *command) Fprint(ctx *goal.Context, w goal.ValueWriter) (n int, err error) {
+	m, err := fmt.Fprintf(w, "open[\"", goal.S(cmd.mode), "\";")
+	n += m
+	if err != nil {
+		return
+	}
+	m, err = cmdToAS(cmd).Fprint(ctx, w)
+	n += m
+	if err != nil {
+		return
+	}
+	err = w.WriteByte(']')
+	if err != nil {
+		return
+	}
+	n++
+	return
+}
+
+func (cmd *command) Type() string {
+	return "h"
+}
+
+func (cmd *command) Less(y goal.Value) bool {
+	switch yv := y.(type) {
+	case *command:
+		return cmd.mode < yv.mode || cmd.mode == yv.mode && cmdToAS(cmd).Less(cmdToAS(yv))
+	case *file:
+		return true
+	default:
+		return cmd.Type() < y.Type()
+	}
+}
+
+func (cmd *command) Read(p []byte) (n int, err error) {
+	if cmd.b.Reader == nil {
+		return 0, errors.New("write-only")
+	}
+	return cmd.b.Read(p)
+}
+
+func (cmd *command) Write(p []byte) (n int, err error) {
+	if cmd.b.Writer == nil {
+		return 0, errors.New("read-only")
+	}
+	return cmd.b.Write(p)
+}
+
+func (cmd *command) Close() error {
+	if cmd.b.Writer != nil {
+		cmd.b.Writer.Flush()
+	}
+	if cmd.stdin != nil {
+		cmd.stdin.Close()
+	}
+	if cmd.stdout != nil {
+		cmd.stdout.Close()
+	}
+	return cmd.c.Wait()
 }
 
 // VOpen implements the open dyad.
@@ -62,7 +162,7 @@ func (f *file) Close() error {
 //
 // mode open "path" : opens file "path" using the given fopen(3) mode
 //
-// mode can be: "r", "r+", "w", "w+", "a", "a+"
+// mode can be: "r", "r+", "w", "w+", "a", "a+", "|-", "-|"
 //
 // It returns a filehandle value of type "h" on success, and an error
 // otherwise.
@@ -77,14 +177,6 @@ func VOpen(ctx *goal.Context, args []goal.V) goal.V {
 		if !ok {
 			return goal.Panicf("mode open path : mode not a string (%s)", args[1].Type())
 		}
-	}
-	path, ok := args[0].Value().(goal.S)
-	if !ok {
-		pfx := ""
-		if len(args) == 2 {
-			pfx = "mode "
-		}
-		return goal.Panicf(pfx+"open path : path not a string (%s)", args[0].Type())
 	}
 	m := string(mode)
 	var flag int
@@ -101,8 +193,18 @@ func VOpen(ctx *goal.Context, args []goal.V) goal.V {
 		flag = os.O_WRONLY | os.O_CREATE | os.O_APPEND
 	case "a+":
 		flag = os.O_RDWR | os.O_CREATE | os.O_APPEND
+	case "-|", "|-":
+		return openPipe(m, args[0])
 	default:
 		return goal.Panicf("mode open path : invalid mode (%s)", m)
+	}
+	path, ok := args[0].Value().(goal.S)
+	if !ok {
+		pfx := ""
+		if len(args) == 2 {
+			pfx = "mode "
+		}
+		return goal.Panicf(pfx+"open path : path not a string (%s)", args[0].Type())
 	}
 	f, err := os.OpenFile(string(path), flag, 0666)
 	if err != nil {
@@ -110,6 +212,46 @@ func VOpen(ctx *goal.Context, args []goal.V) goal.V {
 	}
 	b := bufio.NewReadWriter(bufio.NewReader(f), bufio.NewWriter(f))
 	return goal.NewV(&file{f: f, b: b, mode: m})
+}
+
+func openPipe(m string, c goal.V) goal.V {
+	var cmd *exec.Cmd
+	switch cv := c.Value().(type) {
+	case goal.S:
+		cmd = exec.Command(string(cv))
+	case *goal.AS:
+		if cv.Len() == 0 {
+			return goal.NewPanic("mode open cmd : empty cmd")
+		}
+		cmd = exec.Command(cv.Slice[0], cv.Slice[1:]...)
+	default:
+		return goal.Panicf("mode open cmd : non-string cmd (%s)", c.Type())
+	}
+	r := &command{c: cmd, mode: m}
+	switch m {
+	case "|-":
+		wc, err := cmd.StdinPipe()
+		if err != nil {
+			return goal.Errorf("\"|-\" open cmd : %v", err)
+		}
+		cmd.Stdout = os.Stdout
+		r.stdin = wc
+		r.b = bufio.NewReadWriter(nil, bufio.NewWriter(wc))
+	case "-|":
+		rc, err := cmd.StdoutPipe()
+		if err != nil {
+			return goal.Errorf("\"-|\" open cmd : %v", err)
+		}
+		cmd.Stdin = os.Stdin
+		r.stdout = rc
+		r.b = bufio.NewReadWriter(bufio.NewReader(rc), nil)
+	}
+	cmd.Stderr = os.Stderr
+	err := cmd.Start()
+	if err != nil {
+		return goal.Errorf("open : %v", err)
+	}
+	return goal.NewV(r)
 }
 
 // VClose implements the close monad.
