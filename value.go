@@ -162,6 +162,14 @@ func (x V) IsPanic() bool {
 	return x.kind == valPanic
 }
 
+// Panic returns the panic string. It assumes IsPanic is true.
+func (x V) Panic() string {
+	if x.IsPanic() {
+		return string(x.value.(panicV))
+	}
+	return ""
+}
+
 // IsError returns true if the value is a recoverable error.
 func (x V) IsError() bool {
 	if x.kind != valBoxed {

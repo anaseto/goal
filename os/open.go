@@ -18,6 +18,20 @@ type file struct {
 	mode string
 }
 
+// Stdout represents the standard output filehandle.
+var Stdout = newFile(os.Stdout)
+
+// Stderr represents the standard error filehandle.
+var Stderr = newFile(os.Stderr)
+
+// Stdin represents the standard input filehandle.
+var Stdin = newFile(os.Stdin)
+
+func newFile(f *os.File) goal.V {
+	b := bufio.NewReadWriter(bufio.NewReader(f), bufio.NewWriter(f))
+	return goal.NewV(&file{f: f, b: b, mode: ""})
+}
+
 func (f *file) Matches(y goal.Value) bool {
 	switch yv := y.(type) {
 	case *file:
@@ -158,11 +172,11 @@ func (cmd *command) Close() error {
 
 // VOpen implements the open dyad.
 //
-// open "path" : opens file "path" for reading
+// open "path" : opens file "path" for reading.
 //
-// mode open "path" : opens file "path" using the given fopen(3) mode
+// mode open "path" : opens file "path" using the given fopen(3) mode.
 //
-// mode can be: "r", "r+", "w", "w+", "a", "a+", "|-", "-|"
+// mode can be: "r", "r+", "w", "w+", "a", "a+", "|-", "-|".
 //
 // It returns a filehandle value of type "h" on success, and an error
 // otherwise.
@@ -208,7 +222,7 @@ func VOpen(ctx *goal.Context, args []goal.V) goal.V {
 	}
 	f, err := os.OpenFile(string(path), flag, 0666)
 	if err != nil {
-		return goal.Errorf("open : %v", err)
+		return goal.Errorf("%v", err)
 	}
 	b := bufio.NewReadWriter(bufio.NewReader(f), bufio.NewWriter(f))
 	return goal.NewV(&file{f: f, b: b, mode: m})
@@ -232,7 +246,7 @@ func openPipe(m string, c goal.V) goal.V {
 	case "|-":
 		wc, err := cmd.StdinPipe()
 		if err != nil {
-			return goal.Errorf("\"|-\" open cmd : %v", err)
+			return goal.Errorf("%v", err)
 		}
 		cmd.Stdout = os.Stdout
 		r.stdin = wc
@@ -240,7 +254,7 @@ func openPipe(m string, c goal.V) goal.V {
 	case "-|":
 		rc, err := cmd.StdoutPipe()
 		if err != nil {
-			return goal.Errorf("\"-|\" open cmd : %v", err)
+			return goal.Errorf("%v", err)
 		}
 		cmd.Stdin = os.Stdin
 		r.stdout = rc
@@ -249,14 +263,14 @@ func openPipe(m string, c goal.V) goal.V {
 	cmd.Stderr = os.Stderr
 	err := cmd.Start()
 	if err != nil {
-		return goal.Errorf("open : %v", err)
+		return goal.Errorf("%v", err)
 	}
 	return goal.NewV(r)
 }
 
 // VClose implements the close monad.
 //
-// close h : closes a filehandle
+// close h : closes a filehandle.
 //
 // It returns a true value on success, and an error otherwise.
 func VClose(ctx *goal.Context, args []goal.V) goal.V {
@@ -267,7 +281,7 @@ func VClose(ctx *goal.Context, args []goal.V) goal.V {
 	case io.Closer:
 		err := h.Close()
 		if err != nil {
-			return goal.Errorf("close : %v", err)
+			return goal.Errorf("%v", err)
 		}
 		return goal.NewI(1)
 	default:
@@ -279,10 +293,15 @@ func isI(x float64) bool {
 	return x == float64(int64(x))
 }
 
-// VRead implements the read monad.
+// VRead implements the read dyad.
 //
 // read h : reads from filehandle h until EOF or an error occurs.
-// n read h : reads n bytes from filehandle h until EOF or an error occurs.
+//
+// s read h : reads from filehandle h until delimiter s or EOF, or an error
+// occurs.
+//
+// n read h : reads n bytes from filehandle h until EOF (returning possibly
+// less than n bytes) or an error occurs.
 //
 // It returns the read content as a string on success, and an error otherwise.
 func VRead(ctx *goal.Context, args []goal.V) goal.V {
@@ -300,7 +319,11 @@ func VRead(ctx *goal.Context, args []goal.V) goal.V {
 			}
 			n = int64(x.F())
 		} else {
-			return goal.Panicf("n read h : n not a integer (%s)", x.Type())
+			s, ok := x.Value().(goal.S)
+			if ok {
+				return readString(args[0], string(s))
+			}
+			return goal.Panicf("x read h : x not a integer nor string (%s)", x.Type())
 		}
 	}
 	switch h := args[0].Value().(type) {
@@ -309,17 +332,50 @@ func VRead(ctx *goal.Context, args []goal.V) goal.V {
 			sb := strings.Builder{}
 			_, err := io.Copy(&sb, h)
 			if err != nil {
-				return goal.Errorf("read : %v", err)
+				return goal.Errorf("%v", err)
 			}
 			return goal.NewS(sb.String())
 		}
 		sb := strings.Builder{}
 		_, err := io.CopyN(&sb, h, n)
-		if err != nil {
-			return goal.Errorf("read : %v", err)
+		s := sb.String()
+		if err != nil && (err != io.EOF || s == "") {
+			return goal.Errorf("%v", err)
 		}
-		return goal.NewS(sb.String())
+		return goal.NewS(s)
 	default:
-		return goal.Panicf("read h : h not a handle (%s)", args[0].Type())
+		return goal.Panicf("read h : h not a reader (%s)", args[0].Type())
+	}
+}
+
+func readString(h goal.V, delim string) goal.V {
+	if len(delim) != 1 {
+		return goal.Panicf("s read h : s not a 1-byte string (got %d bytes)", len(delim))
+	}
+	switch hv := h.Value().(type) {
+	case *file:
+		s, err := hv.b.Reader.ReadString(delim[0])
+		if err != nil && (err != io.EOF || s == "") {
+			return goal.Errorf("%v", err)
+		}
+		return goal.NewS(s)
+	case *command:
+		if hv.b.Reader == nil {
+			return goal.NewPanic("write-only handle")
+		}
+		s, err := hv.b.Reader.ReadString(delim[0])
+		if err != nil && (err != io.EOF || s == "") {
+			return goal.Errorf("%v", err)
+		}
+		return goal.NewS(s)
+	case io.Reader:
+		b := bufio.NewReader(hv)
+		s, err := b.ReadString(delim[0])
+		if err != nil && (err != io.EOF || s == "") {
+			return goal.Errorf("%v", err)
+		}
+		return goal.NewS(s)
+	default:
+		return goal.Panicf("s read h : h not a reader (%s)", h.Type())
 	}
 }

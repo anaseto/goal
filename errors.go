@@ -99,11 +99,11 @@ func getPosLine(s string, pos int) (string, int, int) {
 // newExecError returns an execution error from a panicV value. It assumes
 // isPanic(x) is true and the Value type is panicV.
 func newExecError(x V) error {
-	return errors.New(string(x.value.(panicV)))
+	return errors.New(x.Panic())
 }
 
 func ppanic(pfx string, x V) V {
-	return panics(pfx + string(x.value.(panicV)))
+	return panics(pfx + x.Panic())
 }
 
 func panics(s string) V {
@@ -139,8 +139,4 @@ func panicDomain(op, s string) V {
 
 func panicRank(op string) V {
 	return panics(op + " got too many arguments")
-}
-
-func panic2error(v V) error {
-	return errors.New(string(v.value.(panicV)))
 }

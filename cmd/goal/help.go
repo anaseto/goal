@@ -229,9 +229,13 @@ p import s   like import s but with prefix p+"." for globals
 m open s     open path s with mode m in "r" "r+" "w" "w+" "a" "a+"
              or pipe from (mode "-|") or to (mode "|-") command (s or S)
 h print s    print s to writer or filename h     "filename" print "content"
-n read h     read n bytes from reader h or return an error
+n read h     read n bytes from reader h or until EOF, or an error occurs
+s read h     read from reader h until 1-byte s, EOF, or an error occurs
 h say s      same as print, but appends a newline
 
+os.STDIN     standard input filehandle
+os.STDOUT    standard output filehandle
+os.STDERR    standard error filehandle
 os.ARGS      command-line arguments, starting with script name
 os.ENV       keys!values strings dictionnary representing environment
 `

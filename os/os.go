@@ -59,6 +59,10 @@ func VImport(ctx *goal.Context, args []goal.V) goal.V {
 	return r
 }
 
+func ppanic(pfx string, x goal.V) goal.V {
+	return goal.NewPanic(pfx + x.Panic())
+}
+
 // VPrint implements the print dyad.
 //
 // print x : outputs x to standard output. It returns a true value on success.
@@ -74,7 +78,11 @@ func VPrint(ctx *goal.Context, args []goal.V) goal.V {
 		}
 		return goal.NewI(1)
 	case 2:
-		return fprintFunc(ctx, args[1], args[0], fprintV)
+		r := fprintFunc(ctx, args[1], args[0], fprintV)
+		if r.IsPanic() {
+			return ppanic("h print x : ", r)
+		}
+		return r
 	default:
 		return goal.NewPanic("print : too many arguments")
 	}
@@ -92,7 +100,11 @@ func VSay(ctx *goal.Context, args []goal.V) goal.V {
 		}
 		return goal.NewI(1)
 	case 2:
-		return fprintFunc(ctx, args[1], args[0], fsayV)
+		r := fprintFunc(ctx, args[1], args[0], fsayV)
+		if r.IsPanic() {
+			return ppanic("h print x : ", r)
+		}
+		return r
 	default:
 		return goal.NewPanic("say : too many arguments")
 	}
@@ -125,7 +137,7 @@ func fprintFunc(ctx *goal.Context, w, x goal.V, f func(*goal.Context, io.Writer,
 	case *command:
 		wout := wv.b.Writer
 		if wout == nil {
-			return goal.NewError(goal.NewS("read-only pipe"))
+			return goal.NewPanic("read-only pipe")
 		}
 		err := f(ctx, wout, x)
 		if err != nil {
