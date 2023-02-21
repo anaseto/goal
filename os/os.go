@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path"
 	"strings"
+	"unsafe"
 )
 
 // VImport implements the import dyad.
@@ -235,9 +236,8 @@ func VSlurp(ctx *goal.Context, args []goal.V) goal.V {
 			if err != nil {
 				return goal.NewError(goal.NewS(err.Error()))
 			}
-			// TODO: avoid allocation by using Copy and
-			// strings.Builder, or maybe unsafe.
-			return goal.NewS(string(bytes))
+			s := *(*string)(unsafe.Pointer(&bytes))
+			return goal.NewS(s)
 		default:
 			return goal.NewPanic("slurp : non-string filename")
 		}
