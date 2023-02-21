@@ -47,10 +47,11 @@ type Context struct {
 	lambda    int // currently executed lambda (if any)
 
 	// values
-	globals        []V
-	constants      []V
-	variadics      []VariadicFun
-	variadicsNames []string
+	globals        []V            // global variables
+	constants      []V            // constants
+	sconstants     map[string]int // string constants index (avoiding dups)
+	variadics      []VariadicFun  // variadic functions
+	variadicsNames []string       // variadic function names
 
 	// symbol handling
 	gNames       []string       // ID: name
@@ -84,6 +85,7 @@ func NewContext() *Context {
 	ctx.sources = make(map[string]string, 4)
 	var n int = 2
 	ctx.constants = []V{constAV: NewAVWithRC(nil, &n)}
+	ctx.sconstants = map[string]int{}
 	ctx.initVariadics()
 	return ctx
 }
@@ -348,6 +350,7 @@ func (ctx *Context) derive() *Context {
 	nctx.stack = make([]V, 0, 32)
 
 	nctx.constants = ctx.constants
+	nctx.sconstants = ctx.sconstants
 	nctx.variadics = ctx.variadics
 	nctx.variadicsNames = ctx.variadicsNames
 	nctx.keywords = ctx.keywords
@@ -366,6 +369,7 @@ func (ctx *Context) derive() *Context {
 // merge integrates changes from a context created with derive.
 func (ctx *Context) merge(nctx *Context) {
 	ctx.constants = nctx.constants
+	ctx.sconstants = nctx.sconstants
 	ctx.lambdas = nctx.lambdas
 	ctx.globals = nctx.globals
 	ctx.gNames = nctx.gNames

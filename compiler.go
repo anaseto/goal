@@ -401,7 +401,11 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 		if err != nil {
 			return c.errorf("string: %v", err)
 		}
-		id := c.ctx.storeConst(NewS(s))
+		id, ok := c.ctx.sconstants[s]
+		if !ok {
+			id = c.ctx.storeConst(NewS(s))
+			c.ctx.sconstants[s] = id
+		}
 		c.push2(opConst, opcode(id))
 		c.applyN(n)
 		return nil
