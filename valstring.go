@@ -1,228 +1,157 @@
 package goal
 
 import (
-	"fmt"
 	"math"
-	"strings"
+	"strconv"
+	"unsafe"
 )
 
-func sprintFloat(w ValueWriter, f float64) (n int, err error) {
+func appendFloat(dst []byte, f float64) []byte {
 	switch {
 	case math.IsInf(f, 0):
 		if f >= 0 {
-			return w.WriteString("0w")
+			return append(dst, "0w"...)
 		}
-		return w.WriteString("-0w")
+		return append(dst, "-0w"...)
 	case math.IsNaN(f):
-		return w.WriteString("0n")
+		return append(dst, "0n"...)
 	default:
-		return fmt.Fprintf(w, "%g", f)
+		return strconv.AppendFloat(dst, f, 'g', -1, 64)
 	}
 }
 
 // Sprint returns a matching program string representation of the value.
 func (v V) Sprint(ctx *Context) string {
-	var sb strings.Builder
-	v.Fprint(ctx, &sb)
-	return sb.String()
+	// NOTE: optimize allocation away using unsafe. Caveat: Append should
+	// never increase the number of references to the dst slice for such an
+	// optimization to be correct. TODO: This code should be upgraded to
+	// use unsafe.String at a later time.
+	b := v.Append(ctx, nil)
+	return *(*string)(unsafe.Pointer(&b))
 }
 
-// Fprint writes a matching program string representation of the value.
-func (v V) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
+// Append appends a unique program representation of the value to dst, and
+// returns the extended buffer.
+func (v V) Append(ctx *Context, dst []byte) []byte {
 	switch v.kind {
 	case valInt:
-		return fmt.Fprintf(w, "%d", v.n)
+		return strconv.AppendInt(dst, v.I(), 10)
 	case valFloat:
-		return sprintFloat(w, v.F())
+		return appendFloat(dst, v.F())
 	case valVariadic:
 		// v.n < len(ctx.variadicsNames)
-		return w.WriteString(ctx.variadicsNames[v.n])
+		return append(dst, ctx.variadicsNames[v.n]...)
 	case valLambda:
 		// v.n < len(ctx.lambdas)
-		return w.WriteString(ctx.lambdas[v.n].Source)
+		return append(dst, ctx.lambdas[v.n].Source...)
 	case valBoxed, valPanic:
-		return v.value.Fprint(ctx, w)
+		return v.value.Append(ctx, dst)
 	default:
-		return 0, nil
+		// Could happen for nil values, but they are not normally
+		// created from goal programs.
+		return dst
 	}
 }
 
-func (e *errV) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
-	var m int
-	m, err = w.WriteString("error[")
-	n += m
-	if err != nil {
-		return
-	}
-	m, err = e.V.Fprint(ctx, w)
-	n += m
-	if err != nil {
-		return
-	}
-	err = w.WriteByte(']')
-	if err == nil {
-		n++
-	}
-	return
+func (e *errV) Append(ctx *Context, dst []byte) []byte {
+	dst = append(dst, "error["...)
+	dst = e.V.Append(ctx, dst)
+	return append(dst, ']')
 }
 
-func (e panicV) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
-	return fmt.Fprintf(w, "panic[%q]", string(e))
+func (e panicV) Append(ctx *Context, dst []byte) []byte {
+	dst = append(dst, "panic["...)
+	dst = strconv.AppendQuote(dst, string(e))
+	return append(dst, ']')
 }
 
-// Fprint writes a properly quoted string.
-func (s S) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
-	return fmt.Fprintf(w, "%q", string(s))
+// Append appends a properly quoted string.
+func (s S) Append(ctx *Context, dst []byte) []byte {
+	return strconv.AppendQuote(dst, string(s))
 }
 
-func (x *AB) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
+func (x *AB) Append(ctx *Context, dst []byte) []byte {
 	if x.Len() == 0 {
-		return w.WriteString(`!0`)
+		return append(dst, "!0"...)
 	}
-	var m int
 	if x.Len() == 1 {
-		err = w.WriteByte(',')
-		if err != nil {
-			return
-		}
-		n++
-		m, err = fmt.Fprintf(w, "%d", b2i(x.At(0)))
-		n += m
-		return
+		dst = append(dst, ',')
+		dst = strconv.AppendInt(dst, b2i(x.At(0)), 10)
+		return dst
 	}
 	for i, xi := range x.Slice {
-		m, err = fmt.Fprintf(w, "%d", b2i(xi))
-		n += m
-		if err != nil {
-			return
-		}
+		dst = strconv.AppendInt(dst, b2i(xi), 10)
 		if i < x.Len()-1 {
-			err = w.WriteByte(' ')
-			if err != nil {
-				return
-			}
-			n++
+			dst = append(dst, ' ')
 		}
 	}
-	return
+	return dst
 }
 
-func (x *AI) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
+func (x *AI) Append(ctx *Context, dst []byte) []byte {
 	if x.Len() == 0 {
-		return w.WriteString(`!0`)
+		return append(dst, "!0"...)
 	}
-	var m int
 	if x.Len() == 1 {
-		err = w.WriteByte(',')
-		if err != nil {
-			return
-		}
-		n++
-		m, err = fmt.Fprintf(w, "%d", x.At(0))
-		n += m
-		return
+		dst = append(dst, ',')
+		dst = strconv.AppendInt(dst, x.At(0), 10)
+		return dst
 	}
 	for i, xi := range x.Slice {
-		m, err = fmt.Fprintf(w, "%d", xi)
-		n += m
-		if err != nil {
-			return
-		}
+		dst = strconv.AppendInt(dst, xi, 10)
 		if i < x.Len()-1 {
-			err = w.WriteByte(' ')
-			if err != nil {
-				return
-			}
-			n++
+			dst = append(dst, ' ')
 		}
 	}
-	return
+	return dst
 }
 
-func (x *AF) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
+func (x *AF) Append(ctx *Context, dst []byte) []byte {
 	if x.Len() == 0 {
-		return w.WriteString(`!0`)
+		return append(dst, "!0"...)
 	}
-	var m int
 	if x.Len() == 1 {
-		err = w.WriteByte(',')
-		if err != nil {
-			return
-		}
-		n++
-		m, err = sprintFloat(w, x.At(0))
-		n += m
-		return
+		dst = append(dst, ',')
+		dst = appendFloat(dst, x.At(0))
+		return dst
 	}
 	for i, xi := range x.Slice {
-		m, err = sprintFloat(w, xi)
-		n += m
-		if err != nil {
-			return
-		}
+		dst = appendFloat(dst, xi)
 		if i < x.Len()-1 {
-			err = w.WriteByte(' ')
-			if err != nil {
-				return
-			}
-			n++
+			dst = append(dst, ' ')
 		}
 	}
-	return
+	return dst
 }
 
-func (x *AS) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
+func (x *AS) Append(ctx *Context, dst []byte) []byte {
 	if x.Len() == 0 {
-		return w.WriteString(`0#""`)
+		return append(dst, `0#""`...)
 	}
-	var m int
 	if x.Len() == 1 {
-		err = w.WriteByte(',')
-		if err != nil {
-			return
-		}
-		n++
-		m, err = fmt.Fprintf(w, "%q", x.At(0))
-		n += m
-		return
+		dst = append(dst, ',')
+		dst = strconv.AppendQuote(dst, x.At(0))
+		return dst
 	}
 	for i, xi := range x.Slice {
-		m, err = fmt.Fprintf(w, "%q", xi)
-		n += m
-		if err != nil {
-			return
-		}
+		dst = strconv.AppendQuote(dst, xi)
 		if i < x.Len()-1 {
-			err = w.WriteByte(' ')
-			if err != nil {
-				return
-			}
-			n++
+			dst = append(dst, ' ')
 		}
 	}
-	return
+	return dst
 }
 
-func (x *AV) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
+func (x *AV) Append(ctx *Context, dst []byte) []byte {
 	if x.Len() == 0 {
-		return w.WriteString(`()`)
+		return append(dst, "()"...)
 	}
-	var m int
 	if x.Len() == 1 {
-		err = w.WriteByte(',')
-		if err != nil {
-			return
-		}
-		n++
-		m, err = x.At(0).Fprint(ctx, w)
-		n += m
-		return
+		dst = append(dst, ',')
+		dst = x.At(0).Append(ctx, dst)
+		return dst
 	}
-	err = w.WriteByte('(')
-	if err != nil {
-		return
-	}
-	n++
+	dst = append(dst, '(')
 	var sep string
 	if ctx.sprintCompact {
 		sep = ";"
@@ -236,121 +165,55 @@ func (x *AV) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
 	}()
 	for i, xi := range x.Slice {
 		if xi.kind != valNil {
-			m, err = xi.Fprint(ctx, w)
-			n += m
-			if err != nil {
-				return
-			}
+			dst = xi.Append(ctx, dst)
 		}
 		if i < x.Len()-1 {
-			m, err = w.WriteString(sep)
-			n += m
-			if err != nil {
-				return
-			}
+			dst = append(dst, sep...)
 		}
 	}
-	err = w.WriteByte(')')
-	if err != nil {
-		return
-	}
-	n++
-	return
+	dst = append(dst, ')')
+	return dst
 }
 
-func (d *Dict) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
-	m, err := d.keys.Fprint(ctx, w)
-	n += m
-	if err != nil {
-		return
-	}
-	err = w.WriteByte('!')
-	if err != nil {
-		return
-	}
-	n++
-	m, err = d.values.Fprint(ctx, w)
-	n += m
-	return
+func (d *Dict) Append(ctx *Context, dst []byte) []byte {
+	dst = d.keys.Append(ctx, dst)
+	dst = append(dst, '!')
+	dst = d.values.Append(ctx, dst)
+	return dst
 }
 
-func (p *projection) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
-	var m int
-	m, err = p.Fun.Fprint(ctx, w)
-	n += m
-	if err != nil {
-		return
-	}
-	err = w.WriteByte('[')
-	if err != nil {
-		return
-	}
-	n++
+func (p *projection) Append(ctx *Context, dst []byte) []byte {
+	dst = p.Fun.Append(ctx, dst)
+	dst = append(dst, '[')
 	for i := len(p.Args) - 1; i >= 0; i-- {
 		arg := p.Args[i]
 		if arg.kind != valNil {
-			m, err = arg.Fprint(ctx, w)
-			n += m
-			if err != nil {
-				return
-			}
+			dst = arg.Append(ctx, dst)
 		}
 		if i > 0 {
-			err = w.WriteByte(';')
-			if err != nil {
-				return
-			}
-			n++
+			dst = append(dst, ';')
 		}
 	}
-	err = w.WriteByte(']')
-	if err != nil {
-		return
-	}
-	n++
-	return
+	dst = append(dst, ']')
+	return dst
 }
 
-func (p *projectionFirst) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
-	var m int
-	m, err = p.Fun.Fprint(ctx, w)
-	n += m
-	if err != nil {
-		return
-	}
-	err = w.WriteByte('[')
-	if err != nil {
-		return
-	}
-	n++
-	m, err = p.Arg.Fprint(ctx, w)
-	n += m
-	if err != nil {
-		return
-	}
-	m, err = w.WriteString(";]")
-	n += m
-	return
+func (p *projectionFirst) Append(ctx *Context, dst []byte) []byte {
+	dst = p.Fun.Append(ctx, dst)
+	dst = append(dst, '[')
+	dst = p.Arg.Append(ctx, dst)
+	dst = append(dst, ";]"...)
+	return dst
 }
 
-func (p *projectionMonad) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
-	var m int
-	n, err = p.Fun.Fprint(ctx, w)
-	if err != nil {
-		return
-	}
-	m, err = w.WriteString("[]")
-	n += m
-	return
+func (p *projectionMonad) Append(ctx *Context, dst []byte) []byte {
+	dst = p.Fun.Append(ctx, dst)
+	dst = append(dst, "[]"...)
+	return dst
 }
 
-func (r *derivedVerb) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
-	var m int
-	n, err = r.Arg.Fprint(ctx, w)
-	if err != nil {
-		return
-	}
-	m, err = w.WriteString(ctx.variadicsNames[r.Fun])
-	n += m
-	return
+func (r *derivedVerb) Append(ctx *Context, dst []byte) []byte {
+	dst = r.Arg.Append(ctx, dst)
+	dst = append(dst, ctx.variadicsNames[r.Fun]...)
+	return dst
 }

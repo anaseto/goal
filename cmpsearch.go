@@ -88,11 +88,8 @@ func classify(ctx *Context, x V) V {
 	case *AV:
 		if xv.Len() > bruteForceGeneric {
 			ss := make([]string, xv.Len())
-			var sb strings.Builder
 			for i, xi := range xv.Slice {
-				sb.Reset()
-				xi.Fprint(ctx, &sb)
-				ss[i] = sb.String()
+				ss[i] = xi.Sprint(ctx)
 			}
 			return NewAI(classifySlice[string](ss, bruteForceGeneric))
 		}
@@ -191,11 +188,8 @@ func uniq(ctx *Context, x V) V {
 		r := []V{}
 		if xv.Len() > bruteForceGeneric {
 			ss := make([]string, xv.Len())
-			var sb strings.Builder
 			for i, xi := range xv.Slice {
-				sb.Reset()
-				xi.Fprint(ctx, &sb)
-				ss[i] = sb.String()
+				ss[i] = xi.Sprint(ctx)
 			}
 			m := map[string]struct{}{}
 			for i, s := range ss {
@@ -312,11 +306,8 @@ func markFirsts(ctx *Context, x V) V {
 	case *AV:
 		if xv.Len() > bruteForceGeneric {
 			ss := make([]string, xv.Len())
-			var sb strings.Builder
 			for i, xi := range xv.Slice {
-				sb.Reset()
-				xi.Fprint(ctx, &sb)
-				ss[i] = sb.String()
+				ss[i] = xi.Sprint(ctx)
 			}
 			return NewABWithRC(markFirstsSlice[string](ss, bruteForceGeneric), reuseRCp(xv.rc))
 		}
@@ -699,11 +690,8 @@ func occurrenceCount(ctx *Context, x V) V {
 	case *AV:
 		if xv.Len() > bruteForceGeneric {
 			ss := make([]string, xv.Len())
-			var sb strings.Builder
 			for i, xi := range xv.Slice {
-				sb.Reset()
-				xi.Fprint(ctx, &sb)
-				ss[i] = sb.String()
+				ss[i] = xi.Sprint(ctx)
 			}
 			return NewAIWithRC(occurrenceCountSlice[string](ss, bruteForceGeneric), reuseRCp(xv.rc))
 		}

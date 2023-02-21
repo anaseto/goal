@@ -3,10 +3,10 @@ package os
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 
 	"codeberg.org/anaseto/goal"
@@ -43,23 +43,13 @@ func (f *file) Matches(y goal.Value) bool {
 	}
 }
 
-func (f *file) Fprint(ctx *goal.Context, w goal.ValueWriter) (n int, err error) {
-	m, err := fmt.Fprint(w, "open[\"", f.mode, "\";")
-	n += m
-	if err != nil {
-		return
-	}
-	m, err = goal.S(f.f.Name()).Fprint(ctx, w)
-	n += m
-	if err != nil {
-		return
-	}
-	err = w.WriteByte(']')
-	if err != nil {
-		return
-	}
-	n++
-	return
+func (f *file) Append(ctx *goal.Context, dst []byte) []byte {
+	dst = append(dst, "open["...)
+	dst = strconv.AppendQuote(dst, f.mode)
+	dst = append(dst, ';')
+	dst = strconv.AppendQuote(dst, f.f.Name())
+	dst = append(dst, ']')
+	return dst
 }
 
 func (f *file) Type() string {
@@ -109,23 +99,13 @@ func (cmd *command) Matches(y goal.Value) bool {
 	}
 }
 
-func (cmd *command) Fprint(ctx *goal.Context, w goal.ValueWriter) (n int, err error) {
-	m, err := fmt.Fprint(w, "open[\"", cmd.mode, "\";")
-	n += m
-	if err != nil {
-		return
-	}
-	m, err = cmdToAS(cmd).Fprint(ctx, w)
-	n += m
-	if err != nil {
-		return
-	}
-	err = w.WriteByte(']')
-	if err != nil {
-		return
-	}
-	n++
-	return
+func (cmd *command) Append(ctx *goal.Context, dst []byte) []byte {
+	dst = append(dst, "open["...)
+	dst = strconv.AppendQuote(dst, cmd.mode)
+	dst = append(dst, ';')
+	dst = cmdToAS(cmd).Append(ctx, dst)
+	dst = append(dst, ']')
+	return dst
 }
 
 func (cmd *command) Type() string {

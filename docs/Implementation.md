@@ -80,11 +80,20 @@ kinds of native values just means implementing an interface for a new type.
 type Value interface {
 	// Matches returns true if the value matches another (in the sense of
 	// the ~ operator).
-	Matches(x Value) bool
-	// Fprint writes a unique program string representation of the value.
-	Fprint(*Context, ValueWriter) (n int, err error)
-	// Type returns the name of the value's type.
+	Matches(Value) bool
+	// Append appends a unique program representation of the value to dst,
+	// and returns the extended buffer.
+	Append(ctx *Context, dst []byte) []byte
+	// Type returns the name of the value's type. It may be used by Less to
+	// sort non-comparable values using lexicographic order.  This means
+	// Type should return different values for non-comparable values.
 	Type() string
+	// Less returns true if the value should be orderer before the given
+	// one. It is used for sorting values, but not for element-wise
+	// comparison with < and >. It should produce a strict total order, so,
+	// in particular, if x < y, then we do not have y > x, and one of them
+	// should hold unless both values match.
+	Less(Value) bool
 }
 ```
 
@@ -197,8 +206,10 @@ func negate(x V) V {
 }
 ```
 
-The binary case is more intricate, as the number of cases to handle becomes
-quadratic in the number of types (among those that can be combined).
+The actual code is a bit more complicated, and handles also dictionaries, but
+the idea is the same.  The binary case is more intricate, as the number of
+cases to handle becomes quadratic in the number of types (among those that can
+be combined).
 
 Most of the function is quite self-explanatory, except for the `.reuse` method,
 which is an internal optimization that returns an array value of same-length

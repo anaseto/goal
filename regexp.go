@@ -2,6 +2,7 @@ package goal
 
 import (
 	"regexp"
+	"strconv"
 )
 
 type rx struct {
@@ -13,23 +14,11 @@ func (r *rx) Matches(x Value) bool {
 	return ok && r.Regexp.String() == xv.Regexp.String()
 }
 
-func (r *rx) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
-	var m int
-	n, err = w.WriteString("rx[")
-	if err != nil {
-		return
-	}
-	m, err = S(r.Regexp.String()).Fprint(ctx, w)
-	n += m
-	if err != nil {
-		return
-	}
-	err = w.WriteByte(']')
-	if err != nil {
-		return
-	}
-	n++
-	return
+func (r *rx) Append(ctx *Context, dst []byte) []byte {
+	dst = append(dst, "rx["...)
+	dst = strconv.AppendQuote(dst, r.Regexp.String())
+	dst = append(dst, ']')
+	return dst
 }
 
 func (r *rx) Type() string {
@@ -46,33 +35,13 @@ func (r *rxReplacer) Matches(x Value) bool {
 	return ok && r.r.Matches(xv.r) && Match(r.repl, xv.repl)
 }
 
-func (r *rxReplacer) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
-	var m int
-	n, err = w.WriteString("sub[")
-	if err != nil {
-		return
-	}
-	m, err = r.r.Fprint(ctx, w)
-	n += m
-	if err != nil {
-		return
-	}
-	err = w.WriteByte(';')
-	if err != nil {
-		return
-	}
-	n++
-	m, err = r.repl.Fprint(ctx, w)
-	n += m
-	if err != nil {
-		return
-	}
-	err = w.WriteByte(']')
-	if err != nil {
-		return
-	}
-	n++
-	return
+func (r *rxReplacer) Append(ctx *Context, dst []byte) []byte {
+	dst = append(dst, "sub["...)
+	dst = r.r.Append(ctx, dst)
+	dst = append(dst, ';')
+	dst = r.repl.Append(ctx, dst)
+	dst = append(dst, ']')
+	return dst
 }
 
 func (r *rxReplacer) Type() string {

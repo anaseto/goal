@@ -3,7 +3,6 @@ package goal
 //go:generate stringer -type=TokenType,astTokenType,opcode -output stringer.go
 
 import (
-	"io"
 	"unsafe"
 )
 
@@ -27,20 +26,16 @@ const (
 	valPanic              // boxed value (value field)
 )
 
-// ValueWriter is the interface used when formatting values with Fprint.
-type ValueWriter interface {
-	io.Writer
-	io.ByteWriter
-	io.StringWriter
-}
-
 // Value is the interface satisfied by all boxed values.
 type Value interface {
 	// Matches returns true if the value matches another (in the sense of
 	// the ~ operator).
 	Matches(Value) bool
-	// Fprint writes a unique program string representation of the value.
-	Fprint(*Context, ValueWriter) (n int, err error)
+	// Append appends a unique program representation of the value to dst,
+	// and returns the extended buffer. It should not store the returned
+	// buffer elsewhere, so that it's possible to safely convert it to
+	// string without allocations.
+	Append(ctx *Context, dst []byte) []byte
 	// Type returns the name of the value's type. It may be used by Less to
 	// sort non-comparable values using lexicographic order.  This means
 	// Type should return different values for non-comparable values.

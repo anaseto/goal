@@ -1,7 +1,7 @@
 package goal
 
 import (
-	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -21,43 +21,15 @@ func (r *nReplacer) Matches(x Value) bool {
 	return ok && r.olds == xv.olds && r.news == xv.news && r.n == xv.n
 }
 
-func (r *nReplacer) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
-	n, err = w.WriteString("sub[")
-	if err != nil {
-		return
-	}
-	var m int
-	m, err = r.olds.Fprint(ctx, w)
-	n += m
-	if err != nil {
-		return
-	}
-	err = w.WriteByte(';')
-	if err != nil {
-		return
-	}
-	n++
-	m, err = r.news.Fprint(ctx, w)
-	n += m
-	if err != nil {
-		return
-	}
-	err = w.WriteByte(';')
-	if err != nil {
-		return
-	}
-	n++
-	m, err = fmt.Fprintf(w, "%d", r.n)
-	n += m
-	if err != nil {
-		return
-	}
-	err = w.WriteByte(']')
-	if err != nil {
-		return
-	}
-	n++
-	return
+func (r *nReplacer) Append(ctx *Context, dst []byte) []byte {
+	dst = append(dst, "sub["...)
+	dst = r.olds.Append(ctx, dst)
+	dst = append(dst, ';')
+	dst = r.news.Append(ctx, dst)
+	dst = append(dst, ';')
+	dst = strconv.AppendInt(dst, int64(r.n), 10)
+	dst = append(dst, ']')
+	return dst
 }
 
 func (r *nReplacer) Type() string {
@@ -86,23 +58,11 @@ func (r *replacer) Matches(x Value) bool {
 	return ok && r.oldnew.Matches(xv.oldnew)
 }
 
-func (r *replacer) Fprint(ctx *Context, w ValueWriter) (n int, err error) {
-	n, err = w.WriteString("sub[")
-	if err != nil {
-		return
-	}
-	var m int
-	m, err = r.oldnew.Fprint(ctx, w)
-	n += m
-	if err != nil {
-		return
-	}
-	err = w.WriteByte(']')
-	if err != nil {
-		return
-	}
-	n++
-	return
+func (r *replacer) Append(ctx *Context, dst []byte) []byte {
+	dst = append(dst, "sub["...)
+	dst = r.oldnew.Append(ctx, dst)
+	dst = append(dst, ']')
+	return dst
 }
 
 func (r *replacer) Type() string {

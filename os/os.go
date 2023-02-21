@@ -166,9 +166,8 @@ func printV(ctx *goal.Context, x goal.V) error {
 		}
 		return buf.Flush()
 	default:
-		buf := bufio.NewWriter(os.Stdout)
-		x.Fprint(ctx, buf)
-		return buf.Flush()
+		_, err := fmt.Print(x.Append(ctx, nil))
+		return err
 	}
 }
 
@@ -185,10 +184,8 @@ func sayV(ctx *goal.Context, x goal.V) error {
 		buf.WriteByte('\n')
 		return buf.Flush()
 	default:
-		buf := bufio.NewWriter(os.Stdout)
-		x.Fprint(ctx, buf)
-		buf.WriteByte('\n')
-		return buf.Flush()
+		_, err := fmt.Println(x.Append(ctx, nil))
+		return err
 	}
 }
 
@@ -204,9 +201,8 @@ func fprintV(ctx *goal.Context, w io.Writer, x goal.V) error {
 		}
 		return err
 	default:
-		buf := bufio.NewWriter(w)
-		x.Fprint(ctx, buf)
-		return buf.Flush()
+		_, err := w.Write(x.Append(ctx, nil))
+		return err
 	}
 }
 
@@ -222,10 +218,8 @@ func fsayV(ctx *goal.Context, w io.Writer, x goal.V) error {
 		_, err := fmt.Fprint(w, '\n')
 		return err
 	default:
-		buf := bufio.NewWriter(w)
-		x.Fprint(ctx, buf)
-		buf.WriteRune('\n')
-		return buf.Flush()
+		_, err := w.Write(append(x.Append(ctx, nil), '\n'))
+		return err
 	}
 }
 
