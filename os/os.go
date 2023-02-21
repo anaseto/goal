@@ -166,7 +166,7 @@ func printV(ctx *goal.Context, x goal.V) error {
 		}
 		return buf.Flush()
 	default:
-		_, err := fmt.Print(x.Append(ctx, nil))
+		_, err := fmt.Printf("%s", x.Append(ctx, nil))
 		return err
 	}
 }
@@ -184,7 +184,7 @@ func sayV(ctx *goal.Context, x goal.V) error {
 		buf.WriteByte('\n')
 		return buf.Flush()
 	default:
-		_, err := fmt.Println(x.Append(ctx, nil))
+		_, err := fmt.Printf("%s\n", x.Append(ctx, nil))
 		return err
 	}
 }
