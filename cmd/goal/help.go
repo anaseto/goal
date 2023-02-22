@@ -24,14 +24,15 @@ const helpSyntax = `
 SYNTAX HELP
 numbers         1     1.5     0b0110     1.7e-3
 strings         "text\xff\u00F\n"  "\""  "\u65e5"  (backquotes for raw strings)
-operators       :  +  -  *  %  !  &  |  ^  #  _  $  ?  @  .  ::
-regexps         rx/[a-z]/     (see https://pkg.go.dev/regexp/syntax for syntax)
 arrays          1 2 -3 4      1 "ab" -2 "cd"      (1 2;"a";3 "b";(4 2;"c");*)
+regexps         rx/[a-z]/     (see https://pkg.go.dev/regexp/syntax for syntax)
+operators       :  +  -  *  %  !  &  |  ^  #  _  $  ?  @  .  ::
+expressions     2*3+4 -> 14 (no priority)    1+|1 2 3 -> 4 3 2     +/1 2 3 -> 6
+separator       ; or newline (except ignored around parens, brackets and braces)
 variables       a   b   f   data    (any word matching rx/[a-zA-Z][a-zA-Z0-9]*/)
 assign          a:2 (local within lambda, global otherwise)    a::2 (global)    
 op assign       a+:1 (sugar for a:a+1)       a+::2 (sugar for a::a+2)
 list assign     (a;b;c):x   (where 2<#x)     (a;b):1 2;b -> 2
-expressions     2*3+4 -> 14 (no priority)    1+|1 2 3 -> 4 3 2     +/1 2 3 -> 6
 index           x[y] is sugar for x@y (apply); x[] ~ x[*] ~ x[!#x] ~ x (arrays)
 index deep      x[y;z;...] is sugar for x.(y;z;...) (except for x in (?;and;or))
 index assign    x[y]:z is sugar for x:@[x;y;:;z]    (or . for x[y;...]:z)
@@ -43,6 +44,8 @@ and/or          and[1;2] -> 2   and[1;0;3] -> 0   or[0;2] -> 2   or[0;0;0] -> 0
 sequence        [a:2;b:a+3;a+10] -> 12 (bracket block [] at start of expression)
 return          [1;:2;3] -> 2 (a : at start of expression)
 try             'x is sugar for ?["e"~@x;:x;x] (return if it's an error)
+comments        from line with a single / until line with a single \
+                or from / (after space or start of line) to end of line
 `
 
 const helpTypes = `
