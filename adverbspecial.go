@@ -428,7 +428,7 @@ func each2Type(ctx *Context, x array) V {
 		}
 		return NewAS(r)
 	default:
-		r := make([]string, xv.Len())
+		r := make([]string, x.Len())
 		for i := range r {
 			r[i] = "n"
 		}
