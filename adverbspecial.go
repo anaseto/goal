@@ -384,11 +384,11 @@ func each2String(ctx *Context, x array) V {
 		}
 		return NewAS(r)
 	case *AS:
-		r := make([]string, xv.Len())
+		r := xv.reuse()
 		for i, xi := range xv.Slice {
-			r[i] = strconv.Quote(xi)
+			r.Slice[i] = strconv.Quote(xi)
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AV:
 		r := make([]string, xv.Len())
 		for i, xi := range xv.Slice {
@@ -413,14 +413,31 @@ func each2First(ctx *Context, x array) V {
 	}
 }
 
+func each2Length(ctx *Context, x array) V {
+	switch xv := x.(type) {
+	case *AV:
+		r := make([]int64, xv.Len())
+		for i, xi := range xv.Slice {
+			r[i] = int64(Length(xi))
+		}
+		return NewAI(r)
+	default:
+		r := make([]int64, xv.Len())
+		for i := range r {
+			r[i] = 1
+		}
+		return NewAI(r)
+	}
+}
+
 func each2Type(ctx *Context, x array) V {
 	switch xv := x.(type) {
 	case *AS:
-		r := make([]string, xv.Len())
-		for i := range r {
-			r[i] = "s"
+		r := xv.reuse()
+		for i := range r.Slice {
+			r.Slice[i] = "s"
 		}
-		return NewAS(r)
+		return NewV(r)
 	case *AV:
 		r := make([]string, xv.Len())
 		for i, xi := range xv.Slice {
