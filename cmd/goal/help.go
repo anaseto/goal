@@ -80,7 +80,8 @@ x%y divide      3%2 -> 1.5          3 4%2 -> 2 1.5
 !d  keys        !"a" "b"!1 2 -> "a" "b"
 !x  odometer    !2 3 -> (0 0 0 1 1 1;0 1 2 0 1 2)
 x!y dict        d:"a" "b"!1 2;d "a" -> 1
-&x  where       &0 0 1 0 0 0 1 -> 2 6           &2 3 -> 0 0 1 1 1
+&I  where       &0 0 1 0 0 0 1 -> 2 6           &2 3 -> 0 0 1 1 1
+&d  keys where  &"a" "b" "e" "c"!0 1 1 0 -> "b" "e"
 x&y min         2&3 -> 2        4&3 -> 3        "b"&"a" -> "a"
 |x  reverse     |!5 -> 4 3 2 1 0
 x|y max         2|3 -> 3        4|3 -> 4        "b"|"a" -> "b"
@@ -88,12 +89,14 @@ x|y max         2|3 -> 3        4|3 -> 4        "b"|"a" -> "b"
 x<y less        2<3 -> 1        "c" < "a" -> 0
 >x  descend     >2 4 3 -> 1 2 0 (index permutation for descending order)
 x>y greater     2>3 -> 0        "c" > "a" -> 1
-=x  group       =1 0 2 1 2 -> (,1;0 3;2 4)      =-1 2 -1 2 -> (!0;!0;1 3)
+=I  group       =1 0 2 1 2 -> (,1;0 3;2 4)      =-1 2 -1 2 -> (!0;!0;1 3)
+=d  group keys  ="a""b""c"!0 1 0 -> ("a" "c";,"b")
 f=x group by    {1=2!x}=!10 -> (0 2 4 6 8;1 3 5 7 9)
 x=y equal       2 3 4=3 -> 0 1 0        "ab" = "ba" -> 0
 ~x  not         ~0 1 2 -> 1 0 0         ~"a" "" "0" -> 0 1 0
 x~y match       3~3 -> 1        2 3~3 2 -> 0       ("a";%)~("b";%) -> 0 1
 ,x  enlist      ,1 -> ,1 (list with one element)
+d,d merge       ("a""b"!1 2),"b""c"!3 4 -> "a""b""c"!1 3 4
 x,y join        1,2 -> 1 2      "ab" "c","d" -> "ab" "c" "d"
 ^x  sort        ^3 5 0 -> 0 3 5       ^"ca" "ab" "bc" -> "ab" "bc" "ca"
 i^s windows     2^"abcd" -> "ab" "bc" "cd"      (2-bytes strings)
@@ -107,7 +110,7 @@ f#y replicate   {0 1 1 0}#4 1 5 3 -> 1 5    {x>0}#2 -3 1 -> 2 1
 x#y keep only   2 3^1 1 2 3 3 4 -> 2 3 3
 _n  floor       _2.3 -> 2           _1.5 3.7 -> 1 3
 _s  to lower    _"ABC" -> "abc"     _"AB" "CD" -> "ab" "cd"
-i_s drop bytes  2_"abcde" -> "cde"  -2_"abcde" -> "abc" 
+i_s drop bytes  2_"abcde" -> "cde"  -2_"abcde" -> "abc"
 i_x drop        2_3 4 5 6 -> 5 6    -2_3 4 5 6 -> 3 4
 s_i delete      "abc"_1 -> "ac"
 x_i delete      4 3 2 1_1 -> 4 2 1      4 3 2 1_-3 -> 4 2 1
@@ -126,13 +129,16 @@ i?y roll        5?100 -> 10 51 21 51 37
 i?y deal        -5?100 -> 19 26 0 73 94 (always distinct)
 s?r rindex      "abcde"?rx/b../ -> 1 4
 s?s index       "a = a + 1"?"=" "+" -> 2 6
+d?y find key    ("a" "b"!3 4)?4 -> "b"      ("a" "b"!3 4)?5 -> ""
 x?y find        3 2 1?2 -> 1    3 2 1?0 -> 3
 @x  type        @2 -> "n"    @"ab" -> "s"    @2 3 -> "N"       @+ -> "f"
 s@y substr      "abcdef"@2  -> "cdef" (s[offset])
 r@y match       rx/[a-z]/"abc" -> 1     rx/\s/"abc" -> 0
-r@y find        rx/[a-z](.)/"abc" -> "ab" "b"
+r@y find group  m:rx/[a-z](.)/"abc" -> "ab" "b" (m[0] whole match, m[1] group)
+r@y findN       rx/[a-z]/["abc";2] -> "a""b"    rx/[a-z]/["abc";-1] -> "a""b""c"
 f@y apply       (|)@1 2 -> 2 1 (like |[1 2] -> 2 1 or |1 2)
-x@y at          1 2 3@2 -> 3    1 2 3[2 0] -> 3 1       7 8 9@-2 -> 8
+d@y at key      ("a" "b"!1 2)["a"] -> 1
+x@y at          1 2 3@2 -> 3     1 2 3[2 0] -> 3 1     7 8 9@-2 -> 8
 .s  reval       ."2+3" -> 5     a:1;."a" -> panic ".s : undefined global: a"
 .e  get error   .error "msg" -> "msg"
 .d  values      ."a" "b"!1 2 -> 1 2
@@ -154,7 +160,7 @@ const helpNAMEDVERBS = `
 NAMED VERBS HELP
 abs n     abs value     abs -3 -1.5 2 -> 3 1.5 2
 bytes s   byte-count    bytes "abc" -> 3
-ceil n    ceil          ceil 1.5 -> 2   ceil "ab" -> "AB"
+ceil n    ceil/upper    ceil 1.5 -> 2   ceil "ab" -> "AB"
 error x   error         r:{?[~x=0;1%x;error "zero"]}0;?["e"~@r;.r;r] -> "zero"
 eval s    eval          a:5;eval "a+2" -> 7 (unrestricted eval)
 firsts x  mark firsts   firsts 0 0 2 3 0 2 3 4 -> 1 0 1 1 0 0 0 1
@@ -164,7 +170,7 @@ panic s   panic         panic "msg" (for fatal programming-errors)
 rshift x  right shift   rshift 1 2 -> 0 1       rshift "a" "b" -> "" "a"
 rx s      comp. regex   rx "[a-z]"  (like rx/[a-z]/ but compiled at runtime)
 seed i    rand seed     seed 42 (for non-secure pseudo-rand with ?)
-shift x   shift         shift 1 2 -> 2 0        shift "a" "b" -> "b" ""
+shift x   left shift    shift 1 2 -> 2 0        shift "a" "b" -> "b" ""
 sign n    sign          sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
 
 x csv y     csv read    csv "1,2,3" -> ,"1" "2" "3"
@@ -177,14 +183,14 @@ x nan y     fill NaNs   42 nan (1.5;sqrt -1) -> 1.5 42
 n mod n     modulus     3 mod 5 4 3 -> 2 1 0
 x rotate y  rotate      2 rotate 1 2 3 4 -> 3 4 1 2
 x rshift y  right shift "a" "b" rshift 1 2 3 -> "a" "b" 1
-x shift y   shift       "a" "b" shift 1 2 3 -> 3 "a" "b"
+x shift y   left shift  "a" "b" shift 1 2 3 -> 3 "a" "b"
 
 sub[r;s]    regsub      sub[rx/[a-z]/;"Z"] "aBc" -> "ZBZ"
 sub[r;f]    regsub      sub[rx/[A-Z]/;_] "aBc" -> "abc"
 sub[s;s]    replace     sub["b";"B"] "abc" -> "aBc"
 sub[s;s;i]  replaceN    sub["a";"b";2] "aaa" -> "bba" (stop after 2 times)
-sub[S]      replace     sub["b" "d" "c" "e"] "abc" -> "ade"
-sub[S;S]    replace     sub["b" "c";"d" "e"] "abc" -> "ade"
+sub[S]      replaceS    sub["b" "d" "c" "e"] "abc" -> "ade"
+sub[S;S]    replaceS    sub["b" "c";"d" "e"] "abc" -> "ade"
 
 eval[s;n;p] eval        like eval s, but provide name n as location and prefix
                         p for globals
@@ -197,7 +203,7 @@ const helpADVERBS = `
 ADVERBS HELP
 f'x    each      #'(4 5;6 7 8) -> 2 3
 x F'y  each      2 3#'1 2 -> (1 1;2 2 2)    {(x;y;z)}'[1;2 4;3] -> (1 2 3;1 4 3)
-F/x    fold      +/!10 -> 45                         
+F/x    fold      +/!10 -> 45
 F\x    scan      +\!10 -> 0 1 3 6 10 15 21 28 36 45
 x F/y  fold      1 2+/!10 -> 46 47                 {x+y-z}/[9;3 4;2 7] -> 7
 x F\y  scan      5 6+\1 2 3 -> (6 7;8 9;11 12)     {x+y-z}\[9;3 4;2 7] -> 10 7
@@ -209,6 +215,7 @@ f/x    converge  {1+1.0%x}/1 -> 1.618033988749895     {-x}/1 -> -1
 f\x    converges {_x%2}\10 -> 10 5 2 1 0              {-x}\1 -> 1 -1
 s/x    join      ","/"a" "b" "c" -> "a,b,c"
 s\x    split     ","\"a,b,c" -> "a" "b" "c"
+r\x    split     rx/[,;]/\"a,b;c" -> "a" "b" "c"
 i s\x  splitN    (2) ","\"a,b,c" -> "a" "b,c"
 I/x    encode    24 60 60/1 2 3 -> 3723  2/1 1 0 -> 6
 I\x    decode    24 60 60\3723 -> 1 2 3  2\6 -> 1 1 0
