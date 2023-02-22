@@ -2,6 +2,7 @@ package goal
 
 import (
 	"math"
+	"strconv"
 	"strings"
 )
 
@@ -359,5 +360,78 @@ func scan2vMin(x V) V {
 		return NewV(r)
 	default:
 		return x
+	}
+}
+
+func each2String(ctx *Context, x array) V {
+	switch xv := x.(type) {
+	case *AB:
+		r := make([]string, xv.Len())
+		for i, xi := range xv.Slice {
+			r[i] = strconv.FormatInt(b2i(xi), 10)
+		}
+		return NewAS(r)
+	case *AI:
+		r := make([]string, xv.Len())
+		for i, xi := range xv.Slice {
+			r[i] = strconv.FormatInt(xi, 10)
+		}
+		return NewAS(r)
+	case *AF:
+		r := make([]string, xv.Len())
+		for i, xi := range xv.Slice {
+			r[i] = strconv.FormatFloat(xi, 'g', -1, 64)
+		}
+		return NewAS(r)
+	case *AS:
+		r := make([]string, xv.Len())
+		for i, xi := range xv.Slice {
+			r[i] = strconv.Quote(xi)
+		}
+		return NewAS(r)
+	case *AV:
+		r := make([]string, xv.Len())
+		for i, xi := range xv.Slice {
+			r[i] = xi.Sprint(ctx)
+		}
+		return NewAS(r)
+	default:
+		panic("each2String")
+	}
+}
+
+func each2First(ctx *Context, x array) V {
+	switch xv := x.(type) {
+	case *AV:
+		r := make([]V, xv.Len())
+		for i, xi := range xv.Slice {
+			r[i] = first(xi)
+		}
+		return Canonical(NewAV(r))
+	default:
+		return NewV(x)
+	}
+}
+
+func each2Type(ctx *Context, x array) V {
+	switch xv := x.(type) {
+	case *AS:
+		r := make([]string, xv.Len())
+		for i := range r {
+			r[i] = "s"
+		}
+		return NewAS(r)
+	case *AV:
+		r := make([]string, xv.Len())
+		for i, xi := range xv.Slice {
+			r[i] = xi.Type()
+		}
+		return NewAS(r)
+	default:
+		r := make([]string, xv.Len())
+		for i := range r {
+			r[i] = "n"
+		}
+		return NewAS(r)
 	}
 }

@@ -610,6 +610,16 @@ func each2(ctx *Context, f, x V) V {
 }
 
 func eachfx(ctx *Context, f V, x array) V {
+	if f.kind == valVariadic {
+		switch f.variadic() {
+		case vCast:
+			return each2String(ctx, x)
+		case vMultiply:
+			return each2First(ctx, x)
+		case vApply:
+			return each2Type(ctx, x)
+		}
+	}
 	r := make([]V, x.Len())
 	f.IncrRC()
 	ctx.pushNoRC(V{})
