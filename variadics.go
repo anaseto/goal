@@ -401,7 +401,7 @@ func VCast(ctx *Context, args []V) V {
 		if x.IsI() {
 			return padStrings(int(x.I()), y)
 		} else if x.IsF() {
-			if !x.IsI() {
+			if !isI(x.F()) {
 				return Panicf("i$y : non-integer i (%g)", x.F())
 			}
 			return padStrings(int(x.F()), y)

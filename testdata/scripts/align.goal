@@ -7,19 +7,17 @@ f,,function
 e,,error
 ,A,generic array`
 records:","\'"\n"\" \n"^csvs
-padr:{y+" "*1+x-bytes y}
-padl:{(" "*1+x-bytes y)+y}
-padc:{n:(1+x-bytes y)%2;+/(" "*_n;y;" "*ceil n)}
+padc:{n:x-l:bytes y;(-x)$(l+ceil n%2)$y}
 colw:|/bytes records
 res:(
  / Justify left
- {padr'[colw;x]}'records
+ {colw$'x}'records
  / Justify right
- {padl'[colw;x]}'records
+ {(-colw)$'x}'records
  / Justify center
  {padc'[colw;x]}'records
 )
-fmt:" \n"^"\n"/ "\n"/'" "/''res
+fmt:" \n"^"\n"/ "\n"/'"  "/''res
 sub[rx/(?m)\s*$/;""] fmt
 /RESULT:
 result:" \n"^`
@@ -30,18 +28,18 @@ r            regexp
 f            function
 e            error
       A      generic array
- atom  array           name
-    n      N         number
-    s      S         string
-    r                regexp
-    f              function
-    e                 error
-           A  generic array
-atom  array       name
-  n     N        number
-  s     S        string
-  r              regexp
-  f             function
-  e              error
+atom  array           name
+   n      N         number
+   s      S         string
+   r                regexp
+   f              function
+   e                 error
+          A  generic array
+atom  array      name
+ n      N       number
+ s      S       string
+ r              regexp
+ f             function
+ e               error
         A    generic array`
 sub[rx/(?m)\s*$/;""] result
