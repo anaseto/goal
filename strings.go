@@ -640,10 +640,10 @@ func splitN(n int, sep S, y V) V {
 	}
 }
 
-func padStrings(x int64, y V) V {
+func padStrings(x int, y V) V {
 	switch yv := y.value.(type) {
 	case S:
-		if int64(len(yv)) < x || int64(len(yv)) < -x {
+		if len(yv) < x || len(yv) < -x {
 			return NewS(padString(x, string(yv)))
 		}
 		return y
@@ -668,18 +668,20 @@ func padStrings(x int64, y V) V {
 	}
 }
 
-func padString(x int64, s string) string {
+func padString(x int, s string) string {
 	switch {
-	case int64(len(s)) < x:
+	case len(s) < x:
 		var sb strings.Builder
+		sb.Grow(x)
 		sb.WriteString(s)
-		for i := int64(0); i < x-int64(len(s)); i++ {
+		for i := 0; i < x-len(s); i++ {
 			sb.WriteByte(' ')
 		}
 		return sb.String()
-	case int64(len(s)) < -x:
+	case len(s) < -x:
 		var sb strings.Builder
-		for i := int64(0); i < -x-int64(len(s)); i++ {
+		sb.Grow(-x)
+		for i := 0; i < -x-len(s); i++ {
 			sb.WriteByte(' ')
 		}
 		sb.WriteString(s)

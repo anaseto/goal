@@ -399,12 +399,12 @@ func VCast(ctx *Context, args []V) V {
 	case 2:
 		x, y := args[1], args[0]
 		if x.IsI() {
-			return padStrings(int64(x.I()), y)
+			return padStrings(int(x.I()), y)
 		} else if x.IsF() {
 			if !x.IsI() {
 				return Panicf("i$y : non-integer i (%g)", x.F())
 			}
-			return padStrings(int64(x.F()), y)
+			return padStrings(int(x.F()), y)
 		}
 		switch xv := x.value.(type) {
 		case array:
