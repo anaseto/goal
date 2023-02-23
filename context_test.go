@@ -474,3 +474,11 @@ func BenchmarkSearchSorted10In10000(b *testing.B) {
 		ctx.Eval("a?b")
 	}
 }
+
+func BenchmarkEachString(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:1000?10000")
+	for n := 0; n < b.N; n++ {
+		ctx.Eval("$'a")
+	}
+}
