@@ -73,7 +73,7 @@ n-n subtract    5-3 -> 2            5 4-3 -> 2 1
 s-s trim suffix "file.txt"-".txt" -> "file"
 *x  first       *3 2 4 -> 3     *"ab" -> "ab"    *(+;*) -> +
 n*n multiply    2*3 -> 6            1 2 3*3 -> 3 6 9
-s*x repeat      "a"*3 2 1 0 -> "aaa" "aa" "a" ""
+s*i repeat      "a"*3 2 1 0 -> "aaa" "aa" "a" ""
 %x  classify    %1 2 3 1 2 3 -> 0 1 2 0 1 2     %"a" "b" "a" -> 0 1 0
 x%y divide      3%2 -> 1.5          3 4%2 -> 2 1.5
 !i  enum        !5 -> 0 1 2 3 4
@@ -91,7 +91,7 @@ x<y less        2<3 -> 1        "c" < "a" -> 0
 x>y greater     2>3 -> 0        "c" > "a" -> 1
 =I  group       =1 0 2 1 2 -> (,1;0 3;2 4)      =-1 2 -1 2 -> (!0;!0;1 3)
 =d  group keys  ="a""b""c"!0 1 0 -> ("a" "c";,"b")
-f=x group by    {1=2!x}=!10 -> (0 2 4 6 8;1 3 5 7 9)
+f=y group by    {1=2!x}=!10 -> (0 2 4 6 8;1 3 5 7 9)
 x=y equal       2 3 4=3 -> 0 1 0        "ab" = "ba" -> 0
 ~x  not         ~0 1 2 -> 1 0 0         ~"a" "" "0" -> 0 1 0
 x~y match       3~3 -> 1        2 3~3 2 -> 0       ("a";%)~("b";%) -> 0 1
@@ -111,15 +111,15 @@ x#y keep only   2 3^1 1 2 3 3 4 -> 2 3 3
 _n  floor       _2.3 -> 2           _1.5 3.7 -> 1 3
 _s  to lower    _"ABC" -> "abc"     _"AB" "CD" -> "ab" "cd"
 i_s drop bytes  2_"abcde" -> "cde"  -2_"abcde" -> "abc"
-i_x drop        2_3 4 5 6 -> 5 6    -2_3 4 5 6 -> 3 4
+i_y drop        2_3 4 5 6 -> 5 6    -2_3 4 5 6 -> 3 4
 s_i delete      "abc"_1 -> "ac"
 x_i delete      4 3 2 1_1 -> 4 2 1      4 3 2 1_-3 -> 4 2 1
 s_s trim prefix "pref-"_"pref-name" -> "name"
 I_s cut string  1 3_"abcdef" -> "bc" "def"      (I ascending)
 I_y cut         2 5_!10 -> (2 3 4;5 6 7 8 9)    (I ascending)
-f_x weed out    {0 1 1 0}_4 1 5 3 -> 4 3    {x>0}_2 -3 1 -> ,-3
+f_y weed out    {0 1 1 0}_4 1 5 3 -> 4 3    {x>0}_2 -3 1 -> ,-3
 $x  string      $2 3 -> "2 3"     $"text" -> "\"text\""
-i$x split       2$!6 -> (0 1;2 3;4 5)   2$"a" "b" "c" -> ("a" "b";,"c")
+i$y split       2$!6 -> (0 1;2 3;4 5)   2$"a" "b" "c" -> ("a" "b";,"c")
 s$y cast        "i"$2.3 -> 2    "i"$"ab" -> 97 98   "s"$97 98 -> "ab"
 s$y parse num   "n"$"1.5" -> 1.5        "n"$"2" "1e+7" "0b100" -> 2 1e+07 4
 x$y binsearch   2 3 5 7$8 2 7 5 5.5 3 0 -> 4 1 4 3 3 2 0
@@ -207,16 +207,16 @@ F/x    fold      +/!10 -> 45
 F\x    scan      +\!10 -> 0 1 3 6 10 15 21 28 36 45
 x F/y  fold      1 2+/!10 -> 46 47                 {x+y-z}/[9;3 4;2 7] -> 7
 x F\y  scan      5 6+\1 2 3 -> (6 7;8 9;11 12)     {x+y-z}\[9;3 4;2 7] -> 10 7
-i f/x  do        3{x*2}/4 -> 32
-i f\x  dos       3{x*2}\4 -> 4 8 16 32
-f f/x  while     {x<100}{x*2}/4 -> 128
-f f\x  whiles    {x<100}{x*2}\4 -> 4 8 16 32 64 128
+i f/y  do        3{x*2}/4 -> 32
+i f\y  dos       3{x*2}\4 -> 4 8 16 32
+f f/y  while     {x<100}{x*2}/4 -> 128
+f f\y  whiles    {x<100}{x*2}\4 -> 4 8 16 32 64 128
 f/x    converge  {1+1.0%x}/1 -> 1.618033988749895     {-x}/1 -> -1
 f\x    converges {_x%2}\10 -> 10 5 2 1 0              {-x}\1 -> 1 -1
 s/x    join      ","/"a" "b" "c" -> "a,b,c"
 s\x    split     ","\"a,b,c" -> "a" "b" "c"
 r\x    split     rx/[,;]/\"a,b;c" -> "a" "b" "c"
-i s\x  splitN    (2) ","\"a,b,c" -> "a" "b,c"
+i s\y  splitN    (2) ","\"a,b,c" -> "a" "b,c"
 I/x    encode    24 60 60/1 2 3 -> 3723  2/1 1 0 -> 6
 I\x    decode    24 60 60\3723 -> 1 2 3  2\6 -> 1 1 0
 `
