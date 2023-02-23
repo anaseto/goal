@@ -149,6 +149,7 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterDyad("shift", VShift)
 	ctx.RegisterDyad("rshift", VRShift)
 	ctx.RegisterDyad("time", VTime)
+	ctx.RegisterDyad("goal", VGoal)
 }
 
 func (v variadic) zero() V {
@@ -786,5 +787,35 @@ func VSub(ctx *Context, args []V) V {
 		return sub3(args[2], args[1], args[0])
 	default:
 		return panicRank("sub")
+	}
+}
+
+// VGoal implements the goal variadic verb.
+func VGoal(ctx *Context, args []V) V {
+	switch len(args) {
+	case 2:
+		x, y := args[1], args[0]
+		cmd, ok := x.value.(S)
+		if !ok {
+			return panicType("goal[cmd;...]", "cmd", x)
+		}
+		switch cmd {
+		case "prec":
+			if y.IsI() {
+				ctx.prec = int(y.I())
+			} else if y.IsF() {
+				if !isI(y.F()) {
+					return Panicf(`goal["prec";y]: non-integer y (%g)`, y.F())
+				}
+				ctx.prec = int(y.F())
+			} else {
+				return Panicf(`goal["prec";y]: y bad type (%s)`, y.Type())
+			}
+			return NewI(1)
+		default:
+			return Panicf("goal[cmd;...]: invalid cmd (%s)", cmd)
+		}
+	default:
+		return panics("goal: invalid command")
 	}
 }

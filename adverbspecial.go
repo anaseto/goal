@@ -380,7 +380,7 @@ func each2String(ctx *Context, x array) V {
 	case *AF:
 		r := make([]string, xv.Len())
 		for i, xi := range xv.Slice {
-			r[i] = strconv.FormatFloat(xi, 'g', -1, 64)
+			r[i] = strconv.FormatFloat(xi, 'g', ctx.prec, 64)
 		}
 		return NewAS(r)
 	case *AS:

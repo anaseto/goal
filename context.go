@@ -60,20 +60,23 @@ type Context struct {
 	gAssignLists [][]int        // index: assign list ids
 
 	// parsing, scanning
-	scanner       *Scanner
-	compiler      *compiler
-	fname         string              // filename
-	sources       map[string]string   // filename: source
-	assigned      bool                // last instruction was opAssignGlobal
-	sprintCompact bool                // value sprint formatting
-	keywords      map[string]NameType // special keyword names
-	vNames        map[string]variadic // variadic keywords
+	scanner  *Scanner
+	compiler *compiler
+	fname    string              // filename
+	sources  map[string]string   // filename: source
+	keywords map[string]NameType // special keyword names
+	vNames   map[string]variadic // variadic keywords
 
 	// error positions stack
 	errPos []position
 
 	// rand
 	rand *rand.Rand
+
+	// miscellaneous
+	assigned   bool // last instruction was opAssignGlobal
+	compactFmt bool // compact value sprint formatting
+	prec       int  // floating point formatting precision
 }
 
 // NewContext returns a new context for compiling and interpreting code.
@@ -86,6 +89,7 @@ func NewContext() *Context {
 	var n int = 2
 	ctx.constants = []V{constAV: NewAVWithRC(nil, &n)}
 	ctx.sconstants = map[string]int{}
+	ctx.prec = -1
 	ctx.initVariadics()
 	return ctx
 }
@@ -363,6 +367,7 @@ func (ctx *Context) derive() *Context {
 	nctx.sources = ctx.sources
 	nctx.errPos = ctx.errPos
 	nctx.gPrefix = ctx.gPrefix
+	nctx.prec = ctx.prec
 	return nctx
 }
 
@@ -377,4 +382,5 @@ func (ctx *Context) merge(nctx *Context) {
 	ctx.sources = nctx.sources
 	ctx.errPos = nctx.errPos
 	ctx.gPrefix = nctx.gPrefix
+	ctx.prec = nctx.prec
 }

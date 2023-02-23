@@ -39,5 +39,6 @@ func getHelp() map[string]string {
 	help["time"] = helpTime
 	help["syn"] = helpSyntax
 	help["types"] = helpTypes
+	help["goal"] = helpGoal
 	return help
 }

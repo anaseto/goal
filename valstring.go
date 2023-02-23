@@ -6,7 +6,7 @@ import (
 	"unsafe"
 )
 
-func appendFloat(dst []byte, f float64) []byte {
+func appendFloat(ctx *Context, dst []byte, f float64) []byte {
 	switch {
 	case math.IsInf(f, 0):
 		if f >= 0 {
@@ -16,7 +16,7 @@ func appendFloat(dst []byte, f float64) []byte {
 	case math.IsNaN(f):
 		return append(dst, "0n"...)
 	default:
-		return strconv.AppendFloat(dst, f, 'g', -1, 64)
+		return strconv.AppendFloat(dst, f, 'g', ctx.prec, 64)
 	}
 }
 
@@ -37,7 +37,7 @@ func (v V) Append(ctx *Context, dst []byte) []byte {
 	case valInt:
 		return strconv.AppendInt(dst, v.I(), 10)
 	case valFloat:
-		return appendFloat(dst, v.F())
+		return appendFloat(ctx, dst, v.F())
 	case valVariadic:
 		// v.n < len(ctx.variadicsNames)
 		return append(dst, ctx.variadicsNames[v.n]...)
@@ -112,11 +112,11 @@ func (x *AF) Append(ctx *Context, dst []byte) []byte {
 	}
 	if x.Len() == 1 {
 		dst = append(dst, ',')
-		dst = appendFloat(dst, x.At(0))
+		dst = appendFloat(ctx, dst, x.At(0))
 		return dst
 	}
 	for i, xi := range x.Slice {
-		dst = appendFloat(dst, xi)
+		dst = appendFloat(ctx, dst, xi)
 		if i < x.Len()-1 {
 			dst = append(dst, ' ')
 		}
@@ -153,15 +153,15 @@ func (x *AV) Append(ctx *Context, dst []byte) []byte {
 	}
 	dst = append(dst, '(')
 	var sep string
-	if ctx.sprintCompact {
+	if ctx.compactFmt {
 		sep = ";"
 	} else {
 		sep = "\n "
 	}
-	osc := ctx.sprintCompact
-	ctx.sprintCompact = true
+	osc := ctx.compactFmt
+	ctx.compactFmt = true
 	defer func() {
-		ctx.sprintCompact = osc
+		ctx.compactFmt = osc
 	}()
 	for i, xi := range x.Slice {
 		if xi.kind != valNil {

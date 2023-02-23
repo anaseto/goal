@@ -106,6 +106,7 @@ Type help TOPIC or h TOPIC where TOPIC is one of:
 "'"     adverbs ('/\)
 "io"    io functions (slurp, say)
 "time"  time functions
+"goal"  runtime functions
 
 Notations:
         s (string) f (function) F (2-args function)
@@ -357,4 +358,11 @@ Currently available commands:
         "week"          year, week (I)
         "weekday"       0-7 weekday (starts from Sunday) (i)
         format (s)      format time using given layout (s)
+
+RUNTIME HELP
+goal[cmd;...]   runtime command cmd for goal
+
+The supported command forms are as follows:
+
+"prec" goal n   set floating point formatting precision to n (default -1)
 ```
