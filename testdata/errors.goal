@@ -251,7 +251,7 @@ d:"a" "b"!1 2;d["a" "c" "b"] / not found
 d:"a" "b"!1 2;d["c"] / not found
 1 1\4 / base
 1\4 / base
-goal "x" / invalid command
+goal "x" / invalid cmd
 42 goal 3 / type
 "prec" goal 3.5 / non-integer
 "prec" goal ,3.5 / bad type

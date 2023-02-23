@@ -365,5 +365,6 @@ goal[cmd;...]   runtime command cmd for goal
 
 The supported command forms are as follows:
 
-"prec" goal n   set floating point formatting precision to n (default -1)
+goal "globals"   return dictionnary with a copy of global variables
+"prec" goal n    set floating point formatting precision to n (default -1)
 ```

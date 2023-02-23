@@ -800,30 +800,37 @@ func VSub(ctx *Context, args []V) V {
 
 // VGoal implements the goal variadic verb.
 func VGoal(ctx *Context, args []V) V {
-	switch len(args) {
-	case 2:
-		x, y := args[1], args[0]
-		cmd, ok := x.value.(S)
-		if !ok {
-			return panicType("goal[cmd;...]", "cmd", x)
+	x := args[len(args)-1]
+	cmd, ok := x.value.(S)
+	if !ok {
+		return panicType("goal[cmd;...]", "cmd", x)
+	}
+	switch cmd {
+	case "globals":
+		if len(args) != 1 {
+			return panicRank(`goal`)
 		}
-		switch cmd {
-		case "prec":
-			if y.IsI() {
-				ctx.prec = int(y.I())
-			} else if y.IsF() {
-				if !isI(y.F()) {
-					return Panicf(`goal["prec";y]: non-integer y (%g)`, y.F())
-				}
-				ctx.prec = int(y.F())
-			} else {
-				return Panicf(`goal["prec";y]: y bad type (%s)`, y.Type())
+		v := cloneArgs(ctx.globals)
+		k := make([]string, len(ctx.gNames))
+		copy(k, ctx.gNames)
+		return NewDict(NewAS(k), Canonical(NewAV(v)))
+	case "prec":
+		if len(args) != 2 {
+			return panicRank(`goal`)
+		}
+		y := args[0]
+		if y.IsI() {
+			ctx.prec = int(y.I())
+		} else if y.IsF() {
+			if !isI(y.F()) {
+				return Panicf(`goal["prec";n]: non-integer n (%g)`, y.F())
 			}
-			return NewI(1)
-		default:
-			return Panicf("goal[cmd;...]: invalid cmd (%s)", cmd)
+			ctx.prec = int(y.F())
+		} else {
+			return Panicf(`goal["prec";n]: n bad type (%s)`, y.Type())
 		}
+		return NewI(1)
 	default:
-		return panics("goal: invalid command")
+		return Panicf("goal[cmd;...]: invalid cmd (%s)", cmd)
 	}
 }
