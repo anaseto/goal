@@ -315,7 +315,7 @@ run s        run command            run "pwd"        run "ls" "-l"
              inherits stdin, stdout, and stderr, returns true on success
 say s        same as print, but appends a newline    say !5
 shell s      run command as-is through the shell     shell "ls -l"
-             inherits stderr, returns its output
+             inherits stderr, returns its own standard output
 slurp s      read file named s       lines:"\n"\slurp["/path/to/file"]
 
 p import s   like import s but with prefix p+"." for globals
