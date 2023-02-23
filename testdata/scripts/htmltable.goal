@@ -10,7 +10,7 @@ tds:{elt[`tr`;+/elt["td";]'x]+"\n"}
 table:{+/("<table>\n";ths[x];(+/tds'y);"</table>\n")}
 table[
   "" "X" "Y" "Z"
-  escape[$''(!4),'3$!12]
+  escape[$''(!4),'3!!12]
 ]
 /RESULT:
 `<table>

@@ -1133,7 +1133,7 @@ func windows(i int64, y V) V {
 	}
 }
 
-// shapeSplit returns i$y.
+// shapeSplit returns i!y.
 func shapeSplit(x V, y V) V {
 	var i int64
 	if x.IsI() {
@@ -1142,7 +1142,7 @@ func shapeSplit(x V, y V) V {
 		// x.IsF() should be true
 		f := x.F()
 		if !isI(f) {
-			return Panicf("i$y : i non-integer (%g)", f)
+			return Panicf("i!y : i non-integer (%g)", f)
 		}
 		i = int64(f)
 	}
@@ -1150,7 +1150,7 @@ func shapeSplit(x V, y V) V {
 	case array:
 		ylen := yv.Len()
 		if i <= 0 {
-			return Panicf("i$y : i not positive (%d)", i)
+			return Panicf("i!y : i not positive (%d)", i)
 		}
 		if i >= int64(ylen) {
 			return NewAVWithRC([]V{y}, yv.RC())
@@ -1172,6 +1172,6 @@ func shapeSplit(x V, y V) V {
 		var rcn int
 		return NewAVWithRC(r, &rcn)
 	default:
-		return panics("i$y : y not an array")
+		return panics("i!y : y not an array")
 	}
 }

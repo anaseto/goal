@@ -231,7 +231,10 @@ func VKey(ctx *Context, args []V) V {
 	case 1:
 		return enum(args[0])
 	case 2:
-		// TODO: use i!y for something like rotate or a shift variant.
+		x, y := args[1], args[0]
+		if x.IsI() || x.IsF() {
+			return shapeSplit(x, y)
+		}
 		return dict(args[1], args[0])
 	default:
 		return panicRank("!")
@@ -395,8 +398,13 @@ func VCast(ctx *Context, args []V) V {
 		return NewS(args[0].Sprint(ctx))
 	case 2:
 		x, y := args[1], args[0]
-		if x.IsI() || x.IsF() {
-			return shapeSplit(x, y)
+		if x.IsI() {
+			return padStrings(int64(x.I()), y)
+		} else if x.IsF() {
+			if !x.IsI() {
+				return Panicf("i$y : non-integer i (%g)", x.F())
+			}
+			return padStrings(int64(x.F()), y)
 		}
 		switch xv := x.value.(type) {
 		case array:

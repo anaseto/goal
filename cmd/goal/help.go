@@ -34,7 +34,7 @@ variables       a   b   f   data    (any word matching rx/[a-zA-Z][a-zA-Z0-9]*/)
 assign          a:2 (local within lambda, global otherwise)    a::2 (global)    
 op assign       a+:1 (sugar for a:a+1)       a+::2 (sugar for a::a+2)
 list assign     (a;b;c):x   (where 2<#x)     (a;b):1 2;b -> 2
-index           x[y] is sugar for x@y (apply); x[] ~ x[*] ~ x[!#x] ~ x (arrays)
+index           x[y] or x y is sugar for x@y; x[] ~ x[*] ~ x[!#x] ~ x (arrays)
 index deep      x[y;z;...] is sugar for x.(y;z;...) (except for x in (?;and;or))
 index assign    x[y]:z is sugar for x:@[x;y;:;z]    (or . for x[y;...]:z)
 index op assign x[y]op:z is sugar for x:@[x;y;op;z] (for symbol operator)
@@ -80,6 +80,7 @@ x%y divide      3%2 -> 1.5          3 4%2 -> 2 1.5
 !i  enum        !5 -> 0 1 2 3 4
 !d  keys        !"a" "b"!1 2 -> "a" "b"
 !x  odometer    !2 3 -> (0 0 0 1 1 1;0 1 2 0 1 2)
+i!y colsplit    2!!6 -> (0 1;2 3;4 5)   2!"a" "b" "c" -> ("a" "b";,"c")
 x!y dict        d:"a" "b"!1 2;d "a" -> 1
 &I  where       &0 0 1 0 0 0 1 -> 2 6           &2 3 -> 0 0 1 1 1
 &d  keys where  &"a" "b" "e" "c"!0 1 1 0 -> "b" "e"
@@ -120,9 +121,9 @@ I_s cut string  1 3_"abcdef" -> "bc" "def"      (I ascending)
 I_y cut         2 5_!10 -> (2 3 4;5 6 7 8 9)    (I ascending)
 f_y weed out    {0 1 1 0}_4 1 5 3 -> 4 3    {x>0}_2 -3 1 -> ,-3
 $x  string      $2 3 -> "2 3"     $"text" -> "\"text\""
-i$y split       2$!6 -> (0 1;2 3;4 5)   2$"a" "b" "c" -> ("a" "b";,"c")
-s$y cast        "i"$2.3 -> 2    "i"$"ab" -> 97 98   "s"$97 98 -> "ab"
-s$y parse num   "n"$"1.5" -> 1.5        "n"$"2" "1e+7" "0b100" -> 2 1e+07 4
+i$s pad         3$"a" -> "a  "    -3$"1" "23" "456" -> "  1" " 23" "456"
+s$n cast        "i"$2.3 -> 2    "i"$"ab" -> 97 98   "s"$97 98 -> "ab"
+s$s parse num   "n"$"1.5" -> 1.5        "n"$"2" "1e+7" "0b100" -> 2 1e+07 4
 x$y binsearch   2 3 5 7$8 2 7 5 5.5 3 0 -> 4 1 4 3 3 2 0
 ?i  uniform     ?2 -> 0.6046602879796196 0.9405090880450124
 ?x  uniq        ?2 2 3 4 3 3 -> 2 3 4
@@ -138,7 +139,7 @@ r@y match       rx/[a-z]/"abc" -> 1     rx/\s/"abc" -> 0
 r@y find group  m:rx/[a-z](.)/"abc" -> "ab" "b" (m[0] whole match, m[1] group)
 r@y findN       rx/[a-z]/["abc";2] -> "a""b"    rx/[a-z]/["abc";-1] -> "a""b""c"
 f@y apply       (|)@1 2 -> 2 1 (like |[1 2] -> 2 1 or |1 2)
-d@y at key      ("a" "b"!1 2)["a"] -> 1
+d@y at key      ("a" "b"!1 2)@"a" -> 1
 x@y at          1 2 3@2 -> 3     1 2 3[2 0] -> 3 1     7 8 9@-2 -> 8
 .s  reval       ."2+3" -> 5     a:1;."a" -> panic ".s : undefined global: a"
 .e  get error   .error "msg" -> "msg"

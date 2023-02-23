@@ -639,3 +639,52 @@ func splitN(n int, sep S, y V) V {
 		return Panicf("not a string atom or array (%s)", y.Type())
 	}
 }
+
+func padStrings(x int64, y V) V {
+	switch yv := y.value.(type) {
+	case S:
+		if int64(len(yv)) < x || int64(len(yv)) < -x {
+			return NewS(padString(x, string(yv)))
+		}
+		return y
+	case *AS:
+		r := yv.reuse()
+		for i, yi := range yv.Slice {
+			r.Slice[i] = padString(x, yi)
+		}
+		return NewV(r)
+	case *AV:
+		r := yv.reuse()
+		for i, yi := range yv.Slice {
+			ri := padStrings(x, yi)
+			if ri.IsPanic() {
+				return ri
+			}
+			r.Slice[i] = ri
+		}
+		return NewV(r)
+	default:
+		return panicType("i$y", "y", y)
+	}
+}
+
+func padString(x int64, s string) string {
+	switch {
+	case int64(len(s)) < x:
+		var sb strings.Builder
+		sb.WriteString(s)
+		for i := int64(0); i < x-int64(len(s)); i++ {
+			sb.WriteByte(' ')
+		}
+		return sb.String()
+	case int64(len(s)) < -x:
+		var sb strings.Builder
+		for i := int64(0); i < -x-int64(len(s)); i++ {
+			sb.WriteByte(' ')
+		}
+		sb.WriteString(s)
+		return sb.String()
+	default:
+		return s
+	}
+}
