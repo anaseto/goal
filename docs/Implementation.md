@@ -1,4 +1,4 @@
-*Last updated: 2022-12-30*
+*Last updated: 2023-02-24*
 
 # Implementation notes
 
@@ -32,7 +32,8 @@ the surface, and I don't feel comfortable with the second.
 As a bonus, Go gives us excellent garbage collection out of the box, which is
 quite a good thing, as my knowledge about garbage collection implementation is
 limited.  I know there are GC libraries for most non-GC languages, but it's
-still one less thing to worry about.
+still one less thing to worry about. As a tradeoff, we cannot catch out of
+memory errors reliably in programs.
 
 Also, Go slices, strings and interface types are a good match for representing
 Goal's datatypes, as we discuss later on.
@@ -219,8 +220,8 @@ reusable by the reference count system for array values.
 If performance is not a concern, like for example for the APL-like bignum
 calculator [ivy](https://pkg.go.dev/robpike.io/ivy) (also written in Go!), it's
 possible to handle this more simply: all arrays are slices of type `[]Value`
-where `Value` is an interface, and operations are not vectorized, so array
-operations are deduced easily from operations on atoms.
+where `Value` is an interface, and operations are not vectorized for specific
+types, so array operations are deduced easily from operations on atoms.
 
 In our case, some things were even a bit more verbose than they would have been
 in C, because in Go type conversions have to be explicit all the time, and
