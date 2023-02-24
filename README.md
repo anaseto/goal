@@ -247,7 +247,7 @@ x.y applyN      {x+y}.2 3 -> 5    {x+y}[2;3] -> 5    (1 2;3 4)[0;1] -> 2
 NAMED VERBS HELP
 abs n     abs value     abs -3 -1.5 2 -> 3 1.5 2
 bytes s   byte-count    bytes "abc" -> 3
-ceil n    ceil/upper    ceil 1.5 -> 2   ceil "ab" -> "AB"
+ceil x    ceil/upper    ceil 1.5 -> 2   ceil "ab" -> "AB"
 error x   error         r:{?[~x=0;1%x;error "zero"]}0;?["e"~@r;.r;r] -> "zero"
 eval s    eval          a:5;eval "a+2" -> 7 (unrestricted eval)
 firsts x  mark firsts   firsts 0 0 2 3 0 2 3 4 -> 1 0 1 1 0 0 0 1
