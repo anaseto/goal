@@ -114,24 +114,24 @@ Notations:
         x,y (any other)
 
 SYNTAX HELP
-numbers         1     1.5     0b0110     1.7e-3
-strings         "text\xff\u00F\n"  "\""  "\u65e5"  (backquotes for raw strings)
+numbers         1     1.5     0b0110     1.7e-3     0xab
+strings         "text\xff\u00F\n"  "\""  "\u65e5"   (backquotes for raw strings)
 arrays          1 2 -3 4      1 "ab" -2 "cd"      (1 2;"a";3 "b";(4 2;"c");*)
-regexps         rx/[a-z]/     (see https://pkg.go.dev/regexp/syntax for syntax)
+regexps         rx/[a-z]/      (see https://pkg.go.dev/regexp/syntax for syntax)
 verbs           : + - * % ! & | ^ # _ $ ? @ . ::  (right-associative)
 adverbs         / \ '                             (left-associative)
-expressions     2*3+4 -> 14      1+|1 2 3 -> 4 3 2      +/1 2 3 -> 6
+expressions     2*3+4 -> 14     1+|1 2 3 -> 4 3 2     +/'(1 2 3;4 5 6) -> 6 15
 separator       ; or newline (except ignored around parens, brackets and braces)
-variables       a   b   f   data    (any word matching rx/[a-zA-Z][a-zA-Z0-9]*/)
+variables       a  b.c  f  data  t1    (regexp: rx/[A-Za-z]\w*(\.[A-Za-z]\w*)?/)
 assign          a:2 (local within lambda, global otherwise)    a::2 (global)    
-op assign       a+:1 (sugar for a:a+1)       a+::2 (sugar for a::a+2)
-list assign     (a;b;c):x   (where 2<#x)     (a;b):1 2;b -> 2
+op assign       a+:1 (sugar for a:a+1)       a-::2 (sugar for a::a-2)
+list assign     (a;b;c):x (where 2<#x)       (a;b):1 2;b -> 2
 index           x[y] or x y is sugar for x@y; x[] ~ x[*] ~ x[!#x] ~ x (arrays)
 index deep      x[y;z;...] is sugar for x.(y;z;...) (except for x in (?;and;or))
 index assign    x[y]:z is sugar for x:@[x;y;:;z]    (or . for x[y;...]:z)
 index op assign x[y]op:z is sugar for x:@[x;y;op;z] (for symbol operator)
-lambdas         {x+y+z}[2;3;0] -> 5     {[a;b;c]a+b+c}[1;2;3] -> 6
-projections     {x+y}[2;] 3 -> 5        (2+) 3 -> 5
+lambdas         {x+y-z}[7;3;5] -> 5     {[a;b;c]a+b-c}[7;3;5] -> 5
+projections     +[2;] 3 -> 5            (2+) 3 -> 5
 cond            ?[1;2;3] -> 2     ?[0;2;3] -> 3    ?[0;2;"";3;4] -> 4
 and/or          and[1;2] -> 2   and[1;0;3] -> 0   or[0;2] -> 2   or[0;0;0] -> 0
 sequence        [a:2;b:a+3;a+10] -> 12 (bracket block [] at start of expression)
