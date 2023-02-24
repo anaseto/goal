@@ -146,8 +146,10 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterDyad("or", VOr)
 	ctx.RegisterDyad("mod", VMod)
 	ctx.RegisterDyad("rotate", VRotate)
-	ctx.RegisterDyad("shift", VShift)
-	ctx.RegisterDyad("rshift", VRShift)
+	v := ctx.RegisterDyad("shift", VShift)
+	ctx.vNames["«"] = v.variadic()
+	v = ctx.RegisterDyad("rshift", VRShift)
+	ctx.vNames["»"] = v.variadic()
 	ctx.RegisterDyad("time", VTime)
 	ctx.RegisterDyad("goal", VGoal)
 }

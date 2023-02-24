@@ -24,7 +24,9 @@ The long answer is:
   explicit styles.  Lambdas with {} notation and default arguments (x,y,z) are
   already very concise. Having only the explicit style frees the mind of the
   cognitive load of having to choose between both.
-+ I wanted both “ASCII is easy to type” and “no digraphs”.
++ I wanted both “ASCII is easy to type” and “no digraphs”. Actually, « and »
+  are two exceptions to the ASCII rule, but they each have an ASCII keyword
+  counterpart, and I have direct access to them on my bépo keyboard layout :-)
 + I wanted some of BQN's primitives, but leaving the multi-dimensional
   complexity out, like K.
 + Last, but not least, I had some previous experience with some aspects of
