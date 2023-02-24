@@ -41,7 +41,7 @@ a:3 "a";"c" 2=a / bad type
 ?[;1;2] / empty condition
 ?[0;;2] / empty then
 ?[0;1;] / empty cond
-1 2 3^2 / not an array
+1 2 3^2 / bad type
 !-3 / negative
 !3.2 / non-integer index
 !3.2 5.2 / contains non-integer
@@ -74,7 +74,7 @@ f:{x+y};f[1;2;3] / too many arguments
 2 0_"a" / not ascending
 0 5_"a" / out of bound
 1.5#!10 / non-integer
-1 2 3#4 / not an array
+1 2 3#4 / bad type
 sub["a";"b"]#4 / type
 "a"#!10 / type
 1 rshift 2 / not an array

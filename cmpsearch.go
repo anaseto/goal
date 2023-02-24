@@ -755,7 +755,11 @@ func without(x, y V) V {
 	case array:
 		_, ok := y.value.(array)
 		if !ok {
-			return Panicf("x^y : y not an array (%s)", y.Type())
+			d, ok := y.value.(*Dict)
+			if ok {
+				return withoutDict(x, d)
+			}
+			return panicType("x^y", "y", y)
 		}
 		r := memberOf(y, x)
 		switch bres := r.value.(type) {
@@ -770,13 +774,28 @@ func without(x, y V) V {
 	}
 }
 
+func withoutDict(x V, y *Dict) V {
+	r := memberOf(NewV(y.values), x)
+	switch bres := r.value.(type) {
+	case *AB:
+		for i, b := range bres.Slice {
+			bres.Slice[i] = !b
+		}
+	}
+	return NewDict(replicate(r, NewV(y.keys)), replicate(r, NewV(y.values)))
+}
+
 // intersection implements keep x#y.
 func intersection(x, y V) V {
-	_, ok := y.value.(array)
-	if !ok {
-		return Panicf("x#y : y not an array (%s)", y.Type())
+	switch yv := y.value.(type) {
+	case array:
+		return replicate(memberOf(y, x), y)
+	case *Dict:
+		r := memberOf(NewV(yv.values), x)
+		return NewDict(replicate(r, NewV(yv.keys)), replicate(r, NewV(yv.values)))
+	default:
+		return panicType("x#y", "y", y)
 	}
-	return replicate(memberOf(y, x), y)
 }
 
 // find returns x?y.
