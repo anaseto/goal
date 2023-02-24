@@ -1,0 +1,16 @@
+life:{ / life x returns next generation
+  rotx:{y[,(#x[0])#0;x]}[x;]'(«;:;»)
+  roty:,/{y''x}[rotx;]'(«;:;»)
+  nbs8:(+/(roty))-x
+  (nbs8=3)|x&nbs8=2
+}
+blinker:(0 0 0;1 1 1;0 0 0)
+toad:(0 0 0 0;0 1 1 1;1 1 1 0;0 0 0 0)
+&/(
+  (life blinker) ~ (0 1 0;0 1 0;0 1 0)
+  (life toad) ~ (0 0 1 0;1 0 0 1;1 0 0 1;0 1 0 0)
+  (2 life/blinker) ~ blinker
+  (2 life/toad) ~ toad
+)
+/RESULT:
+1
