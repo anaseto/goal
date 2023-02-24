@@ -1,13 +1,13 @@
 Features:
 - maybe more capable io (like bidirectional pipes)
 - maybe some kind of templating/interpolation
-- maybe some kind of printf
+- maybe some kind of printf (though i$s and "prec" goal n do the job)
 - maybe add splice
-- maybe split i$s and maybe amend string @[s;I;s]
+- maybe split i!s and maybe amend string @[s;I;s]
 
 Tests:
 - improve test coverage for error messages and refactor and improve them along
-  the way
+  the way (in particular, ensure more consistency)
 - add more immutability tests to catch any possible regressions after the
   refcount overhaul, because refcounting is hard.
 - add more tests for dicts
@@ -15,10 +15,10 @@ Tests:
 
 Documentation:
 - write reference docs, or at least some some introductory guide (in addition
-  to the current help summary)
+  to the current reference card)
 
 Optimizations:
-- more special code for common op/ and op\
+- maybe special code for remaining common op/ and op\ and op'
 - maybe improve liveness analysis for code with branches, and for global
   variables
 - maybe some remaining special cases in self-search functions
