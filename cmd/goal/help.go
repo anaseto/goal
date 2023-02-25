@@ -172,7 +172,6 @@ ocount x  occur-count   ocount 3 2 5 3 2 2 7 -> 0 0 0 1 1 2 0
 panic s   panic         panic "msg" (for fatal programming-errors)
 rshift x  right shift   rshift 1 2 -> 0 1    rshift "a" "b" -> "" "a" (alias »)
 rx s      comp. regex   rx "[a-z]"  (like rx/[a-z]/ but compiled at runtime)
-seed i    rand seed     seed 42 (for non-secure pseudo-rand with ?)
 shift x   left shift    shift 1 2 -> 2 0     shift "a" "b" -> "b" ""  (alias «)
 sign n    sign          sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
 
@@ -289,5 +288,6 @@ goal[cmd;...]   runtime command cmd for goal
 The supported command forms are as follows:
 
 goal "globals"   return dictionnary with a copy of global variables
-"prec" goal n    set floating point formatting precision to n (default -1)
+"prec" goal i    set floating point formatting precision to i (default -1)
+"seed" goal i    set non-secure pseudo-rand seed to i (used by the ? verb)
 `

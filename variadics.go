@@ -120,7 +120,6 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterMonad("ocount", VOCount)
 	ctx.RegisterMonad("panic", VPanic)
 	ctx.RegisterMonad("rx", VRx)
-	ctx.RegisterMonad("seed", VSeed)
 	ctx.RegisterMonad("sign", VSign)
 	ctx.RegisterMonad("sub", VSub)
 	ctx.RegisterMonad("utf8.rcount", VUTF8RCount)
@@ -705,16 +704,6 @@ func VOr(ctx *Context, args []V) V {
 	return args[0]
 }
 
-// VSeed implements the "seed" variadic verb.
-func VSeed(ctx *Context, args []V) V {
-	switch len(args) {
-	case 1:
-		return seed(ctx, args[0])
-	default:
-		return panicRank("seed")
-	}
-}
-
 // VSet implements the "set" variadic verb.
 func VSet(ctx *Context, args []V) V {
 	switch len(args) {
@@ -832,6 +821,11 @@ func VGoal(ctx *Context, args []V) V {
 			return Panicf(`goal["prec";n]: n bad type (%s)`, y.Type())
 		}
 		return NewI(1)
+	case "seed":
+		if len(args) != 2 {
+			return panicRank(`goal`)
+		}
+		return seed(ctx, args[0])
 	default:
 		return Panicf("goal[cmd;...]: invalid cmd (%s)", cmd)
 	}

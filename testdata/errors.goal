@@ -163,7 +163,7 @@ tan[1;2] / too many arguments
 (+)?4.5 / type
 2?(+) / type
 -2?(+) / type
-seed 2.5 / not an integer
+"seed" goal 2.5 / not an integer
 time 2 / non-string cmd
 time "invalid" / unknown command
 "unix"  time 2.5 / non-integer
@@ -232,7 +232,7 @@ icount[1;2] / too many arguments
 ocount[1;2] / too many arguments
 in[1;2;3] / too many arguments
 panic[1;2] / too many arguments
-seed[1;2] / too many arguments
+goal["seed";1;2] / too many arguments
 sign[1;2] / too many arguments
 rotate[1;2;3] / too many arguments
 shift[1;2;3] / too many arguments
