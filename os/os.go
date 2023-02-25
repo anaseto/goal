@@ -9,7 +9,6 @@ import (
 	"os/exec"
 	"path"
 	"strings"
-	"unsafe"
 )
 
 // VImport implements the import dyad.
@@ -221,28 +220,6 @@ func fsayV(ctx *goal.Context, w io.Writer, x goal.V) error {
 	default:
 		_, err := w.Write(append(x.Append(ctx, nil), '\n'))
 		return err
-	}
-}
-
-// VSlurp implements the slurp monad.
-//
-// slurp x returns the contents of the file with filename x, or an error.
-func VSlurp(ctx *goal.Context, args []goal.V) goal.V {
-	switch len(args) {
-	case 1:
-		switch x := args[0].Value().(type) {
-		case goal.S:
-			bytes, err := os.ReadFile(string(x))
-			if err != nil {
-				return goal.NewError(goal.NewS(err.Error()))
-			}
-			s := *(*string)(unsafe.Pointer(&bytes))
-			return goal.NewS(s)
-		default:
-			return goal.NewPanic("slurp : non-string filename")
-		}
-	default:
-		return goal.NewPanic("slurp : too many arguments")
 	}
 }
 

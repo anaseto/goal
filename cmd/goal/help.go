@@ -229,13 +229,13 @@ close h     flush any buffered data, then close filehandle h
 import s    eval file s+".goal" and import globals with prefix s+"."
 open s      open path s for reading, returning a filehandle (h)
 print s     print "Hello, world!\n" (uses implicit $x for non-string values)
-read h      read from filehandle h until EOF or an error occurs.
+read h      read from filehandle h until EOF or an error occurs
+read s      read file named s       lines:"\n"\read["/path/to/file"]
 run s       run command            run "pwd"        run "ls" "-l"
             inherits stdin, stdout, and stderr, returns true on success
 say s       same as print, but appends a newline    say !5
 shell s     run command as-is through the shell     shell "ls -l"
             inherits stderr, returns its own standard output
-slurp s     read file named s       lines:"\n"\slurp["/path/to/file"]
 
 p import s  like import s but with prefix p+"." for globals
 m open s    open path s with mode m in "r" "r+" "w" "w+" "a" "a+"

@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"unsafe"
 
 	"codeberg.org/anaseto/goal"
 )
@@ -289,43 +290,57 @@ func VRead(ctx *goal.Context, args []goal.V) goal.V {
 		return goal.Panicf("read : too many arguments (%d)", len(args))
 	}
 	var n int64 = -1
+	y := args[0]
 	if len(args) == 2 {
 		x := args[1]
 		if x.IsI() {
 			n = x.I()
 		} else if x.IsF() {
 			if !isI(x.F()) {
-				return goal.Panicf("n read h : n not a integer (%g)", x.F())
+				return goal.Panicf("n read h : n not an integer (%g)", x.F())
 			}
 			n = int64(x.F())
 		} else {
 			s, ok := x.Value().(goal.S)
 			if ok {
-				return readString(args[0], string(s))
+				return readString(y, string(s))
 			}
-			return goal.Panicf("x read h : x not a integer nor string (%s)", x.Type())
+			return goal.Panicf("x read h : bad type for x (%s)", x.Type())
 		}
 	}
-	switch h := args[0].Value().(type) {
+	switch yv := y.Value().(type) {
+	case goal.S:
+		if len(args) != 1 {
+			break
+		}
+		bytes, err := os.ReadFile(string(yv))
+		if err != nil {
+			return goal.NewError(goal.NewS(err.Error()))
+		}
+		s := *(*string)(unsafe.Pointer(&bytes))
+		return goal.NewS(s)
 	case io.Reader:
 		if n < 0 {
 			sb := strings.Builder{}
-			_, err := io.Copy(&sb, h)
+			_, err := io.Copy(&sb, yv)
 			if err != nil {
 				return goal.Errorf("%v", err)
 			}
 			return goal.NewS(sb.String())
 		}
 		sb := strings.Builder{}
-		_, err := io.CopyN(&sb, h, n)
+		_, err := io.CopyN(&sb, yv, n)
 		s := sb.String()
 		if err != nil && (err != io.EOF || s == "") {
 			return goal.Errorf("%v", err)
 		}
 		return goal.NewS(s)
-	default:
-		return goal.Panicf("read h : h not a reader (%s)", args[0].Type())
 	}
+	p := ""
+	if len(args) == 2 {
+		p = "x "
+	}
+	return goal.Panicf("%sread y : bad type for y (%s)", p, y.Type())
 }
 
 func readString(h goal.V, delim string) goal.V {
