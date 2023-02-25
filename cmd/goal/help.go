@@ -30,7 +30,7 @@ regexps         rx/[a-z]/      (see https://pkg.go.dev/regexp/syntax for syntax)
 verbs           : + - * % ! & | ^ # _ $ ? @ . ::  (right-associative)
 adverbs         / \ '                             (left-associative)
 expressions     2*3+4 -> 14     1+|1 2 3 -> 4 3 2     +/'(1 2 3;4 5 6) -> 6 15
-separator       ; or newline (except ignored around parens, brackets and braces)
+separator       ; or newline except when ignored after {[( and before )]}
 variables       a  b.c  f  data  t1    (regexp: rx/[A-Za-z]\w*(\.[A-Za-z]\w*)?/)
 assign          a:2 (local within lambda, global otherwise)    a::2 (global)    
 op assign       a+:1 (sugar for a:a+1)       a-::2 (sugar for a::a-2)
