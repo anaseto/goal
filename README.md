@@ -237,7 +237,7 @@ r.y findN       rx/[a-z]/["abc";2] -> "a" "b" (stop at 2 matches; -1 for all)
 x.y applyN      {x+y}.2 3 -> 5    {x+y}[2;3] -> 5    (1 2;3 4)[0;1] -> 2
 
 ::x         get global  a:3;::"a" -> 3
-::[x;y]     set global  ::["a";3];a -> 3
+x::y        set global  "a"::3;a -> 3
 @[x;y;f]    amend       @[1 2 3;0 1;10+] -> 11 12 3
 @[x;y;F;z]  amend       @[8 4 5;(1 2;0);+;(10 5;-2)] -> 6 14 10
 .[x;y;f]    deep amend  .[(1 2;3 4);0 1;-] -> (1 -2;3 4)
@@ -312,7 +312,7 @@ import s    eval file s+".goal" and import globals with prefix s+"."
 open s      open path s for reading, returning a filehandle (h)
 print s     print "Hello, world!\n" (uses implicit $x for non-string values)
 read h      read from filehandle h until EOF or an error occurs
-read s      read file named s       lines:"\n"\read["/path/to/file"]
+read s      read file named s       lines:"\n"\read"/path/to/file"
 run s       run command            run "pwd"        run "ls" "-l"
             inherits stdin, stdout, and stderr, returns true on success
 say s       same as print, but appends a newline    say !5
