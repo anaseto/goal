@@ -374,3 +374,34 @@ func readString(h goal.V, delim string) goal.V {
 		return goal.Panicf("s read h : h not a reader (%s)", h.Type())
 	}
 }
+
+// VFlush implements the flush monad.
+//
+// flush h : flushes any buffered data to h.
+//
+// It returns a true value on success.
+func VFlush(ctx *goal.Context, args []goal.V) goal.V {
+	if len(args) > 1 {
+		return goal.Panicf("flush : too many arguments (%d)", len(args))
+	}
+	x := args[0]
+	switch xv := x.Value().(type) {
+	case *file:
+		err := xv.b.Writer.Flush()
+		if err != nil {
+			return goal.Errorf("%v", err)
+		}
+		return goal.NewI(1)
+	case *command:
+		if xv.b.Writer == nil {
+			return goal.NewError(goal.NewS("read-only pipe"))
+		}
+		err := xv.b.Writer.Flush()
+		if err != nil {
+			return goal.Errorf("%v", err)
+		}
+		return goal.NewI(1)
+	default:
+		return goal.Panicf("flush h : bad type for h (%s)", x.Type())
+	}
+}
