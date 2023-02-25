@@ -246,38 +246,38 @@ x.y applyN      {x+y}.2 3 -> 5    {x+y}[2;3] -> 5    (1 2;3 4)[0;1] -> 2
 .[f;x;f]    try         .[+;2 3;{"msg"}] -> 5   .[+;2 "a";{"msg"}] -> "msg"
 
 NAMED VERBS HELP
-abs n     abs value     abs -3 -1.5 2 -> 3 1.5 2
-bytes s   byte-count    bytes "abc" -> 3
-ceil x    ceil/upper    ceil 1.5 -> 2   ceil "ab" -> "AB"
-error x   error         r:{?[~x=0;1%x;error "zero"]}0;?["e"~@r;.r;r] -> "zero"
-eval s    eval          a:5;eval "a+2" -> 7 (unrestricted eval)
-firsts x  mark firsts   firsts 0 0 2 3 0 2 3 4 -> 1 0 1 1 0 0 0 1
-icount x  index-count   icount 0 0 1 -1 0 1 2 3 2 -> 3 2 2 1 (same as #'=x)
-ocount x  occur-count   ocount 3 2 5 3 2 2 7 -> 0 0 0 1 1 2 0
-panic s   panic         panic "msg" (for fatal programming-errors)
-rshift x  right shift   rshift 1 2 -> 0 1    rshift "a" "b" -> "" "a" (alias »)
-rx s      comp. regex   rx "[a-z]"  (like rx/[a-z]/ but compiled at runtime)
-shift x   left shift    shift 1 2 -> 2 0     shift "a" "b" -> "b" ""  (alias «)
-sign n    sign          sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
+abs n      abs value    abs -3 -1.5 2 -> 3 1.5 2
+bytes s    byte-count   bytes "abc" -> 3
+ceil x     ceil/upper   ceil 1.5 -> 2   ceil "ab" -> "AB"
+error x    error        r:{?[~x=0;1%x;error "zero"]}0;?["e"~@r;.r;r] -> "zero"
+eval s     eval         a:5;eval "a+2" -> 7 (unrestricted eval)
+firsts x   mark firsts  firsts 0 0 2 3 0 2 3 4 -> 1 0 1 1 0 0 0 1
+icount x   index-count  icount 0 0 1 -1 0 1 2 3 2 -> 3 2 2 1 (same as #'=x)
+ocount x   occur-count  ocount 3 2 5 3 2 2 7 -> 0 0 0 1 1 2 0
+panic s    panic        panic "msg" (for fatal programming-errors)
+rshift x   right shift  rshift 1 2 -> 0 1    rshift "a" "b" -> "" "a" (alias »)
+rx s       comp. regex  rx "[a-z]"  (like rx/[a-z]/ but compiled at runtime)
+shift x    left shift   shift 1 2 -> 2 0     shift "a" "b" -> "b" ""  (alias «)
+sign n     sign         sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
 
-x csv y     csv read    csv "1,2,3" -> ,"1" "2" "3"
+x csv y    csv read     csv "1,2,3" -> ,"1" "2" "3"
                         " " csv "1 2 3" -> ,"1" "2" "3" (" " as separator)
-            csv write   csv ,"1" "2" "3" -> "1,2,3\n"
+           csv write    csv ,"1" "2" "3" -> "1,2,3\n"
                         " " csv ,"1" "2" "3" -> "1 2 3\n"
-x in s      contained   "bc" "ac" in "abcd" -> 1 0
-x in y      member of   2 3 in 0 2 4 -> 1 0
-x nan y     fill NaNs   42 nan (1.5;sqrt -1) -> 1.5 42
-n mod n     modulus     3 mod 5 4 3 -> 2 1 0
-x rotate y  rotate      2 rotate 1 2 3 4 -> 3 4 1 2
-x rshift y  right shift "a" "b" rshift 1 2 3 -> "a" "b" 1     (alias »)
-x shift y   left shift  "a" "b" shift 1 2 3 -> 3 "a" "b"      (alias «)
+x in s     contained    "bc" "ac" in "abcd" -> 1 0
+x in y     member of    2 3 in 0 2 4 -> 1 0
+n mod n    modulus      3 mod 5 4 3 -> 2 1 0
+x nan y    fill NaNs    42 nan (1.5;sqrt -1) -> 1.5 42
+x rotate y rotate       2 rotate 1 2 3 4 -> 3 4 1 2
+x rshift y right shift  "a" "b" rshift 1 2 3 -> "a" "b" 1             (alias »)
+x shift y  left shift   "a" "b" shift 1 2 3 -> 3 "a" "b"              (alias «)
 
-sub[r;s]    regsub      sub[rx/[a-z]/;"Z"] "aBc" -> "ZBZ"
-sub[r;f]    regsub      sub[rx/[A-Z]/;_] "aBc" -> "abc"
-sub[s;s]    replace     sub["b";"B"] "abc" -> "aBc"
-sub[s;s;i]  replaceN    sub["a";"b";2] "aaa" -> "bba" (stop after 2 times)
-sub[S]      replaceS    sub["b" "d" "c" "e"] "abc" -> "ade"
-sub[S;S]    replaceS    sub["b" "c";"d" "e"] "abc" -> "ade"
+sub[r;s]   regsub       sub[rx/[a-z]/;"Z"] "aBc" -> "ZBZ"
+sub[r;f]   regsub       sub[rx/[A-Z]/;_] "aBc" -> "abc"
+sub[s;s]   replace      sub["b";"B"] "abc" -> "aBc"
+sub[s;s;i] replaceN     sub["a";"b";2] "aaa" -> "bba" (stop after 2 times)
+sub[S]     replaceS     sub["b" "d" "c" "e"] "abc" -> "ade"
+sub[S;S]   replaceS     sub["b" "c";"d" "e"] "abc" -> "ade"
 
 eval[s;n;p] eval        like eval s, but provide name n as location and prefix
                         p for globals
@@ -306,31 +306,31 @@ I/x    encode    24 60 60/1 2 3 -> 3723  2/1 1 0 -> 6
 I\x    decode    24 60 60\3723 -> 1 2 3  2\6 -> 1 1 0
 
 IO/OS HELP
-close h      flush any buffered data, then close filehandle h
-import s     eval file s+".goal" and import globals with prefix s+"."
-open s       open path s for reading, returning a filehandle (h)
-print s      print "Hello, world!\n" (works for non-string values too)
-read h       read from filehandle h until EOF or an error occurs.
-run s        run command            run "pwd"        run "ls" "-l"
-             inherits stdin, stdout, and stderr, returns true on success
-say s        same as print, but appends a newline    say !5
-shell s      run command as-is through the shell     shell "ls -l"
-             inherits stderr, returns its own standard output
-slurp s      read file named s       lines:"\n"\slurp["/path/to/file"]
+close h     flush any buffered data, then close filehandle h
+import s    eval file s+".goal" and import globals with prefix s+"."
+open s      open path s for reading, returning a filehandle (h)
+print s     print "Hello, world!\n" (uses implicit $x for non-string values)
+read h      read from filehandle h until EOF or an error occurs.
+run s       run command            run "pwd"        run "ls" "-l"
+            inherits stdin, stdout, and stderr, returns true on success
+say s       same as print, but appends a newline    say !5
+shell s     run command as-is through the shell     shell "ls -l"
+            inherits stderr, returns its own standard output
+slurp s     read file named s       lines:"\n"\slurp["/path/to/file"]
 
-p import s   like import s but with prefix p+"." for globals
-m open s     open path s with mode m in "r" "r+" "w" "w+" "a" "a+"
-             or pipe from (mode "-|") or to (mode "|-") command (s or S)
-h print s    print s to writer or filename h     "filename" print "content"
-n read h     read n bytes from reader h or until EOF, or an error occurs
-s read h     read from reader h until 1-byte s, EOF, or an error occurs
-h say s      same as print, but appends a newline
+p import s  like import s but with prefix p+"." for globals
+m open s    open path s with mode m in "r" "r+" "w" "w+" "a" "a+"
+            or pipe from (mode "-|") or to (mode "|-") command (s or S)
+x print s   print s to filehandle/name x     "filename" print "content"
+n read h    read n bytes from reader h or until EOF, or an error occurs
+s read h    read from reader h until 1-byte s, EOF, or an error occurs
+x say s     same as print, but appends a newline
 
-os.STDIN     standard input filehandle
-os.STDOUT    standard output filehandle
-os.STDERR    standard error filehandle
-os.ARGS      command-line arguments, starting with script name
-os.ENV       keys!values strings dictionnary representing environment
+os.STDIN    standard input filehandle
+os.STDOUT   standard output filehandle
+os.STDERR   standard error filehandle
+os.ARGS     command-line arguments, starting with script name
+os.ENV      keys!values strings dictionnary representing environment
 
 TIME HELP
 time cmd              time command with current time
@@ -341,30 +341,28 @@ time[cmd;t;fmt;loc]   time command with time t in given format and location
 Time t should be either an integer representing unix epochtime, or a string
 in the given format (RFC3339 format layout "2006-01-02T15:04:05Z07:00" is the
 default). See https://pkg.go.dev/time for information on layouts and locations,
-as goal uses the same conventions as Go's time package.
+as goal uses the same conventions as Go's time package. Supported values for
+cmd are as follows:
 
-Currently available commands:
-        "day"           day number (i)
-        "date"          year, month, day (I)
-        "clock"         hour, minute, second (I)
-        "hour"          0-23 hour (i)
-        "minute"        0-59 minute (i)
-        "second"        0-59 second (i)
-        "unix"          unix epoch time (i)
-        "unixmilli"     unix (millisecond version, only for current time) (i)
-        "unixmicro"     unix (microsecond version, only for current time) (i)
-        "unixnano"      unix (nanosecond version, only for current time) (i)
-        "year"          year (i)
-        "yearday"       1-365/6 year day (i)
-        "week"          year, week (I)
-        "weekday"       0-7 weekday (starts from Sunday) (i)
-        format (s)      format time using given layout (s)
+    cmd (s)       result (type)
+    ------        -------------
+    "day"         day number (i)
+    "date"        year, month, day (I)
+    "clock"       hour, minute, second (I)
+    "hour"        0-23 hour (i)
+    "minute"      0-59 minute (i)
+    "second"      0-59 second (i)
+    "unix"        unix epoch time (i)
+    "unixmilli"   unix (millisecond version, only for current time) (i)
+    "unixmicro"   unix (microsecond version, only for current time) (i)
+    "unixnano"    unix (nanosecond version, only for current time) (i)
+    "year"        year (i)
+    "yearday"     1-365/6 year day (i)
+    "week"        year, week (I)
+    "weekday"     0-7 weekday (starts from Sunday) (i)
+    format (s)    format time using given layout (s)
 
 RUNTIME HELP
-goal[cmd;...]   runtime command cmd for goal
-
-The supported command forms are as follows:
-
 goal "globals"   return dictionnary with a copy of global variables
 "prec" goal i    set floating point formatting precision to i (default -1)
 "seed" goal i    set non-secure pseudo-rand seed to i (used by the ? verb)
