@@ -250,10 +250,10 @@ n read h    read n bytes from reader h or until EOF, or an error occurs
 s read h    read from reader h until 1-byte s, EOF, or an error occurs
 x say s     same as print, but appends a newline
 
-ARGS       command-line arguments, starting with script name
-STDIN      standard input filehandle (buffered)
-STDOUT     standard output filehandle (buffered)
-STDERR     standard error filehandle (buffered)
+ARGS        command-line arguments, starting with script name
+STDIN       standard input filehandle (buffered)
+STDOUT      standard output filehandle (buffered)
+STDERR      standard error filehandle (buffered)
 `
 
 const helpTime = `
