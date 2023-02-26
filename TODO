@@ -4,6 +4,7 @@ Features:
 - maybe some kind of printf (though i$s and "prec" goal n do the job)
 - maybe add splice
 - maybe split i!s and maybe amend string @[s;I;s]
+- maybe remove icount if #'= gets optimized to a single operation.
 
 Tests:
 - improve test coverage for error messages and refactor and improve them along
