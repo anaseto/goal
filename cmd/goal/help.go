@@ -7,13 +7,13 @@ TOPICS HELP
 Type help TOPIC or h TOPIC where TOPIC is one of:
 
 "syn"   syntax
-"types" types
+"types" value types
 "+"     verbs (like +*-%,)
 "nv"    named verbs (like in, sign)
 "'"     adverbs ('/\)
-"io"    io functions (slurp, say)
-"time"  time functions
-"goal"  runtime functions
+"io"    IO functions (like say, open, read)
+"time"  time handling
+"goal"  runtime system
 
 Notations:
         s (string) f (function) F (2-args function)
@@ -148,6 +148,10 @@ s.y substr      "abcdef"[2;3] -> "cde" (s[offset;length])
 r.y findN       rx/[a-z]/["abc";2] -> "a""b"    rx/[a-z]/["abc";-1] -> "a""b""c"
 r.y findN group rx/[a-z](.)/["abcdef";2] -> ("ab" "b";"cd" "d")
 x.y applyN      {x+y}.2 3 -> 5    {x+y}[2;3] -> 5    (1 2;3 4)[0;1] -> 2
+«x  shift       «1 2 -> 2 0    «"a" "b" -> "b" ""  (ASCII alternative: shift x)
+x«y shift       "a" "b"«1 2 3 -> 3 "a" "b"
+»x  rshift      »1 2 -> 0 1    »"a" "b" -> "" "a"  (ASCII alternative: rshift x)
+x»y rshift      "a" "b"»1 2 3 -> "a" "b" 1
 
 ::x         get global  a:3;::"a" -> 3
 x::y        set global  "a"::3;a -> 3
@@ -170,9 +174,7 @@ firsts x   mark firsts  firsts 0 0 2 3 0 2 3 4 -> 1 0 1 1 0 0 0 1
 icount x   index-count  icount 0 0 1 -1 0 1 2 3 2 -> 3 2 2 1 (same as #'=x)
 ocount x   occur-count  ocount 3 2 5 3 2 2 7 -> 0 0 0 1 1 2 0
 panic s    panic        panic "msg" (for fatal programming-errors)
-rshift x   right shift  rshift 1 2 -> 0 1    rshift "a" "b" -> "" "a" (alias »)
 rx s       comp. regex  rx "[a-z]"  (like rx/[a-z]/ but compiled at runtime)
-shift x    left shift   shift 1 2 -> 2 0     shift "a" "b" -> "b" ""  (alias «)
 sign n     sign         sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
 
 x csv y    csv read     csv "1,2,3" -> ,"1" "2" "3"
@@ -183,9 +185,7 @@ x in s     contained    "bc" "ac" in "abcd" -> 1 0
 x in y     member of    2 3 in 0 2 4 -> 1 0
 n mod n    modulus      3 mod 5 4 3 -> 2 1 0
 x nan y    fill NaNs    42 nan (1.5;sqrt -1) -> 1.5 42
-x rotate y rotate       2 rotate 1 2 3 4 -> 3 4 1 2
-x rshift y right shift  "a" "b" rshift 1 2 3 -> "a" "b" 1             (alias »)
-x shift y  left shift   "a" "b" shift 1 2 3 -> 3 "a" "b"              (alias «)
+i rotate y rotate       2 rotate 1 2 3 4 -> 3 4 1 2
 
 sub[r;s]   regsub       sub[rx/[a-z]/;"Z"] "aBc" -> "ZBZ"
 sub[r;f]   regsub       sub[rx/[A-Z]/;_] "aBc" -> "abc"
@@ -236,16 +236,16 @@ read h      read from filehandle h until EOF or an error occurs
 read s      read file named s       lines:"\n"\read"/path/to/file"
 run s       run command            run "pwd"        run "ls" "-l"
             inherits stdin, stdout, and stderr, returns true on success
-say s       same as print, but appends a newline    say !5
-shell s     run command as-is through the shell     shell "ls -l"
+say s       same as print, but appends a newline        say !5
+shell s     run command as-is through the shell         shell "ls -l"
             inherits stderr, returns its own standard output
 
 x env s     sets environment variable x to s, or returns an error.
 x env 0     unset environment variable x, or clear environment if x~""
-p import s  like import s but with prefix p+"." for globals
+x import s  like import s but with prefix x+"." for globals
 x open s    open path s with mode x in "r" "r+" "w" "w+" "a" "a+"
             or pipe from (mode "-|") or to (mode "|-") command (s or S)
-x print s   print s to filehandle/name x     "filename" print "content"
+x print s   print s to filehandle/name x        "/path/to/file" print "content"
 n read h    read n bytes from reader h or until EOF, or an error occurs
 s read h    read from reader h until 1-byte s, EOF, or an error occurs
 x say s     same as print, but appends a newline
