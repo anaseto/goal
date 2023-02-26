@@ -227,6 +227,8 @@ const helpIO = `
 IO/OS HELP
 close h     flush any buffered data, then close filehandle h
 flush h     flush any buffered data for filehandle h
+env s       get environment variable s, or an error if unset
+            returns a dictionnary representing the whole environment for s~""
 import s    eval file s+".goal" and import globals with prefix s+"."
 open s      open path s for reading, returning a filehandle (h)
 print s     print "Hello, world!\n" (uses implicit $x for non-string values)
@@ -238,19 +240,20 @@ say s       same as print, but appends a newline    say !5
 shell s     run command as-is through the shell     shell "ls -l"
             inherits stderr, returns its own standard output
 
+x env s     sets environment variable x to s, or returns an error.
+x env 0     unset environment variable x, or clear environment if x~""
 p import s  like import s but with prefix p+"." for globals
-m open s    open path s with mode m in "r" "r+" "w" "w+" "a" "a+"
+x open s    open path s with mode x in "r" "r+" "w" "w+" "a" "a+"
             or pipe from (mode "-|") or to (mode "|-") command (s or S)
 x print s   print s to filehandle/name x     "filename" print "content"
 n read h    read n bytes from reader h or until EOF, or an error occurs
 s read h    read from reader h until 1-byte s, EOF, or an error occurs
 x say s     same as print, but appends a newline
 
-os.STDIN    standard input filehandle
-os.STDOUT   standard output filehandle
-os.STDERR   standard error filehandle
-os.ARGS     command-line arguments, starting with script name
-os.ENV      keys!values strings dictionnary representing environment
+STDIN    standard input filehandle
+STDOUT   standard output filehandle
+STDERR   standard error filehandle
+ARGS     command-line arguments, starting with script name
 `
 
 const helpTime = `

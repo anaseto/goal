@@ -48,7 +48,7 @@ func Cmd(ctx *goal.Context, cfg Config) {
 		defer pprof.StopCPUProfile()
 	}
 	args := flag.Args()
-	ctx.AssignGlobal("os.ARGS", goal.NewAS(args))
+	ctx.AssignGlobal("ARGS", goal.NewAS(args))
 	if *optD {
 		defer runDebug(ctx, cfg)
 	}

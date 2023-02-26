@@ -17,16 +17,16 @@ func registerVariadics(ctx *goal.Context) {
 	ctx.RegisterMonad("flush", gos.VFlush)
 	ctx.RegisterMonad("run", gos.VRun)
 	ctx.RegisterMonad("shell", gos.VShell)
+	ctx.RegisterDyad("env", gos.VEnv)
 	ctx.RegisterDyad("import", gos.VImport)
 	ctx.RegisterDyad("open", gos.VOpen)
 	ctx.RegisterDyad("print", gos.VPrint)
 	ctx.RegisterDyad("read", gos.VRead)
 	ctx.RegisterDyad("say", gos.VSay)
 
-	ctx.AssignGlobal("os.ENV", gos.Environ())
-	ctx.AssignGlobal("os.STDOUT", gos.Stdout)
-	ctx.AssignGlobal("os.STDERR", gos.Stderr)
-	ctx.AssignGlobal("os.STDIN", gos.Stdin)
+	ctx.AssignGlobal("STDOUT", gos.Stdout)
+	ctx.AssignGlobal("STDERR", gos.Stderr)
+	ctx.AssignGlobal("STDIN", gos.Stdin)
 }
 
 func getHelp() map[string]string {
