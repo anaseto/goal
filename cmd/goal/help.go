@@ -130,7 +130,7 @@ x$y binsearch   2 3 5 7$8 2 7 5 5.5 3 0 -> 4 1 4 3 3 2 0   (x ascending)
 ?x  uniq        ?2 2 3 4 3 3 -> 2 3 4
 i?y roll        5?100 -> 10 51 21 51 37
 i?y deal        -5?100 -> 19 26 0 73 94 (always distinct)
-s?r rindex      "abcde"?rx/b../ -> 1 4
+s?r rindex      "abcde"?rx/b../ -> 1 3      (offset;length)
 s?s index       "a = a + 1"?"=" "+" -> 2 6
 d?y find key    ("a" "b"!3 4)?4 -> "b"      ("a" "b"!3 4)?5 -> ""
 x?y find        3 2 1?2 -> 1    3 2 1?0 -> 3

@@ -903,7 +903,7 @@ func findS(s S, y V) V {
 		if loc == nil {
 			return NewAI([]int64{int64(len(s)), int64(len(s))})
 		}
-		return NewAI([]int64{int64(loc[0]), int64(loc[1])})
+		return NewAI([]int64{int64(loc[0]), int64(loc[1] - loc[0])})
 	case *AS:
 		r := make([]int64, yv.Len())
 		for i, ss := range yv.Slice {

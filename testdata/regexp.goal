@@ -16,8 +16,8 @@ sub[rx/(.)(.)/;"$2$1"] "aB" / "Ba"
 'r:rx`[A-Z]`;sub[r;_]"aBbcC" "a" / "abbcc" "a"
 'r:rx`[A-Z]`;sub[r;bytes]"aBbcC" "a" / "a1bc1" "a"
 'r:rx`[A-Z]`;sub[r;_]("aBbcC" "a";"B") / ("abbcc" "a";"b")
-"abcde"?rx`[bc]` / 1 2
-"abcde"?rx`b..` / 1 4
+"abcde"?rx`[bc]` / 1 1
+"abcde"?rx`b..` / 1 3
 "abcde"?rx`[BC]` / 5 5
 rx[`[a-z]`] "abc" / 1
 rx/[a-z]/ "abc" / 1
