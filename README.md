@@ -307,9 +307,9 @@ I\x    decode    24 60 60\3723 -> 1 2 3  2\6 -> 1 1 0
 
 IO/OS HELP
 close h     flush any buffered data, then close filehandle h
-flush h     flush any buffered data for filehandle h
 env s       get environment variable s, or an error if unset
             returns a dictionnary representing the whole environment for s~""
+flush h     flush any buffered data for filehandle h
 import s    read/eval wrapper roughly equivalent to eval[read s;s;s+"."]
 open s      open path s for reading, returning a filehandle (h)
 print s     print "Hello, world!\n" (uses implicit $x for non-string values)
