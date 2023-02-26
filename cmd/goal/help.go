@@ -169,7 +169,7 @@ abs n      abs value    abs -3 -1.5 2 -> 3 1.5 2
 bytes s    byte-count   bytes "abc" -> 3
 ceil x     ceil/upper   ceil 1.5 -> 2   ceil "ab" -> "AB"
 error x    error        r:{?[~x=0;1%x;error "zero"]}0;?["e"~@r;.r;r] -> "zero"
-eval s     eval         a:5;eval "a+2" -> 7 (unrestricted eval)
+eval s     comp/run     a:5;eval "a+2" -> 7         (unrestricted variant of .s)
 firsts x   mark firsts  firsts 0 0 2 3 0 2 3 4 -> 1 0 1 1 0 0 0 1
 icount x   index-count  icount 0 0 1 -1 0 1 2 3 2 -> 3 2 2 1 (same as #'=x)
 ocount x   occur-count  ocount 3 2 5 3 2 2 7 -> 0 0 0 1 1 2 0
@@ -185,7 +185,7 @@ x in s     contained    "bc" "ac" in "abcd" -> 1 0
 x in y     member of    2 3 in 0 2 4 -> 1 0
 n mod n    modulus      3 mod 5 4 3 -> 2 1 0
 x nan y    fill NaNs    42 nan (1.5;sqrt -1) -> 1.5 42
-i rotate y rotate       2 rotate 1 2 3 4 -> 3 4 1 2
+i rotate y rotate       2 rotate 1 2 3 -> 3 1 2       -2 rotate 1 2 3 -> 2 3 1
 
 sub[r;s]   regsub       sub[rx/[a-z]/;"Z"] "aBc" -> "ZBZ"
 sub[r;f]   regsub       sub[rx/[A-Z]/;_] "aBc" -> "abc"
@@ -194,8 +194,8 @@ sub[s;s;i] replaceN     sub["a";"b";2] "aaa" -> "bba" (stop after 2 times)
 sub[S]     replaceS     sub["b" "d" "c" "e"] "abc" -> "ade"
 sub[S;S]   replaceS     sub["b" "c";"d" "e"] "abc" -> "ade"
 
-eval[s;n;p] eval        like eval s, but provide name n as location and prefix
-                        p for globals
+eval[s;loc;pfx]         like eval s, but provide name loc as location (usually
+                        a filename), and prefix pfx+"." for globals
 
 MATH: acos, asin, atan, cos, exp, log, round, sin, sqrt, tan, nan
 UTF-8: utf8.rcount (number of code points), utf8.valid
@@ -229,7 +229,7 @@ close h     flush any buffered data, then close filehandle h
 flush h     flush any buffered data for filehandle h
 env s       get environment variable s, or an error if unset
             returns a dictionnary representing the whole environment for s~""
-import s    eval file s+".goal" and import globals with prefix s+"."
+import s    read/eval wrapper roughly equivalent to eval[read s;s;s+"."]
 open s      open path s for reading, returning a filehandle (h)
 print s     print "Hello, world!\n" (uses implicit $x for non-string values)
 read h      read from filehandle h until EOF or an error occurs
@@ -242,7 +242,7 @@ shell s     run command as-is through the shell         shell "ls -l"
 
 x env s     sets environment variable x to s, or returns an error.
 x env 0     unset environment variable x, or clear environment if x~""
-x import s  like import s but with prefix x+"." for globals
+x import s  read/eval wrapper roughly equivalent to eval[read s;s;x+"."]
 x open s    open path s with mode x in "r" "r+" "w" "w+" "a" "a+"
             or pipe from (mode "-|") or to (mode "|-") command (s or S)
 x print s   print s to filehandle/name x        "/path/to/file" print "content"
