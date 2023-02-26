@@ -138,7 +138,6 @@ x?y find        3 2 1?2 -> 1    3 2 1?0 -> 3
 s@y substr      "abcdef"@2  -> "cdef" (s[offset])
 r@y match       rx/[a-z]/"abc" -> 1     rx/\s/"abc" -> 0
 r@y find group  m:rx/[a-z](.)/"abc" -> "ab" "b" (m[0] whole match, m[1] group)
-r@y findN       rx/[a-z]/["abc";2] -> "a""b"    rx/[a-z]/["abc";-1] -> "a""b""c"
 f@y apply       (|)@1 2 -> 2 1 (like |[1 2] -> 2 1 or |1 2)
 d@y at key      ("a" "b"!1 2)@"a" -> 1
 x@y at          1 2 3@2 -> 3     1 2 3[2 0] -> 3 1     7 8 9@-2 -> 8
@@ -146,7 +145,8 @@ x@y at          1 2 3@2 -> 3     1 2 3[2 0] -> 3 1     7 8 9@-2 -> 8
 .e  get error   .error "msg" -> "msg"
 .d  values      ."a" "b"!1 2 -> 1 2
 s.y substr      "abcdef"[2;3] -> "cde" (s[offset;length])
-r.y findN       rx/[a-z]/["abc";2] -> "a" "b" (stop at 2 matches; -1 for all)
+r.y findN       rx/[a-z]/["abc";2] -> "a""b"    rx/[a-z]/["abc";-1] -> "a""b""c"
+r.y findN group rx/[a-z](.)/["abcdef";2] -> ("ab" "b";"cd" "d")
 x.y applyN      {x+y}.2 3 -> 5    {x+y}[2;3] -> 5    (1 2;3 4)[0;1] -> 2
 
 ::x         get global  a:3;::"a" -> 3
