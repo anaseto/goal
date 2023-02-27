@@ -183,7 +183,7 @@ x csv y    csv read     csv "1,2,3" -> ,"1" "2" "3"
 x in s     contained    "bc" "ac" in "abcd" -> 1 0
 x in y     member of    2 3 in 0 2 4 -> 1 0
 n mod n    modulus      3 mod 5 4 3 -> 2 1 0
-x nan y    fill NaNs    42 nan (1.5;sqrt -1) -> 1.5 42
+n nan n    fill NaNs    42 nan (1.5;sqrt -1) -> 1.5 42
 i rotate y rotate       2 rotate 1 2 3 -> 3 1 2       -2 rotate 1 2 3 -> 2 3 1
 
 sub[r;s]   regsub       sub[rx/[a-z]/;"Z"] "aBc" -> "ZBZ"
