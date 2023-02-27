@@ -96,7 +96,7 @@ func Cmd(ctx *goal.Context, cfg Config) {
 		os.Exit(1)
 	}
 	if r.IsError() {
-		fmt.Fprint(os.Stderr, r.Error())
+		fmt.Fprint(os.Stderr, r.Sprint(ctx))
 		os.Exit(1)
 	}
 }

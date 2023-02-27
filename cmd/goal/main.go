@@ -15,13 +15,13 @@ func main() {
 func registerVariadics(ctx *goal.Context) {
 	ctx.RegisterMonad("close", gos.VClose)
 	ctx.RegisterMonad("flush", gos.VFlush)
-	ctx.RegisterMonad("run", gos.VRun)
 	ctx.RegisterMonad("shell", gos.VShell)
 	ctx.RegisterDyad("env", gos.VEnv)
 	ctx.RegisterDyad("import", gos.VImport)
 	ctx.RegisterDyad("open", gos.VOpen)
 	ctx.RegisterDyad("print", gos.VPrint)
 	ctx.RegisterDyad("read", gos.VRead)
+	ctx.RegisterDyad("run", gos.VRun)
 	ctx.RegisterDyad("say", gos.VSay)
 
 	ctx.AssignGlobal("STDOUT", gos.Stdout)

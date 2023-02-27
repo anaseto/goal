@@ -233,11 +233,11 @@ open s      open path s for reading, returning a filehandle (h)
 print s     print "Hello, world!\n" (uses implicit $x for non-string values)
 read h      read from filehandle h until EOF or an error occurs
 read s      read file named s       lines:"\n"\read"/path/to/file"
-run s       run command            run "pwd"        run "ls" "-l"
+run s       run command s or S      run "pwd"        run "ls" "-l"
             inherits stdin, stdout, and stderr, returns true on success
 say s       same as print, but appends a newline        say !5
 shell s     run command as-is through the shell         shell "ls -l"
-            inherits stderr, returns its own standard output
+            inherits stderr, returns its own standard output or an error
 
 x env s     sets environment variable x to s, or returns an error.
 x env 0     unset environment variable x, or clear environment if x~""
@@ -247,6 +247,8 @@ x open s    open path s with mode x in "r" "r+" "w" "w+" "a" "a+"
 x print s   print s to filehandle/name x        "/path/to/file" print "content"
 n read h    read n bytes from reader h or until EOF, or an error occurs
 s read h    read from reader h until 1-byte s, EOF, or an error occurs
+x run s     run command s or S with input string x as stdin
+            inherits stderr, returns its own standard output or an error
 x say s     same as print, but appends a newline
 
 ARGS        command-line arguments, starting with script name

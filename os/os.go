@@ -243,45 +243,70 @@ func VShell(ctx *goal.Context, args []goal.V) goal.V {
 	}
 	cmd := exec.Command("/bin/sh", "-c", cmds)
 	cmd.Stderr = os.Stderr
-	bytes, err := cmd.Output()
+	var sb strings.Builder
+	cmd.Stdout = &sb
+	err := cmd.Run()
 	if err != nil {
-		return goal.NewError(goal.NewS(err.Error()))
+		return goal.Errorf("%v", err)
 	}
-	return goal.NewS(string(bytes))
+	return goal.NewS(sb.String())
 }
 
 // VRun implements the run monad.
 //
 // run s : run command s, with arguments if s is an array.
 //
-// Standard input, output, and error are inherited from the parent.
-// It returns a true value on success, and an error otherwise.
+// x run s : run command s, with input string x.
+//
+// In the first form, standard input, output, and error are inherited from the
+// parent. It returns a true value on success, and an error otherwise.
+//
+// In the second form, only standard error is inherited, and the command's
+// standard output is returned.
 func VRun(ctx *goal.Context, args []goal.V) goal.V {
 	if len(args) == 0 {
 		return goal.NewPanic("run : missing command string")
 	}
-	if len(args) > 1 {
-		return goal.Panicf("run : too many arguments (%d)", len(args))
-	}
 	var cmds []string
-	switch arg := args[len(args)-1].Value().(type) {
+	switch arg := args[0].Value().(type) {
 	case goal.S:
 		cmds = []string{string(arg)}
 	case *goal.AS:
 		cmds = arg.Slice
 	default:
-		return goal.Panicf("run s : bad type (%s)", arg.Type())
+		return goal.Panicf("run : non-string command (%s)", arg.Type())
 	}
 	if len(cmds) == 0 {
-		return goal.NewPanic("run s : empty command")
+		return goal.NewPanic("run : empty command")
 	}
-	cmd := exec.Command(cmds[0], cmds[1:]...)
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-	cmd.Stdin = os.Stdin
-	err := cmd.Run()
-	if err != nil {
-		return goal.NewError(goal.NewS(err.Error()))
+	switch len(args) {
+	case 1:
+		cmd := exec.Command(cmds[0], cmds[1:]...)
+		cmd.Stderr = os.Stderr
+		cmd.Stdout = os.Stdout
+		cmd.Stdin = os.Stdin
+		err := cmd.Run()
+		if err != nil {
+			return goal.Errorf("%v", err)
+		}
+		return goal.NewI(1)
+	case 2:
+		x := args[1]
+		s, ok := x.Value().(goal.S)
+		if !ok {
+			return goal.Panicf("x run s : bad type for x (%s)", x.Type())
+		}
+		cmd := exec.Command(cmds[0], cmds[1:]...)
+		cmd.Stderr = os.Stderr
+		cmd.Stdin = strings.NewReader(string(s))
+		var sb strings.Builder
+		cmd.Stdout = &sb
+		err := cmd.Run()
+		if err != nil {
+			return goal.Errorf("%v", err)
+		}
+		return goal.NewS(sb.String())
+	default:
+		return goal.Panicf("run : too many arguments (%d)", len(args))
 	}
-	return goal.NewI(1)
 }
