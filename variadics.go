@@ -109,6 +109,10 @@ func (ctx *Context) initVariadics() {
 	ctx.variadicsNames = append(ctx.variadicsNames, "::")
 	ctx.vNames["::"] = variadic(len(ctx.variadics) - 1)
 	ctx.keywords = make(map[string]NameType, 32)
+
+	// special form variadics
+	ctx.registerVariadic("icount", VICount)
+
 	// monads
 	ctx.RegisterMonad("abs", VAbs)
 	ctx.RegisterMonad("bytes", VBytes)
@@ -116,7 +120,6 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterMonad("error", VError)
 	ctx.RegisterMonad("eval", VEval)
 	ctx.RegisterMonad("firsts", VFirsts)
-	ctx.RegisterMonad("icount", VICount)
 	ctx.RegisterMonad("ocount", VOCount)
 	ctx.RegisterMonad("panic", VPanic)
 	ctx.RegisterMonad("rx", VRx)
@@ -634,7 +637,7 @@ func VFirsts(ctx *Context, args []V) V {
 	}
 }
 
-// VICount implements the "icount" variadic verb.
+// VICount implements the "icount" variadic verb (#'=).
 func VICount(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:

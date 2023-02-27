@@ -117,6 +117,14 @@ func (ctx *Context) RegisterMonad(name string, vf VariadicFun) V {
 	return newVariadic(variadic(id))
 }
 
+func (ctx *Context) registerVariadic(name string, vf VariadicFun) V {
+	id := len(ctx.variadics)
+	ctx.variadics = append(ctx.variadics, vf)
+	ctx.variadicsNames = append(ctx.variadicsNames, name)
+	ctx.vNames[name] = variadic(id)
+	return newVariadic(variadic(id))
+}
+
 // RegisterDyad adds a variadic function to the context, and generates a new
 // dyadic keyword for that variadic (parsing will search for a left argument).
 // The variadic is also returned as a value.

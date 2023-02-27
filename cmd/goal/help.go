@@ -171,7 +171,6 @@ ceil x     ceil/upper   ceil 1.5 -> 2   ceil "ab" -> "AB"
 error x    error        r:{?[~x=0;1%x;error "zero"]}0;?["e"~@r;.r;r] -> "zero"
 eval s     comp/run     a:5;eval "a+2" -> 7         (unrestricted variant of .s)
 firsts x   mark firsts  firsts 0 0 2 3 0 2 3 4 -> 1 0 1 1 0 0 0 1
-icount x   index-count  icount 0 0 1 -1 0 1 2 3 2 -> 3 2 2 1 (same as #'=x)
 ocount x   occur-count  ocount 3 2 5 3 2 2 7 -> 0 0 0 1 1 2 0
 panic s    panic        panic "msg" (for fatal programming-errors)
 rx s       comp. regex  rx "[a-z]"  (like rx/[a-z]/ but compiled at runtime)

@@ -143,6 +143,8 @@ type astLambda struct {
 	EndPos   int
 }
 
+type astNop struct{}
+
 func (es exprs) node()                {}
 func (t *astToken) node()             {}
 func (a *astReturn) node()            {}
@@ -160,9 +162,12 @@ func (a *astApplyN) node()            {}
 func (l *astList) node()              {}
 func (b *astSeq) node()               {}
 func (b *astLambda) node()            {}
+func (n *astNop) node()               {}
 
 func nonEmpty(e expr) bool {
 	switch e := e.(type) {
+	case *astNop:
+		return false
 	case exprs:
 		return len(e) > 0
 	default:

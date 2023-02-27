@@ -323,9 +323,7 @@ func scanfx(ctx *Context, f, x V) V {
 	}
 	switch xv := x.value.(type) {
 	case *Dict:
-		r := scanfx(ctx, f, NewV(xv.values))
-		r.InitRC()
-		return NewV(&Dict{keys: xv.keys, values: r.value.(array)})
+		return newDictValues(xv.keys, scanfx(ctx, f, NewV(xv.values)))
 	case array:
 		if xv.Len() == 0 {
 			return NewAV(nil)
@@ -425,9 +423,7 @@ func scan3(ctx *Context, args []V) V {
 func scanxfy(ctx *Context, x, f, y V) V {
 	switch yv := y.value.(type) {
 	case *Dict:
-		r := scanxfy(ctx, x, f, NewV(yv.values))
-		r.InitRC()
-		return NewV(&Dict{keys: yv.keys, values: r.value.(array)})
+		return newDictValues(yv.keys, scanxfy(ctx, x, f, NewV(yv.values)))
 	case array:
 		if yv.Len() == 0 {
 			return NewAV(nil)
@@ -599,9 +595,7 @@ func each2(ctx *Context, f, x V) V {
 	}
 	switch xv := x.value.(type) {
 	case *Dict:
-		r := eachfx(ctx, f, xv.values)
-		r.InitRC()
-		return NewV(&Dict{keys: xv.keys, values: r.value.(array)})
+		return newDictValues(xv.keys, eachfx(ctx, f, xv.values))
 	case array:
 		return eachfx(ctx, f, xv)
 	default:

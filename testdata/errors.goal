@@ -228,7 +228,6 @@ ceil[1;2] / too many arguments
 error[1;2] / too many arguments
 eval[1;2;3;4] / too many arguments
 firsts[1;2] / too many arguments
-icount[1;2] / too many arguments
 ocount[1;2] / too many arguments
 in[1;2;3] / too many arguments
 panic[1;2] / too many arguments

@@ -281,6 +281,8 @@ func (c *compiler) doExpr(e expr, n int) error {
 	switch e := e.(type) {
 	case exprs:
 		return c.doExprs(e, n)
+	case *astNop:
+		return nil
 	case *astToken:
 		err := c.doToken(e, n)
 		if err != nil {

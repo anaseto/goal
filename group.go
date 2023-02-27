@@ -144,7 +144,7 @@ func icount(x V) V {
 		if Length(x) == 0 {
 			return NewAI(nil)
 		}
-		return Panicf("icount x : x not an integer array (%s)", x.Type())
+		return Panicf("= x : x not an integer array (%s)", x.Type())
 	}
 }
 
