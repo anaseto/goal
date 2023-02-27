@@ -663,6 +663,9 @@ func pDoExprs(es exprs) {
 		if i == len(es)-1 {
 			break
 		}
+		if i == 0 {
+			continue
+		}
 		switch e := e.(type) {
 		case *astToken:
 			if e.Text != "=" {
