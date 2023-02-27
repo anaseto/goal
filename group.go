@@ -76,7 +76,7 @@ func group(x V) V {
 	case *AF:
 		z := toAI(xv)
 		if z.IsPanic() {
-			return z
+			return ppanic("=x : ", z)
 		}
 		return group(z)
 	case *Dict:
@@ -135,7 +135,7 @@ func icount(x V) V {
 	case *AF:
 		z := toAI(xv)
 		if z.IsPanic() {
-			return z
+			return ppanic("=x : ", z)
 		}
 		return icount(z)
 	case *Dict:
