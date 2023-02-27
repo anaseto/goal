@@ -80,11 +80,10 @@ func (f *file) Close() error {
 }
 
 type command struct {
-	c      *exec.Cmd
-	b      *bufio.ReadWriter
-	mode   string // -| or |-
-	stdin  io.WriteCloser
-	stdout io.ReadCloser
+	c     *exec.Cmd
+	b     *bufio.ReadWriter
+	mode  string // -| or |-
+	stdin io.WriteCloser
 }
 
 func cmdToAS(cmd *command) goal.V {
@@ -144,9 +143,6 @@ func (cmd *command) Close() error {
 	}
 	if cmd.stdin != nil {
 		cmd.stdin.Close()
-	}
-	if cmd.stdout != nil {
-		cmd.stdout.Close()
 	}
 	return cmd.c.Wait()
 }
@@ -238,7 +234,6 @@ func openPipe(m string, c goal.V) goal.V {
 			return goal.Errorf("%v", err)
 		}
 		cmd.Stdin = os.Stdin
-		r.stdout = rc
 		r.b = bufio.NewReadWriter(bufio.NewReader(rc), nil)
 	}
 	cmd.Stderr = os.Stderr
