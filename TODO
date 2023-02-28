@@ -1,5 +1,4 @@
 Features:
-- maybe some kind of templating/interpolation
 - maybe add bidirectional pipes in open
 - maybe some kind of printf (though i$s and "prec" goal n do the job)
 - maybe add splice

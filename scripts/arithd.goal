@@ -168,9 +168,9 @@ rmbl:sub[rx/\n\s*\n/;"\n"]
 
 genOp:{[opname;opsym] / globals o,op,xt,h
   o::opname; op::opsym; ts:olts[::o]
-  h say "\n"_qq/
-    \/\/ $o returns x${op}y.
-    func $o(x, y V) V {/
+  h say "\n"_qq|
+    // $o returns x${op}y.
+    func $o(x, y V) V {|
   h say'{sub[("{XT}";x;"{O}";o)][
       qq/if x.Is$x() { return $o${x}V(x.$x(), y) }/
   ]}'utypes#ts
@@ -251,7 +251,7 @@ doxUy:{[yt;e;t]
   e:?[t~"B";"b2i("+e+")";e]
   e:sub[rx/\by\b/;"y."+yt+"()"]e
   t:?[t~"B";"I";t]
-  e:?[t in utypes;+/("New";t;"(";e;")");+/("NewV";"(";t;"(";e;"))")]
+  e:?[t in utypes;qq/New$t($e)/;qq/NewV($t($e))/]
   qq/if y.Is$yt() { return $e; }/
 }
 doxBy:{[yt;e;t]

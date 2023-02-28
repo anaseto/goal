@@ -95,6 +95,7 @@ type Scanner struct {
 	token   Token               // last token
 	source  string              // source string
 	state   stateFn             // starting state for Next
+	qr      rune                // quote closing rune
 }
 
 type stateFn func(*Scanner) stateFn
@@ -443,14 +444,14 @@ func scanRegexp(s *Scanner) stateFn {
 			return s.emitError("non terminated rx/PATTERN/: unexpected EOF")
 		case '\\':
 			nr := s.peek()
-			if nr == '/' {
+			if nr == s.qr {
 				s.next()
 			} else if nr == '\\' {
 				s.next()
 				sb.WriteRune(nr)
 			}
 			sb.WriteRune(s.r)
-		case '/':
+		case s.qr:
 			s.next()
 			return s.emitRegexp(sb.String())
 		default:
@@ -501,21 +502,13 @@ func scanMinus(s *Scanner) stateFn {
 
 func scanIdent(s *Scanner) stateFn {
 	dots := 0
+	const delimchars = ":+-*%!&|<>=~,^#_?@/'"
 	for {
 		s.next()
 		switch {
 		case s.r == eof:
 			return s.emitIDENT()
-		case s.r == '/':
-			if s.source[s.tpos:s.npos] == "rx/" {
-				return scanRegexp
-			}
-			if s.source[s.tpos:s.npos] == "qq/" {
-				s.state = scanQQ
-				s.next()
-				return s.emit(QQSTART)
-			}
-			return s.emitIDENT()
+		case isAlphaNum(s.r):
 		case s.r == '.':
 			r := s.peek()
 			if !isAlpha(r) {
@@ -525,7 +518,20 @@ func scanIdent(s *Scanner) stateFn {
 				return s.emitError("too many dots in identifier")
 			}
 			dots++
-		case isAlphaNum(s.r):
+		case s.source[s.tpos:s.epos] == "qq":
+			if strings.ContainsRune(delimchars, s.r) {
+				s.qr = s.r
+				s.state = scanQQ
+				s.next()
+				return s.emit(QQSTART)
+			}
+			return s.emitIDENT()
+		case s.source[s.tpos:s.epos] == "rx":
+			if strings.ContainsRune(delimchars, s.r) {
+				s.qr = s.r
+				return scanRegexp
+			}
+			return s.emitIDENT()
 		default:
 			return s.emitIDENT()
 		}
@@ -537,7 +543,7 @@ func scanQQ(s *Scanner) stateFn {
 	switch s.r {
 	case eof:
 		return s.emitError("non terminated qq/STRING/: unexpected EOF")
-	case '/':
+	case s.qr:
 		s.state = scanAny
 		s.next()
 		return s.emit(QQEND)
@@ -555,7 +561,7 @@ func scanQQ(s *Scanner) stateFn {
 				sb.WriteString(`\n`)
 			case '\\':
 				nr := s.peek()
-				if nr == '/' || nr == '$' {
+				if nr == s.qr || nr == '$' {
 					s.next()
 				}
 				sb.WriteRune(s.r)
@@ -564,7 +570,7 @@ func scanQQ(s *Scanner) stateFn {
 			case '$':
 				sb.WriteByte('"')
 				return s.emitNewString(STRING, sb.String())
-			case '/':
+			case s.qr:
 				sb.WriteByte('"')
 				return s.emitNewString(STRING, sb.String())
 			default:

@@ -118,8 +118,9 @@ numbers         1     1.5     0b0110     1.7e-3     0xab
 strings         "text\xff\u00F\n"  "\""  "\u65e5"   (backquotes for raw strings)
 arrays          1 2 -3 4      1 "ab" -2 "cd"      (1 2;"a";3 "b";(4 2;"c");*)
 regexps         rx/[a-z]/      (see https://pkg.go.dev/regexp/syntax for syntax)
-verbs           : + - * % ! & | ^ # _ $ ? @ . ::  (right-associative)
-adverbs         / \ '                             (left-associative)
+interpolation   qq/text $var\n or ${var}/      (delimiters :+-*%!&|<>=~,^#_?@/')
+verbs           : + - * % ! & | < > = ~ , ^ # _ $ ? @ . ::   (right-associative)
+adverbs         / \ '                                        (left-associative)
 expressions     2*3+4 -> 14     1+|1 2 3 -> 4 3 2     +/'(1 2 3;4 5 6) -> 6 15
 separator       ; or newline except when ignored after {[( and before )]}
 variables       a  b.c  f  data  t1    (regexp: rx/[A-Za-z]\w*(\.[A-Za-z]\w*)?/)
