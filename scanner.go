@@ -15,7 +15,7 @@ type Token struct {
 
 func (t Token) String() string {
 	switch t.Type {
-	case ADVERB, ERROR, IDENT, DYAD, NUMBER, REGEXP:
+	case ADVERB, ERROR, IDENT, DYAD, NUMBER, REGEXP, QQSTART, QQEND:
 		return fmt.Sprintf("{%s %s}", t.Type.String(), t.Text)
 	case LEFTBRACE:
 		return "{"
@@ -62,6 +62,8 @@ const (
 	RIGHTPAREN
 	SEMICOLON
 	STRING
+	QQSTART
+	QQEND
 )
 
 // NameType represents the different kinds of special roles for alphanumeric
@@ -80,18 +82,19 @@ type Scanner struct {
 	names   map[string]NameType // special keywords
 	reader  *strings.Reader     // rune reader
 	err     error               // scanning error (if any)
-	peeked  bool                // peeked next
 	npos    int                 // position of next rune in the input
 	epos    int                 // next token end position
 	tpos    int                 // next token start position
-	pr      rune                // peeked rune
 	psize   int                 // size of last peeked rune
+	pr      rune                // peeked rune
 	r       rune                // current rune
-	start   bool                // at line start
 	exprEnd bool                // at expression start
 	delimOp bool                // at list start
+	peeked  bool                // peeked next
+	start   bool                // at line start
 	token   Token               // last token
 	source  string              // source string
+	state   stateFn             // starting state for Next
 }
 
 type stateFn func(*Scanner) stateFn
@@ -102,13 +105,14 @@ func NewScanner(names map[string]NameType, source string) *Scanner {
 	s.source = source
 	s.reader = strings.NewReader(source)
 	s.start = true
+	s.state = scanAny
 	s.next()
 	return s
 }
 
 // Next produces the next token from the input reader.
 func (s *Scanner) Next() Token {
-	state := scanAny
+	state := s.state
 	for {
 		state = state(s)
 		if state == nil {
@@ -193,7 +197,18 @@ func (s *Scanner) emitRegexp(text string) stateFn {
 	return nil
 }
 
+func (s *Scanner) emitNewString(t TokenType, text string) stateFn {
+	s.token = Token{Type: t, Pos: s.tpos, Text: text}
+	s.start = false
+	s.delimOp = false
+	s.exprEnd = true
+	return nil
+}
+
 func (s *Scanner) emitIDENT() stateFn {
+	if s.tpos == s.epos {
+		return s.emitError("empty identifier")
+	}
 	switch s.names[s.source[s.tpos:s.epos]] {
 	case NameDyad:
 		return s.emitOp(DYAD)
@@ -298,12 +313,24 @@ func isDigit(r rune) bool {
 	return r >= '0' && r <= '9'
 }
 
+func isDigitByte(r byte) bool {
+	return r >= '0' && r <= '9'
+}
+
 func isAlpha(r rune) bool {
+	return r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z'
+}
+
+func isAlphaByte(r byte) bool {
 	return r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z'
 }
 
 func isAlphaNum(r rune) bool {
 	return isAlpha(r) || isDigit(r)
+}
+
+func isAlphaNumByte(r byte) bool {
+	return isAlphaByte(r) || isDigitByte(r)
 }
 
 func scanDyadOp(s *Scanner) stateFn {
@@ -413,14 +440,16 @@ func scanRegexp(s *Scanner) stateFn {
 		s.next()
 		switch s.r {
 		case eof:
-			return s.emitError("non terminated regexp: unexpected EOF")
+			return s.emitError("non terminated rx/PATTERN/: unexpected EOF")
 		case '\\':
 			nr := s.peek()
 			if nr == '/' {
 				s.next()
-			} else {
-				sb.WriteRune(s.r)
+			} else if nr == '\\' {
+				s.next()
+				sb.WriteRune(nr)
 			}
+			sb.WriteRune(s.r)
 		case '/':
 			s.next()
 			return s.emitRegexp(sb.String())
@@ -481,6 +510,11 @@ func scanIdent(s *Scanner) stateFn {
 			if s.source[s.tpos:s.npos] == "rx/" {
 				return scanRegexp
 			}
+			if s.source[s.tpos:s.npos] == "qq/" {
+				s.state = scanQQ
+				s.next()
+				return s.emit(QQSTART)
+			}
 			return s.emitIDENT()
 		case s.r == '.':
 			r := s.peek()
@@ -488,11 +522,93 @@ func scanIdent(s *Scanner) stateFn {
 				return s.emitIDENT()
 			}
 			if dots > 0 {
-				return s.emitError("identifiers cannot have more than one dot prefix")
+				return s.emitError("too many dots in identifier")
 			}
 			dots++
 		case isAlphaNum(s.r):
 		default:
+			return s.emitIDENT()
+		}
+	}
+}
+
+func scanQQ(s *Scanner) stateFn {
+	s.tpos = s.epos
+	switch s.r {
+	case eof:
+		return s.emitError("non terminated qq/STRING/: unexpected EOF")
+	case '/':
+		s.state = scanAny
+		s.next()
+		return s.emit(QQEND)
+	case '$':
+		s.tpos++
+		return scanQQIdent(s)
+	default:
+		var sb strings.Builder
+		sb.WriteByte('"')
+		for {
+			switch s.r {
+			case eof:
+				return s.emitError("non terminated qq/STRING/: unexpected EOF")
+			case '\n':
+				sb.WriteString(`\n`)
+			case '\\':
+				nr := s.peek()
+				if nr == '/' || nr == '$' {
+					s.next()
+				}
+				sb.WriteRune(s.r)
+			case '"':
+				sb.WriteString(`\"`)
+			case '$':
+				sb.WriteByte('"')
+				return s.emitNewString(STRING, sb.String())
+			case '/':
+				sb.WriteByte('"')
+				return s.emitNewString(STRING, sb.String())
+			default:
+				sb.WriteRune(s.r)
+			}
+			s.next()
+		}
+	}
+}
+
+func scanQQIdent(s *Scanner) stateFn {
+	dots := 0
+	braced := false
+	if s.peek() == '{' {
+		s.next()
+		s.tpos++
+		braced = true
+	}
+	for {
+		s.next()
+		switch {
+		case s.r == eof:
+			if braced {
+				return s.emitError("qq// : interpolation ${ without closing }")
+			}
+			return s.emitIDENT()
+		case s.r == '.':
+			r := s.peek()
+			if !isAlpha(r) && !braced {
+				return s.emitIDENT()
+			}
+			if dots > 0 {
+				return s.emitError("qq// : too many dots in identifier")
+			}
+			dots++
+		case isAlphaNum(s.r):
+		case braced && s.r == '}':
+			f := s.emitIDENT()
+			s.next()
+			return f
+		default:
+			if braced {
+				return s.emitError("qq// : invalid char in ${IDENT}")
+			}
 			return s.emitIDENT()
 		}
 	}

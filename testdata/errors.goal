@@ -256,3 +256,7 @@ goal "x" / invalid cmd
 "prec" goal ,3.5 / bad type
 "xx" goal ,3.5 / invalid
 3$42 / type
+qq/$/ / empty
+qq/$in/ / reserved keyword
+qq/${,}/ / invalid char
+qq/${a.b.c}/ / too many dots

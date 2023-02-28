@@ -2,6 +2,7 @@ package goal
 
 import (
 	"math"
+	"strings"
 )
 
 // VariadicFun represents a variadic function.
@@ -32,6 +33,7 @@ const (
 	vApply                    // @
 	vApplyN                   // .
 	vList                     // (...;...;...)
+	vQq                       // qq/STRING/
 	vEach                     // ' (adverb)
 	vFold                     // / (adverb)
 	vScan                     // \ (adverb)
@@ -62,6 +64,7 @@ func init() {
 		vApply:    VApply,
 		vApplyN:   VApplyN,
 		vList:     VList,
+		vQq:       VQq,
 		vEach:     VEach,
 		vFold:     VFold,
 		vScan:     VScan,
@@ -90,6 +93,7 @@ var vStrings = [...]string{
 	vApply:    "@",
 	vApplyN:   ".",
 	vList:     "list",
+	vQq:       "qq",
 	vEach:     "'",
 	vFold:     "/",
 	vScan:     "\\",
@@ -505,6 +509,31 @@ func VList(ctx *Context, args []V) V {
 	xav.Slice = cloneArgs(args)
 	reverseSlice[V](xav.Slice)
 	return NewV(xav)
+}
+
+// VQq implements qq/STRING/ interpolation variadic verb.
+func VQq(ctx *Context, args []V) V {
+	n := 0
+	for _, arg := range args {
+		s, ok := arg.value.(S)
+		if !ok {
+			continue
+		}
+		n += len(s)
+	}
+	var sb strings.Builder
+	if n > 0 {
+		sb.Grow(n)
+	}
+	for _, arg := range args {
+		s, ok := arg.value.(S)
+		if !ok {
+			sb.WriteString(arg.Sprint(ctx))
+		} else {
+			sb.WriteString(string(s))
+		}
+	}
+	return NewS(sb.String())
 }
 
 // VEach implements the ' variadic adverb.

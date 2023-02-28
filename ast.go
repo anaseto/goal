@@ -93,6 +93,12 @@ type astStrand struct {
 	Pos  int
 }
 
+// astInterpolation represents an interpolation construct qq/STRING/.
+type astInterpolation struct {
+	Tokens []astToken
+	Pos    int
+}
+
 // astDerivedVerb represents a derived verb.
 type astDerivedVerb struct {
 	Adverb *astToken
@@ -154,6 +160,7 @@ func (a *astAssignOp) node()          {}
 func (a *astAssignAmendOp) node()     {}
 func (a *astAssignDeepAmendOp) node() {}
 func (st *astStrand) node()           {}
+func (qq *astInterpolation) node()    {}
 func (dv *astDerivedVerb) node()      {}
 func (p *astParen) node()             {}
 func (a *astApply2) node()            {}

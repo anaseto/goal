@@ -168,20 +168,21 @@ rmbl:sub[rx/\n\s*\n/;"\n"]
 
 genOp:{[opname;opsym] / globals o,op,xt,h
   o::opname; op::opsym; ts:olts[::o]
-  h say sub[("{O}";o;"{OP}";op)] "\n"_`
-    // {O} returns x{OP}y.
-    func {O}(x, y V) V {`
+  h say "\n"_qq/
+    \/\/ $o returns x${op}y.
+    func $o(x, y V) V {/
   h say'{sub[("{XT}";x;"{O}";o)][
-      `if x.Is{XT}() { return {O}{XT}V(x.{XT}(), y) }`
+      qq/if x.Is$x() { return $o${x}V(x.$x(), y) }/
   ]}'utypes#ts
   h say `switch xv := x.value.(type) {`
-  h say'{sub[("{XT}";x;"{O}";o)] `  case {XT}: return {O}{XT}V(xv, y)`}'^(ntypes^ts)
-  h say'{sub[("{XT}";x;"{O}";o)] `  case *{XT}: return {O}{XT}V(xv, y)`}'^"A"+ts
-  h say sub[("{OP}";escp op;"{O}";o)]"\n"_`
+  h say'{qq/  case $x: return $o${x}V(xv, y)/}'^(ntypes^ts)
+  h say'{qq/  case *$x: return $o${x}V(xv, y)/}'^"A"+ts
+  fmtop:escp op
+  h say "\n"_qq/
     case *AV:
         switch yv := y.value.(type) {
         case *Dict:
-              v := {O}(x, NewV(yv.values))
+              v := $o(x, NewV(yv.values))
               if v.IsPanic() {
                       return v
               }
@@ -189,43 +190,42 @@ genOp:{[opname;opsym] / globals o,op,xt,h
               return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
         case array:
               if yv.Len() != xv.Len() {
-                      return Panicf("x{OP}y : length mismatch: %d vs %d", xv.Len(), yv.Len())
-              }`
-  tplAV:"\n"_`
+                      return Panicf("x${fmtop}y : length mismatch: %d vs %d", xv.Len(), yv.Len())
+              }/
+  tplAV:{[yi]"\n"_qq/
     r := xv.reuse()
     for i, xi := range xv.Slice {
-            ri := {O}(xi, {YY})
+            ri := $o(xi, $yi)
             if ri.IsPanic() {
                     return ri
             }
             r.Slice[i] = ri
     }
-    return NewV(r)`
-  h say sub[("{O}";o;"{YY}";"yv.at(i)")] tplAV
+    return NewV(r)/}
+  h say tplAV["yv.at(i)"]
   h say `}`
-  h say sub[("{O}";o;"{YY}";"y")] tplAV
-  h say sub[("{O}";o;"{OP}";op)]"\n"_`
+  h say tplAV["y"]
+  h say "\n"_qq/
     case *Dict:
         yv, ok := y.value.(*Dict)
         if ok {
-            r := dictArith(xv, yv, {O})
+            r := dictArith(xv, yv, $o)
             if r.IsPanic() {
-                    return ppanic("d{OP}d", r)
+                    return ppanic("d${op}d", r)
             }
             return r
         }
-        v := {O}(NewV(xv.values), y)
+        v := $o(NewV(xv.values), y)
         if v.IsPanic() {
                 return v
         }
         v.InitRC()
-        return NewV(&Dict{keys: xv.keys, values: v.value.(array)})`
-  h say sub["{OP}";op]"\n"_`
+        return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
     default:
-          return panicTypeElt("x{OP}y", "x", x)
+          return panicTypeElt("x${op}y", "x", x)
     }
   }
-  `
+  /
   dox'^(,"B")^ts / cases with atom x
   doX'^ts        / cases with array x
 }
@@ -236,24 +236,23 @@ dox:{
   xBy:"\n"/{(e;t):getET[::o;x];doxBy[x;e;t]}'^ntypes^rts
   xY:"\n"/{(e;t):getET[::o;x];doxY[x;e;t]}'^rts
   xdAV:doxdAV""
-  repls:("{O}";o;"{XT}";xt;"{XCT}";xct;"{xUy}";xUy;"{xBy}";xBy;"{xY}";xY;"{xdAV}";xdAV)
-  h say rmbl sub[repls] "\n"_`
-    func {O}{XT}V(x {XCT}, y V) V {
-        {xUy}
+  h say rmbl "\n"_qq/
+    func $o${xt}V(x $xct, y V) V {
+        $xUy
         switch yv := y.value.(type) {
-        {xBy}
-        {xY}
-        {xdAV}
+        $xBy
+        $xY
+        $xdAV
         }
     }
-    `
+    /
 }
 doxUy:{[yt;e;t]
   e:?[t~"B";"b2i("+e+")";e]
   e:sub[rx/\by\b/;"y."+yt+"()"]e
   t:?[t~"B";"I";t]
   e:?[t in utypes;+/("New";t;"(";e;")");+/("NewV";"(";t;"(";e;"))")]
-  sub[("{YT}";yt;"{E}";e)] `if y.Is{YT}() { return {E}; }`
+  qq/if y.Is$yt() { return $e; }/
 }
 doxBy:{[yt;e;t]
   e:?[t~"B";"b2i("+e+")";e]
@@ -261,31 +260,31 @@ doxBy:{[yt;e;t]
   e:doExpr[e;yt;"x";"yv"]
   t:nt2go t
   t:?[t~"bool";"int64";t]
-  sub[("{YT}";yt;"{NT}";nt;"{RT}";t;"{E}";e)]`  case {YT}: return New{NT}({RT}({E}))`
+  qq/  case $yt: return New$nt($t($e))/
 }
 doxY:{[yt;e;t]
   e:doExpr[e;yt;"x";"yv.At(i)"]
   rt:t2go t
   ?[yt~t
-   sub[("{YT}";yt;"{RT}";rt;"{E}";e)]"\n"_`
-    case *A{YT}:
+   "\n"_qq/
+    case *A$yt:
         r := yv.reuse()
         for i := range r.Slice {
-                r.Slice[i] = {RT}({E})
+                r.Slice[i] = $rt($e)
         }
-        return NewV(r)`
-   sub[("{YT}";yt;"{RT}";rt;"{E}";e;"{T}";t)]"\n"_`
-    case *A{YT}:
-        r := make([]{RT}, yv.Len())
+        return NewV(r)/
+   "\n"_qq/
+    case *A$yt:
+        r := make([]$rt, yv.Len())
         for i := range r {
-                r[i] = {RT}({E})
+                r[i] = $rt($e)
         }
-        return NewA{T}WithRC(r, reuseRCp(yv.rc))`]
+        return NewA${t}WithRC(r, reuseRCp(yv.rc))/]
 }
 doxdAV:{
-  sub[("{O}";o;"{XT}";xt;"{OP}";op)]"\n"_`
+  "\n"_qq/
     case *Dict:
-        v := {O}{XT}V(x, NewV(yv.values))
+        v := $o${xt}V(x, NewV(yv.values))
         if v.IsPanic() {
                 return v
         }
@@ -294,7 +293,7 @@ doxdAV:{
     case *AV:
         r := yv.reuse()
         for i, yi := range yv.Slice {
-                ri := {O}{XT}V(x, yi)
+                ri := $o${xt}V(x, yi)
                 if ri.IsPanic() {
                         return ri
                 }
@@ -302,7 +301,7 @@ doxdAV:{
         }
         return NewV(r)
     default:
-        return panicTypeElt("x{OP}y", "y", y)`
+        return panicTypeElt("x${op}y", "y", y)/
 }
 
 doX:{
@@ -311,87 +310,88 @@ doX:{
   XBy:"\n"/{(e;t):getET[::o;x];doXBy[x;e;t]}'^ntypes^rts
   XY:"\n"/{(e;t):getET[::o;x];doXY[x;e;t]}'^rts
   XdAV:doXdAV""
-  repls:("{O}";o;"{XT}";xt;"{XUy}";XUy;"{XBy}";XBy;"{XY}";XY;"{XdAV}";XdAV)
-  h say rmbl sub[repls] "\n"_`
-    func {O}A{XT}V(x *A{XT}, y V) V {
-        {XUy}
+  h say rmbl "\n"_qq/
+    func ${o}A${xt}V(x *A${xt}, y V) V {
+        $XUy
         switch yv := y.value.(type) {
-        {XBy}
-        {XY}
-        {XdAV}
+        $XBy
+        $XY
+        $XdAV
         }
     }
-    `
+    /
 }
 doXUy:{[yt;e;t]
   e:doExpr[e;t2go yt;"x.At(i)";"y."+yt+"()"]
   rt:t2go t
   ?[xt~t
-    sub[("{YT}";yt;"{RT}";rt;"{E}";e)]"\n"_`
-      if y.Is{YT}() {
+    "\n"_qq/
+      if y.Is$yt() {
           r := x.reuse()
           for i := range r.Slice {
-                  r.Slice[i] = {RT}({E})
+                  r.Slice[i] = $rt($e)
           }
           return NewV(r)
-      }`
-   sub[("{YT}";yt;"{RT}";rt;"{E}";e;"{T}";t)]"\n"_`
-      if y.Is{YT}() {
-          r := make([]{RT}, x.Len())
+      }/
+   "\n"_qq/
+      if y.Is$yt() {
+          r := make([]$rt, x.Len())
           for i := range r {
-                  r[i] = {RT}({E})
+                  r[i] = $rt($e)
           }
-          return NewA{T}WithRC(r, reuseRCp(x.rc))
-      }`]
+          return NewA${t}WithRC(r, reuseRCp(x.rc))
+      }/]
 }
 doXBy:{[yt;e;t]
   e:doExpr[e;yt;"x.At(i)";"yv"]
   rt:t2go t
   ?[xt~t
-    sub[("{YT}";yt;"{RT}";rt;"{E}";e)]"\n"_`
-      case {YT}:
+    "\n"_qq/
+      case $yt:
               r := x.reuse()
               for i := range r.Slice {
-                      r.Slice[i] = {RT}({E})
+                      r.Slice[i] = $rt($e)
               }
-              return NewV(r)`
-    sub[("{YT}";yt;"{RT}";rt;"{E}";e;"{T}";t)]"\n"_`
-      case {YT}:
-              r := make([]{RT}, x.Len())
+              return NewV(r)/
+    "\n"_qq/
+      case $yt:
+              r := make([]$rt, x.Len())
               for i := range r {
-                      r[i] = {RT}({E})
+                      r[i] = $rt($e)
               }
-              return NewA{T}WithRC(r, reuseRCp(x.rc))`]
+              return NewA${t}WithRC(r, reuseRCp(x.rc))/]
 }
 doXY:{[yt;e;t]
   e:doExpr[e;yt;"x.At(i)";"yv.At(i)"]
   rt:t2go t
-  s1:sub[("{YT}";yt;"{OP}";escp op)]"\n"_`
-    case *A{YT}:
+  fmtop:escp op
+  s1:"\n"_qq/
+    case *A$yt:
             if x.Len() != yv.Len() {
-                    return Panicf("x{OP}y : length mismatch: %d vs %d", x.Len(), yv.Len())
-            }`
+                    return Panicf("x${fmtop}y : length mismatch: %d vs %d", x.Len(), yv.Len())
+            }/
   s2:?[t in xt,yt
-    sub[("{RT}";rt;"{E}";e;"{XY}";?[xt~t;"x";"yv"])]"\n"_`
+    sub["{XY}";?[xt~t;"x";"yv"]]"\n"_qq/
           r := {XY}.reuse()
           for i := range r.Slice {
-                  r.Slice[i] = {RT}({E})
+                  r.Slice[i] = $rt($e)
           }
-          return NewV(r)`
-    sub[("{RT}";rt;"{E}";e;"{T}";t)]"\n"_`
-          r := make([]{RT}, yv.Len())
+          return NewV(r)/
+    "\n"_qq/
+          r := make([]$rt, yv.Len())
           for i := range r {
-                  r[i] = {RT}({E})
+                  r[i] = $rt($e)
           }
-          return NewA{T}WithRC(r, reuseRCp(x.rc))`]
+          return NewA${t}WithRC(r, reuseRCp(x.rc))/]
   "\n"/(s1;s2)
 }
 doXdAV:{
   nxt:?[xt~"B";"I";xt]
   xct:?[xt~"B";"b2i";xt~"I";"int64";xt~"F";"float64";xt]
-  sub[("{OPE}";escp op;"{OP}";op;"{O}";o;"{XT}";xt;"{NXT}";nxt;"{XCT}";xct)]"\n"_`
+  fmtop:escp op
+  "\n"_qq/
     case *Dict:
-            v := {O}A{XT}V(x, NewV(yv.values))
+            v := ${o}A${xt}V(x, NewV(yv.values))
             if v.IsPanic() {
                     return v
             }
@@ -399,11 +399,11 @@ doXdAV:{
             return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
     case *AV:
             if x.Len() != yv.Len() {
-                    return Panicf("x{OPE}y : length mismatch: %d vs %d", x.Len(), yv.Len())
+                    return Panicf("x${fmtop}y : length mismatch: %d vs %d", x.Len(), yv.Len())
             }
             r := yv.reuse()
             for i := range r.Slice {
-                    ri := {O}{NXT}V({XCT}(x.At(i)), yv.At(i))
+                    ri := $o${nxt}V($xct(x.At(i)), yv.At(i))
                     if ri.IsPanic() {
                             return ri
                     }
@@ -411,7 +411,7 @@ doXdAV:{
             }
             return NewV(r)
     default:
-            return panicTypeElt("x{OP}y", "y", y)`
+            return panicTypeElt("x${op}y", "y", y)/
 }
 
 'h:"w" open "../arithd.go"
