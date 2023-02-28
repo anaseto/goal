@@ -20,9 +20,10 @@ It's main distinctive features are as follows:
 * Syntax inspired mainly from the K language, but with quite a few deviations.
   For example, backquotes produce Go-like raw strings instead of symbols,
   rx/[a-z]/ is a regular expression literal (checked and processed at
-  compile-time), and there are no tacit compositions, and digraph operator
-  verbs and adverbs are gone or done differently (except for global assignment
-  with ::).
+  compile-time), and there is a Perl-style string interpolation qq with custom
+  delimiter. On the other side, there are no tacit compositions, and digraph
+  operator verbs and adverbs are gone or done differently (except for global
+  assignment with ::).
 * Primitive semantics are both inspired from the
   [ngn/k](https://codeberg.org/ngn/k) variant of the K language and
   [BQN](https://mlochbaum.github.io/BQN/index.html). For example, group,

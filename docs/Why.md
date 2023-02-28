@@ -19,6 +19,7 @@ The long answer is:
   example, some abstract characters cannot be encoded by a single code point,
   and some abstract characters have more than one possible encoding. That's why
   I feel a scripting language should consider strings as a whole by default.
++ Flexible string quoting with interpolation is nice.
 + While I do feel the appeal and beauty of tacit code, I'm not completely sold
   on it because of the need to constantly switch between both tacit and
   explicit styles.  Lambdas with {} notation and default arguments (x,y,z) are
