@@ -248,14 +248,14 @@ dox:{
     /
 }
 doxUy:{[yt;e;t]
-  e:?[t~"B";"b2i("+e+")";e]
-  e:sub[rx/\by\b/;"y."+yt+"()"]e
+  e:?[t~"B";qq/b2i($e)/;e]
+  e:sub[rx/\by\b/;qq/y.$yt()/]e
   t:?[t~"B";"I";t]
   e:?[t in utypes;qq/New$t($e)/;qq/NewV($t($e))/]
   qq/if y.Is$yt() { return $e; }/
 }
 doxBy:{[yt;e;t]
-  e:?[t~"B";"b2i("+e+")";e]
+  e:?[t~"B";qq/b2i($e)/;e]
   nt:?[t in itypes;"I";t~"F";"F";"V"]
   e:doExpr[e;yt;"x";"yv"]
   t:nt2go t
@@ -322,7 +322,7 @@ doX:{
     /
 }
 doXUy:{[yt;e;t]
-  e:doExpr[e;t2go yt;"x.At(i)";"y."+yt+"()"]
+  e:doExpr[e;t2go yt;"x.At(i)";qq/y.$yt()/]
   rt:t2go t
   ?[xt~t
     "\n"_qq/
