@@ -502,7 +502,7 @@ func scanMinus(s *Scanner) stateFn {
 
 func scanIdent(s *Scanner) stateFn {
 	dots := 0
-	const delimchars = ":+-*%!&|<>=~,^#_?@/'"
+	const delimchars = ":+-*%!&|=~,^#_?@/'"
 	for {
 		s.next()
 		switch {
