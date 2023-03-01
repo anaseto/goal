@@ -122,6 +122,7 @@ raw strings     any text between backquotes or rq/raw, \, no $vars, except \/ /
 arrays          1 2 -3 4      1 "ab" -2 "cd"      (1 2;"a";3 "b";(4 2;"c");*)
 regexps         rx/[a-z]/      (see https://pkg.go.dev/regexp/syntax for syntax)
 verbs           : + - * % ! & | < > = ~ , ^ # _ $ ? @ . ::   (right-associative)
+                abs bytes ceil error ...
 adverbs         / \ '                                        (left-associative)
 expressions     2*3+4 -> 14     1+|1 2 3 -> 4 3 2     +/'(1 2 3;4 5 6) -> 6 15
 separator       ; or newline except when ignored after {[( and before )]}

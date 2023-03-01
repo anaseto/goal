@@ -32,13 +32,13 @@ func registerVariadics(ctx *goal.Context) {
 func getHelp() map[string]string {
 	help := map[string]string{}
 	help[""] = helpTopics
-	help["+"] = helpVERBS
-	help["nv"] = helpNAMEDVERBS
-	help["'"] = helpADVERBS
-	help["io"] = helpIO
-	help["time"] = helpTime
 	help["syn"] = helpSyntax
 	help["types"] = helpTypes
+	help["+"] = helpVerbs
+	help["nv"] = helpNamedVerbs
+	help["'"] = helpAdverbs
+	help["io"] = helpIO
+	help["time"] = helpTime
 	help["goal"] = helpGoal
 	return help
 }
