@@ -339,7 +339,7 @@ func (c *compiler) doExpr(e expr, n int) error {
 		if err != nil {
 			return err
 		}
-	case *astInterpolation:
+	case *astQq:
 		return c.doInterpolation(e, n)
 	case *astParen:
 		err := c.doParen(e, n)
@@ -1251,7 +1251,7 @@ func (c *compiler) doList(l *astList, n int) error {
 	return nil
 }
 
-func (c *compiler) doInterpolation(qq *astInterpolation, n int) error {
+func (c *compiler) doInterpolation(qq *astQq, n int) error {
 	for _, tok := range qq.Tokens {
 		// tok is of type astSTRING or astIDENT
 		err := c.doToken(&tok, 0)

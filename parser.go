@@ -175,7 +175,7 @@ func (p *parser) expr(es exprs) (exprs, error) {
 	case REGEXP:
 		e = &astToken{Type: astREGEXP, Pos: tok.Pos, Text: tok.Text}
 	case QQSTART:
-		e, err = p.interpolation()
+		e, err = p.qq()
 	case RIGHTBRACE, RIGHTBRACKET, RIGHTPAREN:
 		if len(p.depth) == 0 {
 			err = p.errorf("unexpected %s without opening matching pair", tok)
@@ -655,13 +655,17 @@ func (p *parser) strand() (expr, error) {
 	}
 }
 
-func (p *parser) interpolation() (expr, error) {
+func (p *parser) qq() (expr, error) {
 	// p.token.Type is QQSTART
-	qq := &astInterpolation{Pos: p.token.Pos}
+	qq := &astQq{Pos: p.token.Pos}
 	for {
 		p.next()
 		switch p.token.Type {
 		case QQEND:
+			if len(qq.Tokens) == 1 && qq.Tokens[0].Type == astSTRING {
+				tok := qq.Tokens[0]
+				return &tok, nil
+			}
 			return qq, nil
 		case STRING:
 			qq.Tokens = append(qq.Tokens, astToken{Type: astSTRING, Pos: p.token.Pos, Text: p.token.Text})
