@@ -1,6 +1,7 @@
 package goal
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"strings"
@@ -81,6 +82,7 @@ const (
 type Scanner struct {
 	names   map[string]NameType // special keywords
 	reader  *strings.Reader     // rune reader
+	buf     *bytes.Buffer       // buffer for building strings
 	err     error               // scanning error (if any)
 	npos    int                 // position of next rune in the input
 	epos    int                 // next token end position
@@ -105,6 +107,7 @@ func NewScanner(names map[string]NameType, source string) *Scanner {
 	s := &Scanner{names: names}
 	s.source = source
 	s.reader = strings.NewReader(source)
+	s.buf = &bytes.Buffer{}
 	s.start = true
 	s.state = scanAny
 	s.next()
@@ -422,7 +425,7 @@ func scanRawString(s *Scanner) stateFn {
 }
 
 func scanRegexp(s *Scanner) stateFn {
-	var sb strings.Builder
+	s.buf.Reset()
 	for {
 		s.next()
 		switch s.r {
@@ -434,14 +437,14 @@ func scanRegexp(s *Scanner) stateFn {
 				s.next()
 			} else if nr == '\\' {
 				s.next()
-				sb.WriteRune(nr)
+				s.buf.WriteRune(nr)
 			}
-			sb.WriteRune(s.r)
+			s.buf.WriteRune(s.r)
 		case s.qr:
 			s.next()
-			return s.emitRegexp(sb.String())
+			return s.emitRegexp(s.buf.String())
 		default:
-			sb.WriteRune(s.r)
+			s.buf.WriteRune(s.r)
 		}
 	}
 }
@@ -537,38 +540,38 @@ func scanQQ(s *Scanner) stateFn {
 		s.tpos++
 		return scanQQIdent(s)
 	default:
-		var sb strings.Builder
-		sb.WriteByte('"')
+		s.buf.Reset()
+		s.buf.WriteByte('"')
 		for {
 			switch s.r {
 			case eof:
 				return s.emitError("non terminated qq/STRING/: unexpected EOF")
 			case '\n':
-				sb.WriteString(`\n`)
+				s.buf.WriteString(`\n`)
 			case '\\':
 				nr := s.peek()
 				switch {
 				case nr == '\\' || nr == '"' && s.qr == '"':
-					sb.WriteByte('\\')
-					sb.WriteRune(nr)
+					s.buf.WriteByte('\\')
+					s.buf.WriteRune(nr)
 					s.next()
 				case nr == s.qr || nr == '$':
-					sb.WriteRune(nr)
+					s.buf.WriteRune(nr)
 					s.next()
 				case nr == '\n':
 				default:
-					sb.WriteRune(s.r)
+					s.buf.WriteRune(s.r)
 				}
 			case s.qr:
-				sb.WriteByte('"')
-				return s.emitNewString(STRING, sb.String())
+				s.buf.WriteByte('"')
+				return s.emitNewString(STRING, s.buf.String())
 			case '"':
-				sb.WriteString(`\"`)
+				s.buf.WriteString(`\"`)
 			case '$':
-				sb.WriteByte('"')
-				return s.emitNewString(STRING, sb.String())
+				s.buf.WriteByte('"')
+				return s.emitNewString(STRING, s.buf.String())
 			default:
-				sb.WriteRune(s.r)
+				s.buf.WriteRune(s.r)
 			}
 			s.next()
 		}

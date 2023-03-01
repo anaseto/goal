@@ -243,7 +243,7 @@ func applyS2(s S, x V, y V) V {
 	}
 }
 
-func bytes(x V) V {
+func bytecount(x V) V {
 	switch xv := x.value.(type) {
 	case S:
 		return NewI(int64(len(xv)))
@@ -256,14 +256,14 @@ func bytes(x V) V {
 	case *AV:
 		r := make([]V, xv.Len())
 		for i, xi := range xv.Slice {
-			r[i] = bytes(xi)
+			r[i] = bytecount(xi)
 			if r[i].IsPanic() {
 				return r[i]
 			}
 		}
 		return canonicalFast(NewAV(r))
 	case *Dict:
-		return newDictValues(xv.keys, bytes(NewV(xv.values)))
+		return newDictValues(xv.keys, bytecount(NewV(xv.values)))
 	default:
 		return panicType("bytes x", "x", x)
 	}

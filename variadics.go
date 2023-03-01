@@ -612,7 +612,7 @@ func VAbs(ctx *Context, args []V) V {
 func VBytes(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return bytes(args[0])
+		return bytecount(args[0])
 	default:
 		return panicRank("bytes")
 	}
