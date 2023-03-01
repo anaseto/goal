@@ -1,6 +1,6 @@
 #!/usr/bin/env goal
 'help:read"../cmd/goal/help.go"
 helps:""/{x[1]}'rx/const \w+ = `([^`]*)`/[help;-1]
-helps:sub["$";"$$"]helps
+helps:sub[`$`;`$$`]helps
 'readme:read"../README.md"
 "../README.md"print sub[rx/```[^`]*```/;"```"+helps+"```"] readme

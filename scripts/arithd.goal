@@ -160,8 +160,8 @@ orts:{?x["yt"][&x["xt"]=y]} / operator x right types for left type y
 getET:{x["expr" "rt"][;*&(x["xt"]=xt)&x["yt"]=y]} / expression and ret type for type couple
 escp:sub["%";"%%"] / percent escape
 doExpr:{[e;yt;x;y]
-  e:?[~xt in ntypes;sub[rx/(!x|\bx)\b/;xt+"($1)"]e;e]
-  e:?[~yt in ntypes;sub[rx/(!x|\by)\b/;yt+"($1)"]e;e]
+  e:?[~xt in ntypes;sub[rx/(!x|\bx)\b/;xt+`($1)`]e;e]
+  e:?[~yt in ntypes;sub[rx/(!x|\by)\b/;yt+`($1)`]e;e]
   sub[rx/\by\b/;y]sub[rx/\bx\b/;x]e
 }
 rmbl:sub[rx/\n\s*\n/;"\n"]
@@ -171,12 +171,10 @@ genOp:{[opname;opsym] / globals o,op,xt,h
   h say "\n"_qq|
     // $o returns x${op}y.
     func $o(x, y V) V {|
-  h say'{sub[("{XT}";x;"{O}";o)][
-      qq/if x.Is$x() { return $o${x}V(x.$x(), y) }/
-  ]}'utypes#ts
+  h say'{"if x.Is$x() { return $o${x}V(x.$x(), y) }"}'utypes#ts
   h say `switch xv := x.value.(type) {`
-  h say'{qq/  case $x: return $o${x}V(xv, y)/}'^(ntypes^ts)
-  h say'{qq/  case *$x: return $o${x}V(xv, y)/}'^"A"+ts
+  h say'{"  case $x: return $o${x}V(xv, y)"}'^(ntypes^ts)
+  h say'{"  case *$x: return $o${x}V(xv, y)"}'^"A"+ts
   fmtop:escp op
   h say "\n"_qq/
     case *AV:
@@ -248,11 +246,11 @@ dox:{
     /
 }
 doxUy:{[yt;e;t]
-  e:?[t~"B";qq/b2i($e)/;e]
-  e:sub[rx/\by\b/;qq/y.$yt()/]e
+  e:?[t~"B";"b2i($e)";e]
+  e:sub[rx/\by\b/;"y.$yt()"]e
   t:?[t~"B";"I";t]
-  e:?[t in utypes;qq/New$t($e)/;qq/NewV($t($e))/]
-  qq/if y.Is$yt() { return $e; }/
+  e:?[t in utypes;"New$t($e)";"NewV($t($e))"]
+  "if y.Is$yt() { return $e; }"
 }
 doxBy:{[yt;e;t]
   e:?[t~"B";qq/b2i($e)/;e]
@@ -260,7 +258,7 @@ doxBy:{[yt;e;t]
   e:doExpr[e;yt;"x";"yv"]
   t:nt2go t
   t:?[t~"bool";"int64";t]
-  qq/  case $yt: return New$nt($t($e))/
+  "  case $yt: return New$nt($t($e))"
 }
 doxY:{[yt;e;t]
   e:doExpr[e;yt;"x";"yv.At(i)"]

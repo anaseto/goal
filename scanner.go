@@ -296,7 +296,10 @@ func scanAny(s *Scanner) stateFn {
 		'=', '~', ',', '^', '#', '_', '$', '?', '@', '.', '»', '«':
 		return scanDyadOp
 	case '"':
-		return scanString
+		s.qr = s.r
+		s.state = scanQQ
+		s.next()
+		return s.emit(QQSTART)
 	case '`':
 		return scanRawString
 	}
@@ -401,23 +404,6 @@ func scanMultiLineComment(s *Scanner) stateFn {
 				s.next()
 				return scanAny
 			}
-		}
-	}
-}
-
-func scanString(s *Scanner) stateFn {
-	for {
-		s.next()
-		switch s.r {
-		case eof:
-			return s.emitError("non terminated string: unexpected EOF")
-		case '\n':
-			return s.emitError("non terminated string: unexpected newline")
-		case '\\':
-			s.next()
-		case '"':
-			s.next()
-			return s.emitString(STRING)
 		}
 	}
 }
@@ -561,16 +547,24 @@ func scanQQ(s *Scanner) stateFn {
 				sb.WriteString(`\n`)
 			case '\\':
 				nr := s.peek()
-				if nr == s.qr || nr == '$' {
+				switch {
+				case nr == '\\' || nr == '"' && s.qr == '"':
+					sb.WriteByte('\\')
+					sb.WriteRune(nr)
 					s.next()
+				case nr == s.qr || nr == '$':
+					sb.WriteRune(nr)
+					s.next()
+				case nr == '\n':
+				default:
+					sb.WriteRune(s.r)
 				}
-				sb.WriteRune(s.r)
+			case s.qr:
+				sb.WriteByte('"')
+				return s.emitNewString(STRING, sb.String())
 			case '"':
 				sb.WriteString(`\"`)
 			case '$':
-				sb.WriteByte('"')
-				return s.emitNewString(STRING, sb.String())
-			case s.qr:
 				sb.WriteByte('"')
 				return s.emitNewString(STRING, sb.String())
 			default:

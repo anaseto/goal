@@ -691,6 +691,9 @@ func (p *parser) qq() (expr, error) {
 				tok := qq.Tokens[0]
 				return &tok, nil
 			}
+			if len(qq.Tokens) == 0 {
+				return &astToken{Type: astSTRING, Pos: qq.Pos, Text: `""`}, nil
+			}
 			return qq, nil
 		case STRING:
 			qq.Tokens = append(qq.Tokens, astToken{Type: astSTRING, Pos: p.token.Pos, Text: p.token.Text})
