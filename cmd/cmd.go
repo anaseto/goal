@@ -155,12 +155,15 @@ const (
 	scanNormal scanState = iota
 	scanRawString
 	scanString
-	scanRegexp
+	scanQuote
 )
+
+const delimchars = ":+-*%!&|=~,^#_?@/'"
 
 func (lr lineReader) readLine() (string, error) {
 	s := scanner{}
 	sb := strings.Builder{}
+	qr := '/'
 	for {
 		r, _, err := lr.r.ReadRune()
 		if err != nil {
@@ -183,10 +186,6 @@ func (lr lineReader) readLine() (string, error) {
 				s.state = scanString
 			case '`':
 				s.state = scanRawString
-			case '/':
-				if strings.HasSuffix(sb.String(), "rx/") {
-					s.state = scanRegexp
-				}
 			case '{', '(', '[':
 				s.depth = append(s.depth, r)
 			case '}', ')', ']':
@@ -196,15 +195,28 @@ func (lr lineReader) readLine() (string, error) {
 					// error, so return on next \n
 					s.done = true
 				}
+			default:
+				if strings.ContainsRune(delimchars, r) {
+					acc := sb.String()
+					if strings.HasSuffix(acc[:len(acc)-1], "rx") {
+						qr = r
+						s.state = scanQuote
+					}
+					if strings.HasSuffix(acc[:len(acc)-1], "rq") {
+						qr = r
+						s.state = scanQuote
+					}
+					if strings.HasSuffix(acc[:len(acc)-1], "qq") {
+						qr = r
+						s.state = scanQuote
+					}
+				}
 			}
-		case scanRegexp:
+		case scanQuote:
 			switch r {
-			case '\n':
-				// non terminated regexp
-				return sb.String(), nil
 			case '\\':
 				s.escape = !s.escape
-			case '/':
+			case qr:
 				if !s.escape {
 					s.state = scanNormal
 				}

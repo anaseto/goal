@@ -432,6 +432,8 @@ func scanRawString(s *Scanner) stateFn {
 		switch s.r {
 		case eof:
 			return s.emitError("non terminated string: unexpected EOF")
+		case '\n':
+			s.buf.WriteString(`\n`)
 		case '\\':
 			if s.peek() == s.qr {
 				s.next()
