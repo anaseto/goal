@@ -158,24 +158,41 @@ func (p *parser) expr(es exprs) (exprs, error) {
 				return append(es, e), err
 			}
 		}
-	case NUMBER, STRING:
+	case NUMBER:
+		pos := p.token.Pos
+		e = &astToken{Pos: pos, Text: p.token.Text, Type: astNUMBER}
 		switch p.peek().Type {
-		case NUMBER, STRING:
-			e, err = p.strand()
-		default:
-			ptok := &astToken{Pos: p.token.Pos, Text: p.token.Text}
-			switch p.token.Type {
-			case NUMBER:
-				ptok.Type = astNUMBER
-			case STRING:
-				ptok.Type = astSTRING
+		case NUMBER, STRING, QQSTART:
+			st := &astStrand{Pos: pos, Items: []expr{e}}
+			p.next()
+			e, err = p.strand(st)
+		}
+	case STRING:
+		pos := p.token.Pos
+		e = &astToken{Pos: pos, Text: p.token.Text, Type: astSTRING}
+		switch p.peek().Type {
+		case NUMBER, STRING, QQSTART:
+			st := &astStrand{Pos: pos, Items: []expr{e}}
+			p.next()
+			e, err = p.strand(st)
+		}
+	case QQSTART:
+		pos := p.token.Pos
+		e, err = p.qq()
+		if err != nil {
+			return es, err
+		}
+		switch p.peek().Type {
+		case NUMBER, STRING, QQSTART:
+			st := &astStrand{Pos: pos, Items: []expr{e}}
+			if _, ok := e.(*astQq); ok {
+				st.Interp = true
 			}
-			e = ptok
+			p.next()
+			e, err = p.strand(st)
 		}
 	case REGEXP:
 		e = &astToken{Type: astREGEXP, Pos: tok.Pos, Text: tok.Text}
-	case QQSTART:
-		e, err = p.qq()
 	case RIGHTBRACE, RIGHTBRACKET, RIGHTPAREN:
 		if len(p.depth) == 0 {
 			err = p.errorf("unexpected %s without opening matching pair", tok)
@@ -635,19 +652,27 @@ func (p *parser) derivedVerb(e expr) *astDerivedVerb {
 	return dv
 }
 
-func (p *parser) strand() (expr, error) {
+func (p *parser) strand(st *astStrand) (expr, error) {
 	// p.token.Type is NUMBER or STRING for current and peek
-	st := &astStrand{Pos: p.token.Pos}
 	for {
 		switch p.token.Type {
 		case NUMBER:
-			st.Lits = append(st.Lits, astToken{Type: astNUMBER, Pos: p.token.Pos, Text: p.token.Text})
+			st.Items = append(st.Items, &astToken{Type: astNUMBER, Pos: p.token.Pos, Text: p.token.Text})
 		case STRING:
-			st.Lits = append(st.Lits, astToken{Type: astSTRING, Pos: p.token.Pos, Text: p.token.Text})
+			st.Items = append(st.Items, &astToken{Type: astSTRING, Pos: p.token.Pos, Text: p.token.Text})
+		case QQSTART:
+			e, err := p.qq()
+			if err != nil {
+				return st, err
+			}
+			if _, ok := e.(*astQq); ok {
+				st.Interp = true
+			}
+			st.Items = append(st.Items, e)
 		}
 		ntok := p.peek()
 		switch ntok.Type {
-		case NUMBER, STRING:
+		case NUMBER, STRING, QQSTART:
 			p.next()
 		default:
 			return st, nil

@@ -742,8 +742,13 @@ func (c *compiler) doDerivedVerb(dv *astDerivedVerb, n int) error {
 }
 
 func (c *compiler) doStrand(st *astStrand, n int) error {
-	a := make([]V, 0, len(st.Lits))
-	for _, tok := range st.Lits {
+	if st.Interp {
+		// non constant strand
+		return c.doInterpStrand(st, n)
+	}
+	a := make([]V, 0, len(st.Items))
+	for _, e := range st.Items {
+		tok := e.(*astToken) // no interpolation
 		switch tok.Type {
 		case astNUMBER:
 			x, err := parseNumber(tok.Text)
@@ -767,6 +772,20 @@ func (c *compiler) doStrand(st *astStrand, n int) error {
 	id := c.ctx.storeConst(r)
 	c.pos = st.Pos
 	c.push2(opConst, opcode(id))
+	c.applyN(n)
+	return nil
+}
+
+func (c *compiler) doInterpStrand(st *astStrand, n int) error {
+	body := st.Items
+	for i := len(body) - 1; i >= 0; i-- {
+		ei := body[i]
+		err := c.doExpr(ei, 0)
+		if err != nil {
+			return err
+		}
+	}
+	c.pushVariadic(vList, len(body))
 	c.applyN(n)
 	return nil
 }

@@ -89,8 +89,9 @@ type astAssignDeepAmendOp struct {
 
 // astStrand represents a stranding of literals, like 1 23 456
 type astStrand struct {
-	Lits []astToken
-	Pos  int
+	Items  []expr
+	Pos    int
+	Interp bool
 }
 
 // astQq represents an interpolation construct qq/STRING/.
