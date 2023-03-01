@@ -112,3 +112,10 @@ a:"text";"a" 3 qq+$a+ / "a" 3 "text"
 a:"text";"a" 3 qq+${a}s+ "more" / "a" 3 "texts" "more"
 a:"text";"a" 3 "${a}s" "more" / "a" 3 "texts" "more"
 a:"text";"a" 3 "\${a}s" "more" / "a" 3 `${a}s` "more"
+rq/abc/ / "abc"
+rq// / ""
+rq/`/ / "`"
+rq#a\bc# / `a\bc`
+rq#a\/bc# / `a\/bc`
+rq#a\#bc# / `a#bc`
+rq#a"\#bc# / `a"#bc`

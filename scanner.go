@@ -304,7 +304,7 @@ func scanAny(s *Scanner) stateFn {
 		s.next()
 		return s.emit(QQSTART)
 	case '`':
-		return scanRawString
+		return scanBackQuotedString
 	}
 	switch {
 	case isDigit(s.r):
@@ -411,7 +411,7 @@ func scanMultiLineComment(s *Scanner) stateFn {
 	}
 }
 
-func scanRawString(s *Scanner) stateFn {
+func scanBackQuotedString(s *Scanner) stateFn {
 	for {
 		s.next()
 		switch s.r {
@@ -420,6 +420,33 @@ func scanRawString(s *Scanner) stateFn {
 		case '`':
 			s.next()
 			return s.emitString(STRING)
+		}
+	}
+}
+
+func scanRawString(s *Scanner) stateFn {
+	s.buf.Reset()
+	s.buf.WriteByte('"')
+	for {
+		s.next()
+		switch s.r {
+		case eof:
+			return s.emitError("non terminated string: unexpected EOF")
+		case '\\':
+			if s.peek() == s.qr {
+				s.next()
+				s.buf.WriteRune(s.r)
+				break
+			}
+			s.buf.WriteString(`\\`)
+		case '"':
+			s.buf.WriteString(`\"`)
+		case s.qr:
+			s.buf.WriteString(`"`)
+			s.next()
+			return s.emitNewString(STRING, s.buf.String())
+		default:
+			s.buf.WriteRune(s.r)
 		}
 	}
 }
@@ -515,6 +542,12 @@ func scanIdent(s *Scanner) stateFn {
 				return s.emit(QQSTART)
 			}
 			return s.emitIDENT()
+		case s.source[s.tpos:s.epos] == "rq":
+			if strings.ContainsRune(delimchars, s.r) {
+				s.qr = s.r
+				return scanRawString
+			}
+			return s.emitIDENT()
 		case s.source[s.tpos:s.epos] == "rx":
 			if strings.ContainsRune(delimchars, s.r) {
 				s.qr = s.r
@@ -531,7 +564,7 @@ func scanQQ(s *Scanner) stateFn {
 	s.tpos = s.epos
 	switch s.r {
 	case eof:
-		return s.emitError("non terminated qq/STRING/: unexpected EOF")
+		return s.emitError("non terminated string: unexpected EOF")
 	case s.qr:
 		s.state = scanAny
 		s.next()
@@ -545,7 +578,7 @@ func scanQQ(s *Scanner) stateFn {
 		for {
 			switch s.r {
 			case eof:
-				return s.emitError("non terminated qq/STRING/: unexpected EOF")
+				return s.emitError("non terminated string: unexpected EOF")
 			case '\n':
 				s.buf.WriteString(`\n`)
 			case '\\':
@@ -591,7 +624,7 @@ func scanQQIdent(s *Scanner) stateFn {
 		switch {
 		case s.r == eof:
 			if braced {
-				return s.emitError("qq// : interpolation ${ without closing }")
+				return s.emitError("interpolation ${ without closing }")
 			}
 			return s.emitIDENT()
 		case s.r == '.':
@@ -600,7 +633,7 @@ func scanQQIdent(s *Scanner) stateFn {
 				return s.emitIDENT()
 			}
 			if dots > 0 {
-				return s.emitError("qq// : too many dots in identifier")
+				return s.emitError("too many dots in identifier")
 			}
 			dots++
 		case isAlphaNum(s.r):
@@ -610,7 +643,7 @@ func scanQQIdent(s *Scanner) stateFn {
 			return f
 		default:
 			if braced {
-				return s.emitError("qq// : invalid char in ${IDENT}")
+				return s.emitError("invalid char in ${IDENT}")
 			}
 			return s.emitIDENT()
 		}
