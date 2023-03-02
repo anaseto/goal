@@ -117,7 +117,7 @@ Notations:
 SYNTAX HELP
 numbers         1     1.5     0b0110     1.7e-3     0xab
 strings         "text\xff\u00F\n"   "\""   "\u65e5"   "interpolated $var"
-                qq/$var\n or ${var}/   q#text#   (delimiters :+-*%!&|=~,^#_?@/')
+                qq/$var\n or ${var}/   qq#text#  (delimiters :+-*%!&|=~,^#_?@/')
 raw strings     `anything until backquote`    rq/anything until unescaped slash/
 arrays          1 2 -3 4      1 "ab" -2 "cd"      (1 2;"a";3 "b";(4 2;"c");*)
 regexps         rx/[a-z]/      (see https://pkg.go.dev/regexp/syntax for syntax)
@@ -126,7 +126,7 @@ verbs           : + - * % ! & | < > = ~ , ^ # _ $ ? @ . ::   (right-associative)
 adverbs         / \ '                                        (left-associative)
 expressions     2*3+4 -> 14     1+|1 2 3 -> 4 3 2     +/'(1 2 3;4 5 6) -> 6 15
 separator       ; or newline except when ignored after {[( and before )]}
-variables       a  b.c  f  data  t1    (regexp: rx/[A-Za-z]\w*(\.[A-Za-z]\w*)?/)
+variables       a  b.c  f  data  t1
 assign          a:2 (local within lambda, global otherwise)    a::2 (global)    
 op assign       a+:1 (sugar for a:a+1)       a-::2 (sugar for a::a-2)
 list assign     (a;b;c):x (where 2<#x)       (a;b):1 2;b -> 2
