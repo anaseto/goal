@@ -456,11 +456,7 @@ func matchArrayLen(x array, y Value) bool {
 	if !ok {
 		return false
 	}
-	l := x.Len()
-	if l != ya.Len() {
-		return false
-	}
-	return true
+	return x.Len() == ya.Len()
 }
 
 func matchAB(x, y *AB) bool {

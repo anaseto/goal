@@ -320,24 +320,12 @@ func isDigit(r rune) bool {
 	return r >= '0' && r <= '9'
 }
 
-func isDigitByte(r byte) bool {
-	return r >= '0' && r <= '9'
-}
-
 func isAlpha(r rune) bool {
-	return r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z'
-}
-
-func isAlphaByte(r byte) bool {
 	return r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z'
 }
 
 func isAlphaNum(r rune) bool {
 	return isAlpha(r) || isDigit(r)
-}
-
-func isAlphaNumByte(r byte) bool {
-	return isAlphaByte(r) || isDigitByte(r)
 }
 
 func scanDyadOp(s *Scanner) stateFn {

@@ -217,29 +217,6 @@ func uniq(ctx *Context, x V) V {
 	}
 }
 
-// uniq returns ?x.
-func uniqNoContext(x V) V {
-	switch xv := x.value.(type) {
-	case *AV:
-		if xv.Len() == 0 || xv.getFlags().Has(flagUnique) {
-			return x
-		}
-		r := []V{}
-	loop:
-		for i, xi := range xv.Slice {
-			for _, xj := range xv.Slice[:i] {
-				if Match(xi, xj) {
-					continue loop
-				}
-			}
-			r = append(r, xi)
-		}
-		return NewV(canonicalAV(&AV{Slice: r, rc: xv.rc, flags: xv.flags | flagUnique}))
-	default:
-		return uniq(nil, x)
-	}
-}
-
 func uniqSlice[T comparable](xs []T, bruteForceThreshold int) []T {
 	r := []T{}
 	if len(xs) <= bruteForceThreshold {
@@ -426,9 +403,7 @@ func memberOfAB(x V, y *AB) V {
 		switch xv := x.value.(type) {
 		case *AB:
 			r := make([]bool, xv.Len())
-			for i, xi := range xv.Slice {
-				r[i] = xi
-			}
+			copy(r, xv.Slice)
 			return NewAB(r)
 		case *AS:
 			r := make([]bool, xv.Len())

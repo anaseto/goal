@@ -182,21 +182,6 @@ func (x *AV) reuse() *AV {
 	return &AV{Slice: make([]V, x.Len())}
 }
 
-func zeroRCp(p *int) {
-	if p != nil {
-		*p = 0
-	}
-}
-
-func incrRCp(p **int) {
-	if *p == nil {
-		var rc int = 1
-		*p = &rc
-		return
-	}
-	**p++
-}
-
 func decrRCp(p *int) {
 	if p != nil && *p > 0 {
 		*p--
