@@ -1,8 +1,10 @@
 Features:
-- maybe add bidirectional pipes in open
+- maybe add bidirectional pipes in open (though basic cases can be handled
+  already with run)
 - maybe some kind of printf (though i$s and "prec" goal n do the job)
-- maybe add splice
+- maybe add splice (never used it, though)
 - maybe split i!s and maybe amend string @[s;I;s]
+- maybe add a json reader (possible now that we have dicts)
 
 Tests:
 - improve test coverage for error messages and refactor and improve them along
@@ -13,8 +15,7 @@ Tests:
 - search for location improvements in error messages
 
 Documentation:
-- write reference docs, or at least some some introductory guide (in addition
-  to the current reference card)
+- write some introductory guide (in addition to the current help)
 
 Optimizations:
 - maybe special code for remaining common op/ and op\ and op'

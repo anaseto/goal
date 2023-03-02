@@ -1,3 +1,16 @@
+# v0.7.0 2023-03-02
+
+Highlights:
+
++ String interpolation in "" strings, as well as the new qq// Perl-style
+  quoting form with custom delimiter (potentially breaking if strings contained
+  character `$`, which now needs to be escaped).
++ New rq// quoting form with custom delimiter for raw strings. Allow custom
+  delimiter for rx// form too.
++ New x run s form, piping string x to command s, and returning its own stdout.
++ Optimize #'= so that icount can be finally removed.
++ Various small improvements and fixes in language's help.
+
 # v0.6.0 2023-02-26
 
 This release should be the last with various breaking changes in the core
