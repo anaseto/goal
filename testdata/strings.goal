@@ -117,5 +117,6 @@ rq// / ""
 rq/`/ / "`"
 rq#a\bc# / `a\bc`
 rq#a\/bc# / `a\/bc`
-rq#a\#bc# / `a#bc`
-rq#a"\#bc# / `a"#bc`
+rq#a##bc# / `a#bc`
+rq#a"##bc# / `a"#bc`
+rq#a"### / `a"#`

@@ -1,3 +1,10 @@
+# v? ?
+
++ In rq// raw quoting introduced in last release, allow escaping delimiter by
+  doubling it, as a simplification of previous rule. Note that the old
+  backquoted raw strings behave the same as always and do not have any way of
+  writing a literal backquote.
+
 # v0.7.0 2023-03-02
 
 Highlights:
@@ -13,10 +20,9 @@ Highlights:
 
 # v0.6.0 2023-02-26
 
-This release should be the last with various breaking changes in the core
-language.  They should be more rare from now on (but still possible if
-important until we reach 1.0).  Some changes might still happen in the
-embedding API.
+This release has various breaking changes in the core language.  They should be
+more rare from now on (but still possible if important until we reach 1.0).
+Some changes might still happen in the embedding API.
 
 Highlights:
 

@@ -185,6 +185,7 @@ func (lr lineReader) readLine() (string, error) {
 			case '"':
 				s.state = scanString
 			case '`':
+				qr = r
 				s.state = scanRawString
 			case '{', '(', '[':
 				s.depth = append(s.depth, r)
@@ -203,8 +204,9 @@ func (lr lineReader) readLine() (string, error) {
 						s.state = scanQuote
 					}
 					if strings.HasSuffix(acc[:len(acc)-1], "rq") {
+						// TODO: handle escape by doubling delimiter in rq/STRING/
 						qr = r
-						s.state = scanQuote
+						s.state = scanRawString
 					}
 					if strings.HasSuffix(acc[:len(acc)-1], "qq") {
 						qr = r
@@ -240,7 +242,7 @@ func (lr lineReader) readLine() (string, error) {
 				s.escape = false
 			}
 		case scanRawString:
-			if r == '`' {
+			if r == qr {
 				s.state = scanNormal
 			}
 		}

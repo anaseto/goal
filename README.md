@@ -118,7 +118,8 @@ SYNTAX HELP
 numbers         1     1.5     0b0110     1.7e-3     0xab
 strings         "text\xff\u00F\n"   "\""   "\u65e5"   "interpolated $var"
                 qq/$var\n or ${var}/   qq#text#  (delimiters :+-*%!&|=~,^#_?@/')
-raw strings     `anything until backquote`    rq/anything until unescaped slash/
+raw strings     `anything until first backquote`     `literal \, no escaping`
+                rq/anything until single slash/      rq#doubling ## escapes #
 arrays          1 2 -3 4      1 "ab" -2 "cd"      (1 2;"a";3 "b";(4 2;"c");*)
 regexps         rx/[a-z]/      (see https://pkg.go.dev/regexp/syntax for syntax)
 verbs           : + - * % ! & | < > = ~ , ^ # _ $ ? @ . ::   (right-associative)
