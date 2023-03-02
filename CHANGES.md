@@ -1,5 +1,10 @@
 # v? ?
 
++ lists (expr1;expr2) are now evaluated from left to right. This avoids a list
+  reversal in the implementation, and is also more intuitive in multi-line
+  lists. Each sub-expression is still evaluated from right to left as always.
+  This also makes lists and sequences more similar, except that the first
+  construct collects all values, and the second returns the last one only.
 + In rq// raw quoting introduced in last release, allow escaping delimiter by
   doubling it, as a simplification of previous rule. Note that the old
   backquoted raw strings behave the same as always and do not have any way of

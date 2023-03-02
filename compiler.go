@@ -778,8 +778,7 @@ func (c *compiler) doStrand(st *astStrand, n int) error {
 
 func (c *compiler) doInterpStrand(st *astStrand, n int) error {
 	body := st.Items
-	for i := len(body) - 1; i >= 0; i-- {
-		ei := body[i]
+	for _, ei := range body {
 		err := c.doExpr(ei, 0)
 		if err != nil {
 			return err
@@ -1254,8 +1253,7 @@ func (c *compiler) doSeq(b *astSeq, n int) error {
 
 func (c *compiler) doList(l *astList, n int) error {
 	body := l.Args
-	for i := len(body) - 1; i >= 0; i-- {
-		ei := body[i]
+	for _, ei := range body {
 		if nonEmpty(ei) {
 			err := c.doExpr(ei, 0)
 			if err != nil {

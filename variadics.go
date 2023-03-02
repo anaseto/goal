@@ -503,11 +503,9 @@ func VList(ctx *Context, args []V) V {
 	xv, cloned := normalize(xav)
 	if cloned {
 		r := NewV(xv)
-		reverseMut(r)
 		return r
 	}
 	xav.Slice = cloneArgs(args)
-	reverseSlice[V](xav.Slice)
 	return NewV(xav)
 }
 
