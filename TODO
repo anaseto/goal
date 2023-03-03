@@ -11,8 +11,6 @@ Tests:
   the way (in particular, ensure more consistency)
 - add more immutability tests to catch any possible regressions after the
   refcount overhaul, because refcounting is hard.
-- add more tests for dicts
-- search for location improvements in error messages
 
 Documentation:
 - write some introductory guide (in addition to the current help)
