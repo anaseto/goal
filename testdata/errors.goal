@@ -766,3 +766,5 @@ abs(1 2;*) / type
 (1;2 3)&* / type
 (1;2 3)|* / type
 (1;2 3) mod * / type
+a[0;]:5 / undefined global
+{a[0;]:5}4 / undefined local
