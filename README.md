@@ -148,10 +148,10 @@ comments        from line with a single / until line with a single \
 TYPES HELP
 atom    array   name            examples
 n       N       number          0      1.5      !5      1.2 3 1.8
-s       S       string          "abc"   "d"     "a" "b" "c"
+s       S       string          "abc"    "d"    "a" "b" "c"
 r               regexp          rx/[a-z]/       rx/\s+/
 d               dictionnary     "a" "b"!1 2
-f               function        +      {x*2}   (1-)    %[;2]
+f               function        +      {x*2}      (1-)      %[;2]
 h               handle          open "/path/to/file"    "w" open "/path/to/file"
 e               error           error "msg"
         A       generic array   ("a" 1;"b" 2;"c" 3)     (+;-;*;"any")
@@ -225,14 +225,14 @@ i?y deal        -5?100 -> 19 26 0 73 94 (always distinct)
 s?r rindex      "abcde"?rx/b../ -> 1 3      (offset;length)
 s?s index       "a = a + 1"?"=" "+" -> 2 6
 d?y find key    ("a" "b"!3 4)?4 -> "b"      ("a" "b"!3 4)?5 -> ""
-x?y find        3 2 1?2 -> 1    3 2 1?0 -> 3
+x?y find        3 2 1?2 -> 1                 3 2 1?0 -> 3
 @x  type        @2 -> "n"    @"ab" -> "s"    @2 3 -> "N"       @+ -> "f"
 s@y substr      "abcdef"@2  -> "cdef" (s[offset])
 r@y match       rx/[a-z]/"abc" -> 1     rx/\s/"abc" -> 0
 r@y find group  m:rx/[a-z](.)/"abc" -> "ab" "b" (m[0] whole match, m[1] group)
 f@y apply       (|)@1 2 -> 2 1 (like |[1 2] -> 2 1 or |1 2)
 d@y at key      ("a" "b"!1 2)@"a" -> 1
-x@y at          1 2 3@2 -> 3     1 2 3[2 0] -> 3 1     7 8 9@-2 -> 8
+x@y at          1 2 3@2 -> 3      1 2 3[2 0] -> 3 1      7 8 9@-2 -> 8
 .s  reval       ."2+3" -> 5    (restricted eval with new context: see also eval)
 .e  get error   .error "msg" -> "msg"
 .d  values      ."a" "b"!1 2 -> 1 2
