@@ -51,7 +51,7 @@ func reverse(x V) V {
 		v.InitRC()
 		return NewV(&Dict{keys: k.value.(array), values: v.value.(array)})
 	default:
-		return Panicf("|x : x not an array (%s)", x.Type())
+		return panicType("|x", "x", x)
 	}
 }
 
@@ -113,7 +113,7 @@ func rotateI(i int64, y V) V {
 		v.InitRC()
 		return NewV(&Dict{keys: k.value.(array), values: v.value.(array)})
 	default:
-		return Panicf("x rotate y : y not an array (%s)", y.Type())
+		return panicType("x rotate y", "y", y)
 	}
 }
 
@@ -225,7 +225,7 @@ func dropN(n int64, y V) V {
 			keys:   rk.value.(array),
 			values: rv.value.(array)})
 	default:
-		return panics("i_y : y not an array")
+		return panicType("i_y", "y", y)
 	}
 }
 
@@ -320,7 +320,7 @@ func deleteI(x V, i int64) V {
 			keys:   rk.value.(array),
 			values: rv.value.(array)})
 	default:
-		return panics("x_i : x not an array")
+		return panicType("x_i", "x", x)
 	}
 }
 
@@ -495,7 +495,7 @@ func shiftBefore(x, y V) V {
 	case *Dict:
 		return newDictValues(yv.keys, shiftBefore(x, NewV(yv.values)))
 	default:
-		return panics("x rshift y: y not an array")
+		return panicType("x rshift y", "y", y)
 	}
 }
 
@@ -787,7 +787,7 @@ func nudge(x V) V {
 	case *Dict:
 		return newDictValues(xv.keys, nudge(NewV(xv.values)))
 	default:
-		return panics("rshift x : x not an array")
+		return panicType("rshift x", "x", x)
 	}
 }
 
@@ -807,7 +807,7 @@ func shiftAfter(x, y V) V {
 	case *Dict:
 		return newDictValues(yv.keys, shiftAfter(x, NewV(yv.values)))
 	default:
-		return panics("x shift y: y not an array")
+		return panicType("x shift y", "y", y)
 	}
 }
 
@@ -1098,7 +1098,7 @@ func nudgeBack(x V) V {
 	case *Dict:
 		return newDictValues(xv.keys, nudgeBack(NewV(xv.values)))
 	default:
-		return panics("shift x : x not an array")
+		return panicType("shift x", "x", x)
 	}
 }
 
@@ -1172,6 +1172,6 @@ func shapeSplit(x V, y V) V {
 		var rcn int
 		return NewAVWithRC(r, &rcn)
 	default:
-		return panics("i!y : y not an array")
+		return panicType("i!y", "y", y)
 	}
 }

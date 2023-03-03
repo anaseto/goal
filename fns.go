@@ -18,9 +18,9 @@ func enum(x V) V {
 		return rangeArray(xv)
 	default:
 		if isStar(x) {
-			return panics("!x : x non-integer")
+			return panics("!x : x non-integer (*)")
 		}
-		return panics("!x : x nested array")
+		return panics("!x : nested indices in x (A)")
 	}
 }
 
@@ -149,7 +149,7 @@ func where(x V) V {
 	case array:
 		return panics("&x : x non-integer array")
 	default:
-		return Panicf("&x : x non-integer (type %s)", x.Type())
+		return Panicf("&x : x non-integer (%s)", x.Type())
 	}
 }
 
@@ -335,7 +335,7 @@ func replicateAB(x *AB, y V) V {
 		}
 		return NewDict(keys, values)
 	default:
-		return Panicf("f#y : y not an array (%s)", y.Type())
+		return panicType("f#y", "y", y)
 	}
 }
 
@@ -399,7 +399,7 @@ func replicateAI(x *AI, y V) V {
 		}
 		return NewDict(keys, values)
 	default:
-		return Panicf("f#y : y not an array (%s)", y.Type())
+		return panicType("f#y", "y", y)
 	}
 }
 
@@ -490,7 +490,7 @@ func weedOutAB(x *AB, y V) V {
 		}
 		return NewDict(keys, values)
 	default:
-		return Panicf("f_y : y not an array (%s)", y.Type())
+		return panicType("f_y", "y", y)
 	}
 }
 
@@ -551,7 +551,7 @@ func weedOutAI(x *AI, y V) V {
 		}
 		return NewDict(keys, values)
 	default:
-		return Panicf("f_y : y not an array (%s)", y.Type())
+		return panicType("f_y", "y", y)
 	}
 }
 

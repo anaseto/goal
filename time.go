@@ -136,7 +136,7 @@ func doTime(cmd string, y V, layout, loc string) V {
 		}
 		return canonicalFast(NewAV(r))
 	default:
-		return Panicf("time[cmd;t;...] : bad type for t (%s)", y.Type())
+		return panicType("time[cmd;t;...]", "t", y)
 	}
 }
 

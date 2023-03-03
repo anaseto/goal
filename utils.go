@@ -225,10 +225,10 @@ func toIndicesRec(x V) V {
 			}
 		}
 		return NewAV(r)
-	case array:
-		return panics("non-integer indices")
+	case *AS:
+		return Panicf("non-integer indices (%s)", x.Type())
 	default:
-		return Panicf("non-integer index (type %s)", x.Type())
+		return Panicf("non-integer index (%s)", x.Type())
 	}
 }
 

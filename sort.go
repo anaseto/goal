@@ -226,7 +226,7 @@ func ascend(x V) V {
 		p := ascend(NewV(xv.values)).value.(*AI)
 		return NewV(xv.keys.atIndices(p))
 	default:
-		return Panicf("<x : x not an array (%s)", x.Type())
+		return panicType("<x", "x", x)
 	}
 }
 

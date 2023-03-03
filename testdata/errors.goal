@@ -30,7 +30,7 @@ or[1;;3;4] / empty argument (2-th)
 a:3 "a";1 2=a / bad type
 a:3 "a";"c" 2=a / bad type
 0!!6 / not positive
-0!6 / not an array
+0!6 / type
 0.3!6 / non-integer
 " "/1 2 / not a string array
 " "/(1 2;3 4) / not a string array
@@ -45,7 +45,7 @@ a:3 "a";"c" 2=a / bad type
 !-3 / negative
 !3.2 / non-integer index
 !3.2 5.2 / contains non-integer
-!(1 2;3 4) / nested array
+!(1 2;3 4) / nested indices
 &-3 / negative
 &2.5 / non-integer
 &-3.0 / negative
@@ -62,10 +62,10 @@ a,:1 / undefined global
 f:{x+y};f[1;2;3] / too many arguments
 {?[0;a:2;0];a+1}0 / undefined local
 {?[0;a:2;0];a+1;a}0 / undefined local
-|3 / not an array
+|3 / type
 1.5 rotate 1 2 / non-integer
 (+) rotate 1 2 / non-integer
-2 rotate (+) / not an array
+2 rotate (+) / type
 1.5_2 3 / non-integer
 "a" "b"_2 3 4 / non-integer array
 "a"_1 2 / type
@@ -77,9 +77,9 @@ f:{x+y};f[1;2;3] / too many arguments
 1 2 3#4 / bad type
 sub["a";"b"]#4 / type
 "a"#!10 / type
-1 rshift 2 / not an array
-rshift 2 / not an array
-shift 2 / not an array
+1 rshift 2 / type
+rshift 2 / type
+shift 2 / type
 10^!5 / out of range
 0^!5 / out of range
 2^"a" / out of range
@@ -238,13 +238,13 @@ shift[1;2;3] / too many arguments
 rshift[1;2;3] / too many arguments
 "pkg" eval `1+"a"` / type
 "pkg" eval `f:{1+"a"};f 0` / type
->2 / not an array
+>2 / type
 +(1 2;!0) / length mismatch
 (a;b):,1 / length
 (a;b):2 / non-array
-%+ / not an array
+%+ / type
 ?+ / bad type
-ocount+ / not an array
+ocount+ / type
 1.5^2 3 / non-integer
 d:"a" "b"!1 2;d["a" "c" "b"] / not found
 d:"a" "b"!1 2;d["c"] / not found

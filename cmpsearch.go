@@ -50,7 +50,7 @@ func classify(ctx *Context, x V) V {
 			return rangeI(int64(xv.Len()))
 		}
 	default:
-		return Panicf("%%x : x not an array (%s)", x.Type())
+		return panicType("%x", "x", x)
 	}
 	switch xv := x.value.(type) {
 	case *AB:
@@ -260,7 +260,7 @@ func markFirsts(ctx *Context, x V) V {
 			return NewAB(r)
 		}
 	default:
-		return Panicf("firsts x : x not an array (%s)", x.Type())
+		return panicType("firsts x", "x", x)
 	}
 	switch xv := x.value.(type) {
 	case *AB:
@@ -640,7 +640,7 @@ func occurrenceCount(ctx *Context, x V) V {
 			return NewAB(r)
 		}
 	default:
-		return Panicf("ocount x : x not an array (%s)", x.Type())
+		return panicType("ocount x", "x", x)
 	}
 	switch xv := x.value.(type) {
 	case *AB:
