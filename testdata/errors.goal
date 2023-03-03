@@ -327,7 +327,49 @@ abs(1 2;*) / type
 1 2%1 2 3 / length mismatch
 1 2&1 2 3 / length mismatch
 1 2|1 2 3 / length mismatch
+1 2=1 2 3 / length mismatch
 1 2 mod 1 2 3 / length mismatch
+1 2+0 1 0 / length mismatch
+1 2*0 1 0 / length mismatch
+1 2-0 1 0 / length mismatch
+1 2<0 1 0 / length mismatch
+1 2>0 1 0 / length mismatch
+1 2%0 1 0 / length mismatch
+1 2&0 1 0 / length mismatch
+1 2|0 1 0 / length mismatch
+1 2=0 1 0 / length mismatch
+1 2 mod 0 1 0 / length mismatch
+1 2+1 2.5 3 / length mismatch
+1 2*1 2.5 3 / length mismatch
+1 2*"a""b""c" / length mismatch
+1 2-1 2.5 3 / length mismatch
+1 2<1 2.5 3 / length mismatch
+1 2>1 2.5 3 / length mismatch
+1 2%1 2.5 3 / length mismatch
+1 2&1 2.5 3 / length mismatch
+1 2|1 2.5 3 / length mismatch
+1 2=1 2.5 3 / length mismatch
+1 2 mod 1 2.5 3 / length mismatch
+1 2+(0;1;1 2.5 3) / length mismatch
+1 2*(0;1;1 2.5 3) / length mismatch
+1 2-(0;1;1 2.5 3) / length mismatch
+1 2<(0;1;1 2.5 3) / length mismatch
+1 2>(0;1;1 2.5 3) / length mismatch
+1 2%(0;1;1 2.5 3) / length mismatch
+1 2&(0;1;1 2.5 3) / length mismatch
+1 2|(0;1;1 2.5 3) / length mismatch
+1 2=(0;1;1 2.5 3) / length mismatch
+1 2 mod (0;1;1 2.5 3) / length mismatch
+(0;1;1 2.5 3)+(1;1 2.5 3) / length mismatch
+(0;1;1 2.5 3)*(1;1 2.5 3) / length mismatch
+(0;1;1 2.5 3)-(1;1 2.5 3) / length mismatch
+(0;1;1 2.5 3)<(1;1 2.5 3) / length mismatch
+(0;1;1 2.5 3)>(1;1 2.5 3) / length mismatch
+(0;1;1 2.5 3)%(1;1 2.5 3) / length mismatch
+(0;1;1 2.5 3)&(1;1 2.5 3) / length mismatch
+(0;1;1 2.5 3)|(1;1 2.5 3) / length mismatch
+(0;1;1 2.5 3)=(1;1 2.5 3) / length mismatch
+(0;1;1 2.5 3) mod (1;1 2.5 3) / length mismatch
 1 0+1 2 3 / length mismatch
 1 0*1 2 3 / length mismatch
 1 0-1 2 3 / length mismatch
@@ -336,16 +378,123 @@ abs(1 2;*) / type
 1 0%1 2 3 / length mismatch
 1 0&1 2 3 / length mismatch
 1 0|1 2 3 / length mismatch
+1 0=1 2 3 / length mismatch
 1 0 mod 1 2 3 / length mismatch
+1 0+0 1 0 / length mismatch
+1 0*0 1 0 / length mismatch
+1 0-0 1 0 / length mismatch
+1 0<0 1 0 / length mismatch
+1 0>0 1 0 / length mismatch
+1 0%0 1 0 / length mismatch
+1 0&0 1 0 / length mismatch
+1 0|0 1 0 / length mismatch
+1 0=0 1 0 / length mismatch
+1 0 mod 0 1 0 / length mismatch
+1 0+1.5 2 3 / length mismatch
+1 0*1.5 2 3 / length mismatch
+1 0*"a""b""c" / length mismatch
+1 0-1.5 2 3 / length mismatch
+1 0<1.5 2 3 / length mismatch
+1 0>1.5 2 3 / length mismatch
+1 0%1.5 2 3 / length mismatch
+1 0&1.5 2 3 / length mismatch
+1 0|1.5 2 3 / length mismatch
+1 0=1.5 2 3 / length mismatch
+1 0 mod 1.5 2 3 / length mismatch
+1 0+(0;1;1 2 3) / length mismatch
+1 0*(0;1;1 2 3) / length mismatch
+1 0-(0;1;1 2 3) / length mismatch
+1 0<(0;1;1 2 3) / length mismatch
+1 0>(0;1;1 2 3) / length mismatch
+1 0%(0;1;1 2 3) / length mismatch
+1 0&(0;1;1 2 3) / length mismatch
+1 0|(0;1;1 2 3) / length mismatch
+1 0=(0;1;1 2 3) / length mismatch
+1 0 mod (0;1;1 2 3) / length mismatch
+(0;1;1 2 3)+(1;1 2 3) / length mismatch
+(0;1;1 2 3)*(1;1 2 3) / length mismatch
+(0;1;1 2 3)-(1;1 2 3) / length mismatch
+(0;1;1 2 3)<(1;1 2 3) / length mismatch
+(0;1;1 2 3)>(1;1 2 3) / length mismatch
+(0;1;1 2 3)%(1;1 2 3) / length mismatch
+(0;1;1 2 3)&(1;1 2 3) / length mismatch
+(0;1;1 2 3)|(1;1 2 3) / length mismatch
+(0;1;1 2 3)=(1;1 2 3) / length mismatch
+(0;1;1 2 3) mod (1;1 2 3) / length mismatch
 1.5 2+1 2 3 / length mismatch
 1.5 2*1 2 3 / length mismatch
+1.5 2*"a""b""c" / length mismatch
 1.5 2-1 2 3 / length mismatch
 1.5 2<1 2 3 / length mismatch
 1.5 2>1 2 3 / length mismatch
 1.5 2%1 2 3 / length mismatch
 1.5 2&1 2 3 / length mismatch
 1.5 2|1 2 3 / length mismatch
+1.5 2=1 2 3 / length mismatch
 1.5 2 mod 1 2 3 / length mismatch
+1.5 2+0 1 0 / length mismatch
+1.5 2*0 1 0 / length mismatch
+1.5 2*"a""b""c" / length mismatch
+1.5 2-0 1 0 / length mismatch
+1.5 2<0 1 0 / length mismatch
+1.5 2>0 1 0 / length mismatch
+1.5 2%0 1 0 / length mismatch
+1.5 2&0 1 0 / length mismatch
+1.5 2|0 1 0 / length mismatch
+1.5 2=0 1 0 / length mismatch
+1.5 2 mod 0 1 0 / length mismatch
+1.5 2+1 2.5 3 / length mismatch
+1.5 2*1 2.5 3 / length mismatch
+1.5 2*"a""b""c" / length mismatch
+1.5 2-1 2.5 3 / length mismatch
+1.5 2<1 2.5 3 / length mismatch
+1.5 2>1 2.5 3 / length mismatch
+1.5 2%1 2.5 3 / length mismatch
+1.5 2&1 2.5 3 / length mismatch
+1.5 2|1 2.5 3 / length mismatch
+1.5 2=1 2.5 3 / length mismatch
+1.5 2 mod 1 2.5 3 / length mismatch
+1.5 2+(0;1;1 2.5 3) / length mismatch
+1.5 2*(0;1;1 2.5 3) / length mismatch
+1.5 2-(0;1;1 2.5 3) / length mismatch
+1.5 2<(0;1;1 2.5 3) / length mismatch
+1.5 2>(0;1;1 2.5 3) / length mismatch
+1.5 2%(0;1;1 2.5 3) / length mismatch
+1.5 2&(0;1;1 2.5 3) / length mismatch
+1.5 2|(0;1;1 2.5 3) / length mismatch
+1.5 2=(0;1;1 2.5 3) / length mismatch
+1.5 2 mod (0;1;1 2.5 3) / length mismatch
+(0;1;1 2.5 3)+1.5 2 / length mismatch
+(0;1;1 2.5 3)*1.5 2 / length mismatch
+(0;1;1 2.5 3)-1.5 2 / length mismatch
+(0;1;1 2.5 3)<1.5 2 / length mismatch
+(0;1;1 2.5 3)>1.5 2 / length mismatch
+(0;1;1 2.5 3)%1.5 2 / length mismatch
+(0;1;1 2.5 3)&1.5 2 / length mismatch
+(0;1;1 2.5 3)|1.5 2 / length mismatch
+(0;1;1 2.5 3)=1.5 2 / length mismatch
+(0;1;1 2.5 3)mod 1.5 2  / length mismatch
+"a""b"*0 1 0 / length mismatch
+"a""b"*2 1 0 / length mismatch
+"a""b"*2 1 3.5 / length mismatch
+"a""b"+"b""c""d" / length mismatch
+"a""b"*"b""c""d" / type
+"a""b"-"b""c""d" / length mismatch
+"a""b"<"b""c""d" / length mismatch
+"a""b">"b""c""d" / length mismatch
+"a""b"%"b""c""d" / type
+"a""b"&"b""c""d" / length mismatch
+"a""b"|"b""c""d" / length mismatch
+"a""b"="b""c""d" / length mismatch
+"a""b" mod "b""c""d" / type
+"a""b"+("d";"e";"b""c""d") / length mismatch
+"a""b"*("d";"e";"b""c""d") / length mismatch
+"a""b"-("d";"e";"b""c""d") / length mismatch
+"a""b"<("d";"e";"b""c""d") / length mismatch
+"a""b">("d";"e";"b""c""d") / length mismatch
+"a""b"&("d";"e";"b""c""d") / length mismatch
+"a""b"|("d";"e";"b""c""d") / length mismatch
+"a""b"=("d";"e";"b""c""d") / length mismatch
 "a""b""c"=1 2 3 / type
 "a""b""c"+1 2 3 / type
 "a""b""c"** / type
@@ -367,6 +516,67 @@ abs(1 2;*) / type
 "c"&3 / type
 "c"|3 / type
 "c" mod 3 / type
+3="c" / type
+3+"c" / type
+(*)*"c" / type
+3-"c" / type
+3<"c" / type
+3>"c" / type
+3%"c" / type
+3&"c" / type
+3|"c" / type
+3 mod "c" / type
+3+"a""b"!(*;%) / type
+3="a""b"!(*;%) / type
+3*"a""b"!(*;%) / type
+3-"a""b"!(*;%) / type
+3<"a""b"!(*;%) / type
+3>"a""b"!(*;%) / type
+3%"a""b"!(*;%) / type
+3&"a""b"!(*;%) / type
+3|"a""b"!(*;%) / type
+3 mod "a""b"!(*;%) / type
+3.5="c" / type
+3.5+"c" / type
+(*)*"c" / type
+3.5-"c" / type
+3.5<"c" / type
+3.5>"c" / type
+3.5%"c" / type
+3.5&"c" / type
+3.5|"c" / type
+3.5 mod "c" / type
+0 3="c" / type
+0 3+"c" / type
+(*;%)*"c" / type
+0 3-"c" / type
+0 3** / type
+0 3<"c" / type
+0 3>"c" / type
+0 3%"c" / type
+0 3&"c" / type
+0 3|"c" / type
+0 3 mod "c" / type
+0 3.5="c" / type
+0 3.5+"c" / type
+0 3.5** / type
+0 3.5-"c" / type
+0 3.5<"c" / type
+0 3.5>"c" / type
+0 3.5%"c" / type
+0 3.5&"c" / type
+0 3.5|"c" / type
+0 3.5 mod "c" / type
+0 1="c" / type
+0 1** / type
+0 1+"c" / type
+0 1-"c" / type
+0 1<"c" / type
+0 1>"c" / type
+0 1%"c" / type
+0 1&"c" / type
+0 1|"c" / type
+0 1 mod "c" / type
 (sub["a";"b"])=3 / type
 (*)+3 / type
 (*)** / type
@@ -377,3 +587,182 @@ abs(1 2;*) / type
 (*)&3 / type
 (*)|3 / type
 (*) mod 3 / type
+(*)+3.5 / type
+(*)** / type
+(*)-3.5 / type
+(*)<3.5 / type
+(*)>3.5 / type
+(*)%3.5 / type
+(*)&3.5 / type
+(*)|3.5 / type
+(*) mod 3.5 / type
+3.5+* / type
+3.5=* / type
+3.5** / type
+3.5-* / type
+3.5<* / type
+3.5>* / type
+3.5%* / type
+3.5&* / type
+3.5|* / type
+3.5 mod * / type
+"a"+(*;%) / type
+"a"=(*;%) / type
+"a"*(*;%) / type
+"a"-(*;%) / type
+"a"<(*;%) / type
+"a">(*;%) / type
+"a"%(*;%) / type
+"a"&(*;%) / type
+"a"|(*;%) / type
+"a" mod (*;%) / type
+"b""a"+(*;%) / type
+"b""a"=(*;%) / type
+"b""a"*(*;%) / type
+"b""a"-(*;%) / type
+"b""a"<(*;%) / type
+"b""a">(*;%) / type
+"b""a"%(*;%) / type
+"b""a"&(*;%) / type
+"b""a"|(*;%) / type
+"b""a" mod (*;%) / type
+"a"+"a""b"!(*;%) / type
+"a"="a""b"!(*;%) / type
+"a"*"a""b"!(*;%) / type
+"a"-"a""b"!(*;%) / type
+"a"<"a""b"!(*;%) / type
+"a">"a""b"!(*;%) / type
+"a"%"a""b"!(*;%) / type
+"a"&"a""b"!(*;%) / type
+"a"|"a""b"!(*;%) / type
+"a" mod "a""b"!(*;%) / type
+"b""a"+"a""b"!(*;%) / type
+"b""a"="a""b"!(*;%) / type
+"b""a"*"a""b"!(*;%) / type
+"b""a"-"a""b"!(*;%) / type
+"b""a"<"a""b"!(*;%) / type
+"b""a">"a""b"!(*;%) / type
+"b""a"%"a""b"!(*;%) / type
+"b""a"&"a""b"!(*;%) / type
+"b""a"|"a""b"!(*;%) / type
+"b""a" mod "a""b"!(*;%) / type
+3.5+"a""b"!(*;%) / type
+3.5="a""b"!(*;%) / type
+3.5*"a""b"!(*;%) / type
+3.5-"a""b"!(*;%) / type
+3.5<"a""b"!(*;%) / type
+3.5>"a""b"!(*;%) / type
+3.5%"a""b"!(*;%) / type
+3.5&"a""b"!(*;%) / type
+3.5|"a""b"!(*;%) / type
+3.5 mod "a""b"!(*;%) / type
+1 3.5=(*;%) / type
+1 3.5+(*;%) / type
+1 3.5*(*;%) / type
+1 3.5-(*;%) / type
+1 3.5<(*;%) / type
+1 3.5>(*;%) / type
+1 3.5%(*;%) / type
+1 3.5&(*;%) / type
+1 3.5|(*;%) / type
+1 3.5 mod (*;%) / type
+1 3.5="a""b"!(*;%) / type
+1 3.5+"a""b"!(*;%) / type
+1 3.5*"a""b"!(*;%) / type
+1 3.5-"a""b"!(*;%) / type
+1 3.5<"a""b"!(*;%) / type
+1 3.5>"a""b"!(*;%) / type
+1 3.5%"a""b"!(*;%) / type
+1 3.5&"a""b"!(*;%) / type
+1 3.5|"a""b"!(*;%) / type
+1 3.5 mod "a""b"!(*;%) / type
+1 3=(*;%) / type
+1 3+(*;%) / type
+1 3*(*;%) / type
+1 3-(*;%) / type
+1 3<(*;%) / type
+1 3>(*;%) / type
+1 3%(*;%) / type
+1 3&(*;%) / type
+1 3|(*;%) / type
+1 3 mod (*;%) / type
+1 3="a""b"!(*;%) / type
+1 3+"a""b"!(*;%) / type
+1 3*"a""b"!(*;%) / type
+1 3-"a""b"!(*;%) / type
+1 3<"a""b"!(*;%) / type
+1 3>"a""b"!(*;%) / type
+1 3%"a""b"!(*;%) / type
+1 3&"a""b"!(*;%) / type
+1 3|"a""b"!(*;%) / type
+1 3 mod "a""b"!(*;%) / type
+("a""b"!(*;%))=1 3 / type
+("a""b"!(*;%))+1 3 / type
+("a""b"!(*;%))*1 3 / type
+("a""b"!(*;%))-1 3 / type
+("a""b"!(*;%))<1 3 / type
+("a""b"!(*;%))>1 3 / type
+("a""b"!(*;%))%1 3 / type
+("a""b"!(*;%))&1 3 / type
+("a""b"!(*;%))|1 3 / type
+("a""b"!(*;%)) mod 1 3 / type
+("a""b"!(*;%))="a""c"!1 3 / type
+("a""b"!(*;%))+"a""c"!1 3 / type
+("a""b"!(*;%))*"a""c"!1 3 / type
+("a""b"!(*;%))-"a""c"!1 3 / type
+("a""b"!(*;%))<"a""c"!1 3 / type
+("a""b"!(*;%))>"a""c"!1 3 / type
+("a""b"!(*;%))%"a""c"!1 3 / type
+("a""b"!(*;%))&"a""c"!1 3 / type
+("a""b"!(*;%))|"a""c"!1 3 / type
+("a""b"!(*;%)) mod "a""c"!1 3 / type
+1 0=(*;%) / type
+1 0+(*;%) / type
+1 0*(*;%) / type
+1 0-(*;%) / type
+1 0<(*;%) / type
+1 0>(*;%) / type
+1 0%(*;%) / type
+1 0&(*;%) / type
+1 0|(*;%) / type
+1 0 mod (*;%) / type
+1 0="a""b"!(*;%) / type
+1 0+"a""b"!(*;%) / type
+1 0*"a""b"!(*;%) / type
+1 0-"a""b"!(*;%) / type
+1 0<"a""b"!(*;%) / type
+1 0>"a""b"!(*;%) / type
+1 0%"a""b"!(*;%) / type
+1 0&"a""b"!(*;%) / type
+1 0|"a""b"!(*;%) / type
+1 0 mod "a""b"!(*;%) / type
+(1;2 3)="a""b"!(*;%) / type
+(1;2 3)+"a""b"!(*;%) / type
+(1;2 3)*"a""b"!(*;%) / type
+(1;2 3)-"a""b"!(*;%) / type
+(1;2 3)<"a""b"!(*;%) / type
+(1;2 3)>"a""b"!(*;%) / type
+(1;2 3)%"a""b"!(*;%) / type
+(1;2 3)&"a""b"!(*;%) / type
+(1;2 3)|"a""b"!(*;%) / type
+(1;2 3) mod "a""b"!(*;%) / type
+(1;2 3)=(*;%) / type
+(1;2 3)+(*;%) / type
+(1;2 3)*(*;%) / type
+(1;2 3)-(*;%) / type
+(1;2 3)<(*;%) / type
+(1;2 3)>(*;%) / type
+(1;2 3)%(*;%) / type
+(1;2 3)&(*;%) / type
+(1;2 3)|(*;%) / type
+(1;2 3) mod (*;%) / type
+(1;2 3)=* / type
+(1;2 3)+* / type
+(1;2 3)** / type
+(1;2 3)-* / type
+(1;2 3)<* / type
+(1;2 3)>* / type
+(1;2 3)%* / type
+(1;2 3)&* / type
+(1;2 3)|* / type
+(1;2 3) mod * / type
