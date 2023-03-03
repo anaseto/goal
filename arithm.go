@@ -233,11 +233,8 @@ func not(x V) V {
 	case *AV:
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
-			ri := not(xi)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.Slice[i] = ri
+			r.Slice[i] = not(xi)
+			// never panics
 		}
 		return NewV(r)
 	case *Dict:

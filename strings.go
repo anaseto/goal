@@ -636,7 +636,7 @@ func splitN(n int, sep S, y V) V {
 	case *Dict:
 		return newDictValues(yv.keys, splitN(n, sep, NewV(yv.values)))
 	default:
-		return Panicf("not a string atom or array (%s)", y.Type())
+		return Panicf("bad type in y (%s)", y.Type())
 	}
 }
 

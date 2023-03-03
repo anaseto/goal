@@ -109,8 +109,8 @@ a: / assignment without expression right
 "a"{x}/"a" / type
 ("a")"b"\"a" / bad type
 ("a")"b"/"a" / not a function
-" "\1 2 3 / not a string
-" "\(1 2 3;1) / not a string
+" "\1 2 3 / type
+" "\(1 2 3;1) / type
 60\2.5 / non-integer
 60/2.5 / non-integer
 60.5/2 / non-integer
@@ -260,3 +260,120 @@ qq/$/ / empty
 qq/$in/ / reserved keyword
 qq/${,}/ / invalid char
 qq/${a.b.c}/ / too many dots
+1 {x+y+z}/2 3 / expects 3 arguments
+{x+y}/[1;2 3;4 5] / expects 2 arguments
+{x+y+z}/[1;2 3;4 5 6] / length mismatch
+{x+y+z}/[1;2 3;4 "b"] / type
+{x>0}{x+"a"}/"c" / type
+{x>"a"}{x+0}/"c" / type
+2{x+0}/"c" 1 / type
+2{x+0}\"c" 2 / type
+2.5{x+0}/3 4 / non-integer
+2.5{x+0}\3 4 / non-integer
+"a" "b"\"c" / type
+2 ("a" "b")\"c" / type
+{x-y}\1 2 "c" / type
+3 {x-y}\1 2 "c" / type
+{x+y}\[1;2 3;4 5] / expects 2 arguments
+{x+y+z}\[1;2 3;4 5 6] / length mismatch
+{x+y+z}\[1;2 3;4 "b"] / type
+2.5 (",")\"a,b,c" / non-integer
+2 (",")\2 3 / type
+{x>0}{x+"a"}\"c" / type
+{x>"a"}{x+0}\"c" / type
+"a"{x+0}\"c" / type
+"a"{x+0}/"c" / type
+"a"'3 4 / not a function
+"a" 2{x+y}'"c" "d" / type
+{x+y+z}'[1 2;"c" "d";3 4] / type
+{x+y}'[1 2;"c" "d";3 4] / expects 2 arguments
+{x+y+z}'[1 2;"c" "d";3 4 5] / length mismatch
+&'"a" "b" / non-integer
++/(1 2;"a" "b") / type
++\(1 2;"a" "b") / type
+&/(1 2;"a" "b") / type
+&\(1 2;"a" "b") / type
+|/(1 2;"a" "b") / type
+|\(1 2;"a" "b") / type
+@[1 2 3;"a" "b";+;0] / non-integer
+@[1 2 3;0 2;+;0 1 3] / length mismatch
+@[*;0 2;+;0 1 3] / type
+@["a""b""c"!1 2 3;"a" "c";+;0 1 3] / length mismatch
+@["a""b""c"!"d""e""f";"a" "c";&] / non-integer
+@["a""b""c"!"d""e""f";"a";&] / non-integer
+@[1 2 3;0 5;+;0 1] / out of bounds
+@[1 2 3;0 5;1+] / out of bounds
+@[1 2 3;5;1+] / out of bounds
+@[1 2 3;0 "a";1+] / non-integer
+"a"!3 4 / not an array
+"a""a"!3 / not an array
+"a""b"!1 2 3 / length mismatch
+("a""b"!1 2)+"c" / type
+-"a" / type
+-(1 2;"a") / type
+sign"a" / type
+sign(1 2;"a") / type
+_* / type
+_(1 2;*) / type
+ceil * / type
+ceil(1 2;*) / type
+abs * / type
+abs(1 2;*) / type
+1 2+1 2 3 / length mismatch
+1 2*1 2 3 / length mismatch
+1 2-1 2 3 / length mismatch
+1 2<1 2 3 / length mismatch
+1 2>1 2 3 / length mismatch
+1 2%1 2 3 / length mismatch
+1 2&1 2 3 / length mismatch
+1 2|1 2 3 / length mismatch
+1 2 mod 1 2 3 / length mismatch
+1 0+1 2 3 / length mismatch
+1 0*1 2 3 / length mismatch
+1 0-1 2 3 / length mismatch
+1 0<1 2 3 / length mismatch
+1 0>1 2 3 / length mismatch
+1 0%1 2 3 / length mismatch
+1 0&1 2 3 / length mismatch
+1 0|1 2 3 / length mismatch
+1 0 mod 1 2 3 / length mismatch
+1.5 2+1 2 3 / length mismatch
+1.5 2*1 2 3 / length mismatch
+1.5 2-1 2 3 / length mismatch
+1.5 2<1 2 3 / length mismatch
+1.5 2>1 2 3 / length mismatch
+1.5 2%1 2 3 / length mismatch
+1.5 2&1 2 3 / length mismatch
+1.5 2|1 2 3 / length mismatch
+1.5 2 mod 1 2 3 / length mismatch
+"a""b""c"=1 2 3 / type
+"a""b""c"+1 2 3 / type
+"a""b""c"** / type
+"a""b""c"-1 2 3 / type
+"a""b""c"<1 2 3 / type
+"a""b""c">1 2 3 / type
+"a""b""c"%1 2 3 / type
+"a""b""c"&1 2 3 / type
+"a""b""c"|1 2 3 / type
+"a""b""c" mod 1 2 3 / type
+"a""b""c"=1 2 3 / type
+"c"=3 / type
+"c"+3 / type
+"c"** / type
+"c"-3 / type
+"c"<3 / type
+"c">3 / type
+"c"%3 / type
+"c"&3 / type
+"c"|3 / type
+"c" mod 3 / type
+(sub["a";"b"])=3 / type
+(*)+3 / type
+(*)** / type
+(*)-3 / type
+(*)<3 / type
+(*)>3 / type
+(*)%3 / type
+(*)&3 / type
+(*)|3 / type
+(*) mod 3 / type

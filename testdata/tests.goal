@@ -339,3 +339,4 @@ or["a";2;3] / "a"
 "prec" goal 2;$1%3 / "0.33"
 a:42;d:goal "globals";d "a" / 42
 (a:1;a) / 1 1
+csv "a" "b" "c" / "a,b,c\n"

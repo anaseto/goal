@@ -119,6 +119,7 @@ func dictArith(xd, yd *Dict, f func(V, V) V) V {
 
 func dictArithAmendI(x array, y int64, f func(V, V) V, z V) (array, error) {
 	if y < 0 || y >= int64(x.Len()) {
+		// should not happen
 		return x, fmt.Errorf("x out of bounds (%d)", y)
 	}
 	xy := x.at(int(y))
