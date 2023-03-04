@@ -151,7 +151,7 @@ func TestErrors(t *testing.T) {
 				if err == nil {
 					t.Log(ps)
 					t.Log(matchString)
-					t.Fatalf("no error left: result: %v\nexpected: %v", v, mt.Right)
+					t.Fatalf("no error left: result: %s\nexpected: %v", v.Sprint(ctx), mt.Right)
 				}
 			}
 			e, ok := err.(*PanicError)

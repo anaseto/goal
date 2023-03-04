@@ -278,7 +278,7 @@ func (p *projection) applyN(ctx *Context, n int) V {
 		if n > 1 {
 			ctx.dropN(n - 1)
 		}
-		return NewV(&projection{Fun: NewV(p), Args: vargs})
+		return NewV(&projection{Fun: p.Fun, Args: vargs})
 	}
 }
 
@@ -395,11 +395,8 @@ func (d *Dict) applyN(ctx *Context, n int) V {
 		dlen := d.keys.Len()
 		z := findArray(d.keys, y)
 		if z.IsI() {
-			i := z.I()
-			if i < 0 {
-				i += int64(dlen)
-			}
-			if i < 0 || i >= int64(dlen) {
+			i := z.I() // i >= 0
+			if i >= int64(dlen) {
 				return Panicf("d[y] : key not found (%s)", y.Sprint(ctx))
 			}
 			return d.values.at(int(i))
@@ -489,16 +486,14 @@ func applyArray(x array, y V) V {
 }
 
 func (ctx *Context) applyArrayArgs(x array, arg V, args []V) V {
-	if len(args) == 0 {
-		return applyArray(x, arg)
-	}
 	if arg.kind == valNil {
 		r := make([]V, x.Len())
 		for i := 0; i < len(r); i++ {
-			r[i] = ctx.ApplyN(x.at(i), args)
-			if r[i].IsPanic() {
-				return r[i]
+			ri := ctx.ApplyN(x.at(i), args)
+			if ri.IsPanic() {
+				return ri
 			}
+			r[i] = ri
 		}
 		return Canonical(NewAV(r))
 	}
@@ -506,10 +501,11 @@ func (ctx *Context) applyArrayArgs(x array, arg V, args []V) V {
 	case array:
 		r := make([]V, argv.Len())
 		for i := 0; i < argv.Len(); i++ {
-			r[i] = ctx.applyArrayArgs(x, argv.at(i), args)
-			if r[i].IsPanic() {
-				return r[i]
+			ri := ctx.applyArrayArgs(x, argv.at(i), args)
+			if ri.IsPanic() {
+				return ri
 			}
+			r[i] = ri
 		}
 		return Canonical(NewAV(r))
 	default:

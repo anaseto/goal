@@ -176,7 +176,13 @@ func (x *AV) Append(ctx *Context, dst []byte) []byte {
 }
 
 func (d *Dict) Append(ctx *Context, dst []byte) []byte {
+	if d.keys.Len() == 1 {
+		dst = append(dst, '(')
+	}
 	dst = d.keys.Append(ctx, dst)
+	if d.keys.Len() == 1 {
+		dst = append(dst, ')')
+	}
 	dst = append(dst, '!')
 	dst = d.values.Append(ctx, dst)
 	return dst

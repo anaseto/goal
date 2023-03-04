@@ -419,8 +419,14 @@ func weedOut(x, y V) V {
 	}
 	switch xv := x.value.(type) {
 	case *AB:
+		if xv.Len() != Length(y) {
+			return Panicf("f_y : length mismatch: %d (f[y]) vs %d (y)", xv.Len(), Length(y))
+		}
 		return weedOutAB(xv, y)
 	case *AI:
+		if xv.Len() != Length(y) {
+			return Panicf("f_y : length mismatch: %d (f[y]) vs %d (y)", xv.Len(), Length(y))
+		}
 		return weedOutAI(xv, y)
 	case *AF:
 		ix := toAI(xv)

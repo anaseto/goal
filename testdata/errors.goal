@@ -768,3 +768,48 @@ abs(1 2;*) / type
 (1;2 3) mod * / type
 a[0;]:5 / undefined global
 {a[0;]:5}4 / undefined local
+1[2;3] / type
++[;1][2;3;4] / too many arguments
+rx/[a-z]/[1;2;3] / too many arguments
+sub[rx/[a-z]/;"a"]["a";"b"] / too many arguments
+sub["b";"a"]["a";"b"] / too many arguments
+sub["b" "a" "d" "c"]["a";"b"] / too many arguments
+0 1[0;1] / out of depth
+2 1[0;1] / out of depth
+2.5 1[0;1] / out of depth
+("a""b"!1 2)[1;2] / unsupported
+(1 2;3 4)[(5 2;7 3)] / out of bounds
+(1 2;3 4)["a" "b"] / non-integer
+!* / non-integer
+&-3.0 2 / negative
+&"a""b"!-3.0 2 / negative
+{-1}#1 2 / negative
+{1.5}#1 2 / not an integer
+{2 3 4}#1 2 / length mismatch
+{0 1 0}#1 2 / length mismatch
+{2.0 1 0}#1 2 / length mismatch
+{"a" "b"}#1 2 / non-integer
+{,2}#* / type
+{,0}#* / type
+{,2.0}#* / type
+{,2}_* / type
+{,0}_* / type
+{,2.0}_* / type
+{,"a"}#* / non-integer
+{0 1 0}#"a""b"!1 2 / length mismatch
+{0 1 2}#"a""b"!1 2 / length mismatch
+{1.0 1 2}#"a""b"!1 2 / length mismatch
+{0 1 0}_"a""b"!1 2 / length mismatch
+{0 1 2}_"a""b"!1 2 / length mismatch
+{1.0 1 2}_"a""b"!1 2 / length mismatch
+{"a" "b"}_1 2 / non-integer
+.* / type
+.".*" / type
+eval * / not a string
+eval["5";2;3] / not a string
+eval["5";"a";3] / not a string
+eval[5;"a";"b"] / not a string
+eval["5";"a";"@"] / invalid identifier prefix
+eval[".*";"a";"a"] / type
+.[{x};();1] / empty
+.[{. x};*;{.*}] / type
