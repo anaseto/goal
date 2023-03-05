@@ -4,10 +4,9 @@ escape: sub[,/(
   `<` "&lt;"
   `>` "&gt;"
   `"` "&#34;")]
-elt:{+/(`<`;x;`>`;y;`</`;x;`>`)}
-ths:{elt[`tr`;+/elt["th";]'x]+"\n"}
-tds:{elt[`tr`;+/elt["td";]'x]+"\n"}
-table:{+/("<table>\n";ths[x];(+/tds'y);"</table>\n")}
+elt:{"<$x>$y</$x>"}
+ln:{elt[`tr`;+/elt[x;]'y]}
+table:{th:ln["th";] x; tds:"\n"/ln["td";]'y; "<table>\n$th\n$tds\n</table>\n"}
 table[
   "" "X" "Y" "Z"
   escape[$''(!4),'3!!12]
