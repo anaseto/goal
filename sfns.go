@@ -307,10 +307,10 @@ func deleteI(x V, i int64) V {
 		}
 		if reusableRCp(xv.rc) {
 			xv.Slice = append(xv.Slice[:i], xv.Slice[i+1:]...)
-			return x
+			return canonicalFast(x)
 		}
 		r := deleteiSlice[V](xv.Slice, i)
-		return NewV(&AV{Slice: r, flags: xv.flags, rc: xv.rc})
+		return NewV(canonicalAV(&AV{Slice: r, flags: xv.flags, rc: xv.rc}))
 	case *Dict:
 		rk := deleteI(NewV(xv.keys), i)
 		rk.InitRC()
