@@ -451,6 +451,9 @@ func joinToAV(x *AV, y V, left bool) V {
 		// left == false
 		return joinArrays(x, yv)
 	default:
+		if x.Len() == 0 {
+			return toArray(y)
+		}
 		if left {
 			r := make([]V, x.Len()+1)
 			r[0] = y
@@ -470,6 +473,12 @@ func joinToAV(x *AV, y V, left bool) V {
 }
 
 func joinArrays(x, y array) V {
+	if y.Len() == 0 {
+		return NewV(x)
+	}
+	if x.Len() == 0 {
+		return NewV(y)
+	}
 	r := make([]V, y.Len()+x.Len())
 	for i := 0; i < x.Len(); i++ {
 		r[i] = x.at(i)
