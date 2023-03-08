@@ -363,6 +363,24 @@ func scan2vMin(x V) V {
 	}
 }
 
+func fold2vJoin(x V) V {
+	switch xv := x.value.(type) {
+	case *Dict:
+		return fold2vJoin(NewV(xv.values))
+	case *AV:
+		if xv.Len() == 0 {
+			return x
+		}
+		r := xv.Slice[0]
+		for _, xi := range xv.Slice[1:] {
+			r = joinTo(r, xi) // does not panic
+		}
+		return r
+	default:
+		return x
+	}
+}
+
 func each2String(ctx *Context, x array) V {
 	switch xv := x.(type) {
 	case *AB:

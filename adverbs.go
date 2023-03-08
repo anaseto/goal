@@ -39,6 +39,8 @@ func foldfx(ctx *Context, f, x V) V {
 			return fold2vMax(x)
 		case vMin:
 			return fold2vMin(x)
+		case vJoin:
+			return fold2vJoin(x)
 		}
 	}
 	switch xv := x.value.(type) {
