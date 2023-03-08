@@ -168,6 +168,8 @@ func (v variadic) zero() V {
 		return NewF(math.Inf(1))
 	case vMax:
 		return NewF(math.Inf(-1))
+	case vJoin:
+		return NewAV(nil)
 	default:
 		return NewI(0)
 	}
