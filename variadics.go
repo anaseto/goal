@@ -1,7 +1,6 @@
 package goal
 
 import (
-	"math"
 	"strings"
 )
 
@@ -158,21 +157,6 @@ func (ctx *Context) initVariadics() {
 	ctx.vNames["»"] = v.variadic()
 	ctx.RegisterDyad("time", VTime)
 	ctx.RegisterDyad("goal", VGoal)
-}
-
-func (v variadic) zero() V {
-	switch v {
-	case vMultiply:
-		return NewI(1)
-	case vMin:
-		return NewF(math.Inf(1))
-	case vMax:
-		return NewF(math.Inf(-1))
-	case vJoin:
-		return NewAV(nil)
-	default:
-		return NewI(0)
-	}
 }
 
 // VRight implements the : variadic verb.

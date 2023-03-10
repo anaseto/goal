@@ -35,6 +35,10 @@ func foldfx(ctx *Context, f, x V) V {
 		switch f.variadic() {
 		case vAdd:
 			return fold2vAdd(x)
+		case vSubtract:
+			return fold2vSubtract(x)
+		case vMultiply:
+			return fold2vMultiply(x)
 		case vMax:
 			return fold2vMax(x)
 		case vMin:
@@ -48,10 +52,12 @@ func foldfx(ctx *Context, f, x V) V {
 		return foldfx(ctx, f, NewV(xv.values))
 	case array:
 		if xv.Len() == 0 {
-			if f.kind == valVariadic {
-				return f.variadic().zero()
+			switch xv.(type) {
+			case *AS:
+				return NewS("")
+			default:
+				return NewI(0)
 			}
-			return NewI(0)
 		}
 		r := xv.at(0)
 		ctx.pushNoRC(V{})

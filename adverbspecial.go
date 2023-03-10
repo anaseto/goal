@@ -32,10 +32,6 @@ func fold2vAdd(x V) V {
 		return NewF(n)
 	case *AS:
 		if xv.Len() == 0 {
-			// NOTE: Maybe not a great idea to have this exception,
-			// as empty arrays do not really have a specific type
-			// element, but in the event that this code is run,
-			// this would probably be the desired result.
 			return NewS("")
 		}
 		n := 0
@@ -134,6 +130,116 @@ func scan2vAdd(x V) V {
 		}
 		// Will never be canonical, so normalizing is not needed.
 		return NewV(r)
+	default:
+		return x
+	}
+}
+
+func fold2vSubtract(x V) V {
+	switch xv := x.value.(type) {
+	case *Dict:
+		return fold2vSubtract(NewV(xv.values))
+	case *AB:
+		if xv.Len() == 0 {
+			return NewI(0)
+		}
+		var n int64
+		if xv.Slice[0] {
+			n++
+		}
+		for _, b := range xv.Slice[1:] {
+			if b {
+				n--
+			}
+		}
+		return NewI(n)
+	case *AI:
+		if xv.Len() == 0 {
+			return NewI(0)
+		}
+		var n int64 = xv.Slice[0]
+		for _, xi := range xv.Slice[1:] {
+			n -= xi
+		}
+		return NewI(n)
+	case *AF:
+		if xv.Len() == 0 {
+			return NewI(0)
+		}
+		var n float64 = xv.Slice[0]
+		for _, xi := range xv.Slice[1:] {
+			n -= xi
+		}
+		return NewF(n)
+	case *AS:
+		if xv.Len() == 0 {
+			return NewS("")
+		}
+		var r string = xv.Slice[0]
+		for _, xi := range xv.Slice[1:] {
+			r = strings.TrimSuffix(r, xi)
+		}
+		return NewS(r)
+	case *AV:
+		if xv.Len() == 0 {
+			return NewI(0)
+		}
+		r := xv.At(0)
+		for _, xi := range xv.Slice[1:] {
+			r = subtract(r, xi)
+			if r.IsPanic() {
+				return r
+			}
+		}
+		return r
+	default:
+		return x
+	}
+}
+
+func fold2vMultiply(x V) V {
+	switch xv := x.value.(type) {
+	case *Dict:
+		return fold2vMultiply(NewV(xv.values))
+	case *AB:
+		for _, b := range xv.Slice {
+			if !b {
+				return NewI(0)
+			}
+		}
+		return NewI(1)
+	case *AI:
+		if xv.Len() == 0 {
+			return NewI(1)
+		}
+		var n int64 = xv.Slice[0]
+		for _, xi := range xv.Slice[1:] {
+			n *= xi
+		}
+		return NewI(n)
+	case *AF:
+		if xv.Len() == 0 {
+			return NewI(1)
+		}
+		var n float64 = xv.Slice[0]
+		for _, xi := range xv.Slice[1:] {
+			n *= xi
+		}
+		return NewF(n)
+	case *AS:
+		return panics("*/x : bad type in x (S)")
+	case *AV:
+		if xv.Len() == 0 {
+			return NewI(1)
+		}
+		r := xv.At(0)
+		for _, xi := range xv.Slice[1:] {
+			r = multiply(r, xi)
+			if r.IsPanic() {
+				return r
+			}
+		}
+		return r
 	default:
 		return x
 	}

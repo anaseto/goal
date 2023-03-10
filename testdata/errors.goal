@@ -813,3 +813,6 @@ eval["5";"a";"@"] / invalid identifier prefix
 eval[".*";"a";"a"] / type
 .[{x};();1] / empty
 .[{. x};*;{.*}] / type
+*/"abc" "c" "b" / type
+*/("c" "d";"a" "b") / type
+-/(1 2;*) / type
