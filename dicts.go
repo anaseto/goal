@@ -105,6 +105,7 @@ func dictArith(xd, yd *Dict, f func(V, V) V) V {
 			nv := replicate(notbnk, NewV(yv))
 			yv = replicate(bnk, NewV(yv)).value.(array)
 			xk = joinTo(NewV(xk), nk).value.(array)
+			initRC(xk)
 			xv = joinTo(NewV(xv), nv).value.(array)
 			ky = without(NewAI([]int64{int64(nkeys)}), ky)
 			break
