@@ -816,3 +816,4 @@ eval[".*";"a";"a"] / type
 */"abc" "c" "b" / type
 */("c" "d";"a" "b") / type
 -/(1 2;*) / type
+{a}"" / undefined

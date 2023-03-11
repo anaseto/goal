@@ -203,7 +203,7 @@ func (id lambda) applyN(ctx *Context, n int) V {
 	if n > 1 {
 		ctx.stack = ctx.stack[:len(ctx.stack)-n+1]
 	}
-	if unusedFirst {
+	if unusedFirst && err == nil {
 		ctx.stack[len(ctx.stack)-1].IncrRC()
 	}
 	return r
