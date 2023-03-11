@@ -97,6 +97,7 @@ func dictArith(xd, yd *Dict, f func(V, V) V) V {
 	for _, kyi := range kyv.Slice {
 		if kyi == int64(nkeys) {
 			bnk := memberOf(NewV(yk), NewV(xk))
+			bnk.InitRC()
 			bnk.incrRC2()
 			notbnk := not(bnk)
 			bnk.decrRC2()
