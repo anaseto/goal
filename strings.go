@@ -1,6 +1,7 @@
 package goal
 
 import (
+	"math"
 	"strconv"
 	"strings"
 )
@@ -334,7 +335,7 @@ func castn(y V) V {
 	case S:
 		xi, err := parseNumber(string(yv))
 		if err != nil {
-			return Errorf("%v", err)
+			return NewF(math.NaN())
 		}
 		return xi
 	case *AB:
@@ -346,7 +347,7 @@ func castn(y V) V {
 		for i, s := range yv.Slice {
 			n, err := parseNumber(s)
 			if err != nil {
-				return Errorf("%v", err)
+				n = NewF(math.NaN())
 			}
 			r[i] = n
 		}
