@@ -122,6 +122,7 @@ func scan2vAdd(x V) V {
 			last := r.Slice[i]
 			last.incrRC2()
 			next := add(last, xi)
+			next.InitRC()
 			last.decrRC2()
 			if next.IsPanic() {
 				return next
@@ -346,6 +347,7 @@ func scan2vMax(x V) V {
 			last := r.Slice[i]
 			last.incrRC2()
 			next := maximum(last, xi)
+			next.InitRC()
 			last.decrRC2()
 			if next.IsPanic() {
 				return next
@@ -456,6 +458,7 @@ func scan2vMin(x V) V {
 			last := r.Slice[i]
 			last.incrRC2()
 			next := minimum(last, xi)
+			next.InitRC()
 			last.decrRC2()
 			if next.IsPanic() {
 				return next
