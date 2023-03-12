@@ -407,10 +407,7 @@ func (d *Dict) applyN(ctx *Context, n int) V {
 			return Panicf("d[y] : key not found (%s)", y.value.(array).at(i).Sprint(ctx))
 		}
 		r := d.values.atIndices(azi)
-		if r.RC() == nil {
-			var n int
-			r.InitWithRC(&n)
-		}
+		initRC(r)
 		return NewV(r)
 	default:
 		ctx.dropN(n - 1)
