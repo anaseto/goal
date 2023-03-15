@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"codeberg.org/anaseto/goal"
 	"codeberg.org/anaseto/goal/cmd"
 	gos "codeberg.org/anaseto/goal/os"
@@ -24,9 +26,9 @@ func registerVariadics(ctx *goal.Context) {
 	ctx.RegisterDyad("run", gos.VRun)
 	ctx.RegisterDyad("say", gos.VSay)
 
-	ctx.AssignGlobal("STDOUT", gos.Stdout)
-	ctx.AssignGlobal("STDERR", gos.Stderr)
-	ctx.AssignGlobal("STDIN", gos.Stdin)
+	ctx.AssignGlobal("STDOUT", gos.NewStdHandle(os.Stdout))
+	ctx.AssignGlobal("STDERR", gos.NewStdHandle(os.Stderr))
+	ctx.AssignGlobal("STDIN", gos.NewStdHandle(os.Stdin))
 }
 
 func getHelp() map[string]string {

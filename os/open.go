@@ -19,18 +19,14 @@ type file struct {
 	mode string
 }
 
-// Stdout represents the standard output filehandle.
-var Stdout = newFile(os.Stdout)
-
-// Stderr represents the standard error filehandle.
-var Stderr = newFile(os.Stderr)
-
-// Stdin represents the standard input filehandle.
-var Stdin = newFile(os.Stdin)
-
 func newFile(f *os.File) goal.V {
 	b := bufio.NewReadWriter(bufio.NewReader(f), bufio.NewWriter(f))
-	return goal.NewV(&file{f: f, b: b, mode: ""})
+	return goal.NewV(&file{f: f, b: b, mode: "s"})
+}
+
+// NewStdHandle returns a buffered handle for the given file.
+func NewStdHandle(f *os.File) goal.V {
+	return newFile(f)
 }
 
 func (f *file) Matches(y goal.Value) bool {
