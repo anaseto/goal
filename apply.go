@@ -326,7 +326,7 @@ func (x *AB) applyN(ctx *Context, n int) V {
 		return r
 	default:
 		ctx.dropN(n - 1)
-		return Panicf("x[y] : out of depth")
+		return Panicf("x . y : out of depth")
 	}
 }
 
@@ -338,7 +338,7 @@ func (x *AI) applyN(ctx *Context, n int) V {
 		return r
 	default:
 		ctx.dropN(n - 1)
-		return Panicf("x[y] : out of depth")
+		return Panicf("x . y : out of depth")
 	}
 }
 
@@ -350,7 +350,7 @@ func (x *AF) applyN(ctx *Context, n int) V {
 		return r
 	default:
 		ctx.dropN(n - 1)
-		return Panicf("x[y] : out of depth")
+		return Panicf("x . y : out of depth")
 	}
 }
 
