@@ -2,13 +2,13 @@ package goal
 
 import "fmt"
 
-// Dict represents a dictionnary.
+// Dict represents a dictionary.
 type Dict struct {
 	keys   array
 	values array
 }
 
-// NewDict returns a dictionnary. Both keys and values should be arrays, and
+// NewDict returns a dictionary. Both keys and values should be arrays, and
 // they should have the same length.
 func NewDict(keys, values V) V {
 	xv, ok := keys.value.(array)
@@ -36,12 +36,12 @@ func newDictValues(keys array, values V) V {
 	return NewV(&Dict{keys: keys, values: v})
 }
 
-// Keys returns the keys of the dictionnary.
+// Keys returns the keys of the dictionary.
 func (d *Dict) Keys() V {
 	return NewV(d.keys)
 }
 
-// Values returns the values of the dictionnary.
+// Values returns the values of the dictionary.
 func (d *Dict) Values() V {
 	return NewV(d.values)
 }

@@ -31,7 +31,7 @@ It's main distinctive features are as follows:
   BQN's semantics. Multi-dimensional versions, when present in BQN, have been
   left out, though, as Goal has only free-form immutable arrays, like K.  Some
   primitives use words instead of symbols (like ocount for occurrence count).
-  Also, K-like dictionnaries are supported, but not tables.
+  Also, K-like dictionaries are supported, but not tables.
 * Unlike in typical array languages, strings are atoms, and common string
   handling functions (like index, substr or trim) have been integrated into the
   primitives, including regular expression functions.
@@ -91,10 +91,11 @@ written in Goal.
 
 # Documentation
 
-Currently, documentation consists of the REPL help system with usage summary and
-examples for all implemented features, so some prior knowledge of another array
-language, in particular K, can be useful. The full contents are replicated
-below.
+Documentation consists of the REPL help system with a short description and/or
+examples for all implemented features. Some prior knowledge of another array
+language, in particular K, can be useful, but not necessary: the best way to
+learn and discover the language is to play with it in the REPL. The full
+contents are replicated below.
 
 ```
 TOPICS HELP
@@ -125,21 +126,23 @@ regexps         rx/[a-z]/      (see https://pkg.go.dev/regexp/syntax for syntax)
 verbs           : + - * % ! & | < > = ~ , ^ # _ $ ? @ . ::   (right-associative)
                 abs bytes ceil error ...
 adverbs         / \ '                                         (left-associative)
-expressions     2*3+4 -> 14     1+|1 2 3 -> 4 3 2     +/'(1 2 3;4 5 6) -> 6 15
+expressions     2*3+4 -> 14      1+|1 2 3 -> 4 3 2      +/'(1 2 3;4 5 6) -> 6 15
 separator       ; or newline except when ignored after {[( and before )]}
 variables       a  b.c  f  data  t1
 assign          a:2 (local within lambda, global otherwise)        a::2 (global)
 op assign       a+:1 (sugar for a:a+1)         a-::2 (sugar for a::a-2)
 list assign     (a;b;c):x (where 2<#x)         (a;b):1 2;b -> 2
-index           x[y] or x y is sugar for x@y; x[] ~ x[*] ~ x[!#x] ~ x (arrays)
+eval. order     apply:f[e1;e2]   apply:e1 op e2                      (e2 before)
+                list:(e1;e2)     seq:([e1;e2])    lambda:{e1;e2}     (e1 before)
+sequence        [a:2;b:a+3;a+10] -> 12 (bracket block [] at start of expression)
+index/apply     x[y] or x y is sugar for x@y; x[] ~ x[*] ~ x[!#x] ~ x (arrays)
 index deep      x[y;z;...] is sugar for x.(y;z;...) (except for x in (?;and;or))
 index assign    x[y]:z is sugar for x:@[x;y;:;z]           (or . for x[y;...]:z)
 index op assign x[y]op:z is sugar for x:@[x;y;op;z]              (for symbol op)
-lambdas         {x+y-z}[7;3;5] -> 5       {[a;b;c]a+b-c}[7;3;5] -> 5
-projections     +[2;] 3 -> 5              (2+) 3 -> 5
+lambdas         {x+y-z}[3;5;7] -> 1       {[a;b;c]a+b-c}[3;5;7] -> 1
+projections     +[2;] 3 -> 5              (2+) 3 -> 5      (partial application)
 cond            ?[1;2;3] -> 2     ?[0;2;3] -> 3    ?[0;2;"";3;4] -> 4
 and/or          and[1;2] -> 2   and[1;0;3] -> 0   or[0;2] -> 2   or[0;0;0] -> 0
-sequence        [a:2;b:a+3;a+10] -> 12 (bracket block [] at start of expression)
 return          [1;:2;3] -> 2                       (a : at start of expression)
 try             'x is sugar for ?["e"~@x;:x;x]         (return if it's an error)
 comments        from line with a single / until line with a single \
@@ -147,10 +150,10 @@ comments        from line with a single / until line with a single \
 
 TYPES HELP
 atom    array   name            examples
-n       N       number          0      1.5      !5      1.2 3 1.8
-s       S       string          "abc"    "d"    "a" "b" "c"
-r               regexp          rx/[a-z]/       rx/\s+/
-d               dictionnary     "a" "b"!1 2
+n       N       number          0       1.5       !5       1.2 3 1.8
+s       S       string          "abc"   "d"       "a" "b" "c"
+r               regexp          rx/[a-z]/         rx/\s+/
+d               dictionary      "a" "b"!1 2       keys!values
 f               function        +      {x*2}      (1-)      %[;2]
 h               handle          open "/path/to/file"    "w" open "/path/to/file"
 e               error           error "msg"
@@ -199,7 +202,7 @@ i^y windows     2^!4 -> (0 1;1 2;2 3)
 s^y trim        " []"^"  [text]  " -> "text"      "\n"^"\nline\n" -> "line"
 x^y without     2 3^1 1 2 3 3 4 -> 1 1 4
 #x  length      #2 4 5 -> 3       #"ab" "cd" -> 2       #42 -> 1      #"ab" -> 1
-i#y take        2#4 1 5 -> 4 1    4#3 1 5 -> 3 1 5 3 (cyclic)       3#1 -> 1 1 1
+i#y take        2#6 7 8 -> 6 7    4#6 7 8 -> 6 7 8 6 (cyclic)       3#1 -> 1 1 1
 s#y count       "ab"#"cabdab" "cd" "deab" -> 2 0 1
 f#y replicate   {0 1 1 0}#4 1 5 3 -> 1 5          {x>0}#2 -3 1 -> 2 1
 x#y keep only   2 3^1 1 2 3 3 4 -> 2 3 3
@@ -208,7 +211,7 @@ _s  to lower    _"ABC" -> "abc"         _"AB" "CD" -> "ab" "cd"
 i_s drop bytes  2_"abcde" -> "cde"      -2_"abcde" -> "abc"
 i_y drop        2_3 4 5 6 -> 5 6        -2_3 4 5 6 -> 3 4
 s_i delete      "abc"_1 -> "ac"
-x_i delete      4 3 2 1_1 -> 4 2 1      4 3 2 1_-3 -> 4 2 1
+x_i delete      6 7 8 9_1 -> 6 8 9      6 7 8 9_-3 -> 6 8 9
 s_s trim prefix "pref-"_"pref-name" -> "name"
 I_s cut string  1 3_"abcdef" -> "bc" "def"                         (I ascending)
 I_y cut         2 5_!10 -> (2 3 4;5 6 7 8 9)                       (I ascending)
@@ -225,21 +228,21 @@ i?y deal        -5?100 -> 19 26 0 73 94                        (always distinct)
 s?r rindex      "abcde"?rx/b../ -> 1 3                           (offset;length)
 s?s index       "a = a + 1"?"=" "+" -> 2 6
 d?y find key    ("a" "b"!3 4)?4 -> "b"       ("a" "b"!3 4)?5 -> ""
-x?y find        3 2 1?2 -> 1                 3 2 1?0 -> 3
+x?y find        9 8 7?8 -> 1                 9 8 7?6 -> 3
 @x  type        @2 -> "n"    @"ab" -> "s"    @2 3 -> "N"       @+ -> "f"
 s@y substr      "abcdef"@2  -> "cdef"                                (s[offset])
-r@y match       rx/[a-z]/"abc" -> 1          rx/\s/"abc" -> 0
-r@y find group  m:rx/[a-z](.)/"abc" -> "ab" "b"   (m[0] whole match, m[1] group)
+r@y match       rx/^[a-z]+$/"abc" -> 1       rx/\s/"abc" -> 0
+r@y find group  rx/([a-z])(.)/"&a+c" -> "a+" "a" "+"     (whole match, group(s))
 f@y apply       (|)@1 2 -> 2 1                      (like |[1 2] -> 2 1 or |1 2)
 d@y at key      ("a" "b"!1 2)@"a" -> 1
-x@y at          1 2 3@2 -> 3         1 2 3[2 0] -> 3 1      7 8 9@-2 -> 8
+x@y at          7 8 9@2 -> 9         7 8 9[2 0] -> 9 7       7 8 9@-2 -> 8
 .s  reval       ."2+3" -> 5    (restricted eval with new context: see also eval)
 .e  get error   .error "msg" -> "msg"
 .d  values      ."a" "b"!1 2 -> 1 2
 s.y substr      "abcdef"[2;3] -> "cde"                        (s[offset;length])
 r.y findN       rx/[a-z]/["abc";2] -> "a""b"    rx/[a-z]/["abc";-1] -> "a""b""c"
 r.y findN group rx/[a-z](.)/["abcdef";2] -> ("ab" "b";"cd" "d")
-x.y applyN      {x+y}.2 3 -> 5      {x+y}[2;3] -> 5         (1 2;3 4)[0;1] -> 2
+x.y applyN      {x+y}.2 3 -> 5       {x+y}[2;3] -> 5         (1 2;3 4)[0;1] -> 2
 «x  shift       «1 2 -> 2 0    «"a" "b" -> "b" ""   (ASCII alternative: shift x)
 x«y shift       "a" "b"«1 2 3 -> 3 "a" "b"
 »x  rshift      »1 2 -> 0 1    »"a" "b" -> "" "a"  (ASCII alternative: rshift x)
@@ -258,7 +261,7 @@ NAMED VERBS HELP
 abs n      abs value    abs -3 -1.5 2 -> 3 1.5 2
 bytes s    byte-count   bytes "abc" -> 3
 ceil x     ceil/upper   ceil 1.5 -> 2       ceil "ab" -> "AB"
-error x    error        r:{?[~x=0;1%x;error "zero"]}0;?["e"~@r;.r;r] -> "zero"
+error x    error        r:error "msg"; (@r;.r) -> "e" "msg"
 eval s     comp/run     a:5;eval "a+2" -> 7         (unrestricted variant of .s)
 firsts x   mark firsts  firsts 0 0 2 3 0 2 3 4 -> 1 0 1 1 0 0 0 1
 ocount x   occur-count  ocount 3 2 5 3 2 2 7 -> 0 0 0 1 1 2 0
@@ -312,11 +315,11 @@ I\x    decode    24 60 60\3723 -> 1 2 3  2\6 -> 1 1 0
 IO/OS HELP
 close h     flush any buffered data, then close filehandle h
 env s       get environment variable s, or an error if unset
-            returns a dictionnary representing the whole environment for s~""
+            returns a dictionary representing the whole environment for s~""
 flush h     flush any buffered data for filehandle h
 import s    read/eval wrapper roughly equivalent to eval[read s;s;s+"."]
 open s      open path s for reading, returning a filehandle (h)
-print s     print "Hello, world!\n" (uses implicit $x for non-string values)
+print s     print "Hello, world!\n"     (uses implicit $x for non-string values)
 read h      read from filehandle h until EOF or an error occurs
 read s      read file named s       lines:"\n"\read"/path/to/file"
 run s       run command s or S         run "pwd"          run "ls" "-l"
@@ -348,8 +351,8 @@ cmd time t            time command with time t
 time[cmd;t;fmt]       time command with time t in given format
 time[cmd;t;fmt;loc]   time command with time t in given format and location
 
-Time t should be either an integer representing unix epochtime, or a string
-in the given format (RFC3339 format layout "2006-01-02T15:04:05Z07:00" is the
+Time t should be either an integer representing unix epochtime, or a string in
+the given format (RFC3339 format layout "2006-01-02T15:04:05Z07:00" is the
 default). See https://pkg.go.dev/time for information on layouts and locations,
 as goal uses the same conventions as Go's time package. Supported values for
 cmd are as follows:
@@ -373,7 +376,7 @@ cmd are as follows:
     format (s)    format time using given layout (s)
 
 RUNTIME HELP
-goal "globals"   return dictionnary with a copy of global variables
-"prec" goal i    set floating point formatting precision to i (default -1)
-"seed" goal i    set non-secure pseudo-rand seed to i (used by the ? verb)
+goal "globals"   return dictionary with a copy of global variables
+"prec" goal i    set floating point formatting precision to i       (default -1)
+"seed" goal i    set non-secure pseudo-rand seed to i       (used by the ? verb)
 ```
