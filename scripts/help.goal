@@ -4,14 +4,15 @@ help:(
 TOPICS HELP
 Type help TOPIC or h TOPIC where TOPIC is one of:
 
-"syn"   syntax
-"types" value types
-"+"     verbs (like +*-%,)
+"s"     syntax
+"t"     value types
+"v"     verbs (like +*-%,)
 "nv"    named verbs (like in, sign)
-"'"     adverbs ('/\)
+"a"     adverbs ('/\)
 "io"    IO functions (like say, open, read)
-"time"  time handling
+"tm"    time handling
 "goal"  runtime system
+op      where op is a builtin's name (like "+" or "in")
 
 Notations:
         s (string) f (function) F (2-args function)
