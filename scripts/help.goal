@@ -11,7 +11,7 @@ Type help TOPIC or h TOPIC where TOPIC is one of:
 "a"     adverbs ('/\)
 "io"    IO functions (like say, open, read)
 "tm"    time handling
-"goal"  runtime system
+"rt"    runtime system
 op      where op is a builtin's name (like "+" or "in")
 
 Notations:

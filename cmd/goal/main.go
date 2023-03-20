@@ -45,6 +45,7 @@ func getHelp() map[string]string {
 	help["tm"] = helpTime
 	help["time"] = helpTime // for the builtin name
 	help["goal"] = helpGoal
+	help["rt"] = helpGoal
 	const vcols = 4
 	const scols = 12
 	const acols = 5
