@@ -216,6 +216,7 @@ I/x    encode    24 60 60/1 2 3 -> 3723              2/1 1 0 -> 6
 I\x    decode    24 60 60\3723 -> 1 2 3              2\6 -> 1 1 0
 
 IO/OS HELP
+chdir s     change current working directory to s, or return an error
 close h     flush any buffered data, then close filehandle h
 env s       get environment variable s, or an error if unset
             returns a dictionary representing the whole environment for s~""

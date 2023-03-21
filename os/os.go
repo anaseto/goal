@@ -228,9 +228,6 @@ func fsayV(ctx *goal.Context, w io.Writer, x goal.V) error {
 // shell cmd : sends cmd to the shell as-is. It returns the standard output of
 // the command, or an error. Standard error is inherited from the parent.
 func VShell(ctx *goal.Context, args []goal.V) goal.V {
-	if len(args) == 0 {
-		return goal.NewPanic("shell : missing command string")
-	}
 	if len(args) > 1 {
 		return goal.Panicf("shell[cmd] : too many arguments (%d)", len(args))
 	}
@@ -264,17 +261,15 @@ func VShell(ctx *goal.Context, args []goal.V) goal.V {
 // In the second form, only standard error is inherited, and the command's
 // standard output is returned.
 func VRun(ctx *goal.Context, args []goal.V) goal.V {
-	if len(args) == 0 {
-		return goal.NewPanic("run : missing command string")
-	}
 	var cmds []string
-	switch arg := args[0].Value().(type) {
+	y := args[0]
+	switch yv := y.Value().(type) {
 	case goal.S:
-		cmds = []string{string(arg)}
+		cmds = []string{string(yv)}
 	case *goal.AS:
-		cmds = arg.Slice
+		cmds = yv.Slice
 	default:
-		return goal.Panicf("run : non-string command (%s)", arg.Type())
+		return goal.Panicf("run : non-string command (%s)", y.Type())
 	}
 	if len(cmds) == 0 {
 		return goal.NewPanic("run : empty command")
@@ -308,5 +303,27 @@ func VRun(ctx *goal.Context, args []goal.V) goal.V {
 		return goal.NewS(sb.String())
 	default:
 		return goal.Panicf("run : too many arguments (%d)", len(args))
+	}
+}
+
+// VChdir implements the chdir monad.
+//
+// chdir s : change current directory to s, or return an error
+//
+// It returns a true value on success.
+func VChdir(ctx *goal.Context, args []goal.V) goal.V {
+	if len(args) > 1 {
+		return goal.Panicf("chdir : too many arguments (%d)", len(args))
+	}
+	x := args[0]
+	switch dir := x.Value().(type) {
+	case goal.S:
+		err := os.Chdir(string(dir))
+		if err != nil {
+			return goal.Errorf("%v", err)
+		}
+		return goal.NewI(1)
+	default:
+		return goal.Panicf("chdir : non-string directory (%s)", x.Type())
 	}
 }

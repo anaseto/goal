@@ -18,6 +18,7 @@ func main() {
 
 func registerVariadics(ctx *goal.Context) {
 	ctx.RegisterMonad("close", gos.VClose)
+	ctx.RegisterMonad("chdir", gos.VChdir)
 	ctx.RegisterMonad("flush", gos.VFlush)
 	ctx.RegisterMonad("shell", gos.VShell)
 	ctx.RegisterDyad("env", gos.VEnv)
