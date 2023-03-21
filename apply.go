@@ -392,6 +392,9 @@ func (d *Dict) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
 		y := ctx.top()
+		if y.kind == valNil {
+			return NewV(d.values)
+		}
 		dlen := d.keys.Len()
 		z := findArray(d.keys, y)
 		if z.IsI() {
