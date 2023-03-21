@@ -583,12 +583,15 @@ func dosTimes(ctx *Context, n int64, f, y V) V {
 	f.IncrRC()
 	ctx.push(y)
 	for i := int64(1); i <= n; i++ {
-		y = f.applyN(ctx, 1)
-		if y.IsPanic() {
+		y.IncrRC()
+		next := f.applyN(ctx, 1)
+		y.DecrRC()
+		if next.IsPanic() {
 			f.DecrRC()
 			ctx.drop()
-			return y
+			return next
 		}
+		y = next
 		ctx.replaceTop(y)
 		r[i] = y
 	}
