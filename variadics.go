@@ -123,11 +123,11 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterMonad("error", VError)
 	ctx.RegisterMonad("eval", VEval)
 	ctx.RegisterMonad("firsts", VFirsts)
+	ctx.RegisterMonad("json", VJSON)
 	ctx.RegisterMonad("ocount", VOCount)
 	ctx.RegisterMonad("panic", VPanic)
 	ctx.RegisterMonad("rx", VRx)
 	ctx.RegisterMonad("sign", VSign)
-	ctx.RegisterMonad("sub", VSub)
 	ctx.RegisterMonad("utf8.rcount", VUTF8RCount)
 	ctx.RegisterMonad("utf8.valid", VUTF8Valid)
 
@@ -151,10 +151,11 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterDyad("or", VOr)
 	ctx.RegisterDyad("mod", VMod)
 	ctx.RegisterDyad("rotate", VRotate)
-	v := ctx.RegisterDyad("shift", VShift)
-	ctx.vNames["«"] = v.variadic()
-	v = ctx.RegisterDyad("rshift", VRShift)
+	v := ctx.RegisterDyad("rshift", VRShift)
 	ctx.vNames["»"] = v.variadic()
+	v = ctx.RegisterDyad("shift", VShift)
+	ctx.vNames["«"] = v.variadic()
+	ctx.RegisterDyad("sub", VSub)
 	ctx.RegisterDyad("time", VTime)
 	ctx.RegisterDyad("goal", VGoal)
 }
@@ -579,6 +580,16 @@ func VCSV(ctx *Context, args []V) V {
 		return fCSV2(args[1], args[0])
 	default:
 		return panicRank("csv")
+	}
+}
+
+// VJSON implements the "json" variadic verb.
+func VJSON(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		return fJSON(args[0])
+	default:
+		return panicRank("json")
 	}
 }
 

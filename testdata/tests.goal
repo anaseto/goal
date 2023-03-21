@@ -340,3 +340,5 @@ or["a";2;3] / "a"
 a:42;d:goal "globals";d "a" / 42
 (a:1;a) / 1 1
 csv "a" "b" "c" / "a,b,c\n"
+@json"lol" / "e"
+^json rq#{"a":true,"b":"text"}# / "a" "b"!(1;"text")

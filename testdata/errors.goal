@@ -818,3 +818,5 @@ eval[".*";"a";"a"] / type
 -/(1 2;*) / type
 {a}"" / undefined
 -2!"abc" / not positive
+json 3  / type
+json["3";4;5] / too many arguments

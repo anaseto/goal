@@ -176,6 +176,11 @@ func (x *AV) Append(ctx *Context, dst []byte) []byte {
 }
 
 func (d *Dict) Append(ctx *Context, dst []byte) []byte {
+	osc := ctx.compactFmt
+	ctx.compactFmt = true
+	defer func() {
+		ctx.compactFmt = osc
+	}()
 	if d.keys.Len() == 1 {
 		dst = append(dst, '(')
 	}
