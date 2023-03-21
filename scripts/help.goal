@@ -301,7 +301,7 @@ package:"\n"_`
 package main
 
 `
-"../cmd/goal/help.go" say package+"\n"/{{qy:$"\n"_y;qq/const help$x = $qy\n/}. x}'help
+"../cmd/goal/help.go" say package+"\n"/{{qy:$"\n"_y;"const help$x = $qy\n"}. x}'help
 helps:""/help[;1]
 "../docs/help.txt"print "\n"_helps
 helps:sub[`$`;`$$`]helps
