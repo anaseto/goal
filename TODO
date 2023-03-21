@@ -1,9 +1,6 @@
 Features:
 - maybe add bidirectional pipes in open (though basic cases can be handled
   already with run)
-- maybe some kind of printf (though i$s and "prec" goal n do the job)
-- maybe add splice (never used it, though)
-- maybe split i!s and maybe amend string @[s;I;s]
 - maybe add a json reader (possible now that we have dicts)
 
 Tests:

@@ -817,3 +817,4 @@ eval[".*";"a";"a"] / type
 */("c" "d";"a" "b") / type
 -/(1 2;*) / type
 {a}"" / undefined
+-2!"abc" / not positive

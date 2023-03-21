@@ -1147,6 +1147,25 @@ func shapeSplit(x V, y V) V {
 		i = int64(f)
 	}
 	switch yv := y.value.(type) {
+	case S:
+		ylen := len(yv)
+		if i <= 0 {
+			return Panicf("i!s : i not positive (%d)", i)
+		}
+		if i >= int64(ylen) {
+			return NewAS([]string{string(yv)})
+		}
+		n := ylen / int(i)
+		if ylen%int(i) != 0 {
+			n++
+		}
+		r := make([]string, n)
+		for j := 0; j < n; j++ {
+			from := j * int(i)
+			to := minInt(from+int(i), ylen)
+			r[j] = string(yv[from:to])
+		}
+		return NewAS(r)
 	case array:
 		ylen := yv.Len()
 		if i <= 0 {
