@@ -207,7 +207,7 @@ x^y without     2 3^1 1 2 3 3 4 -> 1 1 4
 i#y take        2#6 7 8 -> 6 7    4#6 7 8 -> 6 7 8 6 (cyclic)       3#1 -> 1 1 1
 s#y count       "ab"#"cabdab" "cd" "deab" -> 2 0 1
 f#y replicate   {0 1 1 0}#4 1 5 3 -> 1 5          {x>0}#2 -3 1 -> 2 1
-x#y keep only   2 3^1 1 2 3 3 4 -> 2 3 3
+x#y keep only   2 3#1 1 2 3 3 4 -> 2 3 3
 _n  floor       _2.3 -> 2               _1.5 3.7 -> 1 3
 _s  to lower    _"ABC" -> "abc"         _"AB" "CD" -> "ab" "cd"
 i_s drop bytes  2_"abcde" -> "cde"      -2_"abcde" -> "abc"
