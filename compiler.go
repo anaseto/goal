@@ -766,10 +766,10 @@ func (c *compiler) doStrand(st *astStrand, n int) error {
 			a = append(a, NewS(s))
 		}
 	}
-	r := Canonical(NewAV(a))
-	r.InitRC()
+	r := canonicalArray(&AV{Slice: a})
+	initRC(r)
 	initArrayFlags(r)
-	id := c.ctx.storeConst(r)
+	id := c.ctx.storeConst(NewV(r))
 	c.pos = st.Pos
 	c.push2(opConst, opcode(id))
 	c.applyN(n)

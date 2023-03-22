@@ -5,46 +5,53 @@ import (
 	"strings"
 )
 
-type sortAI []int64
-
-func (bs sortAI) Len() int {
-	return len(bs)
+func (x *AB) Less(i, j int) bool {
+	return x.Slice[j] && !x.Slice[i]
 }
 
-func (bs sortAI) Less(i, j int) bool {
-	return bs[i] < bs[j]
+func (x *AB) Swap(i, j int) {
+	x.Slice[i], x.Slice[j] = x.Slice[j], x.Slice[i]
 }
 
-func (bs sortAI) Swap(i, j int) {
-	bs[i], bs[j] = bs[j], bs[i]
+func (x *AI) Less(i, j int) bool {
+	return x.Slice[i] < x.Slice[j]
 }
 
-type sortAB []bool
-
-func (bs sortAB) Len() int {
-	return len(bs)
+func (x *AI) Swap(i, j int) {
+	x.Slice[i], x.Slice[j] = x.Slice[j], x.Slice[i]
 }
 
-func (bs sortAB) Less(i, j int) bool {
-	return bs[j] && !bs[i]
+func (x *AF) Less(i, j int) bool {
+	return x.Slice[i] < x.Slice[j]
 }
 
-func (bs sortAB) Swap(i, j int) {
-	bs[i], bs[j] = bs[j], bs[i]
+func (x *AF) Swap(i, j int) {
+	x.Slice[i], x.Slice[j] = x.Slice[j], x.Slice[i]
 }
 
-type sortVSlice []V
-
-func (bs sortVSlice) Len() int {
-	return len(bs)
+func (x *AS) Less(i, j int) bool {
+	return x.Slice[i] < x.Slice[j]
 }
 
-func (bs sortVSlice) Less(i, j int) bool {
-	return bs[i].Less(bs[j])
+func (x *AS) Swap(i, j int) {
+	x.Slice[i], x.Slice[j] = x.Slice[j], x.Slice[i]
 }
 
-func (bs sortVSlice) Swap(i, j int) {
-	bs[i], bs[j] = bs[j], bs[i]
+func (x *AV) Less(i, j int) bool {
+	return x.Slice[i].LessV(x.Slice[j])
+}
+
+func (x *AV) Swap(i, j int) {
+	x.Slice[i], x.Slice[j] = x.Slice[j], x.Slice[i]
+}
+
+func (x *Dict) Less(i, j int) bool {
+	return x.values.Less(i, j)
+}
+
+func (x *Dict) Swap(i, j int) {
+	x.keys.Swap(i, j)
+	x.values.Swap(i, j)
 }
 
 // sortUp returns ^x.
@@ -53,131 +60,54 @@ func sortUp(x V) V {
 	if !ok {
 		d, ok := x.value.(*Dict)
 		if ok {
-			if d.values.getFlags().Has(flagAscending) {
-				return x
-			}
-			p := ascend(NewV(d.values)).value.(*AI)
-			nk := d.keys.atIndices(p)
-			nv := d.values.atIndices(p)
-			nv.setFlags(nv.getFlags() | flagAscending)
-			initRC(nk)
-			initRC(nv)
-			return NewV(&Dict{keys: nk, values: nv})
+			return NewV(sortUpDict(d))
 		}
 		return panicType("^x", "x", x)
 	}
-	if xa.getFlags().Has(flagAscending) {
+	flags := xa.getFlags()
+	if flags.Has(flagAscending) {
 		return x
 	}
 	xa = xa.shallowClone()
-	switch xv := xa.(type) {
-	case *AB:
-		sort.Sort(sortAB(xv.Slice))
-		xv.flags |= flagAscending
-		return NewV(xv)
-	case *AF:
-		sort.Float64s(xv.Slice)
-		xv.flags |= flagAscending
-		return NewV(xv)
-	case *AI:
-		sort.Sort(sortAI(xv.Slice))
-		xv.flags |= flagAscending
-		return NewV(xv)
-	case *AS:
-		sort.Strings(xv.Slice)
-		xv.flags |= flagAscending
-		return NewV(xv)
+	switch xa.(type) {
 	case *AV:
-		sort.Stable(sortVSlice(xv.Slice))
-		xv.flags |= flagAscending
-		return NewV(xv)
+		sort.Stable(xa)
 	default:
-		panic("sortUp")
+		sort.Sort(xa)
 	}
+	xa.setFlags(flags | flagAscending)
+	return NewV(xa)
 }
 
-type permutationAV struct {
+func sortUpDict(d *Dict) *Dict {
+	flags := d.values.getFlags()
+	if flags.Has(flagAscending) {
+		return d
+	}
+	nk := d.keys.shallowClone()
+	nv := d.values.shallowClone()
+	initRC(nk)
+	initRC(nv)
+	nd := &Dict{keys: nk, values: nv}
+	sort.Stable(nd)
+	nv.setFlags(flags | flagAscending)
+	return nd
+}
+
+type permutation struct {
 	Perm []int64
-	X    sortVSlice
+	X    array
 }
 
-func (p *permutationAV) Len() int {
+func (p *permutation) Len() int {
 	return p.X.Len()
 }
 
-func (p *permutationAV) Swap(i, j int) {
+func (p *permutation) Swap(i, j int) {
 	p.Perm[i], p.Perm[j] = p.Perm[j], p.Perm[i]
 }
 
-func (p *permutationAV) Less(i, j int) bool {
-	return p.X.Less(int(p.Perm[i]), int(p.Perm[j]))
-}
-
-type permutationAB struct {
-	Perm []int64
-	X    sortAB
-}
-
-func (p *permutationAB) Len() int {
-	return p.X.Len()
-}
-
-func (p *permutationAB) Swap(i, j int) {
-	p.Perm[i], p.Perm[j] = p.Perm[j], p.Perm[i]
-}
-
-func (p *permutationAB) Less(i, j int) bool {
-	return p.X.Less(int(p.Perm[i]), int(p.Perm[j]))
-}
-
-type permutationAI struct {
-	Perm []int64
-	X    sortAI
-}
-
-func (p *permutationAI) Len() int {
-	return p.X.Len()
-}
-
-func (p *permutationAI) Swap(i, j int) {
-	p.Perm[i], p.Perm[j] = p.Perm[j], p.Perm[i]
-}
-
-func (p *permutationAI) Less(i, j int) bool {
-	return p.X.Less(int(p.Perm[i]), int(p.Perm[j]))
-}
-
-type permutationAF struct {
-	Perm []int64
-	X    sort.Float64Slice
-}
-
-func (p *permutationAF) Len() int {
-	return p.X.Len()
-}
-
-func (p *permutationAF) Swap(i, j int) {
-	p.Perm[i], p.Perm[j] = p.Perm[j], p.Perm[i]
-}
-
-func (p *permutationAF) Less(i, j int) bool {
-	return p.X.Less(int(p.Perm[i]), int(p.Perm[j]))
-}
-
-type permutationAS struct {
-	Perm []int64
-	X    sort.StringSlice
-}
-
-func (p *permutationAS) Len() int {
-	return p.X.Len()
-}
-
-func (p *permutationAS) Swap(i, j int) {
-	p.Perm[i], p.Perm[j] = p.Perm[j], p.Perm[i]
-}
-
-func (p *permutationAS) Less(i, j int) bool {
+func (p *permutation) Less(i, j int) bool {
 	return p.X.Less(int(p.Perm[i]), int(p.Perm[j]))
 }
 
@@ -192,39 +122,14 @@ func permRange(n int) []int64 {
 // ascend returns <x.
 func ascend(x V) V {
 	switch xv := x.value.(type) {
-	case *AB:
-		p := &permutationAB{Perm: permRange(xv.Len()), X: sortAB(xv.Slice)}
-		if !xv.flags.Has(flagAscending) {
-			sort.Stable(p)
-		}
-		return NewAI(p.Perm)
-	case *AF:
-		p := &permutationAF{Perm: permRange(xv.Len()), X: sort.Float64Slice(xv.Slice)}
-		if !xv.flags.Has(flagAscending) {
-			sort.Stable(p)
-		}
-		return NewAI(p.Perm)
-	case *AI:
-		p := &permutationAI{Perm: permRange(xv.Len()), X: sortAI(xv.Slice)}
-		if !xv.flags.Has(flagAscending) {
-			sort.Stable(p)
-		}
-		return NewAI(p.Perm)
-	case *AS:
-		p := &permutationAS{Perm: permRange(xv.Len()), X: sort.StringSlice(xv.Slice)}
-		if !xv.flags.Has(flagAscending) {
-			sort.Stable(p)
-		}
-		return NewAI(p.Perm)
-	case *AV:
-		p := &permutationAV{Perm: permRange(xv.Len()), X: sortVSlice(xv.Slice)}
-		if !xv.flags.Has(flagAscending) {
+	case array:
+		p := &permutation{Perm: permRange(xv.Len()), X: xv}
+		if !xv.getFlags().Has(flagAscending) {
 			sort.Stable(p)
 		}
 		return NewAI(p.Perm)
 	case *Dict:
-		p := ascend(NewV(xv.values)).value.(*AI)
-		return NewV(xv.keys.atIndices(p))
+		return NewV(sortUpDict(xv).keys)
 	default:
 		return panicType("<x", "x", x)
 	}
@@ -244,31 +149,31 @@ func descend(x V) V {
 func search(x V, y V) V {
 	switch xv := x.value.(type) {
 	case *AB:
-		if !xv.flags.Has(flagAscending) && !sort.IsSorted(sortAB(xv.Slice)) {
+		if !xv.flags.Has(flagAscending) && !sort.IsSorted(xv) {
 			return panicDomain("x$y", "x is not ascending")
 		}
 		xv.flags |= flagAscending
 		return searchAI(fromABtoAI(xv).value.(*AI), y)
 	case *AI:
-		if !xv.flags.Has(flagAscending) && !sort.IsSorted(sortAI(xv.Slice)) {
+		if !xv.flags.Has(flagAscending) && !sort.IsSorted(xv) {
 			return panicDomain("x$y", "x is not ascending")
 		}
 		xv.flags |= flagAscending
 		return searchAI(xv, y)
 	case *AF:
-		if !xv.flags.Has(flagAscending) && !sort.IsSorted(sort.Float64Slice(xv.Slice)) {
+		if !xv.flags.Has(flagAscending) && !sort.IsSorted(xv) {
 			return panicDomain("x$y", "x is not ascending")
 		}
 		xv.flags |= flagAscending
 		return searchAF(xv, y)
 	case *AS:
-		if !xv.flags.Has(flagAscending) && !sort.IsSorted(sort.StringSlice(xv.Slice)) {
+		if !xv.flags.Has(flagAscending) && !sort.IsSorted(xv) {
 			return panicDomain("x$y", "x is not ascending")
 		}
 		xv.flags |= flagAscending
 		return searchAS(xv, y)
 	case *AV:
-		if !xv.flags.Has(flagAscending) && !sort.IsSorted(sortVSlice(xv.Slice)) {
+		if !xv.flags.Has(flagAscending) && !sort.IsSorted(xv) {
 			return panicDomain("x$y", "x is not ascending")
 		}
 		xv.flags |= flagAscending
@@ -329,7 +234,7 @@ func searchAI(x *AI, y V) V {
 		r := make([]int64, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
 			r[i] = int64(sort.Search(x.Len(),
-				func(j int) bool { return yv.at(i).Less(NewI(x.At(j))) }))
+				func(j int) bool { return yv.at(i).LessV(NewI(x.At(j))) }))
 		}
 		return NewAI(r)
 	default:
@@ -367,7 +272,7 @@ func searchAF(x *AF, y V) V {
 		r := make([]int64, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
 			r[i] = int64(sort.Search(x.Len(),
-				func(j int) bool { return yv.at(i).Less(NewF(x.At(j))) }))
+				func(j int) bool { return yv.at(i).LessV(NewF(x.At(j))) }))
 		}
 		return NewAI(r)
 	default:
@@ -389,7 +294,7 @@ func searchAS(x *AS, y V) V {
 		r := make([]int64, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
 			r[i] = int64(sort.Search(x.Len(),
-				func(j int) bool { return yv.at(i).Less(NewS(x.At(j))) }))
+				func(j int) bool { return yv.at(i).LessV(NewS(x.At(j))) }))
 		}
 		return NewAI(r)
 	default:
@@ -403,12 +308,12 @@ func searchAV(x *AV, y V) V {
 		r := make([]int64, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
 			r[i] = int64(sort.Search(x.Len(),
-				func(j int) bool { return yv.at(i).Less(x.At(j)) }))
+				func(j int) bool { return yv.at(i).LessV(x.At(j)) }))
 		}
 		return NewAI(r)
 	default:
 		return NewI(int64(sort.Search(x.Len(),
-			func(i int) bool { return y.Less(x.At(i)) })))
+			func(i int) bool { return y.LessV(x.At(i)) })))
 
 	}
 }

@@ -11,6 +11,7 @@ type countable interface {
 type array interface {
 	RefCountHolder
 	countable
+	sort.Interface
 	at(i int) V           // x[i]
 	slice(i, j int) array // x[i:j]
 	getFlags() flags
@@ -515,23 +516,9 @@ func matchAF(x, y *AF) bool {
 
 // initArrayFlags sets Ascending flag if x is non-generic sorted array. It is
 // used to set the flag on constants arrays.
-func initArrayFlags(x V) {
-	switch xv := x.value.(type) {
-	case *AB:
-		if !xv.flags.Has(flagAscending) && sort.IsSorted(sortAB(xv.Slice)) {
-			xv.flags |= flagAscending
-		}
-	case *AI:
-		if !xv.flags.Has(flagAscending) && sort.IsSorted(sortAI(xv.Slice)) {
-			xv.flags |= flagAscending
-		}
-	case *AF:
-		if !xv.flags.Has(flagAscending) && sort.IsSorted(sort.Float64Slice(xv.Slice)) {
-			xv.flags |= flagAscending
-		}
-	case *AS:
-		if !xv.flags.Has(flagAscending) && sort.IsSorted(sort.StringSlice(xv.Slice)) {
-			xv.flags |= flagAscending
-		}
+func initArrayFlags(x array) {
+	flags := x.getFlags()
+	if !flags.Has(flagAscending) && sort.IsSorted(x) {
+		x.setFlags(flags | flagAscending)
 	}
 }

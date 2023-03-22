@@ -59,10 +59,10 @@ func (d *Dict) Type() string {
 	return "d"
 }
 
-func (d *Dict) Less(y Value) bool {
+func (d *Dict) LessV(y Value) bool {
 	switch yv := y.(type) {
 	case *Dict:
-		return d.keys.Less(yv.keys) || d.keys.Matches(yv.keys) && d.values.Less(yv.values)
+		return d.keys.LessV(yv.keys) || d.keys.Matches(yv.keys) && d.values.LessV(yv.values)
 	default:
 		return d.Type() < y.Type()
 	}

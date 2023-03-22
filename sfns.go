@@ -325,7 +325,7 @@ func deleteI(x V, i int64) V {
 }
 
 func cutAIarray(x *AI, y array) V {
-	if !x.flags.Has(flagAscending) && !sort.IsSorted(sortAI(x.Slice)) {
+	if !x.flags.Has(flagAscending) && !sort.IsSorted(x) {
 		return panics("I_y : I is not ascending")
 	}
 	x.flags |= flagAscending
@@ -353,7 +353,7 @@ func cutAIarray(x *AI, y array) V {
 }
 
 func cutAIS(x *AI, y S) V {
-	if !x.flags.Has(flagAscending) && !sort.IsSorted(sortAI(x.Slice)) {
+	if !x.flags.Has(flagAscending) && !sort.IsSorted(x) {
 		return panics("I_s : I is not ascending")
 	}
 	x.flags |= flagAscending
