@@ -1,4 +1,4 @@
-*Last updated: 2023-02-24*
+*Last updated: 2023-03-23*
 
 # Implementation notes
 
@@ -256,4 +256,8 @@ Whatever, I would say that Goal's scalar performance is decent. Quite a few
 array programming languages (like J) have done well without that. You're indeed
 normally going to be using array primitives on performance sensitive parts, so
 it's going to go fast, not like in SIMD or gonum fast in Goal's case, but fast
-like in typical Go code.
+like in typical Go code. Also, talking about array performace, the refcount
+system that allows for amortized constant time append and memory reuse in many
+builtins while using immutable arrays has been the major source of bugs during
+development: I know what people mean now when they say refcounting stuff is
+hard!
