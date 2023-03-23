@@ -46,3 +46,4 @@ rx#\/#"/" / 1
 rx/\\/"\\" / 1
 rx/^[a-z]+$/"abc" / 1
 rx/([a-z])(.)/"&a+c" / "a+" "a" "+"
+$sub[rx/[a-z]/;ceil] / `sub[rx["[a-z]"];ceil]`

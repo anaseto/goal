@@ -675,7 +675,7 @@ func VICount(ctx *Context, args []V) V {
 func VIn(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return panics("in : got only one argument")
+		return panics("in : not enough arguments")
 	case 2:
 		return memberOf(args[1], args[0])
 	default:
@@ -741,7 +741,7 @@ func VSet(ctx *Context, args []V) V {
 		}
 		r, ok := ctx.GetGlobal(string(name))
 		if !ok {
-			return Panicf(":: x : undefined variable (%s)", name)
+			return Panicf(":: x : undefined global (%s)", name)
 		}
 		return r
 	case 2:
@@ -770,7 +770,7 @@ func VSign(ctx *Context, args []V) V {
 func VRotate(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return panics("rotate : got only one argument")
+		return panics("rotate : not enough arguments")
 	case 2:
 		return rotate(args[1], args[0])
 	default:

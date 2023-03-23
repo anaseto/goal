@@ -266,7 +266,7 @@ func (ctx *Context) assignGlobals(ids []int, x V) error {
 	switch xv := x.value.(type) {
 	case array:
 		if len(ids) > xv.Len() {
-			return fmt.Errorf("length error in list assignment (%d > %d)", len(ids), xv.Len())
+			return fmt.Errorf("length mismatch in list assignment (%d > %d)", len(ids), xv.Len())
 		}
 		for i, id := range ids {
 			xi := xv.at(i)

@@ -122,3 +122,7 @@ rq#a##bc# / `a#bc`
 rq#a"##bc# / `a"#bc`
 rq#a"### / `a"#`
 nan"n"$"" "2" "2.5" "a" / 1 0 0 1
+a:3;"num $a" / "num 3"
+a:3 2 1;"array $a" / "array 3 2 1"
+id:4;"$id. " / "4. "
+qq/" "/ / `" "`

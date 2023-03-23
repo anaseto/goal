@@ -820,3 +820,47 @@ eval[".*";"a";"a"] / type
 -2!"abc" / not positive
 json 3  / type
 json["3";4;5] / too many arguments
+f 1 / undefined global
+f[1;2] / undefined global
+{(a;b):x}@,3 / length
+{(a;b):x}42 / non-array
+{"a"+x}_1 2 3 / type
+4.5$"abc" / non-integer
+(*)$"abc" / type
+(?)[1;2;3] / too many arguments
+(')[42] / not enough arguments
+(/)[42] / not enough arguments
+(\)[42] / not enough arguments
+error error "msg" / already an error
+rotate ,42 / not enough arguments
+in ,42 / not enough arguments
+mod 3 / not enough arguments
+mod[3;2;1] / too many arguments
+::42 / type
+::"f" / undefined global
+::[1;2] / type
+::[1;2;3] / too many arguments
+goal["globals";"toomany"] / too many arguments
+goal["prec";"toomany";"more"] / too many arguments
+sub[rx/[a-z]/;ceil]["a";"b";"c"] / too many arguments
+rx 42 / type
+rx "\4" / syntax
+rx["a";"b"] / too many arguments
+rx/[a-z]/42 / type
+rx/[a-z]/["abc";*] / type
+rx/[a-z]/["abc";1.5] / not an integer
+rx/([a-z])/["abc" 42;-1] / type
+rx/([a-z])/[*;-1] / type
+rx/[a-z]/["abc" 42;-1] / type
+rx/[a-z]/[*;-1] / type
+rx/[a-z]/42"b" / type
+rx/([a-z])/42 / type
+rx/([a-z])/42"b" / type
+rx/[a-z]/\42 / type
+rx/[a-z]/\42"b" / type
+4 2$"?" / is not ascending
+4.5 2$"?" / is not ascending
+1 0$"?" / is not ascending
+"c" "b"$"?" / is not ascending
+(1 2;3)$"?" / is not ascending
+^* / type
