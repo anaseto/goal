@@ -864,3 +864,11 @@ rx/[a-z]/\42"b" / type
 "c" "b"$"?" / is not ascending
 (1 2;3)$"?" / is not ascending
 ^* / type
+goal["time";+/] / not enough arguments
+goal["time";+/;,2;3;4] / too many arguments
+goal["time";{x+"a"};,2] / type
+goal["time"] / not enough arguments
+goal["time";"+/!10";3;4] / too many arguments
+goal["time";`2+"a"`;3] / type
+goal["time";`2+"a"`] / type
+goal["time";4] / type

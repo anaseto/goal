@@ -826,7 +826,7 @@ func VGoal(ctx *Context, args []V) V {
 	switch cmd {
 	case "globals":
 		if len(args) != 1 {
-			return panicRank(`goal`)
+			return panicRank(`"globals" goal`)
 		}
 		v := cloneArgs(ctx.globals)
 		k := make([]string, len(ctx.gNames))
@@ -834,7 +834,7 @@ func VGoal(ctx *Context, args []V) V {
 		return NewDict(NewAS(k), Canonical(NewAV(v)))
 	case "prec":
 		if len(args) != 2 {
-			return panicRank(`goal`)
+			return panicRank(`"prec" goal`)
 		}
 		y := args[0]
 		if y.IsI() {
@@ -850,9 +850,11 @@ func VGoal(ctx *Context, args []V) V {
 		return NewI(1)
 	case "seed":
 		if len(args) != 2 {
-			return panicRank(`goal`)
+			return panicRank(`"seed" goal`)
 		}
 		return seed(ctx, args[0])
+	case "time":
+		return goalTime(ctx, args[:len(args)-1])
 	default:
 		return Panicf("goal[cmd;...]: invalid cmd (%s)", cmd)
 	}

@@ -319,7 +319,7 @@ IO/OS HELP
 chdir s     change current working directory to s, or return an error
 close h     flush any buffered data, then close filehandle h
 env s       get environment variable s, or an error if unset
-            returns a dictionary representing the whole environment for s~""
+            return a dictionary representing the whole environment if s~""
 flush h     flush any buffered data for filehandle h
 import s    read/eval wrapper roughly equivalent to eval[read s;s;s+"."]
 open s      open path s for reading, returning a filehandle (h)
@@ -332,7 +332,7 @@ say s       same as print, but appends a newline               say !5
 shell s     run command as-is through the shell                shell "ls -l"
             inherits stderr, returns its own standard output or an error
 
-x env s     sets environment variable x to s, or returns an error.
+x env s     set environment variable x to s, or return an error.
 x env 0     unset environment variable x, or clear environment if x~""
 x import s  read/eval wrapper roughly equivalent to eval[read s;s;x+"."]
 x open s    open path s with mode x in "r" "r+" "w" "w+" "a" "a+"
@@ -380,7 +380,9 @@ cmd are as follows:
     format (s)    format time using given layout (s)
 
 RUNTIME HELP
-goal "globals"   return dictionary with a copy of global variables
-"prec" goal i    set floating point formatting precision to i       (default -1)
-"seed" goal i    set non-secure pseudo-rand seed to i       (used by the ? verb)
+goal "globals"     return dictionary with a copy of global variables
+goal["prec";i]     set floating point formatting precision to i     (default -1)
+goal["seed";i]     set non-secure pseudo-rand seed to i     (used by the ? verb)
+goal["time";s;n]   eval s for n times (default 1), return average time (ns)
+goal["time";f;x;n] call f.x for n times (default 1), return average time (ns)
 ```

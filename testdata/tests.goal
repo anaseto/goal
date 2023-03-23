@@ -343,3 +343,7 @@ a:42;d:goal "globals";d "a" / 42
 csv "a" "b" "c" / "a,b,c\n"
 @json"lol" / "e"
 ^json rq#{"a":true,"b":"text"}# / "a" "b"!(1;"text")
+0<goal["time";+/;,!10;10] / 1
+0<goal["time";+/;,!10] / 1
+0<goal["time";"+/!10";10] / 1
+0<goal["time";"+/!10"] / 1

@@ -1,3 +1,14 @@
+# v0.9.0 2023-03-23
+
++ New json builtin for parsing JSON strings.
++ New chdir builtin for changing working directory.
++ Implement i!s colsplit form for strings.
++ New goal["time";s;n] and goal["time";f;x;n] forms for timing code.
++ New d[] form equivalent to .d (for dicts).
++ New help feature: extract help for specific op.
++ Fixed refcount bug in i f\y form.
++ More tests, and various refactorings, and documentation improvements.
+
 # v0.8.0 2023-03-13
 
 + lists (expr1;expr2) are now evaluated from left to right. This avoids a list
