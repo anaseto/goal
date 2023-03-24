@@ -246,7 +246,7 @@ say s       same as print, but appends a newline               say !5
 shell s     run command as-is through the shell                shell "ls -l"
             inherits stderr, returns its own standard output or an error
 
-x env s     set environment variable x to s, or return an error.
+x env s     set environment variable x to s, or return an error
 x env 0     unset environment variable x, or clear environment if x~""
 x import s  same as import s, but using prefix x for globals
 x open s    open path s with mode x in "r" "r+" "w" "w+" "a" "a+"
