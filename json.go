@@ -8,17 +8,37 @@ import (
 func fJSON(x V) V {
 	switch xv := x.value.(type) {
 	case S:
-		sr := strings.NewReader(string(xv))
-		dec := json.NewDecoder(sr)
-		var v any
-		err := dec.Decode(&v)
-		if err != nil {
-			return Errorf("%v", err)
+		return jsonStringToGoal(string(xv))
+	case *AS:
+		r := make([]V, xv.Len())
+		for i, xi := range xv.Slice {
+			r[i] = jsonStringToGoal(xi)
 		}
-		return jsonToGoal(v)
+		return Canonical(NewAV(r))
+	case *AV:
+		r := make([]V, xv.Len())
+		for i, xi := range xv.Slice {
+			ri := fJSON(xi)
+			if ri.IsPanic() {
+				return ri
+			}
+			r[i] = ri
+		}
+		return NewAV(r)
 	default:
 		return panicType("json x", "x", x)
 	}
+}
+
+func jsonStringToGoal(s string) V {
+	sr := strings.NewReader(s)
+	dec := json.NewDecoder(sr)
+	var v any
+	err := dec.Decode(&v)
+	if err != nil {
+		return Errorf("%v", err)
+	}
+	return jsonToGoal(v)
 }
 
 func jsonToGoal(v any) V {
