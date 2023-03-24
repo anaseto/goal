@@ -347,3 +347,4 @@ csv "a" "b" "c" / "a,b,c\n"
 0<goal["time";+/;,!10] / 1
 0<goal["time";"+/!10";10] / 1
 0<goal["time";"+/!10"] / 1
+eval[`3`;"loc";""]; eval[`42`;"loc";""] / 0

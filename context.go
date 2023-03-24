@@ -83,8 +83,8 @@ type Context struct {
 func NewContext() *Context {
 	ctx := &Context{}
 	ctx.gCode = &globalCode{}
-	ctx.gIDs = make(map[string]int, 8)
 	ctx.stack = make([]V, 0, 32)
+	ctx.gIDs = make(map[string]int, 8)
 	ctx.sources = make(map[string]string, 4)
 	var n int = 2
 	ctx.constants = []V{constAV: NewAVWithRC(nil, &n)}
@@ -203,6 +203,10 @@ func (ctx *Context) Run() (V, error) {
 // on the current context, so it would interrupt compilation of current file.
 // Use EvalPackage for that.
 func (ctx *Context) Eval(s string) (V, error) {
+	ofname := ctx.fname
+	defer func() {
+		ctx.fname = ofname
+	}()
 	err := ctx.Compile("", s)
 	if err != nil {
 		return V{}, err
@@ -229,6 +233,10 @@ func (e ErrPackageImported) Error() string {
 // successful completion, so this function can be called within a variadic
 // function.
 func (ctx *Context) EvalPackage(s, name, prefix string) (V, error) {
+	ofname := ctx.fname
+	defer func() {
+		ctx.fname = ofname
+	}()
 	oprefix := ctx.gPrefix
 	if prefix != "" {
 		ctx.gPrefix = prefix
@@ -243,13 +251,14 @@ func (ctx *Context) EvalPackage(s, name, prefix string) (V, error) {
 	nctx := ctx.derive()
 	err := nctx.Compile(name, s)
 	if err != nil {
+		ctx.merge(nctx)
 		return V{}, err
 	}
 	r, err := nctx.Run()
+	ctx.merge(nctx)
 	if err != nil {
 		return V{}, err
 	}
-	ctx.merge(nctx)
 	return r, nil
 }
 
@@ -361,19 +370,19 @@ func (ctx *Context) derive() *Context {
 	nctx.gCode = &globalCode{}
 	nctx.stack = make([]V, 0, 32)
 
-	nctx.constants = ctx.constants
-	nctx.sconstants = ctx.sconstants
 	nctx.variadics = ctx.variadics
 	nctx.variadicsNames = ctx.variadicsNames
 	nctx.keywords = ctx.keywords
 	nctx.vNames = ctx.vNames
+	nctx.rand = ctx.rand
+
+	nctx.constants = ctx.constants
+	nctx.sconstants = ctx.sconstants
 	nctx.lambdas = ctx.lambdas
 	nctx.globals = ctx.globals
 	nctx.gNames = ctx.gNames
-	nctx.rand = ctx.rand
 	nctx.gIDs = ctx.gIDs
 	nctx.sources = ctx.sources
-	nctx.errPos = ctx.errPos
 	nctx.gPrefix = ctx.gPrefix
 	nctx.prec = ctx.prec
 	return nctx
@@ -388,7 +397,6 @@ func (ctx *Context) merge(nctx *Context) {
 	ctx.gNames = nctx.gNames
 	ctx.gIDs = nctx.gIDs
 	ctx.sources = nctx.sources
-	ctx.errPos = nctx.errPos
 	ctx.gPrefix = nctx.gPrefix
 	ctx.prec = nctx.prec
 }

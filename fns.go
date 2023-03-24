@@ -610,13 +610,21 @@ func eval(ctx *Context, x V) V {
 	case *AS:
 		r := make([]V, xv.Len())
 		for i, xi := range xv.Slice {
-			r[i] = evalString(ctx, string(xi))
+			ri := evalString(ctx, string(xi))
+			if ri.IsPanic() {
+				return ri
+			}
+			r[i] = ri
 		}
 		return Canonical(NewAV(r))
 	case *AV:
 		r := make([]V, xv.Len())
 		for i, xi := range xv.Slice {
-			r[i] = eval(ctx, xi)
+			ri := eval(ctx, xi)
+			if ri.IsPanic() {
+				return ri
+			}
+			r[i] = ri
 		}
 		return Canonical(NewAV(r))
 	default:
@@ -625,12 +633,18 @@ func eval(ctx *Context, x V) V {
 }
 
 func evalString(ctx *Context, s string) V {
+	if ctx.fname == "" {
+		osource := ctx.sources[""]
+		defer func() {
+			ctx.sources[""] = osource
+		}()
+	}
 	nctx := ctx.derive()
 	r, err := nctx.Eval(s)
+	ctx.merge(nctx)
 	if err != nil {
 		return Panicf("eval s : %v", err)
 	}
-	ctx.merge(nctx)
 	return r
 }
 
@@ -652,6 +666,12 @@ func evalPackage(ctx *Context, x V, y V, z V) V {
 		if i == 0 && !isAlpha(r) || !isAlphaNum(r) {
 			return Panicf("eval[x;y;z] : z invalid identifier prefix (%s)", prefix)
 		}
+	}
+	if ctx.fname == "" {
+		osource := ctx.sources[""]
+		defer func() {
+			ctx.sources[""] = osource
+		}()
 	}
 	r, err := ctx.EvalPackage(string(s), string(name), string(prefix))
 	if err != nil {

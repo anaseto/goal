@@ -61,7 +61,7 @@ func (e *PanicError) Error() string {
 			writeLine(&sb, s, col)
 		}
 	}
-	return sb.String()
+	return strings.TrimSuffix(sb.String(), "\n")
 }
 
 func writeLine(sb *strings.Builder, s string, col int) {

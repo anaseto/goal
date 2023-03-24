@@ -872,3 +872,5 @@ goal["time";"+/!10";3;4] / too many arguments
 goal["time";`2+"a"`;3] / type
 goal["time";`2+"a"`] / type
 goal["time";4] / type
+eval[`.rq/1+"a"/`;"loc";""] / type
+eval[`.rq/1+"a"/`] / type
