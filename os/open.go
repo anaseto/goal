@@ -304,11 +304,10 @@ func VRead(ctx *goal.Context, args []goal.V) goal.V {
 		if len(args) != 1 {
 			break
 		}
-		bytes, err := os.ReadFile(string(yv))
+		s, err := readFile(string(yv))
 		if err != nil {
 			return goal.NewError(goal.NewS(err.Error()))
 		}
-		s := *(*string)(unsafe.Pointer(&bytes))
 		return goal.NewS(s)
 	case io.Reader:
 		if n < 0 {
@@ -332,6 +331,15 @@ func VRead(ctx *goal.Context, args []goal.V) goal.V {
 		p = "x "
 	}
 	return goal.Panicf("%sread y : bad type for y (%s)", p, y.Type())
+}
+
+func readFile(fname string) (string, error) {
+	bytes, err := os.ReadFile(fname)
+	if err != nil {
+		return "", err
+	}
+	s := *(*string)(unsafe.Pointer(&bytes))
+	return s, nil
 }
 
 func readString(h goal.V, delim string) goal.V {

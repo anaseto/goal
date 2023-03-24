@@ -2,53 +2,80 @@ package os
 
 import (
 	"bufio"
-	"codeberg.org/anaseto/goal"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"path"
+	"runtime"
 	"strings"
+
+	"codeberg.org/anaseto/goal"
 )
 
 // VImport implements the import dyad.
 //
-// import "name" : evaluate file "name.goal" with prefix "name"
+// import s : evaluate file s+".goal" (or s if it has already an extension)
+// with prefix s (without extension) for globals.
 //
-// pfx import "name" : evaluate file "name.goal" with custom prefix pfx
+// pfx import s : same as import s but use prefix pfx.  If pfx is empty, no
+// prefix is used.
 //
 // It returns 0 and does nothing if a file has already been evaluated.
 func VImport(ctx *goal.Context, args []goal.V) goal.V {
-	var fname string
-	var prefix string
 	if len(args) > 2 {
 		return goal.Panicf("import : too many arguments (%d)", len(args))
 	}
-	// TODO: VImport: support importing several files at once?
-	s, ok := args[0].Value().(goal.S)
-	if !ok {
-		return goal.Panicf("import name : name not a string (%s)", args[0].Type())
-	}
-	if strings.ContainsRune(string(s), '.') {
-		return goal.Panicf("import name : name should not include extension .", args[0].Type())
-	}
-	fname = string(s) + ".goal"
+	var prefix string
+	var hasPfx bool
 	if len(args) == 2 {
-		p, ok := args[1].Value().(goal.S)
+		pfx := args[1]
+		p, ok := pfx.Value().(goal.S)
 		if !ok {
-			return goal.Panicf("prefix import name : prefix not a string (%s)", args[1].Type())
+			return goal.Panicf("pfx import s : pfx not a string (%s)", pfx.Type())
 		}
 		prefix = string(p)
-	} else {
-		// TODO: check that prefix is valid (otherwise identifiers could
-		// not be written).
-		prefix = path.Base(string(s))
+		hasPfx = true
 	}
-	bytes, err := os.ReadFile(fname)
+	s := args[0]
+	switch sv := s.Value().(type) {
+	case goal.S:
+		return importWithPrefix(ctx, prefix, string(sv), hasPfx)
+	case *goal.AS:
+		var r goal.V
+		for _, si := range sv.Slice {
+			r = importWithPrefix(ctx, prefix, si, hasPfx)
+			if r.IsPanic() {
+				return r
+			}
+		}
+		return r
+	default:
+		return goal.Panicf("import s : s not a string (%s)", s.Type())
+	}
+}
+
+func importWithPrefix(ctx *goal.Context, prefix, name string, hasPfx bool) goal.V {
+	if !hasPfx {
+		prefix = path.Base(name)
+		prefix = strings.TrimSuffix(name, path.Ext(name))
+	}
+	fname := name
+	if path.Ext(fname) == "" {
+		fname += ".goal"
+	}
+	source, err := readFile(fname)
 	if err != nil {
-		return goal.Panicf("import : %v", err)
+		path, ok := searchIncFile(ctx, fname)
+		if ok {
+			fname = path
+			source, err = readFile(fname)
+		}
+		if err != nil {
+			return goal.Panicf("import : %v", err)
+		}
 	}
-	r, err := ctx.EvalPackage(string(bytes), fname, string(prefix))
+	r, err := ctx.EvalPackage(source, fname, prefix)
 	if err != nil {
 		_, ok := err.(goal.ErrPackageImported)
 		if ok {
@@ -57,6 +84,29 @@ func VImport(ctx *goal.Context, args []goal.V) goal.V {
 		return goal.Panicf("import : %v", err)
 	}
 	return r
+}
+
+// searchIncFile returns the path to filename relative to the current directory
+// or the GOALLIB environment variable, and boolean true if such a file exists.
+// Otherwise it returns a false boolean.
+func searchIncFile(ctx *goal.Context, fname string) (string, bool) {
+	goalLIB, ok := os.LookupEnv("GOALLIB")
+	if !ok {
+		return "", false
+	}
+	sep := ":"
+	if runtime.GOOS == "windows" {
+		// Like they do for PERLLIB.
+		sep = ";"
+	}
+	for _, dir := range strings.Split(goalLIB, sep) {
+		fpath := path.Join(dir, fname)
+		fi, err := os.Stat(fpath)
+		if err == nil && fi.Mode().IsRegular() {
+			return fpath, true
+		}
+	}
+	return "", false
 }
 
 func ppanic(pfx string, x goal.V) goal.V {

@@ -1,3 +1,8 @@
+# v? ?
+
++ Improvements in import builtin supporting GOALLIB environment variable,
+  both use of extension or not, and importing several files at once.
+
 # v0.9.0 2023-03-23
 
 + New json builtin for parsing JSON strings.

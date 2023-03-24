@@ -289,8 +289,8 @@ sub[s;s;i] replaceN     sub["a";"b";2] "aaa" -> "bba"       (stop after 2 times)
 sub[S]     replaceS     sub["b" "d" "c" "e"] "abc" -> "ade"
 sub[S;S]   replaceS     sub["b" "c";"d" "e"] "abc" -> "ade"
 
-eval[s;loc;pfx]         like eval s, but provide name loc as location (usually
-                        a filename), and prefix pfx+"." for globals
+eval[s;loc;pfx]         like eval s, but provide loc as location (usually a
+                        path), and prefix pfx+"." for globals
 
 MATH: acos, asin, atan, cos, exp, log, round, sin, sqrt, tan, nan
 UTF-8: utf8.rcount (number of code points), utf8.valid
@@ -321,7 +321,10 @@ close h     flush any buffered data, then close filehandle h
 env s       get environment variable s, or an error if unset
             return a dictionary representing the whole environment if s~""
 flush h     flush any buffered data for filehandle h
-import s    read/eval wrapper roughly equivalent to eval[read s;s;s+"."]
+import s    read/eval wrapper roughly equivalent to eval[read path;path;pfx]
+            where 1) path~s or is derived from s by appending ".goal" and/or
+                     prefixing with env "GOALLIB"
+                  2) pfx is path's basename without extension
 open s      open path s for reading, returning a filehandle (h)
 print s     print "Hello, world!\n"     (uses implicit $x for non-string values)
 read h      read from filehandle h until EOF or an error occurs
@@ -334,7 +337,7 @@ shell s     run command as-is through the shell                shell "ls -l"
 
 x env s     set environment variable x to s, or return an error.
 x env 0     unset environment variable x, or clear environment if x~""
-x import s  read/eval wrapper roughly equivalent to eval[read s;s;x+"."]
+x import s  same as import s, but using prefix x for globals
 x open s    open path s with mode x in "r" "r+" "w" "w+" "a" "a+"
             or pipe from (mode "-|") or to (mode "|-") command (s or S)
 x print s   print s to filehandle/name x        "/path/to/file" print "content"
