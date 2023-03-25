@@ -38,5 +38,4 @@ as needed, so most applications do not have to care about this.
 
 From integer to float, this means that big integers might be approximated after
 a conversion. From float to integer, if the float is too big to be represented
-or is NaN, an implementation-dependent integer might be returned (current Go
-implementation returns the smallest representable integer).
+or is NaN, it will not be considered an integer.
