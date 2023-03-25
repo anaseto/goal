@@ -1,7 +1,11 @@
 # v? ?
 
++ Rename goal builtin into separate rt.CMD builtins.
 + Improvements in import builtin supporting GOALLIB environment variable,
   both use of extension or not, and importing several files at once.
++ Improvements and fixes in help.
++ The json builtin can now handle several JSON strings at once.
++ Fix panic-case handling in eval, in particular error location.
 
 # v0.9.0 2023-03-23
 
