@@ -16,7 +16,7 @@ import (
 // Config describes the possible configuration options when running a
 // *goal.Context through Cmd.
 type Config struct {
-	Help        map[string]string
+	Help        func() map[string]string
 	ProgramName string
 	Man         string
 }
@@ -102,7 +102,7 @@ func Cmd(ctx *goal.Context, cfg Config) {
 }
 
 func runStdin(ctx *goal.Context, cfg Config) {
-	help := cfg.Help
+	help := cfg.Help()
 	helpLast := false
 	helpv := ctx.RegisterMonad("help", func(ctx *goal.Context, args []goal.V) goal.V {
 		if len(args) >= 1 {

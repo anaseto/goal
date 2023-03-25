@@ -13,7 +13,7 @@ import (
 func main() {
 	ctx := goal.NewContext()
 	registerVariadics(ctx)
-	cmd.Cmd(ctx, cmd.Config{Help: getHelp(), ProgramName: "goal"})
+	cmd.Cmd(ctx, cmd.Config{Help: getHelp, ProgramName: "goal"})
 }
 
 func registerVariadics(ctx *goal.Context) {
