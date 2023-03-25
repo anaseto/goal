@@ -1,7 +1,5 @@
 package goal
 
-import "time"
-
 // enum returns !x.
 func enum(x V) V {
 	d, ok := x.value.(*Dict)
@@ -720,68 +718,4 @@ func getN(y V) V {
 		return panicType(`goal["time";x;n]`, "n", y)
 	}
 	return NewI(n)
-}
-
-func goalTime(ctx *Context, args []V) V {
-	if len(args) == 0 {
-		return panics(`goal["time";...] : not enough arguments`)
-	}
-	x := args[len(args)-1]
-	var n int64 = 1
-	switch xv := x.value.(type) {
-	case S:
-		if len(args) > 2 {
-			return panicRank(`goal["time";s;n]`)
-		}
-		if len(args) == 2 {
-			n = getN(args[0]).I()
-		}
-		t := time.Now()
-		for i := int64(0); i < n; i++ {
-			r := evalString(ctx, string(xv))
-			if r.IsPanic() {
-				return r
-			}
-		}
-		d := time.Since(t)
-		return NewI(int64(d) / n)
-	default:
-		if !x.IsFunction() {
-			return panicType(`goal["time";x;n]`, "x", x)
-		}
-		if len(args) == 1 {
-			return panics(`goal["time";f;x;n] : not enough arguments`)
-		}
-		y := args[len(args)-2]
-		if len(args) > 3 {
-			return panicRank(`goal["time";f;x;n]`)
-		}
-		if len(args) == 3 {
-			n = getN(args[0]).I()
-		}
-		x.IncrRC()
-		av := toArray(y).value.(array)
-		av.IncrRC()
-		t := time.Now()
-		for i := int64(0); i < n; i++ {
-			if av.Len() == 0 {
-				continue
-			}
-			for i := av.Len() - 1; i >= 0; i-- {
-				ctx.push(av.at(i))
-			}
-			r := x.applyN(ctx, av.Len())
-			if r.IsPanic() {
-				x.DecrRC()
-				av.DecrRC()
-				ctx.drop()
-				return r
-			}
-			ctx.drop()
-		}
-		x.DecrRC()
-		av.DecrRC()
-		d := time.Since(t)
-		return NewI(int64(d) / n)
-	}
 }

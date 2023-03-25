@@ -163,7 +163,7 @@ tan[1;2] / too many arguments
 (+)?4.5 / type
 2?(+) / type
 -2?(+) / type
-"seed" goal 2.5 / not an integer
+goal.seed 2.5 / not an integer
 time 2 / non-string cmd
 time "invalid" / unknown command
 "unix"  time 2.5 / non-integer
@@ -231,7 +231,7 @@ firsts[1;2] / too many arguments
 ocount[1;2] / too many arguments
 in[1;2;3] / too many arguments
 panic[1;2] / too many arguments
-goal["seed";1;2] / too many arguments
+goal.seed[1;2] / too many arguments
 sign[1;2] / too many arguments
 rotate[1;2;3] / too many arguments
 shift[1;2;3] / too many arguments
@@ -250,11 +250,8 @@ d:"a" "b"!1 2;d["a" "c" "b"] / not found
 d:"a" "b"!1 2;d["c"] / not found
 1 1\4 / base
 1\4 / base
-goal "x" / invalid cmd
-42 goal 3 / type
-"prec" goal 3.5 / non-integer
-"prec" goal ,3.5 / bad type
-"xx" goal ,3.5 / invalid
+goal.prec 3.5 / non-integer
+goal.prec ,3.5 / bad type
 3$42 / type
 qq/$/ / empty
 qq/$in/ / reserved keyword
@@ -840,8 +837,8 @@ mod[3;2;1] / too many arguments
 ::"f" / undefined global
 ::[1;2] / type
 ::[1;2;3] / too many arguments
-goal["globals";"toomany"] / too many arguments
-goal["prec";"toomany";"more"] / too many arguments
+goal.vars["v";"toomany"] / too many arguments
+goal.prec["toomany";"more"] / too many arguments
 sub[rx/[a-z]/;ceil]["a";"b";"c"] / too many arguments
 rx 42 / type
 rx "\4" / syntax
@@ -864,14 +861,13 @@ rx/[a-z]/\42"b" / type
 "c" "b"$"?" / is not ascending
 (1 2;3)$"?" / is not ascending
 ^* / type
-goal["time";+/] / not enough arguments
-goal["time";+/;,2;3;4] / too many arguments
-goal["time";{x+"a"};,2] / type
-goal["time"] / not enough arguments
-goal["time";"+/!10";3;4] / too many arguments
-goal["time";`2+"a"`;3] / type
-goal["time";`2+"a"`] / type
-goal["time";4] / type
+goal.time[+/] / not enough arguments
+goal.time[+/;,2;3;4] / too many arguments
+goal.time[{x+"a"};,2] / type
+goal.time["+/!10";3;4] / too many arguments
+goal.time[`2+"a"`;3] / type
+goal.time[`2+"a"`] / type
+goal.time[4] / type
 eval[`.rq/1+"a"/`;"loc";""] / type
 eval[`.rq/1+"a"/`] / type
 json(3 `"b"`;`"c"`) / type

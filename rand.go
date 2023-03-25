@@ -120,7 +120,7 @@ func seed(ctx *Context, x V) V {
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
-			return Panicf(`"seed" goal i : i not an integer (%g)`, x.F())
+			return Panicf(`goal.seed i : i not an integer (%g)`, x.F())
 		}
 		if ctx.rand == nil {
 			ctx.rand = rand.New(rand.NewSource(int64(x.F())))
@@ -129,5 +129,5 @@ func seed(ctx *Context, x V) V {
 		ctx.rand.Seed(int64(x.F()))
 		return NewI(int64(x.F()))
 	}
-	return panicType(`"seed" goal i`, "i", x)
+	return panicType(`goal.seed i`, "i", x)
 }

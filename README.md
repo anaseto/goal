@@ -385,9 +385,10 @@ cmd are as follows:
     format (s)    format time using given layout (s)
 
 RUNTIME HELP
-goal "globals"     return dictionary with a copy of global variables
-goal["prec";i]     set floating point formatting precision to i     (default -1)
-goal["seed";i]     set non-secure pseudo-rand seed to i     (used by the ? verb)
-goal["time";s;i]   eval s for i times (default 1), return average time (ns)
-goal["time";f;x;i] call f.x for i times (default 1), return average time (ns)
+goal.vars s       return dictionary with a copy of global variables
+                  s~"" for all variables, "f" functions, "v" non-functions
+goal.prec i       set floating point formatting precision to i     (default -1)
+goal.seed i       set non-secure pseudo-rand seed to i     (used by the ? verb)
+goal.time[s;i]    eval s for i times (default 1), return average time (ns)
+goal.time[f;x;i]  call f.x for i times (default 1), return average time (ns)
 ```

@@ -70,6 +70,9 @@ func getHelp() map[string]string {
 	for _, v := range []string{"close", "env", "flush", "import", "open", "print", "read", "run", "say", "shell", "ARGS", "STDIN", "STDOUT", "STDERR"} {
 		help[v] = getBuiltin(helpIO, v, nvcols)
 	}
+	for _, v := range []string{"goal.vars", "goal.prec", "goal.seed", "goal.time"} {
+		help[v] = getBuiltin(helpGoal, v, nvcols)
+	}
 	help["qq"] = getBuiltin(helpSyntax, "strings", scols)
 	help["rq"] = getBuiltin(helpSyntax, "raw strings", scols)
 	return help

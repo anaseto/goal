@@ -2,6 +2,7 @@ package goal
 
 import (
 	"strings"
+	"time"
 )
 
 // VariadicFun represents a variadic function.
@@ -99,7 +100,8 @@ var vStrings = [...]string{
 }
 
 func (ctx *Context) initVariadics() {
-	const size = 64
+	const size = 80
+	const nkeywords = 50
 	ctx.variadics = make([]VariadicFun, len(vFuns), size)
 	copy(ctx.variadics, vFuns[:])
 	ctx.variadicsNames = make([]string, len(vStrings), size)
@@ -111,7 +113,7 @@ func (ctx *Context) initVariadics() {
 	ctx.variadics = append(ctx.variadics, VSet)
 	ctx.variadicsNames = append(ctx.variadicsNames, "::")
 	ctx.vNames["::"] = variadic(len(ctx.variadics) - 1)
-	ctx.keywords = make(map[string]NameType, 32)
+	ctx.keywords = make(map[string]NameType, nkeywords)
 
 	// special form variadics
 	ctx.registerVariadic("icount", VICount)
@@ -157,7 +159,12 @@ func (ctx *Context) initVariadics() {
 	ctx.vNames["«"] = v.variadic()
 	ctx.RegisterDyad("sub", VSub)
 	ctx.RegisterDyad("time", VTime)
-	ctx.RegisterDyad("goal", VGoal)
+
+	// runtime functions
+	ctx.RegisterMonad("goal.vars", VGoalVars)
+	ctx.RegisterMonad("goal.prec", VGoalPrec)
+	ctx.RegisterMonad("goal.seed", VGoalSeed)
+	ctx.RegisterMonad("goal.time", VGoalTime)
 }
 
 // VRight implements the : variadic verb.
@@ -816,46 +823,132 @@ func VSub(ctx *Context, args []V) V {
 	}
 }
 
-// VGoal implements the goal variadic verb.
-func VGoal(ctx *Context, args []V) V {
-	x := args[len(args)-1]
+// VGoalPrec implements the goal.prec variadic verb.
+func VGoalPrec(ctx *Context, args []V) V {
+	if len(args) > 1 {
+		return panicRank(`goal.prec`)
+	}
+	x := args[0]
+	if x.IsI() {
+		ctx.prec = int(x.I())
+	} else if x.IsF() {
+		if !isI(x.F()) {
+			return Panicf(`goal.prec i : non-integer i (%g)`, x.F())
+		}
+		ctx.prec = int(x.F())
+	} else {
+		return Panicf(`goal.prec i : i bad type (%s)`, x.Type())
+	}
+	return NewI(1)
+}
+
+// VGoalSeed implements the goal.seed variadic verb.
+func VGoalSeed(ctx *Context, args []V) V {
+	if len(args) > 1 {
+		return panicRank(`goal.seed`)
+	}
+	return seed(ctx, args[0])
+}
+
+// VGoalVars implements the goal.vars variadic verb.
+func VGoalVars(ctx *Context, args []V) V {
+	if len(args) > 1 {
+		return panicRank(`goal.vars`)
+	}
+	x := args[0]
 	cmd, ok := x.value.(S)
 	if !ok {
-		return panicType("goal[cmd;...]", "cmd", x)
+		return panicType("goal.vars s", "s", x)
 	}
 	switch cmd {
-	case "globals":
-		if len(args) != 1 {
-			return panicRank(`"globals" goal`)
-		}
+	case "":
 		v := cloneArgs(ctx.globals)
 		k := make([]string, len(ctx.gNames))
 		copy(k, ctx.gNames)
 		return NewDict(NewAS(k), Canonical(NewAV(v)))
-	case "prec":
-		if len(args) != 2 {
-			return panicRank(`"prec" goal`)
-		}
-		y := args[0]
-		if y.IsI() {
-			ctx.prec = int(y.I())
-		} else if y.IsF() {
-			if !isI(y.F()) {
-				return Panicf(`goal["prec";n]: non-integer n (%g)`, y.F())
+	case "f":
+		v := []V{}
+		k := []string{}
+		for i, x := range ctx.globals {
+			if x.IsFunction() {
+				v = append(v, x)
+				k = append(k, ctx.gNames[i])
 			}
-			ctx.prec = int(y.F())
-		} else {
-			return Panicf(`goal["prec";n]: n bad type (%s)`, y.Type())
 		}
-		return NewI(1)
-	case "seed":
-		if len(args) != 2 {
-			return panicRank(`"seed" goal`)
+		return NewDict(NewAS(k), Canonical(NewAV(v)))
+	case "v":
+		v := []V{}
+		k := []string{}
+		for i, x := range ctx.globals {
+			if !x.IsFunction() {
+				v = append(v, x)
+				k = append(k, ctx.gNames[i])
+			}
 		}
-		return seed(ctx, args[0])
-	case "time":
-		return goalTime(ctx, args[:len(args)-1])
+		return NewDict(NewAS(k), Canonical(NewAV(v)))
 	default:
-		return Panicf("goal[cmd;...]: invalid cmd (%s)", cmd)
+		return Panicf("goal.vars s : invalid value (%s)", cmd)
+	}
+}
+
+// VGoalTime implements the goal.time variadic verb.
+func VGoalTime(ctx *Context, args []V) V {
+	x := args[len(args)-1]
+	var n int64 = 1
+	switch xv := x.value.(type) {
+	case S:
+		if len(args) > 2 {
+			return panicRank(`goal.time[s;n]`)
+		}
+		if len(args) == 2 {
+			n = getN(args[0]).I()
+		}
+		t := time.Now()
+		for i := int64(0); i < n; i++ {
+			r := evalString(ctx, string(xv))
+			if r.IsPanic() {
+				return r
+			}
+		}
+		d := time.Since(t)
+		return NewI(int64(d) / n)
+	default:
+		if !x.IsFunction() {
+			return panicType(`goal.time[x;n]`, "x", x)
+		}
+		if len(args) == 1 {
+			return panics(`goal.time[f;x;n] : not enough arguments`)
+		}
+		y := args[len(args)-2]
+		if len(args) > 3 {
+			return panicRank(`goal.time[f;x;n]`)
+		}
+		if len(args) == 3 {
+			n = getN(args[0]).I()
+		}
+		x.IncrRC()
+		av := toArray(y).value.(array)
+		av.IncrRC()
+		t := time.Now()
+		for i := int64(0); i < n; i++ {
+			if av.Len() == 0 {
+				continue
+			}
+			for i := av.Len() - 1; i >= 0; i-- {
+				ctx.push(av.at(i))
+			}
+			r := x.applyN(ctx, av.Len())
+			if r.IsPanic() {
+				x.DecrRC()
+				av.DecrRC()
+				ctx.drop()
+				return r
+			}
+			ctx.drop()
+		}
+		x.DecrRC()
+		av.DecrRC()
+		d := time.Since(t)
+		return NewI(int64(d) / n)
 	}
 }
