@@ -95,7 +95,7 @@ Documentation consists of the REPL help system with a short description and/or
 examples for all implemented features. Some prior knowledge of another array
 language, in particular K, can be useful, but not necessary: the best way to
 learn and discover the language is to play with it in the REPL. The full
-contents are replicated below.
+contents are replicated below. See also this short [FAQ](docs/FAQ.md).
 
 ```
 TOPICS HELP
@@ -117,7 +117,7 @@ Notations:
         x,y (any other)
 
 SYNTAX HELP
-numbers         1     1.5     0b0110     1.7e-3     0xab
+numbers         1     1.5     0b0110     1.7e-3     0xab     0n     0w
 strings         "text\xff\u00F\n"   "\""   "\u65e5"   "interpolated $var"
                 qq/$var\n or ${var}/   qq#text#  (delimiters :+-*%!&|=~,^#_?@/')
 raw strings     `anything until first backquote`     `literal \, no escaping`
