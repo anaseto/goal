@@ -181,13 +181,13 @@ i!s colsplit    3!"abcdefgh" -> "abc" "def" "gh"               (i-bytes strings)
 i!y colsplit    2!!6 -> (0 1;2 3;4 5)            2!"a" "b" "c" -> ("a" "b";,"c")
 x!y dict        d:"a" "b"!1 2;d "a" -> 1
 &I  where       &0 0 1 0 0 0 1 -> 2 6            &2 3 -> 0 0 1 1 1
-&d  keys where  &"a" "b" "e" "c"!0 1 1 0 -> "b" "e"
+&d  keys where  &"a""b""c""d"!0 1 1 0 -> "b" "c"
 x&y min         2&3 -> 2        4&3 -> 3         "b"&"a" -> "a"
 |x  reverse     |!5 -> 4 3 2 1 0
 x|y max         2|3 -> 3        4|3 -> 4         "b"|"a" -> "b"
-<x  ascend      <2 4 3 -> 0 2 1          (index permutation for ascending order)
+<x  ascend      <3 5 4 -> 0 2 1          (index permutation for ascending order)
 x<y less        2<3 -> 1        "c" < "a" -> 0
->x  descend     >2 4 3 -> 1 2 0         (index permutation for descending order)
+>x  descend     >3 5 4 -> 1 2 0         (index permutation for descending order)
 x>y greater     2>3 -> 0        "c" > "a" -> 1
 =I  group       =1 0 2 1 2 -> (,1;0 3;2 4)       =-1 2 -1 2 -> (!0;!0;1 3)
 =d  group keys  ="a""b""c"!0 1 0 -> ("a" "c";,"b")
@@ -244,10 +244,10 @@ x@i at          7 8 9@2 -> 9         7 8 9[2 0] -> 9 7       7 8 9@-2 -> 8
 s.I substr      "abcdef"[2;3] -> "cde"                        (s[offset;length])
 r.y findN       rx/[a-z]/["abc";2] -> "a""b"    rx/[a-z]/["abc";-1] -> "a""b""c"
 r.y findN group rx/[a-z](.)/["abcdef";2] -> ("ab" "b";"cd" "d")
-x.y applyN      {x+y}.2 3 -> 5       {x+y}[2;3] -> 5         (1 2;3 4)[0;1] -> 2
-«x  shift       «1 2 -> 2 0    «"a" "b" -> "b" ""   (ASCII alternative: shift x)
+x.y applyN      {x+y}.2 3 -> 5       {x+y}[2;3] -> 5         (6 7;8 9)[0;1] -> 7
+«x  shift       «8 9 -> 9 0    «"a" "b" -> "b" ""   (ASCII alternative: shift x)
 x«y shift       "a" "b"«1 2 3 -> 3 "a" "b"
-»x  rshift      »1 2 -> 0 1    »"a" "b" -> "" "a"  (ASCII alternative: rshift x)
+»x  rshift      »8 9 -> 0 8    »"a" "b" -> "" "a"  (ASCII alternative: rshift x)
 x»y rshift      "a" "b"»1 2 3 -> "a" "b" 1
 
 ::x         get global  a:3;::"a" -> 3
