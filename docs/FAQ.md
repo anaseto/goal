@@ -30,7 +30,7 @@ In the first case, `-2` is parsed as a single token. In the second case, the
 
 # CAVEATS
 
-## Number implicit conversions
+## Number implicit conversions and overflow
 
 Even though the type builtin `@` returns `"n"` for all numbers, Goal has both
 64-bit integer and floating point numbers. Builtins convert from one to another
@@ -38,4 +38,5 @@ as needed, so most applications do not have to care about this.
 
 From integer to float, this means that big integers might be approximated after
 a conversion. From float to integer, if the float is too big to be represented
-or is NaN, it will not be considered an integer.
+or is NaN, it will not be considered an integer. Also, operations on integer
+operands can overflow, as defined by two's complement integer overflow.
