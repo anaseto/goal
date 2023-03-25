@@ -228,9 +228,6 @@ func (lr lineReader) readLine() (string, error) {
 			}
 		case scanString:
 			switch r {
-			case '\n':
-				// non terminated string
-				return sb.String(), nil
 			case '\\':
 				s.escape = !s.escape
 			case '"':
