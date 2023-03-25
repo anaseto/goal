@@ -250,7 +250,7 @@ x env s     set environment variable x to s, or return an error
 x env 0     unset environment variable x, or clear environment if x~""
 x import s  same as import s, but using prefix x for globals
 x open s    open path s with mode x in "r" "r+" "w" "w+" "a" "a+"
-            or pipe from (mode "-|") or to (mode "|-") command (s or S)
+            or pipe from (x~"-|") or to (x~"|-") command s or S
 x print s   print s to filehandle/name x        "/path/to/file" print "content"
 i read h    read i bytes from reader h or until EOF, or an error occurs
 s read h    read from reader h until 1-byte s, EOF, or an error occurs
