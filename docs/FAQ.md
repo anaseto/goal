@@ -4,8 +4,9 @@
 
 Builtins support dictionary values whenever it makes sense (like for arithmetic
 builtins), and just apply to their value arrays like they would for a normal
-array (but returning the keys along when sensible). The help only mentions
-cases that have some special dictionary-specific semantics.
+array (but returning the keys along when sensible, and using upsert semantics
+for uncommon keys). The help only mentions cases that have some special
+dictionary-specific semantics.
 
 ## Which builtins generalize operations to arrays element-wise?
 
