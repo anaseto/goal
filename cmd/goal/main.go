@@ -45,8 +45,7 @@ func getHelp() map[string]string {
 	help["io"] = helpIO
 	help["tm"] = helpTime
 	help["time"] = helpTime // for the builtin name
-	help["goal"] = helpGoal
-	help["rt"] = helpGoal
+	help["rt"] = helpRuntime
 	const vcols = 4
 	const scols = 12
 	const acols = 5
@@ -70,8 +69,8 @@ func getHelp() map[string]string {
 	for _, v := range []string{"close", "env", "flush", "import", "open", "print", "read", "run", "say", "shell", "ARGS", "STDIN", "STDOUT", "STDERR"} {
 		help[v] = getBuiltin(helpIO, v, nvcols)
 	}
-	for _, v := range []string{"goal.vars", "goal.prec", "goal.seed", "goal.time"} {
-		help[v] = getBuiltin(helpGoal, v, nvcols)
+	for _, v := range []string{"rt.vars", "rt.prec", "rt.seed", "rt.time"} {
+		help[v] = getBuiltin(helpRuntime, v, nvcols)
 	}
 	help["qq"] = getBuiltin(helpSyntax, "strings", scols)
 	help["rq"] = getBuiltin(helpSyntax, "raw strings", scols)

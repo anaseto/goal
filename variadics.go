@@ -161,10 +161,10 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterDyad("time", VTime)
 
 	// runtime functions
-	ctx.RegisterMonad("goal.vars", VGoalVars)
-	ctx.RegisterMonad("goal.prec", VGoalPrec)
-	ctx.RegisterMonad("goal.seed", VGoalSeed)
-	ctx.RegisterMonad("goal.time", VGoalTime)
+	ctx.RegisterMonad("rt.vars", VRTVars)
+	ctx.RegisterMonad("rt.prec", VRTPrec)
+	ctx.RegisterMonad("rt.seed", VRTSeed)
+	ctx.RegisterMonad("rt.time", VRTTime)
 }
 
 // VRight implements the : variadic verb.
@@ -823,42 +823,42 @@ func VSub(ctx *Context, args []V) V {
 	}
 }
 
-// VGoalPrec implements the goal.prec variadic verb.
-func VGoalPrec(ctx *Context, args []V) V {
+// VRTPrec implements the rt.prec variadic verb.
+func VRTPrec(ctx *Context, args []V) V {
 	if len(args) > 1 {
-		return panicRank(`goal.prec`)
+		return panicRank(`rt.prec`)
 	}
 	x := args[0]
 	if x.IsI() {
 		ctx.prec = int(x.I())
 	} else if x.IsF() {
 		if !isI(x.F()) {
-			return Panicf(`goal.prec i : non-integer i (%g)`, x.F())
+			return Panicf(`rt.prec i : non-integer i (%g)`, x.F())
 		}
 		ctx.prec = int(x.F())
 	} else {
-		return Panicf(`goal.prec i : i bad type (%s)`, x.Type())
+		return Panicf(`rt.prec i : i bad type (%s)`, x.Type())
 	}
 	return NewI(1)
 }
 
-// VGoalSeed implements the goal.seed variadic verb.
-func VGoalSeed(ctx *Context, args []V) V {
+// VRTSeed implements the rt.seed variadic verb.
+func VRTSeed(ctx *Context, args []V) V {
 	if len(args) > 1 {
-		return panicRank(`goal.seed`)
+		return panicRank(`rt.seed`)
 	}
 	return seed(ctx, args[0])
 }
 
-// VGoalVars implements the goal.vars variadic verb.
-func VGoalVars(ctx *Context, args []V) V {
+// VRTVars implements the rt.vars variadic verb.
+func VRTVars(ctx *Context, args []V) V {
 	if len(args) > 1 {
-		return panicRank(`goal.vars`)
+		return panicRank(`rt.vars`)
 	}
 	x := args[0]
 	cmd, ok := x.value.(S)
 	if !ok {
-		return panicType("goal.vars s", "s", x)
+		return panicType("rt.vars s", "s", x)
 	}
 	switch cmd {
 	case "":
@@ -887,18 +887,18 @@ func VGoalVars(ctx *Context, args []V) V {
 		}
 		return NewDict(NewAS(k), Canonical(NewAV(v)))
 	default:
-		return Panicf("goal.vars s : invalid value (%s)", cmd)
+		return Panicf("rt.vars s : invalid value (%s)", cmd)
 	}
 }
 
-// VGoalTime implements the goal.time variadic verb.
-func VGoalTime(ctx *Context, args []V) V {
+// VRTTime implements the rt.time variadic verb.
+func VRTTime(ctx *Context, args []V) V {
 	x := args[len(args)-1]
 	var n int64 = 1
 	switch xv := x.value.(type) {
 	case S:
 		if len(args) > 2 {
-			return panicRank(`goal.time[s;n]`)
+			return panicRank(`rt.time[s;n]`)
 		}
 		if len(args) == 2 {
 			n = getN(args[0]).I()
@@ -914,14 +914,14 @@ func VGoalTime(ctx *Context, args []V) V {
 		return NewI(int64(d) / n)
 	default:
 		if !x.IsFunction() {
-			return panicType(`goal.time[x;n]`, "x", x)
+			return panicType(`rt.time[x;n]`, "x", x)
 		}
 		if len(args) == 1 {
-			return panics(`goal.time[f;x;n] : not enough arguments`)
+			return panics(`rt.time[f;x;n] : not enough arguments`)
 		}
 		y := args[len(args)-2]
 		if len(args) > 3 {
-			return panicRank(`goal.time[f;x;n]`)
+			return panicRank(`rt.time[f;x;n]`)
 		}
 		if len(args) == 3 {
 			n = getN(args[0]).I()
