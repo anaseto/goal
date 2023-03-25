@@ -1,5 +1,4 @@
 Features:
-- maybe add a builtin for more convenient error handling
 
 Tests:
 - improve test coverage for error messages and refactor and improve them along
