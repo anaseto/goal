@@ -58,7 +58,7 @@ func VImport(ctx *goal.Context, args []goal.V) goal.V {
 func importWithPrefix(ctx *goal.Context, prefix, name string, hasPfx bool) goal.V {
 	if !hasPfx {
 		prefix = path.Base(name)
-		prefix = strings.TrimSuffix(name, path.Ext(name))
+		prefix = strings.TrimSuffix(prefix, path.Ext(prefix))
 	}
 	fname := name
 	if path.Ext(fname) == "" {

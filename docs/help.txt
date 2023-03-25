@@ -73,7 +73,7 @@ s-s trim suffix "file.txt"-".txt" -> "file"
 n*n multiply    2*3 -> 6            1 2 3*3 -> 3 6 9
 s*i repeat      "a"*3 2 1 0 -> "aaa" "aa" "a" ""
 %x  classify    %1 2 3 1 2 3 -> 0 1 2 0 1 2      %"a" "b" "a" -> 0 1 0
-x%y divide      3%2 -> 1.5          3 4%2 -> 2 1.5
+x%y divide      3%2 -> 1.5          3 4%2 -> 1.5 2
 !i  enum        !5 -> 0 1 2 3 4
 !d  keys        !"a" "b"!1 2 -> "a" "b"
 !I  odometer    !2 3 -> (0 0 0 1 1 1;0 1 2 0 1 2)
@@ -285,9 +285,9 @@ cmd are as follows:
     format (s)    format time using given layout (s)
 
 RUNTIME HELP
-goal.vars s       return dictionary with a copy of global variables
-                  s~"" for all variables, "f" functions, "v" non-functions
 goal.prec i       set floating point formatting precision to i     (default -1)
 goal.seed i       set non-secure pseudo-rand seed to i     (used by the ? verb)
 goal.time[s;i]    eval s for i times (default 1), return average time (ns)
 goal.time[f;x;i]  call f.x for i times (default 1), return average time (ns)
+goal.vars s       return dictionary with a copy of global variables
+                  s~"" for all variables, "f" functions, "v" non-functions
