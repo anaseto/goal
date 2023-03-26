@@ -62,10 +62,10 @@ type Context struct {
 	// parsing, scanning
 	scanner  *Scanner
 	compiler *compiler
-	fname    string              // filename
-	sources  map[string]string   // filename: source
-	keywords map[string]NameType // special keyword names
-	vNames   map[string]variadic // variadic keywords
+	fname    string               // filename
+	sources  map[string]string    // filename: source
+	keywords map[string]IdentType // special keyword names
+	vNames   map[string]variadic  // variadic keywords
 
 	// error positions stack
 	errPos []position
@@ -112,7 +112,7 @@ func (ctx *Context) RegisterMonad(name string, vf VariadicFun) V {
 	}
 	ctx.variadics = append(ctx.variadics, vf)
 	ctx.variadicsNames = append(ctx.variadicsNames, name)
-	ctx.keywords[name] = NameMonad
+	ctx.keywords[name] = IdentMonad
 	ctx.vNames[name] = variadic(id)
 	return newVariadic(variadic(id))
 }
@@ -147,7 +147,7 @@ func (ctx *Context) RegisterDyad(name string, vf VariadicFun) V {
 	}
 	ctx.variadics = append(ctx.variadics, vf)
 	ctx.variadicsNames = append(ctx.variadicsNames, name)
-	ctx.keywords[name] = NameDyad
+	ctx.keywords[name] = IdentDyad
 	ctx.vNames[name] = variadic(id)
 	return newVariadic(variadic(id))
 }

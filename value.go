@@ -84,8 +84,8 @@ func NewS(s string) V {
 }
 
 // NewV returns a new boxed value.
-func NewV(bv Value) V {
-	return V{kind: valBoxed, value: bv}
+func NewV(xv Value) V {
+	return V{kind: valBoxed, value: xv}
 }
 
 // variadic retrieves the variadic value from N field. It assumes kind is

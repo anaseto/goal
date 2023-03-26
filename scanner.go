@@ -67,43 +67,43 @@ const (
 	QQEND
 )
 
-// NameType represents the different kinds of special roles for alphanumeric
+// IdentType represents the different kinds of special roles for alphanumeric
 // identifiers that act as keywords.
-type NameType int
+type IdentType int
 
 // These constants represent the different kinds of special names.
 const (
-	NameIdent NameType = iota // a normal identifier (default zero value)
-	NameMonad                 // a builtin monad (cannot have left argument)
-	NameDyad                  // a builtin dyad (can have left argument)
+	IdentVar   IdentType = iota // a normal identifier (default zero value)
+	IdentMonad                  // a builtin monad (cannot have left argument)
+	IdentDyad                   // a builtin dyad (can have left argument)
 )
 
 // Scanner represents the state of the scanner.
 type Scanner struct {
-	names   map[string]NameType // special keywords
-	reader  *strings.Reader     // rune reader
-	buf     *bytes.Buffer       // buffer for building strings
-	err     error               // scanning error (if any)
-	npos    int                 // position of next rune in the input
-	epos    int                 // next token end position
-	tpos    int                 // next token start position
-	psize   int                 // size of last peeked rune
-	pr      rune                // peeked rune
-	r       rune                // current rune
-	exprEnd bool                // at expression start
-	delimOp bool                // at list start
-	peeked  bool                // peeked next
-	start   bool                // at line start
-	token   Token               // last token
-	source  string              // source string
-	state   stateFn             // starting state for Next
-	qr      rune                // quote closing rune
+	names   map[string]IdentType // special keywords
+	reader  *strings.Reader      // rune reader
+	buf     *bytes.Buffer        // buffer for building strings
+	err     error                // scanning error (if any)
+	npos    int                  // position of next rune in the input
+	epos    int                  // next token end position
+	tpos    int                  // next token start position
+	psize   int                  // size of last peeked rune
+	pr      rune                 // peeked rune
+	r       rune                 // current rune
+	exprEnd bool                 // at expression start
+	delimOp bool                 // at list start
+	peeked  bool                 // peeked next
+	start   bool                 // at line start
+	token   Token                // last token
+	source  string               // source string
+	state   stateFn              // starting state for Next
+	qr      rune                 // quote closing rune
 }
 
 type stateFn func(*Scanner) stateFn
 
 // NewScanner returns a scanner for the given source string.
-func NewScanner(names map[string]NameType, source string) *Scanner {
+func NewScanner(names map[string]IdentType, source string) *Scanner {
 	s := &Scanner{names: names}
 	s.source = source
 	s.reader = strings.NewReader(source)
@@ -214,9 +214,9 @@ func (s *Scanner) emitIDENT() stateFn {
 		return s.emitError("empty identifier")
 	}
 	switch s.names[s.source[s.tpos:s.epos]] {
-	case NameDyad:
+	case IdentDyad:
 		return s.emitOp(DYAD)
-	case NameMonad:
+	case IdentMonad:
 		return s.emitOp(MONAD)
 	default:
 		return s.emitString(IDENT)

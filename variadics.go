@@ -114,7 +114,7 @@ func (ctx *Context) initVariadics() {
 	ctx.variadics = append(ctx.variadics, vfSet)
 	ctx.variadicsNames = append(ctx.variadicsNames, "::")
 	ctx.vNames["::"] = variadic(len(ctx.variadics) - 1)
-	ctx.keywords = make(map[string]NameType, nkeywords)
+	ctx.keywords = make(map[string]IdentType, nkeywords)
 
 	// special form variadics
 	ctx.registerVariadic("icount", vfICount)
