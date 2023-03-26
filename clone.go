@@ -21,6 +21,9 @@ func (x V) Clone() V {
 	return x.CloneWithRC(p)
 }
 
+// CloneWithRC clones the given value using its CloneWithRC method, if it is a
+// RefCounter, or returns it as-is otherwise for immutable values that do not
+// need cloning.
 func (x V) CloneWithRC(rc *int) V {
 	if x.kind != valBoxed {
 		return x
@@ -39,6 +42,7 @@ func (e *errV) CloneWithRC(rc *int) Value {
 	return e
 }
 
+// CloneWithRC satisfies the specification of the RefCounter interface.
 func (x *AB) CloneWithRC(rc *int) Value {
 	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
 		x.setFlags(flagNone)
@@ -50,6 +54,7 @@ func (x *AB) CloneWithRC(rc *int) Value {
 	return r
 }
 
+// CloneWithRC satisfies the specification of the RefCounter interface.
 func (x *AI) CloneWithRC(rc *int) Value {
 	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
 		x.setFlags(flagNone)
@@ -61,6 +66,7 @@ func (x *AI) CloneWithRC(rc *int) Value {
 	return r
 }
 
+// CloneWithRC satisfies the specification of the RefCounter interface.
 func (x *AF) CloneWithRC(rc *int) Value {
 	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
 		x.setFlags(flagNone)
@@ -72,6 +78,7 @@ func (x *AF) CloneWithRC(rc *int) Value {
 	return r
 }
 
+// CloneWithRC satisfies the specification of the RefCounter interface.
 func (x *AS) CloneWithRC(rc *int) Value {
 	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
 		x.setFlags(flagNone)
@@ -83,6 +90,7 @@ func (x *AS) CloneWithRC(rc *int) Value {
 	return r
 }
 
+// CloneWithRC satisfies the specification of the RefCounter interface.
 func (x *AV) CloneWithRC(rc *int) Value {
 	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
 		x.setFlags(flagNone)
@@ -99,6 +107,7 @@ func (x *AV) CloneWithRC(rc *int) Value {
 	return r
 }
 
+// CloneWithRC satisfies the specification of the RefCounter interface.
 func (d *Dict) CloneWithRC(rc *int) Value {
 	return &Dict{keys: d.keys.CloneWithRC(rc).(array), values: d.values.CloneWithRC(rc).(array)}
 }

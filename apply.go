@@ -20,8 +20,8 @@ func (ctx *Context) Apply2(x, y, z V) V {
 }
 
 // ApplyN calls a value with one or more arguments. The arguments should be
-// provided in reverse order, given the stack-based right to left semantics
-// used by the language.
+// provided in stack order, as in the right to left semantics used by the
+// language: the first argument is the last element.
 func (ctx *Context) ApplyN(x V, args []V) V {
 	if len(args) == 0 {
 		panic("ApplyN: len(args) should be > 0")
@@ -32,8 +32,8 @@ func (ctx *Context) ApplyN(x V, args []V) V {
 	return r
 }
 
-// applicable represents boxed values than can be applied.
-type applicable interface {
+// callable represents boxed values than can be applied.
+type callable interface {
 	Value
 
 	// applyN applies the value with the top n arguments in the stack and
@@ -66,7 +66,7 @@ func (x V) applyN(ctx *Context, n int) V {
 		}
 	}
 	switch xv := x.value.(type) {
-	case applicable:
+	case callable:
 		return xv.applyN(ctx, n)
 	default:
 		if n > 1 {

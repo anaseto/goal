@@ -19,7 +19,7 @@ type RefCounter interface {
 	IncrRC()
 
 	// DecrRC decrements the reference count by one, or zero if it is
-	// already zero.
+	// already non positive.
 	DecrRC()
 
 	// InitWithRC recursively sets the refcount pointer for reusable
@@ -28,9 +28,10 @@ type RefCounter interface {
 	InitWithRC(rc *int)
 
 	// CloneWithRC returns a clone of the value, with rc as new refcount
-	// pointer.  If the current value's current refcount pointer is nil or
-	// equal to the passed one, the same value is returned after updating
-	// the refcount pointer as needed, instead of doing a full clone.
+	// pointer.  If the current value's refcount pointer is nil, reusable
+	// or equal to the passed one, the same value is returned after
+	// updating the refcount pointer as needed, instead of doing a full
+	// clone.
 	CloneWithRC(rc *int) Value
 }
 
@@ -188,23 +189,55 @@ func decrRCp(p *int) {
 	}
 }
 
+// IncrRC increments the reference count by one. It can panic if the value's
+// refcount pointer has not been properly initialized.
 func (x *AB) IncrRC() { *x.rc++ }
+
+// IncrRC increments the reference count by one. It can panic if the value's
+// refcount pointer has not been properly initialized.
 func (x *AI) IncrRC() { *x.rc++ }
+
+// IncrRC increments the reference count by one. It can panic if the value's
+// refcount pointer has not been properly initialized.
 func (x *AF) IncrRC() { *x.rc++ }
+
+// IncrRC increments the reference count by one. It can panic if the value's
+// refcount pointer has not been properly initialized.
 func (x *AS) IncrRC() { *x.rc++ }
+
+// IncrRC increments the reference count by one. It can panic if the value's
+// refcount pointer has not been properly initialized.
 func (x *AV) IncrRC() { *x.rc++ }
 
+// DecrRC decrements the reference count by one, or zero if it is already non
+// positive.
 func (x *AB) DecrRC() { decrRCp(x.rc) }
+
+// DecrRC decrements the reference count by one, or zero if it is already non
+// positive.
 func (x *AI) DecrRC() { decrRCp(x.rc) }
+
+// DecrRC decrements the reference count by one, or zero if it is already non
+// positive.
 func (x *AF) DecrRC() { decrRCp(x.rc) }
+
+// DecrRC decrements the reference count by one, or zero if it is already non
+// positive.
 func (x *AS) DecrRC() { decrRCp(x.rc) }
+
+// DecrRC decrements the reference count by one, or zero if it is already non
+// positive.
 func (x *AV) DecrRC() { decrRCp(x.rc) }
 
+// IncrRC increments the reference count of both the key and value arrays by
+// one.
 func (d *Dict) IncrRC() {
 	d.keys.IncrRC()
 	d.values.IncrRC()
 }
 
+// DecrRC decrements the reference count of both the key and value arrays by
+// one, or zero if they are already non positive.
 func (d *Dict) DecrRC() {
 	d.keys.DecrRC()
 	d.values.DecrRC()
@@ -286,6 +319,7 @@ func (e *errV) InitWithRC(rc *int) {
 	e.V.InitWithRC(rc)
 }
 
+// InitWithRC satisfies the specification of the RefCounter interface.
 func (x *AB) InitWithRC(rc *int) {
 	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
 		x.rc = rc
@@ -294,6 +328,7 @@ func (x *AB) InitWithRC(rc *int) {
 	*x.rc += 2
 }
 
+// InitWithRC satisfies the specification of the RefCounter interface.
 func (x *AI) InitWithRC(rc *int) {
 	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
 		x.rc = rc
@@ -302,6 +337,7 @@ func (x *AI) InitWithRC(rc *int) {
 	*x.rc += 2
 }
 
+// InitWithRC satisfies the specification of the RefCounter interface.
 func (x *AF) InitWithRC(rc *int) {
 	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
 		x.rc = rc
@@ -310,6 +346,7 @@ func (x *AF) InitWithRC(rc *int) {
 	*x.rc += 2
 }
 
+// InitWithRC satisfies the specification of the RefCounter interface.
 func (x *AS) InitWithRC(rc *int) {
 	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
 		x.rc = rc
@@ -318,6 +355,7 @@ func (x *AS) InitWithRC(rc *int) {
 	*x.rc += 2
 }
 
+// InitWithRC satisfies the specification of the RefCounter interface.
 func (x *AV) InitWithRC(rc *int) {
 	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
 		x.rc = rc
@@ -329,6 +367,7 @@ func (x *AV) InitWithRC(rc *int) {
 	*x.rc += 2
 }
 
+// InitWithRC satisfies the specification of the RefCounter interface.
 func (d *Dict) InitWithRC(rc *int) {
 	d.keys.InitWithRC(rc)
 	d.values.InitWithRC(rc)

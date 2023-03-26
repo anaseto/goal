@@ -5,7 +5,8 @@ import (
 	"time"
 )
 
-// VariadicFun represents a variadic function.
+// VariadicFun represents a variadic function. The array of arguments is in
+// stack order: the first argument is its last element.
 type VariadicFun func(*Context, []V) V
 
 // variadic represents a built-in function.
@@ -110,7 +111,7 @@ func (ctx *Context) initVariadics() {
 	for v, s := range ctx.variadicsNames {
 		ctx.vNames[s] = variadic(v)
 	}
-	ctx.variadics = append(ctx.variadics, VSet)
+	ctx.variadics = append(ctx.variadics, vfSet)
 	ctx.variadicsNames = append(ctx.variadicsNames, "::")
 	ctx.vNames["::"] = variadic(len(ctx.variadics) - 1)
 	ctx.keywords = make(map[string]NameType, nkeywords)
@@ -738,8 +739,8 @@ func vfOr(ctx *Context, args []V) V {
 	return args[0]
 }
 
-// VSet implements the "set" variadic verb.
-func VSet(ctx *Context, args []V) V {
+// vfSet implements the "set" variadic verb.
+func vfSet(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		name, ok := args[0].value.(S)

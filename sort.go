@@ -5,50 +5,62 @@ import (
 	"strings"
 )
 
+// Less satisfies the specification of sort.Interface.
 func (x *AB) Less(i, j int) bool {
 	return x.Slice[j] && !x.Slice[i]
 }
 
+// Swap satisfies the specification of sort.Interface.
 func (x *AB) Swap(i, j int) {
 	x.Slice[i], x.Slice[j] = x.Slice[j], x.Slice[i]
 }
 
+// Less satisfies the specification of sort.Interface.
 func (x *AI) Less(i, j int) bool {
 	return x.Slice[i] < x.Slice[j]
 }
 
+// Swap satisfies the specification of sort.Interface.
 func (x *AI) Swap(i, j int) {
 	x.Slice[i], x.Slice[j] = x.Slice[j], x.Slice[i]
 }
 
+// Less satisfies the specification of sort.Interface.
 func (x *AF) Less(i, j int) bool {
 	return x.Slice[i] < x.Slice[j]
 }
 
+// Swap satisfies the specification of sort.Interface.
 func (x *AF) Swap(i, j int) {
 	x.Slice[i], x.Slice[j] = x.Slice[j], x.Slice[i]
 }
 
+// Less satisfies the specification of sort.Interface.
 func (x *AS) Less(i, j int) bool {
 	return x.Slice[i] < x.Slice[j]
 }
 
+// Swap satisfies the specification of sort.Interface.
 func (x *AS) Swap(i, j int) {
 	x.Slice[i], x.Slice[j] = x.Slice[j], x.Slice[i]
 }
 
+// Less satisfies the specification of sort.Interface.
 func (x *AV) Less(i, j int) bool {
 	return x.Slice[i].LessV(x.Slice[j])
 }
 
+// Swap satisfies the specification of sort.Interface.
 func (x *AV) Swap(i, j int) {
 	x.Slice[i], x.Slice[j] = x.Slice[j], x.Slice[i]
 }
 
+// Less satisfies the specification of sort.Interface.
 func (x *Dict) Less(i, j int) bool {
 	return x.values.Less(i, j)
 }
 
+// Swap satisfies the specification of sort.Interface.
 func (x *Dict) Swap(i, j int) {
 	x.keys.Swap(i, j)
 	x.values.Swap(i, j)

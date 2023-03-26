@@ -46,6 +46,7 @@ func (d *Dict) Values() V {
 	return NewV(d.values)
 }
 
+// Matches returns true if the two values match like in x~y.
 func (d *Dict) Matches(y Value) bool {
 	switch yv := y.(type) {
 	case *Dict:
@@ -55,10 +56,12 @@ func (d *Dict) Matches(y Value) bool {
 	}
 }
 
+// Type returns the name of the value's type.
 func (d *Dict) Type() string {
 	return "d"
 }
 
+// LessV satisfies the specification of the Value interface.
 func (d *Dict) LessV(y Value) bool {
 	switch yv := y.(type) {
 	case *Dict:
@@ -68,6 +71,8 @@ func (d *Dict) LessV(y Value) bool {
 	}
 }
 
+// Len returns the length of the dictionary, that is the common length to its
+// key and value arrays.
 func (d *Dict) Len() int {
 	return d.keys.Len()
 }

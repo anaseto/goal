@@ -65,11 +65,14 @@ func (e panicV) Append(ctx *Context, dst []byte) []byte {
 	return append(dst, ']')
 }
 
-// Append appends a properly quoted string.
+// Append appends a unique program representation of the value to dst, and
+// returns the extended buffer.
 func (s S) Append(ctx *Context, dst []byte) []byte {
 	return strconv.AppendQuote(dst, string(s))
 }
 
+// Append appends a unique program representation of the value to dst, and
+// returns the extended buffer.
 func (x *AB) Append(ctx *Context, dst []byte) []byte {
 	if x.Len() == 0 {
 		return append(dst, "!0"...)
@@ -88,6 +91,8 @@ func (x *AB) Append(ctx *Context, dst []byte) []byte {
 	return dst
 }
 
+// Append appends a unique program representation of the value to dst, and
+// returns the extended buffer.
 func (x *AI) Append(ctx *Context, dst []byte) []byte {
 	if x.Len() == 0 {
 		return append(dst, "!0"...)
@@ -106,6 +111,8 @@ func (x *AI) Append(ctx *Context, dst []byte) []byte {
 	return dst
 }
 
+// Append appends a unique program representation of the value to dst, and
+// returns the extended buffer.
 func (x *AF) Append(ctx *Context, dst []byte) []byte {
 	if x.Len() == 0 {
 		return append(dst, "!0"...)
@@ -124,6 +131,8 @@ func (x *AF) Append(ctx *Context, dst []byte) []byte {
 	return dst
 }
 
+// Append appends a unique program representation of the value to dst, and
+// returns the extended buffer.
 func (x *AS) Append(ctx *Context, dst []byte) []byte {
 	if x.Len() == 0 {
 		return append(dst, `0#""`...)
@@ -142,6 +151,8 @@ func (x *AS) Append(ctx *Context, dst []byte) []byte {
 	return dst
 }
 
+// Append appends a unique program representation of the value to dst, and
+// returns the extended buffer.
 func (x *AV) Append(ctx *Context, dst []byte) []byte {
 	if x.Len() == 0 {
 		return append(dst, "()"...)
@@ -175,6 +186,8 @@ func (x *AV) Append(ctx *Context, dst []byte) []byte {
 	return dst
 }
 
+// Append appends a unique program representation of the value to dst, and
+// returns the extended buffer.
 func (d *Dict) Append(ctx *Context, dst []byte) []byte {
 	osc := ctx.compactFmt
 	ctx.compactFmt = true

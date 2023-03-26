@@ -33,7 +33,8 @@ func (f flags) Has(ff flags) bool {
 	return f&ff != 0
 }
 
-// AB represents an array of booleans.
+// AB represents an array of booleans, that is an array of zeros (false) and
+// ones (true).
 type AB struct {
 	flags flags
 	rc    *int
@@ -123,19 +124,19 @@ func NewAVWithRC(x []V, rc *int) V {
 	return NewV(&AV{Slice: x, rc: rc})
 }
 
-// Type returns a string representation of the array's type.
+// Type returns the name of the value's type.
 func (x *AB) Type() string { return "N" }
 
-// Type returns a string representation of the array's type.
+// Type returns the name of the value's type.
 func (x *AI) Type() string { return "N" }
 
-// Type returns a string representation of the array's type.
+// Type returns the name of the value's type.
 func (x *AF) Type() string { return "N" }
 
-// Type returns a string representation of the array's type.
+// Type returns the name of the value's type.
 func (x *AS) Type() string { return "S" }
 
-// Type returns a string representation of the array's type.
+// Type returns the name of the value's type.
 func (x *AV) Type() string { return "A" }
 
 // Len returns the length of the array.
@@ -356,6 +357,7 @@ func (x *AV) shallowClone() array {
 	return r
 }
 
+// Matches returns true if the two values match like in x~y.
 func (x *AB) Matches(y Value) bool {
 	if !matchArrayLen(x, y) {
 		return false
@@ -375,6 +377,7 @@ func (x *AB) Matches(y Value) bool {
 	}
 }
 
+// Matches returns true if the two values match like in x~y.
 func (x *AI) Matches(y Value) bool {
 	if !matchArrayLen(x, y) {
 		return false
@@ -394,6 +397,7 @@ func (x *AI) Matches(y Value) bool {
 	}
 }
 
+// Matches returns true if the two values match like in x~y.
 func (x *AF) Matches(y Value) bool {
 	if !matchArrayLen(x, y) {
 		return false
@@ -413,6 +417,7 @@ func (x *AF) Matches(y Value) bool {
 	}
 }
 
+// Matches returns true if the two values match like in x~y.
 func (x *AS) Matches(y Value) bool {
 	if !matchArrayLen(x, y) {
 		return false
@@ -432,6 +437,7 @@ func (x *AS) Matches(y Value) bool {
 	return true
 }
 
+// Matches returns true if the two values match like in x~y.
 func (x *AV) Matches(y Value) bool {
 	if !matchArrayLen(x, y) {
 		return false

@@ -42,15 +42,17 @@ func (x V) LessV(y V) bool {
 	return x.kind < y.kind
 }
 
-func (xv S) LessV(y Value) bool {
+// LessV satisfies the specification of the Value interface.
+func (s S) LessV(y Value) bool {
 	switch yv := y.(type) {
 	case S:
-		return xv < yv
+		return s < yv
 	default:
-		return xv.Type() < y.Type()
+		return s.Type() < y.Type()
 	}
 }
 
+// LessV satisfies the specification of the Value interface.
 func (x *AB) LessV(y Value) bool {
 	switch yv := y.(type) {
 	case *AB:
@@ -97,6 +99,7 @@ func (x *AB) LessV(y Value) bool {
 	}
 }
 
+// LessV satisfies the specification of the Value interface.
 func (x *AI) LessV(y Value) bool {
 	switch yv := y.(type) {
 	case *AB:
@@ -143,6 +146,7 @@ func (x *AI) LessV(y Value) bool {
 	}
 }
 
+// LessV satisfies the specification of the Value interface.
 func (x *AF) LessV(y Value) bool {
 	switch yv := y.(type) {
 	case *AB:
@@ -189,6 +193,7 @@ func (x *AF) LessV(y Value) bool {
 	}
 }
 
+// LessV satisfies the specification of the Value interface.
 func (x *AS) LessV(y Value) bool {
 	switch yv := y.(type) {
 	case *AS:
@@ -209,6 +214,7 @@ func (x *AS) LessV(y Value) bool {
 	}
 }
 
+// LessV satisfies the specification of the Value interface.
 func (x *AV) LessV(y Value) bool {
 	switch yv := y.(type) {
 	case *AV:

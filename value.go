@@ -87,29 +87,29 @@ func NewV(bv Value) V {
 	return V{kind: valBoxed, value: bv}
 }
 
-// variadic retrieves the variadic value from N field. It assumes Kind is
+// variadic retrieves the variadic value from N field. It assumes kind is
 // IntVariadic.
 func (x V) variadic() variadic {
 	return variadic(x.n)
 }
 
-// Variadic retrieves the lambda value from N field. It assumes Kind is
+// Variadic retrieves the lambda value from N field. It assumes kind is
 // IntLambda.
 func (x V) lambda() lambda {
 	return lambda(x.n)
 }
 
-// Error retrieves the error value. It assumes IsError(v).
+// Error retrieves the error value. It assumes x.IsError().
 func (x V) Error() V {
 	return x.value.(*errV).V
 }
 
-// I retrieves the unboxed integer value from N field. It assumes IsI(v).
+// I retrieves the unboxed integer value from N field. It assumes x.IsI().
 func (x V) I() int64 {
 	return x.n
 }
 
-// F retrieves the unboxed float64 value. It assumes isF(v).
+// F retrieves the unboxed float64 value. It assumes x.IsF().
 func (x V) F() float64 {
 	i := x.n
 	f := *(*float64)(unsafe.Pointer(&i))
@@ -157,7 +157,7 @@ func (x V) IsPanic() bool {
 	return x.kind == valPanic
 }
 
-// Panic returns the panic string. It assumes IsPanic is true.
+// Panic returns the panic string. It assumes x.IsPanic().
 func (x V) Panic() string {
 	if x.IsPanic() {
 		return string(x.value.(panicV))
@@ -187,6 +187,21 @@ func (x V) IsFunction() bool {
 		return true
 	case valBoxed:
 		_, ok := x.value.(function)
+		return ok
+	default:
+		return false
+	}
+}
+
+// IsCallable returns true if the value can be called with one or more
+// arguments. This is true for functions, arrays, strings and regexps, for
+// example.
+func (x V) IsCallable() bool {
+	switch x.kind {
+	case valVariadic, valLambda:
+		return true
+	case valBoxed:
+		_, ok := x.value.(callable)
 		return ok
 	default:
 		return false
