@@ -78,8 +78,8 @@ func (r *rxReplacer) replace(ctx *Context, s string) string {
 	}
 }
 
-// VRx implements the rx variadic.
-func VRx(ctx *Context, args []V) V {
+// vfRx implements the rx variadic.
+func vfRx(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return compileRegex(args[0])

@@ -6,8 +6,8 @@ import (
 	"time"
 )
 
-// VTime implements the time variadic verb.
-func VTime(ctx *Context, args []V) V {
+// vfTime implements the time variadic verb.
+func vfTime(ctx *Context, args []V) V {
 	x := args[len(args)-1]
 	var cmd string
 	switch xv := x.value.(type) {

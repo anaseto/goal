@@ -125,6 +125,17 @@ func (ctx *Context) registerVariadic(name string, vf VariadicFun) V {
 	return newVariadic(variadic(id))
 }
 
+// GetVariadic returns the variadic value registered with a given keyword or
+// symbol, along its associated variadic function. It returns a zero value and
+// nil function if there is no registered variadic with such name.
+func (ctx *Context) GetVariadic(name string) (V, VariadicFun) {
+	v, ok := ctx.vNames[name]
+	if !ok {
+		return V{}, nil
+	}
+	return newVariadic(v), ctx.variadics[v]
+}
+
 // RegisterDyad adds a variadic function to the context, and generates a new
 // dyadic keyword for that variadic (parsing will search for a left argument).
 // The variadic is also returned as a value.

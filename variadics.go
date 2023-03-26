@@ -43,31 +43,31 @@ var vFuns []VariadicFun
 
 func init() {
 	vFuns = []VariadicFun{
-		vRight:    VRight,
-		vAdd:      VAdd,
-		vSubtract: VSubtract,
-		vMultiply: VMultiply,
-		vDivide:   VDivide,
-		vKey:      VKey,
-		vMin:      VMin,
-		vMax:      VMax,
-		vLess:     VLess,
-		vMore:     VMore,
-		vEqual:    VEqual,
-		vMatch:    VMatch,
-		vJoin:     VJoin,
-		vWithout:  VWithout,
-		vTake:     VTake,
-		vDrop:     VDrop,
-		vCast:     VCast,
-		vFind:     VFind,
-		vApply:    VApply,
-		vApplyN:   VApplyN,
-		vList:     VList,
-		vQq:       VQq,
-		vEach:     VEach,
-		vFold:     VFold,
-		vScan:     VScan,
+		vRight:    vfRight,
+		vAdd:      vfAdd,
+		vSubtract: vfSubtract,
+		vMultiply: vfMultiply,
+		vDivide:   vfDivide,
+		vKey:      vfKey,
+		vMin:      vfMin,
+		vMax:      vfMax,
+		vLess:     vfLess,
+		vMore:     vfMore,
+		vEqual:    vfEqual,
+		vMatch:    vfMatch,
+		vJoin:     vfJoin,
+		vWithout:  vfWithout,
+		vTake:     vfTake,
+		vDrop:     vfDrop,
+		vCast:     vfCast,
+		vFind:     vfFind,
+		vApply:    vfApply,
+		vApplyN:   vfApplyN,
+		vList:     vfList,
+		vQq:       vfQq,
+		vEach:     vfEach,
+		vFold:     vfFold,
+		vScan:     vfScan,
 	}
 }
 
@@ -116,59 +116,59 @@ func (ctx *Context) initVariadics() {
 	ctx.keywords = make(map[string]NameType, nkeywords)
 
 	// special form variadics
-	ctx.registerVariadic("icount", VICount)
+	ctx.registerVariadic("icount", vfICount)
 
 	// monads
-	ctx.RegisterMonad("abs", VAbs)
-	ctx.RegisterMonad("bytes", VBytes)
-	ctx.RegisterMonad("ceil", VCeil)
-	ctx.RegisterMonad("error", VError)
-	ctx.RegisterMonad("eval", VEval)
-	ctx.RegisterMonad("firsts", VFirsts)
-	ctx.RegisterMonad("json", VJSON)
-	ctx.RegisterMonad("ocount", VOCount)
-	ctx.RegisterMonad("panic", VPanic)
-	ctx.RegisterMonad("rx", VRx)
-	ctx.RegisterMonad("sign", VSign)
-	ctx.RegisterMonad("utf8.rcount", VUTF8RCount)
-	ctx.RegisterMonad("utf8.valid", VUTF8Valid)
+	ctx.RegisterMonad("abs", vfAbs)
+	ctx.RegisterMonad("bytes", vfBytes)
+	ctx.RegisterMonad("ceil", vfCeil)
+	ctx.RegisterMonad("error", vfError)
+	ctx.RegisterMonad("eval", vfEval)
+	ctx.RegisterMonad("firsts", vfFirsts)
+	ctx.RegisterMonad("json", vfjson)
+	ctx.RegisterMonad("ocount", vfOCount)
+	ctx.RegisterMonad("panic", vfPanic)
+	ctx.RegisterMonad("rx", vfRx)
+	ctx.RegisterMonad("sign", vfSign)
+	ctx.RegisterMonad("utf8.rcount", vfUTF8RCount)
+	ctx.RegisterMonad("utf8.valid", vfUTF8Valid)
 
 	// math monads
-	ctx.RegisterMonad("acos", VAcos)
-	ctx.RegisterMonad("asin", VAsin)
-	ctx.RegisterMonad("atan", VAtan)
-	ctx.RegisterMonad("cos", VCos)
-	ctx.RegisterMonad("exp", VExp)
-	ctx.RegisterMonad("log", VLog)
-	ctx.RegisterMonad("round", VRoundToEven)
-	ctx.RegisterMonad("sin", VSin)
-	ctx.RegisterMonad("sqrt", VSqrt)
-	ctx.RegisterMonad("tan", VTan)
-	ctx.RegisterDyad("nan", VNaN)
+	ctx.RegisterMonad("acos", vfAcos)
+	ctx.RegisterMonad("asin", vfAsin)
+	ctx.RegisterMonad("atan", vfAtan)
+	ctx.RegisterMonad("cos", vfCos)
+	ctx.RegisterMonad("exp", vfExp)
+	ctx.RegisterMonad("log", vfLog)
+	ctx.RegisterMonad("round", vfRoundToEven)
+	ctx.RegisterMonad("sin", vfSin)
+	ctx.RegisterMonad("sqrt", vfSqrt)
+	ctx.RegisterMonad("tan", vfTan)
+	ctx.RegisterDyad("nan", vfNaN)
 
 	// dyads
-	ctx.RegisterDyad("and", VAnd)
-	ctx.RegisterDyad("csv", VCSV)
-	ctx.RegisterDyad("in", VIn)
-	ctx.RegisterDyad("or", VOr)
-	ctx.RegisterDyad("mod", VMod)
-	ctx.RegisterDyad("rotate", VRotate)
-	v := ctx.RegisterDyad("rshift", VRShift)
+	ctx.RegisterDyad("and", vfAnd)
+	ctx.RegisterDyad("csv", vfCSV)
+	ctx.RegisterDyad("in", vfIn)
+	ctx.RegisterDyad("or", vfOr)
+	ctx.RegisterDyad("mod", vfMod)
+	ctx.RegisterDyad("rotate", vfRotate)
+	v := ctx.RegisterDyad("rshift", vfRShift)
 	ctx.vNames["»"] = v.variadic()
-	v = ctx.RegisterDyad("shift", VShift)
+	v = ctx.RegisterDyad("shift", vfShift)
 	ctx.vNames["«"] = v.variadic()
-	ctx.RegisterDyad("sub", VSub)
-	ctx.RegisterDyad("time", VTime)
+	ctx.RegisterDyad("sub", vfSub)
+	ctx.RegisterDyad("time", vfTime)
 
 	// runtime functions
-	ctx.RegisterMonad("rt.vars", VRTVars)
-	ctx.RegisterMonad("rt.prec", VRTPrec)
-	ctx.RegisterMonad("rt.seed", VRTSeed)
-	ctx.RegisterMonad("rt.time", VRTTime)
+	ctx.RegisterMonad("rt.vars", vfRTVars)
+	ctx.RegisterMonad("rt.prec", vfRTPrec)
+	ctx.RegisterMonad("rt.seed", vfRTSeed)
+	ctx.RegisterMonad("rt.time", vfRTTime)
 }
 
-// VRight implements the : variadic verb.
-func VRight(ctx *Context, args []V) V {
+// vfRight implements the : variadic verb.
+func vfRight(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return args[0]
@@ -179,8 +179,8 @@ func VRight(ctx *Context, args []V) V {
 	}
 }
 
-// VAdd implements the + variadic verb.
-func VAdd(ctx *Context, args []V) V {
+// vfAdd implements the + variadic verb.
+func vfAdd(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return flip(args[0])
@@ -191,8 +191,8 @@ func VAdd(ctx *Context, args []V) V {
 	}
 }
 
-// VSubtract implements the - variadic verb.
-func VSubtract(ctx *Context, args []V) V {
+// vfSubtract implements the - variadic verb.
+func vfSubtract(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return negate(args[0])
@@ -203,8 +203,8 @@ func VSubtract(ctx *Context, args []V) V {
 	}
 }
 
-// VMultiply implements the * variadic verb.
-func VMultiply(ctx *Context, args []V) V {
+// vfMultiply implements the * variadic verb.
+func vfMultiply(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return first(args[0])
@@ -215,8 +215,8 @@ func VMultiply(ctx *Context, args []V) V {
 	}
 }
 
-// VDivide implements the % variadic verb.
-func VDivide(ctx *Context, args []V) V {
+// vfDivide implements the % variadic verb.
+func vfDivide(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return classify(ctx, args[0])
@@ -227,8 +227,8 @@ func VDivide(ctx *Context, args []V) V {
 	}
 }
 
-// VKey implements the ! variadic verb.
-func VKey(ctx *Context, args []V) V {
+// vfKey implements the ! variadic verb.
+func vfKey(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return enum(args[0])
@@ -243,8 +243,8 @@ func VKey(ctx *Context, args []V) V {
 	}
 }
 
-// VMin implements the & variadic verb.
-func VMin(ctx *Context, args []V) V {
+// vfMin implements the & variadic verb.
+func vfMin(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return where(args[0])
@@ -255,8 +255,8 @@ func VMin(ctx *Context, args []V) V {
 	}
 }
 
-// VMax implements the | variadic verb.
-func VMax(ctx *Context, args []V) V {
+// vfMax implements the | variadic verb.
+func vfMax(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return reverse(args[0])
@@ -267,8 +267,8 @@ func VMax(ctx *Context, args []V) V {
 	}
 }
 
-// VLess implements the < variadic verb.
-func VLess(ctx *Context, args []V) V {
+// vfLess implements the < variadic verb.
+func vfLess(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return ascend(args[0])
@@ -279,8 +279,8 @@ func VLess(ctx *Context, args []V) V {
 	}
 }
 
-// VMore implements the > variadic verb.
-func VMore(ctx *Context, args []V) V {
+// vfMore implements the > variadic verb.
+func vfMore(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return descend(args[0])
@@ -291,8 +291,8 @@ func VMore(ctx *Context, args []V) V {
 	}
 }
 
-// VEqual implements the = variadic verb.
-func VEqual(ctx *Context, args []V) V {
+// vfEqual implements the = variadic verb.
+func vfEqual(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return group(args[0])
@@ -313,8 +313,8 @@ func VEqual(ctx *Context, args []V) V {
 	}
 }
 
-// VMatch implements the ~ variadic verb.
-func VMatch(ctx *Context, args []V) V {
+// vfMatch implements the ~ variadic verb.
+func vfMatch(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return not(args[0])
@@ -325,8 +325,8 @@ func VMatch(ctx *Context, args []V) V {
 	}
 }
 
-// VJoin implements the , variadic verb.
-func VJoin(ctx *Context, args []V) V {
+// vfJoin implements the , variadic verb.
+func vfJoin(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return enlist(args[0])
@@ -337,8 +337,8 @@ func VJoin(ctx *Context, args []V) V {
 	}
 }
 
-// VWithout implements the ^ variadic verb.
-func VWithout(ctx *Context, args []V) V {
+// vfWithout implements the ^ variadic verb.
+func vfWithout(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return sortUp(args[0])
@@ -349,8 +349,8 @@ func VWithout(ctx *Context, args []V) V {
 	}
 }
 
-// VTake implements the # variadic verb.
-func VTake(ctx *Context, args []V) V {
+// vfTake implements the # variadic verb.
+func vfTake(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return NewI(int64(Length(args[0])))
@@ -371,8 +371,8 @@ func VTake(ctx *Context, args []V) V {
 	}
 }
 
-// VDrop implements the _ variadic verb.
-func VDrop(ctx *Context, args []V) V {
+// vfDrop implements the _ variadic verb.
+func vfDrop(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return floor(args[0])
@@ -393,8 +393,8 @@ func VDrop(ctx *Context, args []V) V {
 	}
 }
 
-// VCast implements the $ variadic verb.
-func VCast(ctx *Context, args []V) V {
+// vfCast implements the $ variadic verb.
+func vfCast(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return NewS(args[0].Sprint(ctx))
@@ -421,8 +421,8 @@ func VCast(ctx *Context, args []V) V {
 	}
 }
 
-// VFind implements the ? variadic verb.
-func VFind(ctx *Context, args []V) V {
+// vfFind implements the ? variadic verb.
+func vfFind(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		x := args[0]
@@ -441,8 +441,8 @@ func VFind(ctx *Context, args []V) V {
 	}
 }
 
-// VApply implements the @ variadic verb.
-func VApply(ctx *Context, args []V) V {
+// vfApply implements the @ variadic verb.
+func vfApply(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return NewS(args[0].Type())
@@ -461,8 +461,8 @@ func VApply(ctx *Context, args []V) V {
 	}
 }
 
-// VApplyN implements the . variadic verb.
-func VApplyN(ctx *Context, args []V) V {
+// vfApplyN implements the . variadic verb.
+func vfApplyN(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return get(ctx, args[0])
@@ -491,8 +491,8 @@ func VApplyN(ctx *Context, args []V) V {
 	}
 }
 
-// VList implements (x;y;...) array constructor variadic verb.
-func VList(ctx *Context, args []V) V {
+// vfList implements (x;y;...) array constructor variadic verb.
+func vfList(ctx *Context, args []V) V {
 	xav := &AV{Slice: args}
 	xv, cloned := normalize(xav)
 	if cloned {
@@ -503,8 +503,8 @@ func VList(ctx *Context, args []V) V {
 	return NewV(xav)
 }
 
-// VQq implements qq/STRING/ interpolation variadic verb.
-func VQq(ctx *Context, args []V) V {
+// vfQq implements qq/STRING/ interpolation variadic verb.
+func vfQq(ctx *Context, args []V) V {
 	n := 0
 	for _, arg := range args {
 		s, ok := arg.value.(S)
@@ -528,8 +528,8 @@ func VQq(ctx *Context, args []V) V {
 	return NewS(sb.String())
 }
 
-// VEach implements the ' variadic adverb.
-func VEach(ctx *Context, args []V) V {
+// vfEach implements the ' variadic adverb.
+func vfEach(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return panics("' : not enough arguments")
@@ -540,8 +540,8 @@ func VEach(ctx *Context, args []V) V {
 	}
 }
 
-// VFold implements the / variadic adverb.
-func VFold(ctx *Context, args []V) V {
+// vfFold implements the / variadic adverb.
+func vfFold(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return panics("/ : not enough arguments")
@@ -554,8 +554,8 @@ func VFold(ctx *Context, args []V) V {
 	}
 }
 
-// VScan implements the \ variadic adverb.
-func VScan(ctx *Context, args []V) V {
+// vfScan implements the \ variadic adverb.
+func vfScan(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return panics("\\ : not enough arguments")
@@ -568,8 +568,8 @@ func VScan(ctx *Context, args []V) V {
 	}
 }
 
-// VAnd implements the "and" variadic verb.
-func VAnd(ctx *Context, args []V) V {
+// vfAnd implements the "and" variadic verb.
+func vfAnd(ctx *Context, args []V) V {
 	for i := len(args) - 1; i > 0; i-- {
 		if isFalse(args[i]) {
 			return args[i]
@@ -578,8 +578,8 @@ func VAnd(ctx *Context, args []V) V {
 	return args[0]
 }
 
-// VCSV implements the "csv" variadic verb.
-func VCSV(ctx *Context, args []V) V {
+// vfCSV implements the "csv" variadic verb.
+func vfCSV(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return fCSV(',', args[0])
@@ -590,8 +590,8 @@ func VCSV(ctx *Context, args []V) V {
 	}
 }
 
-// VJSON implements the "json" variadic verb.
-func VJSON(ctx *Context, args []V) V {
+// vfjson implements the "json" variadic verb.
+func vfjson(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return fJSON(args[0])
@@ -600,8 +600,8 @@ func VJSON(ctx *Context, args []V) V {
 	}
 }
 
-// VAbs implements the "abs" variadic verb.
-func VAbs(ctx *Context, args []V) V {
+// vfAbs implements the "abs" variadic verb.
+func vfAbs(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return abs(args[0])
@@ -610,8 +610,8 @@ func VAbs(ctx *Context, args []V) V {
 	}
 }
 
-// VBytes implements the "bytes" variadic verb.
-func VBytes(ctx *Context, args []V) V {
+// vfBytes implements the "bytes" variadic verb.
+func vfBytes(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return bytecount(args[0])
@@ -620,8 +620,8 @@ func VBytes(ctx *Context, args []V) V {
 	}
 }
 
-// VCeil implements the "ceil" variadic verb.
-func VCeil(ctx *Context, args []V) V {
+// vfCeil implements the "ceil" variadic verb.
+func vfCeil(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return ceil(args[0])
@@ -630,8 +630,8 @@ func VCeil(ctx *Context, args []V) V {
 	}
 }
 
-// VError implements the "error" variadic verb.
-func VError(ctx *Context, args []V) V {
+// vfError implements the "error" variadic verb.
+func vfError(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		x := args[0]
@@ -644,8 +644,8 @@ func VError(ctx *Context, args []V) V {
 	}
 }
 
-// VEval implements the "eval" variadic verb.
-func VEval(ctx *Context, args []V) V {
+// vfEval implements the "eval" variadic verb.
+func vfEval(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return eval(ctx, args[0])
@@ -658,8 +658,8 @@ func VEval(ctx *Context, args []V) V {
 	}
 }
 
-// VFirsts implements the "firsts" variadic verb.
-func VFirsts(ctx *Context, args []V) V {
+// vfFirsts implements the "firsts" variadic verb.
+func vfFirsts(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return markFirsts(ctx, args[0])
@@ -668,8 +668,8 @@ func VFirsts(ctx *Context, args []V) V {
 	}
 }
 
-// VICount implements the "icount" variadic verb (#'=).
-func VICount(ctx *Context, args []V) V {
+// vfICount implements the "icount" variadic verb (#'=).
+func vfICount(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return icount(args[0])
@@ -678,8 +678,8 @@ func VICount(ctx *Context, args []V) V {
 	}
 }
 
-// VIn implements the "in" variadic verb.
-func VIn(ctx *Context, args []V) V {
+// vfIn implements the "in" variadic verb.
+func vfIn(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return panics("in : not enough arguments")
@@ -690,8 +690,8 @@ func VIn(ctx *Context, args []V) V {
 	}
 }
 
-// VOCount implements the "ocount" variadic verb.
-func VOCount(ctx *Context, args []V) V {
+// vfOCount implements the "ocount" variadic verb.
+func vfOCount(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return occurrenceCount(ctx, args[0])
@@ -700,8 +700,8 @@ func VOCount(ctx *Context, args []V) V {
 	}
 }
 
-// VMod implements the mod variadic verb.
-func VMod(ctx *Context, args []V) V {
+// vfMod implements the mod variadic verb.
+func vfMod(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return panics("mod : not enough arguments")
@@ -712,8 +712,8 @@ func VMod(ctx *Context, args []V) V {
 	}
 }
 
-// VPanic implements the "panic" variadic verb.
-func VPanic(ctx *Context, args []V) V {
+// vfPanic implements the "panic" variadic verb.
+func vfPanic(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		x := args[0]
@@ -728,8 +728,8 @@ func VPanic(ctx *Context, args []V) V {
 	}
 }
 
-// VOr implements the "or" variadic verb.
-func VOr(ctx *Context, args []V) V {
+// vfOr implements the "or" variadic verb.
+func vfOr(ctx *Context, args []V) V {
 	for i := len(args) - 1; i > 0; i-- {
 		if isTrue(args[i]) {
 			return args[i]
@@ -763,8 +763,8 @@ func VSet(ctx *Context, args []V) V {
 	}
 }
 
-// VSign implements the "sign" variadic verb.
-func VSign(ctx *Context, args []V) V {
+// vfSign implements the "sign" variadic verb.
+func vfSign(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return sign(args[0])
@@ -773,8 +773,8 @@ func VSign(ctx *Context, args []V) V {
 	}
 }
 
-// VRotate implements the rotate variadic verb.
-func VRotate(ctx *Context, args []V) V {
+// vfRotate implements the rotate variadic verb.
+func vfRotate(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return panics("rotate : not enough arguments")
@@ -785,8 +785,8 @@ func VRotate(ctx *Context, args []V) V {
 	}
 }
 
-// VShift implements the shift variadic verb.
-func VShift(ctx *Context, args []V) V {
+// vfShift implements the shift variadic verb.
+func vfShift(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return nudgeBack(args[0])
@@ -797,8 +797,8 @@ func VShift(ctx *Context, args []V) V {
 	}
 }
 
-// VRShift implements the rshift variadic verb.
-func VRShift(ctx *Context, args []V) V {
+// vfRShift implements the rshift variadic verb.
+func vfRShift(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return nudge(args[0])
@@ -809,8 +809,8 @@ func VRShift(ctx *Context, args []V) V {
 	}
 }
 
-// VSub implements the sub variadic verb.
-func VSub(ctx *Context, args []V) V {
+// vfSub implements the sub variadic verb.
+func vfSub(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return sub1(args[0])
@@ -823,8 +823,8 @@ func VSub(ctx *Context, args []V) V {
 	}
 }
 
-// VRTPrec implements the rt.prec variadic verb.
-func VRTPrec(ctx *Context, args []V) V {
+// vfRTPrec implements the rt.prec variadic verb.
+func vfRTPrec(ctx *Context, args []V) V {
 	if len(args) > 1 {
 		return panicRank(`rt.prec`)
 	}
@@ -842,16 +842,16 @@ func VRTPrec(ctx *Context, args []V) V {
 	return NewI(1)
 }
 
-// VRTSeed implements the rt.seed variadic verb.
-func VRTSeed(ctx *Context, args []V) V {
+// vfRTSeed implements the rt.seed variadic verb.
+func vfRTSeed(ctx *Context, args []V) V {
 	if len(args) > 1 {
 		return panicRank(`rt.seed`)
 	}
 	return seed(ctx, args[0])
 }
 
-// VRTVars implements the rt.vars variadic verb.
-func VRTVars(ctx *Context, args []V) V {
+// vfRTVars implements the rt.vars variadic verb.
+func vfRTVars(ctx *Context, args []V) V {
 	if len(args) > 1 {
 		return panicRank(`rt.vars`)
 	}
@@ -891,8 +891,8 @@ func VRTVars(ctx *Context, args []V) V {
 	}
 }
 
-// VRTTime implements the rt.time variadic verb.
-func VRTTime(ctx *Context, args []V) V {
+// vfRTTime implements the rt.time variadic verb.
+func vfRTTime(ctx *Context, args []V) V {
 	x := args[len(args)-1]
 	var n int64 = 1
 	switch xv := x.value.(type) {

@@ -2,8 +2,8 @@ package goal
 
 import "unicode/utf8"
 
-// VUTF8RCount implements the "utf8.rcount" variadic verb.
-func VUTF8RCount(ctx *Context, args []V) V {
+// vfUTF8RCount implements the "utf8.rcount" variadic verb.
+func vfUTF8RCount(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return utf8rcount(args[0])
@@ -36,8 +36,8 @@ func utf8rcount(x V) V {
 	}
 }
 
-// VUTF8Valid implements the "utf8.valid" variadic verb.
-func VUTF8Valid(ctx *Context, args []V) V {
+// vfUTF8Valid implements the "utf8.valid" variadic verb.
+func vfUTF8Valid(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return utf8valid(args[0])

@@ -2,8 +2,8 @@ package goal
 
 import "math"
 
-// VNaN implements the nan variadic verb.
-func VNaN(ctx *Context, args []V) V {
+// vfNaN implements the nan variadic verb.
+func vfNaN(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		r := isNaN(args[0])
