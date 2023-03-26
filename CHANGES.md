@@ -1,10 +1,14 @@
 # v? ?
 
++ Renamings and cleanups in the library interface, preparing for a stable
+  and documented API.
 + Rename goal builtin into separate rt.CMD builtins.
 + Improvements in import builtin supporting GOALLIB environment variable,
   both use of extension or not, and importing several files at once.
-+ Improvements and fixes in help.
++ Improvements and fixes in help, with better examples and a new short FAQ.
++ Improvements in REPL handling of multi-line quoting constructs.
 + The json builtin can now handle several JSON strings at once.
++ Error location improvements in value application.
 + Fix panic-case handling in eval, in particular error location.
 
 # v0.9.0 2023-03-23
