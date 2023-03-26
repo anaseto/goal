@@ -336,7 +336,7 @@ func isFalse(x V) bool {
 	case *errV:
 		return true
 	default:
-		return Length(x) == 0
+		return x.Len() == 0
 	}
 }
 
@@ -354,7 +354,7 @@ func isTrue(x V) bool {
 	case *errV:
 		return false
 	default:
-		return Length(x) > 0
+		return x.Len() > 0
 	}
 }
 

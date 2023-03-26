@@ -228,7 +228,7 @@ type errV struct {
 func (e *errV) Matches(y Value) bool {
 	switch yv := y.(type) {
 	case *errV:
-		return Match(e.V, yv.V)
+		return e.V.Matches(yv.V)
 	default:
 		return false
 	}
@@ -339,14 +339,14 @@ func (r *derivedVerb) stype() string     { return "r" }
 
 func (p *projection) Matches(x Value) bool {
 	xp, ok := x.(*projection)
-	if !ok || !Match(p.Fun, xp.Fun) {
+	if !ok || !p.Fun.Matches(xp.Fun) {
 		return false
 	}
 	if len(p.Args) != len(xp.Args) {
 		return false
 	}
 	for i, arg := range p.Args {
-		if !Match(arg, xp.Args[i]) {
+		if !arg.Matches(xp.Args[i]) {
 			return false
 		}
 	}
@@ -355,15 +355,15 @@ func (p *projection) Matches(x Value) bool {
 
 func (p *projectionFirst) Matches(x Value) bool {
 	xp, ok := x.(*projectionFirst)
-	return ok && Match(p.Fun, xp.Fun) && Match(p.Arg, xp.Arg)
+	return ok && p.Fun.Matches(xp.Fun) && p.Arg.Matches(xp.Arg)
 }
 
 func (p *projectionMonad) Matches(x Value) bool {
 	xp, ok := x.(*projectionMonad)
-	return ok && Match(p.Fun, xp.Fun)
+	return ok && p.Fun.Matches(xp.Fun)
 }
 
 func (r *derivedVerb) Matches(x Value) bool {
 	xr, ok := x.(*derivedVerb)
-	return ok && r.Fun == xr.Fun && Match(r.Arg, xr.Arg)
+	return ok && r.Fun == xr.Fun && r.Arg.Matches(xr.Arg)
 }

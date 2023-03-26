@@ -444,7 +444,7 @@ func (x *AV) Matches(y Value) bool {
 		return false
 	}
 	for i, yi := range yv.Slice {
-		if !Match(yi, x.At(i)) {
+		if !yi.Matches(x.At(i)) {
 			return false
 		}
 	}

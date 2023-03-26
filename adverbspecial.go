@@ -247,7 +247,7 @@ func fold2vMultiply(x V) V {
 }
 
 func fold2vMax(x V) V {
-	if Length(x) == 0 {
+	if x.Len() == 0 {
 		return NewF(math.Inf(-1))
 	}
 	switch xv := x.value.(type) {
@@ -362,7 +362,7 @@ func scan2vMax(x V) V {
 }
 
 func fold2vMin(x V) V {
-	if Length(x) == 0 {
+	if x.Len() == 0 {
 		return NewF(math.Inf(1))
 	}
 	switch xv := x.value.(type) {
@@ -545,7 +545,7 @@ func each2Length(ctx *Context, x array) V {
 	case *AV:
 		r := make([]int64, xv.Len())
 		for i, xi := range xv.Slice {
-			r[i] = int64(Length(xi))
+			r[i] = int64(xi.Len())
 		}
 		return NewAI(r)
 	default:

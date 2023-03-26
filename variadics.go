@@ -319,7 +319,7 @@ func vfMatch(ctx *Context, args []V) V {
 	case 1:
 		return not(args[0])
 	case 2:
-		return NewI(b2i(Match(args[1], args[0])))
+		return NewI(b2i(args[1].Matches(args[0])))
 	default:
 		return panicRank("~")
 	}
@@ -353,7 +353,7 @@ func vfWithout(ctx *Context, args []V) V {
 func vfTake(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return NewI(int64(Length(args[0])))
+		return NewI(int64(args[0].Len()))
 	case 2:
 		x, y := args[1], args[0]
 		if x.IsFunction() {

@@ -6,8 +6,8 @@ import (
 	"sort"
 )
 
-// Length returns the length of a value like in #x.
-func Length(x V) int {
+// Len returns the length of a value like in #x.
+func (x V) Len() int {
 	switch xv := x.value.(type) {
 	case countable:
 		return xv.Len()
@@ -68,7 +68,7 @@ func rotate(x, y V) V {
 	} else {
 		return Panicf("x rotate y : non-integer f[y] (%s)", x.Type())
 	}
-	ylen := int64(Length(y))
+	ylen := int64(y.Len())
 	if ylen == 0 {
 		return y
 	}
@@ -500,7 +500,7 @@ func shiftBefore(x, y V) V {
 }
 
 func shiftBeforeAB(x V, yv *AB) V {
-	max := minInt(Length(x), yv.Len())
+	max := minInt(x.Len(), yv.Len())
 	if max == 0 {
 		return NewV(yv)
 	}
@@ -563,7 +563,7 @@ func shiftBeforeAB(x V, yv *AB) V {
 }
 
 func shiftBeforeAI(x V, yv *AI) V {
-	max := minInt(Length(x), yv.Len())
+	max := minInt(x.Len(), yv.Len())
 	if max == 0 {
 		return NewV(yv)
 	}
@@ -619,7 +619,7 @@ func shiftBeforeAI(x V, yv *AI) V {
 }
 
 func shiftBeforeAF(x V, yv *AF) V {
-	max := minInt(Length(x), yv.Len())
+	max := minInt(x.Len(), yv.Len())
 	if max == 0 {
 		return NewV(yv)
 	}
@@ -667,7 +667,7 @@ func shiftBeforeAF(x V, yv *AF) V {
 }
 
 func shiftBeforeAS(x V, yv *AS) V {
-	max := minInt(Length(x), yv.Len())
+	max := minInt(x.Len(), yv.Len())
 	if max == 0 {
 		return NewV(yv)
 	}
@@ -695,7 +695,7 @@ func shiftBeforeAS(x V, yv *AS) V {
 }
 
 func shiftBeforeAV(x V, yv *AV) V {
-	max := minInt(Length(x), yv.Len())
+	max := minInt(x.Len(), yv.Len())
 	if max == 0 {
 		return NewV(yv)
 	}
@@ -755,7 +755,7 @@ func shiftAVBeforeArray(xv *AV, yv array) V {
 
 // nudge returns rshift x.
 func nudge(x V) V {
-	if Length(x) == 0 {
+	if x.Len() == 0 {
 		return x
 	}
 	switch xv := x.value.(type) {
@@ -812,7 +812,7 @@ func shiftAfter(x, y V) V {
 }
 
 func shiftAfterAB(x V, yv *AB) V {
-	max := minInt(Length(x), yv.Len())
+	max := minInt(x.Len(), yv.Len())
 	if max == 0 {
 		return NewV(yv)
 	}
@@ -874,7 +874,7 @@ func shiftAfterAB(x V, yv *AB) V {
 }
 
 func shiftAfterAI(x V, yv *AI) V {
-	max := minInt(Length(x), yv.Len())
+	max := minInt(x.Len(), yv.Len())
 	if max == 0 {
 		return NewV(yv)
 	}
@@ -930,7 +930,7 @@ func shiftAfterAI(x V, yv *AI) V {
 }
 
 func shiftAfterAF(x V, yv *AF) V {
-	max := minInt(Length(x), yv.Len())
+	max := minInt(x.Len(), yv.Len())
 	if max == 0 {
 		return NewV(yv)
 	}
@@ -978,7 +978,7 @@ func shiftAfterAF(x V, yv *AF) V {
 }
 
 func shiftAfterAS(x V, yv *AS) V {
-	max := minInt(Length(x), yv.Len())
+	max := minInt(x.Len(), yv.Len())
 	if max == 0 {
 		return NewV(yv)
 	}
@@ -1006,7 +1006,7 @@ func shiftAfterAS(x V, yv *AS) V {
 }
 
 func shiftAfterAV(x V, yv *AV) V {
-	max := minInt(Length(x), yv.Len())
+	max := minInt(x.Len(), yv.Len())
 	if max == 0 {
 		return NewV(yv)
 	}
@@ -1066,7 +1066,7 @@ func shiftAVAfterArray(xv *AV, yv array) V {
 
 // NudgeBack returns shift x.
 func nudgeBack(x V) V {
-	if Length(x) == 0 {
+	if x.Len() == 0 {
 		return x
 	}
 	switch xv := x.value.(type) {

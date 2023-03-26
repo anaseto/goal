@@ -82,7 +82,7 @@ func joinS(sep S, x V) V {
 	case *AS:
 		return NewS(strings.Join([]string(xv.Slice), string(sep)))
 	default:
-		if Length(x) == 0 {
+		if x.Len() == 0 {
 			return NewS("")
 		}
 		return Panicf("s/x : x not a string array (%s)", x.Type())
@@ -107,7 +107,7 @@ func converge(ctx *Context, f, x V) V {
 			ctx.drop()
 			return r
 		}
-		if Match(r, x) || Match(r, first) {
+		if r.Matches(x) || r.Matches(first) {
 			f.DecrRC()
 			first.DecrRC()
 			ctx.drop()
@@ -384,7 +384,7 @@ func converges(ctx *Context, f, x V) V {
 			ctx.drop()
 			return y
 		}
-		if Match(y, x) || Match(y, first) {
+		if y.Matches(x) || y.Matches(first) {
 			f.DecrRC()
 			first.DecrRC()
 			ctx.drop()

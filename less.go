@@ -245,7 +245,7 @@ func (xv *projection) LessV(y Value) bool {
 	switch yv := y.(type) {
 	case *projection:
 		return xv.Fun.LessV(yv.Fun) ||
-			Match(xv.Fun, yv.Fun) && NewAV(xv.Args).LessV(NewAV(yv.Args))
+			xv.Fun.Matches(yv.Fun) && NewAV(xv.Args).LessV(NewAV(yv.Args))
 	case function:
 		return xv.stype() < yv.stype()
 	default:
@@ -257,7 +257,7 @@ func (xv *projectionFirst) LessV(y Value) bool {
 	switch yv := y.(type) {
 	case *projectionFirst:
 		return xv.Fun.LessV(yv.Fun) ||
-			Match(xv.Fun, yv.Fun) && xv.Arg.LessV(yv.Arg)
+			xv.Fun.Matches(yv.Fun) && xv.Arg.LessV(yv.Arg)
 	case function:
 		return xv.stype() < yv.stype()
 	default:

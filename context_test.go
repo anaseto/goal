@@ -113,7 +113,7 @@ func TestEval(t *testing.T) {
 				t.Log(matchString)
 				t.Fatalf("return error: `%v` vs `%v`", errLeft, errRight)
 			}
-			if !Match(vLeft, vRight) {
+			if !vLeft.Matches(vRight) {
 				t.Log(ps)
 				t.Log(matchString)
 				if vLeft != (V{}) {

@@ -32,7 +32,7 @@ type rxReplacer struct {
 
 func (r *rxReplacer) Matches(x Value) bool {
 	xv, ok := x.(*rxReplacer)
-	return ok && r.r.Matches(xv.r) && Match(r.repl, xv.repl)
+	return ok && r.r.Matches(xv.r) && r.repl.Matches(xv.repl)
 }
 
 func (r *rxReplacer) Append(ctx *Context, dst []byte) []byte {

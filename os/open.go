@@ -89,7 +89,7 @@ func cmdToAS(cmd *command) goal.V {
 func (cmd *command) Matches(y goal.Value) bool {
 	switch yv := y.(type) {
 	case *command:
-		return cmd.mode == yv.mode && goal.Match(cmdToAS(cmd), cmdToAS(yv))
+		return cmd.mode == yv.mode && cmdToAS(cmd).Matches(cmdToAS(yv))
 	default:
 		return false
 	}

@@ -98,7 +98,7 @@ func group(x V) V {
 		r.InitWithRC(r.rc)
 		return NewV(r)
 	default:
-		if Length(x) == 0 {
+		if x.Len() == 0 {
 			return NewAV(nil)
 		}
 		return Panicf("=x : x not an integer array (%s)", x.Type())
@@ -141,7 +141,7 @@ func icount(x V) V {
 	case *Dict:
 		return icount(NewV(xv.values))
 	default:
-		if Length(x) == 0 {
+		if x.Len() == 0 {
 			return NewAI(nil)
 		}
 		return Panicf("= x : x not an integer array (%s)", x.Type())
@@ -150,9 +150,9 @@ func icount(x V) V {
 
 // groupBy by returns {x}=y.
 func groupBy(x, y V) V {
-	if Length(x) != Length(y) {
+	if x.Len() != y.Len() {
 		return Panicf("f=y : length mismatch for f[y] and y: %d vs %d ",
-			Length(x), Length(y))
+			x.Len(), y.Len())
 
 	}
 	x = group(x)

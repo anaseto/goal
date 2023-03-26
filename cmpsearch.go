@@ -6,8 +6,8 @@ import (
 	"strings"
 )
 
-// Match returns true if the two values match like in x~y.
-func Match(x, y V) bool {
+// Matches returns true if the two values match like in x~y.
+func (x V) Matches(y V) bool {
 	switch x.kind {
 	case valNil:
 		return y.kind == valNil
@@ -98,7 +98,7 @@ func classify(ctx *Context, x V) V {
 	loop:
 		for i, xi := range xv.Slice {
 			for j := range xv.Slice[:i] {
-				if Match(xi, xv.At(j)) {
+				if xi.Matches(xv.At(j)) {
 					r[i] = r[j]
 					continue loop
 				}
@@ -205,7 +205,7 @@ func uniq(ctx *Context, x V) V {
 	loop:
 		for i, xi := range xv.Slice {
 			for _, xj := range xv.Slice[:i] {
-				if Match(xi, xj) {
+				if xi.Matches(xj) {
 					continue loop
 				}
 			}
@@ -292,7 +292,7 @@ func markFirsts(ctx *Context, x V) V {
 	loop:
 		for i, xi := range xv.Slice {
 			for _, xj := range xv.Slice[:i] {
-				if Match(xi, xj) {
+				if xi.Matches(xj) {
 					continue loop
 				}
 			}
@@ -332,7 +332,7 @@ func markFirstsSlice[T comparable](xs []T, bruteForceThreshold int) []bool {
 
 // memberOf returns x in y.
 func memberOf(x, y V) V {
-	if Length(y) == 0 {
+	if y.Len() == 0 {
 		switch xv := x.value.(type) {
 		case array:
 			r := make([]bool, xv.Len())
@@ -341,7 +341,7 @@ func memberOf(x, y V) V {
 			return NewI(b2i(false))
 		}
 	}
-	if Length(x) == 0 {
+	if x.Len() == 0 {
 		return NewAB(nil)
 	}
 	switch yv := y.value.(type) {
@@ -603,7 +603,7 @@ func memberOfAV(x V, y *AV) V {
 		return memberOfArray(xv, y)
 	default:
 		for _, yi := range y.Slice {
-			if Match(x, yi) {
+			if x.Matches(yi) {
 				return NewI(b2i(true))
 			}
 		}
@@ -617,7 +617,7 @@ func memberOfArray(x, y array) V {
 	r := make([]bool, x.Len())
 	for i := 0; i < x.Len(); i++ {
 		for j := 0; j < y.Len(); j++ {
-			if Match(x.at(i), y.at(j)) {
+			if x.at(i).Matches(y.at(j)) {
 				r[i] = true
 				break
 			}
@@ -674,7 +674,7 @@ func occurrenceCount(ctx *Context, x V) V {
 	loop:
 		for i, xi := range xv.Slice {
 			for j := i - 1; j >= 0; j-- {
-				if Match(xi, xv.At(j)) {
+				if xi.Matches(xv.At(j)) {
 					r[i] = r[j] + 1
 					continue loop
 				}
@@ -1228,7 +1228,7 @@ func findArrays(x, y array) V {
 	}
 	for i := 0; i < y.Len(); i++ {
 		for j := 0; j < x.Len(); j++ {
-			if Match(y.at(i), x.at(j)) {
+			if y.at(i).Matches(x.at(j)) {
 				r[i] = int64(j)
 				break
 			}
@@ -1243,7 +1243,7 @@ func findAV(x *AV, y V) V {
 		return findArrays(x, yv)
 	default:
 		for i, xi := range x.Slice {
-			if Match(y, xi) {
+			if y.Matches(xi) {
 				return NewI(int64(i))
 			}
 		}
