@@ -19,8 +19,8 @@ import (
 // import s : evaluate file s+".goal" (or s if it has already an extension)
 // with prefix s (without extension) for globals.
 //
-// pfx import s : same as import s but use prefix pfx.  If pfx is empty, no
-// prefix is used.
+// x import s : same as import s but use prefix x.  If x is empty, no prefix is
+// used.
 //
 // It returns 0 and does nothing if a file has already been evaluated.
 func VFImport(ctx *goal.Context, args []goal.V) goal.V {
@@ -33,7 +33,7 @@ func VFImport(ctx *goal.Context, args []goal.V) goal.V {
 		pfx := args[1]
 		p, ok := pfx.Value().(goal.S)
 		if !ok {
-			return goal.Panicf("pfx import s : pfx not a string (%s)", pfx.Type())
+			return goal.Panicf("x import s : x not a string (%s)", pfx.Type())
 		}
 		prefix = string(p)
 		hasPfx = true
@@ -118,7 +118,8 @@ func ppanic(pfx string, x goal.V) goal.V {
 //
 // print x : outputs x to standard output. It returns a true value on success.
 //
-// h print y : outputs y to w, where w is an io.Writer or a filename (goal.S).
+// x print y : outputs y to x, where x is an io.Writer handle or a filename
+// (goal.S).
 func VFPrint(ctx *goal.Context, args []goal.V) goal.V {
 	switch len(args) {
 	case 1:
@@ -276,18 +277,18 @@ func fsayV(ctx *goal.Context, w io.Writer, x goal.V) error {
 
 // VFShell implements the shell monad.
 //
-// shell cmd : sends cmd to the shell as-is. It returns the standard output of
-// the command, or an error. Standard error is inherited from the parent.
+// shell s : sends command s to the shell as-is. It returns the standard output
+// of the command, or an error. Standard error is inherited from the parent.
 func VFShell(ctx *goal.Context, args []goal.V) goal.V {
 	if len(args) > 1 {
-		return goal.Panicf("shell[cmd] : too many arguments (%d)", len(args))
+		return goal.Panicf("shell : too many arguments (%d)", len(args))
 	}
 	var cmds string
 	switch arg := args[len(args)-1].Value().(type) {
 	case goal.S:
 		cmds = string(arg)
 	default:
-		return goal.Panicf("shell[cmd] : cmd is not a string (%s)", arg.Type())
+		return goal.Panicf("shell s : s is not a string (%s)", arg.Type())
 	}
 	cmd := exec.Command("/bin/sh", "-c", cmds)
 	cmd.Stderr = os.Stderr

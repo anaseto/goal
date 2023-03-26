@@ -147,9 +147,11 @@ func (cmd *command) Close() error {
 //
 // open "path" : opens file "path" for reading.
 //
-// mode open "path" : opens file "path" using the given fopen(3) mode.
+// x open "path" : opens file "path" using the given fopen(3) mode x.
 //
-// mode can be: "r", "r+", "w", "w+", "a", "a+", "|-", "-|".
+// x can be: "r", "r+", "w", "w+", "a", "a+", "|-", "-|". In the last two
+// modes, the path is instead interpreted as a command, and can be a list of
+// strings.
 //
 // It returns a filehandle value of type "h" on success, and an error
 // otherwise.
@@ -269,11 +271,13 @@ func isI(x float64) bool {
 //
 // read h : reads from filehandle h until EOF or an error occurs.
 //
+// read s : reads file named s
+//
 // s read h : reads from filehandle h until delimiter s or EOF, or an error
 // occurs.
 //
-// n read h : reads n bytes from filehandle h until EOF (returning possibly
-// less than n bytes) or an error occurs.
+// i read h : reads i bytes from filehandle h until EOF (returning possibly
+// less than i bytes) or an error occurs.
 //
 // It returns the read content as a string on success, and an error otherwise.
 func VFRead(ctx *goal.Context, args []goal.V) goal.V {
@@ -288,7 +292,7 @@ func VFRead(ctx *goal.Context, args []goal.V) goal.V {
 			n = x.I()
 		} else if x.IsF() {
 			if !isI(x.F()) {
-				return goal.Panicf("n read h : n not an integer (%g)", x.F())
+				return goal.Panicf("i read h : n not an integer (%g)", x.F())
 			}
 			n = int64(x.F())
 		} else {
