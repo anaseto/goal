@@ -38,7 +38,7 @@ func encode(f V, x V) V {
 			max = maxI(absI(min), absI(max))
 			n := encodeBaseDigits(f.I(), max)
 			ai := make([]int64, n*xv.Len())
-			copy(ai[(n-1)*xv.Len():], xv.Slice)
+			copy(ai[(n-1)*xv.Len():], xv.elts)
 			for i := n - 1; i >= 0; i-- {
 				for j := 0; j < xv.Len(); j++ {
 					ox := ai[i*xv.Len()+j]
@@ -63,7 +63,7 @@ func encode(f V, x V) V {
 			return encode(f, aix)
 		case *AV:
 			r := make([]V, xv.Len())
-			for i, xi := range xv.Slice {
+			for i, xi := range xv.elts {
 				r[i] = encode(f, xi)
 				if r[i].IsPanic() {
 					return r[i]
@@ -85,7 +85,7 @@ func encode(f V, x V) V {
 	case *AB:
 		return encode(fromABtoAI(fv), x)
 	case *AI:
-		for _, b := range fv.Slice {
+		for _, b := range fv.elts {
 			if b <= 1 {
 				return panics("I\\x : I contains base < 2")
 			}
@@ -111,7 +111,7 @@ func encode(f V, x V) V {
 		case *AI:
 			n := fv.Len()
 			ai := make([]int64, n*xv.Len())
-			copy(ai[(n-1)*xv.Len():], xv.Slice)
+			copy(ai[(n-1)*xv.Len():], xv.elts)
 			for i := n - 1; i >= 0; i-- {
 				for j := 0; j < xv.Len(); j++ {
 					fi := fv.At(i)
@@ -137,7 +137,7 @@ func encode(f V, x V) V {
 			return encode(f, aix)
 		case *AV:
 			r := make([]V, xv.Len())
-			for i, xi := range xv.Slice {
+			for i, xi := range xv.elts {
 				r[i] = encode(f, xi)
 				if r[i].IsPanic() {
 					return r[i]
@@ -196,7 +196,7 @@ func decode(f V, x V) V {
 			return decode(f, aix)
 		case *AV:
 			r := make([]V, xv.Len())
-			for i, xi := range xv.Slice {
+			for i, xi := range xv.elts {
 				r[i] = decode(f, xi)
 				if r[i].IsPanic() {
 					return r[i]
@@ -218,7 +218,7 @@ func decode(f V, x V) V {
 	case *AB:
 		return decode(fromABtoAI(fv), x)
 	case *AI:
-		for _, b := range fv.Slice {
+		for _, b := range fv.elts {
 			if b <= 0 {
 				return panics("I/x : I contains non positive")
 			}
@@ -258,7 +258,7 @@ func decode(f V, x V) V {
 			return decode(f, aix)
 		case *AV:
 			r := make([]V, xv.Len())
-			for i, xi := range xv.Slice {
+			for i, xi := range xv.elts {
 				r[i] = decode(f, xi)
 				if r[i].IsPanic() {
 					return r[i]

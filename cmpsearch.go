@@ -59,7 +59,7 @@ func classify(ctx *Context, x V) V {
 		}
 		return not(x)
 	case *AF:
-		return NewAIWithRC(classifySlice[float64](xv.Slice, bruteForceNumeric), reuseRCp(xv.rc))
+		return NewAIWithRC(classifySlice[float64](xv.elts, bruteForceNumeric), reuseRCp(xv.rc))
 	case *AI:
 		if xv.Len() > bruteForceNumeric {
 			min, max := minMax(xv)
@@ -69,7 +69,7 @@ func classify(ctx *Context, x V) V {
 				// fast path avoiding hash table
 				offset := -min
 				m := make([]int64, max-min+1)
-				for i, xi := range xv.Slice {
+				for i, xi := range xv.elts {
 					c := m[xi+offset]
 					if c == 0 {
 						r[i] = n
@@ -82,13 +82,13 @@ func classify(ctx *Context, x V) V {
 				return NewAI(r)
 			}
 		}
-		return NewAIWithRC(classifySlice[int64](xv.Slice, bruteForceNumeric), reuseRCp(xv.rc))
+		return NewAIWithRC(classifySlice[int64](xv.elts, bruteForceNumeric), reuseRCp(xv.rc))
 	case *AS:
-		return NewAIWithRC(classifySlice[string](xv.Slice, bruteForceGeneric), reuseRCp(xv.rc))
+		return NewAIWithRC(classifySlice[string](xv.elts, bruteForceGeneric), reuseRCp(xv.rc))
 	case *AV:
 		if xv.Len() > bruteForceGeneric {
 			ss := make([]string, xv.Len())
-			for i, xi := range xv.Slice {
+			for i, xi := range xv.elts {
 				ss[i] = xi.Sprint(ctx)
 			}
 			return NewAI(classifySlice[string](ss, bruteForceGeneric))
@@ -96,8 +96,8 @@ func classify(ctx *Context, x V) V {
 		r := make([]int64, xv.Len())
 		n := int64(0)
 	loop:
-		for i, xi := range xv.Slice {
-			for j := range xv.Slice[:i] {
+		for i, xi := range xv.elts {
+			for j := range xv.elts[:i] {
 				if xi.Matches(xv.At(j)) {
 					r[i] = r[j]
 					continue loop
@@ -171,24 +171,24 @@ func uniq(ctx *Context, x V) V {
 		b := xv.At(0)
 		for i := 1; i < xv.Len(); i++ {
 			if xv.At(i) != b {
-				return NewV(&AB{Slice: []bool{b, xv.At(i)}, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
+				return NewV(&AB{elts: []bool{b, xv.At(i)}, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
 			}
 		}
-		return NewV(&AB{Slice: []bool{b}, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
+		return NewV(&AB{elts: []bool{b}, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
 	case *AF:
-		r := uniqSlice[float64](xv.Slice, bruteForceNumeric)
-		return NewV(&AF{Slice: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
+		r := uniqSlice[float64](xv.elts, bruteForceNumeric)
+		return NewV(&AF{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
 	case *AI:
-		r := uniqSlice[int64](xv.Slice, bruteForceNumeric)
-		return NewV(&AI{Slice: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
+		r := uniqSlice[int64](xv.elts, bruteForceNumeric)
+		return NewV(&AI{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
 	case *AS:
-		r := uniqSlice[string](xv.Slice, bruteForceGeneric)
-		return NewV(&AS{Slice: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
+		r := uniqSlice[string](xv.elts, bruteForceGeneric)
+		return NewV(&AS{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
 	case *AV:
 		r := []V{}
 		if xv.Len() > bruteForceGeneric {
 			ss := make([]string, xv.Len())
-			for i, xi := range xv.Slice {
+			for i, xi := range xv.elts {
 				ss[i] = xi.Sprint(ctx)
 			}
 			m := map[string]struct{}{}
@@ -200,18 +200,18 @@ func uniq(ctx *Context, x V) V {
 					continue
 				}
 			}
-			return NewV(canonicalAV(&AV{Slice: r, rc: xv.rc, flags: xv.flags | flagUnique}))
+			return NewV(canonicalAV(&AV{elts: r, rc: xv.rc, flags: xv.flags | flagUnique}))
 		}
 	loop:
-		for i, xi := range xv.Slice {
-			for _, xj := range xv.Slice[:i] {
+		for i, xi := range xv.elts {
+			for _, xj := range xv.elts[:i] {
 				if xi.Matches(xj) {
 					continue loop
 				}
 			}
 			r = append(r, xi)
 		}
-		return NewV(canonicalAV(&AV{Slice: r, rc: xv.rc, flags: xv.flags | flagUnique}))
+		return NewV(canonicalAV(&AV{elts: r, rc: xv.rc, flags: xv.flags | flagUnique}))
 	default:
 		panic("uniq")
 	}
@@ -275,23 +275,23 @@ func markFirsts(ctx *Context, x V) V {
 		}
 		return NewAB(r)
 	case *AF:
-		return NewABWithRC(markFirstsSlice[float64](xv.Slice, bruteForceNumeric), reuseRCp(xv.rc))
+		return NewABWithRC(markFirstsSlice[float64](xv.elts, bruteForceNumeric), reuseRCp(xv.rc))
 	case *AI:
-		return NewABWithRC(markFirstsSlice[int64](xv.Slice, bruteForceNumeric), reuseRCp(xv.rc))
+		return NewABWithRC(markFirstsSlice[int64](xv.elts, bruteForceNumeric), reuseRCp(xv.rc))
 	case *AS:
-		return NewABWithRC(markFirstsSlice[string](xv.Slice, bruteForceGeneric), reuseRCp(xv.rc))
+		return NewABWithRC(markFirstsSlice[string](xv.elts, bruteForceGeneric), reuseRCp(xv.rc))
 	case *AV:
 		if xv.Len() > bruteForceGeneric {
 			ss := make([]string, xv.Len())
-			for i, xi := range xv.Slice {
+			for i, xi := range xv.elts {
 				ss[i] = xi.Sprint(ctx)
 			}
 			return NewABWithRC(markFirstsSlice[string](ss, bruteForceGeneric), reuseRCp(xv.rc))
 		}
 		r := make([]bool, xv.Len())
 	loop:
-		for i, xi := range xv.Slice {
-			for _, xj := range xv.Slice[:i] {
+		for i, xi := range xv.elts {
+			for _, xj := range xv.elts[:i] {
 				if xi.Matches(xj) {
 					continue loop
 				}
@@ -373,7 +373,7 @@ func boolSliceMembers(xs []bool) (t bool, f bool) {
 }
 
 func memberOfAB(x V, y *AB) V {
-	t, f := boolSliceMembers(y.Slice)
+	t, f := boolSliceMembers(y.elts)
 	if t && f {
 		switch xv := x.value.(type) {
 		case *AB:
@@ -403,7 +403,7 @@ func memberOfAB(x V, y *AB) V {
 		switch xv := x.value.(type) {
 		case *AB:
 			r := make([]bool, xv.Len())
-			copy(r, xv.Slice)
+			copy(r, xv.elts)
 			return NewAB(r)
 		case *AS:
 			r := make([]bool, xv.Len())
@@ -425,7 +425,7 @@ func memberOfAB(x V, y *AB) V {
 	switch xv := x.value.(type) {
 	case *AB:
 		r := make([]bool, xv.Len())
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			r[i] = !xi
 		}
 		return NewAB(r)
@@ -481,7 +481,7 @@ func memberOfSlice[T comparable](xs []T, ys []T, bruteForceThreshold int) []bool
 
 func memberOfAF(x V, y *AF) V {
 	if x.IsI() {
-		for _, yi := range y.Slice {
+		for _, yi := range y.elts {
 			if float64(x.I()) == yi {
 				return NewI(B2I(true))
 			}
@@ -489,7 +489,7 @@ func memberOfAF(x V, y *AF) V {
 		return NewI(B2I(false))
 	}
 	if x.IsF() {
-		for _, yi := range y.Slice {
+		for _, yi := range y.elts {
 			if x.F() == yi {
 				return NewI(B2I(true))
 			}
@@ -502,7 +502,7 @@ func memberOfAF(x V, y *AF) V {
 	case *AI:
 		return memberOfAF(toAF(xv), y)
 	case *AF:
-		return NewABWithRC(memberOfSlice[float64](xv.Slice, y.Slice, bruteForceNumeric), reuseRCp(xv.rc))
+		return NewABWithRC(memberOfSlice[float64](xv.elts, y.elts, bruteForceNumeric), reuseRCp(xv.rc))
 	case array:
 		return memberOfArray(xv, y)
 	default:
@@ -521,7 +521,7 @@ func memberOfAI(x V, y *AI) V {
 		if y.flags.Has(flagAscending) && y.Len() > bruteForceNumeric/2 {
 			return NewI(B2I(memberIOfAI(x.I(), y)))
 		}
-		for _, yi := range y.Slice {
+		for _, yi := range y.elts {
 			if x.I() == yi {
 				return NewI(B2I(true))
 			}
@@ -535,7 +535,7 @@ func memberOfAI(x V, y *AI) V {
 		if y.flags.Has(flagAscending) && y.Len() > bruteForceNumeric/2 {
 			return NewI(B2I(memberIOfAI(int64(x.F()), y)))
 		}
-		for _, yi := range y.Slice {
+		for _, yi := range y.elts {
 			if x.F() == float64(yi) {
 				return NewI(B2I(true))
 			}
@@ -548,12 +548,12 @@ func memberOfAI(x V, y *AI) V {
 	case *AI:
 		if y.flags.Has(flagAscending) && y.Len() > bruteForceNumeric/2 {
 			r := make([]bool, xv.Len())
-			for i, xi := range xv.Slice {
+			for i, xi := range xv.elts {
 				r[i] = memberIOfAI(xi, y)
 			}
 			return NewABWithRC(r, reuseRCp(xv.rc))
 		}
-		return NewABWithRC(memberOfSlice[int64](xv.Slice, y.Slice, bruteForceNumeric), reuseRCp(xv.rc))
+		return NewABWithRC(memberOfSlice[int64](xv.elts, y.elts, bruteForceNumeric), reuseRCp(xv.rc))
 	case *AF:
 		return memberOf(x, toAF(y))
 	case array:
@@ -575,7 +575,7 @@ func memberOfAS(x V, y *AS) V {
 		if y.flags.Has(flagAscending) && y.Len() > bruteForceGeneric/4 {
 			return NewI(B2I(memberSOfAS(string(xv), y)))
 		}
-		for _, yi := range y.Slice {
+		for _, yi := range y.elts {
 			if string(xv) == yi {
 				return NewI(1)
 			}
@@ -584,12 +584,12 @@ func memberOfAS(x V, y *AS) V {
 	case *AS:
 		if y.flags.Has(flagAscending) && y.Len() > bruteForceGeneric/4 {
 			r := make([]bool, xv.Len())
-			for i, xi := range xv.Slice {
+			for i, xi := range xv.elts {
 				r[i] = memberSOfAS(xi, y)
 			}
 			return NewABWithRC(r, reuseRCp(xv.rc))
 		}
-		return NewABWithRC(memberOfSlice[string](xv.Slice, y.Slice, bruteForceGeneric), reuseRCp(xv.rc))
+		return NewABWithRC(memberOfSlice[string](xv.elts, y.elts, bruteForceGeneric), reuseRCp(xv.rc))
 	case array:
 		return memberOfArray(xv, y)
 	default:
@@ -602,7 +602,7 @@ func memberOfAV(x V, y *AV) V {
 	case array:
 		return memberOfArray(xv, y)
 	default:
-		for _, yi := range y.Slice {
+		for _, yi := range y.elts {
 			if x.Matches(yi) {
 				return NewI(B2I(true))
 			}
@@ -646,7 +646,7 @@ func occurrenceCount(ctx *Context, x V) V {
 	case *AB:
 		r := make([]int64, xv.Len())
 		var f, t int64
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			if xi {
 				r[i] = t
 				t++
@@ -657,22 +657,22 @@ func occurrenceCount(ctx *Context, x V) V {
 		}
 		return NewAIWithRC(r, reuseRCp(xv.rc))
 	case *AF:
-		return NewAIWithRC(occurrenceCountSlice[float64](xv.Slice, bruteForceNumeric), reuseRCp(xv.rc))
+		return NewAIWithRC(occurrenceCountSlice[float64](xv.elts, bruteForceNumeric), reuseRCp(xv.rc))
 	case *AI:
-		return NewAIWithRC(occurrenceCountSlice[int64](xv.Slice, bruteForceNumeric), reuseRCp(xv.rc))
+		return NewAIWithRC(occurrenceCountSlice[int64](xv.elts, bruteForceNumeric), reuseRCp(xv.rc))
 	case *AS:
-		return NewAIWithRC(occurrenceCountSlice[string](xv.Slice, bruteForceGeneric), reuseRCp(xv.rc))
+		return NewAIWithRC(occurrenceCountSlice[string](xv.elts, bruteForceGeneric), reuseRCp(xv.rc))
 	case *AV:
 		if xv.Len() > bruteForceGeneric {
 			ss := make([]string, xv.Len())
-			for i, xi := range xv.Slice {
+			for i, xi := range xv.elts {
 				ss[i] = xi.Sprint(ctx)
 			}
 			return NewAIWithRC(occurrenceCountSlice[string](ss, bruteForceGeneric), reuseRCp(xv.rc))
 		}
 		r := make([]int64, xv.Len())
 	loop:
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			for j := i - 1; j >= 0; j-- {
 				if xi.Matches(xv.At(j)) {
 					r[i] = r[j] + 1
@@ -739,8 +739,8 @@ func without(x, y V) V {
 		r := memberOf(y, x)
 		switch bres := r.value.(type) {
 		case *AB:
-			for i, b := range bres.Slice {
-				bres.Slice[i] = !b
+			for i, b := range bres.elts {
+				bres.elts[i] = !b
 			}
 		}
 		return replicate(r, y)
@@ -753,8 +753,8 @@ func withoutDict(x V, y *Dict) V {
 	r := memberOf(NewV(y.values), x)
 	switch bres := r.value.(type) {
 	case *AB:
-		for i, b := range bres.Slice {
-			bres.Slice[i] = !b
+		for i, b := range bres.elts {
+			bres.elts[i] = !b
 		}
 	}
 	return NewDict(replicate(r, NewV(y.keys)), replicate(r, NewV(y.values)))
@@ -881,13 +881,13 @@ func findS(s S, y V) V {
 		return NewAI([]int64{int64(loc[0]), int64(loc[1] - loc[0])})
 	case *AS:
 		r := make([]int64, yv.Len())
-		for i, ss := range yv.Slice {
+		for i, ss := range yv.elts {
 			r[i] = int64(strings.Index(string(s), string(ss)))
 		}
 		return NewAI(r)
 	case *AV:
 		r := make([]V, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			r[i] = findS(s, yi)
 			if r[i].IsPanic() {
 				return r[i]
@@ -906,7 +906,7 @@ func imapAB(x *AB) (m [2]int64) {
 		return m
 	}
 	m[B2I(x.At(0))] = 0
-	for i, xi := range x.Slice[1:] {
+	for i, xi := range x.elts[1:] {
 		if xi != x.At(0) {
 			m[B2I(xi)] = int64(i) + 1
 			break
@@ -929,7 +929,7 @@ func imapSlice[T comparable](xs []T) map[T]int64 {
 
 func findAB(x *AB, y V) V {
 	if y.IsI() {
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if B2I(xi) == y.I() {
 				return NewI(int64(i))
 			}
@@ -946,14 +946,14 @@ func findAB(x *AB, y V) V {
 	case *AB:
 		m := imapAB(x)
 		r := make([]int64, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			r[i] = m[B2I(yi)]
 		}
 		return NewAI(r)
 	case *AI:
 		m := imapAB(x)
 		r := make([]int64, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			if yi != 0 && yi != 1 {
 				r[i] = int64(x.Len())
 			} else {
@@ -964,7 +964,7 @@ func findAB(x *AB, y V) V {
 	case *AF:
 		m := imapAB(x)
 		r := make([]int64, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			if yi != 0 && yi != 1 {
 				r[i] = int64(x.Len())
 			} else {
@@ -1027,7 +1027,7 @@ func findAFbools(xs []float64) (t int64, f int64) {
 
 func findAF(x *AF, y V) V {
 	if y.IsI() {
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if xi == float64(y.I()) {
 				return NewI(int64(i))
 			}
@@ -1036,7 +1036,7 @@ func findAF(x *AF, y V) V {
 
 	}
 	if y.IsF() {
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if float64(xi) == y.F() {
 				return NewI(int64(i))
 			}
@@ -1045,9 +1045,9 @@ func findAF(x *AF, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		t, f := findAFbools(x.Slice)
+		t, f := findAFbools(x.elts)
 		r := make([]int64, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			if yi {
 				r[i] = t
 			} else {
@@ -1058,7 +1058,7 @@ func findAF(x *AF, y V) V {
 	case *AI:
 		return findAF(x, toAF(yv))
 	case *AF:
-		return NewAIWithRC(findSlices[float64](x.Slice, yv.Slice, bruteForceNumeric), reuseRCp(yv.rc))
+		return NewAIWithRC(findSlices[float64](x.elts, yv.elts, bruteForceNumeric), reuseRCp(yv.rc))
 	case array:
 		return findArrays(x, yv)
 	default:
@@ -1099,7 +1099,7 @@ func findAI(x *AI, y V) V {
 		if x.flags.Has(flagAscending) && x.Len() > bruteForceNumeric/2 {
 			return NewI(findAII(x, y.I()))
 		}
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if xi == y.I() {
 				return NewI(int64(i))
 			}
@@ -1115,7 +1115,7 @@ func findAI(x *AI, y V) V {
 		if x.flags.Has(flagAscending) && x.Len() > bruteForceNumeric/2 {
 			return NewI(findAII(x, yI))
 		}
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if xi == yI {
 				return NewI(int64(i))
 			}
@@ -1124,9 +1124,9 @@ func findAI(x *AI, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		t, f := findAIbools(x.Slice)
+		t, f := findAIbools(x.elts)
 		r := make([]int64, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			if yi {
 				r[i] = t
 			} else {
@@ -1137,7 +1137,7 @@ func findAI(x *AI, y V) V {
 	case *AI:
 		if x.flags.Has(flagAscending) && x.Len() > bruteForceNumeric/2 {
 			r := make([]int64, yv.Len())
-			for i, yi := range yv.Slice {
+			for i, yi := range yv.elts {
 				r[i] = findAII(x, yi)
 			}
 			return NewAI(r)
@@ -1150,14 +1150,14 @@ func findAI(x *AI, y V) V {
 				// fast path avoiding hash table
 				offset := -min
 				m := make([]int64, max-min+1)
-				for i, xi := range x.Slice {
+				for i, xi := range x.elts {
 					c := m[xi+offset]
 					if c == 0 {
 						m[xi+offset] = int64(i) + 1
 						continue
 					}
 				}
-				for i, yi := range yv.Slice {
+				for i, yi := range yv.elts {
 					if yi < min || yi > max {
 						r[i] = xlen
 						continue
@@ -1172,7 +1172,7 @@ func findAI(x *AI, y V) V {
 				return NewAIWithRC(r, reuseRCp(yv.rc))
 			}
 		}
-		return NewAIWithRC(findSlices[int64](x.Slice, yv.Slice, bruteForceNumeric), reuseRCp(yv.rc))
+		return NewAIWithRC(findSlices[int64](x.elts, yv.elts, bruteForceNumeric), reuseRCp(yv.rc))
 	case *AF:
 		return findAF(toAF(x).value.(*AF), y)
 	case array:
@@ -1197,7 +1197,7 @@ func findAS(x *AS, y V) V {
 		if x.flags.Has(flagAscending) && x.Len() > bruteForceGeneric/4 {
 			return NewI(findASS(x, yv))
 		}
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if S(xi) == yv {
 				return NewI(int64(i))
 			}
@@ -1206,12 +1206,12 @@ func findAS(x *AS, y V) V {
 	case *AS:
 		if x.flags.Has(flagAscending) && x.Len() > bruteForceGeneric/4 {
 			r := make([]int64, yv.Len())
-			for i, yi := range yv.Slice {
+			for i, yi := range yv.elts {
 				r[i] = findASS(x, S(yi))
 			}
 			return NewAIWithRC(r, reuseRCp(yv.rc))
 		}
-		return NewAIWithRC(findSlices[string](x.Slice, yv.Slice, bruteForceGeneric), reuseRCp(yv.rc))
+		return NewAIWithRC(findSlices[string](x.elts, yv.elts, bruteForceGeneric), reuseRCp(yv.rc))
 	case array:
 		return findArrays(x, yv)
 	default:
@@ -1242,7 +1242,7 @@ func findAV(x *AV, y V) V {
 	case array:
 		return findArrays(x, yv)
 	default:
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if y.Matches(xi) {
 				return NewI(int64(i))
 			}

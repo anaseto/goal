@@ -460,13 +460,13 @@ func applyArray(x array, y V) V {
 		return NewV(x.atIndices(yv))
 	case *AV:
 		r := make([]V, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			r[i] = applyArray(x, yi)
 			if r[i].IsPanic() {
 				return r[i]
 			}
 		}
-		return NewV(canonicalAV(&AV{Slice: r}))
+		return NewV(canonicalAV(&AV{elts: r}))
 	case array:
 		iy := toIndices(y)
 		if iy.IsPanic() {

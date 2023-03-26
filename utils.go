@@ -100,7 +100,7 @@ func minMax(x *AI) (min, max int64) {
 	}
 	min = x.At(0)
 	max = min
-	for _, xi := range x.Slice[1:] {
+	for _, xi := range x.elts[1:] {
 		switch {
 		case xi > max:
 			max = xi
@@ -116,7 +116,7 @@ func maxAI(x *AI) int64 {
 	if x.Len() == 0 {
 		return max
 	}
-	for _, xi := range x.Slice {
+	for _, xi := range x.elts {
 		if xi > max {
 			max = xi
 		}
@@ -129,7 +129,7 @@ func minAI(x *AI) int64 {
 	if x.Len() == 0 {
 		return min
 	}
-	for _, xi := range x.Slice {
+	for _, xi := range x.elts {
 		if xi < min {
 			min = xi
 		}
@@ -142,7 +142,7 @@ func maxAF(x *AF) float64 {
 	if x.Len() == 0 {
 		return max
 	}
-	for _, xi := range x.Slice {
+	for _, xi := range x.elts {
 		if xi > max {
 			max = xi
 		}
@@ -155,7 +155,7 @@ func minAF(x *AF) float64 {
 	if x.Len() == 0 {
 		return min
 	}
-	for _, xi := range x.Slice {
+	for _, xi := range x.elts {
 		if xi < min {
 			min = xi
 		}
@@ -180,7 +180,7 @@ func isIndices(x V) bool {
 	case *AI:
 		return true
 	case *AV:
-		for _, xi := range xv.Slice {
+		for _, xi := range xv.elts {
 			if !isIndices(xi) {
 				return false
 			}
@@ -218,7 +218,7 @@ func toIndicesRec(x V) V {
 		return toAI(xv)
 	case *AV:
 		r := make([]V, xv.Len())
-		for i, z := range xv.Slice {
+		for i, z := range xv.elts {
 			r[i] = toIndicesRec(z)
 			if r[i].IsPanic() {
 				return r[i]
@@ -233,7 +233,7 @@ func toIndicesRec(x V) V {
 }
 
 func indicesInBounds(x *AI, l int) (int64, bool) {
-	for _, xi := range x.Slice {
+	for _, xi := range x.elts {
 		if xi < 0 {
 			xi += int64(l)
 		}
@@ -245,7 +245,7 @@ func indicesInBounds(x *AI, l int) (int64, bool) {
 }
 
 func inBoundsInfo(x *AI, l int) (int64, int, bool) {
-	for i, xi := range x.Slice {
+	for i, xi := range x.elts {
 		if xi < 0 {
 			xi += int64(l)
 		}
@@ -260,24 +260,24 @@ func inBoundsInfo(x *AI, l int) (int64, int, bool) {
 func toArray(x V) V {
 	if x.IsI() {
 		var n int
-		r := &AI{Slice: []int64{x.I()}, rc: &n}
+		r := &AI{elts: []int64{x.I()}, rc: &n}
 		return NewV(r)
 	}
 	if x.IsF() {
 		var n int
-		r := &AF{Slice: []float64{float64(x.F())}, rc: &n}
+		r := &AF{elts: []float64{float64(x.F())}, rc: &n}
 		return NewV(r)
 	}
 	switch xv := x.value.(type) {
 	case S:
 		var n int
-		r := &AS{Slice: []string{string(xv)}, rc: &n}
+		r := &AS{elts: []string{string(xv)}, rc: &n}
 		return NewV(r)
 	case array:
 		return x
 	default:
 		var n int
-		r := &AV{Slice: []V{x}, rc: &n}
+		r := &AV{elts: []V{x}, rc: &n}
 		return NewV(r)
 	}
 }
@@ -285,7 +285,7 @@ func toArray(x V) V {
 // toAI converts AF into AI if possible.
 func toAI(x *AF) V {
 	r := make([]int64, x.Len())
-	for i, xi := range x.Slice {
+	for i, xi := range x.elts {
 		if !isI(xi) {
 			return Panicf("contains non-integer (%g)", xi)
 		}
@@ -297,7 +297,7 @@ func toAI(x *AF) V {
 // toAF converts AI into AF.
 func toAF(x *AI) V {
 	r := make([]float64, x.Len())
-	for i, xi := range x.Slice {
+	for i, xi := range x.elts {
 		r[i] = float64(xi)
 	}
 	return NewAFWithRC(r, reuseRCp(x.rc))
@@ -306,7 +306,7 @@ func toAF(x *AI) V {
 // fromABtoAF converts AB into AF.
 func fromABtoAF(x *AB) V {
 	r := make([]float64, x.Len())
-	for i, xi := range x.Slice {
+	for i, xi := range x.elts {
 		r[i] = float64(B2I(xi))
 	}
 	return NewAFWithRC(r, reuseRCp(x.rc))
@@ -453,8 +453,8 @@ func eType(x *AV) vType {
 	if x.Len() == 0 {
 		return tV
 	}
-	t := getAtomType(x.Slice[0])
-	for _, xi := range x.Slice[1:] {
+	t := getAtomType(x.elts[0])
+	for _, xi := range x.elts[1:] {
 		t &= getAtomType(xi)
 		if t == tV {
 			return tV
@@ -468,8 +468,8 @@ func eTypeFast(x *AV) vType {
 	if x.Len() == 0 {
 		return tV
 	}
-	t := getAtomTypeFast(x.Slice[0])
-	for _, xi := range x.Slice[1:] {
+	t := getAtomTypeFast(x.elts[0])
+	for _, xi := range x.elts[1:] {
 		t &= getAtomTypeFast(xi)
 		if t == tV {
 			return tV
@@ -485,8 +485,8 @@ func rType(x *AV) vType {
 	if x.Len() == 0 {
 		return tV
 	}
-	t := getType(x.Slice[0])
-	for _, xi := range x.Slice[1:] {
+	t := getType(x.elts[0])
+	for _, xi := range x.elts[1:] {
 		t &= getType(xi)
 		if t == tV {
 			return tV
@@ -551,7 +551,7 @@ func isCanonicalAV(x *AV) (vType, bool) {
 	case tB, tI, tF, tS:
 		return t, false
 	case tV, tAV:
-		for _, xi := range x.Slice {
+		for _, xi := range x.elts {
 			if !isCanonical(xi) {
 				return t, false
 			}
@@ -567,7 +567,7 @@ func (ctx *Context) assertCanonical(x V) {
 	case *AV:
 		_, ok := isCanonicalAV(xv)
 		if !ok {
-			panic(fmt.Sprintf("not canonical: %#v: %s", xv.Slice, x.Sprint(ctx)))
+			panic(fmt.Sprintf("not canonical: %#v: %s", xv.elts, x.Sprint(ctx)))
 		}
 	}
 }
@@ -579,35 +579,35 @@ func normalizeRec(x *AV) (array, bool) {
 	switch t {
 	case tB:
 		r := make([]bool, x.Len())
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			r[i] = xi.I() != 0
 		}
-		return &AB{Slice: r, rc: x.rc}, true
+		return &AB{elts: r, rc: x.rc}, true
 	case tI:
 		r := make([]int64, x.Len())
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			r[i] = xi.I()
 		}
-		return &AI{Slice: r, rc: x.rc}, true
+		return &AI{elts: r, rc: x.rc}, true
 	case tF:
 		r := make([]float64, x.Len())
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if xi.IsI() {
 				r[i] = float64(xi.I())
 			} else {
 				r[i] = float64(xi.F())
 			}
 		}
-		return &AF{Slice: r, rc: x.rc}, true
+		return &AF{elts: r, rc: x.rc}, true
 	case tS:
 		r := make([]string, x.Len())
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			r[i] = string(xi.value.(S))
 		}
-		return &AS{Slice: r, rc: x.rc}, true
+		return &AS{elts: r, rc: x.rc}, true
 	case tV, tAV:
-		for i, xi := range x.Slice {
-			x.Slice[i] = CanonicalRec(xi)
+		for i, xi := range x.elts {
+			x.elts[i] = CanonicalRec(xi)
 		}
 		return x, false
 	default:
@@ -623,32 +623,32 @@ func normalize(x *AV) (array, bool) {
 	switch t {
 	case tB:
 		r := make([]bool, x.Len())
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			r[i] = xi.I() != 0
 		}
-		return &AB{Slice: r, rc: reuseRCp(x.rc), flags: x.flags}, true
+		return &AB{elts: r, rc: reuseRCp(x.rc), flags: x.flags}, true
 	case tI:
 		r := make([]int64, x.Len())
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			r[i] = xi.I()
 		}
-		return &AI{Slice: r, rc: reuseRCp(x.rc), flags: x.flags}, true
+		return &AI{elts: r, rc: reuseRCp(x.rc), flags: x.flags}, true
 	case tF:
 		r := make([]float64, x.Len())
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if xi.IsI() {
 				r[i] = float64(xi.I())
 			} else {
 				r[i] = float64(xi.F())
 			}
 		}
-		return &AF{Slice: r, rc: reuseRCp(x.rc), flags: x.flags}, true
+		return &AF{elts: r, rc: reuseRCp(x.rc), flags: x.flags}, true
 	case tS:
 		r := make([]string, x.Len())
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			r[i] = string(xi.value.(S))
 		}
-		return &AS{Slice: r, rc: reuseRCp(x.rc), flags: x.flags}, true
+		return &AS{elts: r, rc: reuseRCp(x.rc), flags: x.flags}, true
 	default:
 		return x, false
 	}
@@ -662,26 +662,26 @@ func normalizeFast(x *AV) (array, bool) {
 	switch t {
 	case tI:
 		r := make([]int64, x.Len())
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			r[i] = xi.I()
 		}
-		return &AI{Slice: r, rc: reuseRCp(x.rc), flags: x.flags}, true
+		return &AI{elts: r, rc: reuseRCp(x.rc), flags: x.flags}, true
 	case tF:
 		r := make([]float64, x.Len())
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if xi.IsI() {
 				r[i] = float64(xi.I())
 			} else {
 				r[i] = float64(xi.F())
 			}
 		}
-		return &AF{Slice: r, rc: reuseRCp(x.rc), flags: x.flags}, true
+		return &AF{elts: r, rc: reuseRCp(x.rc), flags: x.flags}, true
 	case tS:
 		r := make([]string, x.Len())
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			r[i] = string(xi.value.(S))
 		}
-		return &AS{Slice: r, rc: reuseRCp(x.rc), flags: x.flags}, true
+		return &AS{elts: r, rc: reuseRCp(x.rc), flags: x.flags}, true
 	default:
 		return x, false
 	}
@@ -783,7 +783,7 @@ func cloneArgs(a []V) []V {
 
 func sumAB(x *AB) int64 {
 	n := int64(0)
-	for _, xi := range x.Slice {
+	for _, xi := range x.elts {
 		if xi {
 			n++
 		}

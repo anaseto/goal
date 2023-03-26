@@ -14,30 +14,30 @@ func mathm(x V, f func(float64) float64) V {
 	switch xv := x.value.(type) {
 	case *AB:
 		r := make([]float64, xv.Len())
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			r[i] = f(B2F(xi))
 		}
 		return NewAFWithRC(r, reuseRCp(xv.rc))
 	case *AI:
 		r := make([]float64, xv.Len())
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			r[i] = f(float64(xi))
 		}
 		return NewAFWithRC(r, reuseRCp(xv.rc))
 	case *AF:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
-			r.Slice[i] = f(xi)
+		for i, xi := range xv.elts {
+			r.elts[i] = f(xi)
 		}
 		return NewV(r)
 	case *AV:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			ri := mathm(xi, f)
 			if ri.IsPanic() {
 				return ri
 			}
-			r.Slice[i] = ri
+			r.elts[i] = ri
 		}
 		return NewV(r)
 	case *Dict:

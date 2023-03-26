@@ -104,7 +104,7 @@ func applyS(s S, x V) V {
 		return applyS(s, fromABtoAI(xv))
 	case *AI:
 		r := make([]string, xv.Len())
-		for i, n := range xv.Slice {
+		for i, n := range xv.elts {
 			if n < 0 {
 				n += int64(len(s))
 			}
@@ -122,7 +122,7 @@ func applyS(s S, x V) V {
 		return applyS(s, z)
 	case *AV:
 		r := make([]V, xv.Len())
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			r[i] = applyS(s, xi)
 			if r[i].IsPanic() {
 				return r[i]
@@ -195,7 +195,7 @@ func applyS2(s S, x V, y V) V {
 					xv.Len(), z.Len())
 
 			}
-			for i, n := range xv.Slice {
+			for i, n := range xv.elts {
 				if n < 0 {
 					n += int64(len(s))
 				}
@@ -210,7 +210,7 @@ func applyS2(s S, x V, y V) V {
 			}
 			return NewAS(r)
 		}
-		for i, n := range xv.Slice {
+		for i, n := range xv.elts {
 			if n < 0 {
 				n += int64(len(s))
 			}
@@ -232,7 +232,7 @@ func applyS2(s S, x V, y V) V {
 		return applyS2(s, z, y)
 	case *AV:
 		r := make([]V, xv.Len())
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			r[i] = applyS2(s, xi, y)
 			if r[i].IsPanic() {
 				return r[i]
@@ -250,13 +250,13 @@ func bytecount(x V) V {
 		return NewI(int64(len(xv)))
 	case *AS:
 		r := make([]int64, xv.Len())
-		for i, s := range xv.Slice {
+		for i, s := range xv.elts {
 			r[i] = int64(len(s))
 		}
 		return NewAI(r)
 	case *AV:
 		r := make([]V, xv.Len())
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			r[i] = bytecount(xi)
 			if r[i].IsPanic() {
 				return r[i]
@@ -305,7 +305,7 @@ func casti(y V) V {
 		return y
 	case *AS:
 		r := make([]V, yv.Len())
-		for i, s := range yv.Slice {
+		for i, s := range yv.elts {
 			r[i] = casti(NewS(s))
 		}
 		return NewAV(r)
@@ -344,7 +344,7 @@ func castn(y V) V {
 		return y
 	case *AS:
 		r := make([]V, yv.Len())
-		for i, s := range yv.Slice {
+		for i, s := range yv.elts {
 			n, err := parseNumber(s)
 			if err != nil {
 				n = NewF(math.NaN())
@@ -382,7 +382,7 @@ func casts(y V) V {
 		return casts(fromABtoAI(yv))
 	case *AI:
 		sb := strings.Builder{}
-		for _, i := range yv.Slice {
+		for _, i := range yv.elts {
 			sb.WriteRune(rune(i))
 		}
 		return NewS(sb.String())
@@ -408,13 +408,13 @@ func dropS(s S, y V) V {
 		return NewS(strings.TrimPrefix(string(yv), string(s)))
 	case *AS:
 		r := make([]string, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			r[i] = strings.TrimPrefix(string(yi), string(s))
 		}
 		return NewAS(r)
 	case *AV:
 		r := make([]V, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			r[i] = dropS(s, yi)
 			if r[i].IsPanic() {
 				return r[i]
@@ -435,13 +435,13 @@ func trim(s S, y V) V {
 		return NewS(strings.Trim(string(yv), string(s)))
 	case *AS:
 		r := make([]string, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			r[i] = strings.Trim(string(yi), string(s))
 		}
 		return NewAS(r)
 	case *AV:
 		r := make([]V, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			r[i] = trim(s, yi)
 			if r[i].IsPanic() {
 				return r[i]
@@ -461,7 +461,7 @@ func sub1(x V) V {
 		if xv.Len()%2 != 0 {
 			return panics("sub[S] : non-even length array")
 		}
-		return NewV(&replacer{r: strings.NewReplacer(xv.Slice...), oldnew: xv})
+		return NewV(&replacer{r: strings.NewReplacer(xv.elts...), oldnew: xv})
 	default:
 		return panicType("sub[x]", "x", x)
 	}
@@ -484,11 +484,11 @@ func sub2(x, y V) V {
 			return Panicf("sub[S;S] : length mismatch (%d vs %d)", xv.Len(), yv.Len())
 		}
 		oldnew := make([]string, 2*xv.Len())
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			oldnew[2*i] = xi
-			oldnew[2*i+1] = yv.Slice[i]
+			oldnew[2*i+1] = yv.elts[i]
 		}
-		return NewV(&replacer{r: strings.NewReplacer(oldnew...), oldnew: &AS{Slice: oldnew, rc: reuseRCp(yv.rc)}})
+		return NewV(&replacer{r: strings.NewReplacer(oldnew...), oldnew: &AS{elts: oldnew, rc: reuseRCp(yv.rc)}})
 	case *rx:
 		switch y.value.(type) {
 		case S:
@@ -532,18 +532,18 @@ func (ctx *Context) replace(f stringReplacer, x V) V {
 		return NewS(f.replace(ctx, string(xv)))
 	case *AS:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
-			r.Slice[i] = f.replace(ctx, xi)
+		for i, xi := range xv.elts {
+			r.elts[i] = f.replace(ctx, xi)
 		}
 		return NewV(r)
 	case *AV:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			ri := ctx.replace(f, xi)
 			if ri.IsPanic() {
 				return ri
 			}
-			r.Slice[i] = ri
+			r.elts[i] = ri
 		}
 		return NewV(r)
 	case *Dict:
@@ -559,18 +559,18 @@ func containedInS(x V, s string) V {
 		return NewI(B2I(strings.Contains(s, string(xv))))
 	case *AS:
 		r := make([]bool, xv.Len())
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			r[i] = strings.Contains(s, xi)
 		}
 		return NewAB(r)
 	case *AV:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			ri := containedInS(xi, s)
 			if ri.IsPanic() {
 				return ri
 			}
-			r.Slice[i] = ri
+			r.elts[i] = ri
 		}
 		return NewV(r)
 	case *Dict:
@@ -593,13 +593,13 @@ func scount(s S, y V) V {
 		return NewI(int64(strings.Count(string(yv), string(s))))
 	case *AS:
 		r := make([]int64, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			r[i] = int64(strings.Count(string(yi), string(s)))
 		}
 		return NewAI(r)
 	case *AV:
 		r := make([]V, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			ri := scount(s, yi)
 			if ri.IsPanic() {
 				return ri
@@ -626,12 +626,12 @@ func splitN(n int, sep S, y V) V {
 		return NewAV(r)
 	case *AV:
 		r := yv.reuse()
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			ri := splitN(n, sep, yi)
 			if ri.IsPanic() {
 				return ri
 			}
-			r.Slice[i] = ri
+			r.elts[i] = ri
 		}
 		return NewV(r)
 	case *Dict:
@@ -650,18 +650,18 @@ func padStrings(x int, y V) V {
 		return y
 	case *AS:
 		r := yv.reuse()
-		for i, yi := range yv.Slice {
-			r.Slice[i] = padString(x, yi)
+		for i, yi := range yv.elts {
+			r.elts[i] = padString(x, yi)
 		}
 		return NewV(r)
 	case *AV:
 		r := yv.reuse()
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			ri := padStrings(x, yi)
 			if ri.IsPanic() {
 				return ri
 			}
-			r.Slice[i] = ri
+			r.elts[i] = ri
 		}
 		return NewV(r)
 	default:

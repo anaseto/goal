@@ -114,18 +114,18 @@ func applyRxMatch(x *rx, y V) V {
 		return NewI(B2I(x.Regexp.MatchString(string(yv))))
 	case *AS:
 		r := make([]bool, yv.Len())
-		for i, s := range yv.Slice {
+		for i, s := range yv.elts {
 			r[i] = x.Regexp.MatchString(s)
 		}
 		return NewAB(r)
 	case *AV:
 		r := yv.reuse()
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			ri := applyRxMatch(x, yi)
 			if ri.IsPanic() {
 				return ri
 			}
-			r.Slice[i] = ri
+			r.elts[i] = ri
 		}
 		return NewV(r)
 	default:
@@ -139,18 +139,18 @@ func applyRxFindSubmatch(x *rx, y V) V {
 		return NewAS(x.Regexp.FindStringSubmatch(string(yv)))
 	case *AS:
 		r := make([]V, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			r[i] = applyRxFindSubmatch(x, NewS(yi))
 		}
 		return NewAV(r)
 	case *AV:
 		r := yv.reuse()
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			ri := applyRxFindSubmatch(x, yi)
 			if ri.IsPanic() {
 				return ri
 			}
-			r.Slice[i] = ri
+			r.elts[i] = ri
 		}
 		return NewV(r)
 	default:
@@ -187,18 +187,18 @@ func applyRxFindAllSubmatch(x *rx, y V, n int64) V {
 		return NewAV(r)
 	case *AS:
 		r := make([]V, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			r[i] = applyRxFindAllSubmatch(x, NewS(yi), n)
 		}
 		return NewAV(r)
 	case *AV:
 		r := yv.reuse()
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			ri := applyRxFindAllSubmatch(x, yi, n)
 			if ri.IsPanic() {
 				return ri
 			}
-			r.Slice[i] = ri
+			r.elts[i] = ri
 		}
 		return NewV(r)
 	default:
@@ -213,18 +213,18 @@ func applyRxFindAll(x *rx, y V, n int64) V {
 		return NewAS(matches)
 	case *AS:
 		r := make([]V, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			r[i] = applyRxFindAll(x, NewS(yi), n)
 		}
 		return NewAV(r)
 	case *AV:
 		r := yv.reuse()
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			ri := applyRxFindAll(x, yi, n)
 			if ri.IsPanic() {
 				return ri
 			}
-			r.Slice[i] = ri
+			r.elts[i] = ri
 		}
 		return NewV(r)
 	default:
@@ -239,18 +239,18 @@ func splitRx(f *rx, x V) V {
 		return NewAS(r)
 	case *AS:
 		r := make([]V, xv.Len())
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			r[i] = NewAS(f.Regexp.Split(string(xi), -1))
 		}
 		return NewAV(r)
 	case *AV:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			ri := splitRx(f, xi)
 			if ri.IsPanic() {
 				return ri
 			}
-			r.Slice[i] = ri
+			r.elts[i] = ri
 		}
 		return NewV(r)
 	default:

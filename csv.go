@@ -50,7 +50,7 @@ func fCSV(comma rune, x V) V {
 		sb := strings.Builder{}
 		csvw := csv.NewWriter(&sb)
 		csvw.Comma = comma
-		csvw.Write(xv.Slice)
+		csvw.Write(xv.elts)
 		csvw.Flush()
 		return NewS(sb.String())
 	case *AV:
@@ -61,9 +61,9 @@ func fCSV(comma rune, x V) V {
 		sb := strings.Builder{}
 		csvw := csv.NewWriter(&sb)
 		csvw.Comma = comma
-		for _, xi := range xv.Slice {
+		for _, xi := range xv.elts {
 			xi := xi.value.(*AS)
-			csvw.Write(xi.Slice)
+			csvw.Write(xi.elts)
 		}
 		csvw.Flush()
 		return NewS(sb.String())

@@ -494,13 +494,13 @@ func vfApplyN(ctx *Context, args []V) V {
 
 // vfList implements (x;y;...) array constructor variadic verb.
 func vfList(ctx *Context, args []V) V {
-	xav := &AV{Slice: args}
+	xav := &AV{elts: args}
 	xv, cloned := normalize(xav)
 	if cloned {
 		r := NewV(xv)
 		return r
 	}
-	xav.Slice = cloneArgs(args)
+	xav.elts = cloneArgs(args)
 	return NewV(xav)
 }
 

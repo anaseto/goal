@@ -766,7 +766,7 @@ func (c *compiler) doStrand(st *astStrand, n int) error {
 			a = append(a, NewS(s))
 		}
 	}
-	r := canonicalArray(&AV{Slice: a})
+	r := canonicalArray(&AV{elts: a})
 	initRC(r)
 	initArrayFlags(r)
 	id := c.ctx.storeConst(NewV(r))

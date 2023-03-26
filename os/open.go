@@ -210,7 +210,7 @@ func openPipe(m string, c goal.V) goal.V {
 		if cv.Len() == 0 {
 			return goal.NewPanic("mode open cmd : empty cmd")
 		}
-		cmd = exec.Command(cv.Slice[0], cv.Slice[1:]...)
+		cmd = exec.Command(cv.Slice()[0], cv.Slice()[1:]...)
 	default:
 		return goal.Panicf("mode open cmd : non-string cmd (%s)", c.Type())
 	}

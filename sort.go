@@ -7,52 +7,52 @@ import (
 
 // Less satisfies the specification of sort.Interface.
 func (x *AB) Less(i, j int) bool {
-	return x.Slice[j] && !x.Slice[i]
+	return x.elts[j] && !x.elts[i]
 }
 
 // Swap satisfies the specification of sort.Interface.
 func (x *AB) Swap(i, j int) {
-	x.Slice[i], x.Slice[j] = x.Slice[j], x.Slice[i]
+	x.elts[i], x.elts[j] = x.elts[j], x.elts[i]
 }
 
 // Less satisfies the specification of sort.Interface.
 func (x *AI) Less(i, j int) bool {
-	return x.Slice[i] < x.Slice[j]
+	return x.elts[i] < x.elts[j]
 }
 
 // Swap satisfies the specification of sort.Interface.
 func (x *AI) Swap(i, j int) {
-	x.Slice[i], x.Slice[j] = x.Slice[j], x.Slice[i]
+	x.elts[i], x.elts[j] = x.elts[j], x.elts[i]
 }
 
 // Less satisfies the specification of sort.Interface.
 func (x *AF) Less(i, j int) bool {
-	return x.Slice[i] < x.Slice[j]
+	return x.elts[i] < x.elts[j]
 }
 
 // Swap satisfies the specification of sort.Interface.
 func (x *AF) Swap(i, j int) {
-	x.Slice[i], x.Slice[j] = x.Slice[j], x.Slice[i]
+	x.elts[i], x.elts[j] = x.elts[j], x.elts[i]
 }
 
 // Less satisfies the specification of sort.Interface.
 func (x *AS) Less(i, j int) bool {
-	return x.Slice[i] < x.Slice[j]
+	return x.elts[i] < x.elts[j]
 }
 
 // Swap satisfies the specification of sort.Interface.
 func (x *AS) Swap(i, j int) {
-	x.Slice[i], x.Slice[j] = x.Slice[j], x.Slice[i]
+	x.elts[i], x.elts[j] = x.elts[j], x.elts[i]
 }
 
 // Less satisfies the specification of sort.Interface.
 func (x *AV) Less(i, j int) bool {
-	return x.Slice[i].LessT(x.Slice[j])
+	return x.elts[i].LessT(x.elts[j])
 }
 
 // Swap satisfies the specification of sort.Interface.
 func (x *AV) Swap(i, j int) {
-	x.Slice[i], x.Slice[j] = x.Slice[j], x.Slice[i]
+	x.elts[i], x.elts[j] = x.elts[j], x.elts[i]
 }
 
 // Less satisfies the specification of sort.Interface.
@@ -226,19 +226,19 @@ func searchAI(x *AI, y V) V {
 	switch yv := y.value.(type) {
 	case *AB:
 		r := make([]int64, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			r[i] = searchAII(x, B2I(yi))
 		}
 		return NewAI(r)
 	case *AI:
 		r := make([]int64, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			r[i] = searchAII(x, yi)
 		}
 		return NewAI(r)
 	case *AF:
 		r := make([]int64, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			r[i] = searchAIF(x, yi)
 		}
 		return NewAI(r)
@@ -264,19 +264,19 @@ func searchAF(x *AF, y V) V {
 	switch yv := y.value.(type) {
 	case *AB:
 		r := make([]int64, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			r[i] = searchAFI(x, B2I(yi))
 		}
 		return NewAI(r)
 	case *AI:
 		r := make([]int64, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			r[i] = searchAFI(x, yi)
 		}
 		return NewAI(r)
 	case *AF:
 		r := make([]int64, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			r[i] = searchAFF(x, yi)
 		}
 		return NewAI(r)
@@ -298,7 +298,7 @@ func searchAS(x *AS, y V) V {
 		return NewI(searchASS(x, yv))
 	case *AS:
 		r := make([]int64, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			r[i] = searchASS(x, S(yi))
 		}
 		return NewAI(r)

@@ -18,13 +18,13 @@ func utf8rcount(x V) V {
 		return NewI(int64(utf8.RuneCountInString(string(xv))))
 	case *AS:
 		r := make([]int64, xv.Len())
-		for i, s := range xv.Slice {
+		for i, s := range xv.elts {
 			r[i] = int64(utf8.RuneCountInString(s))
 		}
 		return NewAI(r)
 	case *AV:
 		r := make([]V, xv.Len())
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			r[i] = utf8rcount(xi)
 			if r[i].IsPanic() {
 				return r[i]
@@ -52,13 +52,13 @@ func utf8valid(x V) V {
 		return NewI(B2I(utf8.ValidString(string(xv))))
 	case *AS:
 		r := make([]bool, xv.Len())
-		for i, s := range xv.Slice {
+		for i, s := range xv.elts {
 			r[i] = utf8.ValidString(s)
 		}
 		return NewAB(r)
 	case *AV:
 		r := make([]V, xv.Len())
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			r[i] = utf8valid(xi)
 			if r[i].IsPanic() {
 				return r[i]

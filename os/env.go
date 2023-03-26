@@ -16,12 +16,12 @@ func environ() goal.V {
 		ss[i] = b
 		ss[i+len(env)] = a
 	}
-	keys := &goal.AS{Slice: ss[:len(env)]}
-	values := &goal.AS{Slice: ss[len(env):]}
+	keys := goal.NewAS(ss[:len(env)])
+	values := goal.NewAS(ss[len(env):])
 	var n int = 2
 	keys.InitWithRC(&n)
 	values.InitWithRC(&n)
-	return goal.NewDict(goal.NewV(keys), goal.NewV(values))
+	return goal.NewDict(keys, values)
 }
 
 // VFEnv implements the os.env dyad.

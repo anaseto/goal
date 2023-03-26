@@ -38,90 +38,125 @@ func (f flags) Has(ff flags) bool {
 type AB struct {
 	flags flags
 	rc    *int
-	Slice []bool
+	elts  []bool
 }
 
 // NewAB returns a new boolean array. It does not initialize the reference
 // counter.
 func NewAB(x []bool) V {
-	return NewV(&AB{Slice: x})
+	return NewV(&AB{elts: x})
+}
+
+// Slice returns the underlying immutable slice of values. It should not be
+// modified unless the value's refcount pointer is reusable, and even then, you
+// should normally return a new array with the modified slice.
+func (x *AB) Slice() []bool {
+	return x.elts
 }
 
 // NewABWithRC returns a new boolean array.
 func NewABWithRC(x []bool, rc *int) V {
-	return NewV(&AB{Slice: x, rc: rc})
+	return NewV(&AB{elts: x, rc: rc})
 }
 
 // AI represents an array of integers.
 type AI struct {
 	flags flags
 	rc    *int
-	Slice []int64
+	elts  []int64
 }
 
 // NewAI returns a new int array. It does not initialize the reference
 // counter.
 func NewAI(x []int64) V {
-	return NewV(&AI{Slice: x})
+	return NewV(&AI{elts: x})
+}
+
+// Slice returns the underlying immutable slice of values. It should not be
+// modified unless the value's refcount pointer is reusable, and even then, you
+// should normally return a new array with the modified slice.
+func (x *AI) Slice() []int64 {
+	return x.elts
 }
 
 // NewAIWithRC returns a new int array.
 func NewAIWithRC(x []int64, rc *int) V {
-	return NewV(&AI{Slice: x, rc: rc})
+	return NewV(&AI{elts: x, rc: rc})
 }
 
 // AF represents an array of reals.
 type AF struct {
 	flags flags
 	rc    *int
-	Slice []float64
+	elts  []float64
 }
 
 // NewAF returns a new array of reals. It does not initialize the reference
 // counter.
 func NewAF(x []float64) V {
-	return NewV(&AF{Slice: x})
+	return NewV(&AF{elts: x})
+}
+
+// Slice returns the underlying immutable slice of values. It should not be
+// modified unless the value's refcount pointer is reusable, and even then, you
+// should normally return a new array with the modified slice.
+func (x *AF) Slice() []float64 {
+	return x.elts
 }
 
 // NewAFWithRC returns a new array of reals.
 func NewAFWithRC(x []float64, rc *int) V {
-	return NewV(&AF{Slice: x, rc: rc})
+	return NewV(&AF{elts: x, rc: rc})
 }
 
 // AS represents an array of strings.
 type AS struct {
 	flags flags
 	rc    *int
-	Slice []string // string array
+	elts  []string // string array
 }
 
 // NewAS returns a new array of strings. It does not initialize the reference
 // counter.
 func NewAS(x []string) V {
-	return NewV(&AS{Slice: x})
+	return NewV(&AS{elts: x})
+}
+
+// Slice returns the underlying immutable slice of values. It should not be
+// modified unless the value's refcount pointer is reusable, and even then, you
+// should normally return a new array with the modified slice.
+func (x *AS) Slice() []string {
+	return x.elts
 }
 
 // NewASWithRC returns a new array of strings.
 func NewASWithRC(x []string, rc *int) V {
-	return NewV(&AS{Slice: x, rc: rc})
+	return NewV(&AS{elts: x, rc: rc})
 }
 
 // AV represents a generic array.
 type AV struct {
 	flags flags
 	rc    *int
-	Slice []V
+	elts  []V
 }
 
 // NewAV returns a new generic array. It does not initialize the reference
 // counter.
 func NewAV(x []V) V {
-	return NewV(&AV{Slice: x})
+	return NewV(&AV{elts: x})
+}
+
+// Slice returns the underlying immutable slice of values. It should not be
+// modified unless the value's refcount pointer is reusable, and even then, you
+// should normally return a new array with the modified slice.
+func (x *AV) Slice() []V {
+	return x.elts
 }
 
 // NewAVWithRC returns a new generic array.
 func NewAVWithRC(x []V, rc *int) V {
-	return NewV(&AV{Slice: x, rc: rc})
+	return NewV(&AV{elts: x, rc: rc})
 }
 
 // Type returns the name of the value's type.
@@ -140,46 +175,46 @@ func (x *AS) Type() string { return "S" }
 func (x *AV) Type() string { return "A" }
 
 // Len returns the length of the array.
-func (x *AB) Len() int { return len(x.Slice) }
+func (x *AB) Len() int { return len(x.elts) }
 
 // Len returns the length of the array.
-func (x *AI) Len() int { return len(x.Slice) }
+func (x *AI) Len() int { return len(x.elts) }
 
 // Len returns the length of the array.
-func (x *AF) Len() int { return len(x.Slice) }
+func (x *AF) Len() int { return len(x.elts) }
 
 // Len returns the length of the array.
-func (x *AS) Len() int { return len(x.Slice) }
+func (x *AS) Len() int { return len(x.elts) }
 
 // Len returns the length of the array.
-func (x *AV) Len() int { return len(x.Slice) }
+func (x *AV) Len() int { return len(x.elts) }
 
-func (x *AB) at(i int) V { return NewI(B2I(x.Slice[i])) }
-func (x *AI) at(i int) V { return NewI(x.Slice[i]) }
-func (x *AF) at(i int) V { return NewF(x.Slice[i]) }
-func (x *AS) at(i int) V { return NewS(x.Slice[i]) }
-func (x *AV) at(i int) V { return x.Slice[i] }
-
-// At returns array value at the given index.
-func (x *AB) At(i int) bool { return x.Slice[i] }
+func (x *AB) at(i int) V { return NewI(B2I(x.elts[i])) }
+func (x *AI) at(i int) V { return NewI(x.elts[i]) }
+func (x *AF) at(i int) V { return NewF(x.elts[i]) }
+func (x *AS) at(i int) V { return NewS(x.elts[i]) }
+func (x *AV) at(i int) V { return x.elts[i] }
 
 // At returns array value at the given index.
-func (x *AI) At(i int) int64 { return x.Slice[i] }
+func (x *AB) At(i int) bool { return x.elts[i] }
 
 // At returns array value at the given index.
-func (x *AF) At(i int) float64 { return x.Slice[i] }
+func (x *AI) At(i int) int64 { return x.elts[i] }
 
 // At returns array value at the given index.
-func (x *AS) At(i int) string { return x.Slice[i] }
+func (x *AF) At(i int) float64 { return x.elts[i] }
 
 // At returns array value at the given index.
-func (x *AV) At(i int) V { return x.Slice[i] }
+func (x *AS) At(i int) string { return x.elts[i] }
 
-func (x *AB) slice(i, j int) array { return &AB{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
-func (x *AI) slice(i, j int) array { return &AI{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
-func (x *AF) slice(i, j int) array { return &AF{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
-func (x *AS) slice(i, j int) array { return &AS{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
-func (x *AV) slice(i, j int) array { return &AV{rc: x.rc, flags: x.flags, Slice: x.Slice[i:j]} }
+// At returns array value at the given index.
+func (x *AV) At(i int) V { return x.elts[i] }
+
+func (x *AB) slice(i, j int) array { return &AB{rc: x.rc, flags: x.flags, elts: x.elts[i:j]} }
+func (x *AI) slice(i, j int) array { return &AI{rc: x.rc, flags: x.flags, elts: x.elts[i:j]} }
+func (x *AF) slice(i, j int) array { return &AF{rc: x.rc, flags: x.flags, elts: x.elts[i:j]} }
+func (x *AS) slice(i, j int) array { return &AS{rc: x.rc, flags: x.flags, elts: x.elts[i:j]} }
+func (x *AV) slice(i, j int) array { return &AV{rc: x.rc, flags: x.flags, elts: x.elts[i:j]} }
 
 func (x *AB) getFlags() flags { return x.flags }
 func (x *AI) getFlags() flags { return x.flags }
@@ -196,99 +231,99 @@ func (x *AV) setFlags(f flags) { x.flags = f }
 // set changes x at i with y (in place).
 func (x *AB) set(i int, y V) {
 	if y.IsI() {
-		x.Slice[i] = y.n != 0
+		x.elts[i] = y.n != 0
 	} else {
-		x.Slice[i] = y.F() != 0
+		x.elts[i] = y.F() != 0
 	}
 }
 
 // set changes x at i with y (in place).
 func (x *AI) set(i int, y V) {
 	if y.IsI() {
-		x.Slice[i] = y.n
+		x.elts[i] = y.n
 	} else {
-		x.Slice[i] = int64(y.F())
+		x.elts[i] = int64(y.F())
 	}
 }
 
 // set changes x at i with y (in place).
 func (x *AF) set(i int, y V) {
 	if y.IsI() {
-		x.Slice[i] = float64(y.I())
+		x.elts[i] = float64(y.I())
 	} else {
-		x.Slice[i] = y.F()
+		x.elts[i] = y.F()
 	}
 }
 
 // set changes x at i with y (in place).
 func (x *AS) set(i int, y V) {
-	x.Slice[i] = string(y.value.(S))
+	x.elts[i] = string(y.value.(S))
 }
 
 // set changes x at i with y (in place).
 func (x *AV) set(i int, y V) {
 	y.InitWithRC(x.rc)
-	x.Slice[i] = y
+	x.elts[i] = y
 }
 
 func (x *AB) atIndices(y *AI) array {
 	r := make([]bool, y.Len())
 	xlen := int64(x.Len())
-	for i, yi := range y.Slice {
+	for i, yi := range y.elts {
 		if yi < 0 {
 			yi += xlen
 		}
 		r[i] = x.At(int(yi))
 	}
-	return &AB{Slice: r}
+	return &AB{elts: r}
 }
 
 func (x *AI) atIndices(y *AI) array {
 	r := make([]int64, y.Len())
 	xlen := int64(x.Len())
-	for i, yi := range y.Slice {
+	for i, yi := range y.elts {
 		if yi < 0 {
 			yi += xlen
 		}
 		r[i] = x.At(int(yi))
 	}
-	return &AI{Slice: r}
+	return &AI{elts: r}
 }
 
 func (x *AF) atIndices(y *AI) array {
 	r := make([]float64, y.Len())
 	xlen := int64(x.Len())
-	for i, yi := range y.Slice {
+	for i, yi := range y.elts {
 		if yi < 0 {
 			yi += xlen
 		}
 		r[i] = x.At(int(yi))
 	}
-	return &AF{Slice: r}
+	return &AF{elts: r}
 }
 
 func (x *AS) atIndices(y *AI) array {
 	r := make([]string, y.Len())
 	xlen := int64(x.Len())
-	for i, yi := range y.Slice {
+	for i, yi := range y.elts {
 		if yi < 0 {
 			yi += xlen
 		}
 		r[i] = x.At(int(yi))
 	}
-	return &AS{Slice: r}
+	return &AS{elts: r}
 }
 
 func (x *AV) atIndices(y *AI) array {
 	r := make([]V, y.Len())
 	xlen := int64(x.Len())
-	for i, yi := range y.Slice {
+	for i, yi := range y.elts {
 		if yi < 0 {
 			yi += xlen
 		}
 		r[i] = x.At(int(yi))
 	}
-	nr := &AV{Slice: r}
+	nr := &AV{elts: r}
 	var p *int
 	if !reusableRCp(p) {
 		var n int
@@ -308,8 +343,8 @@ func (x *AB) shallowClone() array {
 		return x
 	}
 	var n int
-	r := &AB{Slice: make([]bool, x.Len()), rc: &n}
-	copy(r.Slice, x.Slice)
+	r := &AB{elts: make([]bool, x.Len()), rc: &n}
+	copy(r.elts, x.elts)
 	return r
 }
 
@@ -319,8 +354,8 @@ func (x *AI) shallowClone() array {
 		return x
 	}
 	var n int
-	r := &AI{Slice: make([]int64, x.Len()), rc: &n}
-	copy(r.Slice, x.Slice)
+	r := &AI{elts: make([]int64, x.Len()), rc: &n}
+	copy(r.elts, x.elts)
 	return r
 }
 
@@ -330,8 +365,8 @@ func (x *AF) shallowClone() array {
 		return x
 	}
 	var n int
-	r := &AF{Slice: make([]float64, x.Len()), rc: &n}
-	copy(r.Slice, x.Slice)
+	r := &AF{elts: make([]float64, x.Len()), rc: &n}
+	copy(r.elts, x.elts)
 	return r
 }
 
@@ -341,8 +376,8 @@ func (x *AS) shallowClone() array {
 		return x
 	}
 	var n int
-	r := &AS{Slice: make([]string, x.Len()), rc: &n}
-	copy(r.Slice, x.Slice)
+	r := &AS{elts: make([]string, x.Len()), rc: &n}
+	copy(r.elts, x.elts)
 	return r
 }
 
@@ -352,8 +387,8 @@ func (x *AV) shallowClone() array {
 		return x
 	}
 	var n int
-	r := &AV{Slice: make([]V, x.Len()), rc: &n}
-	copy(r.Slice, x.Slice)
+	r := &AV{elts: make([]V, x.Len()), rc: &n}
+	copy(r.elts, x.elts)
 	return r
 }
 
@@ -429,7 +464,7 @@ func (x *AS) Matches(y Value) bool {
 	if !ok {
 		return false
 	}
-	for i, yi := range yv.Slice {
+	for i, yi := range yv.elts {
 		if yi != x.At(i) {
 			return false
 		}
@@ -449,7 +484,7 @@ func (x *AV) Matches(y Value) bool {
 	if !ok {
 		return false
 	}
-	for i, yi := range yv.Slice {
+	for i, yi := range yv.elts {
 		if !yi.Matches(x.At(i)) {
 			return false
 		}
@@ -467,7 +502,7 @@ func matchArrayLen(x array, y Value) bool {
 }
 
 func matchAB(x, y *AB) bool {
-	for i, yi := range y.Slice {
+	for i, yi := range y.elts {
 		if yi != x.At(i) {
 			return false
 		}
@@ -476,7 +511,7 @@ func matchAB(x, y *AB) bool {
 }
 
 func matchABAI(x *AB, y *AI) bool {
-	for i, yi := range y.Slice {
+	for i, yi := range y.elts {
 		if yi != B2I(x.At(i)) {
 			return false
 		}
@@ -485,7 +520,7 @@ func matchABAI(x *AB, y *AI) bool {
 }
 
 func matchABAF(x *AB, y *AF) bool {
-	for i, yi := range y.Slice {
+	for i, yi := range y.elts {
 		if yi != B2F(x.At(i)) {
 			return false
 		}
@@ -494,7 +529,7 @@ func matchABAF(x *AB, y *AF) bool {
 }
 
 func matchAI(x, y *AI) bool {
-	for i, yi := range y.Slice {
+	for i, yi := range y.elts {
 		if yi != x.At(i) {
 			return false
 		}
@@ -503,7 +538,7 @@ func matchAI(x, y *AI) bool {
 }
 
 func matchAIAF(x *AI, y *AF) bool {
-	for i, yi := range y.Slice {
+	for i, yi := range y.elts {
 		if yi != float64(x.At(i)) {
 			return false
 		}
@@ -512,7 +547,7 @@ func matchAIAF(x *AI, y *AF) bool {
 }
 
 func matchAF(x, y *AF) bool {
-	for i, yi := range y.Slice {
+	for i, yi := range y.elts {
 		if yi != x.At(i) {
 			return false
 		}

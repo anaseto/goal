@@ -89,7 +89,7 @@ func dictArith(xd, yd *Dict, f func(V, V) V) V {
 	ky := findArray(xk, NewV(yk))
 	kyv := ky.value.(*AI)
 	nkeys := xk.Len()
-	for _, kyi := range kyv.Slice {
+	for _, kyi := range kyv.elts {
 		if kyi == int64(nkeys) {
 			bnk := memberOf(NewV(yk), NewV(xk))
 			bnk.InitRC()
@@ -125,7 +125,7 @@ func dictArithAmendI(x array, y int64, f func(V, V) V, z V) (array, error) {
 
 func dictArithAmend(x array, yv *AI, f func(V, V) V, z array) (array, error) {
 	var err error
-	for i, yi := range yv.Slice {
+	for i, yi := range yv.elts {
 		x, err = dictArithAmendI(x, yi, f, z.at(i))
 		if err != nil {
 			return x, err

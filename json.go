@@ -11,13 +11,13 @@ func fJSON(x V) V {
 		return jsonStringToGoal(string(xv))
 	case *AS:
 		r := make([]V, xv.Len())
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			r[i] = jsonStringToGoal(xi)
 		}
 		return Canonical(NewAV(r))
 	case *AV:
 		r := make([]V, xv.Len())
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			ri := fJSON(xi)
 			if ri.IsPanic() {
 				return ri

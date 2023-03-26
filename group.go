@@ -20,7 +20,7 @@ func group(x V) V {
 		aif := ai[:len(ai)-n]
 		ait := ai[len(ai)-n:]
 		iTrue, iFalse := 0, 0
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			if xi {
 				ait[iTrue] = int64(i)
 				iTrue++
@@ -45,7 +45,7 @@ func group(x V) V {
 		counta := make([]int64, 2*(max+1))
 		counts := counta[:max+1]
 		countn := 0
-		for _, j := range xv.Slice {
+		for _, j := range xv.elts {
 			if j < 0 {
 				countn++
 				continue
@@ -65,7 +65,7 @@ func group(x V) V {
 			r[i] = NewAIWithRC(ai[pj:scounts[i]], &n)
 			pj = scounts[i]
 		}
-		for i, j := range xv.Slice {
+		for i, j := range xv.elts {
 			if j < 0 {
 				continue
 			}
@@ -86,8 +86,8 @@ func group(x V) V {
 		}
 		gv := gi.value.(*AV)
 		r := gv.reuse()
-		for i, gi := range gv.Slice {
-			r.Slice[i] = NewV(xv.keys.atIndices(gi.value.(*AI)))
+		for i, gi := range gv.elts {
+			r.elts[i] = NewV(xv.keys.atIndices(gi.value.(*AI)))
 		}
 		if r.rc == nil {
 			var n = 2
@@ -126,7 +126,7 @@ func icount(x V) V {
 			max = -1
 		}
 		counts := make([]int64, max+1)
-		for _, j := range xv.Slice {
+		for _, j := range xv.elts {
 			if j >= 0 {
 				counts[j]++
 			}
@@ -163,7 +163,7 @@ func groupBy(x, y V) V {
 	switch yv := y.value.(type) {
 	case array:
 		r := make([]V, xav.Len())
-		for i, xi := range xav.Slice {
+		for i, xi := range xav.elts {
 			r[i] = NewV(yv.atIndices(xi.value.(*AI)))
 		}
 		return NewAV(r)

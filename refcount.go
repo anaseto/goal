@@ -147,7 +147,7 @@ func (x *AB) reuse() *AB {
 		x.flags = flagNone
 		return x
 	}
-	return &AB{Slice: make([]bool, x.Len())}
+	return &AB{elts: make([]bool, x.Len())}
 }
 
 func (x *AI) reuse() *AI {
@@ -155,7 +155,7 @@ func (x *AI) reuse() *AI {
 		x.flags = flagNone
 		return x
 	}
-	return &AI{Slice: make([]int64, x.Len())}
+	return &AI{elts: make([]int64, x.Len())}
 }
 
 func (x *AF) reuse() *AF {
@@ -163,7 +163,7 @@ func (x *AF) reuse() *AF {
 		x.flags = flagNone
 		return x
 	}
-	return &AF{Slice: make([]float64, x.Len())}
+	return &AF{elts: make([]float64, x.Len())}
 }
 
 func (x *AS) reuse() *AS {
@@ -171,7 +171,7 @@ func (x *AS) reuse() *AS {
 		x.flags = flagNone
 		return x
 	}
-	return &AS{Slice: make([]string, x.Len())}
+	return &AS{elts: make([]string, x.Len())}
 }
 
 func (x *AV) reuse() *AV {
@@ -180,7 +180,7 @@ func (x *AV) reuse() *AV {
 		x.rc = nil // NOTE: not always necessary, maybe use two functions
 		return x
 	}
-	return &AV{Slice: make([]V, x.Len())}
+	return &AV{elts: make([]V, x.Len())}
 }
 
 func decrRCp(p *int) {
@@ -359,7 +359,7 @@ func (x *AS) InitWithRC(rc *int) {
 func (x *AV) InitWithRC(rc *int) {
 	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
 		x.rc = rc
-		for _, xi := range x.Slice {
+		for _, xi := range x.elts {
 			xi.InitWithRC(rc)
 		}
 		return

@@ -49,8 +49,8 @@ func (x *AB) CloneWithRC(rc *int) Value {
 		x.rc = rc
 		return x
 	}
-	r := &AB{Slice: make([]bool, x.Len()), rc: rc}
-	copy(r.Slice, x.Slice)
+	r := &AB{elts: make([]bool, x.Len()), rc: rc}
+	copy(r.elts, x.elts)
 	return r
 }
 
@@ -61,8 +61,8 @@ func (x *AI) CloneWithRC(rc *int) Value {
 		x.rc = rc
 		return x
 	}
-	r := &AI{Slice: make([]int64, x.Len()), rc: rc}
-	copy(r.Slice, x.Slice)
+	r := &AI{elts: make([]int64, x.Len()), rc: rc}
+	copy(r.elts, x.elts)
 	return r
 }
 
@@ -73,8 +73,8 @@ func (x *AF) CloneWithRC(rc *int) Value {
 		x.rc = rc
 		return x
 	}
-	r := &AF{Slice: make([]float64, x.Len()), rc: rc}
-	copy(r.Slice, x.Slice)
+	r := &AF{elts: make([]float64, x.Len()), rc: rc}
+	copy(r.elts, x.elts)
 	return r
 }
 
@@ -85,8 +85,8 @@ func (x *AS) CloneWithRC(rc *int) Value {
 		x.rc = rc
 		return x
 	}
-	r := &AS{Slice: make([]string, x.Len()), rc: rc}
-	copy(r.Slice, x.Slice)
+	r := &AS{elts: make([]string, x.Len()), rc: rc}
+	copy(r.elts, x.elts)
 	return r
 }
 
@@ -95,14 +95,14 @@ func (x *AV) CloneWithRC(rc *int) Value {
 	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
 		x.setFlags(flagNone)
 		x.rc = rc
-		for i, xi := range x.Slice {
-			x.Slice[i] = xi.CloneWithRC(rc)
+		for i, xi := range x.elts {
+			x.elts[i] = xi.CloneWithRC(rc)
 		}
 		return x
 	}
-	r := &AV{Slice: make([]V, x.Len()), rc: rc}
-	for i, xi := range x.Slice {
-		r.Slice[i] = xi.CloneWithRC(rc)
+	r := &AV{elts: make([]V, x.Len()), rc: rc}
+	for i, xi := range x.elts {
+		r.elts[i] = xi.CloneWithRC(rc)
 	}
 	return r
 }
@@ -160,8 +160,8 @@ func (r *replacer) CloneWithRC(rc *int) Value {
 		r.oldnew.rc = rc
 		return r
 	}
-	olnew := &AS{Slice: make([]string, r.oldnew.Len()), rc: rc}
-	copy(olnew.Slice, r.oldnew.Slice)
+	olnew := &AS{elts: make([]string, r.oldnew.Len()), rc: rc}
+	copy(olnew.elts, r.oldnew.elts)
 	return &replacer{r: r.r, oldnew: olnew}
 }
 

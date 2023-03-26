@@ -34,7 +34,7 @@ func amend3Dict(ctx *Context, d *Dict, y, f V) V {
 	case array:
 		kyv := ky.value.(*AI)
 		nkeys := keys.Len()
-		for _, kyi := range kyv.Slice {
+		for _, kyi := range kyv.elts {
 			if kyi == int64(nkeys) {
 				keys = uniq(ctx, joinTo(NewV(keys), y)).value.(array)
 				break
@@ -72,23 +72,23 @@ func padArrayMut(x array, n int) array {
 	switch xv := x.(type) {
 	case *AB:
 		for i := 0; i < n; i++ {
-			xv.Slice = append(xv.Slice, false)
+			xv.elts = append(xv.elts, false)
 		}
 	case *AI:
 		for i := 0; i < n; i++ {
-			xv.Slice = append(xv.Slice, 0)
+			xv.elts = append(xv.elts, 0)
 		}
 	case *AF:
 		for i := 0; i < n; i++ {
-			xv.Slice = append(xv.Slice, 0)
+			xv.elts = append(xv.elts, 0)
 		}
 	case *AS:
 		for i := 0; i < n; i++ {
-			xv.Slice = append(xv.Slice, "")
+			xv.elts = append(xv.elts, "")
 		}
 	case *AV:
 		for i := 0; i < n; i++ {
-			xv.Slice = append(xv.Slice, NewI(0))
+			xv.elts = append(xv.elts, NewI(0))
 		}
 	}
 	return x
@@ -106,7 +106,7 @@ func amendArrayAt(x array, y int, z V) array {
 	rc := x.RC()
 	z.InitWithRC(rc)
 	a[y] = z
-	return &AV{Slice: a, rc: rc}
+	return &AV{elts: a, rc: rc}
 }
 
 func (ctx *Context) amend3arrayI(x array, y int64, f V) (array, error) {
@@ -138,7 +138,7 @@ func (ctx *Context) amend3array(x array, y, f V) (array, error) {
 	switch yv := y.value.(type) {
 	case *AI:
 		var err error
-		for _, yi := range yv.Slice {
+		for _, yi := range yv.elts {
 			x, err = ctx.amend3arrayI(x, yi, f)
 			if err != nil {
 				return x, err
@@ -147,7 +147,7 @@ func (ctx *Context) amend3array(x array, y, f V) (array, error) {
 		return x, nil
 	case *AV:
 		var err error
-		for _, yi := range yv.Slice {
+		for _, yi := range yv.elts {
 			x, err = ctx.amend3array(x, yi, f)
 			if err != nil {
 				return x, err
@@ -195,7 +195,7 @@ func amend4Dict(ctx *Context, d *Dict, y, f, z V) V {
 	case array:
 		kyv := ky.value.(*AI)
 		nkeys := keys.Len()
-		for _, kyi := range kyv.Slice {
+		for _, kyi := range kyv.elts {
 			if kyi == int64(nkeys) {
 				keys = uniq(ctx, joinTo(NewV(keys), y)).value.(array)
 				break
@@ -254,7 +254,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) (array, error) {
 		var err error
 		za, ok := z.value.(array)
 		if !ok {
-			for _, yi := range yv.Slice {
+			for _, yi := range yv.elts {
 				x, err = ctx.amend4arrayI(x, yi, f, z)
 				if err != nil {
 					return x, err
@@ -267,7 +267,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) (array, error) {
 				yv.Len(), za.Len())
 
 		}
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			x, err = ctx.amend4arrayI(x, yi, f, za.at(i))
 			if err != nil {
 				return x, err
@@ -278,7 +278,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) (array, error) {
 		var err error
 		za, ok := z.value.(array)
 		if !ok {
-			for _, yi := range yv.Slice {
+			for _, yi := range yv.elts {
 				x, err = ctx.amend4array(x, yi, f, z)
 				if err != nil {
 					return x, err
@@ -291,7 +291,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) (array, error) {
 				yv.Len(), za.Len())
 
 		}
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			x, err = ctx.amend4array(x, yi, f, za.at(i))
 			if err != nil {
 				return x, err
@@ -323,7 +323,7 @@ func amendr(x array, y, z V) (array, error) {
 		rc := x.RC()
 		z.InitWithRC(rc)
 		r[y.I()] = z
-		return &AV{Slice: r, rc: rc}, nil
+		return &AV{elts: r, rc: rc}, nil
 	}
 	if isStar(y) {
 		y = rangeI(int64(x.Len()))
@@ -340,7 +340,7 @@ func amendr(x array, y, z V) (array, error) {
 
 func amendrAI(x array, yv *AI, z V) (array, error) {
 	xlen := x.Len()
-	for _, yi := range yv.Slice {
+	for _, yi := range yv.elts {
 		if outOfBounds(yi, xlen) {
 			return x, fmt.Errorf("out of bounds index (%d)", yi)
 		}
@@ -357,10 +357,10 @@ func amendrAI(x array, yv *AI, z V) (array, error) {
 		}
 		rc := x.RC()
 		z.InitWithRC(rc)
-		for _, yi := range yv.Slice {
+		for _, yi := range yv.elts {
 			r[yi] = z
 		}
-		return &AV{Slice: r, rc: rc}, nil
+		return &AV{elts: r, rc: rc}, nil
 	}
 	if za.Len() != yv.Len() {
 		return x, fmt.Errorf("length mismatch between y and z (%d vs %d)",
@@ -370,17 +370,17 @@ func amendrAI(x array, yv *AI, z V) (array, error) {
 		amendrAIarrayMut(x, yv, za)
 		return x, nil
 	}
-	for i := range yv.Slice {
+	for i := range yv.elts {
 		if !isEltType(x, za.at(i)) {
 			r := make([]V, xlen)
 			for i := range r {
 				r[i] = x.at(i)
 			}
-			x = &AV{Slice: r, rc: x.RC()}
+			x = &AV{elts: r, rc: x.RC()}
 			break
 		}
 	}
-	for i, yi := range yv.Slice {
+	for i, yi := range yv.elts {
 		x.set(int(yi), za.at(i))
 	}
 	return x, nil
@@ -395,8 +395,8 @@ func amendrAIatomMut(x array, yv *AI, z V) {
 		} else {
 			zb = z.F() != 0
 		}
-		for _, yi := range yv.Slice {
-			xv.Slice[int(yi)] = zb
+		for _, yi := range yv.elts {
+			xv.elts[int(yi)] = zb
 		}
 	case *AI:
 		var zi int64
@@ -405,8 +405,8 @@ func amendrAIatomMut(x array, yv *AI, z V) {
 		} else {
 			zi = int64(z.F())
 		}
-		for _, yi := range yv.Slice {
-			xv.Slice[yi] = zi
+		for _, yi := range yv.elts {
+			xv.elts[yi] = zi
 		}
 	case *AF:
 		var zf float64
@@ -415,19 +415,19 @@ func amendrAIatomMut(x array, yv *AI, z V) {
 		} else {
 			zf = z.F()
 		}
-		for _, yi := range yv.Slice {
-			xv.Slice[yi] = zf
+		for _, yi := range yv.elts {
+			xv.elts[yi] = zf
 		}
 	case *AS:
 		zs := string(z.value.(S))
-		for _, yi := range yv.Slice {
-			xv.Slice[yi] = zs
+		for _, yi := range yv.elts {
+			xv.elts[yi] = zs
 		}
 	case *AV:
 		rc := x.RC()
 		z.InitWithRC(rc)
-		for _, yi := range yv.Slice {
-			xv.Slice[yi] = z
+		for _, yi := range yv.elts {
+			xv.elts[yi] = z
 		}
 	}
 }
@@ -436,31 +436,31 @@ func amendrAIarrayMut(x array, yv *AI, za array) {
 	switch xv := x.(type) {
 	case *AB:
 		zv := za.(*AB)
-		for i, yi := range yv.Slice {
-			xv.Slice[yi] = zv.Slice[i]
+		for i, yi := range yv.elts {
+			xv.elts[yi] = zv.elts[i]
 		}
 	case *AI:
 		zv := za.(*AI)
-		for i, yi := range yv.Slice {
-			xv.Slice[yi] = zv.Slice[i]
+		for i, yi := range yv.elts {
+			xv.elts[yi] = zv.elts[i]
 		}
 	case *AF:
 		zv := za.(*AF)
-		for i, yi := range yv.Slice {
-			xv.Slice[yi] = zv.Slice[i]
+		for i, yi := range yv.elts {
+			xv.elts[yi] = zv.elts[i]
 		}
 	case *AS:
 		zv := za.(*AS)
-		for i, yi := range yv.Slice {
-			xv.Slice[yi] = zv.Slice[i]
+		for i, yi := range yv.elts {
+			xv.elts[yi] = zv.elts[i]
 		}
 	case *AV:
 		zv := za.(*AV)
 		rc := x.RC()
-		for i, yi := range yv.Slice {
-			zi := zv.Slice[i]
+		for i, yi := range yv.elts {
+			zi := zv.elts[i]
 			zi.InitWithRC(rc)
-			xv.Slice[yi] = zi
+			xv.elts[yi] = zi
 		}
 	}
 }
@@ -469,7 +469,7 @@ func amendrAV(x array, yv *AV, z V) (array, error) {
 	var err error
 	za, ok := z.value.(array)
 	if !ok {
-		for _, yi := range yv.Slice {
+		for _, yi := range yv.elts {
 			x, err = amendr(x, yi, z)
 			if err != nil {
 				return x, err
@@ -482,7 +482,7 @@ func amendrAV(x array, yv *AV, z V) (array, error) {
 			yv.Len(), za.Len())
 
 	}
-	for i, yi := range yv.Slice {
+	for i, yi := range yv.elts {
 		x, err = amendr(x, yi, za.at(i))
 		if err != nil {
 			return x, err

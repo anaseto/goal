@@ -99,7 +99,7 @@ func doTime(cmd string, y V, layout, loc string) V {
 	case *AI:
 		// doTime: allocations could be optimized depending on cmd.
 		r := make([]V, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			ri := doTimeI(cmd, yi, layout)
 			if ri.IsPanic() {
 				return ri
@@ -117,7 +117,7 @@ func doTime(cmd string, y V, layout, loc string) V {
 		return doTimeS(cmd, string(yv), layout, loc)
 	case *AS:
 		r := make([]V, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			ri := doTimeS(cmd, yi, layout, loc)
 			if ri.IsPanic() {
 				return ri
@@ -127,7 +127,7 @@ func doTime(cmd string, y V, layout, loc string) V {
 		return canonicalFast(NewAV(r))
 	case *AV:
 		r := make([]V, yv.Len())
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			ri := doTime(cmd, yi, layout, loc)
 			if ri.IsPanic() {
 				return ri

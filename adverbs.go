@@ -80,7 +80,7 @@ func joinS(sep S, x V) V {
 	case S:
 		return x
 	case *AS:
-		return NewS(strings.Join([]string(xv.Slice), string(sep)))
+		return NewS(strings.Join([]string(xv.elts), string(sep)))
 	default:
 		if x.Len() == 0 {
 			return NewS("")

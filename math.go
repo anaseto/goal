@@ -25,8 +25,8 @@ func isNaN(x V) V {
 	switch xv := x.value.(type) {
 	case *AB:
 		r := xv.reuse()
-		for i := range r.Slice {
-			r.Slice[i] = false
+		for i := range r.elts {
+			r.elts[i] = false
 		}
 		return NewV(r)
 	case *AI:
@@ -34,18 +34,18 @@ func isNaN(x V) V {
 		return NewABWithRC(r, reuseRCp(xv.rc))
 	case *AF:
 		r := make([]bool, xv.Len())
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			r[i] = math.IsNaN(xi)
 		}
 		return NewABWithRC(r, reuseRCp(xv.rc))
 	case *AV:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			ri := isNaN(xi)
 			if ri.IsPanic() {
 				return ri
 			}
-			r.Slice[i] = ri
+			r.elts[i] = ri
 		}
 		return NewV(r)
 	case *Dict:
@@ -86,10 +86,10 @@ func fillNaNf(fill float64, y V) V {
 	case *AF:
 		var r []float64
 		if reusableRCp(yv.RC()) {
-			r = yv.Slice
+			r = yv.elts
 		} else {
 			r = make([]float64, yv.Len())
-			copy(r, yv.Slice)
+			copy(r, yv.elts)
 		}
 		for i, ri := range r {
 			if math.IsNaN(ri) {
@@ -99,12 +99,12 @@ func fillNaNf(fill float64, y V) V {
 		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		r := yv.reuse()
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			ri := fillNaNf(fill, yi)
 			if ri.IsPanic() {
 				return ri
 			}
-			r.Slice[i] = ri
+			r.elts[i] = ri
 		}
 		return NewV(r)
 	case *Dict:

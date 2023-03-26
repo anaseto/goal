@@ -16,30 +16,30 @@ func negate(x V) V {
 	switch xv := x.value.(type) {
 	case *AB:
 		r := make([]int64, xv.Len())
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			r[i] = -B2I(xi)
 		}
 		return NewAIWithRC(r, reuseRCp(xv.rc))
 	case *AI:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
-			r.Slice[i] = -xi
+		for i, xi := range xv.elts {
+			r.elts[i] = -xi
 		}
 		return NewV(r)
 	case *AF:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
-			r.Slice[i] = -xi
+		for i, xi := range xv.elts {
+			r.elts[i] = -xi
 		}
 		return NewV(r)
 	case *AV:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			ri := negate(xi)
 			if ri.IsPanic() {
 				return ri
 			}
-			r.Slice[i] = ri
+			r.elts[i] = ri
 		}
 		return NewV(r)
 	case *Dict:
@@ -84,24 +84,24 @@ func sign(x V) V {
 		return x
 	case *AI:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
-			r.Slice[i] = signI(xi)
+		for i, xi := range xv.elts {
+			r.elts[i] = signI(xi)
 		}
 		return NewV(r)
 	case *AF:
 		r := make([]int64, xv.Len())
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			r[i] = int64(signF(xi))
 		}
 		return NewAIWithRC(r, reuseRCp(xv.rc))
 	case *AV:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			ri := sign(xi)
 			if ri.IsPanic() {
 				return ri
 			}
-			r.Slice[i] = ri
+			r.elts[i] = ri
 		}
 		return NewV(r)
 	case *Dict:
@@ -128,26 +128,26 @@ func floor(x V) V {
 		return x
 	case *AF:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			// NOTE: we assume conversion is possible, leaving
 			// handling NaN, INF or big floats to the program.
-			r.Slice[i] = math.Floor(xi)
+			r.elts[i] = math.Floor(xi)
 		}
 		return NewV(r)
 	case *AS:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
-			r.Slice[i] = strings.ToLower(xi)
+		for i, xi := range xv.elts {
+			r.elts[i] = strings.ToLower(xi)
 		}
 		return NewV(r)
 	case *AV:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			ri := floor(xi)
 			if ri.IsPanic() {
 				return ri
 			}
-			r.Slice[i] = ri
+			r.elts[i] = ri
 		}
 		return NewV(r)
 	case *Dict:
@@ -174,24 +174,24 @@ func ceil(x V) V {
 		return x
 	case *AF:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
-			r.Slice[i] = math.Ceil(xi)
+		for i, xi := range xv.elts {
+			r.elts[i] = math.Ceil(xi)
 		}
 		return NewV(r)
 	case *AS:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
-			r.Slice[i] = strings.ToUpper(xi)
+		for i, xi := range xv.elts {
+			r.elts[i] = strings.ToUpper(xi)
 		}
 		return NewV(r)
 	case *AV:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			ri := ceil(xi)
 			if ri.IsPanic() {
 				return ri
 			}
-			r.Slice[i] = ri
+			r.elts[i] = ri
 		}
 		return NewV(r)
 	case *Dict:
@@ -214,26 +214,26 @@ func not(x V) V {
 		return NewI(B2I(xv == ""))
 	case *AB:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
-			r.Slice[i] = !xi
+		for i, xi := range xv.elts {
+			r.elts[i] = !xi
 		}
 		return NewV(r)
 	case *AI:
 		r := make([]bool, xv.Len())
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			r[i] = xi == 0
 		}
 		return NewABWithRC(r, reuseRCp(xv.rc))
 	case *AF:
 		r := make([]bool, xv.Len())
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			r[i] = xi == 0
 		}
 		return NewABWithRC(r, reuseRCp(xv.rc))
 	case *AV:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
-			r.Slice[i] = not(xi)
+		for i, xi := range xv.elts {
+			r.elts[i] = not(xi)
 			// never panics
 		}
 		return NewV(r)
@@ -257,24 +257,24 @@ func abs(x V) V {
 		return x
 	case *AI:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
-			r.Slice[i] = absI(xi)
+		for i, xi := range xv.elts {
+			r.elts[i] = absI(xi)
 		}
 		return NewV(r)
 	case *AF:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
-			r.Slice[i] = math.Abs(xi)
+		for i, xi := range xv.elts {
+			r.elts[i] = math.Abs(xi)
 		}
 		return NewV(r)
 	case *AV:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			ri := abs(xi)
 			if ri.IsPanic() {
 				return ri
 			}
-			r.Slice[i] = ri
+			r.elts[i] = ri
 		}
 		return NewV(r)
 	case *Dict:

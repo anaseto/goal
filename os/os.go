@@ -44,7 +44,7 @@ func VFImport(ctx *goal.Context, args []goal.V) goal.V {
 		return importWithPrefix(ctx, prefix, string(sv), hasPfx)
 	case *goal.AS:
 		var r goal.V
-		for _, si := range sv.Slice {
+		for _, si := range sv.Slice() {
 			r = importWithPrefix(ctx, prefix, si, hasPfx)
 			if r.IsPanic() {
 				return r
@@ -212,7 +212,7 @@ func printV(ctx *goal.Context, x goal.V) error {
 		return err
 	case *goal.AS:
 		buf := bufio.NewWriter(os.Stdout)
-		for _, s := range xv.Slice {
+		for _, s := range xv.Slice() {
 			buf.WriteString(s)
 		}
 		return buf.Flush()
@@ -229,7 +229,7 @@ func sayV(ctx *goal.Context, x goal.V) error {
 		return err
 	case *goal.AS:
 		buf := bufio.NewWriter(os.Stdout)
-		for _, s := range xv.Slice {
+		for _, s := range xv.Slice() {
 			buf.WriteString(s)
 		}
 		buf.WriteByte('\n')
@@ -247,7 +247,7 @@ func fprintV(ctx *goal.Context, w io.Writer, x goal.V) error {
 		return err
 	case *goal.AS:
 		var err error
-		for _, s := range xv.Slice {
+		for _, s := range xv.Slice() {
 			_, err = fmt.Fprint(w, s)
 		}
 		return err
@@ -263,7 +263,7 @@ func fsayV(ctx *goal.Context, w io.Writer, x goal.V) error {
 		_, err := fmt.Fprintln(w, string(xv))
 		return err
 	case *goal.AS:
-		for _, s := range xv.Slice {
+		for _, s := range xv.Slice() {
 			fmt.Fprint(w, s)
 		}
 		_, err := fmt.Fprint(w, '\n')
@@ -318,7 +318,7 @@ func VFRun(ctx *goal.Context, args []goal.V) goal.V {
 	case goal.S:
 		cmds = []string{string(yv)}
 	case *goal.AS:
-		cmds = yv.Slice
+		cmds = yv.Slice()
 	default:
 		return goal.Panicf("run : non-string command (%s)", y.Type())
 	}

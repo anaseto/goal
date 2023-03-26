@@ -32,12 +32,12 @@ func rangeI(n int64) V {
 	for i := range r {
 		r[i] = int64(i)
 	}
-	return NewV(&AI{Slice: r, flags: flagAscending | flagUnique})
+	return NewV(&AI{elts: r, flags: flagAscending | flagUnique})
 }
 
 func rangeArray(x *AI) V {
 	cols := int64(1)
-	for _, n := range x.Slice {
+	for _, n := range x.elts {
 		if n == 0 {
 			return NewAV(nil)
 		}
@@ -97,34 +97,34 @@ func where(x V) V {
 	switch xv := x.value.(type) {
 	case *AB:
 		n := int64(0)
-		for _, xi := range xv.Slice {
+		for _, xi := range xv.elts {
 			n += B2I(xi)
 		}
 		r := make([]int64, n+1)
 		j := int64(0)
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			r[j] = int64(i)
 			j += B2I(xi)
 		}
-		return NewV(&AI{Slice: r[:len(r)-1], rc: reuseRCp(xv.rc), flags: flagAscending})
+		return NewV(&AI{elts: r[:len(r)-1], rc: reuseRCp(xv.rc), flags: flagAscending})
 	case *AI:
 		n := int64(0)
-		for _, xi := range xv.Slice {
+		for _, xi := range xv.elts {
 			if xi < 0 {
 				return Panicf("&x : x contains negative integer (%d)", xv)
 			}
 			n += xi
 		}
 		r := make([]int64, 0, n)
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			for j := int64(0); j < xi; j++ {
 				r = append(r, int64(i))
 			}
 		}
-		return NewV(&AI{Slice: r, rc: reuseRCp(xv.rc), flags: flagAscending})
+		return NewV(&AI{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
 	case *AF:
 		n := int64(0)
-		for _, xi := range xv.Slice {
+		for _, xi := range xv.elts {
 			if !isI(xi) {
 				return Panicf("&x : x contains non-integer (%g)", xi)
 			}
@@ -134,12 +134,12 @@ func where(x V) V {
 			n += int64(xi)
 		}
 		r := make([]int64, 0, n)
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			for j := int64(0); j < int64(xi); j++ {
 				r = append(r, int64(i))
 			}
 		}
-		return NewV(&AI{Slice: r, rc: reuseRCp(xv.rc), flags: flagAscending})
+		return NewV(&AI{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
 	case *Dict:
 		r := where(NewV(xv.values))
 		if r.IsPanic() {
@@ -222,7 +222,7 @@ func replicateI(n int64, y V) V {
 		return NewAS(r)
 	case *AB:
 		r := make([]bool, n*int64(yv.Len()))
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			in := int64(i) * n
 			for j := int64(0); j < n; j++ {
 				r[in+j] = yi
@@ -231,7 +231,7 @@ func replicateI(n int64, y V) V {
 		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		r := make([]int64, n*int64(yv.Len()))
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			in := int64(i) * n
 			for j := int64(0); j < n; j++ {
 				r[in+j] = yi
@@ -240,7 +240,7 @@ func replicateI(n int64, y V) V {
 		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AF:
 		r := make([]float64, n*int64(yv.Len()))
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			in := int64(i) * n
 			for j := int64(0); j < n; j++ {
 				r[in+j] = yi
@@ -249,7 +249,7 @@ func replicateI(n int64, y V) V {
 		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AS:
 		r := make([]string, n*int64(yv.Len()))
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			in := int64(i) * n
 			for j := int64(0); j < n; j++ {
 				r[in+j] = yi
@@ -258,7 +258,7 @@ func replicateI(n int64, y V) V {
 		return NewASWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		r := make([]V, n*int64(yv.Len()))
-		for i, yi := range yv.Slice {
+		for i, yi := range yv.elts {
 			in := int64(i) * n
 			for j := int64(0); j < n; j++ {
 				r[in+j] = yi
@@ -280,13 +280,13 @@ func replicateI(n int64, y V) V {
 
 func replicateAB(x *AB, y V) V {
 	n := int64(0)
-	for _, xi := range x.Slice {
+	for _, xi := range x.elts {
 		n += B2I(xi)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
 		r := make([]bool, 0, n)
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if xi {
 				r = append(r, yv.At(i))
 			}
@@ -294,7 +294,7 @@ func replicateAB(x *AB, y V) V {
 		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AF:
 		r := make([]float64, 0, n)
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if xi {
 				r = append(r, yv.At(i))
 			}
@@ -302,7 +302,7 @@ func replicateAB(x *AB, y V) V {
 		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		r := make([]int64, 0, n)
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if xi {
 				r = append(r, yv.At(i))
 			}
@@ -310,7 +310,7 @@ func replicateAB(x *AB, y V) V {
 		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AS:
 		r := make([]string, 0, n)
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if xi {
 				r = append(r, yv.At(i))
 			}
@@ -318,12 +318,12 @@ func replicateAB(x *AB, y V) V {
 		return NewASWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		r := make([]V, 0, n)
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if xi {
 				r = append(r, yv.at(i))
 			}
 		}
-		return NewV(canonicalAV(&AV{Slice: r, rc: yv.rc}))
+		return NewV(canonicalAV(&AV{elts: r, rc: yv.rc}))
 	case *Dict:
 		keys := replicateAB(x, NewV(yv.keys))
 		if keys.IsPanic() {
@@ -341,7 +341,7 @@ func replicateAB(x *AB, y V) V {
 
 func replicateAI(x *AI, y V) V {
 	n := int64(0)
-	for _, xi := range x.Slice {
+	for _, xi := range x.elts {
 		if xi < 0 {
 			return Panicf("f#y : f[y] contains negative integer (%d)", xi)
 		}
@@ -350,7 +350,7 @@ func replicateAI(x *AI, y V) V {
 	switch yv := y.value.(type) {
 	case *AB:
 		r := make([]bool, 0, n)
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			for j := int64(0); j < xi; j++ {
 				r = append(r, yv.At(i))
 			}
@@ -358,7 +358,7 @@ func replicateAI(x *AI, y V) V {
 		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AF:
 		r := make([]float64, 0, n)
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			for j := int64(0); j < xi; j++ {
 				r = append(r, yv.At(i))
 			}
@@ -366,7 +366,7 @@ func replicateAI(x *AI, y V) V {
 		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		r := make([]int64, 0, n)
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			for j := int64(0); j < xi; j++ {
 				r = append(r, yv.At(i))
 			}
@@ -374,7 +374,7 @@ func replicateAI(x *AI, y V) V {
 		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AS:
 		r := make([]string, 0, n)
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			for j := int64(0); j < xi; j++ {
 				r = append(r, yv.At(i))
 			}
@@ -382,12 +382,12 @@ func replicateAI(x *AI, y V) V {
 		return NewASWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		r := make([]V, 0, n)
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			for j := int64(0); j < xi; j++ {
 				r = append(r, yv.At(i))
 			}
 		}
-		return NewV(canonicalAV(&AV{Slice: r, rc: yv.rc}))
+		return NewV(canonicalAV(&AV{elts: r, rc: yv.rc}))
 	case *Dict:
 		keys := replicateAI(x, NewV(yv.keys))
 		if keys.IsPanic() {
@@ -441,13 +441,13 @@ func weedOut(x, y V) V {
 
 func weedOutAB(x *AB, y V) V {
 	n := int64(0)
-	for _, xi := range x.Slice {
+	for _, xi := range x.elts {
 		n += 1 - B2I(xi)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
 		r := make([]bool, 0, n)
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if !xi {
 				r = append(r, yv.At(i))
 			}
@@ -455,7 +455,7 @@ func weedOutAB(x *AB, y V) V {
 		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AF:
 		r := make([]float64, 0, n)
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if !xi {
 				r = append(r, yv.At(i))
 			}
@@ -463,7 +463,7 @@ func weedOutAB(x *AB, y V) V {
 		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		r := make([]int64, 0, n)
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if !xi {
 				r = append(r, yv.At(i))
 			}
@@ -471,7 +471,7 @@ func weedOutAB(x *AB, y V) V {
 		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AS:
 		r := make([]string, 0, n)
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if !xi {
 				r = append(r, yv.At(i))
 			}
@@ -479,12 +479,12 @@ func weedOutAB(x *AB, y V) V {
 		return NewASWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		r := make([]V, 0, n)
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if !xi {
 				r = append(r, yv.at(i))
 			}
 		}
-		return NewV(canonicalAV(&AV{Slice: r, rc: yv.rc}))
+		return NewV(canonicalAV(&AV{elts: r, rc: yv.rc}))
 	case *Dict:
 		keys := weedOutAB(x, NewV(yv.keys))
 		if keys.IsPanic() {
@@ -502,13 +502,13 @@ func weedOutAB(x *AB, y V) V {
 
 func weedOutAI(x *AI, y V) V {
 	n := int64(0)
-	for _, xi := range x.Slice {
+	for _, xi := range x.elts {
 		n += B2I(xi == 0)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
 		r := make([]bool, 0, n)
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if xi == 0 {
 				r = append(r, yv.At(i))
 			}
@@ -516,7 +516,7 @@ func weedOutAI(x *AI, y V) V {
 		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AF:
 		r := make([]float64, 0, n)
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if xi == 0 {
 				r = append(r, yv.At(i))
 			}
@@ -524,7 +524,7 @@ func weedOutAI(x *AI, y V) V {
 		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		r := make([]int64, 0, n)
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if xi == 0 {
 				r = append(r, yv.At(i))
 			}
@@ -532,7 +532,7 @@ func weedOutAI(x *AI, y V) V {
 		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AS:
 		r := make([]string, 0, n)
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if xi == 0 {
 				r = append(r, yv.At(i))
 			}
@@ -540,12 +540,12 @@ func weedOutAI(x *AI, y V) V {
 		return NewASWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		r := make([]V, 0, n)
-		for i, xi := range x.Slice {
+		for i, xi := range x.elts {
 			if xi == 0 {
 				r = append(r, yv.At(i))
 			}
 		}
-		return NewV(canonicalAV(&AV{Slice: r, rc: yv.rc}))
+		return NewV(canonicalAV(&AV{elts: r, rc: yv.rc}))
 	case *Dict:
 		keys := weedOutAI(x, NewV(yv.keys))
 		if keys.IsPanic() {
@@ -591,8 +591,8 @@ func recompileLambdas(ctx, nctx *Context, x V) V {
 	}
 	switch xv := x.value.(type) {
 	case *AV:
-		for i, xi := range xv.Slice {
-			xv.Slice[i] = recompileLambdas(ctx, nctx, xi)
+		for i, xi := range xv.elts {
+			xv.elts[i] = recompileLambdas(ctx, nctx, xi)
 		}
 		return x
 	default:
@@ -607,7 +607,7 @@ func eval(ctx *Context, x V) V {
 		return evalString(ctx, string(xv))
 	case *AS:
 		r := make([]V, xv.Len())
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			ri := evalString(ctx, string(xi))
 			if ri.IsPanic() {
 				return ri
@@ -617,7 +617,7 @@ func eval(ctx *Context, x V) V {
 		return Canonical(NewAV(r))
 	case *AV:
 		r := make([]V, xv.Len())
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			ri := eval(ctx, xi)
 			if ri.IsPanic() {
 				return ri

@@ -192,12 +192,12 @@ genOp:{[opname;opsym] / globals o,op,xt,h
               }/
   tplAV:{[yi]"\n"_qq/
     r := xv.reuse()
-    for i, xi := range xv.Slice {
+    for i, xi := range xv.elts {
             ri := $o(xi, $yi)
             if ri.IsPanic() {
                     return ri
             }
-            r.Slice[i] = ri
+            r.elts[i] = ri
     }
     return NewV(r)/}
   h say tplAV["yv.at(i)"]
@@ -267,8 +267,8 @@ doxY:{[yt;e;t]
    "\n"_qq/
     case *A$yt:
         r := yv.reuse()
-        for i := range r.Slice {
-                r.Slice[i] = $rt($e)
+        for i := range r.elts {
+                r.elts[i] = $rt($e)
         }
         return NewV(r)/
    "\n"_qq/
@@ -290,12 +290,12 @@ doxdAV:{
         return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
     case *AV:
         r := yv.reuse()
-        for i, yi := range yv.Slice {
+        for i, yi := range yv.elts {
                 ri := $o${xt}V(x, yi)
                 if ri.IsPanic() {
                         return ri
                 }
-                r.Slice[i] = ri
+                r.elts[i] = ri
         }
         return NewV(r)
     default:
@@ -326,8 +326,8 @@ doXUy:{[yt;e;t]
     "\n"_qq/
       if y.Is$yt() {
           r := x.reuse()
-          for i := range r.Slice {
-                  r.Slice[i] = $rt($e)
+          for i := range r.elts {
+                  r.elts[i] = $rt($e)
           }
           return NewV(r)
       }/
@@ -347,8 +347,8 @@ doXBy:{[yt;e;t]
     "\n"_qq/
       case $yt:
               r := x.reuse()
-              for i := range r.Slice {
-                      r.Slice[i] = $rt($e)
+              for i := range r.elts {
+                      r.elts[i] = $rt($e)
               }
               return NewV(r)/
     "\n"_qq/
@@ -371,8 +371,8 @@ doXY:{[yt;e;t]
   s2:?[t in xt,yt
     sub["{XY}";?[xt~t;"x";"yv"]]"\n"_qq/
           r := {XY}.reuse()
-          for i := range r.Slice {
-                  r.Slice[i] = $rt($e)
+          for i := range r.elts {
+                  r.elts[i] = $rt($e)
           }
           return NewV(r)/
     "\n"_qq/
@@ -400,12 +400,12 @@ doXdAV:{
                     return Panicf("x${fmtop}y : length mismatch: %d vs %d", x.Len(), yv.Len())
             }
             r := yv.reuse()
-            for i := range r.Slice {
+            for i := range r.elts {
                     ri := $o${nxt}V($xct(x.At(i)), yv.At(i))
                     if ri.IsPanic() {
                             return ri
                     }
-                    r.Slice[i] = ri
+                    r.elts[i] = ri
             }
             return NewV(r)
     default:

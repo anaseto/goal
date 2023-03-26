@@ -82,7 +82,7 @@ func (x *AB) Append(ctx *Context, dst []byte) []byte {
 		dst = strconv.AppendInt(dst, B2I(x.At(0)), 10)
 		return dst
 	}
-	for i, xi := range x.Slice {
+	for i, xi := range x.elts {
 		dst = strconv.AppendInt(dst, B2I(xi), 10)
 		if i < x.Len()-1 {
 			dst = append(dst, ' ')
@@ -102,7 +102,7 @@ func (x *AI) Append(ctx *Context, dst []byte) []byte {
 		dst = strconv.AppendInt(dst, x.At(0), 10)
 		return dst
 	}
-	for i, xi := range x.Slice {
+	for i, xi := range x.elts {
 		dst = strconv.AppendInt(dst, xi, 10)
 		if i < x.Len()-1 {
 			dst = append(dst, ' ')
@@ -122,7 +122,7 @@ func (x *AF) Append(ctx *Context, dst []byte) []byte {
 		dst = appendFloat(ctx, dst, x.At(0))
 		return dst
 	}
-	for i, xi := range x.Slice {
+	for i, xi := range x.elts {
 		dst = appendFloat(ctx, dst, xi)
 		if i < x.Len()-1 {
 			dst = append(dst, ' ')
@@ -142,7 +142,7 @@ func (x *AS) Append(ctx *Context, dst []byte) []byte {
 		dst = strconv.AppendQuote(dst, x.At(0))
 		return dst
 	}
-	for i, xi := range x.Slice {
+	for i, xi := range x.elts {
 		dst = strconv.AppendQuote(dst, xi)
 		if i < x.Len()-1 {
 			dst = append(dst, ' ')
@@ -174,7 +174,7 @@ func (x *AV) Append(ctx *Context, dst []byte) []byte {
 	defer func() {
 		ctx.compactFmt = osc
 	}()
-	for i, xi := range x.Slice {
+	for i, xi := range x.elts {
 		if xi.kind != valNil {
 			dst = xi.Append(ctx, dst)
 		}
