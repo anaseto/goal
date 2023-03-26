@@ -119,9 +119,10 @@ func runStdin(ctx *goal.Context, cfg Config) {
 	ctx.AssignGlobal("h", helpv)
 	lr := lineReader{r: bufio.NewReader(os.Stdin)}
 	fmt.Printf("%s repl, type help\"\" for basic info.\n", cfg.ProgramName)
+	sc := &scanner{}
 	for {
 		fmt.Print("  ")
-		s, err := lr.readLine()
+		s, err := lr.readLine(sc)
 		if err != nil && s == "" {
 			return
 		}
@@ -143,7 +144,7 @@ type lineReader struct {
 }
 
 type scanner struct {
-	depth  []rune // (){}[] depth stack
+	depth  []byte // (){}[] depth stack
 	state  scanState
 	done   bool
 	escape bool
@@ -156,28 +157,29 @@ const (
 	scanRawString
 	scanString
 	scanQuote
+	scanRawQuote
 )
 
 const delimchars = ":+-*%!&|=~,^#_?@/'"
 
-func (lr lineReader) readLine() (string, error) {
-	s := scanner{}
+func (lr lineReader) readLine(s *scanner) (string, error) {
+	*s = scanner{depth: s.depth[:0]}
 	sb := strings.Builder{}
-	qr := '/'
+	var qr byte = '/'
 	for {
-		r, _, err := lr.r.ReadRune()
+		c, err := lr.r.ReadByte()
 		if err != nil {
 			return sb.String(), err
 		}
-		switch r {
+		switch c {
 		case '\r':
 			continue
 		default:
-			sb.WriteRune(r)
+			sb.WriteByte(c)
 		}
 		switch s.state {
 		case scanNormal:
-			switch r {
+			switch c {
 			case '\n':
 				if len(s.depth) == 0 || s.done {
 					return sb.String(), nil
@@ -185,37 +187,35 @@ func (lr lineReader) readLine() (string, error) {
 			case '"':
 				s.state = scanString
 			case '`':
-				qr = r
+				qr = c
 				s.state = scanRawString
 			case '{', '(', '[':
-				s.depth = append(s.depth, r)
+				s.depth = append(s.depth, c)
 			case '}', ')', ']':
-				if len(s.depth) > 0 && s.depth[len(s.depth)-1] == opening(r) {
+				if len(s.depth) > 0 && s.depth[len(s.depth)-1] == opening(c) {
 					s.depth = s.depth[:len(s.depth)-1]
 				} else {
 					// error, so return on next \n
 					s.done = true
 				}
 			default:
-				if strings.ContainsRune(delimchars, r) {
+				if strings.IndexByte(delimchars, c) != -1 {
 					acc := sb.String()
-					if strings.HasSuffix(acc[:len(acc)-1], "rx") {
-						qr = r
+					switch {
+					case strings.HasSuffix(acc[:len(acc)-1], "rx"):
+						qr = c
 						s.state = scanQuote
-					}
-					if strings.HasSuffix(acc[:len(acc)-1], "rq") {
-						// TODO: handle escape by doubling delimiter in rq/STRING/
-						qr = r
-						s.state = scanRawString
-					}
-					if strings.HasSuffix(acc[:len(acc)-1], "qq") {
-						qr = r
+					case strings.HasSuffix(acc[:len(acc)-1], "rq"):
+						qr = c
+						s.state = scanRawQuote
+					case strings.HasSuffix(acc[:len(acc)-1], "qq"):
+						qr = c
 						s.state = scanQuote
 					}
 				}
 			}
 		case scanQuote:
-			switch r {
+			switch c {
 			case '\\':
 				s.escape = !s.escape
 			case qr:
@@ -227,7 +227,7 @@ func (lr lineReader) readLine() (string, error) {
 				s.escape = false
 			}
 		case scanString:
-			switch r {
+			switch c {
 			case '\\':
 				s.escape = !s.escape
 			case '"':
@@ -239,14 +239,30 @@ func (lr lineReader) readLine() (string, error) {
 				s.escape = false
 			}
 		case scanRawString:
-			if r == qr {
+			if c == qr {
 				s.state = scanNormal
+			}
+		case scanRawQuote:
+			if c == qr {
+				c, err := lr.r.ReadByte()
+				if err != nil {
+					return sb.String(), err
+				}
+				if c == qr {
+					sb.WriteByte(c)
+				} else {
+					err := lr.r.UnreadByte()
+					if err != nil {
+						return sb.String(), err
+					}
+					s.state = scanNormal
+				}
 			}
 		}
 	}
 }
 
-func opening(r rune) rune {
+func opening(r byte) byte {
 	switch r {
 	case ')':
 		return '('
