@@ -143,7 +143,7 @@ func (cmd *command) Close() error {
 	return cmd.c.Wait()
 }
 
-// VOpen implements the open dyad.
+// VFOpen implements the open dyad.
 //
 // open "path" : opens file "path" for reading.
 //
@@ -153,7 +153,7 @@ func (cmd *command) Close() error {
 //
 // It returns a filehandle value of type "h" on success, and an error
 // otherwise.
-func VOpen(ctx *goal.Context, args []goal.V) goal.V {
+func VFOpen(ctx *goal.Context, args []goal.V) goal.V {
 	if len(args) > 2 {
 		return goal.Panicf("open : too many arguments (%d)", len(args))
 	}
@@ -240,12 +240,12 @@ func openPipe(m string, c goal.V) goal.V {
 	return goal.NewV(r)
 }
 
-// VClose implements the close monad.
+// VFClose implements the close monad.
 //
 // close h : closes a filehandle.
 //
 // It returns a true value on success, and an error otherwise.
-func VClose(ctx *goal.Context, args []goal.V) goal.V {
+func VFClose(ctx *goal.Context, args []goal.V) goal.V {
 	if len(args) > 1 {
 		return goal.Panicf("close : too many arguments (%d)", len(args))
 	}
@@ -265,7 +265,7 @@ func isI(x float64) bool {
 	return x == float64(int64(x))
 }
 
-// VRead implements the read dyad.
+// VFRead implements the read dyad.
 //
 // read h : reads from filehandle h until EOF or an error occurs.
 //
@@ -276,7 +276,7 @@ func isI(x float64) bool {
 // less than n bytes) or an error occurs.
 //
 // It returns the read content as a string on success, and an error otherwise.
-func VRead(ctx *goal.Context, args []goal.V) goal.V {
+func VFRead(ctx *goal.Context, args []goal.V) goal.V {
 	if len(args) > 2 {
 		return goal.Panicf("read : too many arguments (%d)", len(args))
 	}
@@ -374,12 +374,12 @@ func readString(h goal.V, delim string) goal.V {
 	}
 }
 
-// VFlush implements the flush monad.
+// VFFlush implements the flush monad.
 //
 // flush h : flushes any buffered data to h.
 //
 // It returns a true value on success.
-func VFlush(ctx *goal.Context, args []goal.V) goal.V {
+func VFFlush(ctx *goal.Context, args []goal.V) goal.V {
 	if len(args) > 1 {
 		return goal.Panicf("flush : too many arguments (%d)", len(args))
 	}

@@ -24,7 +24,7 @@ func environ() goal.V {
 	return goal.NewDict(goal.NewV(keys), goal.NewV(values))
 }
 
-// VEnv implements the os.env dyad.
+// VFEnv implements the os.env dyad.
 //
 // env s : retrieve environment variable s, or return an error if unset. As
 // a special case, "" returns a dictionary representing the whole environment.
@@ -33,7 +33,7 @@ func environ() goal.V {
 // a true value of success, and an error otherwise. Also, the special form
 // env[x;0] unsets a variable, and as a special case, env["";0] clears the
 // whole environment.
-func VEnv(ctx *goal.Context, args []goal.V) goal.V {
+func VFEnv(ctx *goal.Context, args []goal.V) goal.V {
 	x := args[len(args)-1]
 	name, ok := x.Value().(goal.S)
 	switch len(args) {

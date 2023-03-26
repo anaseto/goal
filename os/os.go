@@ -1,3 +1,4 @@
+// Package os provides variadic function definitions for IO/OS builtins.
 package os
 
 import (
@@ -13,7 +14,7 @@ import (
 	"codeberg.org/anaseto/goal"
 )
 
-// VImport implements the import dyad.
+// VFImport implements the import dyad.
 //
 // import s : evaluate file s+".goal" (or s if it has already an extension)
 // with prefix s (without extension) for globals.
@@ -22,7 +23,7 @@ import (
 // prefix is used.
 //
 // It returns 0 and does nothing if a file has already been evaluated.
-func VImport(ctx *goal.Context, args []goal.V) goal.V {
+func VFImport(ctx *goal.Context, args []goal.V) goal.V {
 	if len(args) > 2 {
 		return goal.Panicf("import : too many arguments (%d)", len(args))
 	}
@@ -113,12 +114,12 @@ func ppanic(pfx string, x goal.V) goal.V {
 	return goal.NewPanic(pfx + x.Panic())
 }
 
-// VPrint implements the print dyad.
+// VFPrint implements the print dyad.
 //
 // print x : outputs x to standard output. It returns a true value on success.
 //
 // h print y : outputs y to w, where w is an io.Writer or a filename (goal.S).
-func VPrint(ctx *goal.Context, args []goal.V) goal.V {
+func VFPrint(ctx *goal.Context, args []goal.V) goal.V {
 	switch len(args) {
 	case 1:
 		x := args[0]
@@ -138,9 +139,9 @@ func VPrint(ctx *goal.Context, args []goal.V) goal.V {
 	}
 }
 
-// VSay implements the say dyad. It is the same as print, but appends a newline
+// VFSay implements the say dyad. It is the same as print, but appends a newline
 // to the result.
-func VSay(ctx *goal.Context, args []goal.V) goal.V {
+func VFSay(ctx *goal.Context, args []goal.V) goal.V {
 	switch len(args) {
 	case 1:
 		x := args[0]
@@ -273,11 +274,11 @@ func fsayV(ctx *goal.Context, w io.Writer, x goal.V) error {
 	}
 }
 
-// VShell implements the shell monad.
+// VFShell implements the shell monad.
 //
 // shell cmd : sends cmd to the shell as-is. It returns the standard output of
 // the command, or an error. Standard error is inherited from the parent.
-func VShell(ctx *goal.Context, args []goal.V) goal.V {
+func VFShell(ctx *goal.Context, args []goal.V) goal.V {
 	if len(args) > 1 {
 		return goal.Panicf("shell[cmd] : too many arguments (%d)", len(args))
 	}
@@ -299,7 +300,7 @@ func VShell(ctx *goal.Context, args []goal.V) goal.V {
 	return goal.NewS(sb.String())
 }
 
-// VRun implements the run monad.
+// VFRun implements the run monad.
 //
 // run s : run command s, with arguments if s is an array.
 //
@@ -310,7 +311,7 @@ func VShell(ctx *goal.Context, args []goal.V) goal.V {
 //
 // In the second form, only standard error is inherited, and the command's
 // standard output is returned.
-func VRun(ctx *goal.Context, args []goal.V) goal.V {
+func VFRun(ctx *goal.Context, args []goal.V) goal.V {
 	var cmds []string
 	y := args[0]
 	switch yv := y.Value().(type) {
@@ -356,12 +357,12 @@ func VRun(ctx *goal.Context, args []goal.V) goal.V {
 	}
 }
 
-// VChdir implements the chdir monad.
+// VFChdir implements the chdir monad.
 //
 // chdir s : change current directory to s, or return an error
 //
 // It returns a true value on success.
-func VChdir(ctx *goal.Context, args []goal.V) goal.V {
+func VFChdir(ctx *goal.Context, args []goal.V) goal.V {
 	if len(args) > 1 {
 		return goal.Panicf("chdir : too many arguments (%d)", len(args))
 	}
