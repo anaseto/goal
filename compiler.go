@@ -770,9 +770,8 @@ func (c *compiler) doStrand(st *astStrand, n int) error {
 	initRC(r)
 	initArrayFlags(r)
 	id := c.ctx.storeConst(NewV(r))
-	c.pos = st.Pos
 	c.push2(opConst, opcode(id))
-	c.applyN(n)
+	c.applyAtN(st.Pos, n)
 	return nil
 }
 
@@ -785,7 +784,7 @@ func (c *compiler) doInterpStrand(st *astStrand, n int) error {
 		}
 	}
 	c.pushVariadic(vList, len(body))
-	c.applyN(n)
+	c.applyAtN(st.Pos, n)
 	return nil
 }
 
@@ -794,7 +793,7 @@ func (c *compiler) doParen(p *astParen, n int) error {
 	if err != nil {
 		return err
 	}
-	c.applyAtN(p.EndPos, n)
+	c.applyAtN(p.EndPos-1, n)
 	return err
 }
 
@@ -830,7 +829,7 @@ func (c *compiler) doLambda(b *astLambda, n int) error {
 	c.ctx.resolveLambda(lc)
 	c.ctx.analyzeLambdaLiveness(lc)
 	c.push2(opLambda, opcode(id))
-	c.applyAtN(b.EndPos, n)
+	c.applyAtN(b.EndPos-1, n)
 	return nil
 }
 
@@ -1047,7 +1046,10 @@ func (c *compiler) doApply2(a *astApply2, n int) error {
 			return err
 		}
 		if e.Text == "@" {
+			opos := c.pos
+			c.pos = e.Pos
 			c.push(opApply)
+			c.pos = opos
 		} else {
 			c.doVariadic(e, 2)
 		}
@@ -1121,7 +1123,7 @@ func (c *compiler) doApplyN(a *astApplyN, n int) error {
 	if err != nil {
 		return err
 	}
-	c.applyAtN(a.EndPos, n)
+	c.applyAtN(a.EndPos-1, n)
 	return nil
 }
 
@@ -1178,7 +1180,7 @@ func (c *compiler) doCond(a *astApplyN, n, pos int) error {
 	for _, offset := range jumpsEnd {
 		c.body()[offset] = opcode(end - offset)
 	}
-	c.applyN(n)
+	c.applyAtN(a.EndPos-1, n)
 	return nil
 }
 
@@ -1247,7 +1249,7 @@ func (c *compiler) doSeq(b *astSeq, n int) error {
 			c.push(opDrop)
 		}
 	}
-	c.applyN(n)
+	c.applyAtN(b.EndPos-1, n)
 	return nil
 }
 
@@ -1264,7 +1266,7 @@ func (c *compiler) doList(l *astList, n int) error {
 		}
 	}
 	c.pushVariadic(vList, len(body))
-	c.applyN(n)
+	c.applyAtN(l.EndPos-1, n)
 	return nil
 }
 
@@ -1277,6 +1279,6 @@ func (c *compiler) doInterpolation(qq *astQq, n int) error {
 		}
 	}
 	c.pushVariadic(vQq, len(qq.Tokens))
-	c.applyN(n)
+	c.applyAtN(qq.Pos, n)
 	return nil
 }

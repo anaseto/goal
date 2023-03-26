@@ -107,9 +107,8 @@ type astDerivedVerb struct {
 }
 
 type astParen struct {
-	Expr     expr // parenthesized sub-expressions
-	StartPos int  // remove?
-	EndPos   int  // remove?
+	Expr   expr // parenthesized sub-expressions
+	EndPos int
 }
 
 type astApply2 struct {
@@ -125,22 +124,19 @@ type astApply2Adverb struct {
 }
 
 type astApplyN struct {
-	Verb     expr
-	Args     []expr
-	StartPos int // remove?
-	EndPos   int // remove?
+	Verb   expr
+	Args   []expr
+	EndPos int
 }
 
 type astList struct {
-	Args     []expr
-	StartPos int // remove?
-	EndPos   int // remove?
+	Args   []expr
+	EndPos int
 }
 
 type astSeq struct {
-	Body     []expr
-	StartPos int // remove?
-	EndPos   int // remove?
+	Body   []expr
+	EndPos int
 }
 
 type astLambda struct {

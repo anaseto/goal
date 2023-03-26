@@ -353,7 +353,7 @@ func (p *parser) lambdaArgs() ([]string, error) {
 
 func (p *parser) sequence() (expr, error) {
 	p.depth = append(p.depth, p.token)
-	b := &astSeq{StartPos: p.token.Pos}
+	b := &astSeq{}
 	b.Body = []expr{}
 	for {
 		es, err := p.expr(exprs{})
@@ -384,9 +384,8 @@ func (p *parser) sequence() (expr, error) {
 func (p *parser) applyN(verb expr) (expr, error) {
 	p.depth = append(p.depth, p.token)
 	a := &astApplyN{
-		Verb:     verb,
-		Args:     []expr{},
-		StartPos: p.token.Pos,
+		Verb: verb,
+		Args: []expr{},
 	}
 loop:
 	for {
@@ -472,7 +471,7 @@ func (p *parser) assignDeepAmendOp(identok *astToken, an *astApplyN,
 	a := &astAssignDeepAmendOp{
 		Name:    identok.Text,
 		Global:  global,
-		Indices: &astList{StartPos: an.StartPos, Args: an.Args, EndPos: an.EndPos},
+		Indices: &astList{Args: an.Args, EndPos: an.EndPos},
 		Dyad:    dyad,
 		Pos:     identok.Pos,
 	}
@@ -581,7 +580,7 @@ func (p *parser) subExpr() (exprs, error) {
 
 func (p *parser) list() (expr, error) {
 	p.depth = append(p.depth, p.token)
-	l := &astList{StartPos: p.token.Pos}
+	l := &astList{}
 	l.Args = []expr{}
 	for {
 		es, err := p.expr(exprs{})
@@ -604,9 +603,8 @@ func (p *parser) list() (expr, error) {
 				// not a list, but a parenthesized
 				// expression.
 				return &astParen{
-					Expr:     es,
-					StartPos: l.StartPos,
-					EndPos:   err.Pos + 1,
+					Expr:   es,
+					EndPos: err.Pos + 1,
 				}, nil
 			}
 			l.EndPos = err.Pos + 1
@@ -689,6 +687,7 @@ func (p *parser) qq() (expr, error) {
 		case QQEND:
 			if len(qq.Tokens) == 1 && qq.Tokens[0].Type == astSTRING {
 				tok := qq.Tokens[0]
+				tok.Pos = qq.Pos
 				return &tok, nil
 			}
 			if len(qq.Tokens) == 0 {
