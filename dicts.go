@@ -61,16 +61,6 @@ func (d *Dict) Type() string {
 	return "d"
 }
 
-// LessV satisfies the specification of the Value interface.
-func (d *Dict) LessV(y Value) bool {
-	switch yv := y.(type) {
-	case *Dict:
-		return d.keys.LessV(yv.keys) || d.keys.Matches(yv.keys) && d.values.LessV(yv.values)
-	default:
-		return d.Type() < y.Type()
-	}
-}
-
 // Len returns the length of the dictionary, that is the common length to its
 // key and value arrays.
 func (d *Dict) Len() int {

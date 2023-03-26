@@ -47,7 +47,7 @@ func (x *AS) Swap(i, j int) {
 
 // Less satisfies the specification of sort.Interface.
 func (x *AV) Less(i, j int) bool {
-	return x.Slice[i].LessV(x.Slice[j])
+	return x.Slice[i].LessT(x.Slice[j])
 }
 
 // Swap satisfies the specification of sort.Interface.
@@ -246,7 +246,7 @@ func searchAI(x *AI, y V) V {
 		r := make([]int64, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
 			r[i] = int64(sort.Search(x.Len(),
-				func(j int) bool { return yv.at(i).LessV(NewI(x.At(j))) }))
+				func(j int) bool { return yv.at(i).LessT(NewI(x.At(j))) }))
 		}
 		return NewAI(r)
 	default:
@@ -284,7 +284,7 @@ func searchAF(x *AF, y V) V {
 		r := make([]int64, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
 			r[i] = int64(sort.Search(x.Len(),
-				func(j int) bool { return yv.at(i).LessV(NewF(x.At(j))) }))
+				func(j int) bool { return yv.at(i).LessT(NewF(x.At(j))) }))
 		}
 		return NewAI(r)
 	default:
@@ -306,7 +306,7 @@ func searchAS(x *AS, y V) V {
 		r := make([]int64, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
 			r[i] = int64(sort.Search(x.Len(),
-				func(j int) bool { return yv.at(i).LessV(NewS(x.At(j))) }))
+				func(j int) bool { return yv.at(i).LessT(NewS(x.At(j))) }))
 		}
 		return NewAI(r)
 	default:
@@ -320,12 +320,12 @@ func searchAV(x *AV, y V) V {
 		r := make([]int64, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
 			r[i] = int64(sort.Search(x.Len(),
-				func(j int) bool { return yv.at(i).LessV(x.At(j)) }))
+				func(j int) bool { return yv.at(i).LessT(x.At(j)) }))
 		}
 		return NewAI(r)
 	default:
 		return NewI(int64(sort.Search(x.Len(),
-			func(i int) bool { return y.LessV(x.At(i)) })))
+			func(i int) bool { return y.LessT(x.At(i)) })))
 
 	}
 }

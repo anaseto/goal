@@ -36,16 +36,17 @@ type Value interface {
 	// buffer elsewhere, so that it's possible to safely convert it to
 	// string without allocations.
 	Append(ctx *Context, dst []byte) []byte
-	// Type returns the name of the value's type. It may be used by LessV to
+	// Type returns the name of the value's type. It may be used by LessT to
 	// sort non-comparable values using lexicographic order.  This means
 	// Type should return different values for non-comparable values.
 	Type() string
-	// LessV returns true if the value should be orderer before the given
+	// LessT returns true if the value should be orderer before the given
 	// one. It is used for sorting values, but not for element-wise
-	// comparison with < and >. It should produce a strict total order, so,
-	// in particular, if x < y, then we do not have y > x, and one of them
-	// should hold unless both values match.
-	LessV(Value) bool
+	// comparison with < and >. It should produce a strict total order,
+	// that is, irreflexive (~x<x), asymmetric (if x<y then ~y<x),
+	// transitive, connected (different values are comparable, except
+	// NaNs).
+	LessT(Value) bool
 }
 
 // newVariadic returns a new variadic value.

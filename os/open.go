@@ -53,7 +53,7 @@ func (f *file) Type() string {
 	return "h"
 }
 
-func (f *file) LessV(y goal.Value) bool {
+func (f *file) LessT(y goal.Value) bool {
 	switch yv := y.(type) {
 	case *file:
 		return f.f.Fd() < yv.f.Fd()
@@ -108,10 +108,10 @@ func (cmd *command) Type() string {
 	return "h"
 }
 
-func (cmd *command) LessV(y goal.Value) bool {
+func (cmd *command) LessT(y goal.Value) bool {
 	switch yv := y.(type) {
 	case *command:
-		return cmd.mode < yv.mode || cmd.mode == yv.mode && cmdToAS(cmd).LessV(cmdToAS(yv))
+		return cmd.mode < yv.mode || cmd.mode == yv.mode && cmdToAS(cmd).LessT(cmdToAS(yv))
 	case *file:
 		return true
 	default:

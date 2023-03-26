@@ -1,12 +1,12 @@
 package goal
 
-// LessV returns true if x is ordered before y. It represents a strict
-// total order. Values are ordered as follows: unboxed atoms first
-// (nums, variadics, then lambdas), then boxed values. Otherwise, values
-// are compared with < and > when comparable, and otherwise using their
-// Type string value. As a special case, comparable arrays are compared
-// first by length, or lexicographically if they are of equal length.
-func (x V) LessV(y V) bool {
+// LessT returns true if x is ordered before y. It represents a strict
+// total order (except non-strict for NaNs). Values are ordered as follows:
+// unboxed atoms first (numbers, variadics, then lambdas), then boxed values.
+// Otherwise, values are compared with < and > when comparable, and otherwise
+// using their Type string value. As a special case, comparable arrays are
+// compared first by length, or lexicographically if they are of equal length.
+func (x V) LessT(y V) bool {
 	switch x.kind {
 	case valInt:
 		if y.IsI() {
@@ -32,18 +32,18 @@ func (x V) LessV(y V) bool {
 		}
 	case valBoxed:
 		if y.kind == valBoxed {
-			return x.value.LessV(y.value)
+			return x.value.LessT(y.value)
 		}
 	case valPanic:
 		if y.kind == valPanic {
-			return x.value.LessV(y.value)
+			return x.value.LessT(y.value)
 		}
 	}
 	return x.kind < y.kind
 }
 
-// LessV satisfies the specification of the Value interface.
-func (s S) LessV(y Value) bool {
+// LessT satisfies the specification of the Value interface.
+func (s S) LessT(y Value) bool {
 	switch yv := y.(type) {
 	case S:
 		return s < yv
@@ -52,8 +52,8 @@ func (s S) LessV(y Value) bool {
 	}
 }
 
-// LessV satisfies the specification of the Value interface.
-func (x *AB) LessV(y Value) bool {
+// LessT satisfies the specification of the Value interface.
+func (x *AB) LessT(y Value) bool {
 	switch yv := y.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
@@ -99,8 +99,8 @@ func (x *AB) LessV(y Value) bool {
 	}
 }
 
-// LessV satisfies the specification of the Value interface.
-func (x *AI) LessV(y Value) bool {
+// LessT satisfies the specification of the Value interface.
+func (x *AI) LessT(y Value) bool {
 	switch yv := y.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
@@ -146,8 +146,8 @@ func (x *AI) LessV(y Value) bool {
 	}
 }
 
-// LessV satisfies the specification of the Value interface.
-func (x *AF) LessV(y Value) bool {
+// LessT satisfies the specification of the Value interface.
+func (x *AF) LessT(y Value) bool {
 	switch yv := y.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
@@ -193,8 +193,8 @@ func (x *AF) LessV(y Value) bool {
 	}
 }
 
-// LessV satisfies the specification of the Value interface.
-func (x *AS) LessV(y Value) bool {
+// LessT satisfies the specification of the Value interface.
+func (x *AS) LessT(y Value) bool {
 	switch yv := y.(type) {
 	case *AS:
 		if x.Len() != yv.Len() {
@@ -214,18 +214,18 @@ func (x *AS) LessV(y Value) bool {
 	}
 }
 
-// LessV satisfies the specification of the Value interface.
-func (x *AV) LessV(y Value) bool {
+// LessT satisfies the specification of the Value interface.
+func (x *AV) LessT(y Value) bool {
 	switch yv := y.(type) {
 	case *AV:
 		if x.Len() != yv.Len() {
 			return x.Len() < yv.Len()
 		}
 		for i := 0; i < x.Len() && i < yv.Len(); i++ {
-			if x.At(i).LessV(yv.At(i)) {
+			if x.At(i).LessT(yv.At(i)) {
 				return true
 			}
-			if yv.At(i).LessV(x.At(i)) {
+			if yv.At(i).LessT(x.At(i)) {
 				return false
 			}
 		}
@@ -235,11 +235,21 @@ func (x *AV) LessV(y Value) bool {
 	}
 }
 
-func (xv *derivedVerb) LessV(y Value) bool {
+// LessT satisfies the specification of the Value interface.
+func (d *Dict) LessT(y Value) bool {
+	switch yv := y.(type) {
+	case *Dict:
+		return d.keys.LessT(yv.keys) || d.keys.Matches(yv.keys) && d.values.LessT(yv.values)
+	default:
+		return d.Type() < y.Type()
+	}
+}
+
+func (xv *derivedVerb) LessT(y Value) bool {
 	switch yv := y.(type) {
 	case *derivedVerb:
 		return xv.Fun < yv.Fun ||
-			xv.Fun == yv.Fun && xv.Arg.LessV(yv.Arg)
+			xv.Fun == yv.Fun && xv.Arg.LessT(yv.Arg)
 	case function:
 		return xv.stype() < yv.stype()
 	default:
@@ -247,11 +257,11 @@ func (xv *derivedVerb) LessV(y Value) bool {
 	}
 }
 
-func (xv *projection) LessV(y Value) bool {
+func (xv *projection) LessT(y Value) bool {
 	switch yv := y.(type) {
 	case *projection:
-		return xv.Fun.LessV(yv.Fun) ||
-			xv.Fun.Matches(yv.Fun) && NewAV(xv.Args).LessV(NewAV(yv.Args))
+		return xv.Fun.LessT(yv.Fun) ||
+			xv.Fun.Matches(yv.Fun) && NewAV(xv.Args).LessT(NewAV(yv.Args))
 	case function:
 		return xv.stype() < yv.stype()
 	default:
@@ -259,11 +269,11 @@ func (xv *projection) LessV(y Value) bool {
 	}
 }
 
-func (xv *projectionFirst) LessV(y Value) bool {
+func (xv *projectionFirst) LessT(y Value) bool {
 	switch yv := y.(type) {
 	case *projectionFirst:
-		return xv.Fun.LessV(yv.Fun) ||
-			xv.Fun.Matches(yv.Fun) && xv.Arg.LessV(yv.Arg)
+		return xv.Fun.LessT(yv.Fun) ||
+			xv.Fun.Matches(yv.Fun) && xv.Arg.LessT(yv.Arg)
 	case function:
 		return xv.stype() < yv.stype()
 	default:
@@ -271,10 +281,10 @@ func (xv *projectionFirst) LessV(y Value) bool {
 	}
 }
 
-func (xv *projectionMonad) LessV(y Value) bool {
+func (xv *projectionMonad) LessT(y Value) bool {
 	switch yv := y.(type) {
 	case *projectionMonad:
-		return xv.Fun.LessV(yv.Fun)
+		return xv.Fun.LessT(yv.Fun)
 	case function:
 		return xv.stype() < yv.stype()
 	default:
@@ -282,7 +292,7 @@ func (xv *projectionMonad) LessV(y Value) bool {
 	}
 }
 
-func (xv *nReplacer) LessV(y Value) bool {
+func (xv *nReplacer) LessT(y Value) bool {
 	switch yv := y.(type) {
 	case *nReplacer:
 		return xv.olds < yv.olds || xv.olds == yv.olds &&
@@ -294,10 +304,10 @@ func (xv *nReplacer) LessV(y Value) bool {
 	}
 }
 
-func (xv *replacer) LessV(y Value) bool {
+func (xv *replacer) LessT(y Value) bool {
 	switch yv := y.(type) {
 	case *replacer:
-		return xv.oldnew.LessV(yv.oldnew)
+		return xv.oldnew.LessT(yv.oldnew)
 	case function:
 		return xv.stype() < yv.stype()
 	default:
@@ -305,10 +315,10 @@ func (xv *replacer) LessV(y Value) bool {
 	}
 }
 
-func (xv *rxReplacer) LessV(y Value) bool {
+func (xv *rxReplacer) LessT(y Value) bool {
 	switch yv := y.(type) {
 	case *rxReplacer:
-		return xv.r.LessV(yv.r) || xv.r.Matches(yv.r) && xv.repl.LessV(yv.repl)
+		return xv.r.LessT(yv.r) || xv.r.Matches(yv.r) && xv.repl.LessT(yv.repl)
 	case function:
 		return xv.stype() < yv.stype()
 	default:
@@ -316,7 +326,7 @@ func (xv *rxReplacer) LessV(y Value) bool {
 	}
 }
 
-func (xv *rx) LessV(y Value) bool {
+func (xv *rx) LessT(y Value) bool {
 	switch yv := y.(type) {
 	case *rx:
 		return xv.Regexp.String() < yv.Regexp.String()
@@ -325,16 +335,16 @@ func (xv *rx) LessV(y Value) bool {
 	}
 }
 
-func (xv *errV) LessV(y Value) bool {
+func (xv *errV) LessT(y Value) bool {
 	switch yv := y.(type) {
 	case *errV:
-		return xv.V.LessV(yv.V)
+		return xv.V.LessT(yv.V)
 	default:
 		return xv.Type() < y.Type()
 	}
 }
 
-func (xv panicV) LessV(y Value) bool {
+func (xv panicV) LessT(y Value) bool {
 	switch yv := y.(type) {
 	case panicV:
 		return xv < yv
