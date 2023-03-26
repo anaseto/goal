@@ -17,10 +17,10 @@ func vfNaN(ctx *Context, args []V) V {
 
 func isNaN(x V) V {
 	if x.IsI() {
-		return NewI(b2i(false))
+		return NewI(B2I(false))
 	}
 	if x.IsF() {
-		return NewF(b2f(math.IsNaN(x.F())))
+		return NewF(B2F(math.IsNaN(x.F())))
 	}
 	switch xv := x.value.(type) {
 	case *AB:

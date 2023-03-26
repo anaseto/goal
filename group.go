@@ -8,7 +8,7 @@ func group(x V) V {
 			return NewAV(nil)
 		}
 		n := int(sumAB(xv))
-		r := make([]V, int(b2i(n > 0)+1))
+		r := make([]V, int(B2I(n > 0)+1))
 		ai := make([]int64, xv.Len())
 		if n == 0 {
 			for i := range ai {

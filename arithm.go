@@ -17,7 +17,7 @@ func negate(x V) V {
 	case *AB:
 		r := make([]int64, xv.Len())
 		for i, xi := range xv.Slice {
-			r[i] = -b2i(xi)
+			r[i] = -B2I(xi)
 		}
 		return NewAIWithRC(r, reuseRCp(xv.rc))
 	case *AI:
@@ -204,14 +204,14 @@ func ceil(x V) V {
 // not returns ~x.
 func not(x V) V {
 	if x.IsI() {
-		return NewI(b2i(x.I() == 0))
+		return NewI(B2I(x.I() == 0))
 	}
 	if x.IsF() {
-		return NewI(b2i(x.F() == 0))
+		return NewI(B2I(x.F() == 0))
 	}
 	switch xv := x.value.(type) {
 	case S:
-		return NewI(b2i(xv == ""))
+		return NewI(B2I(xv == ""))
 	case *AB:
 		r := xv.reuse()
 		for i, xi := range xv.Slice {
@@ -240,7 +240,7 @@ func not(x V) V {
 	case *Dict:
 		return newDictValues(xv.keys, not(NewV(xv.values)))
 	default:
-		return NewI(b2i(!isTrue(x)))
+		return NewI(B2I(!x.IsTrue()))
 	}
 }
 

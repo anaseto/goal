@@ -117,7 +117,7 @@ func flipAF(x *AV) V {
 		}
 		switch z := xi.value.(type) {
 		case *AB:
-			r[i] = float64(b2f(z.At(0)))
+			r[i] = float64(B2F(z.At(0)))
 		case *AF:
 			r[i] = z.At(0)
 		case *AI:
@@ -151,7 +151,7 @@ func flipAVAF(x *AV, lines int) V {
 		switch z := xi.value.(type) {
 		case *AB:
 			for j := 0; j < lines; j++ {
-				a[i+j*xlen] = float64(b2f(z.At(j)))
+				a[i+j*xlen] = float64(B2F(z.At(j)))
 			}
 		case *AF:
 			for j := 0; j < lines; j++ {
@@ -179,7 +179,7 @@ func flipAI(x *AV) V {
 		}
 		switch z := xi.value.(type) {
 		case *AB:
-			r[i] = b2i(z.At(0))
+			r[i] = B2I(z.At(0))
 		case *AI:
 			r[i] = z.At(0)
 		}
@@ -204,7 +204,7 @@ func flipAVAI(x *AV, lines int) V {
 		switch z := xi.value.(type) {
 		case *AB:
 			for j := 0; j < lines; j++ {
-				a[i+j*xlen] = b2i(z.At(j))
+				a[i+j*xlen] = B2I(z.At(j))
 			}
 		case *AI:
 			for j := 0; j < lines; j++ {

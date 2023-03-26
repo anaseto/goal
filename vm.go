@@ -161,13 +161,13 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 		case opJump:
 			ip += int(ops[ip])
 		case opJumpFalse:
-			if isFalse(ctx.top()) {
+			if ctx.top().IsFalse() {
 				ip += int(ops[ip])
 			} else {
 				ip++
 			}
 		case opJumpTrue:
-			if isTrue(ctx.top()) {
+			if ctx.top().IsTrue() {
 				ip += int(ops[ip])
 			} else {
 				ip++

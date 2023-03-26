@@ -6,8 +6,8 @@ import (
 	"reflect"
 )
 
-// b2i converts a boolean to an integer.
-func b2i(b bool) int64 {
+// B2I converts a boolean to an integer.
+func B2I(b bool) int64 {
 	var i int64
 	if b {
 		i = 1
@@ -18,7 +18,7 @@ func b2i(b bool) int64 {
 }
 
 // b2i converts a boolean to a float.
-func b2f(b bool) float64 {
+func B2F(b bool) float64 {
 	var f float64
 	if b {
 		f = 1
@@ -307,7 +307,7 @@ func toAF(x *AI) V {
 func fromABtoAF(x *AB) V {
 	r := make([]float64, x.Len())
 	for i, xi := range x.Slice {
-		r[i] = float64(b2i(xi))
+		r[i] = float64(B2I(xi))
 	}
 	return NewAFWithRC(r, reuseRCp(x.rc))
 }
@@ -317,13 +317,14 @@ func fromABtoAF(x *AB) V {
 func fromABtoAI(x *AB) V {
 	r := make([]int64, x.Len())
 	for i := range r {
-		r[i] = b2i(x.At(i))
+		r[i] = B2I(x.At(i))
 	}
 	return NewAIWithRC(r, reuseRCp(x.rc))
 }
 
-// isFalse returns true for false values.
-func isFalse(x V) bool {
+// IsFalse returns true for false values, that is zero numbers, empty strings,
+// zero-length values, and errors.
+func (x V) IsFalse() bool {
 	if x.IsI() {
 		return x.I() == 0
 	}
@@ -340,8 +341,9 @@ func isFalse(x V) bool {
 	}
 }
 
-// isTrue returns true for true values.
-func isTrue(x V) bool {
+// IsTrue returns true for true values, that is non-zero numbers, non-empty
+// strings, and non-zero length values that are not errors.
+func (x V) IsTrue() bool {
 	if x.IsI() {
 		return x.I() != 0
 	}
@@ -688,8 +690,8 @@ func normalizeFast(x *AV) (array, bool) {
 // CanonicalRec returns the canonical form of a given value, that is the most
 // specialized form. In practice, if the value is a generic array, but a more
 // specialized version could represent the value, it returns the specialized
-// value. All goal variadic functions have to return results in canonical
-// form, so this function can be used to ensure that.
+// value. All variadic functions have to return results in canonical form, so
+// this function can be used to ensure that when defining new ones.
 func CanonicalRec(x V) V {
 	switch xv := x.value.(type) {
 	case *AV:
@@ -723,9 +725,9 @@ func canonicalArray(x array) array {
 // Canonical returns the canonical form of a given value, that is the
 // most specialized form, assuming it's already canonical at depth > 1. In
 // practice, if the value is a generic array, but a more specialized version
-// could represent the value, it returns the specialized value. All goal
-// variadic functions have to return results in canonical form, so this
-// function can be used to ensure that.
+// could represent the value, it returns the specialized value. All variadic
+// functions have to return results in canonical form, so this function can be
+// used to ensure that when defining new ones.
 func Canonical(x V) V {
 	switch xv := x.value.(type) {
 	case *AV:

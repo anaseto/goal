@@ -514,7 +514,7 @@ func shiftBeforeAB(x V, yv *AB) V {
 		}
 		r := make([]int64, len(ys))
 		for i := max; i < len(ys); i++ {
-			r[i] = b2i(yv.At(i - max))
+			r[i] = B2I(yv.At(i - max))
 		}
 		r[0] = x.I()
 		return NewAIWithRC(r, reuseRCp(yv.rc))
@@ -528,7 +528,7 @@ func shiftBeforeAB(x V, yv *AB) V {
 		}
 		r := make([]float64, len(ys))
 		for i := max; i < len(ys); i++ {
-			r[i] = b2f(yv.At(i - max))
+			r[i] = B2F(yv.At(i - max))
 		}
 		r[0] = x.F()
 		return NewAFWithRC(r, reuseRCp(yv.rc))
@@ -542,14 +542,14 @@ func shiftBeforeAB(x V, yv *AB) V {
 	case *AF:
 		r := make([]float64, len(ys))
 		for i := max; i < len(ys); i++ {
-			r[i] = b2f(ys[i-max])
+			r[i] = B2F(ys[i-max])
 		}
 		copy(r[:max], xv.Slice)
 		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		r := make([]int64, len(ys))
 		for i := max; i < len(ys); i++ {
-			r[i] = b2i(yv.At(i - max))
+			r[i] = B2I(yv.At(i - max))
 		}
 		copy(r[:max], xv.Slice)
 		return NewAIWithRC(r, reuseRCp(yv.rc))
@@ -592,7 +592,7 @@ func shiftBeforeAI(x V, yv *AI) V {
 		r := yv.reuse()
 		copy(r.Slice[max:], ys[:len(ys)-max])
 		for i := 0; i < max; i++ {
-			r.Slice[i] = b2i(xv.At(i))
+			r.Slice[i] = B2I(xv.At(i))
 		}
 		return NewV(r)
 	case *AF:
@@ -640,7 +640,7 @@ func shiftBeforeAF(x V, yv *AF) V {
 		r := yv.reuse()
 		copy(r.Slice[max:], ys[:len(ys)-max])
 		for i := 0; i < max; i++ {
-			r.Slice[i] = float64(b2f(xv.At(i)))
+			r.Slice[i] = float64(B2F(xv.At(i)))
 		}
 		return NewV(r)
 	case *AF:
@@ -826,7 +826,7 @@ func shiftAfterAB(x V, yv *AB) V {
 		}
 		r := make([]int64, len(ys))
 		for i := max; i < len(ys); i++ {
-			r[i-max] = b2i(yv.At(i))
+			r[i-max] = B2I(yv.At(i))
 		}
 		r[len(ys)-1] = x.I()
 		return NewAIWithRC(r, reuseRCp(yv.rc))
@@ -839,7 +839,7 @@ func shiftAfterAB(x V, yv *AB) V {
 		}
 		r := make([]float64, len(ys))
 		for i := max; i < len(ys); i++ {
-			r[i-max] = b2f(yv.At(i))
+			r[i-max] = B2F(yv.At(i))
 		}
 		r[len(ys)-1] = x.F()
 		return NewAFWithRC(r, reuseRCp(yv.rc))
@@ -853,14 +853,14 @@ func shiftAfterAB(x V, yv *AB) V {
 	case *AF:
 		r := make([]float64, len(ys))
 		for i := max; i < len(ys); i++ {
-			r[i-max] = b2f(ys[i])
+			r[i-max] = B2F(ys[i])
 		}
 		copy(r[len(ys)-max:], xv.Slice)
 		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		r := make([]int64, len(ys))
 		for i := max; i < len(ys); i++ {
-			r[i-max] = b2i(yv.At(i))
+			r[i-max] = B2I(yv.At(i))
 		}
 		copy(r[len(ys)-max:], xv.Slice)
 		return NewAIWithRC(r, reuseRCp(yv.rc))
@@ -903,7 +903,7 @@ func shiftAfterAI(x V, yv *AI) V {
 		r := yv.reuse()
 		copy(r.Slice[:len(ys)-max], ys[max:])
 		for i := 0; i < max; i++ {
-			r.Slice[len(ys)-max+i] = b2i(xv.At(i))
+			r.Slice[len(ys)-max+i] = B2I(xv.At(i))
 		}
 		return NewV(r)
 	case *AF:
@@ -951,7 +951,7 @@ func shiftAfterAF(x V, yv *AF) V {
 		r := yv.reuse()
 		copy(r.Slice[:len(ys)-max], ys[max:])
 		for i := 0; i < max; i++ {
-			r.Slice[len(ys)-max+i] = float64(b2f(xv.At(i)))
+			r.Slice[len(ys)-max+i] = float64(B2F(xv.At(i)))
 		}
 		return NewV(r)
 	case *AF:

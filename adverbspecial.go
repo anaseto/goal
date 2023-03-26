@@ -495,7 +495,7 @@ func each2String(ctx *Context, x array) V {
 	case *AB:
 		r := make([]string, xv.Len())
 		for i, xi := range xv.Slice {
-			r[i] = strconv.FormatInt(b2i(xi), 10)
+			r[i] = strconv.FormatInt(B2I(xi), 10)
 		}
 		return NewAS(r)
 	case *AI:

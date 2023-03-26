@@ -49,7 +49,7 @@ func vfUTF8Valid(ctx *Context, args []V) V {
 func utf8valid(x V) V {
 	switch xv := x.value.(type) {
 	case S:
-		return NewI(b2i(utf8.ValidString(string(xv))))
+		return NewI(B2I(utf8.ValidString(string(xv))))
 	case *AS:
 		r := make([]bool, xv.Len())
 		for i, s := range xv.Slice {

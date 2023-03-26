@@ -73,10 +73,10 @@ func (x *AB) LessT(y Value) bool {
 			return x.Len() < yv.Len()
 		}
 		for i := 0; i < x.Len(); i++ {
-			if b2f(x.At(i)) < yv.At(i) {
+			if B2F(x.At(i)) < yv.At(i) {
 				return true
 			}
-			if b2f(x.At(i)) > yv.At(i) {
+			if B2F(x.At(i)) > yv.At(i) {
 				return false
 			}
 		}
@@ -86,10 +86,10 @@ func (x *AB) LessT(y Value) bool {
 			return x.Len() < yv.Len()
 		}
 		for i := 0; i < x.Len(); i++ {
-			if b2i(x.At(i)) < yv.At(i) {
+			if B2I(x.At(i)) < yv.At(i) {
 				return true
 			}
-			if b2i(x.At(i)) > yv.At(i) {
+			if B2I(x.At(i)) > yv.At(i) {
 				return false
 			}
 		}
@@ -107,10 +107,10 @@ func (x *AI) LessT(y Value) bool {
 			return x.Len() < yv.Len()
 		}
 		for i := 0; i < x.Len() && i < yv.Len(); i++ {
-			if x.At(i) < b2i(yv.At(i)) {
+			if x.At(i) < B2I(yv.At(i)) {
 				return true
 			}
-			if x.At(i) > b2i(yv.At(i)) {
+			if x.At(i) > B2I(yv.At(i)) {
 				return false
 			}
 		}
@@ -154,10 +154,10 @@ func (x *AF) LessT(y Value) bool {
 			return x.Len() < yv.Len()
 		}
 		for i := 0; i < x.Len() && i < yv.Len(); i++ {
-			if x.At(i) < b2f(yv.At(i)) {
+			if x.At(i) < B2F(yv.At(i)) {
 				return true
 			}
-			if x.At(i) > b2f(yv.At(i)) {
+			if x.At(i) > B2F(yv.At(i)) {
 				return false
 			}
 		}

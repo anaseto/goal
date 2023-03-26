@@ -79,11 +79,11 @@ func (x *AB) Append(ctx *Context, dst []byte) []byte {
 	}
 	if x.Len() == 1 {
 		dst = append(dst, ',')
-		dst = strconv.AppendInt(dst, b2i(x.At(0)), 10)
+		dst = strconv.AppendInt(dst, B2I(x.At(0)), 10)
 		return dst
 	}
 	for i, xi := range x.Slice {
-		dst = strconv.AppendInt(dst, b2i(xi), 10)
+		dst = strconv.AppendInt(dst, B2I(xi), 10)
 		if i < x.Len()-1 {
 			dst = append(dst, ' ')
 		}

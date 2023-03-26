@@ -320,7 +320,7 @@ func vfMatch(ctx *Context, args []V) V {
 	case 1:
 		return not(args[0])
 	case 2:
-		return NewI(b2i(args[1].Matches(args[0])))
+		return NewI(B2I(args[1].Matches(args[0])))
 	default:
 		return panicRank("~")
 	}
@@ -572,7 +572,7 @@ func vfScan(ctx *Context, args []V) V {
 // vfAnd implements the "and" variadic verb.
 func vfAnd(ctx *Context, args []V) V {
 	for i := len(args) - 1; i > 0; i-- {
-		if isFalse(args[i]) {
+		if args[i].IsFalse() {
 			return args[i]
 		}
 	}
@@ -732,7 +732,7 @@ func vfPanic(ctx *Context, args []V) V {
 // vfOr implements the "or" variadic verb.
 func vfOr(ctx *Context, args []V) V {
 	for i := len(args) - 1; i > 0; i-- {
-		if isTrue(args[i]) {
+		if args[i].IsTrue() {
 			return args[i]
 		}
 	}

@@ -154,7 +154,7 @@ func (x *AS) Len() int { return len(x.Slice) }
 // Len returns the length of the array.
 func (x *AV) Len() int { return len(x.Slice) }
 
-func (x *AB) at(i int) V { return NewI(b2i(x.Slice[i])) }
+func (x *AB) at(i int) V { return NewI(B2I(x.Slice[i])) }
 func (x *AI) at(i int) V { return NewI(x.Slice[i]) }
 func (x *AF) at(i int) V { return NewF(x.Slice[i]) }
 func (x *AS) at(i int) V { return NewS(x.Slice[i]) }
@@ -477,7 +477,7 @@ func matchAB(x, y *AB) bool {
 
 func matchABAI(x *AB, y *AI) bool {
 	for i, yi := range y.Slice {
-		if yi != b2i(x.At(i)) {
+		if yi != B2I(x.At(i)) {
 			return false
 		}
 	}
@@ -486,7 +486,7 @@ func matchABAI(x *AB, y *AI) bool {
 
 func matchABAF(x *AB, y *AF) bool {
 	for i, yi := range y.Slice {
-		if yi != b2f(x.At(i)) {
+		if yi != B2F(x.At(i)) {
 			return false
 		}
 	}

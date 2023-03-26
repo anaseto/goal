@@ -44,7 +44,7 @@ func jsonStringToGoal(s string) V {
 func jsonToGoal(v any) V {
 	switch vv := v.(type) {
 	case bool:
-		return NewI(b2i(vv))
+		return NewI(B2I(vv))
 	case float64:
 		return NewF(vv)
 	case string:

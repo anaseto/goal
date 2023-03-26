@@ -227,7 +227,7 @@ func searchAI(x *AI, y V) V {
 	case *AB:
 		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
-			r[i] = searchAII(x, b2i(yi))
+			r[i] = searchAII(x, B2I(yi))
 		}
 		return NewAI(r)
 	case *AI:
@@ -265,7 +265,7 @@ func searchAF(x *AF, y V) V {
 	case *AB:
 		r := make([]int64, yv.Len())
 		for i, yi := range yv.Slice {
-			r[i] = searchAFI(x, b2i(yi))
+			r[i] = searchAFI(x, B2I(yi))
 		}
 		return NewAI(r)
 	case *AI:

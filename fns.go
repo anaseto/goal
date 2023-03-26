@@ -98,13 +98,13 @@ func where(x V) V {
 	case *AB:
 		n := int64(0)
 		for _, xi := range xv.Slice {
-			n += b2i(xi)
+			n += B2I(xi)
 		}
 		r := make([]int64, n+1)
 		j := int64(0)
 		for i, xi := range xv.Slice {
 			r[j] = int64(i)
-			j += b2i(xi)
+			j += B2I(xi)
 		}
 		return NewV(&AI{Slice: r[:len(r)-1], rc: reuseRCp(xv.rc), flags: flagAscending})
 	case *AI:
@@ -281,7 +281,7 @@ func replicateI(n int64, y V) V {
 func replicateAB(x *AB, y V) V {
 	n := int64(0)
 	for _, xi := range x.Slice {
-		n += b2i(xi)
+		n += B2I(xi)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -442,7 +442,7 @@ func weedOut(x, y V) V {
 func weedOutAB(x *AB, y V) V {
 	n := int64(0)
 	for _, xi := range x.Slice {
-		n += 1 - b2i(xi)
+		n += 1 - B2I(xi)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -503,7 +503,7 @@ func weedOutAB(x *AB, y V) V {
 func weedOutAI(x *AI, y V) V {
 	n := int64(0)
 	for _, xi := range x.Slice {
-		n += b2i(xi == 0)
+		n += B2I(xi == 0)
 	}
 	switch yv := y.value.(type) {
 	case *AB:

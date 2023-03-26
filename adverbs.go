@@ -257,7 +257,7 @@ func doWhile(ctx *Context, args []V) V {
 				ctx.drop()
 				return cond
 			}
-			if !isTrue(cond) {
+			if !cond.IsTrue() {
 				x.DecrRC()
 				f.DecrRC()
 				ctx.drop()
@@ -557,7 +557,7 @@ func doWhiles(ctx *Context, args []V) V {
 				ctx.drop()
 				return cond
 			}
-			if !isTrue(cond) {
+			if !cond.IsTrue() {
 				f.DecrRC()
 				x.DecrRC()
 				ctx.drop()

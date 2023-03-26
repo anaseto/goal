@@ -15,7 +15,7 @@ func mathm(x V, f func(float64) float64) V {
 	case *AB:
 		r := make([]float64, xv.Len())
 		for i, xi := range xv.Slice {
-			r[i] = f(b2f(xi))
+			r[i] = f(B2F(xi))
 		}
 		return NewAFWithRC(r, reuseRCp(xv.rc))
 	case *AI:
