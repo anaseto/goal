@@ -51,181 +51,181 @@ func (xv S) LessV(y Value) bool {
 	}
 }
 
-func (xv *AB) LessV(y Value) bool {
+func (x *AB) LessV(y Value) bool {
 	switch yv := y.(type) {
 	case *AB:
-		if xv.Len() != yv.Len() {
-			return xv.Len() < yv.Len()
+		if x.Len() != yv.Len() {
+			return x.Len() < yv.Len()
 		}
-		for i := 0; i < xv.Len(); i++ {
-			if !xv.At(i) && yv.At(i) {
+		for i := 0; i < x.Len(); i++ {
+			if !x.At(i) && yv.At(i) {
 				return true
 			}
-			if xv.At(i) && !yv.At(i) {
+			if x.At(i) && !yv.At(i) {
 				return false
 			}
 		}
 		return false
 	case *AF:
-		if xv.Len() != yv.Len() {
-			return xv.Len() < yv.Len()
+		if x.Len() != yv.Len() {
+			return x.Len() < yv.Len()
 		}
-		for i := 0; i < xv.Len(); i++ {
-			if b2f(xv.At(i)) < yv.At(i) {
+		for i := 0; i < x.Len(); i++ {
+			if b2f(x.At(i)) < yv.At(i) {
 				return true
 			}
-			if b2f(xv.At(i)) > yv.At(i) {
+			if b2f(x.At(i)) > yv.At(i) {
 				return false
 			}
 		}
 		return false
 	case *AI:
-		if xv.Len() != yv.Len() {
-			return xv.Len() < yv.Len()
+		if x.Len() != yv.Len() {
+			return x.Len() < yv.Len()
 		}
-		for i := 0; i < xv.Len(); i++ {
-			if b2i(xv.At(i)) < yv.At(i) {
+		for i := 0; i < x.Len(); i++ {
+			if b2i(x.At(i)) < yv.At(i) {
 				return true
 			}
-			if b2i(xv.At(i)) > yv.At(i) {
+			if b2i(x.At(i)) > yv.At(i) {
 				return false
 			}
 		}
 		return false
 	default:
-		return xv.Type() < y.Type()
+		return x.Type() < y.Type()
 	}
 }
 
-func (xv *AI) LessV(y Value) bool {
+func (x *AI) LessV(y Value) bool {
 	switch yv := y.(type) {
 	case *AB:
-		if xv.Len() != yv.Len() {
-			return xv.Len() < yv.Len()
+		if x.Len() != yv.Len() {
+			return x.Len() < yv.Len()
 		}
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if xv.At(i) < b2i(yv.At(i)) {
+		for i := 0; i < x.Len() && i < yv.Len(); i++ {
+			if x.At(i) < b2i(yv.At(i)) {
 				return true
 			}
-			if xv.At(i) > b2i(yv.At(i)) {
+			if x.At(i) > b2i(yv.At(i)) {
 				return false
 			}
 		}
 		return false
 	case *AF:
-		if xv.Len() != yv.Len() {
-			return xv.Len() < yv.Len()
+		if x.Len() != yv.Len() {
+			return x.Len() < yv.Len()
 		}
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if float64(xv.At(i)) < yv.At(i) {
+		for i := 0; i < x.Len() && i < yv.Len(); i++ {
+			if float64(x.At(i)) < yv.At(i) {
 				return true
 			}
-			if float64(xv.At(i)) > yv.At(i) {
+			if float64(x.At(i)) > yv.At(i) {
 				return false
 			}
 		}
 		return false
 	case *AI:
-		if xv.Len() != yv.Len() {
-			return xv.Len() < yv.Len()
+		if x.Len() != yv.Len() {
+			return x.Len() < yv.Len()
 		}
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if xv.At(i) < yv.At(i) {
+		for i := 0; i < x.Len() && i < yv.Len(); i++ {
+			if x.At(i) < yv.At(i) {
 				return true
 			}
-			if xv.At(i) > yv.At(i) {
+			if x.At(i) > yv.At(i) {
 				return false
 			}
 		}
 		return false
 	default:
-		return xv.Type() < y.Type()
+		return x.Type() < y.Type()
 	}
 }
 
-func (xv *AF) LessV(y Value) bool {
+func (x *AF) LessV(y Value) bool {
 	switch yv := y.(type) {
 	case *AB:
-		if xv.Len() != yv.Len() {
-			return xv.Len() < yv.Len()
+		if x.Len() != yv.Len() {
+			return x.Len() < yv.Len()
 		}
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if xv.At(i) < b2f(yv.At(i)) {
+		for i := 0; i < x.Len() && i < yv.Len(); i++ {
+			if x.At(i) < b2f(yv.At(i)) {
 				return true
 			}
-			if xv.At(i) > b2f(yv.At(i)) {
+			if x.At(i) > b2f(yv.At(i)) {
 				return false
 			}
 		}
 		return false
 	case *AF:
-		if xv.Len() != yv.Len() {
-			return xv.Len() < yv.Len()
+		if x.Len() != yv.Len() {
+			return x.Len() < yv.Len()
 		}
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if xv.At(i) < yv.At(i) {
+		for i := 0; i < x.Len() && i < yv.Len(); i++ {
+			if x.At(i) < yv.At(i) {
 				return true
 			}
-			if xv.At(i) > yv.At(i) {
+			if x.At(i) > yv.At(i) {
 				return false
 			}
 		}
 		return false
 	case *AI:
-		if xv.Len() != yv.Len() {
-			return xv.Len() < yv.Len()
+		if x.Len() != yv.Len() {
+			return x.Len() < yv.Len()
 		}
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if xv.At(i) < float64(yv.At(i)) {
+		for i := 0; i < x.Len() && i < yv.Len(); i++ {
+			if x.At(i) < float64(yv.At(i)) {
 				return true
 			}
-			if xv.At(i) > float64(yv.At(i)) {
+			if x.At(i) > float64(yv.At(i)) {
 				return false
 			}
 		}
 		return false
 	default:
-		return xv.Type() < y.Type()
+		return x.Type() < y.Type()
 	}
 }
 
-func (xv *AS) LessV(y Value) bool {
+func (x *AS) LessV(y Value) bool {
 	switch yv := y.(type) {
 	case *AS:
-		if xv.Len() != yv.Len() {
-			return xv.Len() < yv.Len()
+		if x.Len() != yv.Len() {
+			return x.Len() < yv.Len()
 		}
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if xv.At(i) < yv.At(i) {
+		for i := 0; i < x.Len() && i < yv.Len(); i++ {
+			if x.At(i) < yv.At(i) {
 				return true
 			}
-			if xv.At(i) > yv.At(i) {
+			if x.At(i) > yv.At(i) {
 				return false
 			}
 		}
 		return false
 	default:
-		return xv.Type() < y.Type()
+		return x.Type() < y.Type()
 	}
 }
 
-func (xv *AV) LessV(y Value) bool {
+func (x *AV) LessV(y Value) bool {
 	switch yv := y.(type) {
 	case *AV:
-		if xv.Len() != yv.Len() {
-			return xv.Len() < yv.Len()
+		if x.Len() != yv.Len() {
+			return x.Len() < yv.Len()
 		}
-		for i := 0; i < xv.Len() && i < yv.Len(); i++ {
-			if xv.At(i).LessV(yv.At(i)) {
+		for i := 0; i < x.Len() && i < yv.Len(); i++ {
+			if x.At(i).LessV(yv.At(i)) {
 				return true
 			}
-			if yv.At(i).LessV(xv.At(i)) {
+			if yv.At(i).LessV(x.At(i)) {
 				return false
 			}
 		}
 		return false
 	default:
-		return xv.Type() < y.Type()
+		return x.Type() < y.Type()
 	}
 }
 
