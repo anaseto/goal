@@ -34,11 +34,7 @@ func rangeI(n int64) V {
 
 func rangeII(from, to int64) V {
 	if from > to {
-		r := make([]int64, from-to)
-		for i := range r {
-			r[i] = from - int64(i)
-		}
-		return NewV(&AI{elts: r, flags: flagUnique})
+		return NewAI(nil)
 	}
 	r := make([]int64, to-from)
 	for i := range r {

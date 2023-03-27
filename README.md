@@ -176,7 +176,7 @@ x%y divide      3%2 -> 1.5          3 4%2 -> 1.5 2
 !i  enum        !5 -> 0 1 2 3 4
 !d  keys        !"a" "b"!1 2 -> "a" "b"
 !I  odometer    !2 3 -> (0 0 0 1 1 1;0 1 2 0 1 2)
-i!i range       2!5 -> 2 3 4        5!2 -> 5 4 3
+i!i range       2!5 -> 2 3 4        5!2 -> !0
 i!s colsplit    3!"abcdefgh" -> "abc" "def" "gh"               (i-bytes strings)
 i!Y colsplit    2!!6 -> (0 1;2 3;4 5)            2!"a" "b" "c" -> ("a" "b";,"c")
 X!Y dict        d:"a" "b"!1 2;d "a" -> 1
