@@ -236,7 +236,7 @@ func vfKey(ctx *Context, args []V) V {
 	case 2:
 		x, y := args[1], args[0]
 		if x.IsI() || x.IsF() {
-			return shapeSplit(x, y)
+			return colSplit(x, y)
 		}
 		return dict(args[1], args[0])
 	default:

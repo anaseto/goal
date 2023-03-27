@@ -17,20 +17,32 @@ func enum(x V) V {
 	case *AI:
 		return rangeArray(xv)
 	default:
-		if isStar(x) {
-			return panics("!x : x non-integer (*)")
-		}
-		return panics("!x : nested indices in x (A)")
+		return panicType("!x", "x", x)
 	}
 }
 
 func rangeI(n int64) V {
 	if n < 0 {
-		return panics("!x : x negative")
+		return panics("!i : i negative")
 	}
 	r := make([]int64, n)
 	for i := range r {
 		r[i] = int64(i)
+	}
+	return NewV(&AI{elts: r, flags: flagAscending | flagUnique})
+}
+
+func rangeII(from, to int64) V {
+	if from > to {
+		r := make([]int64, from-to)
+		for i := range r {
+			r[i] = from - int64(i)
+		}
+		return NewV(&AI{elts: r, flags: flagUnique})
+	}
+	r := make([]int64, to-from)
+	for i := range r {
+		r[i] = from + int64(i)
 	}
 	return NewV(&AI{elts: r, flags: flagAscending | flagUnique})
 }

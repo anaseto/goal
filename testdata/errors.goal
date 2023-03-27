@@ -30,7 +30,6 @@ or[1;;3;4] / empty argument (2-th)
 a:3 "a";1 2=a / bad type
 a:3 "a";"c" 2=a / bad type
 0!!6 / not positive
-0!6 / type
 0.3!6 / non-integer
 " "/1 2 / not a string array
 " "/(1 2;3 4) / not a string array
@@ -45,7 +44,7 @@ a:3 "a";"c" 2=a / bad type
 !-3 / negative
 !3.2 / non-integer index
 !3.2 5.2 / contains non-integer
-!(1 2;3 4) / nested indices
+!(1 2;3 4) / type
 &-3 / negative
 &2.5 / non-integer
 &-3.0 / negative
@@ -777,7 +776,7 @@ sub["b" "a" "d" "c"]["a";"b"] / too many arguments
 ("a""b"!1 2)[1;2] / unsupported
 (1 2;3 4)[(5 2;7 3)] / out of bounds
 (1 2;3 4)["a" "b"] / non-integer
-!* / non-integer
+!* / type
 &-3.0 2 / negative
 &"a""b"!-3.0 2 / negative
 {-1}#1 2 / negative

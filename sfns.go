@@ -1133,8 +1133,8 @@ func windows(i int64, y V) V {
 	}
 }
 
-// shapeSplit returns i!y.
-func shapeSplit(x V, y V) V {
+// colSplit returns i!y.
+func colSplit(x V, y V) V {
 	var i int64
 	if x.IsI() {
 		i = x.I()
@@ -1145,6 +1145,15 @@ func shapeSplit(x V, y V) V {
 			return Panicf("i!y : i non-integer (%g)", f)
 		}
 		i = int64(f)
+	}
+	if y.IsI() {
+		return rangeII(i, y.I())
+	} else if y.IsF() {
+		f := y.F()
+		if !isI(f) {
+			return Panicf("i!i : non-integer right (%g)", f)
+		}
+		return rangeII(i, int64(f))
 	}
 	switch yv := y.value.(type) {
 	case S:
