@@ -2,6 +2,9 @@
 
 + New i!i range form.
 + New ""^s unicode-aware trim spaces form.
++ More permissive projection application: for example `+[][2;3]` is valid, even
+  though `+[]` has rank 1 when used in adverbial contexts that make use of
+  function rank.
 
 # v0.10.0 2023-03-26
 

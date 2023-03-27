@@ -224,54 +224,44 @@ func (dv *derivedVerb) applyN(ctx *Context, n int) V {
 }
 
 func (p *projectionFirst) applyN(ctx *Context, n int) V {
-	if n > 1 {
-		ctx.dropN(n - 1)
-		return Panicf("too many arguments: got %d, expected 1", n)
-	}
 	ctx.push(p.Arg)
-	return p.Fun.applyN(ctx, 2)
+	return p.Fun.applyN(ctx, n+1)
 }
 
 func (p *projectionMonad) applyN(ctx *Context, n int) V {
-	if n > 1 {
-		ctx.dropN(n - 1)
-		return Panicf("too many arguments: got %d, expected 1", n)
-	}
-	return p.Fun.applyN(ctx, 1)
+	return p.Fun.applyN(ctx, n)
 }
 
 func (p *projection) applyN(ctx *Context, n int) V {
 	args := ctx.peekN(n)
-	nNils := countNils(p.Args)
+	nilN := countNils(p.Args)
 	switch {
-	case len(args) > nNils:
-		if n > 1 {
-			ctx.dropN(n - 1)
+	case n >= nilN:
+		for _, arg := range args[nilN:] {
+			ctx.pushNoRC(arg)
 		}
-		return panics("too many arguments")
-	case len(args) == nNils:
 		nilc := 0
 		for _, arg := range p.Args {
 			switch {
 			case arg.kind != valNil:
 				ctx.push(arg)
 			default:
-				ctx.push(args[nilc])
+				ctx.pushNoRC(args[nilc])
 				nilc++
 			}
 		}
-		r := p.Fun.applyN(ctx, len(p.Args))
-		ctx.dropN(n)
+		r := p.Fun.applyN(ctx, len(p.Args)+n-nilN)
+		ctx.dropNnoRC(n)
 		return r
 	default:
 		vargs := cloneArgs(p.Args)
 		nilc := 1
 		for i := len(vargs) - 1; i >= 0; i-- {
 			if vargs[i].kind == valNil {
-				if nilc > len(args) {
+				if nilc > n {
 					break
 				}
-				vargs[i] = args[len(args)-nilc]
+				vargs[i] = args[n-nilc]
 				nilc++
 			}
 		}
