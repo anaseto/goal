@@ -409,13 +409,13 @@ func weedOut(x, y V) V {
 		if x.I() != 0 {
 			return NewAV(nil)
 		}
-		return y
+		return toArray(y)
 	}
 	if x.IsF() {
 		if x.F() != 0 {
 			return NewAV(nil)
 		}
-		return y
+		return toArray(y)
 	}
 	switch xv := x.value.(type) {
 	case *AB:
