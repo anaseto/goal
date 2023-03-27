@@ -455,6 +455,33 @@ func trim(s S, y V) V {
 	}
 }
 
+// trimSpaces returns ""^y.
+func trimSpaces(y V) V {
+	switch yv := y.value.(type) {
+	case S:
+		return NewS(strings.TrimSpace(string(yv)))
+	case *AS:
+		r := make([]string, yv.Len())
+		for i, yi := range yv.elts {
+			r[i] = strings.TrimSpace(string(yi))
+		}
+		return NewAS(r)
+	case *AV:
+		r := make([]V, yv.Len())
+		for i, yi := range yv.elts {
+			r[i] = trimSpaces(yi)
+			if r[i].IsPanic() {
+				return r[i]
+			}
+		}
+		return NewAV(r)
+	case *Dict:
+		return newDictValues(yv.keys, trimSpaces(NewV(yv.values)))
+	default:
+		return panicType("s^y", "y", y)
+	}
+}
+
 func sub1(x V) V {
 	switch xv := x.value.(type) {
 	case *AS:

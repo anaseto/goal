@@ -73,8 +73,6 @@ func sortUp(x V) V {
 		switch xv := x.value.(type) {
 		case *Dict:
 			return NewV(sortUpDict(xv))
-		case S:
-			return NewS(strings.TrimSpace(string(xv)))
 		default:
 			return panicType("^x", "x", x)
 		}

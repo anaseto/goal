@@ -726,6 +726,9 @@ func without(x, y V) V {
 	}
 	switch xv := x.value.(type) {
 	case S:
+		if xv == "" {
+			return trimSpaces(y)
+		}
 		return trim(xv, y)
 	case array:
 		_, ok := y.value.(array)

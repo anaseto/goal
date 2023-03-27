@@ -870,3 +870,5 @@ rt.time[4] / type
 eval[`.rq/1+"a"/`;"loc";""] / type
 eval[`.rq/1+"a"/`] / type
 json(3 `"b"`;`"c"`) / type
+""^3 / type
+""^("  \nstuff\t" " \n";"a ";4) / type
