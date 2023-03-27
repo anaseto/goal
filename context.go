@@ -170,17 +170,18 @@ func (ctx *Context) GetGlobal(name string) (V, bool) {
 	return ctx.globals[id], true
 }
 
-// Compile parses and compiles code from the given source string. The name
-// argument is used for error reporting and represents, usually, the filename.
-func (ctx *Context) Compile(name string, s string) error {
+// Compile parses and compiles code from the given source string. The loc
+// argument is the location used for error reporting and represents, usually a
+// filename.
+func (ctx *Context) Compile(loc string, s string) error {
 	s = strings.Trim(s, " \n")
 	if len(ctx.gCode.Body) > 0 {
 		ctx.gCode.Body = ctx.gCode.Body[:0]
 		ctx.gCode.Pos = ctx.gCode.Pos[:0]
 		ctx.gCode.last = 0
 	}
-	ctx.fname = name
-	ctx.sources[name] = s
+	ctx.fname = loc
+	ctx.sources[loc] = s
 	ctx.scanner = NewScanner(ctx.keywords, s)
 	ctx.compiler = newCompiler(ctx)
 	llen := len(ctx.lambdas)
@@ -209,10 +210,10 @@ func (ctx *Context) Run() (V, error) {
 	return ctx.pop(), nil
 }
 
-// Eval calls Compile with the given string as unnamed source, and then Run.
-// You cannot call it within a variadic function, as the evaluation is done
-// on the current context, so it would interrupt compilation of current file.
-// Use EvalPackage for that.
+// Eval calls Compile with the given string and an empty location, and then
+// Run.  You cannot call it within a variadic function, as the evaluation is
+// done on the current context, so it would interrupt compilation of current
+// file.  Use EvalPackage for that.
 func (ctx *Context) Eval(s string) (V, error) {
 	ofname := ctx.fname
 	defer func() {
@@ -226,41 +227,41 @@ func (ctx *Context) Eval(s string) (V, error) {
 }
 
 // ErrPackageImported is returned by EvalPackage for packages that have already
-// been processed.
+// been processed (same location).
 type ErrPackageImported struct{}
 
 func (e ErrPackageImported) Error() string {
 	return "ErrPackageImported"
 }
 
-// EvalPackage calls Compile with the string as source, name (for error
-// location and caching, usually a filename), prefix (for global variables,
-// usually a filename without the extension), and then Run.  If a package with
-// same name has already been evaluated, it returns ErrPackageImported. Current
-// implementation has the following limitation: if a prefix is provided, it is
-// only used the first time a same package is evaluated (so all imports have to
-// share the same prefix).
-// The package is evaluated in a derived context that is then merged on
-// successful completion, so this function can be called within a variadic
-// function.
-func (ctx *Context) EvalPackage(s, name, prefix string) (V, error) {
+// EvalPackage calls Compile with the string s as source, loc as error location
+// (used for caching too, usually a filename), pfx as prefix for global
+// variables (usually a filename without the extension), and then Run.  If a
+// package with same location has already been evaluated, it returns
+// ErrPackageImported. This means that even though Goal allows to evaluate
+// (also via import) with the same location several times (which can be useful
+// if separate files using the same package can be used together or alone),
+// only the first one counts.  The package is evaluated in a derived context
+// that is then merged on successful completion, so this function can be called
+// within a variadic function.
+func (ctx *Context) EvalPackage(s, loc, pfx string) (V, error) {
 	ofname := ctx.fname
 	defer func() {
 		ctx.fname = ofname
 	}()
 	oprefix := ctx.gPrefix
-	if prefix != "" {
-		ctx.gPrefix = prefix
+	if pfx != "" {
+		ctx.gPrefix = pfx
 		defer func() {
 			ctx.gPrefix = oprefix
 		}()
 	}
-	_, ok := ctx.sources[name]
+	_, ok := ctx.sources[loc]
 	if ok {
 		return NewI(0), ErrPackageImported{}
 	}
 	nctx := ctx.derive()
-	err := nctx.Compile(name, s)
+	err := nctx.Compile(loc, s)
 	if err != nil {
 		ctx.merge(nctx)
 		return V{}, err
