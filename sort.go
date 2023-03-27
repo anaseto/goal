@@ -70,11 +70,14 @@ func (x *Dict) Swap(i, j int) {
 func sortUp(x V) V {
 	xa, ok := x.value.(array)
 	if !ok {
-		d, ok := x.value.(*Dict)
-		if ok {
-			return NewV(sortUpDict(d))
+		switch xv := x.value.(type) {
+		case *Dict:
+			return NewV(sortUpDict(xv))
+		case S:
+			return NewS(strings.TrimSpace(string(xv)))
+		default:
+			return panicType("^x", "x", x)
 		}
-		return panicType("^x", "x", x)
 	}
 	flags := xa.getFlags()
 	if flags.Has(flagAscending) {

@@ -1,6 +1,7 @@
 # v? ?
 
 + New i!i range form.
++ New ^s trim spaces form.
 
 # v0.10.0 2023-03-26
 

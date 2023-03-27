@@ -126,3 +126,4 @@ a:3;"num $a" / "num 3"
 a:3 2 1;"array $a" / "array 3 2 1"
 id:4;"$id. " / "4. "
 qq/" "/ / `" "`
+^"  \nstuff\t" / "stuff"

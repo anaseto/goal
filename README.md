@@ -198,6 +198,7 @@ x~y match       3~3 -> 1        2 3~3 2 -> 0        ("a";%)~("b";%) -> 0 1
 ,x  enlist      ,1 -> ,1        #,2 3 -> 1               (list with one element)
 d,d merge       ("a""b"!1 2),"b""c"!3 4 -> "a""b""c"!1 3 4
 x,y join        1,2 -> 1 2              "ab" "c","d" -> "ab" "c" "d"
+^s  trim spaces ^" \nstuff\t" -> "stuff"
 ^X  sort        ^3 5 0 -> 0 3 5         ^"ca" "ab" "bc" -> "ab" "bc" "ca"
 i^s windows     2^"abcd" -> "ab" "bc" "cd"                     (i-bytes strings)
 i^Y windows     2^!4 -> (0 1;1 2;2 3)
