@@ -72,7 +72,7 @@ func (x V) applyN(ctx *Context, n int) V {
 		if n > 1 {
 			ctx.dropN(n - 1)
 		}
-		return Panicf("type %s cannot be applied", x.Type())
+		return Panicf("type \"%s\" is not callable", x.Type())
 	}
 }
 
@@ -471,7 +471,7 @@ func applyArray(x array, y V) V {
 		r := NewV(x.atIndices(ayi))
 		return r
 	default:
-		return Panicf("x[y] : y non-integer (%s)", y.Type())
+		return panicType("x[y]", "y", y)
 	}
 }
 

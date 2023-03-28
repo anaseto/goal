@@ -45,7 +45,7 @@ func mathm(x V, f func(float64) float64) V {
 		r.InitRC()
 		return NewV(&Dict{keys: xv.keys, values: r.value.(array)})
 	default:
-		return Panicf("bad type in x (%s)", x.Type())
+		return Panicf("bad type \"%s\" in x", x.Type())
 	}
 }
 

@@ -164,7 +164,7 @@ func VFOpen(ctx *goal.Context, args []goal.V) goal.V {
 		var ok bool
 		mode, ok = args[1].Value().(goal.S)
 		if !ok {
-			return goal.Panicf("mode open path : mode not a string (%s)", args[1].Type())
+			return panicType("x open s", "x", args[1])
 		}
 	}
 	m := string(mode)
@@ -189,11 +189,10 @@ func VFOpen(ctx *goal.Context, args []goal.V) goal.V {
 	}
 	path, ok := args[0].Value().(goal.S)
 	if !ok {
-		pfx := ""
 		if len(args) == 2 {
-			pfx = "mode "
+			return panicType("x open s", "s", args[0])
 		}
-		return goal.Panicf(pfx+"open path : path not a string (%s)", args[0].Type())
+		return panicType("open s", "s", args[0])
 	}
 	f, err := os.OpenFile(string(path), flag, 0666)
 	if err != nil {
@@ -214,7 +213,7 @@ func openPipe(m string, c goal.V) goal.V {
 		}
 		cmd = exec.Command(cv.Slice()[0], cv.Slice()[1:]...)
 	default:
-		return goal.Panicf("mode open cmd : non-string cmd (%s)", c.Type())
+		return panicType("x open s", "s", c)
 	}
 	r := &command{c: cmd, mode: m}
 	switch m {
@@ -259,7 +258,7 @@ func VFClose(ctx *goal.Context, args []goal.V) goal.V {
 		}
 		return goal.NewI(1)
 	default:
-		return goal.Panicf("close h : h not a handle (%s)", args[0].Type())
+		return panicType("close h", "h", args[0])
 	}
 }
 
@@ -292,7 +291,7 @@ func VFRead(ctx *goal.Context, args []goal.V) goal.V {
 			n = x.I()
 		} else if x.IsF() {
 			if !isI(x.F()) {
-				return goal.Panicf("i read h : n not an integer (%g)", x.F())
+				return goal.Panicf("i read h : non-integer i (%g)", x.F())
 			}
 			n = int64(x.F())
 		} else {
@@ -300,7 +299,7 @@ func VFRead(ctx *goal.Context, args []goal.V) goal.V {
 			if ok {
 				return readString(y, string(s))
 			}
-			return goal.Panicf("x read h : bad type for x (%s)", x.Type())
+			return panicType("x read h", "x", x)
 		}
 	}
 	switch yv := y.Value().(type) {
@@ -330,11 +329,10 @@ func VFRead(ctx *goal.Context, args []goal.V) goal.V {
 		}
 		return goal.NewS(s)
 	}
-	p := ""
 	if len(args) == 2 {
-		p = "x "
+		return panicType("read h", "h", y)
 	}
-	return goal.Panicf("%sread y : bad type for y (%s)", p, y.Type())
+	return panicType("x read h", "h", y)
 }
 
 func readFile(fname string) (string, error) {
@@ -374,7 +372,7 @@ func readString(h goal.V, delim string) goal.V {
 		}
 		return goal.NewS(s)
 	default:
-		return goal.Panicf("s read h : h not a reader (%s)", h.Type())
+		return panicType("s read h", "h", h)
 	}
 }
 
@@ -405,6 +403,6 @@ func VFFlush(ctx *goal.Context, args []goal.V) goal.V {
 		}
 		return goal.NewI(1)
 	default:
-		return goal.Panicf("flush h : bad type for h (%s)", x.Type())
+		return panicType("flush h", "h", x)
 	}
 }

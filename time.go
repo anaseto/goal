@@ -14,7 +14,7 @@ func vfTime(ctx *Context, args []V) V {
 	case S:
 		cmd = string(xv)
 	default:
-		return Panicf("time[cmd;t;format] : non-string cmd (%s)", x.Type())
+		return panicType("time[cmd;t;format]", "cmd", x)
 	}
 	if len(args) == 1 {
 		r := ftime(cmd, time.Now())
@@ -31,21 +31,18 @@ func vfTime(ctx *Context, args []V) V {
 		z := args[len(args)-3]
 		format, ok := z.value.(S)
 		if !ok {
-			return Panicf("time[t;cmd;format] : non-string format (%s)",
-				z.Type())
+			return panicType("time[cmd;t;format]", "format", z)
 		}
 		return doTime(cmd, y, getFormat(string(format)), "")
 	case 4:
 		z := args[len(args)-3]
 		format, ok := z.value.(S)
 		if !ok {
-			return Panicf("time[t;cmd;format;loc] : non-string format (%s)",
-				z.Type())
+			return panicType("time[cmd;t;format]", "format", z)
 		}
 		loc, ok := args[len(args)-4].value.(S)
 		if !ok {
-			return Panicf("time[t;cmd;format;loc] : non-string location (%s)",
-				args[len(args)-4].Type())
+			return panicType("time[cmd;t;format;loc]", "loc", args[len(args)-4])
 		}
 		return doTime(cmd, y, getFormat(string(format)), string(loc))
 	default:

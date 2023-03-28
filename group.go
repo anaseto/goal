@@ -101,7 +101,7 @@ func group(x V) V {
 		if x.Len() == 0 {
 			return NewAV(nil)
 		}
-		return Panicf("=x : x not an integer array (%s)", x.Type())
+		return panicType("=x", "x", x)
 	}
 }
 
@@ -144,22 +144,22 @@ func icount(x V) V {
 		if x.Len() == 0 {
 			return NewAI(nil)
 		}
-		return Panicf("= x : x not an integer array (%s)", x.Type())
+		return panicType("=x", "x", x)
 	}
 }
 
 // groupBy by returns {x}=y.
 func groupBy(x, y V) V {
 	if x.Len() != y.Len() {
-		return Panicf("f=y : length mismatch for f[y] and y: %d vs %d ",
+		return Panicf("f=Y : length mismatch for f[Y] and Y: %d vs %d ",
 			x.Len(), y.Len())
 
 	}
-	x = group(x)
-	if x.IsPanic() {
-		return panics("f=y : f[y] not an integer array")
+	gx := group(x)
+	if gx.IsPanic() {
+		return panicType("f=Y", "f[Y]", x)
 	}
-	xav := x.value.(*AV) // group should always return *AV or panicV
+	xav := gx.value.(*AV) // group should always return *AV or panicV
 	switch yv := y.value.(type) {
 	case array:
 		r := make([]V, xav.Len())
@@ -168,6 +168,6 @@ func groupBy(x, y V) V {
 		}
 		return NewAV(r)
 	default:
-		return Panicf("f=y : y not array (%s)", y.Type())
+		return panicType("f=Y", "Y", y)
 	}
 }

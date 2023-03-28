@@ -520,7 +520,7 @@ func splitNS(x V, sep S, y V) V {
 		}
 		n = int(x.F())
 	} else {
-		return Panicf("i s/y : i bad type (%s)", x.Type())
+		return panicType("i s/y", "i", x)
 	}
 	r := splitN(n, sep, y)
 	if r.IsPanic() {

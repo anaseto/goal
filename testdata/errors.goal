@@ -1,12 +1,12 @@
-(1)2 / type n cannot be applied
-1[2] / type n cannot be applied
+(1)2 / not callable
+1[2] / not callable
 {x}[2;3] / too many arguments
 {x+y}[2][2;3] / too many arguments
 (!5)[7] / out of bounds
 2.3 5[7] / out of bounds
 "a" "b"[7] / out of bounds
 0 1 0[7] / out of bounds
-(!5)[`a`] / non-integer
+(!5)[`a`] / type
 { / EOF
 ) / unexpected ) without opening
 {) / unexpected ) without closing
@@ -89,7 +89,7 @@ shift 2 / type
 "s"[1;2;3] / too many arguments
 1 2[0.5] / non-integer index
 1 2[-4.0] / out of bound
-1 2[+] / non-integer
+1 2[+] / type
 {x+y}[1;][2;3] / too many arguments
 (,1)[,1] / out of bound
 (,1)[,2] / out of bound
@@ -149,7 +149,7 @@ tan[1;2] / too many arguments
 @[1 2;3 5;:;5] / out of bounds
 @[1 2;3 5;:;5 2] / out of bounds
 @[1 2;0 1;:;5 2 3] / length mismatch
-@[1 2;"a";+;5] / non-integer
+@[1 2;"a";+;5] / type
 @[2;"a";+;5] / type
 ?-3 / negative integer
 ?3.5 / not an integer
@@ -164,15 +164,15 @@ tan[1;2] / too many arguments
 2?(+) / type
 -2?(+) / type
 rt.seed 2.5 / not an integer
-time 2 / non-string cmd
+time 2 / type
 time "invalid" / unknown command
 "unix"  time 2.5 / non-integer
 "invalid"  time 2 / unknown command
 "unix"  time (+) / type
 time["unix";10000;"RFC3339";"UTC";"UTC"] / too many arguments
-time["unix";10000;2;"UTC"] / non-string format
-time["unix";10000;2] / non-string format
-time["unix";10000;"RFC3339";42] / non-string location
+time["unix";10000;2;"UTC"] / type
+time["unix";10000;2] / type
+time["unix";10000;"RFC3339";42] / type
 a[1]:2 / undefined global
 {a[1]:2}0 / undefined local
 a:!10;a[]:2 / no indices
@@ -292,7 +292,7 @@ qq/${a.b.c}/ / too many dots
 &\(1 2;"a" "b") / type
 |/(1 2;"a" "b") / type
 |\(1 2;"a" "b") / type
-@[1 2 3;"a" "b";+;0] / non-integer
+@[1 2 3;"a" "b";+;0] / type
 @[1 2 3;0 2;+;0 1 3] / length mismatch
 @[*;0 2;+;0 1 3] / type
 @["a""b""c"!1 2 3;"a" "c";+;0 1 3] / length mismatch
@@ -301,7 +301,7 @@ qq/${a.b.c}/ / too many dots
 @[1 2 3;0 5;+;0 1] / out of bounds
 @[1 2 3;0 5;1+] / out of bounds
 @[1 2 3;5;1+] / out of bounds
-@[1 2 3;0 "a";1+] / non-integer
+@[1 2 3;0 "a";1+] / type
 "a"!3 4 / type
 "a""a"!3 / type
 "a""b"!1 2 3 / length mismatch
@@ -776,7 +776,7 @@ sub["b" "a" "d" "c"]["a";"b"] / too many arguments
 2.5 1[0;1] / out of depth
 ("a""b"!1 2)[1;2] / unsupported
 (1 2;3 4)[(5 2;7 3)] / out of bounds
-(1 2;3 4)["a" "b"] / non-integer
+(1 2;3 4)["a" "b"] / type
 !* / type
 &-3.0 2 / negative
 &"a""b"!-3.0 2 / negative
@@ -876,3 +876,4 @@ json(3 `"b"`;`"c"`) / type
 (-3)?() / empty
 (-3)?2 3 / i > #Y
 rt.seed "a" / type
+3 in * / type

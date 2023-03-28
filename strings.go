@@ -130,7 +130,7 @@ func applyS(s S, x V) V {
 		}
 		return canonicalFast(NewAV(r))
 	default:
-		return Panicf("s[x] : x non-integer (%s)", x.Type())
+		return panicType("s[x]", "x", x)
 	}
 }
 
@@ -240,7 +240,7 @@ func applyS2(s S, x V, y V) V {
 		}
 		return canonicalFast(NewAV(r))
 	default:
-		return Panicf("s[x;y] : x non-integer (%s)", x.Type())
+		return panicType("s[x;y]", "x", x)
 	}
 }
 
@@ -664,7 +664,7 @@ func splitN(n int, sep S, y V) V {
 	case *Dict:
 		return newDictValues(yv.keys, splitN(n, sep, NewV(yv.values)))
 	default:
-		return Panicf("bad type in y (%s)", y.Type())
+		return Panicf("bad type \"%s\" in y", y.Type())
 	}
 }
 

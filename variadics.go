@@ -838,7 +838,7 @@ func vfRTPrec(ctx *Context, args []V) V {
 		}
 		ctx.prec = int(x.F())
 	} else {
-		return Panicf(`rt.prec i : i bad type (%s)`, x.Type())
+		return panicType("rt.prec i", "i", x)
 	}
 	return NewI(1)
 }

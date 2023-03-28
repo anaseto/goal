@@ -33,7 +33,7 @@ func VFImport(ctx *goal.Context, args []goal.V) goal.V {
 		pfx := args[1]
 		p, ok := pfx.Value().(goal.S)
 		if !ok {
-			return goal.Panicf("x import s : x not a string (%s)", pfx.Type())
+			return panicType("x import s", "x", pfx)
 		}
 		prefix = string(p)
 		hasPfx = true
@@ -52,7 +52,10 @@ func VFImport(ctx *goal.Context, args []goal.V) goal.V {
 		}
 		return r
 	default:
-		return goal.Panicf("import s : s not a string (%s)", s.Type())
+		if len(args) == 2 {
+			return panicType("x import s", "s", s)
+		}
+		return panicType("import s", "s", s)
 	}
 }
 
@@ -288,7 +291,7 @@ func VFShell(ctx *goal.Context, args []goal.V) goal.V {
 	case goal.S:
 		cmds = string(arg)
 	default:
-		return goal.Panicf("shell s : s is not a string (%s)", arg.Type())
+		return panicType("shell s", "s", args[len(args)-1])
 	}
 	cmd := exec.Command("/bin/sh", "-c", cmds)
 	cmd.Stderr = os.Stderr
@@ -319,7 +322,10 @@ func VFRun(ctx *goal.Context, args []goal.V) goal.V {
 	case *goal.AS:
 		cmds = yv.Slice()
 	default:
-		return goal.Panicf("run : non-string command (%s)", y.Type())
+		if len(args) == 2 {
+			return panicType("x run s", "s", y)
+		}
+		return panicType("run s", "s", y)
 	}
 	if len(cmds) == 0 {
 		return goal.NewPanic("run : empty command")
@@ -340,7 +346,7 @@ func VFRun(ctx *goal.Context, args []goal.V) goal.V {
 		x := args[1]
 		s, ok := x.Value().(goal.S)
 		if !ok {
-			return goal.Panicf("x run s : bad type for x (%s)", x.Type())
+			return panicType("x run s", "x", x)
 		}
 		cmd := exec.Command(cmds[0], cmds[1:]...)
 		cmd.Stdin = strings.NewReader(string(s))
@@ -375,6 +381,10 @@ func VFChdir(ctx *goal.Context, args []goal.V) goal.V {
 		}
 		return goal.NewI(1)
 	default:
-		return goal.Panicf("chdir : non-string directory (%s)", x.Type())
+		return panicType("chdir s", "s", x)
 	}
+}
+
+func panicType(op, sym string, x goal.V) goal.V {
+	return goal.Panicf("%s : bad type \"%s\" in %s", op, x.Type(), sym)
 }

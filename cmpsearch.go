@@ -357,8 +357,10 @@ func memberOf(x, y V) V {
 		return memberOfAS(x, yv)
 	case *AV:
 		return memberOfAV(x, yv)
+	case *Dict:
+		return memberOf(x, NewV(yv.values))
 	default:
-		return Panicf("x in y : y not an array (%s)", y.Type())
+		return panicType("x in y", "y", y)
 	}
 }
 

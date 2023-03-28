@@ -39,7 +39,7 @@ func VFEnv(ctx *goal.Context, args []goal.V) goal.V {
 	switch len(args) {
 	case 1:
 		if !ok {
-			return goal.Panicf("env s : s not a string (%s)", x.Type())
+			return panicType("env s", "s", x)
 		}
 		if name == "" {
 			return environ()
@@ -51,7 +51,7 @@ func VFEnv(ctx *goal.Context, args []goal.V) goal.V {
 		return goal.NewS(s)
 	case 2:
 		if !ok {
-			return goal.Panicf("x env s : x not a string (%s)", x.Type())
+			return panicType("x env s", "x", x)
 		}
 		y := args[0]
 		s, ok := y.Value().(goal.S)
@@ -67,7 +67,7 @@ func VFEnv(ctx *goal.Context, args []goal.V) goal.V {
 				}
 				return goal.NewI(1)
 			}
-			return goal.Panicf("n env s : s not a string (%s)", y.Type())
+			return panicType("x env s", "s", y)
 		}
 		err := os.Setenv(string(name), string(s))
 		if err != nil {
