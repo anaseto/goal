@@ -226,7 +226,9 @@ X$y binsearch   2 3 5 7$8 2 7 5 5.5 3 0 -> 4 1 4 3 3 2 0           (x ascending)
 ?i  uniform     ?2 -> 0.6046602879796196 0.9405090880450124
 ?X  uniq        ?2 2 3 4 3 3 -> 2 3 4
 i?i roll        5?100 -> 10 51 21 51 37
+i?Y roll array  5?"a" "b" "c" -> "c" "a" "c" "c" "b"
 i?i deal        -5?100 -> 19 26 0 73 94                        (always distinct)
+i?Y deal array  -3?"a""b""c" -> "a""c""b"                      (always distinct)
 s?r rindex      "abcde"?rx/b../ -> 1 3                           (offset;length)
 s?s index       "a = a + 1"?"=" "+" -> 2 6
 d?y find key    ("a" "b"!3 4)?4 -> "b"       ("a" "b"!3 4)?5 -> ""

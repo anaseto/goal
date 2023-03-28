@@ -873,3 +873,6 @@ eval[`.rq/1+"a"/`] / type
 json(3 `"b"`;`"c"`) / type
 ""^3 / type
 ""^("  \nstuff\t" " \n";"a ";4) / type
+(-3)?() / empty
+(-3)?2 3 / i > #Y
+rt.seed "a" / type

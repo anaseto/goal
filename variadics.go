@@ -434,7 +434,7 @@ func vfFind(ctx *Context, args []V) V {
 	case 2:
 		x, y := args[1], args[0]
 		if x.IsI() || x.IsF() {
-			return roll(ctx, x, y)
+			return rolldeal(ctx, x, y)
 		}
 		return find(x, y)
 	default:
