@@ -260,7 +260,7 @@ func markFirsts(ctx *Context, x V) V {
 			return NewAB(r)
 		}
 	default:
-		return panicType("firsts x", "x", x)
+		return panicType("firsts X", "X", x)
 	}
 	switch xv := x.value.(type) {
 	case *AB:
@@ -642,7 +642,7 @@ func occurrenceCount(ctx *Context, x V) V {
 			return NewAB(r)
 		}
 	default:
-		return panicType("ocount x", "x", x)
+		return panicType("ocount X", "X", x)
 	}
 	switch xv := x.value.(type) {
 	case *AB:
@@ -739,7 +739,7 @@ func without(x, y V) V {
 			if ok {
 				return withoutDict(x, d)
 			}
-			return panicType("x^y", "y", y)
+			return panicType("X^Y", "Y", y)
 		}
 		r := memberOf(y, x)
 		switch bres := r.value.(type) {
@@ -774,7 +774,7 @@ func intersection(x, y V) V {
 		r := memberOf(NewV(yv.values), x)
 		return NewDict(replicate(r, NewV(yv.keys)), replicate(r, NewV(yv.values)))
 	default:
-		return panicType("x#y", "y", y)
+		return panicType("X#Y", "Y", y)
 	}
 }
 

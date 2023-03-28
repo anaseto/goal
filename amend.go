@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-// amend3 implements @[x;y;f].
+// amend3 implements @[X;i;f].
 func (ctx *Context) amend3(x, y, f V) V {
 	switch xv := x.value.(type) {
 	case *Dict:
@@ -14,15 +14,15 @@ func (ctx *Context) amend3(x, y, f V) V {
 		xv = xv.shallowClone()
 		y = toIndices(y)
 		if y.IsPanic() {
-			return ppanic("@[x;y;f] : y ", y)
+			return ppanic("@[X;i;f] : i ", y)
 		}
 		r, err := ctx.amend3array(xv, y, f)
 		if err != nil {
-			return Panicf("@[x;y;f] : %v", err)
+			return Panicf("@[X;i;f] : %v", err)
 		}
 		return canonicalFast(NewV(r))
 	default:
-		return panicType("@[x;y;f]", "x", x)
+		return panicType("@[X;i;f]", "X", x)
 	}
 }
 
@@ -159,7 +159,7 @@ func (ctx *Context) amend3array(x array, y, f V) (array, error) {
 	}
 }
 
-// amend4 implements @[x;y;f;z].
+// amend4 implements @[X;i;f;z].
 func (ctx *Context) amend4(x, y, f, z V) V {
 	switch xv := x.value.(type) {
 	case *Dict:
@@ -168,22 +168,22 @@ func (ctx *Context) amend4(x, y, f, z V) V {
 		xv = xv.shallowClone()
 		y = toIndices(y)
 		if y.IsPanic() {
-			return ppanic("@[x;y;f;z] : y ", y)
+			return ppanic("@[X;i;f;z] : i ", y)
 		}
 		if f.kind == valVariadic && variadic(f.n) == vRight {
 			r, err := amendr(xv, y, z)
 			if err != nil {
-				return Panicf("@[x;y;:;z] : %v", err)
+				return Panicf("@[X;i;:;z] : %v", err)
 			}
 			return canonicalFast(NewV(r))
 		}
 		r, err := ctx.amend4array(xv, y, f, z)
 		if err != nil {
-			return Panicf("@[x;y;f;z] : %v", err)
+			return Panicf("@[X;i;f;z] : %v", err)
 		}
 		return canonicalFast(NewV(r))
 	default:
-		return panicType("@[x;y;f;z]", "x", x)
+		return panicType("@[X;i;f;z]", "X", x)
 	}
 }
 
@@ -491,22 +491,22 @@ func amendrAV(x array, yv *AV, z V) (array, error) {
 	return x, nil
 }
 
-// deepAmend3 implements .[x;y;f].
+// deepAmend3 implements .[X;y;f].
 func (ctx *Context) deepAmend3(x, y, f V) V {
 	x = x.Clone()
 	switch xv := x.value.(type) {
 	case array:
 		y = toIndices(y)
 		if y.IsPanic() {
-			return ppanic(".[x;y;f] : y ", y)
+			return ppanic(".[X;y;f] : y ", y)
 		}
 		x, err := ctx.deepAmend3array(xv, y, f)
 		if err != nil {
-			return Panicf(".[x;y;f] : %v", err)
+			return Panicf(".[X;y;f] : %v", err)
 		}
 		return CanonicalRec(NewV(x))
 	default:
-		return panicType(".[x;y;f]", "x", x)
+		return panicType(".[X;y;f]", "x", x)
 	}
 }
 
@@ -561,22 +561,22 @@ func (ctx *Context) deepAmend3rec(x array, y0 V, y array, f V) (array, error) {
 	return x, nil
 }
 
-// deepAmend4 implements .[x;y;f].
+// deepAmend4 implements .[X;y;f].
 func (ctx *Context) deepAmend4(x, y, f, z V) V {
 	x = x.Clone()
 	switch xv := x.value.(type) {
 	case array:
 		y = toIndices(y)
 		if y.IsPanic() {
-			return ppanic(".[x;y;f] : y ", y)
+			return ppanic(".[X;y;f] : y ", y)
 		}
 		x, err := ctx.deepAmend4array(xv, y, f, z)
 		if err != nil {
-			return Panicf(".[x;y;f] : %v", err)
+			return Panicf(".[X;y;f] : %v", err)
 		}
 		return CanonicalRec(NewV(x))
 	default:
-		return panicType(".[x;y;f]", "x", x)
+		return panicType(".[X;y;f]", "x", x)
 	}
 }
 

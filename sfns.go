@@ -539,7 +539,7 @@ func shiftBefore(x, y V) V {
 	case *Dict:
 		return newDictValues(yv.keys, shiftBefore(x, NewV(yv.values)))
 	default:
-		return panicType("x rshift y", "y", y)
+		return panicType("x rshift Y", "Y", y)
 	}
 }
 
@@ -831,7 +831,7 @@ func nudge(x V) V {
 	case *Dict:
 		return newDictValues(xv.keys, nudge(NewV(xv.values)))
 	default:
-		return panicType("rshift x", "x", x)
+		return panicType("rshift X", "X", x)
 	}
 }
 
@@ -851,7 +851,7 @@ func shiftAfter(x, y V) V {
 	case *Dict:
 		return newDictValues(yv.keys, shiftAfter(x, NewV(yv.values)))
 	default:
-		return panicType("x shift y", "y", y)
+		return panicType("x shift Y", "Y", y)
 	}
 }
 
@@ -1142,7 +1142,7 @@ func nudgeBack(x V) V {
 	case *Dict:
 		return newDictValues(xv.keys, nudgeBack(NewV(xv.values)))
 	default:
-		return panicType("shift x", "x", x)
+		return panicType("shift X", "X", x)
 	}
 }
 
