@@ -240,7 +240,7 @@ func decode(f V, x V) V {
 		switch xv := x.value.(type) {
 		case *AI:
 			if fv.Len() != xv.Len() {
-				return Panicf("I/x : length mismatch: %d (#I) %d (#x)", fv.Len(), xv.Len())
+				return panicLength("I/x", fv.Len(), xv.Len())
 			}
 			var r, n int64 = 0, 1
 			for i := xv.Len() - 1; i >= 0; i-- {

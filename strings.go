@@ -191,8 +191,7 @@ func applyS2(s S, x V, y V) V {
 		r := make([]string, xv.Len())
 		if z, ok := y.value.(*AI); ok {
 			if z.Len() != xv.Len() {
-				return Panicf("s[x;y] : length mismatch: %d (#x) %d (#y)",
-					xv.Len(), z.Len())
+				return panicLength("s[x;y]", xv.Len(), z.Len())
 
 			}
 			for i, n := range xv.elts {
@@ -499,16 +498,16 @@ func sub2(x, y V) V {
 	case S:
 		yv, ok := y.value.(S)
 		if !ok {
-			return panicType("sub[s;y]", "y", y)
+			return panicType("sub[s;s]", "s", y)
 		}
 		return NewV(&nReplacer{olds: xv, news: yv, n: -1})
 	case *AS:
 		yv, ok := y.value.(*AS)
 		if !ok {
-			return panicType("sub[S;y]", "y", y)
+			return panicType("sub[S;S]", "S", y)
 		}
 		if xv.Len() != yv.Len() {
-			return Panicf("sub[S;S] : length mismatch (%d vs %d)", xv.Len(), yv.Len())
+			return panicLength("sub[S;S]", xv.Len(), yv.Len())
 		}
 		oldnew := make([]string, 2*xv.Len())
 		for i, xi := range xv.elts {

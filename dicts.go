@@ -77,7 +77,7 @@ func dict(x, y V) V {
 		return panicType("X!Y", "X", x)
 	}
 	if xv.Len() != yv.Len() {
-		return Panicf("X!Y : length mismatch (%d vs %d)", xv.Len(), yv.Len())
+		return panicLength("X!Y", xv.Len(), yv.Len())
 	}
 	return NewV(&Dict{keys: xv, values: yv})
 }

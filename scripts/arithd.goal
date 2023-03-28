@@ -188,7 +188,7 @@ genOp:{[opname;opsym] / globals o,op,xt,h
               return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
         case array:
               if yv.Len() != xv.Len() {
-                      return Panicf("x${fmtop}y : length mismatch: %d vs %d", xv.Len(), yv.Len())
+                      return panicLength("x${op}y", xv.Len(), yv.Len())
               }/
   tplAV:{[yi]"\n"_qq/
     r := xv.reuse()
@@ -366,7 +366,7 @@ doXY:{[yt;e;t]
   s1:"\n"_qq/
     case *A$yt:
             if x.Len() != yv.Len() {
-                    return Panicf("x${fmtop}y : length mismatch: %d vs %d", x.Len(), yv.Len())
+                    return panicLength("x${op}y", x.Len(), yv.Len())
             }/
   s2:?[t in xt,yt
     sub["{XY}";?[xt~t;"x";"yv"]]"\n"_qq/
@@ -397,7 +397,7 @@ doXdAV:{
             return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
     case *AV:
             if x.Len() != yv.Len() {
-                    return Panicf("x${fmtop}y : length mismatch: %d vs %d", x.Len(), yv.Len())
+                    return panicLength("x${op}y", x.Len(), yv.Len())
             }
             r := yv.reuse()
             for i := range r.elts {
