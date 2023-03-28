@@ -2,7 +2,7 @@ pad:{p:(2+#x)#0;,/(,p;{0,x,0}'x;,p)}
 upad:{|'(1_)'|'(1_)'|1_|1_x}
 life:{ / life x returns next generation
   padx:pad x
-  rotx:{y rotate x}[padx;]'-1 0 1
+  rotx:-1 0 1 rotate padx
   roty:,/{(y rotate)''x}[rotx;]'-1 0 1
   nbs8:(+/roty)-padx
   upad(nbs8=3)|padx&nbs8=2
