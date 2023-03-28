@@ -126,17 +126,17 @@ func NewPanic(s string) V {
 }
 
 func panicType(op, sym string, x V) V {
-	return Panicf("%s : bad type for %s (%s)", op, sym, x.Type())
+	return Panicf("%s : bad type \"%s\" in %s", op, x.Type(), sym)
 }
 
-func panicTypeElt(op, sym string, x V) V {
-	return Panicf("%s : bad type in %s (%s)", op, sym, x.Type())
-}
-
-func panicDomain(op, s string) V {
-	return panics(op + " : " + s)
+func panicLength(op string, n1, n2 int) V {
+	return Panicf("%s : length mismatch: %d vs %d", op, n1, n2)
 }
 
 func panicRank(op string) V {
 	return panics(op + " got too many arguments")
+}
+
+func panicRankN(op, sym string, wanted, got int) V {
+	return Panicf("%s : %s expected %d arguments, but got %d", op, sym, wanted, got)
 }

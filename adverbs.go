@@ -85,7 +85,7 @@ func joinS(sep S, x V) V {
 		if x.Len() == 0 {
 			return NewS("")
 		}
-		return Panicf("s/x : x not a string array (%s)", x.Type())
+		return panicType("s/S", "S", x)
 	}
 }
 
@@ -128,7 +128,7 @@ func converge(ctx *Context, f, x V) V {
 func fold3(ctx *Context, args []V) V {
 	f := args[2]
 	if !f.IsFunction() {
-		return Panicf("x F/y : F not a function (%s)", f.Type())
+		return panicType("x F/y", "F", f)
 	}
 	rank := f.Rank(ctx)
 	if rank == 1 {
@@ -137,7 +137,7 @@ func fold3(ctx *Context, args []V) V {
 	if rank == 2 {
 		return foldxfy(ctx, args[1], f, args[0])
 	}
-	return Panicf("x F/y : F expects %d arguments, but got %d", rank, len(args)-1)
+	return panicRankN("x F/y", "F", rank, len(args)-1)
 }
 
 func foldxfy(ctx *Context, x, f, y V) V {
@@ -192,11 +192,11 @@ func getIterLen(args []V) (int, error) {
 func foldN(ctx *Context, args []V) V {
 	f := args[len(args)-1]
 	if !f.IsFunction() {
-		return Panicf("f/[x;y;...] : f not a function (%s)", f.Type())
+		return panicType("f/[x;y;...]", "f", f)
 	}
 	n := len(args) - 1
 	if f.Rank(ctx) != n {
-		return Panicf("f/[x;y;...] : f expects %d arguments, but got %d", f.Rank(ctx), n)
+		return panicRankN("f/[x;y;...]", "f", f.Rank(ctx), n)
 	}
 	mlen, err := getIterLen(args[:len(args)-2])
 	if err != nil {
@@ -468,11 +468,11 @@ func scanxfy(ctx *Context, x, f, y V) V {
 func scanN(ctx *Context, args []V) V {
 	f := args[len(args)-1]
 	if !f.IsFunction() {
-		return Panicf("f\\[x;y;...] : f not a function (%s)", f.Type())
+		return panicType(`f[x;y;...]`, "f", f)
 	}
 	n := len(args) - 1
 	if f.Rank(ctx) != n {
-		return Panicf("f\\[x;y;...] : f expects %d arguments, but got %d", f.Rank(ctx), n)
+		return panicRankN(`f\[x;y;...]`, "f", f.Rank(ctx), n)
 	}
 	mlen, err := getIterLen(args[:len(args)-2])
 	if err != nil {
@@ -602,7 +602,7 @@ func dosTimes(ctx *Context, n int64, f, y V) V {
 
 func each2(ctx *Context, f, x V) V {
 	if !f.IsFunction() {
-		return Panicf("f'x : f not a function (%s)", f.Type())
+		return panicType(`f'x`, "f", f)
 	}
 	switch xv := x.value.(type) {
 	case *Dict:
@@ -648,11 +648,11 @@ func eachfx(ctx *Context, f V, x array) V {
 func eachN(ctx *Context, args []V) V {
 	f := args[len(args)-1]
 	if !f.IsFunction() {
-		return Panicf("f'[x;y;...] : f not a function (%s)", f.Type())
+		return panicType(`f'[x;y;...]`, "f", f)
 	}
 	n := len(args) - 1
 	if f.Rank(ctx) != n {
-		return Panicf("f'[x;y;...] : f expects %d arguments, but got %d", f.Rank(ctx), n)
+		return panicRankN(`f'[x;y;...]`, "f", f.Rank(ctx), n)
 	}
 	mlen, err := getIterLen(args[:len(args)-1])
 	if err != nil {

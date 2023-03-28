@@ -220,7 +220,7 @@ genOp:{[opname;opsym] / globals o,op,xt,h
         v.InitRC()
         return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
     default:
-          return panicTypeElt("x${op}y", "x", x)
+          return panicType("x${op}y", "x", x)
     }
   }
   /
@@ -299,7 +299,7 @@ doxdAV:{
         }
         return NewV(r)
     default:
-        return panicTypeElt("x${op}y", "y", y)/
+        return panicType("x${op}y", "y", y)/
 }
 
 doX:{
@@ -409,7 +409,7 @@ doXdAV:{
             }
             return NewV(r)
     default:
-            return panicTypeElt("x${op}y", "y", y)/
+            return panicType("x${op}y", "y", y)/
 }
 
 'h:"w" open "../arithd.go"

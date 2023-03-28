@@ -111,7 +111,7 @@ func rotate(x, y V) V {
 		}
 		return NewAV(r)
 	default:
-		return panicTypeElt("x rotate y", "x", x)
+		return panicType("x rotate y", "x", x)
 	}
 }
 
@@ -370,7 +370,7 @@ func deleteI(x V, i int64) V {
 
 func cutAIarray(x *AI, y array) V {
 	if !x.flags.Has(flagAscending) && !sort.IsSorted(x) {
-		return panics("I_y : I is not ascending")
+		return panics("I_y : non-ascending I")
 	}
 	x.flags |= flagAscending
 	ylen := int64(y.Len())
@@ -398,7 +398,7 @@ func cutAIarray(x *AI, y array) V {
 
 func cutAIS(x *AI, y S) V {
 	if !x.flags.Has(flagAscending) && !sort.IsSorted(x) {
-		return panics("I_s : I is not ascending")
+		return panics("I_s : non-ascending I")
 	}
 	x.flags |= flagAscending
 	ylen := int64(len(y))

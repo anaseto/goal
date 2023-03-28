@@ -74,7 +74,7 @@ func sortUp(x V) V {
 		case *Dict:
 			return NewV(sortUpDict(xv))
 		default:
-			return panicType("^x", "x", x)
+			return panicType("^X", "X", x)
 		}
 	}
 	flags := xa.getFlags()
@@ -144,7 +144,7 @@ func ascend(x V) V {
 	case *Dict:
 		return NewV(sortUpDict(xv).keys)
 	default:
-		return panicType("<x", "x", x)
+		return panicType("<X", "X", x)
 	}
 }
 
@@ -163,37 +163,37 @@ func search(x V, y V) V {
 	switch xv := x.value.(type) {
 	case *AB:
 		if !xv.flags.Has(flagAscending) && !sort.IsSorted(xv) {
-			return panicDomain("x$y", "x is not ascending")
+			return panics("X$y : non-ascending X")
 		}
 		xv.flags |= flagAscending
 		return searchAI(fromABtoAI(xv).value.(*AI), y)
 	case *AI:
 		if !xv.flags.Has(flagAscending) && !sort.IsSorted(xv) {
-			return panicDomain("x$y", "x is not ascending")
+			return panics("X$y : non-ascending X")
 		}
 		xv.flags |= flagAscending
 		return searchAI(xv, y)
 	case *AF:
 		if !xv.flags.Has(flagAscending) && !sort.IsSorted(xv) {
-			return panicDomain("x$y", "x is not ascending")
+			return panics("X$y : non-ascending X")
 		}
 		xv.flags |= flagAscending
 		return searchAF(xv, y)
 	case *AS:
 		if !xv.flags.Has(flagAscending) && !sort.IsSorted(xv) {
-			return panicDomain("x$y", "x is not ascending")
+			return panics("X$y : non-ascending X")
 		}
 		xv.flags |= flagAscending
 		return searchAS(xv, y)
 	case *AV:
 		if !xv.flags.Has(flagAscending) && !sort.IsSorted(xv) {
-			return panicDomain("x$y", "x is not ascending")
+			return panics("X$y : non-ascending X")
 		}
 		xv.flags |= flagAscending
 		return searchAV(xv, y)
 	default:
 		// should not happen
-		return panicType("x$y", "x", x)
+		return panicType("X$y", "x", x)
 	}
 }
 

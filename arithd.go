@@ -74,7 +74,7 @@ func equal(x, y V) V {
 		v.InitRC()
 		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
 	default:
-		return panicTypeElt("x=y", "x", x)
+		return panicType("x=y", "x", x)
 	}
 }
 
@@ -122,7 +122,7 @@ func equalFV(x float64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x=y", "y", y)
+		return panicType("x=y", "y", y)
 	}
 }
 
@@ -170,7 +170,7 @@ func equalIV(x int64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x=y", "y", y)
+		return panicType("x=y", "y", y)
 	}
 }
 
@@ -202,7 +202,7 @@ func equalSV(x S, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x=y", "y", y)
+		return panicType("x=y", "y", y)
 	}
 }
 
@@ -270,7 +270,7 @@ func equalABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x=y", "y", y)
+		return panicType("x=y", "y", y)
 	}
 }
 
@@ -338,7 +338,7 @@ func equalAFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x=y", "y", y)
+		return panicType("x=y", "y", y)
 	}
 }
 
@@ -406,7 +406,7 @@ func equalAIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x=y", "y", y)
+		return panicType("x=y", "y", y)
 	}
 }
 
@@ -448,7 +448,7 @@ func equalASV(x *AS, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x=y", "y", y)
+		return panicType("x=y", "y", y)
 	}
 }
 
@@ -519,7 +519,7 @@ func lesser(x, y V) V {
 		v.InitRC()
 		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
 	default:
-		return panicTypeElt("x<y", "x", x)
+		return panicType("x<y", "x", x)
 	}
 }
 
@@ -567,7 +567,7 @@ func lesserFV(x float64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x<y", "y", y)
+		return panicType("x<y", "y", y)
 	}
 }
 
@@ -615,7 +615,7 @@ func lesserIV(x int64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x<y", "y", y)
+		return panicType("x<y", "y", y)
 	}
 }
 
@@ -647,7 +647,7 @@ func lesserSV(x S, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x<y", "y", y)
+		return panicType("x<y", "y", y)
 	}
 }
 
@@ -715,7 +715,7 @@ func lesserABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x<y", "y", y)
+		return panicType("x<y", "y", y)
 	}
 }
 
@@ -783,7 +783,7 @@ func lesserAFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x<y", "y", y)
+		return panicType("x<y", "y", y)
 	}
 }
 
@@ -851,7 +851,7 @@ func lesserAIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x<y", "y", y)
+		return panicType("x<y", "y", y)
 	}
 }
 
@@ -893,7 +893,7 @@ func lesserASV(x *AS, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x<y", "y", y)
+		return panicType("x<y", "y", y)
 	}
 }
 
@@ -964,7 +964,7 @@ func greater(x, y V) V {
 		v.InitRC()
 		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
 	default:
-		return panicTypeElt("x>y", "x", x)
+		return panicType("x>y", "x", x)
 	}
 }
 
@@ -1012,7 +1012,7 @@ func greaterFV(x float64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x>y", "y", y)
+		return panicType("x>y", "y", y)
 	}
 }
 
@@ -1060,7 +1060,7 @@ func greaterIV(x int64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x>y", "y", y)
+		return panicType("x>y", "y", y)
 	}
 }
 
@@ -1092,7 +1092,7 @@ func greaterSV(x S, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x>y", "y", y)
+		return panicType("x>y", "y", y)
 	}
 }
 
@@ -1160,7 +1160,7 @@ func greaterABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x>y", "y", y)
+		return panicType("x>y", "y", y)
 	}
 }
 
@@ -1228,7 +1228,7 @@ func greaterAFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x>y", "y", y)
+		return panicType("x>y", "y", y)
 	}
 }
 
@@ -1296,7 +1296,7 @@ func greaterAIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x>y", "y", y)
+		return panicType("x>y", "y", y)
 	}
 }
 
@@ -1338,7 +1338,7 @@ func greaterASV(x *AS, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x>y", "y", y)
+		return panicType("x>y", "y", y)
 	}
 }
 
@@ -1409,7 +1409,7 @@ func add(x, y V) V {
 		v.InitRC()
 		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
 	default:
-		return panicTypeElt("x+y", "x", x)
+		return panicType("x+y", "x", x)
 	}
 }
 
@@ -1457,7 +1457,7 @@ func addFV(x float64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x+y", "y", y)
+		return panicType("x+y", "y", y)
 	}
 }
 
@@ -1505,7 +1505,7 @@ func addIV(x int64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x+y", "y", y)
+		return panicType("x+y", "y", y)
 	}
 }
 
@@ -1537,7 +1537,7 @@ func addSV(x S, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x+y", "y", y)
+		return panicType("x+y", "y", y)
 	}
 }
 
@@ -1605,7 +1605,7 @@ func addABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x+y", "y", y)
+		return panicType("x+y", "y", y)
 	}
 }
 
@@ -1673,7 +1673,7 @@ func addAFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x+y", "y", y)
+		return panicType("x+y", "y", y)
 	}
 }
 
@@ -1741,7 +1741,7 @@ func addAIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x+y", "y", y)
+		return panicType("x+y", "y", y)
 	}
 }
 
@@ -1783,7 +1783,7 @@ func addASV(x *AS, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x+y", "y", y)
+		return panicType("x+y", "y", y)
 	}
 }
 
@@ -1854,7 +1854,7 @@ func subtract(x, y V) V {
 		v.InitRC()
 		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
 	default:
-		return panicTypeElt("x-y", "x", x)
+		return panicType("x-y", "x", x)
 	}
 }
 
@@ -1902,7 +1902,7 @@ func subtractFV(x float64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x-y", "y", y)
+		return panicType("x-y", "y", y)
 	}
 }
 
@@ -1950,7 +1950,7 @@ func subtractIV(x int64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x-y", "y", y)
+		return panicType("x-y", "y", y)
 	}
 }
 
@@ -1982,7 +1982,7 @@ func subtractSV(x S, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x-y", "y", y)
+		return panicType("x-y", "y", y)
 	}
 }
 
@@ -2050,7 +2050,7 @@ func subtractABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x-y", "y", y)
+		return panicType("x-y", "y", y)
 	}
 }
 
@@ -2118,7 +2118,7 @@ func subtractAFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x-y", "y", y)
+		return panicType("x-y", "y", y)
 	}
 }
 
@@ -2186,7 +2186,7 @@ func subtractAIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x-y", "y", y)
+		return panicType("x-y", "y", y)
 	}
 }
 
@@ -2228,7 +2228,7 @@ func subtractASV(x *AS, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x-y", "y", y)
+		return panicType("x-y", "y", y)
 	}
 }
 
@@ -2299,7 +2299,7 @@ func multiply(x, y V) V {
 		v.InitRC()
 		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
 	default:
-		return panicTypeElt("x*y", "x", x)
+		return panicType("x*y", "x", x)
 	}
 }
 
@@ -2355,7 +2355,7 @@ func multiplyFV(x float64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x*y", "y", y)
+		return panicType("x*y", "y", y)
 	}
 }
 
@@ -2411,7 +2411,7 @@ func multiplyIV(x int64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x*y", "y", y)
+		return panicType("x*y", "y", y)
 	}
 }
 
@@ -2459,7 +2459,7 @@ func multiplySV(x S, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x*y", "y", y)
+		return panicType("x*y", "y", y)
 	}
 }
 
@@ -2542,7 +2542,7 @@ func multiplyABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x*y", "y", y)
+		return panicType("x*y", "y", y)
 	}
 }
 
@@ -2625,7 +2625,7 @@ func multiplyAFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x*y", "y", y)
+		return panicType("x*y", "y", y)
 	}
 }
 
@@ -2708,7 +2708,7 @@ func multiplyAIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x*y", "y", y)
+		return panicType("x*y", "y", y)
 	}
 }
 
@@ -2776,7 +2776,7 @@ func multiplyASV(x *AS, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x*y", "y", y)
+		return panicType("x*y", "y", y)
 	}
 }
 
@@ -2843,7 +2843,7 @@ func divide(x, y V) V {
 		v.InitRC()
 		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
 	default:
-		return panicTypeElt("x%y", "x", x)
+		return panicType("x%y", "x", x)
 	}
 }
 
@@ -2891,7 +2891,7 @@ func divideFV(x float64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x%y", "y", y)
+		return panicType("x%y", "y", y)
 	}
 }
 
@@ -2939,7 +2939,7 @@ func divideIV(x int64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x%y", "y", y)
+		return panicType("x%y", "y", y)
 	}
 }
 
@@ -3007,7 +3007,7 @@ func divideABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x%y", "y", y)
+		return panicType("x%y", "y", y)
 	}
 }
 
@@ -3075,7 +3075,7 @@ func divideAFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x%y", "y", y)
+		return panicType("x%y", "y", y)
 	}
 }
 
@@ -3143,7 +3143,7 @@ func divideAIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x%y", "y", y)
+		return panicType("x%y", "y", y)
 	}
 }
 
@@ -3214,7 +3214,7 @@ func minimum(x, y V) V {
 		v.InitRC()
 		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
 	default:
-		return panicTypeElt("x&y", "x", x)
+		return panicType("x&y", "x", x)
 	}
 }
 
@@ -3262,7 +3262,7 @@ func minimumFV(x float64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x&y", "y", y)
+		return panicType("x&y", "y", y)
 	}
 }
 
@@ -3310,7 +3310,7 @@ func minimumIV(x int64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x&y", "y", y)
+		return panicType("x&y", "y", y)
 	}
 }
 
@@ -3342,7 +3342,7 @@ func minimumSV(x S, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x&y", "y", y)
+		return panicType("x&y", "y", y)
 	}
 }
 
@@ -3410,7 +3410,7 @@ func minimumABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x&y", "y", y)
+		return panicType("x&y", "y", y)
 	}
 }
 
@@ -3478,7 +3478,7 @@ func minimumAFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x&y", "y", y)
+		return panicType("x&y", "y", y)
 	}
 }
 
@@ -3546,7 +3546,7 @@ func minimumAIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x&y", "y", y)
+		return panicType("x&y", "y", y)
 	}
 }
 
@@ -3588,7 +3588,7 @@ func minimumASV(x *AS, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x&y", "y", y)
+		return panicType("x&y", "y", y)
 	}
 }
 
@@ -3659,7 +3659,7 @@ func maximum(x, y V) V {
 		v.InitRC()
 		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
 	default:
-		return panicTypeElt("x|y", "x", x)
+		return panicType("x|y", "x", x)
 	}
 }
 
@@ -3707,7 +3707,7 @@ func maximumFV(x float64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x|y", "y", y)
+		return panicType("x|y", "y", y)
 	}
 }
 
@@ -3755,7 +3755,7 @@ func maximumIV(x int64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x|y", "y", y)
+		return panicType("x|y", "y", y)
 	}
 }
 
@@ -3787,7 +3787,7 @@ func maximumSV(x S, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x|y", "y", y)
+		return panicType("x|y", "y", y)
 	}
 }
 
@@ -3855,7 +3855,7 @@ func maximumABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x|y", "y", y)
+		return panicType("x|y", "y", y)
 	}
 }
 
@@ -3923,7 +3923,7 @@ func maximumAFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x|y", "y", y)
+		return panicType("x|y", "y", y)
 	}
 }
 
@@ -3991,7 +3991,7 @@ func maximumAIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x|y", "y", y)
+		return panicType("x|y", "y", y)
 	}
 }
 
@@ -4033,7 +4033,7 @@ func maximumASV(x *AS, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x|y", "y", y)
+		return panicType("x|y", "y", y)
 	}
 }
 
@@ -4100,7 +4100,7 @@ func modulus(x, y V) V {
 		v.InitRC()
 		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
 	default:
-		return panicTypeElt("x mod y", "x", x)
+		return panicType("x mod y", "x", x)
 	}
 }
 
@@ -4148,7 +4148,7 @@ func modulusFV(x float64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x mod y", "y", y)
+		return panicType("x mod y", "y", y)
 	}
 }
 
@@ -4196,7 +4196,7 @@ func modulusIV(x int64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x mod y", "y", y)
+		return panicType("x mod y", "y", y)
 	}
 }
 
@@ -4264,7 +4264,7 @@ func modulusABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x mod y", "y", y)
+		return panicType("x mod y", "y", y)
 	}
 }
 
@@ -4332,7 +4332,7 @@ func modulusAFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x mod y", "y", y)
+		return panicType("x mod y", "y", y)
 	}
 }
 
@@ -4400,6 +4400,6 @@ func modulusAIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicTypeElt("x mod y", "y", y)
+		return panicType("x mod y", "y", y)
 	}
 }

@@ -70,14 +70,14 @@ func (d *Dict) Len() int {
 func dict(x, y V) V {
 	xv, ok := x.value.(array)
 	if !ok {
-		return Panicf("x!y : not an array x (%s)", x.Type())
+		return panicType("X!Y", "X", x)
 	}
 	yv, ok := y.value.(array)
 	if !ok {
-		return Panicf("x!y : not an array y (%s)", y.Type())
+		return panicType("X!Y", "X", x)
 	}
 	if xv.Len() != yv.Len() {
-		return Panicf("x!y : length mismatch (%d vs %d)", xv.Len(), yv.Len())
+		return Panicf("X!Y : length mismatch (%d vs %d)", xv.Len(), yv.Len())
 	}
 	return NewV(&Dict{keys: xv, values: yv})
 }

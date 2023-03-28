@@ -154,10 +154,8 @@ func where(x V) V {
 			return r
 		}
 		return NewV(xv.keys.atIndices(r.value.(*AI)))
-	case array:
-		return panics("&x : x non-integer array")
 	default:
-		return Panicf("&x : x non-integer (%s)", x.Type())
+		return panicType("&x", "x", x)
 	}
 }
 
@@ -173,7 +171,7 @@ func replicate(x, y V) V {
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
-			return Panicf("f#y : f[y] not an integer (%g)", x.F())
+			return Panicf("f#y : non-integer f[y] (%g)", x.F())
 		}
 		return replicate(NewI(int64(x.F())), y)
 	}
@@ -195,7 +193,7 @@ func replicate(x, y V) V {
 		}
 		return replicate(ix, y)
 	default:
-		return Panicf("f#y : f[y] non-integer (%s)", x.Type())
+		return panicType("f#y", "f[y]", x)
 	}
 }
 
@@ -443,7 +441,7 @@ func weedOut(x, y V) V {
 		}
 		return weedOut(ix, y)
 	default:
-		return Panicf("f_y : f[y] non-integer (%s)", x.Type())
+		return panicType("f_y", "f[y]", x)
 	}
 }
 
@@ -634,7 +632,7 @@ func eval(ctx *Context, x V) V {
 		}
 		return Canonical(NewAV(r))
 	default:
-		return Panicf("eval x : x not a string (%s)", x.Type())
+		return panicType("eval x", "x", x)
 	}
 }
 
@@ -654,23 +652,23 @@ func evalString(ctx *Context, s string) V {
 	return r
 }
 
-// evalPackage implements eval[x;y;z].
+// evalPackage implements eval[s;loc;pfx].
 func evalPackage(ctx *Context, x V, y V, z V) V {
 	s, ok := x.value.(S)
 	if !ok {
-		return Panicf("eval[x;...] : x not a string (%s)", x.Type())
+		return panicType("eval[s;loc;pfx]", "s", x)
 	}
-	name, ok := y.value.(S)
+	loc, ok := y.value.(S)
 	if !ok {
-		return Panicf("eval[x;y;...] : y not a string (%s)", y.Type())
+		return panicType("eval[s;loc;pfx]", "loc", y)
 	}
-	prefix, ok := z.value.(S)
+	pfx, ok := z.value.(S)
 	if !ok {
-		return Panicf("eval[x;y;z] : z not a string (%s)", z.Type())
+		return panicType("eval[s;loc;pfx]", "pfx", z)
 	}
-	for i, r := range prefix {
+	for i, r := range pfx {
 		if i == 0 && !isAlpha(r) || !isAlphaNum(r) {
-			return Panicf("eval[x;y;z] : z invalid identifier prefix (%s)", prefix)
+			return Panicf("eval[s;loc;pfx] : non-identifier prefix (%s)", pfx)
 		}
 	}
 	if ctx.fname == "" {
@@ -679,13 +677,13 @@ func evalPackage(ctx *Context, x V, y V, z V) V {
 			ctx.sources[""] = osource
 		}()
 	}
-	r, err := ctx.EvalPackage(string(s), string(name), string(prefix))
+	r, err := ctx.EvalPackage(string(s), string(loc), string(pfx))
 	if err != nil {
 		_, ok := err.(ErrPackageImported)
 		if ok {
 			return NewI(0)
 		}
-		return Panicf(".s : %v", err)
+		return Panicf("eval[s;loc;pfx] : %v", err)
 	}
 	return r
 }
@@ -719,7 +717,7 @@ func getN(y V) V {
 		n = y.I()
 	} else if y.IsF() {
 		if !isI(y.F()) {
-			return Panicf(`goal["time";x;n] : n not an integer (%g)`, y.F())
+			return Panicf(`goal["time";x;n] : non-integer n (%g)`, y.F())
 		}
 		n = int64(y.F())
 	} else {

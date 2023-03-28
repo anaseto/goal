@@ -50,7 +50,7 @@ func classify(ctx *Context, x V) V {
 			return rangeI(int64(xv.Len()))
 		}
 	default:
-		return panicType("%x", "x", x)
+		return panicType("%X", "X", x)
 	}
 	switch xv := x.value.(type) {
 	case *AB:

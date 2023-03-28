@@ -10,14 +10,14 @@ import (
 func fCSV2(x, y V) V {
 	s, ok := x.value.(S)
 	if !ok {
-		return Panicf("x csv y : x not a string (%s)", x.Type())
+		return panicType("x csv y", "x", x)
 	}
 	if utf8.RuneCountInString(string(s)) != 1 {
-		return panics("x csv y : x not a code point character")
+		return panics("x csv y : x is not a code point character")
 	}
 	c, _ := utf8.DecodeRuneInString(string(s))
 	if c == utf8.RuneError {
-		return panics("x csv y : x not a valid code point character")
+		return panics("x csv y : x is not a valid code point character")
 	}
 	r := fCSV(c, y)
 	if r.IsPanic() {
