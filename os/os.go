@@ -305,13 +305,11 @@ func VFShell(ctx *goal.Context, args []goal.V) goal.V {
 //
 // run s : run command s, with arguments if s is an array.
 //
-// x run s : run command s, with input string x.
+// x run s : run command s, with input string x as standard input.
 //
-// In the first form, standard input, output, and error are inherited from the
-// parent. It returns a true value on success, and an error otherwise.
-//
-// In the second form, only standard error is inherited, and the command's
-// standard output is returned.
+// In the first form, standard input and error are inherited from the
+// parent. In the second form, only standard error is inherited.
+// Both commands return their own standard output, or an error.
 func VFRun(ctx *goal.Context, args []goal.V) goal.V {
 	var cmds []string
 	y := args[0]
@@ -329,14 +327,15 @@ func VFRun(ctx *goal.Context, args []goal.V) goal.V {
 	switch len(args) {
 	case 1:
 		cmd := exec.Command(cmds[0], cmds[1:]...)
-		cmd.Stderr = os.Stderr
-		cmd.Stdout = os.Stdout
 		cmd.Stdin = os.Stdin
+		var sb strings.Builder
+		cmd.Stdout = &sb
+		cmd.Stderr = os.Stderr
 		err := cmd.Run()
 		if err != nil {
 			return goal.Errorf("%v", err)
 		}
-		return goal.NewI(1)
+		return goal.NewS(sb.String())
 	case 2:
 		x := args[1]
 		s, ok := x.Value().(goal.S)
@@ -344,10 +343,10 @@ func VFRun(ctx *goal.Context, args []goal.V) goal.V {
 			return goal.Panicf("x run s : bad type for x (%s)", x.Type())
 		}
 		cmd := exec.Command(cmds[0], cmds[1:]...)
-		cmd.Stderr = os.Stderr
 		cmd.Stdin = strings.NewReader(string(s))
 		var sb strings.Builder
 		cmd.Stdout = &sb
+		cmd.Stderr = os.Stderr
 		err := cmd.Run()
 		if err != nil {
 			return goal.Errorf("%v", err)
