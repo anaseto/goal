@@ -57,26 +57,62 @@ func reverse(x V) V {
 
 // Rotate returns x rotate y.
 func rotate(x, y V) V {
-	i := int64(0)
 	if x.IsI() {
-		i = x.I()
-	} else if x.IsF() {
+		return rotateI(x.I(), y)
+	}
+	if x.IsF() {
 		if !isI(x.F()) {
-			return Panicf("x rotate y : non-integer f[y] (%g)", x.F())
+			return Panicf("x rotate y : non-integer x (%g)", x.F())
 		}
-		i = int64(x.F())
-	} else {
-		return Panicf("x rotate y : non-integer f[y] (%s)", x.Type())
+		return rotateI(int64(x.F()), y)
 	}
-	ylen := int64(y.Len())
-	if ylen == 0 {
-		return y
+	switch xv := x.value.(type) {
+	case *AB:
+		r := make([]V, xv.Len())
+		for i, xi := range xv.elts {
+			ri := rotateI(B2I(xi), y)
+			if ri.IsPanic() {
+				return ri
+			}
+			r[i] = ri
+		}
+		return NewAV(r)
+	case *AI:
+		r := make([]V, xv.Len())
+		for i, xi := range xv.elts {
+			ri := rotateI(xi, y)
+			if ri.IsPanic() {
+				return ri
+			}
+			r[i] = ri
+		}
+		return NewAV(r)
+	case *AF:
+		r := make([]V, xv.Len())
+		for i, xi := range xv.elts {
+			if !isI(xi) {
+				return Panicf("x rotate y : non-integer x (%g)", x.F())
+			}
+			ri := rotateI(int64(xi), y)
+			if ri.IsPanic() {
+				return ri
+			}
+			r[i] = ri
+		}
+		return NewAV(r)
+	case *AV:
+		r := make([]V, xv.Len())
+		for i, xi := range xv.elts {
+			ri := rotate(xi, y)
+			if ri.IsPanic() {
+				return ri
+			}
+			r[i] = ri
+		}
+		return NewAV(r)
+	default:
+		return panicTypeElt("x rotate y", "x", x)
 	}
-	i %= ylen
-	if i < 0 {
-		i += ylen
-	}
-	return rotateI(i, y)
 }
 
 func rotateSlice[T any](i int64, ys []T) []T {
@@ -89,6 +125,14 @@ func rotateSlice[T any](i int64, ys []T) []T {
 }
 
 func rotateI(i int64, y V) V {
+	ylen := int64(y.Len())
+	if ylen == 0 {
+		return y
+	}
+	i %= ylen
+	if i < 0 {
+		i += ylen
+	}
 	switch yv := y.value.(type) {
 	case *AB:
 		return NewABWithRC(rotateSlice[bool](i, yv.elts), reuseRCp(yv.rc))

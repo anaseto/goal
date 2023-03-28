@@ -63,7 +63,8 @@ f:{x+y};f[1;2;3] / too many arguments
 {?[0;a:2;0];a+1;a}0 / undefined local
 |3 / type
 1.5 rotate 1 2 / non-integer
-(+) rotate 1 2 / non-integer
+2 1.5 rotate 1 2 / non-integer
+(+) rotate 1 2 / type
 2 rotate (+) / type
 1.5_2 3 / non-integer
 "a" "b"_2 3 4 / non-integer array
