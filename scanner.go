@@ -16,7 +16,7 @@ type Token struct {
 
 func (t Token) String() string {
 	switch t.Type {
-	case ADVERB, ERROR, IDENT, DYAD, NUMBER, REGEXP, QQSTART, QQEND, SPECIAL:
+	case ADVERB, ERROR, IDENT, DYAD, NUMBER, REGEXP, QQSTART, QQEND, SADVERB:
 		return fmt.Sprintf("{%s %s}", t.Type.String(), t.Text)
 	case LEFTBRACE:
 		return "{"
@@ -63,7 +63,7 @@ const (
 	RIGHTBRACKET
 	RIGHTPAREN
 	SEMICOLON
-	SPECIAL
+	SADVERB
 	STRING
 	QQSTART
 	QQEND
@@ -212,7 +212,7 @@ func (s *Scanner) emitNewString(t TokenType, text string) stateFn {
 }
 
 func (s *Scanner) emitSpecial(r rune) stateFn {
-	s.token = Token{Type: SPECIAL, Pos: s.tpos, Text: string(r)}
+	s.token = Token{Type: SADVERB, Pos: s.tpos, Text: string(r)}
 	s.start = false
 	s.delimOp = true
 	s.exprEnd = false

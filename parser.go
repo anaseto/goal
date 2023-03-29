@@ -96,23 +96,17 @@ func (p *parser) expr(es exprs) (exprs, error) {
 	case ERROR:
 		err = p.errorf("%s", tok.Text)
 		return es, err
-	case ADVERB:
-		switch tok.Text {
-		case "'":
-			switch p.peek().Type {
-			case EOF, NEWLINE, SEMICOLON,
-				RIGHTBRACE, RIGHTBRACKET, RIGHTPAREN,
-				LEFTBRACKET:
-			default:
+	case ADVERB, SADVERB:
+		switch p.peek().Type {
+		case EOF, NEWLINE, SEMICOLON,
+			RIGHTBRACE, RIGHTBRACKET, RIGHTPAREN,
+			LEFTBRACKET:
+		default:
+			switch tok.Text {
+			case "'":
 				e, err = p.earlyReturn(tok.Text)
 				return append(es, e), err
-			}
-		case `\`:
-			switch p.peek().Type {
-			case EOF, NEWLINE, SEMICOLON,
-				RIGHTBRACE, RIGHTBRACKET, RIGHTPAREN,
-				LEFTBRACKET:
-			default:
+			case `\`:
 				err = p.errorf("unexpected non-adverbial %s", tok.Text)
 				return es, err
 			}
@@ -185,29 +179,6 @@ func (p *parser) expr(es exprs) (exprs, error) {
 			p.next()
 			e, err = p.strand(st)
 		}
-	case SPECIAL:
-		switch tok.Text {
-		case "'":
-			switch p.peek().Type {
-			case EOF, NEWLINE, SEMICOLON,
-				RIGHTBRACE, RIGHTBRACKET, RIGHTPAREN,
-				LEFTBRACKET:
-			default:
-				e, err = p.earlyReturn(tok.Text)
-				return append(es, e), err
-			}
-		case `\`:
-			switch p.peek().Type {
-			case EOF, NEWLINE, SEMICOLON,
-				RIGHTBRACE, RIGHTBRACKET, RIGHTPAREN,
-				LEFTBRACKET:
-			default:
-				err = p.errorf("unexpected non-adverbial %s", tok.Text)
-				return es, err
-			}
-		}
-		// We handle adverb at start of expression.
-		e = p.derivedVerb(nil)
 	case QQSTART:
 		pos := p.token.Pos
 		e, err = p.qq()
