@@ -8,6 +8,7 @@
   function rank.
 + For consistency, make run s form returns its standard output too, and return
   a dictionary in error case containing exit code, message and output.
++ More permissive indexing returning zero value on out of bounds.
 + More consistent error messages.
 
 # v0.10.0 2023-03-26
