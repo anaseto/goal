@@ -16,7 +16,7 @@ type Token struct {
 
 func (t Token) String() string {
 	switch t.Type {
-	case ADVERB, ERROR, IDENT, DYAD, NUMBER, REGEXP, QQSTART, QQEND:
+	case ADVERB, ERROR, IDENT, DYAD, NUMBER, REGEXP, QQSTART, QQEND, SPECIAL:
 		return fmt.Sprintf("{%s %s}", t.Type.String(), t.Text)
 	case LEFTBRACE:
 		return "{"
@@ -63,6 +63,7 @@ const (
 	RIGHTBRACKET
 	RIGHTPAREN
 	SEMICOLON
+	SPECIAL
 	STRING
 	QQSTART
 	QQEND
@@ -169,9 +170,9 @@ func (s *Scanner) next() {
 func (s *Scanner) emit(t TokenType) stateFn {
 	s.token = Token{Type: t, Pos: s.tpos}
 	s.start = t == NEWLINE
-	s.delimOp = t == LEFTPAREN || t == LEFTBRACKET || t == LEFTBRACE
+	s.delimOp = t == LEFTPAREN || t == LEFTBRACKET || t == LEFTBRACE || t == LEFTBRACKETS
 	switch t {
-	case LEFTBRACE, LEFTBRACKET, LEFTPAREN, NEWLINE, SEMICOLON, EOF:
+	case LEFTBRACE, LEFTBRACKET, LEFTBRACKETS, LEFTPAREN, NEWLINE, SEMICOLON, EOF:
 		// all of these don't have additional content, so we don't do
 		// this test in the other emits.
 		s.exprEnd = false
@@ -207,6 +208,14 @@ func (s *Scanner) emitNewString(t TokenType, text string) stateFn {
 	s.start = false
 	s.delimOp = false
 	s.exprEnd = true
+	return nil
+}
+
+func (s *Scanner) emitSpecial(r rune) stateFn {
+	s.token = Token{Type: SPECIAL, Pos: s.tpos, Text: string(r)}
+	s.start = false
+	s.delimOp = true
+	s.exprEnd = false
 	return nil
 }
 
@@ -352,8 +361,14 @@ func scanSpace(s *Scanner) stateFn {
 			s.tpos = s.epos
 			return scanMinus
 		case '[':
+			s.tpos = s.epos
 			s.next()
 			return s.emit(LEFTBRACKETS)
+		case '\'', '\\':
+			s.tpos = s.epos
+			rs := s.emitSpecial(s.r)
+			s.next()
+			return rs
 		default:
 			return scanAny
 		}
