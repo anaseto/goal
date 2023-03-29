@@ -7,7 +7,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -61,11 +61,11 @@ func VFImport(ctx *goal.Context, args []goal.V) goal.V {
 
 func importWithPrefix(ctx *goal.Context, prefix, name string, hasPfx bool) goal.V {
 	if !hasPfx {
-		prefix = path.Base(name)
-		prefix = strings.TrimSuffix(prefix, path.Ext(prefix))
+		prefix = filepath.Base(name)
+		prefix = strings.TrimSuffix(prefix, filepath.Ext(prefix))
 	}
 	fname := name
-	if path.Ext(fname) == "" {
+	if filepath.Ext(fname) == "" {
 		fname += ".goal"
 	}
 	source, err := readFile(fname)
@@ -104,7 +104,7 @@ func searchIncFile(ctx *goal.Context, fname string) (string, bool) {
 		sep = ";"
 	}
 	for _, dir := range strings.Split(goalLIB, sep) {
-		fpath := path.Join(dir, fname)
+		fpath := filepath.Join(dir, fname)
 		fi, err := os.Stat(fpath)
 		if err == nil && fi.Mode().IsRegular() {
 			return fpath, true
@@ -299,9 +299,15 @@ func VFShell(ctx *goal.Context, args []goal.V) goal.V {
 	cmd.Stdout = &sb
 	err := cmd.Run()
 	if err != nil {
-		return goal.Errorf("%v", err)
+		return cmdError(err, cmd, sb.String())
 	}
 	return goal.NewS(sb.String())
+}
+
+func cmdError(err error, cmd *exec.Cmd, out string) goal.V {
+	keys := goal.NewAS([]string{"code", "msg", "out"})
+	values := goal.NewAV([]goal.V{goal.NewI(int64(cmd.ProcessState.ExitCode())), goal.NewS(err.Error()), goal.NewS(out)})
+	return goal.NewError(goal.NewDict(keys, values))
 }
 
 // VFRun implements the run monad.
@@ -339,7 +345,7 @@ func VFRun(ctx *goal.Context, args []goal.V) goal.V {
 		cmd.Stderr = os.Stderr
 		err := cmd.Run()
 		if err != nil {
-			return goal.Errorf("%v", err)
+			return cmdError(err, cmd, sb.String())
 		}
 		return goal.NewS(sb.String())
 	case 2:
@@ -355,7 +361,7 @@ func VFRun(ctx *goal.Context, args []goal.V) goal.V {
 		cmd.Stderr = os.Stderr
 		err := cmd.Run()
 		if err != nil {
-			return goal.Errorf("%v", err)
+			return cmdError(err, cmd, sb.String())
 		}
 		return goal.NewS(sb.String())
 	default:

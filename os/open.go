@@ -254,12 +254,21 @@ func VFClose(ctx *goal.Context, args []goal.V) goal.V {
 	case io.Closer:
 		err := h.Close()
 		if err != nil {
+			if e, ok := err.(*exec.ExitError); ok {
+				return exitError(e)
+			}
 			return goal.Errorf("%v", err)
 		}
 		return goal.NewI(1)
 	default:
 		return panicType("close h", "h", args[0])
 	}
+}
+
+func exitError(err *exec.ExitError) goal.V {
+	keys := goal.NewAS([]string{"code", "msg"})
+	values := goal.NewAV([]goal.V{goal.NewI(int64(err.ProcessState.ExitCode())), goal.NewS(err.Error())})
+	return goal.NewError(goal.NewDict(keys, values))
 }
 
 func isI(x float64) bool {
