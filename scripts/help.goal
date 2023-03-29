@@ -140,7 +140,7 @@ s?r rindex      "abcde"?rx/b../ -> 1 3                           (offset;length)
 s?s index       "a = a + 1"?"=" "+" -> 2 6
 d?y find key    ("a" "b"!3 4)?4 -> "b"       ("a" "b"!3 4)?5 -> ""
 X?y find        9 8 7?8 -> 1                 9 8 7?6 -> 3
-@x  type        @2 -> "n"    @"ab" -> "s"    @2 3 -> "N"       @+ -> "f"
+@x  type        @2 -> "n"    @"ab" -> "s"    @2 3 -> "N"     @+ -> "f"
 s@i substr      "abcdef"@2  -> "cdef"                                (s[offset])
 r@s match       rx/^[a-z]+$/"abc" -> 1       rx/\s/"abc" -> 0
 r@s find group  rx/([a-z])(.)/"&a+c" -> "a+" "a" "+"     (whole match, group(s))
