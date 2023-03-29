@@ -38,7 +38,7 @@ assign          a:2 (local within lambda, global otherwise)        a::2 (global)
 op assign       a+:1 (sugar for a:a+1)         a-::2 (sugar for a::a-2)
 list assign     (a;b;c):x (where 2<#x)         (a;b):1 2;b -> 2
 eval. order     apply:f[e1;e2]   apply:e1 op e2                      (e2 before)
-                list:(e1;e2)     seq:([e1;e2])    lambda:{e1;e2}     (e1 before)
+                list:(e1;e2)     seq: [e1;e2]     lambda:{e1;e2}     (e1 before)
 sequence        [a:2;b:a+3;a+10] -> 12
 index/apply     x[y] or x y is sugar for x@y; x[] ~ x[*] ~ x[!#x] ~ x (arrays)
 index deep      x[y;z;...] is sugar for x.(y;z;...) (except for x in (?;and;or))
