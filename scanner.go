@@ -20,7 +20,7 @@ func (t Token) String() string {
 		return fmt.Sprintf("{%s %s}", t.Type.String(), t.Text)
 	case LEFTBRACE:
 		return "{"
-	case LEFTBRACKET:
+	case LEFTBRACKET, LEFTBRACKETS:
 		return "["
 	case LEFTPAREN:
 		return "("
@@ -53,6 +53,7 @@ const (
 	IDENT
 	LEFTBRACE
 	LEFTBRACKET
+	LEFTBRACKETS
 	LEFTPAREN
 	NEWLINE
 	NUMBER
@@ -350,6 +351,9 @@ func scanSpace(s *Scanner) stateFn {
 		case '-':
 			s.tpos = s.epos
 			return scanMinus
+		case '[':
+			s.next()
+			return s.emit(LEFTBRACKETS)
 		default:
 			return scanAny
 		}

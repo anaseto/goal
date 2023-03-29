@@ -62,7 +62,7 @@ func closeToken(opTok TokenType) TokenType {
 	switch opTok {
 	case LEFTBRACE:
 		return RIGHTBRACE
-	case LEFTBRACKET:
+	case LEFTBRACKET, LEFTBRACKETS:
 		return RIGHTBRACKET
 	case LEFTPAREN:
 		return RIGHTPAREN
@@ -131,7 +131,7 @@ func (p *parser) expr(es exprs) (exprs, error) {
 		}
 	case LEFTBRACE:
 		e, err = p.lambda()
-	case LEFTBRACKET:
+	case LEFTBRACKET, LEFTBRACKETS:
 		// We have a sequence, because index-like application is
 		// handled after each expr() below.
 		e, err = p.sequence()
