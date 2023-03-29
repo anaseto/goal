@@ -6,6 +6,8 @@
 + More permissive projection application: for example `+[][2;3]` is valid, even
   though `+[]` has rank 1 when used in adverbial contexts that make use of
   function rank.
++ Disallow space before adverb application. For ' this means that usage is
+  reserved for early return on error, and for \ it has no meaning yet.
 + For consistency, make run s form returns its standard output too, and return
   a dictionary in error case containing exit code, message and output.
 + More consistent error messages.
