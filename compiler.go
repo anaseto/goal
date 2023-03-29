@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // globalCode represents the last code compiled in global context, outside any
@@ -464,6 +465,10 @@ func parseNumber(s string) (V, error) {
 	f, errF := strconv.ParseFloat(s, 64)
 	if errF == nil {
 		return NewF(f), nil
+	}
+	d, errT := time.ParseDuration(s)
+	if errT == nil {
+		return NewI(int64(d)), nil
 	}
 	err := errF.(*strconv.NumError)
 	return V{}, err.Err
