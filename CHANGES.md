@@ -6,7 +6,8 @@
 + More permissive projection application: for example `+[][2;3]` is valid, even
   though `+[]` has rank 1 when used in adverbial contexts that make use of
   function rank.
-+ For consistency, make run s form returns its standard output too.
++ For consistency, make run s form returns its standard output too, and return
+  a dictionary in error case containing exit code, message and output.
 + More consistent error messages.
 
 # v0.10.0 2023-03-26
