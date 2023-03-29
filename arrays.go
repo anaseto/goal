@@ -13,7 +13,6 @@ type array interface {
 	countable
 	sort.Interface
 	at(i int) V           // x[i]
-	atI(i int64) V        // x[i]
 	slice(i, j int) array // x[i:j]
 	getFlags() flags
 	setFlags(flags)
@@ -196,39 +195,6 @@ func (x *AF) at(i int) V { return NewF(x.elts[i]) }
 func (x *AS) at(i int) V { return NewS(x.elts[i]) }
 func (x *AV) at(i int) V { return x.elts[i] }
 
-func (x *AB) atI(i int64) V {
-	if i < 0 || i >= int64(x.Len()) {
-		return NewI(0)
-	}
-	return NewI(B2I(x.elts[i]))
-}
-func (x *AI) atI(i int64) V {
-	if i < 0 || i >= int64(x.Len()) {
-		return NewI(0)
-	}
-	return NewI(x.elts[i])
-}
-func (x *AF) atI(i int64) V {
-	if i < 0 || i >= int64(x.Len()) {
-		return NewF(0)
-	}
-	return NewF(x.elts[i])
-}
-func (x *AS) atI(i int64) V {
-	if i < 0 || i >= int64(x.Len()) {
-		return NewS("")
-	}
-	return NewS(x.elts[i])
-}
-
-func (x *AV) atI(i int64) V {
-	if i < 0 || i >= int64(x.Len()) {
-		// TODO: return zero value with first's element shape/type.
-		return NewI(0)
-	}
-	return x.elts[i]
-}
-
 // At returns array value at the given index.
 func (x *AB) At(i int) bool { return x.elts[i] }
 
@@ -307,11 +273,7 @@ func (x *AB) atIndices(y *AI) array {
 		if yi < 0 {
 			yi += xlen
 		}
-		if yi < 0 || yi >= int64(xlen) {
-			r[i] = false
-		} else {
-			r[i] = x.At(int(yi))
-		}
+		r[i] = x.At(int(yi))
 	}
 	return &AB{elts: r}
 }
@@ -323,11 +285,7 @@ func (x *AI) atIndices(y *AI) array {
 		if yi < 0 {
 			yi += xlen
 		}
-		if yi < 0 || yi >= int64(xlen) {
-			r[i] = 0
-		} else {
-			r[i] = x.At(int(yi))
-		}
+		r[i] = x.At(int(yi))
 	}
 	return &AI{elts: r}
 }
@@ -339,11 +297,7 @@ func (x *AF) atIndices(y *AI) array {
 		if yi < 0 {
 			yi += xlen
 		}
-		if yi < 0 || yi >= int64(xlen) {
-			r[i] = 0
-		} else {
-			r[i] = x.At(int(yi))
-		}
+		r[i] = x.At(int(yi))
 	}
 	return &AF{elts: r}
 }
@@ -355,11 +309,7 @@ func (x *AS) atIndices(y *AI) array {
 		if yi < 0 {
 			yi += xlen
 		}
-		if yi < 0 || yi >= int64(xlen) {
-			r[i] = ""
-		} else {
-			r[i] = x.At(int(yi))
-		}
+		r[i] = x.At(int(yi))
 	}
 	return &AS{elts: r}
 }
@@ -371,11 +321,7 @@ func (x *AV) atIndices(y *AI) array {
 		if yi < 0 {
 			yi += xlen
 		}
-		if yi < 0 || yi >= int64(xlen) {
-			r[i] = NewI(0)
-		} else {
-			r[i] = x.At(int(yi))
-		}
+		r[i] = x.At(int(yi))
 	}
 	nr := &AV{elts: r}
 	var p *int

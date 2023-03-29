@@ -2,6 +2,10 @@
 1[2] / not callable
 {x}[2;3] / too many arguments
 {x+y}[2][2;3] / too many arguments
+(!5)[7] / out of bounds
+2.3 5[7] / out of bounds
+"a" "b"[7] / out of bounds
+0 1 0[7] / out of bounds
 (!5)[`a`] / type
 { / EOF
 ) / unexpected ) without opening
@@ -84,8 +88,13 @@ shift 2 / type
 +[][2;3;4] / too many arguments
 "s"[1;2;3] / too many arguments
 1 2[0.5] / non-integer index
+1 2[-4.0] / out of bound
 1 2[+] / type
 {x+y}[1;][2;3] / too many arguments
+(,1)[,1] / out of bound
+(,1)[,2] / out of bound
+(,1)[,2.0] / out of bound
+(,"a")[,2.0] / out of bound
 a,:: / assignment operation without expression right
 ,:2 / assignment operation without identifier left
 a: / assignment without expression right
@@ -237,6 +246,8 @@ rshift[1;2;3] / too many arguments
 ?+ / type
 ocount+ / type
 1.5^2 3 / non-integer
+d:"a" "b"!1 2;d["a" "c" "b"] / not found
+d:"a" "b"!1 2;d["c"] / not found
 1 1\4 / base
 1\4 / base
 rt.prec 3.5 / non-integer
@@ -764,6 +775,7 @@ sub["b" "a" "d" "c"]["a";"b"] / too many arguments
 2 1[0;1] / out of depth
 2.5 1[0;1] / out of depth
 ("a""b"!1 2)[1;2] / unsupported
+(1 2;3 4)[(5 2;7 3)] / out of bounds
 (1 2;3 4)["a" "b"] / type
 !* / type
 &-3.0 2 / negative

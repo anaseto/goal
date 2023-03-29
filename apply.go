@@ -385,12 +385,20 @@ func (d *Dict) applyN(ctx *Context, n int) V {
 		if y.kind == valNil {
 			return NewV(d.values)
 		}
+		dlen := d.keys.Len()
 		z := findArray(d.keys, y)
 		if z.IsI() {
 			i := z.I() // i >= 0
-			return d.values.atI(i)
+			if i >= int64(dlen) {
+				return Panicf("d[y] : key not found (%s)", y.Sprint(ctx))
+			}
+			return d.values.at(int(i))
 		}
 		azi := z.value.(*AI)
+		_, i, ok := inBoundsInfo(azi, dlen)
+		if !ok {
+			return Panicf("d[y] : key not found (%s)", y.value.(array).at(i).Sprint(ctx))
+		}
 		r := d.values.atIndices(azi)
 		initRC(r)
 		return NewV(r)
@@ -410,7 +418,11 @@ func applyArray(x array, y V) V {
 		if i < 0 {
 			i = int64(x.Len()) + i
 		}
-		return x.atI(i)
+		if i < 0 || i >= int64(x.Len()) {
+			return Panicf("x[y] : out of bounds index: %d", i)
+		}
+		return x.at(int(i))
+
 	}
 	if y.IsF() {
 		if !isI(y.F()) {
@@ -420,13 +432,21 @@ func applyArray(x array, y V) V {
 		if i < 0 {
 			i = int64(x.Len()) + i
 		}
-		return x.atI(i)
+		if i < 0 || i >= int64(x.Len()) {
+			return Panicf("x[y] : out of bounds index: %d", i)
+		}
+		return x.at(int(i))
 	}
 	if isStar(y) {
 		return NewV(x)
 	}
 	switch yv := y.value.(type) {
 	case *AI:
+		xlen := x.Len()
+		i, ok := indicesInBounds(yv, xlen)
+		if !ok {
+			return Panicf("x[y] : index out of bounds: %d (length %d)", i, xlen)
+		}
 		return NewV(x.atIndices(yv))
 	case *AV:
 		r := make([]V, yv.Len())
@@ -443,6 +463,11 @@ func applyArray(x array, y V) V {
 			return Panicf("x[y] : %v", iy.value)
 		}
 		ayi := iy.value.(*AI)
+		xlen := x.Len()
+		i, ok := indicesInBounds(ayi, xlen)
+		if !ok {
+			return Panicf("x[y] : index out of bounds: %d (length %d)", i, xlen)
+		}
 		r := NewV(x.atIndices(ayi))
 		return r
 	default:
