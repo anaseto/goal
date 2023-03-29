@@ -232,18 +232,6 @@ func toIndicesRec(x V) V {
 	}
 }
 
-func indicesInBounds(x *AI, l int) (int64, bool) {
-	for _, xi := range x.elts {
-		if xi < 0 {
-			xi += int64(l)
-		}
-		if xi < 0 || xi >= int64(l) {
-			return xi, false
-		}
-	}
-	return 0, true
-}
-
 func inBoundsInfo(x *AI, l int) (int64, int, bool) {
 	for i, xi := range x.elts {
 		if xi < 0 {
