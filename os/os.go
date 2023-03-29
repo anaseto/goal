@@ -286,14 +286,15 @@ func VFShell(ctx *goal.Context, args []goal.V) goal.V {
 	if len(args) > 1 {
 		return goal.Panicf("shell : too many arguments (%d)", len(args))
 	}
-	var cmds string
+	var source string
 	switch arg := args[len(args)-1].Value().(type) {
 	case goal.S:
-		cmds = string(arg)
+		source = string(arg)
 	default:
 		return panicType("shell s", "s", args[len(args)-1])
 	}
-	cmd := exec.Command("/bin/sh", "-c", cmds)
+	cmd := exec.Command("/bin/sh")
+	cmd.Stdin = strings.NewReader(source)
 	cmd.Stderr = os.Stderr
 	var sb strings.Builder
 	cmd.Stdout = &sb

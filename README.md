@@ -333,12 +333,12 @@ import s    read/eval wrapper roughly equivalent to eval[read path;path;pfx]
 open s      open path s for reading, returning a filehandle (h)
 print s     print "Hello, world!\n"     (uses implicit $x for non-string values)
 read h      read from filehandle h until EOF or an error occurs
-read s      read file named s               lines:"\n"\read"/path/to/file"
-run s       run command s or S              run "pwd"          run "ls" "-l"
+read s      read file named s                     lines:"\n"\read"/path/to/file"
+run s       run command s or S (with arguments)   run "pwd"        run "ls" "-l"
             inherits stdin and stderr, returns its standard output or an error
-say s       same as print, but appends a newline               say !5
-shell s     run command as-is through the shell                shell "ls -l"
-            inherits stderr, returns its standard output or an error
+            dict with keys "code" "msg" "out"
+say s       same as print, but appends a newline                   say !5
+shell s     same as s run "/bin/sh"                                shell "ls -l"
 
 x env s     set environment variable x to s, or return an error
 x env 0     unset environment variable x, or clear environment if x~""
@@ -348,8 +348,7 @@ x open s    open path s with mode x in "r" "r+" "w" "w+" "a" "a+"
 x print s   print s to filehandle/name x        "/path/to/file" print "content"
 i read h    read i bytes from reader h or until EOF, or an error occurs
 s read h    read from reader h until 1-byte s, EOF, or an error occurs
-x run s     run command s or S with input string x as stdin
-            inherits stderr, returns its standard output or an error
+x run s     same as run s but with input string x as stdin
 x say s     same as print, but appends a newline
 
 ARGS        command-line arguments, starting with script name
