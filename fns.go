@@ -596,6 +596,29 @@ func recompileLambdas(ctx, nctx *Context, x V) V {
 		return evalString(ctx, x.Sprint(nctx))
 	}
 	switch xv := x.value.(type) {
+	case *Dict:
+		xv.keys = recompileLambdas(ctx, nctx, xv.Keys()).value.(array)
+		xv.values = recompileLambdas(ctx, nctx, xv.Values()).value.(array)
+		return x
+	case *errV:
+		xv.V = recompileLambdas(ctx, nctx, xv.V)
+		return x
+	case *derivedVerb:
+		xv.Arg = recompileLambdas(ctx, nctx, xv.Arg)
+		return x
+	case *projection:
+		xv.Fun = recompileLambdas(ctx, nctx, xv.Fun)
+		for i, arg := range xv.Args {
+			xv.Args[i] = recompileLambdas(ctx, nctx, arg)
+		}
+		return x
+	case *projectionFirst:
+		xv.Fun = recompileLambdas(ctx, nctx, xv.Fun)
+		xv.Arg = recompileLambdas(ctx, nctx, xv.Arg)
+		return x
+	case *rxReplacer:
+		xv.repl = recompileLambdas(ctx, nctx, xv.repl)
+		return x
 	case *AV:
 		for i, xi := range xv.elts {
 			xv.elts[i] = recompileLambdas(ctx, nctx, xi)
