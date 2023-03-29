@@ -21,7 +21,7 @@ Notations:
 `
 "Syntax" rq&
 SYNTAX HELP
-numbers         1     1.5     0b0110     1.7e-3     0xab     0n     0w
+numbers         1     1.5     0b0110     1.7e-3     0xab     0n     0w     3h2m
 strings         "text\xff\u00F\n"   "\""   "\u65e5"   "interpolated $var"
                 qq/$var\n or ${var}/   qq#text#  (delimiters :+-*%!&&|=~,^#_?@/')
 raw strings     `anything until first backquote`     `literal \, no escaping`
