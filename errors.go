@@ -51,7 +51,7 @@ func (e *PanicError) Error() string {
 			if e.compile {
 				ctxs = "from"
 			}
-			fmt.Fprintf(&sb, "  (%s) %s:%d:%d:%d\n", ctxs, pos.Filename, line, col+1, pos.Pos)
+			fmt.Fprintf(&sb, "  (%s) %s:%d:%d\n", ctxs, pos.Filename, line, col+1)
 			writeLine(&sb, s, col)
 		} else if lc := pos.lambda; lc != nil {
 			s, _, col := getPosLine(lc.Source, pos.Pos-lc.StartPos)
