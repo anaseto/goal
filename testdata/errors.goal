@@ -882,3 +882,4 @@ rt.seed "a" / type
 "a" utf8.valid 42 / type
 "" utf8.valid (42;"a" "c") / type
 =(*;%) / type
+{"a" 2 "c"}=1 2 3 / type

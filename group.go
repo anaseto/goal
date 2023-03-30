@@ -175,6 +175,13 @@ func groupBy(x, y V) V {
 			x.Len(), y.Len())
 
 	}
+	switch x.value.(type) {
+	case *AB:
+	case *AI:
+	case *AF:
+	default:
+		return panicType("f=Y", "f[Y]", x)
+	}
 	gx := group(x)
 	if gx.IsPanic() {
 		return panicType("f=Y", "f[Y]", x)
