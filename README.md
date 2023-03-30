@@ -105,7 +105,7 @@ Type help TOPIC or h TOPIC where TOPIC is one of:
 "v"     verbs (like +*-%,)
 "nv"    named verbs (like in, sign)
 "a"     adverbs ('/\)
-"io"    IO functions (like say, open, read)
+"io"    IO verbs (like say, open, read)
 "tm"    time handling
 "rt"    runtime system
 op      where op is a builtin's name (like "+" or "in")
