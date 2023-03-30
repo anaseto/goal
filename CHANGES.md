@@ -1,17 +1,19 @@
-# v? ?
+# v0.11.0 2023-03-30
 
 + New i!i range form.
 + New ""^s unicode-aware trim spaces form.
 + New i?Y and (-i)?Y forms.
 + New x utf8.valid s form for replacing invalid byte sequences.
++ New i?Y roll array and (-i)?Y deal array forms.
 + More permissive projection application: for example `+[][2;3]` is valid, even
   though `+[]` has rank 1 when used in adverbial contexts that make use of
   function rank.
 + Disallow space before adverb application. For ' this means that usage is
   reserved for early return on error, and for \ it has no meaning yet.
-+ For consistency, make run s form returns its standard output too, and return
++ For consistency, make run s form return its standard output too, and return
   a dictionary in error case containing exit code, message and output.
 + More consistent error messages.
++ Fix some unhandled cases of .s with lambda return.
 
 # v0.10.0 2023-03-26
 

@@ -1,4 +1,5 @@
 Features:
+- maybe use non-adverbial \ for some kind of statement (no ideas yet).
 
 Tests:
 - improve test coverage for error messages and refactor and improve them along
@@ -7,7 +8,7 @@ Tests:
   refcount overhaul, because refcounting is hard (in progress).
 
 Documentation:
-- maybe write some introductory guide (in addition to the current help)
+- maybe write some introductory guide (in addition to the current help and FAQ)
 
 Optimizations:
 - maybe special code for more uncommon op/ and op\ and op'

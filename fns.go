@@ -595,29 +595,84 @@ func recompileLambdas(ctx, nctx *Context, x V) V {
 	if x.kind == valLambda {
 		return evalString(ctx, x.Sprint(nctx))
 	}
+	if x.kind != valBoxed {
+		return x
+	}
 	switch xv := x.value.(type) {
+	case S:
+		return x
+	case *AB:
+		return x
+	case *AI:
+		return x
+	case *AF:
+		return x
+	case *AS:
+		return x
+	case *nReplacer:
+		return x
+	case *replacer:
+		return x
+	case *rx:
+		return x
 	case *Dict:
-		xv.keys = recompileLambdas(ctx, nctx, xv.Keys()).value.(array)
-		xv.values = recompileLambdas(ctx, nctx, xv.Values()).value.(array)
+		ks := recompileLambdas(ctx, nctx, xv.Keys())
+		if ks.IsPanic() {
+			return ks
+		}
+		xv.keys = ks.value.(array)
+		vs := recompileLambdas(ctx, nctx, xv.Values())
+		if vs.IsPanic() {
+			return vs
+		}
+		xv.values = vs.value.(array)
 		return x
 	case *errV:
 		xv.V = recompileLambdas(ctx, nctx, xv.V)
+		if xv.V.IsPanic() {
+			return xv.V
+		}
 		return x
 	case *derivedVerb:
 		xv.Arg = recompileLambdas(ctx, nctx, xv.Arg)
+		if xv.Arg.IsPanic() {
+			return xv.Arg
+		}
 		return x
 	case *projection:
 		xv.Fun = recompileLambdas(ctx, nctx, xv.Fun)
+		if xv.Fun.IsPanic() {
+			return xv.Fun
+		}
 		for i, arg := range xv.Args {
-			xv.Args[i] = recompileLambdas(ctx, nctx, arg)
+			xi := recompileLambdas(ctx, nctx, arg)
+			if xi.IsPanic() {
+				return xi
+			}
+			xv.Args[i] = xi
+		}
+		return x
+	case *projectionMonad:
+		xv.Fun = recompileLambdas(ctx, nctx, xv.Fun)
+		if xv.Fun.IsPanic() {
+			return xv.Fun
 		}
 		return x
 	case *projectionFirst:
 		xv.Fun = recompileLambdas(ctx, nctx, xv.Fun)
+		if xv.Fun.IsPanic() {
+			return xv.Fun
+		}
 		xv.Arg = recompileLambdas(ctx, nctx, xv.Arg)
+		if xv.Arg.IsPanic() {
+			return xv.Arg
+		}
 		return x
 	case *rxReplacer:
 		xv.repl = recompileLambdas(ctx, nctx, xv.repl)
+		if xv.repl.IsPanic() {
+			return xv.repl
+		}
 		return x
 	case *AV:
 		for i, xi := range xv.elts {
@@ -625,7 +680,7 @@ func recompileLambdas(ctx, nctx *Context, x V) V {
 		}
 		return x
 	default:
-		return x
+		return Panicf(".s : unsupported return value type (%s)", x.Type())
 	}
 }
 
