@@ -1,6 +1,9 @@
 package goal
 
-import "unicode/utf8"
+import (
+	"strings"
+	"unicode/utf8"
+)
 
 // vfUTF8RCount implements the "utf8.rcount" variadic verb.
 func vfUTF8RCount(ctx *Context, args []V) V {
@@ -32,7 +35,7 @@ func utf8rcount(x V) V {
 		}
 		return canonicalFast(NewAV(r))
 	default:
-		return panicType("utf8.rcount x", "x", x)
+		return panicType("utf8.rcount s", "s", x)
 	}
 }
 
@@ -41,6 +44,13 @@ func vfUTF8Valid(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return utf8valid(args[0])
+	case 2:
+		x := args[1]
+		s, ok := x.value.(S)
+		if !ok {
+			return panicType("x utf8.valid s", "x", x)
+		}
+		return toValidUTF8(string(s), args[0])
 	default:
 		return panicRank("utf8.valid")
 	}
@@ -66,6 +76,30 @@ func utf8valid(x V) V {
 		}
 		return Canonical(NewAV(r))
 	default:
-		return panicType("utf8.rcount x", "x", x)
+		return panicType("utf8.valid s", "s", x)
+	}
+}
+
+func toValidUTF8(repl string, x V) V {
+	switch xv := x.value.(type) {
+	case S:
+		return NewS(strings.ToValidUTF8(string(xv), repl))
+	case *AS:
+		r := make([]string, xv.Len())
+		for i, s := range xv.elts {
+			r[i] = strings.ToValidUTF8(s, repl)
+		}
+		return NewAS(r)
+	case *AV:
+		r := make([]V, xv.Len())
+		for i, xi := range xv.elts {
+			r[i] = toValidUTF8(repl, xi)
+			if r[i].IsPanic() {
+				return r[i]
+			}
+		}
+		return Canonical(NewAV(r))
+	default:
+		return panicType("x utf8.valid s", "s", x)
 	}
 }

@@ -182,6 +182,7 @@ error x    error        r:error "msg"; (@r;.r) -> "e" "msg"
 eval s     comp/run     a:5;eval "a+2" -> 7         (unrestricted variant of .s)
 firsts X   mark firsts  firsts 0 0 2 3 0 2 3 4 -> 1 0 1 1 0 0 0 1
 json s     parse json   ^json `{"a":true,"b":"text"}` -> "a" "b"!(1;"text")
+nan n      isNaN        nan (0n;2;sqrt -1) -> 1 0 1
 ocount X   occur-count  ocount 3 4 5 3 4 4 7 -> 0 0 0 1 1 2 0
 panic s    panic        panic "msg"               (for fatal programming-errors)
 rx s       comp. regex  rx "[a-z]"      (like rx/[a-z]/ but compiled at runtime)
@@ -205,8 +206,11 @@ sub[S;S]   replaceS     sub["b" "c";"d" "e"] "abc" -> "ade"
 eval[s;loc;pfx]         like eval s, but provide loc as location (usually a
                         path), and prefix pfx+"." for globals
 
-MATH: acos, asin, atan, cos, exp, log, round, sin, sqrt, tan, nan
-UTF-8: utf8.rcount (number of code points), utf8.valid
+utf8.rcount s           utf8.rcount "aπc" -> 3           (number of code points)
+utf8.valid s            utf8.valid "aπc" -> 1            utf8.valid "a\xff" -> 0
+x utf8.valid s          "b" utf8.valid "a\xff" -> "ab"  (replace invalid with x)
+
+MATH: acos, asin, atan, cos, exp, log, round, sin, sqrt, tan
 &
 "Adverbs" `
 ADVERBS HELP
