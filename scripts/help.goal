@@ -96,6 +96,7 @@ x|y max         2|3 -> 3        4|3 -> 4         "b"|"a" -> "b"
 x<y less        2<3 -> 1        "c" < "a" -> 0
 >X  descend     >3 5 4 -> 1 2 0         (index permutation for descending order)
 x>y greater     2>3 -> 0        "c" > "a" -> 1
+=s  fields      ="a b\tc\nd  e" -> "a" "b" "c" "d" "e"       (unicode space too)
 =I  group       =1 0 2 1 2 -> (,1;0 3;2 4)       =-1 2 -1 2 -> (!0;!0;1 3)
 =d  group keys  ="a""b""c"!0 1 0 -> ("a" "c";,"b")
 f=Y group by    {2 mod x}=!10 -> (0 2 4 6 8;1 3 5 7 9)

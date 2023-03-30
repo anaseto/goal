@@ -1,8 +1,12 @@
 package goal
 
+import "strings"
+
 // group returns =x.
 func group(x V) V {
 	switch xv := x.value.(type) {
+	case S:
+		return NewAS(strings.Fields(string(xv)))
 	case *AB:
 		if xv.Len() == 0 {
 			return NewAV(nil)
@@ -79,6 +83,22 @@ func group(x V) V {
 			return ppanic("=x : ", z)
 		}
 		return group(z)
+	case *AS:
+		r := make([]V, xv.Len())
+		for i, xi := range xv.elts {
+			r[i] = NewAS(strings.Fields(xi))
+		}
+		return NewAV(r)
+	case *AV:
+		r := make([]V, xv.Len())
+		for i, xi := range xv.elts {
+			ri := group(xi)
+			if ri.IsPanic() {
+				return ri
+			}
+			r[i] = ri
+		}
+		return NewAV(r)
 	case *Dict:
 		gi := group(NewV(xv.values))
 		if gi.IsPanic() {
