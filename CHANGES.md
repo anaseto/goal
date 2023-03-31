@@ -1,3 +1,8 @@
+# v? ?
+
++ New =s fields form, similar to rx/[\n \t]/+\ but splits on any kind of unicode
+  space.
+
 # v0.11.0 2023-03-30
 
 + New i!i range form.
