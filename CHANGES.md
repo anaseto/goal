@@ -2,6 +2,7 @@
 
 + New =s fields form, similar to rx/[\n \t]+/\ but splits on any kind of unicode
   space.
++ New "zone" command for time.
 
 # v0.11.0 2023-03-30
 
