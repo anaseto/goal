@@ -173,17 +173,14 @@ func doTimeS(cmd string, yv string, layout, loc string) V {
 
 func ftime(cmd string, t time.Time) V {
 	switch cmd {
-	case "week":
-		y, w := t.ISOWeek()
-		return NewAI([]int64{int64(y), int64(w)})
-	case "day":
-		return NewI(int64(t.Day()))
-	case "date":
-		y, m, d := t.Date()
-		return NewAI([]int64{int64(y), int64(m), int64(d)})
 	case "clock":
 		h, m, s := t.Clock()
 		return NewAI([]int64{int64(h), int64(m), int64(s)})
+	case "date":
+		y, m, d := t.Date()
+		return NewAI([]int64{int64(y), int64(m), int64(d)})
+	case "day":
+		return NewI(int64(t.Day()))
 	case "hour":
 		return NewI(int64(t.Hour()))
 	case "minute":
@@ -194,18 +191,24 @@ func ftime(cmd string, t time.Time) V {
 		return NewI(int64(t.Second()))
 	case "unix":
 		return NewI(t.Unix())
-	case "unixmilli":
-		return NewI(t.UnixMilli())
 	case "unixmicro":
 		return NewI(t.UnixMicro())
+	case "unixmilli":
+		return NewI(t.UnixMilli())
 	case "unixnano":
 		return NewI(t.UnixNano())
+	case "week":
+		y, w := t.ISOWeek()
+		return NewAI([]int64{int64(y), int64(w)})
+	case "weekday":
+		return NewI(int64(t.Weekday()))
 	case "year":
 		return NewI(int64(t.Year()))
 	case "yearday":
 		return NewI(int64(t.YearDay()))
-	case "weekday":
-		return NewI(int64(t.Weekday()))
+	case "zone":
+		zone, seconds := t.Zone()
+		return NewAV([]V{NewS(zone), NewI(int64(seconds))})
 	default:
 		cmd = getFormat(cmd)
 		if strings.ContainsAny(cmd, " 0123456789-") {

@@ -25,6 +25,7 @@ time["unix";"Mon Jan 2 15:04:05 MST 2006";"Mon Jan _2 15:04:05 MST 2006"] / 1136
 time["unix";"Mon Jan 2 15:04:05 UTC 2006";"UnixDate"] / 1136214245
 time["unix";"Mon Jan 2 15:04:05 MST 2006";"UnixDate";"MST"] / 1136239445
 time["unix";"2006-01-02T15:04:05";"2006-01-02T15:04:05";"UTC"] / 1136214245
+time["zone";"2006-01-02T15:04:05";"2006-01-02T15:04:05";"UTC"] / ("UTC";0)
 time["unix";"2006-01-02T15:04:05";"2006-01-02T15:04:05";"MST"] / 1136239445
 "parsing time" in ."unix" time "2042" / 1
 "time zone" in .time["unix";"2006-01-02T15:04:05";"2006-01-02T15:04:05";"XXX"] / 1

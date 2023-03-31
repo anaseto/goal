@@ -297,9 +297,10 @@ cmd are as follows:
     "unixmilli"   unix (millisecond version, only for current time) (i)
     "unixnano"    unix (nanosecond version, only for current time) (i)
     "week"        year, week (I)
-    "weekday"     0-7 weekday (starts from Sunday) (i)
+    "weekday"     0-7 weekday starting from Sunday (i)
     "year"        year (i)
     "yearday"     1-365/6 year day (i)
+    "zone"        name, offset in seconds east of UTC (s;i)
     format (s)    format time using given layout (s)
 `
 "Runtime" `
