@@ -287,8 +287,8 @@ cmd are as follows:
     cmd (s)       result (type)
     ------        -------------
     "clock"       hour, minute, second (I)
-    "day"         day number (i)
     "date"        year, month, day (I)
+    "day"         day number (i)
     "hour"        0-23 hour (i)
     "minute"      0-59 minute (i)
     "second"      0-59 second (i)
