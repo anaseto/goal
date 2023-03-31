@@ -375,20 +375,20 @@ cmd are as follows:
 
     cmd (s)       result (type)
     ------        -------------
+    "clock"       hour, minute, second (I)
     "day"         day number (i)
     "date"        year, month, day (I)
-    "clock"       hour, minute, second (I)
     "hour"        0-23 hour (i)
     "minute"      0-59 minute (i)
     "second"      0-59 second (i)
     "unix"        unix epoch time (i)
-    "unixmilli"   unix (millisecond version, only for current time) (i)
     "unixmicro"   unix (microsecond version, only for current time) (i)
+    "unixmilli"   unix (millisecond version, only for current time) (i)
     "unixnano"    unix (nanosecond version, only for current time) (i)
-    "year"        year (i)
-    "yearday"     1-365/6 year day (i)
     "week"        year, week (I)
     "weekday"     0-7 weekday (starts from Sunday) (i)
+    "year"        year (i)
+    "yearday"     1-365/6 year day (i)
     format (s)    format time using given layout (s)
 
 RUNTIME HELP
