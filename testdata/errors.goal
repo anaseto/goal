@@ -124,26 +124,21 @@ sub[+;"c"] / type
 sub["a"] / type
 sub["a";"b";"c";"d"] / too many arguments
 sub["b";"d"] ("abc";*) / type
-acos "a" / type
-asin "a" / type
-atan "a" / type
+"b" atan2 "a" / type
 cos "a" / type
 exp "a" / type
 log "a" / type
 round "a" / type
 sin "a" / type
 sqrt "a" / type
-tan "a" / type
-acos[1;2] / too many arguments
-asin[1;2] / too many arguments
-atan[1;2] / too many arguments
+atan2[1;2;3] / too many arguments
+atan2[1] / not enough arguments
 cos[1;2] / too many arguments
 exp[1;2] / too many arguments
 log[1;2] / too many arguments
 round[1;2] / too many arguments
 sin[1;2] / too many arguments
 sqrt[1;2] / too many arguments
-tan[1;2] / too many arguments
 @[1 2;3;+;5] / out of bounds
 @[1 2;3 5;+;5] / out of bounds
 @[1 2;3 5;:;5] / out of bounds
@@ -326,6 +321,7 @@ abs(1 2;*) / type
 1 2|1 2 3 / length mismatch
 1 2=1 2 3 / length mismatch
 1 2 mod 1 2 3 / length mismatch
+1 2 atan2 1 2 3 / length mismatch
 1 2+0 1 0 / length mismatch
 1 2*0 1 0 / length mismatch
 1 2-0 1 0 / length mismatch
@@ -336,6 +332,7 @@ abs(1 2;*) / type
 1 2|0 1 0 / length mismatch
 1 2=0 1 0 / length mismatch
 1 2 mod 0 1 0 / length mismatch
+1 2 atan2 0 1 0 / length mismatch
 1 2+1 2.5 3 / length mismatch
 1 2*1 2.5 3 / length mismatch
 1 2*"a""b""c" / length mismatch
@@ -347,6 +344,7 @@ abs(1 2;*) / type
 1 2|1 2.5 3 / length mismatch
 1 2=1 2.5 3 / length mismatch
 1 2 mod 1 2.5 3 / length mismatch
+1 2 atan2 1 2.5 3 / length mismatch
 1 2+(0;1;1 2.5 3) / length mismatch
 1 2*(0;1;1 2.5 3) / length mismatch
 1 2-(0;1;1 2.5 3) / length mismatch
@@ -357,6 +355,7 @@ abs(1 2;*) / type
 1 2|(0;1;1 2.5 3) / length mismatch
 1 2=(0;1;1 2.5 3) / length mismatch
 1 2 mod (0;1;1 2.5 3) / length mismatch
+1 2 atan2 (0;1;1 2.5 3) / length mismatch
 (0;1;1 2.5 3)+(1;1 2.5 3) / length mismatch
 (0;1;1 2.5 3)*(1;1 2.5 3) / length mismatch
 (0;1;1 2.5 3)-(1;1 2.5 3) / length mismatch
@@ -367,6 +366,7 @@ abs(1 2;*) / type
 (0;1;1 2.5 3)|(1;1 2.5 3) / length mismatch
 (0;1;1 2.5 3)=(1;1 2.5 3) / length mismatch
 (0;1;1 2.5 3) mod (1;1 2.5 3) / length mismatch
+(0;1;1 2.5 3) atan2 (1;1 2.5 3) / length mismatch
 1 0+1 2 3 / length mismatch
 1 0*1 2 3 / length mismatch
 1 0-1 2 3 / length mismatch
@@ -377,6 +377,7 @@ abs(1 2;*) / type
 1 0|1 2 3 / length mismatch
 1 0=1 2 3 / length mismatch
 1 0 mod 1 2 3 / length mismatch
+1 0 atan2 1 2 3 / length mismatch
 1 0+0 1 0 / length mismatch
 1 0*0 1 0 / length mismatch
 1 0-0 1 0 / length mismatch
@@ -387,6 +388,7 @@ abs(1 2;*) / type
 1 0|0 1 0 / length mismatch
 1 0=0 1 0 / length mismatch
 1 0 mod 0 1 0 / length mismatch
+1 0 atan2 0 1 0 / length mismatch
 1 0+1.5 2 3 / length mismatch
 1 0*1.5 2 3 / length mismatch
 1 0*"a""b""c" / length mismatch
@@ -398,6 +400,7 @@ abs(1 2;*) / type
 1 0|1.5 2 3 / length mismatch
 1 0=1.5 2 3 / length mismatch
 1 0 mod 1.5 2 3 / length mismatch
+1 0 atan2 1.5 2 3 / length mismatch
 1 0+(0;1;1 2 3) / length mismatch
 1 0*(0;1;1 2 3) / length mismatch
 1 0-(0;1;1 2 3) / length mismatch
@@ -408,6 +411,7 @@ abs(1 2;*) / type
 1 0|(0;1;1 2 3) / length mismatch
 1 0=(0;1;1 2 3) / length mismatch
 1 0 mod (0;1;1 2 3) / length mismatch
+1 0 atan2 (0;1;1 2 3) / length mismatch
 (0;1;1 2 3)+(1;1 2 3) / length mismatch
 (0;1;1 2 3)*(1;1 2 3) / length mismatch
 (0;1;1 2 3)-(1;1 2 3) / length mismatch
@@ -418,6 +422,7 @@ abs(1 2;*) / type
 (0;1;1 2 3)|(1;1 2 3) / length mismatch
 (0;1;1 2 3)=(1;1 2 3) / length mismatch
 (0;1;1 2 3) mod (1;1 2 3) / length mismatch
+(0;1;1 2 3) atan2 (1;1 2 3) / length mismatch
 1.5 2+1 2 3 / length mismatch
 1.5 2*1 2 3 / length mismatch
 1.5 2*"a""b""c" / length mismatch
@@ -429,6 +434,7 @@ abs(1 2;*) / type
 1.5 2|1 2 3 / length mismatch
 1.5 2=1 2 3 / length mismatch
 1.5 2 mod 1 2 3 / length mismatch
+1.5 2 atan2 1 2 3 / length mismatch
 1.5 2+0 1 0 / length mismatch
 1.5 2*0 1 0 / length mismatch
 1.5 2*"a""b""c" / length mismatch
@@ -440,6 +446,7 @@ abs(1 2;*) / type
 1.5 2|0 1 0 / length mismatch
 1.5 2=0 1 0 / length mismatch
 1.5 2 mod 0 1 0 / length mismatch
+1.5 2 atan2 0 1 0 / length mismatch
 1.5 2+1 2.5 3 / length mismatch
 1.5 2*1 2.5 3 / length mismatch
 1.5 2*"a""b""c" / length mismatch
@@ -451,6 +458,7 @@ abs(1 2;*) / type
 1.5 2|1 2.5 3 / length mismatch
 1.5 2=1 2.5 3 / length mismatch
 1.5 2 mod 1 2.5 3 / length mismatch
+1.5 2 atan2 1 2.5 3 / length mismatch
 1.5 2+(0;1;1 2.5 3) / length mismatch
 1.5 2*(0;1;1 2.5 3) / length mismatch
 1.5 2-(0;1;1 2.5 3) / length mismatch
@@ -461,6 +469,7 @@ abs(1 2;*) / type
 1.5 2|(0;1;1 2.5 3) / length mismatch
 1.5 2=(0;1;1 2.5 3) / length mismatch
 1.5 2 mod (0;1;1 2.5 3) / length mismatch
+1.5 2 atan2 (0;1;1 2.5 3) / length mismatch
 (0;1;1 2.5 3)+1.5 2 / length mismatch
 (0;1;1 2.5 3)*1.5 2 / length mismatch
 (0;1;1 2.5 3)-1.5 2 / length mismatch
@@ -471,6 +480,7 @@ abs(1 2;*) / type
 (0;1;1 2.5 3)|1.5 2 / length mismatch
 (0;1;1 2.5 3)=1.5 2 / length mismatch
 (0;1;1 2.5 3)mod 1.5 2  / length mismatch
+(0;1;1 2.5 3)atan2 1.5 2  / length mismatch
 "a""b"*0 1 0 / length mismatch
 "a""b"*2 1 0 / length mismatch
 "a""b"*2 1 3.5 / length mismatch
@@ -484,6 +494,7 @@ abs(1 2;*) / type
 "a""b"|"b""c""d" / length mismatch
 "a""b"="b""c""d" / length mismatch
 "a""b" mod "b""c""d" / type
+"a""b" atan2 "b""c""d" / type
 "a""b"+("d";"e";"b""c""d") / length mismatch
 "a""b"*("d";"e";"b""c""d") / length mismatch
 "a""b"-("d";"e";"b""c""d") / length mismatch
@@ -502,6 +513,7 @@ abs(1 2;*) / type
 "a""b""c"&1 2 3 / type
 "a""b""c"|1 2 3 / type
 "a""b""c" mod 1 2 3 / type
+"a""b""c" atan2 1 2 3 / type
 "a""b""c"=1 2 3 / type
 "c"=3 / type
 "c"+3 / type
@@ -513,6 +525,7 @@ abs(1 2;*) / type
 "c"&3 / type
 "c"|3 / type
 "c" mod 3 / type
+"c" atan2 3 / type
 3="c" / type
 3+"c" / type
 (*)*"c" / type
@@ -523,6 +536,7 @@ abs(1 2;*) / type
 3&"c" / type
 3|"c" / type
 3 mod "c" / type
+3 atan2 "c" / type
 3+"a""b"!(*;%) / type
 3="a""b"!(*;%) / type
 3*"a""b"!(*;%) / type
@@ -533,6 +547,7 @@ abs(1 2;*) / type
 3&"a""b"!(*;%) / type
 3|"a""b"!(*;%) / type
 3 mod "a""b"!(*;%) / type
+3 atan2 "a""b"!(*;%) / type
 3.5="c" / type
 3.5+"c" / type
 (*)*"c" / type
@@ -543,6 +558,7 @@ abs(1 2;*) / type
 3.5&"c" / type
 3.5|"c" / type
 3.5 mod "c" / type
+3.5 atan2 "c" / type
 0 3="c" / type
 0 3+"c" / type
 (*;%)*"c" / type
@@ -554,6 +570,7 @@ abs(1 2;*) / type
 0 3&"c" / type
 0 3|"c" / type
 0 3 mod "c" / type
+0 3 atan2 "c" / type
 0 3.5="c" / type
 0 3.5+"c" / type
 0 3.5** / type
@@ -564,6 +581,7 @@ abs(1 2;*) / type
 0 3.5&"c" / type
 0 3.5|"c" / type
 0 3.5 mod "c" / type
+0 3.5 atan2 "c" / type
 0 1="c" / type
 0 1** / type
 0 1+"c" / type
@@ -574,6 +592,7 @@ abs(1 2;*) / type
 0 1&"c" / type
 0 1|"c" / type
 0 1 mod "c" / type
+0 1 atan2 "c" / type
 (sub["a";"b"])=3 / type
 (*)+3 / type
 (*)** / type
@@ -584,6 +603,7 @@ abs(1 2;*) / type
 (*)&3 / type
 (*)|3 / type
 (*) mod 3 / type
+(*) atan2 3 / type
 (*)+3.5 / type
 (*)** / type
 (*)-3.5 / type
@@ -593,6 +613,7 @@ abs(1 2;*) / type
 (*)&3.5 / type
 (*)|3.5 / type
 (*) mod 3.5 / type
+(*) atan2 3.5 / type
 3.5+* / type
 3.5=* / type
 3.5** / type
@@ -603,6 +624,7 @@ abs(1 2;*) / type
 3.5&* / type
 3.5|* / type
 3.5 mod * / type
+3.5 atan2 * / type
 "a"+(*;%) / type
 "a"=(*;%) / type
 "a"*(*;%) / type
@@ -613,6 +635,7 @@ abs(1 2;*) / type
 "a"&(*;%) / type
 "a"|(*;%) / type
 "a" mod (*;%) / type
+"a" atan2 (*;%) / type
 "b""a"+(*;%) / type
 "b""a"=(*;%) / type
 "b""a"*(*;%) / type
@@ -623,6 +646,7 @@ abs(1 2;*) / type
 "b""a"&(*;%) / type
 "b""a"|(*;%) / type
 "b""a" mod (*;%) / type
+"b""a" atan2 (*;%) / type
 "a"+"a""b"!(*;%) / type
 "a"="a""b"!(*;%) / type
 "a"*"a""b"!(*;%) / type
@@ -633,6 +657,7 @@ abs(1 2;*) / type
 "a"&"a""b"!(*;%) / type
 "a"|"a""b"!(*;%) / type
 "a" mod "a""b"!(*;%) / type
+"a" atan2 "a""b"!(*;%) / type
 "b""a"+"a""b"!(*;%) / type
 "b""a"="a""b"!(*;%) / type
 "b""a"*"a""b"!(*;%) / type
@@ -643,6 +668,7 @@ abs(1 2;*) / type
 "b""a"&"a""b"!(*;%) / type
 "b""a"|"a""b"!(*;%) / type
 "b""a" mod "a""b"!(*;%) / type
+"b""a" atan2 "a""b"!(*;%) / type
 3.5+"a""b"!(*;%) / type
 3.5="a""b"!(*;%) / type
 3.5*"a""b"!(*;%) / type
@@ -653,6 +679,7 @@ abs(1 2;*) / type
 3.5&"a""b"!(*;%) / type
 3.5|"a""b"!(*;%) / type
 3.5 mod "a""b"!(*;%) / type
+3.5 atan2 "a""b"!(*;%) / type
 1 3.5=(*;%) / type
 1 3.5+(*;%) / type
 1 3.5*(*;%) / type
@@ -663,6 +690,7 @@ abs(1 2;*) / type
 1 3.5&(*;%) / type
 1 3.5|(*;%) / type
 1 3.5 mod (*;%) / type
+1 3.5 atan2 (*;%) / type
 1 3.5="a""b"!(*;%) / type
 1 3.5+"a""b"!(*;%) / type
 1 3.5*"a""b"!(*;%) / type
@@ -673,6 +701,7 @@ abs(1 2;*) / type
 1 3.5&"a""b"!(*;%) / type
 1 3.5|"a""b"!(*;%) / type
 1 3.5 mod "a""b"!(*;%) / type
+1 3.5 atan2 "a""b"!(*;%) / type
 1 3=(*;%) / type
 1 3+(*;%) / type
 1 3*(*;%) / type
@@ -683,6 +712,7 @@ abs(1 2;*) / type
 1 3&(*;%) / type
 1 3|(*;%) / type
 1 3 mod (*;%) / type
+1 3 atan2 (*;%) / type
 1 3="a""b"!(*;%) / type
 1 3+"a""b"!(*;%) / type
 1 3*"a""b"!(*;%) / type
@@ -693,6 +723,7 @@ abs(1 2;*) / type
 1 3&"a""b"!(*;%) / type
 1 3|"a""b"!(*;%) / type
 1 3 mod "a""b"!(*;%) / type
+1 3 atan2 "a""b"!(*;%) / type
 ("a""b"!(*;%))=1 3 / type
 ("a""b"!(*;%))+1 3 / type
 ("a""b"!(*;%))*1 3 / type
@@ -703,6 +734,7 @@ abs(1 2;*) / type
 ("a""b"!(*;%))&1 3 / type
 ("a""b"!(*;%))|1 3 / type
 ("a""b"!(*;%)) mod 1 3 / type
+("a""b"!(*;%)) atan2 1 3 / type
 ("a""b"!(*;%))="a""c"!1 3 / type
 ("a""b"!(*;%))+"a""c"!1 3 / type
 ("a""b"!(*;%))*"a""c"!1 3 / type
@@ -713,6 +745,7 @@ abs(1 2;*) / type
 ("a""b"!(*;%))&"a""c"!1 3 / type
 ("a""b"!(*;%))|"a""c"!1 3 / type
 ("a""b"!(*;%)) mod "a""c"!1 3 / type
+("a""b"!(*;%)) atan2 "a""c"!1 3 / type
 1 0=(*;%) / type
 1 0+(*;%) / type
 1 0*(*;%) / type
@@ -723,6 +756,7 @@ abs(1 2;*) / type
 1 0&(*;%) / type
 1 0|(*;%) / type
 1 0 mod (*;%) / type
+1 0 atan2 (*;%) / type
 1 0="a""b"!(*;%) / type
 1 0+"a""b"!(*;%) / type
 1 0*"a""b"!(*;%) / type
@@ -733,6 +767,7 @@ abs(1 2;*) / type
 1 0&"a""b"!(*;%) / type
 1 0|"a""b"!(*;%) / type
 1 0 mod "a""b"!(*;%) / type
+1 0 atan2 "a""b"!(*;%) / type
 (1;2 3)="a""b"!(*;%) / type
 (1;2 3)+"a""b"!(*;%) / type
 (1;2 3)*"a""b"!(*;%) / type
@@ -743,6 +778,7 @@ abs(1 2;*) / type
 (1;2 3)&"a""b"!(*;%) / type
 (1;2 3)|"a""b"!(*;%) / type
 (1;2 3) mod "a""b"!(*;%) / type
+(1;2 3) atan2 "a""b"!(*;%) / type
 (1;2 3)=(*;%) / type
 (1;2 3)+(*;%) / type
 (1;2 3)*(*;%) / type
@@ -753,6 +789,7 @@ abs(1 2;*) / type
 (1;2 3)&(*;%) / type
 (1;2 3)|(*;%) / type
 (1;2 3) mod (*;%) / type
+(1;2 3) atan2 (*;%) / type
 (1;2 3)=* / type
 (1;2 3)+* / type
 (1;2 3)** / type
@@ -763,6 +800,7 @@ abs(1 2;*) / type
 (1;2 3)&* / type
 (1;2 3)|* / type
 (1;2 3) mod * / type
+(1;2 3) atan2 * / type
 a[0;]:5 / undefined global
 {a[0;]:5}4 / undefined local
 1[2;3] / type
@@ -832,7 +870,9 @@ error error "msg" / already an error
 rotate ,42 / not enough arguments
 in ,42 / not enough arguments
 mod 3 / not enough arguments
+atan2 3 / not enough arguments
 mod[3;2;1] / too many arguments
+atan2[3;2;1] / too many arguments
 ::42 / type
 ::"f" / undefined global
 ::[1;2] / type

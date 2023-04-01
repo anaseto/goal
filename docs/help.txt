@@ -204,7 +204,7 @@ utf8.rcount s           utf8.rcount "aπc" -> 3           (number of code points
 utf8.valid s            utf8.valid "aπc" -> 1            utf8.valid "a\xff" -> 0
 x utf8.valid s          "b" utf8.valid "a\xff" -> "ab"  (replace invalid with x)
 
-MATH: acos, asin, atan, cos, exp, log, round, sin, sqrt, tan
+MATH: atan2, cos, exp, log, round, sin, sqrt
 
 ADVERBS HELP
 f'x    each      #'(4 5;6 7 8) -> 2 3

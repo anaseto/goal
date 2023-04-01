@@ -49,48 +49,6 @@ func mathm(x V, f func(float64) float64) V {
 	}
 }
 
-// vfAcos implements the acos variadic.
-func vfAcos(ctx *Context, args []V) V {
-	switch len(args) {
-	case 1:
-		r := mathm(args[0], math.Acos)
-		if r.IsPanic() {
-			return ppanic("acos x : ", r)
-		}
-		return r
-	default:
-		return panicRank("acos")
-	}
-}
-
-// vfAsin implements the asin variadic.
-func vfAsin(ctx *Context, args []V) V {
-	switch len(args) {
-	case 1:
-		r := mathm(args[0], math.Asin)
-		if r.IsPanic() {
-			return ppanic("asin x : ", r)
-		}
-		return r
-	default:
-		return panicRank("asin")
-	}
-}
-
-// vfAtan implements the atan variadic.
-func vfAtan(ctx *Context, args []V) V {
-	switch len(args) {
-	case 1:
-		r := mathm(args[0], math.Atan)
-		if r.IsPanic() {
-			return ppanic("atan x : ", r)
-		}
-		return r
-	default:
-		return panicRank("atan")
-	}
-}
-
 // vfCos implements the cos variadic.
 func vfCos(ctx *Context, args []V) V {
 	switch len(args) {
@@ -172,19 +130,5 @@ func vfSqrt(ctx *Context, args []V) V {
 		return r
 	default:
 		return panicRank("sqrt")
-	}
-}
-
-// vfTan implements the tan variadic.
-func vfTan(ctx *Context, args []V) V {
-	switch len(args) {
-	case 1:
-		r := mathm(args[0], math.Tan)
-		if r.IsPanic() {
-			return ppanic("tan x : ", r)
-		}
-		return r
-	default:
-		return panicRank("tan")
 	}
 }

@@ -3,6 +3,8 @@
 + New =s fields form, similar to rx/[\n \t]+/\ but splits on any kind of unicode
   space.
 + New "zone" command for time.
++ Simplify math builtins: atan2 in place of acos, asin, atan, and remove tan
+  (provide same functions as AWK).
 
 # v0.11.0 2023-03-30
 

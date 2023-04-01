@@ -67,16 +67,12 @@ func vf$N(ctx *Context, args []V) V {
 }
 #}
 funcs:+/({ftpl . x}'(
-  "Acos" "acos"
-  "Asin" "asin"
-  "Atan" "atan"
   "Cos" "cos"
   "Exp" "exp"
   "Log" "log"
   "RoundToEven" "round"
   "Sin" "sin"
   "Sqrt" "sqrt"
-  "Tan" "tan"
 ))
 '"../mathm.go" say package+mathm+funcs
 'run "gofmt" "-s" "-w" "../mathm.go"

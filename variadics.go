@@ -133,18 +133,14 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterMonad("sign", vfSign)
 	ctx.RegisterMonad("utf8.rcount", vfUTF8RCount)
 
-	// math monads
-	ctx.RegisterMonad("acos", vfAcos)
-	ctx.RegisterMonad("asin", vfAsin)
-	ctx.RegisterMonad("atan", vfAtan)
+	// math
+	ctx.RegisterDyad("atan2", vfAtan2)
 	ctx.RegisterMonad("cos", vfCos)
 	ctx.RegisterMonad("exp", vfExp)
 	ctx.RegisterMonad("log", vfLog)
 	ctx.RegisterMonad("round", vfRoundToEven)
 	ctx.RegisterMonad("sin", vfSin)
 	ctx.RegisterMonad("sqrt", vfSqrt)
-	ctx.RegisterMonad("tan", vfTan)
-	ctx.RegisterDyad("nan", vfNaN)
 
 	// dyads
 	ctx.RegisterDyad("and", vfAnd)
@@ -152,6 +148,7 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterDyad("in", vfIn)
 	ctx.RegisterDyad("or", vfOr)
 	ctx.RegisterDyad("mod", vfMod)
+	ctx.RegisterDyad("nan", vfNaN)
 	ctx.RegisterDyad("rotate", vfRotate)
 	v := ctx.RegisterDyad("rshift", vfRShift)
 	ctx.vNames["»"] = v.variadic()

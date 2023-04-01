@@ -4403,3 +4403,370 @@ func modulusAIV(x *AI, y V) V {
 		return panicType("x mod y", "y", y)
 	}
 }
+
+// arctan2 returns x atan2 y.
+func arctan2(x, y V) V {
+	if x.IsI() {
+		return arctan2IV(x.I(), y)
+	}
+	if x.IsF() {
+		return arctan2FV(x.F(), y)
+	}
+	switch xv := x.value.(type) {
+	case *AB:
+		return arctan2ABV(xv, y)
+	case *AF:
+		return arctan2AFV(xv, y)
+	case *AI:
+		return arctan2AIV(xv, y)
+	case *AV:
+		switch yv := y.value.(type) {
+		case *Dict:
+			v := arctan2(x, NewV(yv.values))
+			if v.IsPanic() {
+				return v
+			}
+			v.InitRC()
+			return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
+		case array:
+			if yv.Len() != xv.Len() {
+				return panicLength("x atan2 y", xv.Len(), yv.Len())
+			}
+			r := xv.reuse()
+			for i, xi := range xv.elts {
+				ri := arctan2(xi, yv.at(i))
+				if ri.IsPanic() {
+					return ri
+				}
+				r.elts[i] = ri
+			}
+			return NewV(r)
+		}
+		r := xv.reuse()
+		for i, xi := range xv.elts {
+			ri := arctan2(xi, y)
+			if ri.IsPanic() {
+				return ri
+			}
+			r.elts[i] = ri
+		}
+		return NewV(r)
+	case *Dict:
+		yv, ok := y.value.(*Dict)
+		if ok {
+			r := dictArith(xv, yv, arctan2)
+			if r.IsPanic() {
+				return ppanic("d atan2 d", r)
+			}
+			return r
+		}
+		v := arctan2(NewV(xv.values), y)
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
+	default:
+		return panicType("x atan2 y", "x", x)
+	}
+}
+
+func arctan2FV(x float64, y V) V {
+	if y.IsI() {
+		return NewF(math.Atan2(float64(y.I()), x))
+	}
+	if y.IsF() {
+		return NewF(math.Atan2(y.F(), x))
+	}
+	switch yv := y.value.(type) {
+	case *AB:
+		r := make([]float64, yv.Len())
+		for i := range r {
+			r[i] = float64(math.Atan2(B2F(yv.At(i)), x))
+		}
+		return NewAFWithRC(r, reuseRCp(yv.rc))
+	case *AF:
+		r := yv.reuse()
+		for i := range r.elts {
+			r.elts[i] = float64(math.Atan2(yv.At(i), x))
+		}
+		return NewV(r)
+	case *AI:
+		r := make([]float64, yv.Len())
+		for i := range r {
+			r[i] = float64(math.Atan2(float64(yv.At(i)), x))
+		}
+		return NewAFWithRC(r, reuseRCp(yv.rc))
+	case *Dict:
+		v := arctan2FV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
+	case *AV:
+		r := yv.reuse()
+		for i, yi := range yv.elts {
+			ri := arctan2FV(x, yi)
+			if ri.IsPanic() {
+				return ri
+			}
+			r.elts[i] = ri
+		}
+		return NewV(r)
+	default:
+		return panicType("x atan2 y", "y", y)
+	}
+}
+
+func arctan2IV(x int64, y V) V {
+	if y.IsI() {
+		return NewF(math.Atan2(float64(y.I()), float64(x)))
+	}
+	if y.IsF() {
+		return NewF(math.Atan2(y.F(), float64(x)))
+	}
+	switch yv := y.value.(type) {
+	case *AB:
+		r := make([]float64, yv.Len())
+		for i := range r {
+			r[i] = float64(math.Atan2(B2F(yv.At(i)), float64(x)))
+		}
+		return NewAFWithRC(r, reuseRCp(yv.rc))
+	case *AF:
+		r := yv.reuse()
+		for i := range r.elts {
+			r.elts[i] = float64(math.Atan2(yv.At(i), float64(x)))
+		}
+		return NewV(r)
+	case *AI:
+		r := make([]float64, yv.Len())
+		for i := range r {
+			r[i] = float64(math.Atan2(float64(yv.At(i)), float64(x)))
+		}
+		return NewAFWithRC(r, reuseRCp(yv.rc))
+	case *Dict:
+		v := arctan2IV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
+	case *AV:
+		r := yv.reuse()
+		for i, yi := range yv.elts {
+			ri := arctan2IV(x, yi)
+			if ri.IsPanic() {
+				return ri
+			}
+			r.elts[i] = ri
+		}
+		return NewV(r)
+	default:
+		return panicType("x atan2 y", "y", y)
+	}
+}
+
+func arctan2ABV(x *AB, y V) V {
+	if y.IsI() {
+		r := make([]float64, x.Len())
+		for i := range r {
+			r[i] = float64(math.Atan2(float64(int64(y.I())), B2F(x.At(i))))
+		}
+		return NewAFWithRC(r, reuseRCp(x.rc))
+	}
+	if y.IsF() {
+		r := make([]float64, x.Len())
+		for i := range r {
+			r[i] = float64(math.Atan2(float64(y.F()), B2F(x.At(i))))
+		}
+		return NewAFWithRC(r, reuseRCp(x.rc))
+	}
+	switch yv := y.value.(type) {
+	case *AB:
+		if x.Len() != yv.Len() {
+			return panicLength("x atan2 y", x.Len(), yv.Len())
+		}
+		r := make([]float64, yv.Len())
+		for i := range r {
+			r[i] = float64(math.Atan2(B2F(yv.At(i)), B2F(x.At(i))))
+		}
+		return NewAFWithRC(r, reuseRCp(x.rc))
+	case *AF:
+		if x.Len() != yv.Len() {
+			return panicLength("x atan2 y", x.Len(), yv.Len())
+		}
+		r := yv.reuse()
+		for i := range r.elts {
+			r.elts[i] = float64(math.Atan2(yv.At(i), B2F(x.At(i))))
+		}
+		return NewV(r)
+	case *AI:
+		if x.Len() != yv.Len() {
+			return panicLength("x atan2 y", x.Len(), yv.Len())
+		}
+		r := make([]float64, yv.Len())
+		for i := range r {
+			r[i] = float64(math.Atan2(float64(yv.At(i)), B2F(x.At(i))))
+		}
+		return NewAFWithRC(r, reuseRCp(x.rc))
+	case *Dict:
+		v := arctan2ABV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
+	case *AV:
+		if x.Len() != yv.Len() {
+			return panicLength("x atan2 y", x.Len(), yv.Len())
+		}
+		r := yv.reuse()
+		for i := range r.elts {
+			ri := arctan2IV(B2I(x.At(i)), yv.At(i))
+			if ri.IsPanic() {
+				return ri
+			}
+			r.elts[i] = ri
+		}
+		return NewV(r)
+	default:
+		return panicType("x atan2 y", "y", y)
+	}
+}
+
+func arctan2AFV(x *AF, y V) V {
+	if y.IsI() {
+		r := x.reuse()
+		for i := range r.elts {
+			r.elts[i] = float64(math.Atan2(float64(int64(y.I())), x.At(i)))
+		}
+		return NewV(r)
+	}
+	if y.IsF() {
+		r := x.reuse()
+		for i := range r.elts {
+			r.elts[i] = float64(math.Atan2(float64(y.F()), x.At(i)))
+		}
+		return NewV(r)
+	}
+	switch yv := y.value.(type) {
+	case *AB:
+		if x.Len() != yv.Len() {
+			return panicLength("x atan2 y", x.Len(), yv.Len())
+		}
+		r := x.reuse()
+		for i := range r.elts {
+			r.elts[i] = float64(math.Atan2(B2F(yv.At(i)), x.At(i)))
+		}
+		return NewV(r)
+	case *AF:
+		if x.Len() != yv.Len() {
+			return panicLength("x atan2 y", x.Len(), yv.Len())
+		}
+		r := x.reuse()
+		for i := range r.elts {
+			r.elts[i] = float64(math.Atan2(yv.At(i), x.At(i)))
+		}
+		return NewV(r)
+	case *AI:
+		if x.Len() != yv.Len() {
+			return panicLength("x atan2 y", x.Len(), yv.Len())
+		}
+		r := x.reuse()
+		for i := range r.elts {
+			r.elts[i] = float64(math.Atan2(float64(yv.At(i)), x.At(i)))
+		}
+		return NewV(r)
+	case *Dict:
+		v := arctan2AFV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
+	case *AV:
+		if x.Len() != yv.Len() {
+			return panicLength("x atan2 y", x.Len(), yv.Len())
+		}
+		r := yv.reuse()
+		for i := range r.elts {
+			ri := arctan2FV(float64(x.At(i)), yv.At(i))
+			if ri.IsPanic() {
+				return ri
+			}
+			r.elts[i] = ri
+		}
+		return NewV(r)
+	default:
+		return panicType("x atan2 y", "y", y)
+	}
+}
+
+func arctan2AIV(x *AI, y V) V {
+	if y.IsI() {
+		r := make([]float64, x.Len())
+		for i := range r {
+			r[i] = float64(math.Atan2(float64(int64(y.I())), float64(x.At(i))))
+		}
+		return NewAFWithRC(r, reuseRCp(x.rc))
+	}
+	if y.IsF() {
+		r := make([]float64, x.Len())
+		for i := range r {
+			r[i] = float64(math.Atan2(float64(y.F()), float64(x.At(i))))
+		}
+		return NewAFWithRC(r, reuseRCp(x.rc))
+	}
+	switch yv := y.value.(type) {
+	case *AB:
+		if x.Len() != yv.Len() {
+			return panicLength("x atan2 y", x.Len(), yv.Len())
+		}
+		r := make([]float64, yv.Len())
+		for i := range r {
+			r[i] = float64(math.Atan2(B2F(yv.At(i)), float64(x.At(i))))
+		}
+		return NewAFWithRC(r, reuseRCp(x.rc))
+	case *AF:
+		if x.Len() != yv.Len() {
+			return panicLength("x atan2 y", x.Len(), yv.Len())
+		}
+		r := yv.reuse()
+		for i := range r.elts {
+			r.elts[i] = float64(math.Atan2(yv.At(i), float64(x.At(i))))
+		}
+		return NewV(r)
+	case *AI:
+		if x.Len() != yv.Len() {
+			return panicLength("x atan2 y", x.Len(), yv.Len())
+		}
+		r := make([]float64, yv.Len())
+		for i := range r {
+			r[i] = float64(math.Atan2(float64(yv.At(i)), float64(x.At(i))))
+		}
+		return NewAFWithRC(r, reuseRCp(x.rc))
+	case *Dict:
+		v := arctan2AIV(x, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		v.InitRC()
+		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
+	case *AV:
+		if x.Len() != yv.Len() {
+			return panicLength("x atan2 y", x.Len(), yv.Len())
+		}
+		r := yv.reuse()
+		for i := range r.elts {
+			ri := arctan2IV(int64(x.At(i)), yv.At(i))
+			if ri.IsPanic() {
+				return ri
+			}
+			r.elts[i] = ri
+		}
+		return NewV(r)
+	default:
+		return panicType("x atan2 y", "y", y)
+	}
+}

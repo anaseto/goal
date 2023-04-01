@@ -133,6 +133,17 @@ modulus:keys!+(
   "F" "I" "modF(x, float64(y))" "F"
   "F" "F" "modF(x, y)" "F"
 )
+arctan2:keys!+(
+  "B" "B" "math.Atan2(B2F(y), B2F(x))" "F"
+  "B" "I" "math.Atan2(float64(y), B2F(x))" "F"
+  "B" "F" "math.Atan2(y, B2F(x))" "F"
+  "I" "B" "math.Atan2(B2F(y), float64(x))" "F"
+  "I" "I" "math.Atan2(float64(y), float64(x))" "F"
+  "I" "F" "math.Atan2(y, float64(x))" "F"
+  "F" "B" "math.Atan2(B2F(y), x)" "F"
+  "F" "I" "math.Atan2(float64(y), x)" "F"
+  "F" "F" "math.Atan2(y, x)" "F"
+)
 
 ops:(
   "equal" "="
@@ -145,6 +156,7 @@ ops:(
   "minimum" "&"
   "maximum" "|"
   "modulus" " mod "
+  "arctan2" " atan2 "
 )
 
 types:"B" "F" "I" "S" / atom types

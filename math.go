@@ -113,3 +113,15 @@ func fillNaNf(fill float64, y V) V {
 		return panicType("x NaN y", "y", y)
 	}
 }
+
+// vfAtan2 implements the atan2 variadic verb.
+func vfAtan2(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		return panics("atan2 : not enough arguments")
+	case 2:
+		return arctan2(args[1], args[0])
+	default:
+		return panicRank("+")
+	}
+}

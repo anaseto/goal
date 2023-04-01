@@ -1,17 +1,11 @@
 sin 0 / 0
 cos 0 / 1
-tan 0 / 0
-asin 0 / 0
-1 < acos 0 / 1
-atan 0 / 0
+1 atan2 0 / 0
 2 < exp 1  / 1
 0.1 > log exp 0  / 1
 sin 0.0 / 0
 cos 0.0 / 1
-tan 0.0 / 0
-asin 0.0 / 0
-1 < acos 0.0 / 1
-atan 0.0 / 0
+1.0 atan2 0 / 0
 2 < exp 1.0  / 1
 0.1 > log exp 0.0  / 1
 sqrt 4 / 2
