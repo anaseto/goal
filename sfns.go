@@ -212,6 +212,8 @@ func drop(x, y V) V {
 			return cutAIS(xv, yv)
 		case array:
 			return cutAIarray(xv, yv)
+		case *Dict:
+			return NewDict(cutAIarray(xv, yv.keys), cutAIarray(xv, yv.values))
 		default:
 			return panicType("I_y", "y", y)
 		}
@@ -221,8 +223,6 @@ func drop(x, y V) V {
 			return z
 		}
 		return drop(z, y)
-	case array:
-		return panics("x_y : x non-integer array")
 	default:
 		return panicType("x_y", "x", x)
 	}
