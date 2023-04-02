@@ -862,7 +862,7 @@ f[1;2] / undefined global
 {"a"+x}_1 2 3 / type
 4.5$"abc" / non-integer
 (*)$"abc" / type
-(?)[1;2;3] / too many arguments
+(?)[1;2;3;4] / too many arguments
 (')[42] / not enough arguments
 (/)[42] / not enough arguments
 (\)[42] / not enough arguments

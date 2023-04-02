@@ -434,6 +434,11 @@ func vfFind(ctx *Context, args []V) V {
 			return rolldeal(ctx, x, y)
 		}
 		return find(x, y)
+	case 3:
+		if args[2].IsTrue() {
+			return args[1]
+		}
+		return args[0]
 	default:
 		return panicRank("?")
 	}
