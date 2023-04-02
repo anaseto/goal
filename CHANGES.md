@@ -1,4 +1,4 @@
-# v? ?
+# v0.12.0 2023-04-02
 
 + New =s fields form, similar to rx/[\n \t]+/\ but splits on any kind of unicode
   space.
