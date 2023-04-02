@@ -161,10 +161,11 @@ func icount(x V) V {
 	case *Dict:
 		return icount(NewV(xv.values))
 	default:
-		if x.Len() == 0 {
-			return NewAI(nil)
+		r := group(x)
+		if r.IsPanic() {
+			return panicType("=x", "x", x)
 		}
-		return panicType("=x", "x", x)
+		return each2Length(r.value.(array))
 	}
 }
 

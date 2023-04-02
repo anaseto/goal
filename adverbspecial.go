@@ -540,7 +540,7 @@ func each2First(ctx *Context, x array) V {
 	}
 }
 
-func each2Length(ctx *Context, x array) V {
+func each2Length(x array) V {
 	switch xv := x.(type) {
 	case *AV:
 		r := make([]int64, xv.Len())
