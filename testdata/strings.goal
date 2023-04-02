@@ -129,3 +129,4 @@ qq/" "/ / `" "`
 ""^"  \nstuff\t" / "stuff"
 ""^"a""b"!"  \nstuff\t" " \n" / "a""b"!"stuff" ""
 ""^("  \nstuff\t" " \n";"a ") / ("stuff" "";"a")
+a:"a" "b";"$a" / "ab"

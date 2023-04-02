@@ -521,11 +521,15 @@ func vfQq(ctx *Context, args []V) V {
 		sb.Grow(n)
 	}
 	for _, arg := range args {
-		s, ok := arg.value.(S)
-		if !ok {
+		switch argv := arg.value.(type) {
+		case S:
+			sb.WriteString(string(argv))
+		case *AS:
+			for _, s := range argv.elts {
+				sb.WriteString(s)
+			}
+		default:
 			sb.WriteString(arg.Sprint(ctx))
-		} else {
-			sb.WriteString(string(s))
 		}
 	}
 	return NewS(sb.String())
