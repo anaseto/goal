@@ -1222,7 +1222,7 @@ func colSplit(x V, y V) V {
 	case array:
 		ylen := yv.Len()
 		if i <= 0 {
-			return Panicf("i!y : i not positive (%d)", i)
+			return Panicf("i!Y : i not positive (%d)", i)
 		}
 		if i >= int64(ylen) {
 			return NewAVWithRC([]V{y}, yv.RC())
