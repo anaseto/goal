@@ -622,9 +622,9 @@ func eachfx(ctx *Context, f V, x array) V {
 		case vTake:
 			return each2Length(x)
 		case vMultiply:
-			return each2First(ctx, x)
+			return each2First(x)
 		case vApply:
-			return each2Type(ctx, x)
+			return each2Type(x)
 		}
 	}
 	r := make([]V, x.Len())

@@ -527,7 +527,7 @@ func each2String(ctx *Context, x array) V {
 	}
 }
 
-func each2First(ctx *Context, x array) V {
+func each2First(x array) V {
 	switch xv := x.(type) {
 	case *AV:
 		r := make([]V, xv.Len())
@@ -557,7 +557,7 @@ func each2Length(x array) V {
 	}
 }
 
-func each2Type(ctx *Context, x array) V {
+func each2Type(x array) V {
 	switch xv := x.(type) {
 	case *AS:
 		r := xv.reuse()
