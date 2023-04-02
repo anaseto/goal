@@ -4,6 +4,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 type stringReplacer interface {
@@ -292,12 +293,7 @@ func casti(y V) V {
 	}
 	switch yv := y.value.(type) {
 	case S:
-		runes := []rune(yv)
-		r := make([]int64, len(runes))
-		for i, rc := range runes {
-			r[i] = int64(rc)
-		}
-		return NewAI(r)
+		return NewAI(toAIrunes(string(yv)))
 	case *AB:
 		return y
 	case *AI:
@@ -305,7 +301,7 @@ func casti(y V) V {
 	case *AS:
 		r := make([]V, yv.Len())
 		for i, s := range yv.elts {
-			r[i] = casti(NewS(s))
+			r[i] = NewAI(toAIrunes(s))
 		}
 		return NewAV(r)
 	case *AF:
@@ -324,6 +320,17 @@ func casti(y V) V {
 	default:
 		return panicType("\"i\"$y", "y", y)
 	}
+}
+
+func toAIrunes(s string) []int64 {
+	n := utf8.RuneCountInString(s)
+	r := make([]int64, n)
+	i := 0
+	for _, c := range s {
+		r[i] = int64(c)
+		i++
+	}
+	return r
 }
 
 func castn(y V) V {
