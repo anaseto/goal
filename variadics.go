@@ -852,8 +852,9 @@ func vfOFS(ctx *Context, args []V) V {
 	if !ok {
 		return panicType("rt.ofs s", "s", x)
 	}
+	ofs := NewS(ctx.OFS)
 	ctx.OFS = string(s)
-	return NewI(1)
+	return ofs
 }
 
 // vfRTPrec implements the rt.prec variadic verb.
@@ -861,6 +862,7 @@ func vfRTPrec(ctx *Context, args []V) V {
 	if len(args) > 1 {
 		return panicRank(`rt.prec`)
 	}
+	oprec := NewI(int64(ctx.Prec))
 	x := args[0]
 	if x.IsI() {
 		ctx.Prec = int(x.I())
@@ -872,7 +874,7 @@ func vfRTPrec(ctx *Context, args []V) V {
 	} else {
 		return panicType("rt.prec i", "i", x)
 	}
-	return NewI(1)
+	return oprec
 }
 
 // vfRTSeed implements the rt.seed variadic verb.
