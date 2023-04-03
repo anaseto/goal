@@ -259,8 +259,12 @@ func fprintV(ctx *goal.Context, w io.Writer, x goal.V) error {
 		return err
 	case *goal.AS:
 		var err error
-		for _, s := range xv.Slice() {
+		imax := xv.Len() - 1
+		for i, s := range xv.Slice() {
 			_, err = fmt.Fprint(w, s)
+			if i < imax {
+				fmt.Fprint(w, ctx.OFS)
+			}
 		}
 		return err
 	default:
@@ -275,10 +279,14 @@ func fsayV(ctx *goal.Context, w io.Writer, x goal.V) error {
 		_, err := fmt.Fprintln(w, string(xv))
 		return err
 	case *goal.AS:
-		for _, s := range xv.Slice() {
+		imax := xv.Len() - 1
+		for i, s := range xv.Slice() {
 			fmt.Fprint(w, s)
+			if i < imax {
+				fmt.Fprint(w, ctx.OFS)
+			}
 		}
-		_, err := fmt.Fprint(w, '\n')
+		_, err := fmt.Fprint(w, "\n")
 		return err
 	default:
 		_, err := w.Write(append(x.Append(ctx, nil), '\n'))
