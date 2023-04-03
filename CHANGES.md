@@ -1,10 +1,14 @@
-# v? ?
+# v0.13.0 2023-04-03
 
 + New rt.ofs runtime builtin for setting the output field separator for string
   lists used in print S and "$S", defaulting to space.
-+ Allow use of 3-arg ? as function, by putting parens around, in which case,
-  it's arguments are evaluated like for any function.
++ Export OFS and Prec parameters in Context API.
++ Allow use of 3-arg ? as function too, by putting parens around, in which
+  case, the arguments are evaluated like for any function (this can be useful
+  in special cases where avoiding branching improves liveness analysis and
+  performance).
 + Make the new =s form of last release work with the #'=x special case.
++ Fixed incorrect newline termination in x say S form.
 
 # v0.12.0 2023-04-02
 
