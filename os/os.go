@@ -216,8 +216,12 @@ func printV(ctx *goal.Context, x goal.V) error {
 		return err
 	case *goal.AS:
 		buf := bufio.NewWriter(os.Stdout)
-		for _, s := range xv.Slice() {
+		imax := xv.Len() - 1
+		for i, s := range xv.Slice() {
 			buf.WriteString(s)
+			if i < imax {
+				buf.WriteString(ctx.OFS)
+			}
 		}
 		return buf.Flush()
 	default:
@@ -233,8 +237,12 @@ func sayV(ctx *goal.Context, x goal.V) error {
 		return err
 	case *goal.AS:
 		buf := bufio.NewWriter(os.Stdout)
-		for _, s := range xv.Slice() {
+		imax := xv.Len() - 1
+		for i, s := range xv.Slice() {
 			buf.WriteString(s)
+			if i < imax {
+				buf.WriteString(ctx.OFS)
+			}
 		}
 		buf.WriteByte('\n')
 		return buf.Flush()

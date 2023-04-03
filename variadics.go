@@ -159,10 +159,11 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterDyad("utf8.valid", vfUTF8Valid)
 
 	// runtime functions
-	ctx.RegisterMonad("rt.vars", vfRTVars)
+	ctx.RegisterMonad("rt.ofs", vfOFS)
 	ctx.RegisterMonad("rt.prec", vfRTPrec)
 	ctx.RegisterMonad("rt.seed", vfRTSeed)
 	ctx.RegisterMonad("rt.time", vfRTTime)
+	ctx.RegisterMonad("rt.vars", vfRTVars)
 }
 
 // vfRight implements the : variadic verb.
@@ -510,11 +511,18 @@ func vfList(ctx *Context, args []V) V {
 func vfQq(ctx *Context, args []V) V {
 	n := 0
 	for _, arg := range args {
-		s, ok := arg.value.(S)
-		if !ok {
-			continue
+		switch argv := arg.value.(type) {
+		case S:
+			n += len(argv)
+		case *AS:
+			imax := len(argv.elts) - 1
+			for i, s := range argv.elts {
+				n += len(s)
+				if i < imax {
+					n += len(ctx.OFS)
+				}
+			}
 		}
-		n += len(s)
 	}
 	var sb strings.Builder
 	if n > 0 {
@@ -525,8 +533,12 @@ func vfQq(ctx *Context, args []V) V {
 		case S:
 			sb.WriteString(string(argv))
 		case *AS:
-			for _, s := range argv.elts {
+			imax := len(argv.elts) - 1
+			for i, s := range argv.elts {
 				sb.WriteString(s)
+				if i < imax {
+					sb.WriteString(ctx.OFS)
+				}
 			}
 		default:
 			sb.WriteString(arg.Sprint(ctx))
@@ -830,6 +842,20 @@ func vfSub(ctx *Context, args []V) V {
 	}
 }
 
+// vfOFS implements the rt.ofs variadic verb.
+func vfOFS(ctx *Context, args []V) V {
+	if len(args) > 1 {
+		return panicRank(`rt.ofs`)
+	}
+	x := args[0]
+	s, ok := x.value.(S)
+	if !ok {
+		return panicType("rt.ofs s", "s", x)
+	}
+	ctx.OFS = string(s)
+	return NewI(1)
+}
+
 // vfRTPrec implements the rt.prec variadic verb.
 func vfRTPrec(ctx *Context, args []V) V {
 	if len(args) > 1 {
@@ -837,12 +863,12 @@ func vfRTPrec(ctx *Context, args []V) V {
 	}
 	x := args[0]
 	if x.IsI() {
-		ctx.prec = int(x.I())
+		ctx.Prec = int(x.I())
 	} else if x.IsF() {
 		if !isI(x.F()) {
 			return Panicf(`rt.prec i : non-integer i (%g)`, x.F())
 		}
-		ctx.prec = int(x.F())
+		ctx.Prec = int(x.F())
 	} else {
 		return panicType("rt.prec i", "i", x)
 	}

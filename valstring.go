@@ -16,7 +16,7 @@ func appendFloat(ctx *Context, dst []byte, f float64) []byte {
 	case math.IsNaN(f):
 		return append(dst, "0n"...)
 	default:
-		return strconv.AppendFloat(dst, f, 'g', ctx.prec, 64)
+		return strconv.AppendFloat(dst, f, 'g', ctx.Prec, 64)
 	}
 }
 

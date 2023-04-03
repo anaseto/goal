@@ -1,3 +1,11 @@
+# v? ?
+
++ New rt.ofs runtime builtin for setting the output field separator for string
+  lists used in print S and "$S", defaulting to space.
++ Allow use of 3-arg ? as function, by putting parens around, in which case,
+  it's arguments are evaluated like for any function.
++ Make the new =s form of last release work with the #'=x special case.
+
 # v0.12.0 2023-04-02
 
 + New =s fields form, similar to rx/[\n \t]+/\ but splits on any kind of unicode

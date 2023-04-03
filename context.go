@@ -34,7 +34,8 @@ import (
 	"strings"
 )
 
-// Context holds the state of the interpreter.
+// Context holds the state of the interpreter. Context values have to be
+// created with NewContext.
 type Context struct {
 	// program representations (AST and compiled)
 	gCode   *globalCode
@@ -76,10 +77,13 @@ type Context struct {
 	// miscellaneous
 	assigned   bool // last instruction was opAssignGlobal
 	compactFmt bool // compact value sprint formatting
-	prec       int  // floating point formatting precision
+
+	Prec int    // floating point formatting precision (default: -1)
+	OFS  string // output field separator (default: " ")
 }
 
-// NewContext returns a new context for compiling and interpreting code.
+// NewContext returns a new context for compiling and interpreting code, with
+// default parameters.
 func NewContext() *Context {
 	ctx := &Context{}
 	ctx.gCode = &globalCode{}
@@ -89,7 +93,8 @@ func NewContext() *Context {
 	var n int = 2
 	ctx.constants = []V{constAV: NewAVWithRC(nil, &n)}
 	ctx.sconstants = map[string]int{}
-	ctx.prec = -1
+	ctx.Prec = -1
+	ctx.OFS = " "
 	ctx.initVariadics()
 	return ctx
 }
@@ -396,7 +401,8 @@ func (ctx *Context) derive() *Context {
 	nctx.gIDs = ctx.gIDs
 	nctx.sources = ctx.sources
 	nctx.gPrefix = ctx.gPrefix
-	nctx.prec = ctx.prec
+	nctx.Prec = ctx.Prec
+	nctx.OFS = ctx.OFS
 	return nctx
 }
 
@@ -410,5 +416,6 @@ func (ctx *Context) merge(nctx *Context) {
 	ctx.gIDs = nctx.gIDs
 	ctx.sources = nctx.sources
 	ctx.gPrefix = nctx.gPrefix
-	ctx.prec = nctx.prec
+	ctx.Prec = nctx.Prec
+	ctx.OFS = nctx.OFS
 }
