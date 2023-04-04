@@ -146,7 +146,6 @@ sqrt[1;2] / too many arguments
 @[1 2;0 1;:;5 2 3] / length mismatch
 @[1 2;"a";+;5] / type
 @[2;"a";+;5] / type
-?-3 / negative integer
 ?3.5 / not an integer
 1.5?10 / not an integer
 3?-10 / non-positive

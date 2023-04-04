@@ -12,11 +12,15 @@ func uniform(ctx *Context, x V) V {
 		}
 		n = int64(x.F())
 	}
-	if n < 0 {
-		return Panicf("?i : negative integer (%d)", n)
-	}
 	if ctx.rand == nil {
 		ctx.rand = rand.New(rand.NewSource(1))
+	}
+	if n < 0 {
+		r := make([]float64, -n)
+		for i := range r {
+			r[i] = ctx.rand.NormFloat64()
+		}
+		return NewAF(r)
 	}
 	r := make([]float64, n)
 	for i := range r {

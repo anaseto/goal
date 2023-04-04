@@ -1,3 +1,8 @@
+# v? ?
+
++ New ?(-i) form returning normal distribution.
++ Make rt.ofs and rt.prec return the previous value.
+
 # v0.13.0 2023-04-03
 
 + New rt.ofs runtime builtin for setting the output field separator for string
