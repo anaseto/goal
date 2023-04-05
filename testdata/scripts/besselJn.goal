@@ -1,0 +1,15 @@
+pi:atan2[-1.0;0.0]
+number:40
+step:pi%number
+jn:{[n;x]
+  / same algorithm as ::math::special::Jn from tcllib
+  (~n~_n)and:error "jn n : non-integer n"
+  res:{[n;x;r;i]
+    t:i*step; f:cos(x*sin t)-n*t; f:?[(i~0)|(i~number);f%2;f]; r+f
+  }[n;x;;]/[0;!number+1]
+  (res*step)%pi
+}
+rnd:{f:1000000;round[x*f]%f}
+{rnd@jn[x;]'0.0 1.0 2.0 5.0}'0 1
+/RESULT:
+(1 0.765198 0.223891 -0.177597;0 0.440051 0.576725 -0.327579)
