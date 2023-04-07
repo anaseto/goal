@@ -29,6 +29,7 @@ func Cmd(ctx *goal.Context, cfg Config) {
 	cpuprofile := flag.String("cpuprofile", "", "write cpu profile to `file`")
 	optE := flag.String("e", "", "execute command")
 	optD := flag.Bool("d", false, "debug info (for scripts)")
+	optQ := flag.Bool("q", false, "quiet (no echo)")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [-e command] [path]\n", os.Args[0])
 		flag.PrintDefaults()
@@ -56,7 +57,7 @@ func Cmd(ctx *goal.Context, cfg Config) {
 		runCommand(ctx, *optE, cfg.ProgramName)
 	}
 	if *optE == "" && len(args) == 0 || len(args) == 1 && args[0] == "-" {
-		runStdin(ctx, cfg)
+		runStdin(ctx, cfg, *optQ)
 		return
 	}
 	if len(args) == 0 {
@@ -101,7 +102,7 @@ func Cmd(ctx *goal.Context, cfg Config) {
 	}
 }
 
-func runStdin(ctx *goal.Context, cfg Config) {
+func runStdin(ctx *goal.Context, cfg Config, quiet bool) {
 	help := cfg.Help()
 	helpLast := false
 	helpv := ctx.RegisterMonad("help", func(ctx *goal.Context, args []goal.V) goal.V {
@@ -118,7 +119,9 @@ func runStdin(ctx *goal.Context, cfg Config) {
 	// We define an alias for help as a global to allow redefinition.
 	ctx.AssignGlobal("h", helpv)
 	lr := lineReader{r: bufio.NewReader(os.Stdin)}
-	fmt.Printf("%s repl, type help\"\" for basic info.\n", cfg.ProgramName)
+	if !quiet {
+		fmt.Printf("%s repl, type help\"\" for basic info.\n", cfg.ProgramName)
+	}
 	sc := &scanner{}
 	for {
 		fmt.Print("  ")
@@ -132,7 +135,7 @@ func runStdin(ctx *goal.Context, cfg Config) {
 			continue
 		}
 		assigned := ctx.AssignedLast()
-		if !assigned && !helpLast {
+		if !quiet && !assigned && !helpLast {
 			echo(ctx, r)
 		}
 		helpLast = false
