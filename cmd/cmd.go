@@ -42,7 +42,7 @@ func Cmd(ctx *goal.Context, cfg Config) {
 		// profiling
 		f, err := os.Create(*cpuprofile)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s: %v", cfg.ProgramName, err)
+			fmt.Fprintf(os.Stderr, "%s: %v\n", cfg.ProgramName, err)
 			os.Exit(1)
 		}
 		pprof.StartCPUProfile(f)
@@ -66,7 +66,7 @@ func Cmd(ctx *goal.Context, cfg Config) {
 	fname := args[0]
 	bs, err := os.ReadFile(fname)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s: %v", cfg.ProgramName, err)
+		fmt.Fprintf(os.Stderr, "%s: %v\n", cfg.ProgramName, err)
 		os.Exit(1)
 	}
 	source := string(bs)
@@ -81,7 +81,7 @@ func Cmd(ctx *goal.Context, cfg Config) {
 	}
 	err = ctx.Compile(fname, source)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s: %v", cfg.ProgramName, err)
+		fmt.Fprintf(os.Stderr, "%s: %v\n", cfg.ProgramName, err)
 		if *optD {
 			printProgram(ctx, cfg)
 		}
@@ -93,12 +93,21 @@ func Cmd(ctx *goal.Context, cfg Config) {
 	}
 	r, err := ctx.Run()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s: %v", cfg.ProgramName, err)
+		fmt.Fprintf(os.Stderr, "%s: %v\n", cfg.ProgramName, err)
 		os.Exit(1)
 	}
 	if r.IsError() {
-		fmt.Fprint(os.Stderr, r.Sprint(ctx))
+		warn(ctx, r)
 		os.Exit(1)
+	}
+}
+
+func warn(ctx *goal.Context, r goal.V) {
+	s, ok := r.Error().Value().(goal.S)
+	if ok {
+		fmt.Fprintln(os.Stderr, s)
+	} else {
+		fmt.Fprintln(os.Stderr, r.Sprint(ctx))
 	}
 }
 
@@ -293,11 +302,11 @@ func runDebug(ctx *goal.Context, cfg Config) {
 func runCommand(ctx *goal.Context, cmd string, name string) {
 	r, err := ctx.Eval(cmd)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s: %v", name, err)
+		fmt.Fprintf(os.Stderr, "%s: %v\n", name, err)
 		os.Exit(1)
 	}
 	if r.IsError() {
-		fmt.Fprint(os.Stderr, r.Error())
+		warn(ctx, r)
 		os.Exit(1)
 	}
 }
