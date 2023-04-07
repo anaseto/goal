@@ -1,0 +1,9 @@
+#!/usr/bin/env goal
+/ EXAMPLES:
+/ goalx "+/#'x" file                       (wordcount like wc)
+/ ls ls -l | goalx '+/"n"$(1_x)[;4]'       (sum of file sizes)
+msg:"USAGE: goalx prog [file]"
+(2>#ARGS)and:error msg; prg:ARGS 1
+x:='"\n"\ '"\n"^read?[2<#ARGS;ARGS 2;STDIN]
+say eval prg
+/ vim:ft=goal

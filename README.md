@@ -81,9 +81,9 @@ goal`.
 
 # Examples
 
-A few short examples can be found in the `testdata/scripts` directory. Because
-they're used for testing, they come along an expected result after a `/RESULT:`
-comment.
+A few short examples can be found in the `examples` and `testdata/scripts`
+directory. Because the latter are used for testing, they come along an expected
+result after a `/RESULT:` comment.
 
 Also, various code generation scripts in the toplevel `scripts` directory are
 written in Goal.
