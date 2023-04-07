@@ -8,3 +8,4 @@
 prg:ARGS 1; fs:?[2<#ARGS;2_ARGS;,STDIN]
 doxf:{xs::read xf::x; eval `x:='"\n"\"\n"^xs`; eval prg}
 {say doxf x}'fs
+/ vim:ft=goal
