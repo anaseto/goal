@@ -60,7 +60,7 @@ func Cmd(ctx *goal.Context, cfg Config) {
 		runStdin(ctx, cfg, *optQ)
 		return
 	}
-	if len(args) == 0 {
+	if len(args) == 0 || *optE != "" {
 		return
 	}
 	fname := args[0]
