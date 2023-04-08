@@ -2,6 +2,10 @@
 
 + New ?(-i) form returning normal distribution.
 + Make rt.ofs and rt.prec return the previous value.
++ New -q command-line option disabling echo.
++ New examples/ directory with some example scripts.
++ Do not search for script filename when -e option is provided.
++ Fix possible refcount bug with shallowClone and join of generic array.
 
 # v0.13.0 2023-04-03
 
