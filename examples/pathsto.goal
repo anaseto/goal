@@ -1,0 +1,23 @@
+'dot:read"graph.dot" / dot input file
+edges:1_'rx/(\w+)\s*->\s*(\w+)/[dot;-1]
+edges,:,/{,[x 0;]'rx/\s+/\x 1}'1_'rx/(\w+)\s*->\s*\{([^}]+)\}/[dot;-1]
+nodes:^?,/edges:^edges
+succ:{=x[;1]!x[;0]}@{nodes?x}'edges
+TO:-1
+next:{
+  ((TO~x -1)|LEN<#x)and:,x
+  s:{~y in x}[x;]#succ x -1; (0~#s)and:,x
+  {x,y}[x;]'s
+}
+paths:{[from;len]
+  LEN::len; f:nodes?from; (f~#nodes)and:error"unknown node: $from"
+  {nodes x}'{,/next'x}/,,f
+}
+/ pathsTo returns a list of paths from node "from" to a node "to" of length at most
+/ "len".
+pathsTo:{[from;to;len]
+  t:nodes?to; (t~#nodes)and:error"unknown node: $to"
+  TO::t; 'ps:paths[from;len]; TO::-1; ^ps[&{x in y}[to;]'ps]
+}
+say pathsTo["A";"G";10] / paths from A to G of length less at most 10
+say paths["A";10] / distinct paths from A of length less at most 10

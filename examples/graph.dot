@@ -1,0 +1,18 @@
+digraph {
+	A -> {B D}
+	B -> {C K}
+	C -> E
+	D -> {B G}
+	E -> F
+	F -> {G H}
+	G -> {A H}
+	H -> {I O}
+	I -> {E J}
+	J -> G
+	K -> L
+	L -> M
+	M -> D
+	O -> P
+	P -> Q
+	Q -> {O G}
+}
