@@ -444,6 +444,7 @@ func joinToAV(x *AV, y V, left bool) V {
 		if reusableRCp(x.RC()) {
 			x.elts = append(x.elts, yv.elts...)
 			x.flags = flagNone
+			x.rc = nil
 			return NewV(x)
 		}
 		return joinArrays(x, yv)
@@ -462,6 +463,7 @@ func joinToAV(x *AV, y V, left bool) V {
 		}
 		if reusableRCp(x.RC()) {
 			x.elts = append(x.elts, y)
+			y.InitWithRC(x.RC())
 			x.flags = flagNone
 			return NewV(x)
 		}

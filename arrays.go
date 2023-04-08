@@ -386,9 +386,9 @@ func (x *AV) shallowClone() array {
 		x.setFlags(flagNone)
 		return x
 	}
-	var n int
-	r := &AV{elts: make([]V, x.Len()), rc: &n}
+	r := &AV{elts: make([]V, x.Len())}
 	copy(r.elts, x.elts)
+	initRC(r)
 	return r
 }
 
