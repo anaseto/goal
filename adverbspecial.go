@@ -493,23 +493,11 @@ func fold2vJoin(x V) V {
 func each2String(ctx *Context, x array) V {
 	switch xv := x.(type) {
 	case *AB:
-		r := make([]string, xv.Len())
-		for i, xi := range xv.elts {
-			r[i] = strconv.FormatInt(B2I(xi), 10)
-		}
-		return NewAS(r)
+		return NewAS(stringBools(xv.elts))
 	case *AI:
-		r := make([]string, xv.Len())
-		for i, xi := range xv.elts {
-			r[i] = strconv.FormatInt(xi, 10)
-		}
-		return NewAS(r)
+		return NewAS(stringInt64s(xv.elts))
 	case *AF:
-		r := make([]string, xv.Len())
-		for i, xi := range xv.elts {
-			r[i] = strconv.FormatFloat(xi, 'g', ctx.Prec, 64)
-		}
-		return NewAS(r)
+		return NewAS(stringFloat64s(xv.elts, ctx.Prec))
 	case *AS:
 		r := xv.reuse()
 		for i, xi := range xv.elts {
@@ -517,14 +505,42 @@ func each2String(ctx *Context, x array) V {
 		}
 		return NewV(r)
 	case *AV:
-		r := make([]string, xv.Len())
-		for i, xi := range xv.elts {
-			r[i] = xi.Sprint(ctx)
-		}
-		return NewAS(r)
+		return NewAS(stringVs(xv.elts, ctx))
 	default:
 		panic("each2String")
 	}
+}
+
+func stringBools(x []bool) []string {
+	r := make([]string, len(x))
+	for i, xi := range x {
+		r[i] = strconv.FormatInt(B2I(xi), 10)
+	}
+	return r
+}
+
+func stringInt64s(x []int64) []string {
+	r := make([]string, len(x))
+	for i, xi := range x {
+		r[i] = strconv.FormatInt(xi, 10)
+	}
+	return r
+}
+
+func stringFloat64s(x []float64, prec int) []string {
+	r := make([]string, len(x))
+	for i, xi := range x {
+		r[i] = strconv.FormatFloat(xi, 'g', prec, 64)
+	}
+	return r
+}
+
+func stringVs(x []V, ctx *Context) []string {
+	r := make([]string, len(x))
+	for i, xi := range x {
+		r[i] = xi.Sprint(ctx)
+	}
+	return r
 }
 
 func each2First(x array) V {

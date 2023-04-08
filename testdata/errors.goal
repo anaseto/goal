@@ -184,7 +184,7 @@ panic["msg"] / msg
 60 -60/2 42 / non positive
 2 csv "1,2,3" / type
 "ab" csv "1,2,3" / not a code point character
-csv (1 2;3) / not an array of records
+csv (1 2;3) / type
 csv 3 / type
 "\t" csv 3 / type
 utf8.valid 1 / type

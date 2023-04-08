@@ -7,7 +7,7 @@ import (
 	"unicode/utf8"
 )
 
-func fCSV2(x, y V) V {
+func fCSV2(ctx *Context, x, y V) V {
 	s, ok := x.value.(S)
 	if !ok {
 		return panicType("x csv y", "x", x)
@@ -19,7 +19,7 @@ func fCSV2(x, y V) V {
 	if c == utf8.RuneError {
 		return panics("x csv y : x is not a valid code point character")
 	}
-	r := fCSV(c, y)
+	r := fCSV(ctx, c, y)
 	if r.IsPanic() {
 		s := string(r.value.(panicV))
 		return NewPanic("x csv y" + strings.TrimPrefix(s, "csv x"))
@@ -27,7 +27,20 @@ func fCSV2(x, y V) V {
 	return r
 }
 
-func fCSV(comma rune, x V) V {
+func csvStringVs(x []V, ctx *Context) []string {
+	r := make([]string, len(x))
+	for i, xi := range x {
+		switch xiv := xi.value.(type) {
+		case S:
+			r[i] = string(xiv)
+		default:
+			r[i] = xi.Sprint(ctx)
+		}
+	}
+	return r
+}
+
+func fCSV(ctx *Context, comma rune, x V) V {
 	switch xv := x.value.(type) {
 	case S:
 		sr := strings.NewReader(string(xv))
@@ -54,16 +67,28 @@ func fCSV(comma rune, x V) V {
 		csvw.Flush()
 		return NewS(sb.String())
 	case *AV:
-		t := rType(xv)
-		if t != tAS {
-			return Panicf("csv x : not an array of records")
-		}
 		sb := strings.Builder{}
 		csvw := csv.NewWriter(&sb)
 		csvw.Comma = comma
 		for _, xi := range xv.elts {
-			xi := xi.value.(*AS)
-			csvw.Write(xi.elts)
+			switch xiv := xi.value.(type) {
+			case *AS:
+				csvw.Write(xiv.elts)
+			case *AB:
+				r := stringBools(xiv.elts)
+				csvw.Write(r)
+			case *AI:
+				r := stringInt64s(xiv.elts)
+				csvw.Write(r)
+			case *AF:
+				r := stringFloat64s(xiv.elts, ctx.Prec)
+				csvw.Write(r)
+			case *AV:
+				r := csvStringVs(xiv.elts, ctx)
+				csvw.Write(r)
+			default:
+				return panicType("csv x", "xi", xi)
+			}
 		}
 		csvw.Flush()
 		return NewS(sb.String())

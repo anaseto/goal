@@ -601,9 +601,9 @@ func vfAnd(ctx *Context, args []V) V {
 func vfCSV(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return fCSV(',', args[0])
+		return fCSV(ctx, ',', args[0])
 	case 2:
-		return fCSV2(args[1], args[0])
+		return fCSV2(ctx, args[1], args[0])
 	default:
 		return panicRank("csv")
 	}

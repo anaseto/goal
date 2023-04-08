@@ -1,9 +1,10 @@
-# v? ?
+# v0.14.0 2023-04-08
 
 + New ?(-i) form returning normal distribution.
 + Make rt.ofs and rt.prec return the previous value.
 + New -q command-line option disabling echo.
 + New examples/ directory with some example scripts.
++ csv now accepts non-string fields (it stringifies fields if necessary).
 + Do not search for script filename when -e option is provided.
 + Fix possible refcount bug with shallowClone and join of generic array.
 
