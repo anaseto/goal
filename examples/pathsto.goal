@@ -19,5 +19,5 @@ pathsTo:{[from;to;len]
   t:nodes?to; (t~#nodes)and:error"unknown node: $to"
   TO::t; 'ps:paths[from;len]; TO::-1; ^ps[&{x in y}[to;]'ps]
 }
-say pathsTo["A";"G";10] / paths from A to G of length less at most 10
-say paths["A";10] / distinct paths from A of length less at most 10
+say pathsTo["A";"G";10] / paths from A to G of length at most 10
+say paths["A";10] / distinct paths from A of length at most 10
