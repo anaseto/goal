@@ -811,7 +811,8 @@ sub["b" "a" "d" "c"]["a";"b"] / too many arguments
 0 1[0;1] / out of depth
 2 1[0;1] / out of depth
 2.5 1[0;1] / out of depth
-("a""b"!1 2)[1;2] / unsupported
+("a""b"!1 2)[1;2] / key not found
+("a""b"!1 2)["a";2] / not callable
 (1 2;3 4)[(5 2;7 3)] / out of bounds
 (1 2;3 4)["a" "b"] / type
 !* / type

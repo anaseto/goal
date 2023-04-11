@@ -382,30 +382,56 @@ func (d *Dict) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
 		y := ctx.top()
-		if y.kind == valNil {
-			return NewV(d.values)
-		}
-		dlen := d.keys.Len()
-		z := findArray(d.keys, y)
-		if z.IsI() {
-			i := z.I() // i >= 0
-			if i >= int64(dlen) {
-				return Panicf("d[y] : key not found (%s)", y.Sprint(ctx))
-			}
-			return d.values.at(int(i))
-		}
-		azi := z.value.(*AI)
-		_, i, ok := inBoundsInfo(azi, dlen)
-		if !ok {
-			return Panicf("d[y] : key not found (%s)", y.value.(array).at(i).Sprint(ctx))
-		}
-		r := d.values.atIndices(azi)
-		initRC(r)
-		return NewV(r)
+		return d.apply(ctx, y)
 	default:
-		ctx.dropN(n - 1)
-		return Panicf("x[y] : deep indexing unsupported for dict")
+		y := ctx.pop()
+		v := d.apply(ctx, y)
+		if v.IsPanic() {
+			return v
+		}
+		va, ok := v.value.(array)
+		if !ok {
+			return v.applyN(ctx, n-1)
+		}
+		args := ctx.peekN(n - 1)
+		r := make([]V, va.Len())
+		for i := 0; i < len(r); i++ {
+			ri := ctx.ApplyN(va.at(i), args)
+			if ri.IsPanic() {
+				return ri
+			}
+			r[i] = ri
+		}
+		if n > 2 {
+			ctx.dropN(n - 2)
+		}
+		rv := &AV{elts: r}
+		initRC(rv)
+		return NewV(canonicalAV(rv))
 	}
+}
+
+func (d *Dict) apply(ctx *Context, y V) V {
+	if y.kind == valNil {
+		return NewV(d.values)
+	}
+	dlen := d.keys.Len()
+	z := findArray(d.keys, y)
+	if z.IsI() {
+		i := z.I() // i >= 0
+		if i >= int64(dlen) {
+			return Panicf("d[y] : key not found (%s)", y.Sprint(ctx))
+		}
+		return d.values.at(int(i))
+	}
+	azi := z.value.(*AI)
+	_, i, ok := inBoundsInfo(azi, dlen)
+	if !ok {
+		return Panicf("d[y] : key not found (%s)", y.value.(array).at(i).Sprint(ctx))
+	}
+	r := d.values.atIndices(azi)
+	initRC(r)
+	return NewV(r)
 }
 
 // applyArray applies an array to a value.
@@ -485,7 +511,7 @@ func (ctx *Context) applyArrayArgs(x array, arg V, args []V) V {
 			}
 			r[i] = ri
 		}
-		return Canonical(NewAV(r))
+		return NewV(canonicalAV(&AV{elts: r}))
 	}
 	switch argv := arg.value.(type) {
 	case array:
@@ -497,7 +523,7 @@ func (ctx *Context) applyArrayArgs(x array, arg V, args []V) V {
 			}
 			r[i] = ri
 		}
-		return Canonical(NewAV(r))
+		return NewV(canonicalAV(&AV{elts: r}))
 	default:
 		r := applyArray(x, arg)
 		if r.IsPanic() {
