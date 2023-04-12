@@ -29,7 +29,10 @@ or[1;;3;4] / empty argument (2-th)
 (;) / empty slot in list
 a:3 "a";1 2=a / type
 a:3 "a";"c" 2=a / type
-0!!6 / not positive
+0!!6 / out of range
+-7!!6 / out of range
+-5!"abcd" / out of range
+5!"abcd" / out of range
 0.3!6 / non-integer
 " "/1 2 / type
 " "/(1 2;3 4) / type
@@ -852,7 +855,7 @@ eval[".*";"a";"a"] / type
 */("c" "d";"a" "b") / type
 -/(1 2;*) / type
 {a}"" / undefined
--2!"abc" / not positive
+0!"abc" / out of range
 json 3  / type
 json["3";4;5] / too many arguments
 f 1 / undefined global

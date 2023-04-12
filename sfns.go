@@ -1150,35 +1150,47 @@ func nudgeBack(x V) V {
 func windows(i int64, y V) V {
 	switch yv := y.value.(type) {
 	case S:
-		if i <= 0 || i >= int64(len(yv)+1) {
-			return Panicf("i^y : i out of range !%d (%d)", len(yv)+1, i)
+		if i < 0 && -i < int64(len(yv))+1 {
+			return windowsString(-i, string(yv))
 		}
-		r := make([]string, 1+len(yv)-int(i))
-		for j := range r {
-			r[j] = string(yv[j : j+int(i)])
+		if i > 0 && i < int64(len(yv))+1 {
+			return windowsString(int64(len(yv))-i+1, string(yv))
 		}
-		return NewAS(r)
+		return Panicf("i^y : out of range i !%d (%d)", len(yv)+1, i)
 	case array:
-		if i <= 0 || i >= int64(yv.Len()+1) {
-			return Panicf("i^y : i out of range !%d (%d)", yv.Len()+1, i)
+		if i < 0 && -i < int64(yv.Len())+1 {
+			return windowsArray(-i, yv)
 		}
-		r := make([]V, 1+yv.Len()-int(i))
-		rc := yv.RC()
-		*rc += 2
-		for j := range r {
-			yc := y
-			yc.value = yv.slice(j, j+int(i))
-			r[j] = Canonical(yc)
+		if i > 0 && i < int64(yv.Len())+1 {
+			return windowsArray(int64(yv.Len())-i+1, yv)
 		}
-		var n int
-		return NewAVWithRC(r, &n)
+		return Panicf("i^y : out of range i !%d (%d)", yv.Len()+1, i)
 	default:
 		return panicType("i^y", "y", y)
 	}
 }
 
-// colSplit returns i!y.
-func colSplit(x V, y V) V {
+func windowsString(i int64, s string) V {
+	r := make([]string, 1+len(s)-int(i))
+	for j := range r {
+		r[j] = s[j : j+int(i)]
+	}
+	return NewAS(r)
+}
+
+func windowsArray(i int64, y array) V {
+	r := make([]V, 1+y.Len()-int(i))
+	rc := y.RC()
+	*rc += 2
+	for j := range r {
+		r[j] = Canonical(NewV(y.slice(j, j+int(i))))
+	}
+	var n int
+	return NewAVWithRC(r, &n)
+}
+
+// cutShape returns i!y.
+func cutShape(x V, y V) V {
 	var i int64
 	if x.IsI() {
 		i = x.I()
@@ -1186,7 +1198,7 @@ func colSplit(x V, y V) V {
 		// x.IsF() should be true
 		f := x.F()
 		if !isI(f) {
-			return Panicf("i!y : i non-integer (%g)", f)
+			return Panicf("i!y : non-integer i (%g)", f)
 		}
 		i = int64(f)
 	}
@@ -1195,55 +1207,98 @@ func colSplit(x V, y V) V {
 	} else if y.IsF() {
 		f := y.F()
 		if !isI(f) {
-			return Panicf("i!i : non-integer right (%g)", f)
+			return Panicf("i!i : non-integer up bound (%g)", f)
 		}
 		return rangeII(i, int64(f))
 	}
 	switch yv := y.value.(type) {
 	case S:
-		ylen := len(yv)
-		if i <= 0 {
-			return Panicf("i!s : i not positive (%d)", i)
+		if i < 0 && -i < int64(len(yv))+1 {
+			return cutColsString(-i, string(yv))
 		}
-		if i >= int64(ylen) {
-			return NewAS([]string{string(yv)})
+		if i > 0 && i < int64(len(yv))+1 {
+			return cutLinesString(int(i), string(yv))
 		}
-		n := ylen / int(i)
-		if ylen%int(i) != 0 {
-			n++
-		}
-		r := make([]string, n)
-		for j := 0; j < n; j++ {
-			from := j * int(i)
-			to := minInt(from+int(i), ylen)
-			r[j] = string(yv[from:to])
-		}
-		return NewAS(r)
+		return Panicf("i!s : out of range i (%d)", i)
 	case array:
-		ylen := yv.Len()
-		if i <= 0 {
-			return Panicf("i!Y : i not positive (%d)", i)
+		if i < 0 && -i < int64(yv.Len())+1 {
+			return cutColsArray(-i, yv)
 		}
-		if i >= int64(ylen) {
-			return NewAVWithRC([]V{y}, yv.RC())
+		if i > 0 && i < int64(yv.Len())+1 {
+			return cutLinesArray(int(i), yv)
 		}
-		n := ylen / int(i)
-		if ylen%int(i) != 0 {
-			n++
-		}
-		rc := yv.RC()
-		*rc += 2
-		r := make([]V, n)
-		for j := 0; j < n; j++ {
-			yc := y
-			from := j * int(i)
-			to := minInt(from+int(i), ylen)
-			yc.value = yv.slice(from, to)
-			r[j] = Canonical(yc)
-		}
-		var rcn int
-		return NewAVWithRC(r, &rcn)
+		return Panicf("i!Y : out of range i (%d)", i)
 	default:
 		return panicType("i!y", "y", y)
 	}
+}
+
+func cutColsString(i int64, s string) V {
+	if i >= int64(len(s)) {
+		return NewAS([]string{s})
+	}
+	n := len(s) / int(i)
+	if len(s)%int(i) != 0 {
+		n++
+	}
+	r := make([]string, n)
+	for j := 0; j < n; j++ {
+		from := j * int(i)
+		to := minInt(from+int(i), len(s))
+		r[j] = s[from:to]
+	}
+	return NewAS(r)
+}
+
+func cutLinesString(n int, s string) V {
+	r := make([]string, n)
+	if n == 1 {
+		return NewAS([]string{s})
+	}
+	from := 0
+	for j := 0; j < n; j++ {
+		to := minInt(from+(len(s)-from)/(n-j), len(s))
+		r[j] = s[from:to]
+		from = to
+	}
+	return NewAS(r)
+}
+
+func cutColsArray(i int64, y array) V {
+	ylen := y.Len()
+	if i >= int64(ylen) {
+		return NewAVWithRC([]V{NewV(y)}, y.RC())
+	}
+	n := ylen / int(i)
+	if ylen%int(i) != 0 {
+		n++
+	}
+	rc := y.RC()
+	*rc += 2
+	r := make([]V, n)
+	for j := 0; j < n; j++ {
+		from := j * int(i)
+		to := minInt(from+int(i), ylen)
+		r[j] = Canonical(NewV(y.slice(from, to)))
+	}
+	var rcn int
+	return NewAVWithRC(r, &rcn)
+}
+
+func cutLinesArray(n int, y array) V {
+	ylen := y.Len()
+	if n == 1 {
+		return NewAVWithRC([]V{NewV(y)}, y.RC())
+	}
+	rc := y.RC()
+	*rc += 2
+	r := make([]V, n)
+	from := 0
+	for j := 0; j < n; j++ {
+		to := minInt(from+(ylen-from)/(n-j), ylen)
+		r[j] = Canonical(NewV(y.slice(from, to)))
+		from = to
+	}
+	var rcn int
+	return NewAVWithRC(r, &rcn)
 }

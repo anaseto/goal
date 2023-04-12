@@ -177,8 +177,8 @@ x%y divide      3%2 -> 1.5          3 4%2 -> 1.5 2
 !d  keys        !"a" "b"!1 2 -> "a" "b"
 !I  odometer    !2 3 -> (0 0 0 1 1 1;0 1 2 0 1 2)
 i!i range       2!5 -> 2 3 4        5!2 -> !0
-i!s colsplit    3!"abcdefghijk" -> "abc" "def" "ghi" "jk"      (i-bytes strings)
-i!Y colsplit    2!!6 -> (0 1;2 3;4 5)            2!"a" "b" "c" -> ("a" "b";,"c")
+i!s cut shape   3!"abcdefghijk" -> "abc" "defg" "hijk"         (i-bytes strings)
+i!Y cut shape   3!!6 -> (0 1;2 3;4 5)            -3!!6 -> (0 1 2;3 4 5)
 X!Y dict        d:"a" "b"!1 2;d "a" -> 1
 &I  where       &0 0 1 0 0 0 1 -> 2 6            &2 3 -> 0 0 1 1 1
 &d  keys where  &"a""b""c""d"!0 1 1 0 -> "b" "c"
@@ -200,8 +200,8 @@ x~y match       3~3 -> 1        2 3~3 2 -> 0        ("a";%)~("b";%) -> 0 1
 d,d merge       ("a""b"!1 2),"b""c"!3 4 -> "a""b""c"!1 3 4
 x,y join        1,2 -> 1 2              "ab" "c","d" -> "ab" "c" "d"
 ^X  sort        ^3 5 0 -> 0 3 5         ^"ca" "ab" "bc" -> "ab" "bc" "ca"
-i^s windows     2^"abcd" -> "ab" "bc" "cd"                     (i-bytes strings)
-i^Y windows     2^!4 -> (0 1;1 2;2 3)
+i^s windows     2^"abcde" -> "abcd" "bcde"                     (i-bytes strings)
+i^Y windows     2^!4 -> (0 1 2;1 2 3)   -2^!4 -> (0 1;1 2;2 3)
 s^s trim        " []"^"  [text]  " -> "text"      ""^" \nstuff\t" -> "stuff"
 X^Y without     2 3^1 1 2 3 3 4 -> 1 1 4
 #x  length      #2 4 5 -> 3       #"ab" "cd" -> 2       #42 -> 1      #"ab" -> 1

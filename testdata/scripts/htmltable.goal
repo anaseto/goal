@@ -9,7 +9,7 @@ ln:{elt[`tr`;+/elt[x;]'y]}
 table:{th:ln["th";] x; tds:"\n"/ln["td";]'y; "<table>\n$th\n$tds\n</table>\n"}
 table[
   "" "X" "Y" "Z"
-  escape[$''(!4),'3!!12]
+  escape[$''(!4),'-3!!12]
 ]
 /RESULT:
 `<table>

@@ -1,3 +1,9 @@
+# v? ?
+
++ Make i^Y, i^s, i!s, i!Y use i as the length of the result, and use -i for the
+  old behavior (breaking change).
++ Implemented deep indexing for dicts.
+
 # v0.14.0 2023-04-08
 
 + New ?(-i) form returning normal distribution.
