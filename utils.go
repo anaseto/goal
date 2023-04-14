@@ -113,9 +113,6 @@ func minMax(x *AI) (min, max int64) {
 
 func maxAI(x *AI) int64 {
 	max := int64(math.MinInt64)
-	if x.Len() == 0 {
-		return max
-	}
 	for _, xi := range x.elts {
 		if xi > max {
 			max = xi
@@ -126,9 +123,6 @@ func maxAI(x *AI) int64 {
 
 func minAI(x *AI) int64 {
 	min := int64(math.MaxInt64)
-	if x.Len() == 0 {
-		return min
-	}
 	for _, xi := range x.elts {
 		if xi < min {
 			min = xi
@@ -139,10 +133,9 @@ func minAI(x *AI) int64 {
 
 func maxAF(x *AF) float64 {
 	max := math.Inf(-1)
-	if x.Len() == 0 {
-		return max
-	}
 	for _, xi := range x.elts {
+		// NOTE: not equivalent to math.Max(xi, max) if there are NaNs,
+		// but faster, so keep it this way.
 		if xi > max {
 			max = xi
 		}
@@ -152,10 +145,9 @@ func maxAF(x *AF) float64 {
 
 func minAF(x *AF) float64 {
 	min := math.Inf(1)
-	if x.Len() == 0 {
-		return min
-	}
 	for _, xi := range x.elts {
+		// NOTE: not equivalent to math.Min(xi, min) if there are NaNs,
+		// but faster, so keep it this way.
 		if xi < min {
 			min = xi
 		}

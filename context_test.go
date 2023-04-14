@@ -490,3 +490,11 @@ func BenchmarkPad(b *testing.B) {
 		ctx.Eval("5$a")
 	}
 }
+
+func BenchmarkMax(b *testing.B) {
+	ctx := NewContext()
+	ctx.Eval("a:0.0+1000?10000")
+	for n := 0; n < b.N; n++ {
+		ctx.Eval("|/a")
+	}
+}
