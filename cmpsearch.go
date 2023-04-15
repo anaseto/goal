@@ -61,7 +61,7 @@ func classify(ctx *Context, x V) V {
 	case *AF:
 		return NewAIWithRC(classifySlice[float64](xv.elts, bruteForceNumeric), reuseRCp(xv.rc))
 	case *AI:
-		if xv.Len() > bruteForceNumeric {
+		if xv.Len() > bruteForceNumeric/2 {
 			min, max := minMax(xv)
 			n := int64(0)
 			if max-min+1 < int64(xv.Len())+8 {
