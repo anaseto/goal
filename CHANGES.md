@@ -3,6 +3,9 @@
 + Make i^Y, i^s, i!s, i!Y use i as the length of the result, and use -i for the
   old behavior (breaking change).
 + Implemented deep indexing for dicts.
++ Implement `@[f1;x;f2]`, like `.[f1;y;f2]` but doing f1@x instead of `f1 . y`.
++ Fix default rank of s/ s\ I/ I\ (used in the case they would be followed by a
+  fold or scan, which will probably never happen).
 
 # v0.14.0 2023-04-08
 
