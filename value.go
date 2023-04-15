@@ -218,7 +218,7 @@ func (x V) IsCallable() bool {
 //	variadic	2
 //	lambda		number of arguments
 //	projections	number of gaps
-//	derived verb	1
+//	derived verb	depends on the verb and adverb
 func (x V) Rank(ctx *Context) int {
 	switch x.kind {
 	case valVariadic:
@@ -339,12 +339,12 @@ func (r *derivedVerb) rank(ctx *Context) int {
 	switch r.Fun {
 	case vEach:
 		// f' has same rank as f
-		return r.Arg.Rank(ctx)
+		return maxInt(1, r.Arg.Rank(ctx))
 	default:
 		// f/ and f\ have rank derived from f, except that by default
 		// it's one less, because we consider as default case the
 		// non-seeded case.
-		return maxInt(0, r.Arg.Rank(ctx)-1)
+		return maxInt(1, r.Arg.Rank(ctx)-1)
 	}
 }
 
