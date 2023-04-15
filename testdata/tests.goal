@@ -227,7 +227,9 @@ eval["a:3";"package.goal";"package"];package.a / 3
 "a" "c" "e"$"d" / 2
 "a" "c" "e"$"e" / 3
 .[+;2 3;{"msg"}] / 5
-.[+;2 "a";{"msg"}] / "msg"
+@[2+;3;{"msg"}] / 5
+"type"in.[+;2 "a";:] / 1
+"type"in@[2+;"a";:];"type"in@[2+;"a";:] / 1
 .[+;2 "a";{"type"in x}] / 1
 "prefix-"_"prefix-name" / "name"
 "prefix-"_"prefix-name" "prefix-name2" / "name" "name2"

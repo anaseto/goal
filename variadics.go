@@ -457,7 +457,11 @@ func vfApply(ctx *Context, args []V) V {
 		ctx.drop()
 		return r
 	case 3:
-		return ctx.amend3(args[2], args[1], args[0])
+		x := args[2]
+		if x.IsFunction() {
+			return tryAt(ctx, x, args[1], args[0])
+		}
+		return ctx.amend3(x, args[1], args[0])
 	case 4:
 		return ctx.amend4(args[3], args[2], args[1], args[0])
 	default:

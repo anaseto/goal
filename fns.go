@@ -789,6 +789,20 @@ func try(ctx *Context, f1, x, f2 V) V {
 	return r
 }
 
+// tryAt implements @[f1;x;f2].
+func tryAt(ctx *Context, f1, x, f2 V) V {
+	r := ctx.Apply(f1, x)
+	if r.IsPanic() {
+		r = NewS(string(r.value.(panicV)))
+		ctx.replaceTop(r)
+		r = f2.applyN(ctx, 1)
+		if r.IsPanic() {
+			return Panicf("@[f1;x;f2] : f2 call: %v", r)
+		}
+	}
+	return r
+}
+
 func getN(y V) V {
 	var n int64 = 1
 	if y.IsI() {
