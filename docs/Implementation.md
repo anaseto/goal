@@ -1,4 +1,4 @@
-*Last updated: 2023-03-23*
+*Last updated: 2023-04-15*
 
 # Implementation notes
 
@@ -89,12 +89,13 @@ type Value interface {
 	// sort non-comparable values using lexicographic order.  This means
 	// Type should return different values for non-comparable values.
 	Type() string
-	// Less returns true if the value should be orderer before the given
+	// LessT returns true if the value should be orderer before the given
 	// one. It is used for sorting values, but not for element-wise
-	// comparison with < and >. It should produce a strict total order, so,
-	// in particular, if x < y, then we do not have y > x, and one of them
-	// should hold unless both values match.
-	Less(Value) bool
+	// comparison with < and >. It should produce a strict total order,
+	// that is, irreflexive (~x<x), asymmetric (if x<y then ~y<x),
+	// transitive, connected (different values are comparable, except
+	// NaNs).
+	LessT(Value) bool
 }
 ```
 
@@ -112,12 +113,12 @@ type V struct {
 ```
 
 As a result, Goal has unboxed integer and floating point values (by
-interpreting the n field as one type or the other depending on the kind field),
-as well as unboxed types for built-in functions and lambdas. This makes scalar
-code faster and more memory-friendly by keeping numeric atoms in the stack.
-Although the V struct is less compact than a union struct in C (we need four
-words), it does perform quite well in practice, as Go is good at efficiently
-copying small types up to a few words.
+interpreting the `n` field as one type or the other depending on the kind
+field), as well as unboxed types for built-in functions and lambdas. This makes
+scalar code faster and more memory-friendly by keeping numeric atoms in the
+stack.  Although the V struct is less compact than a union struct in C (we need
+four words), it does perform quite well in practice, as Go is good at
+efficiently copying small types up to a few words.
 
 # Primitives
 
@@ -152,8 +153,8 @@ combinations, not with similar types separately).
 For simple unary functions, a variadic function looks like this:
 
 ``` go
-// VSubtract implements the - variadic verb.
-func VSubtract(ctx *Context, args []V) V {
+// vfSubtract implements the - variadic verb.
+func vfSubtract(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return negate(args[0])
@@ -235,8 +236,7 @@ Other than that, some array primitives do require some algorithmic work, in
 particular self-search functions, though there's no way I'm going to explain
 this better than [BQN implementation
 notes](https://mlochbaum.github.io/BQN/implementation/), so there you go. I did
-not optimize as far as BQN, but I picked quite a few ideas from there, and plan
-to do a bit more of it in the future.
+not optimize as far as BQN, but I picked a few ideas from there.
 
 # Performance
 
