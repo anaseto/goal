@@ -828,6 +828,7 @@ func nudge(x V) V {
 		r0 := proto(xv.elts)
 		copy(r.elts[1:], xv.elts[:xv.Len()-1])
 		r.elts[0] = r0
+		r0.InitWithRC(r.rc)
 		return Canonical(NewV(r))
 	case *Dict:
 		return newDictValues(xv.keys, nudge(NewV(xv.values)))
@@ -1140,6 +1141,7 @@ func nudgeBack(x V) V {
 		rlast := proto(xv.elts)
 		copy(r.elts[0:xv.Len()-1], xv.elts[1:])
 		r.elts[xv.Len()-1] = rlast
+		rlast.InitWithRC(r.rc)
 		return Canonical(NewV(r))
 	case *Dict:
 		return newDictValues(xv.keys, nudgeBack(NewV(xv.values)))
