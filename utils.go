@@ -746,6 +746,38 @@ func canonicalFast(x V) V {
 	}
 }
 
+func proto(x []V) V {
+	if len(x) == 0 {
+		return NewI(0)
+	}
+	x0 := x[0]
+	if x0.IsI() {
+		return NewI(0)
+	}
+	if x0.IsF() {
+		return NewF(0)
+	}
+	switch x0.value.(type) {
+	case S:
+		return NewS("")
+	case *AB:
+		return NewAB(nil)
+	case *AI:
+		return NewAI(nil)
+	case *AF:
+		return NewAF(nil)
+	case *AS:
+		return NewAS(nil)
+	case *AV:
+		return NewAV(nil)
+	default:
+		if x0.IsFunction() {
+			return newVariadic(vRight)
+		}
+		return NewError(NewS("fill"))
+	}
+}
+
 // hasNil returns true if there is a nil value in the given array.
 func hasNil(a []V) bool {
 	for _, x := range a {

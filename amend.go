@@ -87,8 +87,11 @@ func padArrayMut(x array, n int) array {
 			xv.elts = append(xv.elts, "")
 		}
 	case *AV:
+		pad := proto(xv.elts)
+		var rc int = 2
+		pad.InitWithRC(&rc)
 		for i := 0; i < n; i++ {
-			xv.elts = append(xv.elts, NewI(0))
+			xv.elts = append(xv.elts, pad)
 		}
 	}
 	return x
