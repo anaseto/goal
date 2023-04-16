@@ -714,31 +714,4 @@ func pDoExprs(es exprs) {
 	for i := 0; i < len(es)/2; i++ {
 		es[i], es[len(es)-i-1] = es[len(es)-i-1], es[i]
 	}
-	// Recognize some special forms. Currently: #'=
-	for i, e := range es {
-		if i == len(es)-1 {
-			break
-		}
-		if i == 0 {
-			continue
-		}
-		switch e := e.(type) {
-		case *astToken:
-			if e.Text != "=" {
-				break
-			}
-			ne, ok := es[i+1].(*astDerivedVerb)
-			if !ok || ne.Adverb.Text != "'" {
-				break
-			}
-			v, ok := ne.Verb.(*astToken)
-			if !ok {
-				break
-			}
-			if v.Text == "#" {
-				e.Text = "icount"
-				es[i+1] = &astNop{}
-			}
-		}
-	}
 }

@@ -190,8 +190,8 @@ x<y less        2<3 -> 1        "c" < "a" -> 0
 >X  descend     >3 5 4 -> 1 2 0         (index permutation for descending order)
 x>y greater     2>3 -> 0        "c" > "a" -> 1
 =s  fields      ="a b\tc\nd  e" -> "a" "b" "c" "d" "e"       (unicode space too)
-=I  group       =1 0 2 1 2 -> (,1;0 3;2 4)       =-1 2 -1 2 -> (!0;!0;1 3)
-=d  group keys  ="a""b""c"!0 1 0 -> ("a" "c";,"b")
+=I  index-count =1 0 0 2 2 3 -1 2 1 1 1 -> 2 4 3 1
+=d  group keys  ="a""b""c"!0 1 0 -> ("a" "c";,"b")         ="a""b"!0 -1 -> ,,"a"
 f=Y group by    {2 mod x}=!10 -> (0 2 4 6 8;1 3 5 7 9)
 x=y equal       2 3 4=3 -> 0 1 0        "ab" = "ba" -> 0
 ~x  not         ~0 1 2 -> 1 0 0         ~"a" "" "0" -> 0 1 0
@@ -208,7 +208,7 @@ X^Y without     2 3^1 1 2 3 3 4 -> 1 1 4
 i#y take        2#6 7 8 -> 6 7    4#6 7 8 -> 6 7 8 6 (cyclic)       3#1 -> 1 1 1
 s#s count       "ab"#"cabdab" "cd" "deab" -> 2 0 1
 f#y replicate   {0 1 1 0}#4 1 5 3 -> 1 5          {x>0}#2 -3 1 -> 2 1
-X#Y keep only   2 3#1 1 2 3 3 4 -> 2 3 3
+X#Y with only   2 3#1 1 2 3 3 4 -> 2 3 3
 _n  floor       _2.3 -> 2               _1.5 3.7 -> 1 3
 _s  to lower    _"ABC" -> "abc"         _"AB" "CD" -> "ab" "cd"
 i_s drop bytes  2_"abcde" -> "cde"      -2_"abcde" -> "abc"

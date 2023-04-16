@@ -116,9 +116,6 @@ func (ctx *Context) initVariadics() {
 	ctx.vNames["::"] = variadic(len(ctx.variadics) - 1)
 	ctx.keywords = make(map[string]IdentType, nkeywords)
 
-	// special form variadics
-	ctx.registerVariadic("icount", vfICount)
-
 	// monads
 	ctx.RegisterMonad("abs", vfAbs)
 	ctx.RegisterMonad("bytes", vfBytes)
@@ -294,7 +291,7 @@ func vfMore(ctx *Context, args []V) V {
 func vfEqual(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return group(args[0])
+		return icountFields(args[0])
 	case 2:
 		x, y := args[1], args[0]
 		if x.IsFunction() {
@@ -688,16 +685,6 @@ func vfFirsts(ctx *Context, args []V) V {
 		return markFirsts(ctx, args[0])
 	default:
 		return panicRank("firsts")
-	}
-}
-
-// vfICount implements the "icount" variadic verb (#'=).
-func vfICount(ctx *Context, args []V) V {
-	switch len(args) {
-	case 1:
-		return icount(args[0])
-	default:
-		return panicRank("icount")
 	}
 }
 

@@ -2,132 +2,11 @@ package goal
 
 import "strings"
 
-// group returns =x.
-func group(x V) V {
+// icountFields returns =x.
+func icountFields(x V) V {
 	switch xv := x.value.(type) {
 	case S:
 		return NewAS(strings.Fields(string(xv)))
-	case *AB:
-		if xv.Len() == 0 {
-			return NewAV(nil)
-		}
-		n := int(sumAB(xv))
-		r := make([]V, int(B2I(n > 0)+1))
-		ai := make([]int64, xv.Len())
-		if n == 0 {
-			for i := range ai {
-				ai[i] = int64(i)
-			}
-			r[0] = NewAI(ai)
-			return NewAV(r)
-		}
-		aif := ai[:len(ai)-n]
-		ait := ai[len(ai)-n:]
-		iTrue, iFalse := 0, 0
-		for i, xi := range xv.elts {
-			if xi {
-				ait[iTrue] = int64(i)
-				iTrue++
-			} else {
-				aif[iFalse] = int64(i)
-				iFalse++
-			}
-		}
-		var nrc int = 2
-		r[0] = NewAIWithRC(aif, &nrc)
-		r[1] = NewAIWithRC(ait, &nrc)
-		return NewAVWithRC(r, &nrc)
-	case *AI:
-		if xv.Len() == 0 {
-			return NewAV(nil)
-		}
-		max := maxAI(xv)
-		if max < 0 {
-			max = -1
-		}
-		r := make([]V, max+1)
-		counta := make([]int64, 2*(max+1))
-		counts := counta[:max+1]
-		countn := 0
-		for _, j := range xv.elts {
-			if j < 0 {
-				countn++
-				continue
-			}
-			counts[j]++
-		}
-		scounts := counta[max+1:]
-		sn := int64(0)
-		for i, n := range counts {
-			sn += n
-			scounts[i] = sn
-		}
-		pj := int64(0)
-		ai := make([]int64, xv.Len()-countn)
-		var n int = 2
-		for i := range r {
-			r[i] = NewAIWithRC(ai[pj:scounts[i]], &n)
-			pj = scounts[i]
-		}
-		for i, j := range xv.elts {
-			if j < 0 {
-				continue
-			}
-			ai[scounts[j]-counts[j]] = int64(i)
-			counts[j]--
-		}
-		return NewAVWithRC(r, &n)
-	case *AF:
-		z := toAI(xv)
-		if z.IsPanic() {
-			return ppanic("=x : ", z)
-		}
-		return group(z)
-	case *AS:
-		r := make([]V, xv.Len())
-		for i, xi := range xv.elts {
-			r[i] = NewAS(strings.Fields(xi))
-		}
-		return NewAV(r)
-	case *AV:
-		r := make([]V, xv.Len())
-		for i, xi := range xv.elts {
-			ri := group(xi)
-			if ri.IsPanic() {
-				return ri
-			}
-			r[i] = ri
-		}
-		return NewAV(r)
-	case *Dict:
-		gi := group(NewV(xv.values))
-		if gi.IsPanic() {
-			return gi
-		}
-		gv := gi.value.(*AV)
-		r := gv.reuse()
-		for i, gi := range gv.elts {
-			r.elts[i] = NewV(xv.keys.atIndices(gi.value.(*AI)))
-		}
-		if r.rc == nil {
-			var n = 2
-			r.rc = &n
-		} else {
-			*r.rc += 2
-		}
-		r.InitWithRC(r.rc)
-		return NewV(r)
-	default:
-		if x.Len() == 0 {
-			return NewAV(nil)
-		}
-		return panicType("=x", "x", x)
-	}
-}
-
-// icount efficiently returns #'=x.
-func icount(x V) V {
-	switch xv := x.value.(type) {
 	case *AB:
 		if xv.Len() == 0 {
 			return NewAI(nil)
@@ -145,57 +24,221 @@ func icount(x V) V {
 		if max < 0 {
 			max = -1
 		}
-		counts := make([]int64, max+1)
+		icounts := make([]int64, max+1)
 		for _, j := range xv.elts {
 			if j >= 0 {
-				counts[j]++
+				icounts[j]++
 			}
 		}
-		return NewAI(counts)
+		return NewAI(icounts)
 	case *AF:
 		z := toAI(xv)
 		if z.IsPanic() {
 			return ppanic("=x : ", z)
 		}
-		return icount(z)
-	case *Dict:
-		return icount(NewV(xv.values))
-	default:
-		r := group(x)
-		if r.IsPanic() {
-			return panicType("=x", "x", x)
+		return icountFields(z)
+	case *AS:
+		r := make([]V, xv.Len())
+		for i, xi := range xv.elts {
+			r[i] = NewAS(strings.Fields(xi))
 		}
-		return each2Length(r.value.(array))
+		return NewAV(r)
+	case *Dict:
+		return groupBy(NewV(xv.values), NewV(xv.keys))
+	case *AV:
+		r := make([]V, xv.Len())
+		for i, xi := range xv.elts {
+			ri := icountFields(xi)
+			if ri.IsPanic() {
+				return ri
+			}
+			r[i] = ri
+		}
+		return NewAV(r)
+	default:
+		return panicType("=x", "x", x)
 	}
 }
 
 // groupBy by returns {x}=y.
 func groupBy(x, y V) V {
-	if x.Len() != y.Len() {
+	xlen := x.Len()
+	if xlen != y.Len() {
 		return Panicf("f=Y : length mismatch for f[Y] and Y: %d vs %d ",
 			x.Len(), y.Len())
 
 	}
-	switch x.value.(type) {
+	if xlen == 0 {
+		return NewAV(nil)
+	}
+	switch xv := x.value.(type) {
 	case *AB:
-	case *AI:
-	case *AF:
-	default:
-		return panicType("f=Y", "f[Y]", x)
-	}
-	gx := group(x)
-	if gx.IsPanic() {
-		return panicType("f=Y", "f[Y]", x)
-	}
-	xav := gx.value.(*AV) // group should always return *AV or panicV
-	switch yv := y.value.(type) {
-	case array:
-		r := make([]V, xav.Len())
-		for i, xi := range xav.elts {
-			r[i] = NewV(yv.atIndices(xi.value.(*AI)))
+		n := int(sumAB(xv))
+		r := make([]V, int(B2I(n > 0)+1))
+		switch yv := y.value.(type) {
+		case *AB:
+			if n == 0 {
+				r[0] = y
+				return NewAVWithRC(r, yv.rc)
+			}
+			rf, rt := groupByBools[bool](xv.elts, yv.elts, n)
+			var nrc int = 2
+			r[0] = NewABWithRC(rf, &nrc)
+			r[1] = NewABWithRC(rt, &nrc)
+			return NewAVWithRC(r, &nrc)
+		case *AI:
+			if n == 0 {
+				r[0] = y
+				return NewAVWithRC(r, yv.rc)
+			}
+			rf, rt := groupByBools[int64](xv.elts, yv.elts, n)
+			var nrc int = 2
+			r[0] = NewAIWithRC(rf, &nrc)
+			r[1] = NewAIWithRC(rt, &nrc)
+			return NewAVWithRC(r, &nrc)
+		case *AF:
+			if n == 0 {
+				r[0] = y
+				return NewAVWithRC(r, yv.rc)
+			}
+			rf, rt := groupByBools[float64](xv.elts, yv.elts, n)
+			var nrc int = 2
+			r[0] = NewAFWithRC(rf, &nrc)
+			r[1] = NewAFWithRC(rt, &nrc)
+			return NewAVWithRC(r, &nrc)
+		case *AS:
+			if n == 0 {
+				r[0] = y
+				return NewAVWithRC(r, yv.rc)
+			}
+			rf, rt := groupByBools[string](xv.elts, yv.elts, n)
+			var nrc int = 2
+			r[0] = NewASWithRC(rf, &nrc)
+			r[1] = NewASWithRC(rt, &nrc)
+			return NewAVWithRC(r, &nrc)
+		case *AV:
+			if n == 0 {
+				r[0] = y
+				return NewAVWithRC(r, yv.rc)
+			}
+			rf, rt := groupByBools[V](xv.elts, yv.elts, n)
+			*yv.rc += 2
+			r[0] = Canonical(NewAVWithRC(rf, yv.rc))
+			r[1] = Canonical(NewAVWithRC(rt, yv.rc))
+			return NewAV(r)
+		default:
+			return panicType("f=Y", "Y", y)
 		}
-		return NewAV(r)
+	case *AI:
+		max := maxAI(xv)
+		if max < 0 {
+			max = -1
+		}
+		r := make([]V, max+1)
+		// NOTE: we could do a stack-allocating variant for small max.
+		// Also, if groups are big, we could maybe just allocate them
+		// separately.
+		counta := make([]int64, 2*(max+1))
+		icounts := counta[:max+1]
+		countn := 0
+		for _, j := range xv.elts {
+			if j < 0 {
+				countn++
+				continue
+			}
+			icounts[j]++
+		}
+		scounts := counta[max+1:]
+		sn := int64(0)
+		for i, n := range icounts {
+			sn += n
+			scounts[i] = sn
+		}
+		switch yv := y.value.(type) {
+		case *AB:
+			rg := groupByInt64s[bool](xv.elts, icounts, scounts, yv.elts, countn)
+			var n int = 2
+			pj := int64(0)
+			for i := range r {
+				r[i] = NewABWithRC(rg[pj:scounts[i]], &n)
+				pj = scounts[i]
+			}
+			return NewAVWithRC(r, &n)
+		case *AI:
+			rg := groupByInt64s[int64](xv.elts, icounts, scounts, yv.elts, countn)
+			var n int = 2
+			pj := int64(0)
+			for i := range r {
+				r[i] = NewAIWithRC(rg[pj:scounts[i]], &n)
+				pj = scounts[i]
+			}
+			return NewAVWithRC(r, &n)
+		case *AF:
+			rg := groupByInt64s[float64](xv.elts, icounts, scounts, yv.elts, countn)
+			var n int = 2
+			pj := int64(0)
+			for i := range r {
+				r[i] = NewAFWithRC(rg[pj:scounts[i]], &n)
+				pj = scounts[i]
+			}
+			return NewAVWithRC(r, &n)
+		case *AS:
+			rg := groupByInt64s[string](xv.elts, icounts, scounts, yv.elts, countn)
+			var n int = 2
+			pj := int64(0)
+			for i := range r {
+				r[i] = NewASWithRC(rg[pj:scounts[i]], &n)
+				pj = scounts[i]
+			}
+			return NewAVWithRC(r, &n)
+		case *AV:
+			rg := groupByInt64s[V](xv.elts, icounts, scounts, yv.elts, countn)
+			pj := int64(0)
+			*yv.rc += 2
+			for i := range r {
+				r[i] = Canonical(NewAVWithRC(rg[pj:scounts[i]], yv.rc))
+				pj = scounts[i]
+			}
+			return NewAV(r)
+		default:
+			return panicType("f=Y", "Y", x)
+		}
+	case *AF:
+		ix := toAI(xv)
+		if ix.IsPanic() {
+			return ppanic("f=x : f[Y]", ix)
+		}
+		return groupBy(ix, y)
 	default:
-		return panicType("f=Y", "Y", y)
+		return panicType("f=Y", "f[Y]", x)
 	}
+}
+
+func groupByBools[T any](x []bool, y []T, n int) (rf, rt []T) {
+	r := make([]T, len(x))
+	rf = r[:len(r)-n]
+	rt = r[len(r)-n:]
+	iTrue, iFalse := 0, 0
+	for i, xi := range x {
+		if xi {
+			rt[iTrue] = y[i]
+			iTrue++
+		} else {
+			rf[iFalse] = y[i]
+			iFalse++
+		}
+	}
+	return rf, rt
+}
+
+func groupByInt64s[T any](x, icounts, scounts []int64, y []T, n int) []T {
+	r := make([]T, len(x)-n)
+	for i, j := range x {
+		if j < 0 {
+			continue
+		}
+		r[scounts[j]-icounts[j]] = y[i]
+		icounts[j]--
+	}
+	return r
 }

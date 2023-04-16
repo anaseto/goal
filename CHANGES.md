@@ -4,6 +4,8 @@
   old behavior (breaking change).
 + Implemented deep indexing for dicts.
 + Implement `@[f1;x;f2]`, like `.[f1;y;f2]` but doing f1@x instead of `f1 . y`.
++ Make `=I` return `#'=I`, because the latter is used less often, and can be
+  obtained with group keys `=(!#I)!I` and group by `{!#x}=I`.
 + Fix default rank of s/ s\ I/ I\ (used in the case they would be followed by a
   fold or scan, which will probably never happen).
 
