@@ -169,6 +169,8 @@ func first(x V) V {
 			switch xv.(type) {
 			case *AS:
 				return NewS("")
+			case *AV:
+				return NewAV(nil)
 			default:
 				return NewI(0)
 			}
