@@ -133,3 +133,39 @@ func dictArithAmend(x array, yv *AI, f func(V, V) V, z array) (array, error) {
 	}
 	return x, nil
 }
+
+// takeKeys implements X#d.
+func takeKeys(x array, y *Dict) V {
+	b := memberOf(NewV(y.keys), NewV(x))
+	b.InitRC()
+	kv := replicate(b, NewV(y.keys))
+	yv := replicate(b, NewV(y.values))
+	var xv array
+	switch yv := y.values.(type) {
+	case *AB:
+		xv = &AB{elts: make([]bool, x.Len())}
+	case *AI:
+		xv = &AI{elts: make([]int64, x.Len())}
+	case *AF:
+		xv = &AF{elts: make([]float64, x.Len())}
+	case *AS:
+		xv = &AS{elts: make([]string, x.Len())}
+	case *AV:
+		pad := proto(yv.elts)
+		var n int = 2
+		pad.InitWithRC(&n)
+		r := make([]V, x.Len())
+		for i := range r {
+			r[i] = pad
+		}
+		xv = &AV{elts: r}
+	}
+	ky := findArray(x, kv)
+	v, err := amendr(xv, ky, yv)
+	if err != nil {
+		// should not happen
+		return Panicf("X#d : %v", err)
+	}
+	initRC(v)
+	return NewV(&Dict{keys: x, values: v})
+}

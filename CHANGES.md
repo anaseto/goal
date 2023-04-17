@@ -11,8 +11,12 @@
 + Make `=I` return `#'=I`, because the latter is used less often, and can be
   obtained with group keys `=(!#I)!I` and group by `{!#x}=I`. (minor breaking
   change)
++ Improve state of things with fill/pad values of generic arrays: now we use
+  the type of the first element to determine the zero value if it's not empty,
+  and we use () otherwise (which is often the desired default for generic
+  arrays).
 + Implemented deep indexing for dicts.
-+ Implemented drop keys X^d.
++ Implemented w/o keys X^d and w/ keys X#d.
 + Implement +d as swap of keys and values.
 + Implement `@[f1;x;f2]`, like `.[f1;y;f2]` but doing f1@x instead of `f1 . y`.
 + Fix default rank of s/ s\ I/ I\ (used in the case they would be followed by a

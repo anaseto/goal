@@ -766,13 +766,12 @@ func withoutDict(x V, y *Dict) V {
 }
 
 // intersection implements keep x#y.
-func intersection(x, y V) V {
+func intersection(x array, y V) V {
 	switch yv := y.value.(type) {
 	case array:
-		return replicate(memberOf(y, x), y)
+		return replicate(memberOf(y, NewV(x)), y)
 	case *Dict:
-		r := memberOf(NewV(yv.values), x)
-		return NewDict(replicate(r, NewV(yv.keys)), replicate(r, NewV(yv.values)))
+		return takeKeys(x, yv)
 	default:
 		return panicType("X#Y", "Y", y)
 	}

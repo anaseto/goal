@@ -447,7 +447,7 @@ func take(x, y V) V {
 		case S:
 			return scount(xv, y)
 		case array:
-			return intersection(x, y)
+			return intersection(xv, y)
 		default:
 			return panicType("x#y", "x", x)
 		}

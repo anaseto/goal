@@ -111,12 +111,13 @@ x,y join        1,2 -> 1 2              "ab" "c","d" -> "ab" "c" "d"
 i^s windows     2^"abcde" -> "abcd" "bcde"
 i^Y windows     2^!4 -> (0 1 2;1 2 3)   -2^!4 -> (0 1;1 2;2 3)
 s^s trim        " []"^"  [text]  " -> "text"      ""^" \nstuff\t" -> "stuff"
-X^d drop keys   (,"b")^"a""b""c"!0 1 2 -> "a""c"!0 2
+X^d w/o keys    (,"b")^"a""b""c"!0 1 2 -> "a""c"!0 2
 X^Y without     2 3^1 1 2 3 3 4 -> 1 1 4
 #x  length      #2 4 5 -> 3       #"ab" "cd" -> 2       #42 -> 1      #"ab" -> 1
 i#y take/pad    2#6 7 8 -> 6 7    4#6 7 8 -> 6 7 8 0    -4#6 7 8 -> 0 6 7 8
 s#s count       "ab"#"cabdab" "cd" "deab" -> 2 0 1
 f#y replicate   {0 1 2 0}#4 1 5 3 -> 1 5 5        {x>0}#2 -3 1 -> 2 1
+X#d with keys   "a""c""e"#"a""b""c"!2 3 4 -> "a""c""e"!2 4 0
 X#Y with only   2 3#1 1 2 3 3 4 -> 2 3 3
 _n  floor       _2.3 -> 2               _1.5 3.7 -> 1 3
 _s  to lower    _"ABC" -> "abc"         _"AB" "CD" -> "ab" "cd"
