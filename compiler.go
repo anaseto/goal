@@ -391,15 +391,13 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 		if err != nil {
 			return c.errorf("number: %v", err)
 		}
-		if n > 0 {
-			return c.errorf("type \"n\" is not callable")
-		}
 		if x.kind == valInt && x.n <= math.MaxInt32 && x.n >= math.MinInt32 {
 			c.push2(opInt, opcode(int32(x.n)))
 		} else {
 			id := c.ctx.storeConst(x)
 			c.push2(opConst, opcode(id))
 		}
+		c.applyN(n)
 		return nil
 	case astSTRING:
 		s, err := strconv.Unquote(tok.Text)

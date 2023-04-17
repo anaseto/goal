@@ -41,7 +41,7 @@ func amend3Dict(ctx *Context, d *Dict, y, f V) V {
 			}
 		}
 		if keys.Len() > nkeys {
-			values = padArrayMut(values, keys.Len()-nkeys)
+			values = padArrayMut(keys.Len()-nkeys, values)
 			ky = findArray(keys, y)
 		}
 		y.DecrRC()
@@ -56,7 +56,7 @@ func amend3Dict(ctx *Context, d *Dict, y, f V) V {
 			keys = uniq(ctx, joinTo(NewV(keys), y)).value.(array)
 		}
 		if keys.Len() > nkeys {
-			values = padArrayMut(values, keys.Len()-nkeys)
+			values = padArrayMut(keys.Len()-nkeys, values)
 			ky = findArray(keys, y)
 		}
 		y.DecrRC()
@@ -68,7 +68,7 @@ func amend3Dict(ctx *Context, d *Dict, y, f V) V {
 	}
 }
 
-func padArrayMut(x array, n int) array {
+func padArrayMut(n int, x array) array {
 	switch xv := x.(type) {
 	case *AB:
 		for i := 0; i < n; i++ {
@@ -205,7 +205,7 @@ func amend4Dict(ctx *Context, d *Dict, y, f, z V) V {
 			}
 		}
 		if keys.Len() > nkeys {
-			values = padArrayMut(values, keys.Len()-nkeys)
+			values = padArrayMut(keys.Len()-nkeys, values)
 			ky = findArray(keys, y)
 		}
 		y.DecrRC()
@@ -221,7 +221,7 @@ func amend4Dict(ctx *Context, d *Dict, y, f, z V) V {
 			y.DecrRC()
 		}
 		if keys.Len() > nkeys {
-			values = padArrayMut(values, keys.Len()-nkeys)
+			values = padArrayMut(keys.Len()-nkeys, values)
 			ky = findArray(keys, y)
 		}
 		y.DecrRC()

@@ -106,20 +106,20 @@ i^Y windows     2^!4 -> (0 1 2;1 2 3)   -2^!4 -> (0 1;1 2;2 3)
 s^s trim        " []"^"  [text]  " -> "text"      ""^" \nstuff\t" -> "stuff"
 X^Y without     2 3^1 1 2 3 3 4 -> 1 1 4
 #x  length      #2 4 5 -> 3       #"ab" "cd" -> 2       #42 -> 1      #"ab" -> 1
-i#y take        2#6 7 8 -> 6 7    4#6 7 8 -> 6 7 8 6 (cyclic)       3#1 -> 1 1 1
+i#y take/pad    2#6 7 8 -> 6 7    4#6 7 8 -> 6 7 8 0    -4#6 7 8 -> 0 6 7 8
 s#s count       "ab"#"cabdab" "cd" "deab" -> 2 0 1
 f#y replicate   {0 1 1 0}#4 1 5 3 -> 1 5          {x>0}#2 -3 1 -> 2 1
 X#Y with only   2 3#1 1 2 3 3 4 -> 2 3 3
 _n  floor       _2.3 -> 2               _1.5 3.7 -> 1 3
 _s  to lower    _"ABC" -> "abc"         _"AB" "CD" -> "ab" "cd"
 i_s drop bytes  2_"abcde" -> "cde"      -2_"abcde" -> "abc"
-i_y drop        2_3 4 5 6 -> 5 6        -2_3 4 5 6 -> 3 4
+i_Y drop        2_3 4 5 6 -> 5 6        -2_3 4 5 6 -> 3 4
 s_i delete      "abc"_1 -> "ac"
 X_i delete      6 7 8 9_1 -> 6 8 9      6 7 8 9_-3 -> 6 8 9
 s_s trim prefix "pref-"_"pref-name" -> "name"
+f_y weed out    {0 1 1 0}_4 1 5 3 -> 4 3          {x>0}_2 -3 1 -> ,-3
 I_s cut string  1 3_"abcdef" -> "bc" "def"                         (I ascending)
 I_Y cut         2 5_!10 -> (2 3 4;5 6 7 8 9)                       (I ascending)
-f_y weed out    {0 1 1 0}_4 1 5 3 -> 4 3          {x>0}_2 -3 1 -> ,-3
 $x  string      $2 3 -> "2 3"       $"text" -> "\"text\""
 i$s pad         3$"a" -> "a  "      -3$"1" "23" "456" -> "  1" " 23" "456"
 s$y cast        "i"$2.3 -> 2        "i"$"ab" -> 97 98          "s"$97 98 -> "ab"
@@ -137,6 +137,7 @@ s?s index       "a = a + 1"?"=" "+" -> 2 6
 d?y find key    ("a" "b"!3 4)?4 -> "b"       ("a" "b"!3 4)?5 -> ""
 X?y find        9 8 7?8 -> 1                 9 8 7?6 -> 3
 @x  type        @2 -> "n"    @"ab" -> "s"    @2 3 -> "N"     @+ -> "f"
+i@y take/repeat 2@6 7 8 -> 6 7    4@6 7 8 -> 6 7 8 6 (cyclic)       3@1 -> 1 1 1
 s@i substr      "abcdef"@2  -> "cdef"                                (s[offset])
 r@s match       rx/^[a-z]+$/"abc" -> 1       rx/\s/"abc" -> 0
 r@s find group  rx/([a-z])(.)/"&a+c" -> "a+" "a" "+"     (whole match, group(s))

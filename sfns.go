@@ -444,17 +444,72 @@ func take(x, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *Dict:
-		rk := takeN(n, yv.keys)
+		rk := takePadN(n, yv.keys)
 		rk.InitRC()
-		rv := takeN(n, yv.values)
+		rv := takePadN(n, yv.values)
 		rv.InitRC()
 		return NewV(&Dict{
 			keys:   rk.value.(array),
 			values: rv.value.(array)})
 	case array:
-		return takeN(n, yv)
+		return takePadN(n, yv)
 	default:
-		return takeN(n, toArray(y).value.(array))
+		return takePadN(n, toArray(y).value.(array))
+	}
+}
+
+func takeNAtom(n int64, y V) V {
+	if y.IsI() {
+		yv := y.I()
+		if isBI(yv) {
+			r := make([]bool, n)
+			for i := range r {
+				r[i] = yv != 0
+			}
+			return NewAB(r)
+		}
+		r := make([]int64, n)
+		for i := range r {
+			r[i] = yv
+		}
+		return NewAI(r)
+	}
+	if y.IsF() {
+		yv := y.F()
+		if isBF(yv) {
+			r := make([]bool, n)
+			for i := range r {
+				r[i] = yv != 0
+			}
+			return NewAB(r)
+		}
+		r := make([]float64, n)
+		for i := range r {
+			r[i] = yv
+		}
+		return NewAF(r)
+	}
+	switch yv := y.value.(type) {
+	case S:
+		r := make([]string, n)
+		for i := range r {
+			r[i] = string(yv)
+		}
+		return NewAS(r)
+	case RefCountHolder:
+		rc := yv.RC()
+		*rc += 2
+		r := make([]V, n)
+		for i := range r {
+			r[i] = y
+		}
+		return NewAVWithRC(r, rc)
+	default:
+		r := make([]V, n)
+		for i := range r {
+			r[i] = y
+		}
+		return NewAV(r)
 	}
 }
 
@@ -463,8 +518,20 @@ func takeN(n int64, y array) V {
 		if n < 0 {
 			n = -n
 		}
-		r := make([]bool, n)
-		return NewABWithRC(r, reuseRCp(y.RC()))
+		switch y.(type) {
+		case *AS:
+			r := make([]string, n)
+			return NewAS(r)
+		case *AV:
+			r := make([]V, n)
+			for i := range r {
+				r[i] = NewAV(nil)
+			}
+			return NewAV(r)
+		default:
+			r := make([]bool, n)
+			return NewAB(r)
+		}
 	}
 	switch {
 	case n >= 0:
@@ -521,6 +588,76 @@ func takeCyclic(n int64, y array) V {
 	default:
 		panic("takeCyclic: y not an array")
 	}
+}
+
+func takePadN(n int64, x array) V {
+	switch {
+	case n >= 0:
+		if n > int64(x.Len()) {
+			return padArrayN(n, x)
+		}
+		return Canonical(NewV(x.slice(0, int(n))))
+	default:
+		if n < int64(-x.Len()) {
+			return padArrayN(n, x)
+		}
+		return Canonical(NewV(x.slice(x.Len()+int(n), x.Len())))
+	}
+	return NewI(0)
+}
+
+func padArrayN(n int64, x array) V {
+	switch xv := x.(type) {
+	case *AB:
+		return NewAB(padNSlice[bool](n, xv.elts))
+	case *AI:
+		return NewAI(padNSlice[int64](n, xv.elts))
+	case *AF:
+		return NewAF(padNSlice[float64](n, xv.elts))
+	case *AS:
+		return NewAS(padNSlice[string](n, xv.elts))
+	case *AV:
+		return NewAV(padNSliceVs(n, xv.elts))
+	default:
+		panic("padArrayN")
+	}
+}
+
+func padNSlice[T any](n int64, ys []T) []T {
+	l := n
+	if l < 0 {
+		l = -l
+	}
+	r := make([]T, l)
+	if n >= 0 {
+		copy(r[:len(ys)], ys)
+	} else {
+		copy(r[len(r)-len(ys):], ys)
+	}
+	return r
+}
+
+func padNSliceVs(n int64, ys []V) []V {
+	l := n
+	if l < 0 {
+		l = -l
+	}
+	r := make([]V, l)
+	pad := proto(ys)
+	var rc int = 2
+	pad.InitWithRC(&rc)
+	if n >= 0 {
+		copy(r[:len(ys)], ys)
+		for i := len(ys); i < len(r); i++ {
+			r[i] = pad
+		}
+	} else {
+		copy(r[len(r)-len(ys):], ys)
+		for i := 0; i < len(r)-len(ys); i++ {
+			r[i] = pad
+		}
+	}
+	return r
 }
 
 // ShiftBefore returns x rshift y.

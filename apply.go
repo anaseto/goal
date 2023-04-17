@@ -53,6 +53,13 @@ func (x V) applyN(ctx *Context, n int) V {
 	//}
 	//}()
 	switch x.kind {
+	case valInt:
+		return applyI(n, x.I(), ctx.top())
+	case valFloat:
+		if !isI(x.F()) {
+			return Panicf("i@y : non-integer i (%g)", x.F())
+		}
+		return applyI(n, int64(x.F()), ctx.top())
 	case valLambda:
 		return x.lambda().applyN(ctx, n)
 	case valVariadic:
@@ -561,4 +568,28 @@ func (r *rxReplacer) applyN(ctx *Context, n int) V {
 	nr := ctx.replace(r, ctx.top())
 	nr.InitRC()
 	return nr
+}
+
+func applyI(n int, i int64, y V) V {
+	if n > 1 {
+		return panicRank("i . y")
+	}
+	switch yv := y.value.(type) {
+	case *Dict:
+		rk := takeN(i, yv.keys)
+		rk.InitRC()
+		rv := takeN(i, yv.values)
+		rv.InitRC()
+		return NewV(&Dict{
+			keys:   rk.value.(array),
+			values: rv.value.(array)})
+	case array:
+		r := takeN(i, yv)
+		r.InitRC()
+		return r
+	default:
+		r := takeNAtom(i, y)
+		r.InitRC()
+		return r
+	}
 }

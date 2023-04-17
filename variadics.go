@@ -448,10 +448,9 @@ func vfApply(ctx *Context, args []V) V {
 	case 1:
 		return NewS(args[0].Type())
 	case 2:
-		x := args[1]
-		ctx.push(args[0])
+		x := ctx.pop()
 		r := x.applyN(ctx, 1)
-		ctx.drop()
+		ctx.pushNoRC(V{})
 		return r
 	case 3:
 		x := args[2]

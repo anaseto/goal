@@ -252,11 +252,19 @@ func inBoundsInfo(x *AI, l int) (int64, int, bool) {
 func toArray(x V) V {
 	if x.IsI() {
 		var n int
+		if isBI(x.I()) {
+			r := &AB{elts: []bool{x.I() != 0}, rc: &n}
+			return NewV(r)
+		}
 		r := &AI{elts: []int64{x.I()}, rc: &n}
 		return NewV(r)
 	}
 	if x.IsF() {
 		var n int
+		if isBF(x.F()) {
+			r := &AB{elts: []bool{x.F() != 0}, rc: &n}
+			return NewV(r)
+		}
 		r := &AF{elts: []float64{float64(x.F())}, rc: &n}
 		return NewV(r)
 	}
@@ -267,9 +275,13 @@ func toArray(x V) V {
 		return NewV(r)
 	case array:
 		return x
+	case RefCountHolder:
+		r := &AV{elts: []V{x}, rc: xv.RC()}
+		return NewV(r)
 	default:
 		var n int
 		r := &AV{elts: []V{x}, rc: &n}
+		x.InitWithRC(&n)
 		return NewV(r)
 	}
 }
@@ -748,7 +760,7 @@ func canonicalFast(x V) V {
 
 func proto(x []V) V {
 	if len(x) == 0 {
-		return NewI(0)
+		return NewAV(nil)
 	}
 	x0 := x[0]
 	if x0.IsI() {

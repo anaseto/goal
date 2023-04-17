@@ -2,10 +2,17 @@
 
 + Make i^Y, i^s, i!s, i!Y use i as the length of the result, and use -i for the
   old behavior (breaking change).
++ New take/repeat i@y equivalent to old i#y, that now is take/pad. Both give
+  same results unless i>#y or (-i)>#y. A simple way to pad arrays with
+  zero-values (now properly based on first element type, or default type) was
+  missing.  Also, @ in kind of a circle, so it was chosen for the cyclic
+  behavior (which also feels to me more like an action than just padding).
+  (breaking change)
++ Make `=I` return `#'=I`, because the latter is used less often, and can be
+  obtained with group keys `=(!#I)!I` and group by `{!#x}=I`. (minor breaking
+  change)
 + Implemented deep indexing for dicts.
 + Implement `@[f1;x;f2]`, like `.[f1;y;f2]` but doing f1@x instead of `f1 . y`.
-+ Make `=I` return `#'=I`, because the latter is used less often, and can be
-  obtained with group keys `=(!#I)!I` and group by `{!#x}=I`.
 + Fix default rank of s/ s\ I/ I\ (used in the case they would be followed by a
   fold or scan, which will probably never happen).
 
