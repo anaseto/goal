@@ -213,7 +213,15 @@ func drop(x, y V) V {
 		case array:
 			return cutAIarray(xv, yv)
 		case *Dict:
-			return NewDict(cutAIarray(xv, yv.keys), cutAIarray(xv, yv.values))
+			k := cutAIarray(xv, yv.keys)
+			if k.IsPanic() {
+				return k
+			}
+			v := cutAIarray(xv, yv.values)
+			if v.IsPanic() {
+				return v
+			}
+			return NewDict(k, v)
 		default:
 			return panicType("I_y", "y", y)
 		}
@@ -1343,6 +1351,10 @@ func cutShape(x V, y V) V {
 		}
 		i = int64(f)
 	}
+	return cutShapeI(i, y)
+}
+
+func cutShapeI(i int64, y V) V {
 	if y.IsI() {
 		return rangeII(i, y.I())
 	} else if y.IsF() {
@@ -1369,6 +1381,16 @@ func cutShape(x V, y V) V {
 			return cutLinesArray(int(i), yv)
 		}
 		return Panicf("i!Y : out of range i (%d)", i)
+	case *Dict:
+		k := cutShapeI(i, NewV(yv.keys))
+		if k.IsPanic() {
+			return k
+		}
+		v := cutShapeI(i, NewV(yv.values))
+		if v.IsPanic() {
+			return v
+		}
+		return NewDict(k, v)
 	default:
 		return panicType("i!y", "y", y)
 	}
