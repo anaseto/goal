@@ -110,6 +110,7 @@ x,y join        1,2 -> 1 2              "ab" "c","d" -> "ab" "c" "d"
 i^s windows     2^"abcde" -> "abcd" "bcde"
 i^Y windows     2^!4 -> (0 1 2;1 2 3)   -2^!4 -> (0 1;1 2;2 3)
 s^s trim        " []"^"  [text]  " -> "text"      ""^" \nstuff\t" -> "stuff"
+X^d drop keys   (,"b")^"a""b""c"!0 1 2 -> "a""c"!0 2
 X^Y without     2 3^1 1 2 3 3 4 -> 1 1 4
 #x  length      #2 4 5 -> 3       #"ab" "cd" -> 2       #42 -> 1      #"ab" -> 1
 i#y take/pad    2#6 7 8 -> 6 7    4#6 7 8 -> 6 7 8 0    -4#6 7 8 -> 0 6 7 8

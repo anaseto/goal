@@ -755,7 +755,7 @@ func without(x, y V) V {
 }
 
 func withoutDict(x V, y *Dict) V {
-	r := memberOf(NewV(y.values), x)
+	r := memberOf(NewV(y.keys), x)
 	switch bres := r.value.(type) {
 	case *AB:
 		for i, b := range bres.elts {
