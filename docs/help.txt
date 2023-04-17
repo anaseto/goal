@@ -63,6 +63,7 @@ e               error           error "msg"
 VERBS HELP
 :x  identity    :[42] -> 42            (recall that : is also syntax for return)
 x:y right       2:3 -> 3            "a":"b" -> "b"
++d  swap k/v    +"a""b"!0 1 -> 0 1!"a" "b"
 +x  flip        +(1 2;3 4) -> (1 3;2 4)                   +42 -> ,,42
 n+n add         2+3 -> 5            2+3 4 -> 5 6
 s+s concat      "a"+"b" -> "ab"     "a" "b"+"c" -> "ac" "bc"
@@ -104,6 +105,7 @@ x,y join        1,2 -> 1 2              "ab" "c","d" -> "ab" "c" "d"
 i^s windows     2^"abcde" -> "abcd" "bcde"
 i^Y windows     2^!4 -> (0 1 2;1 2 3)   -2^!4 -> (0 1;1 2;2 3)
 s^s trim        " []"^"  [text]  " -> "text"      ""^" \nstuff\t" -> "stuff"
+X^d drop keys   (,"b")^"a""b""c"!0 1 2 -> "a""c"!0 2
 X^Y without     2 3^1 1 2 3 3 4 -> 1 1 4
 #x  length      #2 4 5 -> 3       #"ab" "cd" -> 2       #42 -> 1      #"ab" -> 1
 i#y take/pad    2#6 7 8 -> 6 7    4#6 7 8 -> 6 7 8 0    -4#6 7 8 -> 0 6 7 8
