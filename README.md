@@ -18,35 +18,32 @@ It's main distinctive features are as follows:
 
 * Syntax inspired mainly from the K language, but with quite a few deviations.
   For example, backquotes produce Go-like raw strings instead of symbols,
-  rx/[a-z]/ is a regular expression literal (checked and processed at
-  compile-time), and there is a Perl-style qq string interpolation with custom
-  delimiter. On the other side, there are no tacit compositions, and digraph
-  operator verbs and adverbs are gone or done differently (except for global
-  assignment with ::).
+  rx/[a-z]/ is a compile-time regular expression literal, and there is
+  Perl-style string interpolation. On the other side, there are no tacit
+  compositions, and digraph operator verbs and adverbs are gone or done
+  differently (except for global assignment with ::).
 * Primitive semantics are both inspired from the
   [ngn/k](https://codeberg.org/ngn/k) variant of the K language and
-  [BQN](https://mlochbaum.github.io/BQN/index.html). For example, group,
-  classify, shifts, windows, find (index of) and occurrence count take after
-  BQN's semantics. Multi-dimensional versions, when present in BQN, have been
-  left out, though, as Goal has only free-form immutable arrays, like K.  Some
-  primitives use words instead of symbols (like ocount for occurrence count).
-  Also, K-like dictionaries are supported, but not tables.
+  [BQN](https://mlochbaum.github.io/BQN/index.html). For example, group by,
+  classify, shifts, windows, binary search and occurrence count take after
+  BQN's semantics, but free-form immutable arrays, dictionaries and adverbs
+  take after K.
 * Unlike in typical array languages, strings are atoms, and common string
-  handling functions (like index, substr or trim) have been integrated into the
-  primitives, including regular expression functions.
+  handling functions have been integrated into the primitives, including
+  regular expression functions.
 * Error handling makes a distinction between fatal errors (panics) and
   recoverable errors which are handled as values.
-* Easily embeddable and extensible in Go, meaning easy access to the standard
-  library.
-* Integrated support for csv and time handling.
-* Array performance is unsurprising and good enough most of the time, with
-  basic (but good in code with limited branching) variable liveness analysis to
-  reduce cloning by reusing dead immutable arrays, though it is not a goal to
-  reach state-of-the-art (no SIMD, and there is still room for more special
-  code and specialized algorithms). Scalar performance is typical for a
-  bytecode-compiled interpreter (without JIT), somewhat slower than a C
-  bytecode interpreter (value representation in Go is somewhat less compact
-  than how it can be done in C).
+* Integrated support for csv, json, time handling, and basic math.
+* Simple IO: read/write files, run commands/pipes, open filehandles.
+* Easily embeddable and extensible in Go.
+* Array performance is good enough most of the time, with variable liveness
+  analysis that reduces cloning by reusing dead immutable arrays (good in code
+  with limited branching), though it is not a goal to reach state-of-the-art
+  (no SIMD, and small-int optimizations for bools only).
++ Scalar performance is typical for a bytecode-compiled interpreter (without
+  JIT), somewhat slower than a C bytecode interpreter: value representation is
+  less compact than how it could be done in C, but Goal does have unboxed
+  integers and floats.
 
 If this list is not enough to satisfy your curiosity, there's also a
 [Why.md](docs/Why.md) text for you. You can also read the [Credits.md](Credits.md)
