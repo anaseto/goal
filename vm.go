@@ -91,6 +91,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			v := variadic(ops[ip])
 			r := v.apply(ctx)
 			if r.IsPanic() {
+				ctx.clearAssignOnPanic(ops, ip) // currently unnecessary case (but could be in the future)
 				return ip - 1, newExecError(r)
 			}
 			ctx.replaceTop(r)
@@ -103,6 +104,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			}
 			r := x.applyN(ctx, 1)
 			if r.IsPanic() {
+				ctx.clearAssignOnPanic(ops, ip) // currently unnecessary case
 				return ip - 1, newExecError(r)
 			}
 			ctx.replaceTop(r)
@@ -115,6 +117,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			x := ctx.pop()
 			r := x.applyN(ctx, 2)
 			if r.IsPanic() {
+				ctx.clearAssignOnPanic(ops, ip-1) // currently unnecessary case
 				return ip - 1, newExecError(r)
 			}
 			ctx.replaceTop(r)
@@ -122,6 +125,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			v := variadic(ops[ip])
 			r := v.apply2(ctx)
 			if r.IsPanic() {
+				ctx.clearAssignOnPanic(ops, ip)
 				return ip - 1, newExecError(r)
 			}
 			ctx.replaceTop(r)
@@ -130,6 +134,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			x := ctx.pop()
 			r := x.applyN(ctx, int(ops[ip]))
 			if r.IsPanic() {
+				ctx.clearAssignOnPanic(ops, ip) // currently unnecessary case
 				return ip - 1, newExecError(r)
 			}
 			ctx.replaceTop(r)
@@ -139,6 +144,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ip++
 			r := v.applyN(ctx, int(ops[ip]))
 			if r.IsPanic() {
+				ctx.clearAssignOnPanic(ops, ip)
 				return ip - 2, newExecError(r)
 			}
 			ctx.replaceTop(r)
@@ -152,6 +158,7 @@ func (ctx *Context) execute(ops []opcode) (int, error) {
 			ip++
 			r := x.applyN(ctx, int(ops[ip]))
 			if r.IsPanic() {
+				ctx.clearAssignOnPanic(ops, ip) // currently unnecessary case
 				return ip - 2, newExecError(r)
 			}
 			ctx.replaceTop(r)
@@ -299,5 +306,23 @@ func (ctx *Context) assignLocals(ids []int32, x V) error {
 func rcincrArgs(args []V) {
 	for _, v := range args {
 		v.IncrRC()
+	}
+}
+
+func (ctx *Context) clearAssignOnPanic(ops []opcode, ip int) {
+	// NOTE: it's not a perfect solution, because ideally we would want to
+	// preserve the old value, instead of clearing.
+	// With current optimizations, only simple global assignement patterns
+	// can get in-place modification.  Local assignement doesn't need
+	// clearing, because on panic, local variables in panic's context are
+	// no longer accessible.
+	ip++
+	if ip >= len(ops) {
+		return
+	}
+	op := ops[ip]
+	ip++
+	if op == opAssignGlobal {
+		ctx.globals[ops[ip]] = V{}
 	}
 }

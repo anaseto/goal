@@ -21,6 +21,8 @@
 + Implement `@[f1;x;f2]`, like `.[f1;y;f2]` but doing f1@x instead of `f1 . y`.
 + Fix default rank of s/ s\ I/ I\ (used in the case they would be followed by a
   fold or scan, which will probably never happen).
++ When an in-place assignement operation panics, clear the variable (instead of
+  producing random garbage).
 
 # v0.14.0 2023-04-08
 
