@@ -490,6 +490,8 @@ func applyArray(x array, y V) V {
 			}
 		}
 		return NewV(canonicalAV(&AV{elts: r}))
+	case *Dict:
+		return newDictValues(yv.keys, applyArray(x, NewV(yv.values)))
 	case array:
 		iy := toIndices(y)
 		if iy.IsPanic() {

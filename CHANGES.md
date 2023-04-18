@@ -1,9 +1,9 @@
 # v? ?
 
-+ Make i^Y, i^s, i!s, i!Y use i as the length of the result, and use -i for the
-  old behavior (breaking change).
-+ New take/repeat i@y equivalent to old i#y, that now is take/pad. Both give
-  same results unless i>#y or (-i)>#y. A simple way to pad arrays with
++ Make `i^Y`, `i^s`, `i!s`, `i!Y` use `i` as the length of the result, and use
+  `-i` for the old behavior (breaking change).
++ New take/repeat `i@y` equivalent to old `i#y`, that now is take/pad. Both give
+  same results unless `i>#y` or `(-i)>#y`. A simple way to pad arrays with
   zero-values (now properly based on first element type, or default type) was
   missing.  Also, @ in kind of a circle, so it was chosen for the cyclic
   behavior (which also feels to me more like an action than just padding).
@@ -15,18 +15,18 @@
   the type of the first element to determine the zero value if it's not empty,
   and we use () otherwise (which is often the desired default for generic
   arrays).
-+ Implemented deep indexing for dicts.
-+ Implemented w/o keys X^d and w/ keys X#d.
-+ Implement +d as swap of keys and values.
++ Implemented `d.y` for `1<#y`, and `X@d`.
++ Implemented w/o keys `X^d` and w/ keys `X#d`.
++ Implement `+d` as swap of keys and values.
 + Implement `@[f1;x;f2]`, like `.[f1;y;f2]` but doing f1@x instead of `f1 . y`.
-+ Fix default rank of s/ s\ I/ I\ (used in the case they would be followed by a
-  fold or scan, which will probably never happen).
++ Fix default rank of `s/` `s\` `I/` `I\` (used in the case they would be
+  followed by a fold or scan, which will probably never happen).
 + When an in-place assignement operation panics, clear the variable (instead of
   producing random garbage).
 
 # v0.14.0 2023-04-08
 
-+ New ?(-i) form returning normal distribution.
++ New `?(-i)` form returning normal distribution.
 + Make rt.ofs and rt.prec return the previous value.
 + New -q command-line option disabling echo.
 + New examples/ directory with some example scripts.
@@ -43,12 +43,12 @@
   case, the arguments are evaluated like for any function (this can be useful
   in special cases where avoiding branching improves liveness analysis and
   performance).
-+ Make the new =s form of last release work with the #'=x special case.
++ Make the new `=s` form of last release work with the `#'=x` special case.
 + Fixed incorrect newline termination in x say S form.
 
 # v0.12.0 2023-04-02
 
-+ New =s fields form, similar to rx/[\n \t]+/\ but splits on any kind of unicode
++ New `=s` fields form, similar to `rx/[\n \t]+/\` but splits on any kind of unicode
   space.
 + New "zone" command for time.
 + Simplify math builtins: atan2 in place of acos, asin, atan, and remove tan
@@ -56,16 +56,16 @@
 
 # v0.11.0 2023-03-30
 
-+ New i!i range form.
-+ New ""^s unicode-aware trim spaces form.
-+ New i?Y and (-i)?Y forms.
-+ New x utf8.valid s form for replacing invalid byte sequences.
-+ New i?Y roll array and (-i)?Y deal array forms.
++ New `i!i` range form.
++ New `""^s` unicode-aware trim spaces form.
++ New `i?Y` and `(-i)?Y` forms.
++ New `x utf8.valid s` form for replacing invalid byte sequences.
++ New `i?Y` roll array and `(-i)?Y` deal array forms.
 + More permissive projection application: for example `+[][2;3]` is valid, even
   though `+[]` has rank 1 when used in adverbial contexts that make use of
   function rank.
-+ Disallow space before adverb application. For ' this means that usage is
-  reserved for early return on error, and for \ it has no meaning yet.
++ Disallow space before adverb application. For `'` this means that usage is
+  reserved for early return on error, and for `\` it has no meaning yet.
 + For consistency, make run s form return its standard output too, and return
   a dictionary in error case containing exit code, message and output.
 + More consistent error messages.
@@ -89,26 +89,26 @@
 + New json builtin for parsing JSON strings.
 + New chdir builtin for changing working directory.
 + Implement i!s colsplit form for strings.
-+ New goal["time";s;n] and goal["time";f;x;n] forms for timing code.
-+ New d[] form equivalent to .d (for dicts).
++ New `goal["time";s;n]` and `goal["time";f;x;n]` forms for timing code.
++ New `d[]` form equivalent to `.d` (for dicts).
 + New help feature: extract help for specific op.
-+ Fixed refcount bug in i f\y form.
++ Fixed refcount bug in `i f\y` form.
 + More tests, and various refactorings, and documentation improvements.
 
 # v0.8.0 2023-03-13
 
-+ lists (expr1;expr2) are now evaluated from left to right. This avoids a list
++ lists `(expr1;expr2)` are now evaluated from left to right. This avoids a list
   reversal in the implementation, and is also more intuitive in multi-line
   lists. Function arguments in binary and index application are still evaluated
   from right to left as always.  Now lists and sequences are similar, except
   that the first construct collects all values, and the second returns the last
   one only.
-+ In rq// raw quoting introduced in last release, allow escaping delimiter by
++ In `rq//` raw quoting introduced in last release, allow escaping delimiter by
   doubling it, as a simplification of previous rule. Note that the old
   backquoted raw strings behave the same as always and do not have any way of
   writing a literal backquote.
-+ ,/() now returns ()
-+ "n"$y returns 0n instead of error for incorrect syntax, as it is more
++ `,/()` now returns ()
++ `"n"$y` returns 0n instead of error for incorrect syntax, as it is more
   convenient by ensuring a numerical result.
 + Various bug fixes and more op/ special code.
 
@@ -116,13 +116,13 @@
 
 Highlights:
 
-+ String interpolation in "" strings, as well as the new qq// Perl-style
++ String interpolation in "" strings, as well as the new `qq//` Perl-style
   quoting form with custom delimiter (potentially breaking if strings contained
   character `$`, which now needs to be escaped).
-+ New rq// quoting form with custom delimiter for raw strings. Allow custom
-  delimiter for rx// form too.
++ New `rq//` quoting form with custom delimiter for raw strings. Allow custom
+  delimiter for `rx//` form too.
 + New x run s form, piping string x to command s, and returning its own stdout.
-+ Optimize #'= so that icount can be finally removed.
++ Optimize `#'=` so that icount can be finally removed.
 + Various small improvements and fixes in language's help.
 
 # v0.6.0 2023-02-26
@@ -140,8 +140,8 @@ Highlights:
 * Dict support is now implemented in all builtins where it makes sense (though
   the help only mentions most interesting cases).
 * New forms `x_i` and `s_i` (delete)
-* i$s is now pad, and i!x is the old i$s.
-* Added special code for some op\ and op' forms.
+* `i$s` is now pad, and `i!x` is the old `i$s`.
+* Added special code for some `op\` and `op'` forms.
 * Many improvements in help.
 * Added goal builtin for runtime state inspection and configuration, like
   floating point formatting precision. Also, the seed builtin was removed, and
