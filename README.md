@@ -300,8 +300,8 @@ sub[S;S]   replaceS     sub["b" "c";"d" "e"] "abc" -> "ade"
 eval[s;loc;pfx]         like eval s, but provide loc as location (usually a
                         path), and prefix pfx+"." for globals
 
-utf8 s    valid UTF8    utf8 "aπc" -> 1                        utf8 "a\xff" -> 0
-s utf8 s  to-valid UTF8 "b" utf8 "a\xff" -> "ab"      (replace invalid with "b")
+utf8 s    is UTF-8      utf8 "aπc" -> 1                        utf8 "a\xff" -> 0
+s utf8 s  to UTF-8      "b" utf8 "a\xff" -> "ab"      (replace invalid with "b")
 
 MATH: atan2[n;n]; cos n; exp n; log n; round n; sin n; sqrt n
 
