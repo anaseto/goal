@@ -12,9 +12,9 @@ sub[rx/(.)(.)/;`$2$1`] "aB" / "Ba"
 2 sub[rx/(.)(.)/;`$2$1`]/ "aB" / "aB"
 'r:rx`[a-z]`;sub[r;"Z"]"aBbcC" "a" / "ZBZZC" "Z"
 'r:rx`[a-z]`;sub[r;ceil]"aBbcC" / "ABBCC"
-'r:rx`[a-z]`;sub[r;bytes]"aBbcC" / "1B11C"
+'r:rx`[a-z]`;sub[r;&]"aBbcC" / "1B11C"
 'r:rx`[A-Z]`;sub[r;_]"aBbcC" "a" / "abbcc" "a"
-'r:rx`[A-Z]`;sub[r;bytes]"aBbcC" "a" / "a1bc1" "a"
+'r:rx`[A-Z]`;sub[r;&]"aBbcC" "a" / "a1bc1" "a"
 'r:rx`[A-Z]`;sub[r;_]("aBbcC" "a";"B") / ("abbcc" "a";"b")
 "abcde"?rx`[bc]` / 1 1
 "abcde"?rx`b..` / 1 3

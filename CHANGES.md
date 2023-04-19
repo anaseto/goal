@@ -2,15 +2,16 @@
 
 + Make `i^Y`, `i^s`, `i!s`, `i!Y` use `i` as the length of the result, and use
   `-i` for the old behavior (breaking change).
++ Rename bytes s into &s (breaking change).
 + New take/repeat `i@y` equivalent to old `i#y`, that now is take/pad. Both give
   same results unless `i>#y` or `(-i)>#y`. A simple way to pad arrays with
   zero-values (now properly based on first element type, or default type) was
   missing.  Also, @ in kind of a circle, so it was chosen for the cyclic
   behavior (which also feels to me more like an action than just padding).
   (breaking change)
-+ Make `=I` return `#'=I`, because the latter is used less often, and can be
-  obtained with group keys `=(!#I)!I` and group by `{!#x}=I`. (minor breaking
-  change)
++ Make `=I` return `#'=I`, because the former is not used often in this form,
+  and can be obtained with group keys `=(!#I)!I` and group by `{!#x}=I`. (minor
+  breaking change)
 + Improve state of things with fill/pad values of generic arrays: now we use
   the type of the first element to determine the zero value if it's not empty,
   and we use () otherwise (which is often the desired default for generic

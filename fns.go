@@ -148,12 +148,47 @@ func where(x V) V {
 			}
 		}
 		return NewV(&AI{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
-	case *Dict:
-		r := where(NewV(xv.values))
-		if r.IsPanic() {
-			return r
+	case S:
+		return NewI(int64(len(xv)))
+	case *AS:
+		r := make([]int64, xv.Len())
+		for i, s := range xv.elts {
+			r[i] = int64(len(s))
 		}
-		return NewV(xv.keys.atIndices(r.value.(*AI)))
+		return NewAI(r)
+	case *AV:
+		r := make([]V, xv.Len())
+		for i, xi := range xv.elts {
+			ri := where(xi)
+			if ri.IsPanic() {
+				return ri
+			}
+			r[i] = ri
+		}
+		return canonicalFast(NewAV(r))
+	case *Dict:
+		switch xv.values.(type) {
+		case *AB:
+			r := where(NewV(xv.values))
+			if r.IsPanic() {
+				return r
+			}
+			return NewV(xv.keys.atIndices(r.value.(*AI)))
+		case *AI:
+			r := where(NewV(xv.values))
+			if r.IsPanic() {
+				return r
+			}
+			return NewV(xv.keys.atIndices(r.value.(*AI)))
+		case *AF:
+			r := where(NewV(xv.values))
+			if r.IsPanic() {
+				return r
+			}
+			return NewV(xv.keys.atIndices(r.value.(*AI)))
+		default:
+			return newDictValues(xv.keys, where(NewV(xv.values)))
+		}
 	default:
 		return panicType("&x", "x", x)
 	}
