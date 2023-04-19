@@ -1,4 +1,5 @@
 Features:
+- maybe s$ could be extended into some kind of sprintf/scanf
 - maybe use non-adverbial \ for some kind of statement (no ideas yet).
 
 Tests:

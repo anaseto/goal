@@ -83,8 +83,8 @@ s*i repeat      "a"*3 2 1 0 -> "aaa" "aa" "a" ""
 x%y divide      3%2 -> 1.5          3 4%2 -> 1.5 2
 !i  enum        !5 -> 0 1 2 3 4
 !s  fields      !"a b\tc\nd  e" -> "a" "b" "c" "d" "e"       (unicode space too)
-!d  keys        !"a" "b"!1 2 -> "a" "b"
 !I  odometer    !2 3 -> (0 0 0 1 1 1;0 1 2 0 1 2)
+!d  keys        !"a" "b"!1 2 -> "a" "b"
 i!i range       2!5 -> 2 3 4        5!2 -> !0
 i!s cut shape   3!"abcdefghijk" -> "abc" "defg" "hijk"
 i!Y cut shape   3!!6 -> (0 1;2 3;4 5)            -3!!6 -> (0 1 2;3 4 5)
