@@ -157,7 +157,7 @@ e               error           error "msg"
         A       generic array   ("a" 1;"b" 2;"c" 3)     (+;-;*;"any")
 
 VERBS HELP
-:x  identity    :[42] -> 42            (recall that : is also syntax for return)
+:x  identity    :[42] -> 42 (recall that : is also syntax for return and assign)
 x:y right       2:3 -> 3            "a":"b" -> "b"
 +d  swap k/v    +"a""b"!0 1 -> 0 1!"a" "b"
 +x  flip        +(1 2;3 4) -> (1 3;2 4)                   +42 -> ,,42
