@@ -2,15 +2,16 @@
 
 This release makes quite a few significant changes and improvements.
 
-+ Rename `bytes s` into `&s`, because it's quite a fundamental operation
-  (breaking change).
++ Rename `bytes s` into `&s`, because getting the length in bytes of a string
+  is quite a fundamental operation, even if it's not used that often (breaking
+  change).
 + New take/repeat `i@y` equivalent to old `i#y`, that now is take/pad. Both give
   same results unless `i>#y` or `(-i)>#y`. A simple way to pad arrays with
   zero-values (now properly based on first element type, or default type) was
   missing.  `@` in kind of a circle, which is a good mnemonic for the cyclic
   behavior (which also feels to me more like an apply action than just padding
-  would). Also, because new with keys `X#d` that does padding for new keys,
-  it's less surprising that `i#y` does too. (breaking change)
+  would). Also, because new `X#d` does padding for new keys, it's expected that
+  `i#y` does too for out of bound indices. (breaking change)
 + Make `i^Y`, `i^s`, `i!s`, `i!Y` use `i` as the length of the result, and use
   `-i` for the old behavior (breaking change). This was suggested by @Marshall
   on the aplfarm matrix channel.
