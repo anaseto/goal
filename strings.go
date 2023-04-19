@@ -648,6 +648,32 @@ func splitN(n int, sep S, y V) V {
 	}
 }
 
+func lineSplit(s string) []string {
+	n := strings.Count(s, "\n") + 1
+	r := make([]string, n)
+	n--
+	i := 0
+	for i < n {
+		j := strings.IndexByte(s, '\n')
+		if j < 0 {
+			// should not happen
+			break
+		}
+		r[i] = dropCR(s[:j])
+		s = s[j+1:]
+		i++
+	}
+	r[i] = s
+	return r[:i+1]
+}
+
+func dropCR(s string) string {
+	if len(s) > 0 && s[len(s)-1] == '\r' {
+		return s[0 : len(s)-1]
+	}
+	return s
+}
+
 func padStrings(x int, y V) V {
 	switch yv := y.value.(type) {
 	case S:

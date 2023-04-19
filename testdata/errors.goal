@@ -43,9 +43,9 @@ a:3 "a";"c" 2=a / type
 ?[0;1;] / empty cond
 1 2 3^2 / type
 !-3 / negative
-!3.2 / non-integer index
+!3.2 / non-integer
 !3.2 5.2 / contains non-integer
-!(1 2;3 4) / type
+!(*;+) / type
 &-3 / negative
 &2.5 / non-integer
 &-3.0 / negative

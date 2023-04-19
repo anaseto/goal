@@ -1,12 +1,10 @@
 package goal
 
-import "strings"
-
-// icountFields returns =x.
-func icountFields(x V) V {
+// icountLinesGroup returns =x.
+func icountLinesGroup(x V) V {
 	switch xv := x.value.(type) {
 	case S:
-		return NewAS(strings.Fields(string(xv)))
+		return NewAS(lineSplit(string(xv)))
 	case *AB:
 		if xv.Len() == 0 {
 			return NewAI(nil)
@@ -36,11 +34,11 @@ func icountFields(x V) V {
 		if z.IsPanic() {
 			return ppanic("=x : ", z)
 		}
-		return icountFields(z)
+		return icountLinesGroup(z)
 	case *AS:
 		r := make([]V, xv.Len())
 		for i, xi := range xv.elts {
-			r[i] = NewAS(strings.Fields(xi))
+			r[i] = NewAS(lineSplit(xi))
 		}
 		return NewAV(r)
 	case *Dict:
@@ -48,7 +46,7 @@ func icountFields(x V) V {
 	case *AV:
 		r := make([]V, xv.Len())
 		for i, xi := range xv.elts {
-			ri := icountFields(xi)
+			ri := icountLinesGroup(xi)
 			if ri.IsPanic() {
 				return ri
 			}

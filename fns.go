@@ -1,21 +1,49 @@
 package goal
 
-// enum returns !x.
-func enum(x V) V {
-	d, ok := x.value.(*Dict)
-	if ok {
-		return d.Keys()
-	}
-	x = toIndices(x)
-	if x.IsPanic() {
-		return Panicf("!x : %v", x)
-	}
+import "strings"
+
+// enumFieldsKeys returns !x.
+func enumFieldsKeys(x V) V {
 	if x.IsI() {
 		return rangeI(x.I())
 	}
+	if x.IsF() {
+		if !isI(x.F()) {
+			return Panicf("!i : non-integer i (%g)", x.F())
+		}
+		return rangeI(int64(x.F()))
+	}
 	switch xv := x.value.(type) {
+	case S:
+		return NewAS(strings.Fields(string(xv)))
+	case *AB:
+		return enumFieldsKeys(fromABtoAI(xv))
+	case *AF:
+		x := toAI(xv)
+		if x.IsPanic() {
+			return ppanic("!I : ", x)
+		}
+		return enumFieldsKeys(x)
 	case *AI:
 		return rangeArray(xv)
+	case *AS:
+		r := make([]V, xv.Len())
+		for i, xi := range xv.elts {
+			r[i] = NewAS(strings.Fields(xi))
+		}
+		return NewAV(r)
+	case *AV:
+		r := make([]V, xv.Len())
+		for i, xi := range xv.elts {
+			ri := enumFieldsKeys(xi)
+			if ri.IsPanic() {
+				return ri
+			}
+			r[i] = ri
+		}
+		return NewAV(r)
+	case *Dict:
+		return xv.Keys()
 	default:
 		return panicType("!x", "x", x)
 	}
@@ -28,17 +56,6 @@ func rangeI(n int64) V {
 	r := make([]int64, n)
 	for i := range r {
 		r[i] = int64(i)
-	}
-	return NewV(&AI{elts: r, flags: flagAscending | flagUnique})
-}
-
-func rangeII(from, to int64) V {
-	if from > to {
-		return NewAI(nil)
-	}
-	r := make([]int64, to-from)
-	for i := range r {
-		r[i] = from + int64(i)
 	}
 	return NewV(&AI{elts: r, flags: flagAscending | flagUnique})
 }
@@ -71,6 +88,17 @@ func rangeArray(x *AI) V {
 	}
 	var rn int
 	return NewAVWithRC(r, &rn)
+}
+
+func rangeII(from, to int64) V {
+	if from > to {
+		return NewAI(nil)
+	}
+	r := make([]int64, to-from)
+	for i := range r {
+		r[i] = from + int64(i)
+	}
+	return NewV(&AI{elts: r, flags: flagAscending | flagUnique})
 }
 
 // where returns &x.

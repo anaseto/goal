@@ -225,7 +225,7 @@ func vfDivide(ctx *Context, args []V) V {
 func vfKey(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return enum(args[0])
+		return enumFieldsKeys(args[0])
 	case 2:
 		x, y := args[1], args[0]
 		if x.IsI() || x.IsF() {
@@ -289,7 +289,7 @@ func vfMore(ctx *Context, args []V) V {
 func vfEqual(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return icountFields(args[0])
+		return icountLinesGroup(args[0])
 	case 2:
 		x, y := args[1], args[0]
 		if x.IsFunction() {
