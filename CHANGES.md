@@ -7,10 +7,10 @@ This release makes quite a few significant changes and improvements.
 + New take/repeat `i@y` equivalent to old `i#y`, that now is take/pad. Both give
   same results unless `i>#y` or `(-i)>#y`. A simple way to pad arrays with
   zero-values (now properly based on first element type, or default type) was
-  missing.  Also, @ in kind of a circle, so it was chosen for the cyclic
-  behavior (which also feels to me more like an apply action than just
-  padding), and also because new `X#d` does padding, so it's less surprising that
-  `i#y` does too. (breaking change)
+  missing.  `@` in kind of a circle, which is a good mnemonic for the cyclic
+  behavior (which also feels to me more like an apply action than just padding
+  would). Also, because new with keys `X#d` that does padding for new keys,
+  it's less surprising that `i#y` does too. (breaking change)
 + Make `i^Y`, `i^s`, `i!s`, `i!Y` use `i` as the length of the result, and use
   `-i` for the old behavior (breaking change). This was suggested by @Marshall
   on the aplfarm matrix channel.
@@ -32,9 +32,12 @@ This release makes quite a few significant changes and improvements.
   are not that useful (outside of golfing maybe), and `_` is already quite
   polysemic. (minor breaking change)
 + Implement w/o keys `X^d` and w/ keys `X#d`.
++ Implement `+d` as swap of keys and values. The reason for this is that Goal
+  does not have tables, and they are not planned, as making them useful would
+  require a lot of work (including some kind of query methods).
 + Implement `d.y` for `1<#y`, and `X@d`.
-+ Implement `+d` as swap of keys and values.
-+ Implement `@[f1;x;f2]`, like `.[f1;y;f2]` but doing f1@x instead of `f1 . y`.
++ Implement `@[f1;x;f2]`, like `.[f1;y;f2]` but doing `f1@x` instead of `f1 .
+  y`.
 + Fix default rank of `s/` `s\` `I/` `I\` (used in the case they would be
   followed by a fold or scan, which would be quite rare).
 + When an in-place assignement operation panics, clear the variable (instead of
@@ -85,7 +88,7 @@ This release makes quite a few significant changes and improvements.
 + For consistency, make run s form return its standard output too, and return
   a dictionary in error case containing exit code, message and output.
 + More consistent error messages.
-+ Fix some unhandled cases of .s with lambda return.
++ Fix some unhandled cases of `.s` with lambda return.
 
 # v0.10.0 2023-03-26
 
@@ -144,8 +147,9 @@ Highlights:
 # v0.6.0 2023-02-26
 
 This release has various breaking changes in the core language.  They should be
-more rare from now on (but still possible if important until we reach 1.0).
-Some changes might still happen in the embedding API.
+more rare from now on (but still possible if important until we reach 1.0), and
+they will at least be documented.  Some changes might still happen in the
+embedding API.
 
 Highlights:
 
