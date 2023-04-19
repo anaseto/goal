@@ -14,11 +14,11 @@ func vfUTF8(ctx *Context, args []V) V {
 		x := args[1]
 		s, ok := x.value.(S)
 		if !ok {
-			return panicType("x utf8.valid s", "x", x)
+			return panicType("x utf8 s", "x", x)
 		}
 		return toValidUTF8(string(s), args[0])
 	default:
-		return panicRank("utf8.valid")
+		return panicRank("utf8")
 	}
 }
 
@@ -42,7 +42,7 @@ func utf8valid(x V) V {
 		}
 		return Canonical(NewAV(r))
 	default:
-		return panicType("utf8.valid s", "s", x)
+		return panicType("utf8 s", "s", x)
 	}
 }
 
@@ -66,6 +66,6 @@ func toValidUTF8(repl string, x V) V {
 		}
 		return Canonical(NewAV(r))
 	default:
-		return panicType("x utf8.valid s", "s", x)
+		return panicType("x utf8 s", "s", x)
 	}
 }

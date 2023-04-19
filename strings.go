@@ -244,32 +244,6 @@ func applyS2(s S, x V, y V) V {
 	}
 }
 
-func bytecount(x V) V {
-	switch xv := x.value.(type) {
-	case S:
-		return NewI(int64(len(xv)))
-	case *AS:
-		r := make([]int64, xv.Len())
-		for i, s := range xv.elts {
-			r[i] = int64(len(s))
-		}
-		return NewAI(r)
-	case *AV:
-		r := make([]V, xv.Len())
-		for i, xi := range xv.elts {
-			r[i] = bytecount(xi)
-			if r[i].IsPanic() {
-				return r[i]
-			}
-		}
-		return canonicalFast(NewAV(r))
-	case *Dict:
-		return newDictValues(xv.keys, bytecount(NewV(xv.values)))
-	default:
-		return panicType("bytes x", "x", x)
-	}
-}
-
 // cast implements s$y.
 func cast(s S, y V) V {
 	switch s {

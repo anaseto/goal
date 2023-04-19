@@ -118,7 +118,6 @@ func (ctx *Context) initVariadics() {
 
 	// monads
 	ctx.RegisterMonad("abs", vfAbs)
-	ctx.RegisterMonad("bytes", vfBytes)
 	ctx.RegisterMonad("ceil", vfCeil)
 	ctx.RegisterMonad("error", vfError)
 	ctx.RegisterMonad("eval", vfEval)
@@ -625,16 +624,6 @@ func vfAbs(ctx *Context, args []V) V {
 		return abs(args[0])
 	default:
 		return panicRank("abs")
-	}
-}
-
-// vfBytes implements the "bytes" variadic verb.
-func vfBytes(ctx *Context, args []V) V {
-	switch len(args) {
-	case 1:
-		return bytecount(args[0])
-	default:
-		return panicRank("bytes")
 	}
 }
 
