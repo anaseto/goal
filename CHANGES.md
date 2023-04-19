@@ -7,8 +7,9 @@
   same results unless `i>#y` or `(-i)>#y`. A simple way to pad arrays with
   zero-values (now properly based on first element type, or default type) was
   missing.  Also, @ in kind of a circle, so it was chosen for the cyclic
-  behavior (which also feels to me more like an action than just padding).
-  (breaking change)
+  behavior (which also feels to me more like an action than just padding), and
+  also because X#d does padding, so it's better that i#d does too. (breaking
+  change)
 + Make `=I` return `#'=I`, because the former is not used often in this form,
   and can be obtained with group keys `=(!#I)!I` and group by `{!#x}=I`. (minor
   breaking change)
