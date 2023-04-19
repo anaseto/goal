@@ -2,8 +2,8 @@
 
 This release makes quite a few significant changes and improvements.
 
-+ Rename bytes s into &s, because it's quite a fundamental operation (breaking
-  change).
++ Rename `bytes s` into `&s`, because it's quite a fundamental operation
+  (breaking change).
 + New take/repeat `i@y` equivalent to old `i#y`, that now is take/pad. Both give
   same results unless `i>#y` or `(-i)>#y`. A simple way to pad arrays with
   zero-values (now properly based on first element type, or default type) was
@@ -12,8 +12,8 @@ This release makes quite a few significant changes and improvements.
   padding), and also because new X#d does padding, so it's less surprising that
   i#d does too. (breaking change)
 + Make `i^Y`, `i^s`, `i!s`, `i!Y` use `i` as the length of the result, and use
-  `-i` for the old behavior (breaking change). This was suggested by Marshall
-  on the matrix channel.
+  `-i` for the old behavior (breaking change). This was suggested by @Marshall
+  on the aplfarm matrix channel.
 + Make `=I` return index-counting `#'=I`, because the former is not used often
   in this form, and can be obtained with group keys `=(!#I)!I` and group by
   `{!#x}=I`. (minor breaking change)
@@ -22,12 +22,12 @@ This release makes quite a few significant changes and improvements.
   and we use () otherwise (which is often the desired default for generic
   arrays). Previously fills where only really usable in numeric and string
   arrays.
-+ Rename fields from v0.13 into `!s`, and add new `=s` lines (like "\n"\ but
-  handles "\r\n" endings too). The mnemonics for the new name is that fields
++ Rename fields from v0.13 into `!s`, and add new `=s` lines (like `"\n"\` but
+  handles `"\r\n"` endings too). The mnemonics for the new name is that fields
   is mainly used to break text vertically, while `=s` only breaks it
   horizontally (and `=` represents two lines).  (breaking change)
 + Rename utf8.valid into utf8, and remove utf8.rcount, because it's the same as
-  -1+""#x with same underlying counting code. (breaking change)
+  `-1+""#x` with same underlying counting code. (breaking change)
 + Remove delete `X_i` and `s_i`, because they don't follow the common pattern,
   are not that useful (outside of golfing maybe), and `_` is already quite
   polysemic. (minor breaking change)
