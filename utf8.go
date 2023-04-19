@@ -5,42 +5,8 @@ import (
 	"unicode/utf8"
 )
 
-// vfUTF8RCount implements the "utf8.rcount" variadic verb.
-func vfUTF8RCount(ctx *Context, args []V) V {
-	switch len(args) {
-	case 1:
-		return utf8rcount(args[0])
-	default:
-		return panicRank("utf8.rcount")
-	}
-}
-
-func utf8rcount(x V) V {
-	switch xv := x.value.(type) {
-	case S:
-		return NewI(int64(utf8.RuneCountInString(string(xv))))
-	case *AS:
-		r := make([]int64, xv.Len())
-		for i, s := range xv.elts {
-			r[i] = int64(utf8.RuneCountInString(s))
-		}
-		return NewAI(r)
-	case *AV:
-		r := make([]V, xv.Len())
-		for i, xi := range xv.elts {
-			r[i] = utf8rcount(xi)
-			if r[i].IsPanic() {
-				return r[i]
-			}
-		}
-		return canonicalFast(NewAV(r))
-	default:
-		return panicType("utf8.rcount s", "s", x)
-	}
-}
-
-// vfUTF8Valid implements the "utf8.valid" variadic verb.
-func vfUTF8Valid(ctx *Context, args []V) V {
+// vfUTF8 implements the utf8 variadic verb.
+func vfUTF8(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return utf8valid(args[0])

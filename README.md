@@ -206,7 +206,7 @@ X^d w/o keys    (,"b")^"a""b""c"!0 1 2 -> "a""c"!0 2
 X^Y without     2 3^1 1 2 3 3 4 -> 1 1 4
 #x  length      #2 4 5 -> 3       #"ab" "cd" -> 2       #42 -> 1      #"ab" -> 1
 i#y take/pad    2#6 7 8 -> 6 7    4#6 7 8 -> 6 7 8 0    -4#6 7 8 -> 0 6 7 8
-s#s count       "ab"#"cabdab" "cd" "deab" -> 2 0 1
+s#s count       "ab"#"cabdab" "cd" "deab" -> 2 0 1      ""#"αβγ" -> 4
 f#y replicate   {0 1 2 0}#4 1 5 3 -> 1 5 5        {x>0}#2 -3 1 -> 2 1
 X#d with keys   "a""c""e"#"a""b""c"!2 3 4 -> "a""c""e"!2 4 0
 X#Y with only   2 3#1 1 2 3 3 4 -> 2 3 3
@@ -300,11 +300,10 @@ sub[S;S]   replaceS     sub["b" "c";"d" "e"] "abc" -> "ade"
 eval[s;loc;pfx]         like eval s, but provide loc as location (usually a
                         path), and prefix pfx+"." for globals
 
-utf8.rcount s           utf8.rcount "aπc" -> 3           (number of code points)
-utf8.valid s            utf8.valid "aπc" -> 1            utf8.valid "a\xff" -> 0
-x utf8.valid s          "b" utf8.valid "a\xff" -> "ab"  (replace invalid with x)
+utf8 s    valid UTF8    utf8 "aπc" -> 1                        utf8 "a\xff" -> 0
+s utf8 s  to-valid UTF8 "b" utf8 "a\xff" -> "ab"      (replace invalid with "b")
 
-MATH: atan2, cos, exp, log, round, sin, sqrt
+MATH: atan2[n;n]; cos n; exp n; log n; round n; sin n; sqrt n
 
 ADVERBS HELP
 f'x    each      #'(4 5;6 7 8) -> 2 3

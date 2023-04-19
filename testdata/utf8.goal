@@ -1,14 +1,14 @@
-utf8.rcount "a" / 1
-utf8.rcount "é" / 1
-utf8.rcount "a" "bc" "è" / 1 2 1
-utf8.rcount ("ê" "bc";"世界" "d" "efg") / (1 2;2 1 3)
-utf8.valid "a" / 1
-utf8.valid "é" / 1
-utf8.valid "a\xff" / 0
-utf8.valid "a" "bc" "è" / 1 1 1
-utf8.valid ("ê" "bc";"世界" "d" "efg") / (1 1;1 1 1)
-"" utf8.valid "a\xffb\xC0\xAFc\xff" / "abc"
-"" utf8.valid "a\xff" / "a"
-"bc" utf8.valid "a\xff" / "abc"
-"" utf8.valid "a\xff" "a\xffb\xC0\xAFc\xff" / "a" "abc"
-"" utf8.valid ("a\xff";"a\xff""a\xffb\xC0\xAFc\xff") / ("a";"a" "abc")
+-1+""#"a" / 1
+-1+""#"é" / 1
+-1+""#"a" "bc" "è" / 1 2 1
+-1+""#("ê" "bc";"世界" "d" "efg") / (1 2;2 1 3)
+utf8 "a" / 1
+utf8 "é" / 1
+utf8 "a\xff" / 0
+utf8 "a" "bc" "è" / 1 1 1
+utf8 ("ê" "bc";"世界" "d" "efg") / (1 1;1 1 1)
+"" utf8 "a\xffb\xC0\xAFc\xff" / "abc"
+"" utf8 "a\xff" / "a"
+"bc" utf8 "a\xff" / "abc"
+"" utf8 "a\xff" "a\xffb\xC0\xAFc\xff" / "a" "abc"
+"" utf8 ("a\xff";"a\xff""a\xffb\xC0\xAFc\xff") / ("a";"a" "abc")

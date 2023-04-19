@@ -128,7 +128,6 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterMonad("panic", vfPanic)
 	ctx.RegisterMonad("rx", vfRx)
 	ctx.RegisterMonad("sign", vfSign)
-	ctx.RegisterMonad("utf8.rcount", vfUTF8RCount)
 
 	// math
 	ctx.RegisterDyad("atan2", vfAtan2)
@@ -153,7 +152,7 @@ func (ctx *Context) initVariadics() {
 	ctx.vNames["«"] = v.variadic()
 	ctx.RegisterDyad("sub", vfSub)
 	ctx.RegisterDyad("time", vfTime)
-	ctx.RegisterDyad("utf8.valid", vfUTF8Valid)
+	ctx.RegisterDyad("utf8", vfUTF8)
 
 	// runtime functions
 	ctx.RegisterMonad("rt.ofs", vfOFS)

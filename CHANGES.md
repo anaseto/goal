@@ -7,9 +7,14 @@
   same results unless `i>#y` or `(-i)>#y`. A simple way to pad arrays with
   zero-values (now properly based on first element type, or default type) was
   missing.  Also, @ in kind of a circle, so it was chosen for the cyclic
-  behavior (which also feels to me more like an action than just padding), and
-  also because X#d does padding, so it's better that i#d does too. (breaking
-  change)
+  behavior (which also feels to me more like an apply action than just
+  padding), and also because X#d does padding, so it's less surprising that i#d
+  does too. (breaking change)
++ Rename utf8.valid into utf8, and remove utf8.rcount (which is the same as
+  -1+""#x with same underlying counting code). (breaking change)
++ Remove delete `X_i` and `s_i`, because they don't follow the common pattern,
+  are not that useful (outside of code golfing), and `_` is already quite
+  polysemic. (minor breaking change)
 + Make `=I` return `#'=I`, because the former is not used often in this form,
   and can be obtained with group keys `=(!#I)!I` and group by `{!#x}=I`. (minor
   breaking change)
@@ -21,9 +26,6 @@
 + Implemented w/o keys `X^d` and w/ keys `X#d`.
 + Implement `+d` as swap of keys and values.
 + Implement `@[f1;x;f2]`, like `.[f1;y;f2]` but doing f1@x instead of `f1 . y`.
-+ Remove delete `X_i` and `s_i`, because they don't follow the common pattern,
-  are not that useful (outside of code golfing), and `_` is already quite
-  polysemic.
 + Fix default rank of `s/` `s\` `I/` `I\` (used in the case they would be
   followed by a fold or scan, which will probably never happen).
 + When an in-place assignement operation panics, clear the variable (instead of
