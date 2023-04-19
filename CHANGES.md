@@ -9,8 +9,8 @@ This release makes quite a few significant changes and improvements.
   zero-values (now properly based on first element type, or default type) was
   missing.  Also, @ in kind of a circle, so it was chosen for the cyclic
   behavior (which also feels to me more like an apply action than just
-  padding), and also because new X#d does padding, so it's less surprising that
-  i#d does too. (breaking change)
+  padding), and also because new `X#d` does padding, so it's less surprising that
+  `i#y` does too. (breaking change)
 + Make `i^Y`, `i^s`, `i!s`, `i!Y` use `i` as the length of the result, and use
   `-i` for the old behavior (breaking change). This was suggested by @Marshall
   on the aplfarm matrix channel.
