@@ -101,7 +101,7 @@ x>y greater     2>3 -> 0        "c" > "a" -> 1
 =s  fields      ="a b\tc\nd  e" -> "a" "b" "c" "d" "e"       (unicode space too)
 =I  index-count =1 0 0 2 2 3 -1 2 1 1 1 -> 2 4 3 1
 =d  group keys  ="a""b""c"!0 1 0 -> ("a" "c";,"b")         ="a""b"!0 -1 -> ,,"a"
-f=Y group by    {2 mod x}=!10 -> (0 2 4 6 8;1 3 5 7 9)
+f=Y group by    (2 mod)=!10 -> (0 2 4 6 8;1 3 5 7 9)
 x=y equal       2 3 4=3 -> 0 1 0        "ab" = "ba" -> 0
 ~x  not         ~0 1 2 -> 1 0 0         ~"a" "" "0" -> 0 1 0
 x~y match       3~3 -> 1        2 3~3 2 -> 0        ("a";%)~("b";%) -> 0 1
