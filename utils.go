@@ -758,6 +758,23 @@ func canonicalFast(x V) V {
 	}
 }
 
+func protoArray(x array) V {
+	switch x.(type) {
+	case *AB:
+		return NewAB(nil)
+	case *AI:
+		return NewAI(nil)
+	case *AF:
+		return NewAF(nil)
+	case *AS:
+		return NewAS(nil)
+	case *AV:
+		return NewAV(nil)
+	default:
+		panic("protoArray")
+	}
+}
+
 func proto(x []V) V {
 	if len(x) == 0 {
 		return NewAV(nil)
@@ -769,7 +786,7 @@ func proto(x []V) V {
 	if x0.IsF() {
 		return NewF(0)
 	}
-	switch x0.value.(type) {
+	switch x0v := x0.value.(type) {
 	case S:
 		return NewS("")
 	case *AB:
@@ -782,6 +799,8 @@ func proto(x []V) V {
 		return NewAS(nil)
 	case *AV:
 		return NewAV(nil)
+	case *Dict:
+		return NewDict(protoArray(x0v.keys), protoArray(x0v.values))
 	default:
 		if x0.IsFunction() {
 			return newVariadic(vRight)

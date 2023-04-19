@@ -194,16 +194,33 @@ func (d *Dict) Append(ctx *Context, dst []byte) []byte {
 	defer func() {
 		ctx.compactFmt = osc
 	}()
-	if d.keys.Len() == 1 {
+	parens := arrayNeedsParens(d.keys)
+	if parens {
 		dst = append(dst, '(')
 	}
 	dst = d.keys.Append(ctx, dst)
-	if d.keys.Len() == 1 {
+	if parens {
 		dst = append(dst, ')')
 	}
 	dst = append(dst, '!')
 	dst = d.values.Append(ctx, dst)
 	return dst
+}
+
+func arrayNeedsParens(x array) bool {
+	switch x.Len() {
+	case 0:
+		switch x.(type) {
+		case *AV:
+			return false
+		default:
+			return true
+		}
+	case 1:
+		return true
+	default:
+		return false
+	}
 }
 
 func (p *projection) Append(ctx *Context, dst []byte) []byte {
