@@ -923,3 +923,7 @@ rt.seed "a" / type
 "" utf8.valid (42;"a" "c") / type
 =(*;%) / type
 {"a" 2 "c"}=1 2 3 / type
+"a" 1 "b"_1 / type
+0 3.5 2 1_-2 / non-integer
+"a" 3.5 2 1_-2 / type
+("a""b""c""d"!0 3 2 1)_-2 / type

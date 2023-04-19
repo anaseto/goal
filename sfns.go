@@ -194,15 +194,6 @@ func drop(x, y V) V {
 		}
 		return dropN(int64(x.F()), y)
 	}
-	if y.IsI() {
-		return deleteI(x, y.I())
-	}
-	if y.IsF() {
-		if !isI(y.F()) {
-			return Panicf("x_i : non-integer i (%g)", y.F())
-		}
-		return deleteI(x, int64(y.F()))
-	}
 	switch xv := x.value.(type) {
 	case S:
 		return dropS(xv, y)
@@ -280,101 +271,6 @@ func dropN(n int64, y V) V {
 			values: rv.value.(array)})
 	default:
 		return panicType("i_y", "y", y)
-	}
-}
-
-func deleteiSlice[T any](xs []T, i int64) []T {
-	r := make([]T, i, len(xs)-1)
-	copy(r, xs[:i])
-	r = append(r, xs[i+1:]...)
-	return r
-}
-
-func deleteI(x V, i int64) V {
-	switch xv := x.value.(type) {
-	case S:
-		if i < 0 {
-			i += int64(len(xv))
-		}
-		if i >= int64(len(xv)) || i < 0 {
-			return x
-		}
-		return NewV(xv[:i] + xv[i+1:])
-	case *AB:
-		if i < 0 {
-			i += int64(xv.Len())
-		}
-		if i >= int64(xv.Len()) || i < 0 {
-			return x
-		}
-		if reusableRCp(xv.rc) {
-			xv.elts = append(xv.elts[:i], xv.elts[i+1:]...)
-			return x
-		}
-		r := deleteiSlice[bool](xv.elts, i)
-		return NewV(&AB{elts: r, flags: xv.flags})
-	case *AI:
-		if i < 0 {
-			i += int64(xv.Len())
-		}
-		if i >= int64(xv.Len()) || i < 0 {
-			return x
-		}
-		if reusableRCp(xv.rc) {
-			xv.elts = append(xv.elts[:i], xv.elts[i+1:]...)
-			return x
-		}
-		r := deleteiSlice[int64](xv.elts, i)
-		return NewV(&AI{elts: r, flags: xv.flags})
-	case *AF:
-		if i < 0 {
-			i += int64(xv.Len())
-		}
-		if i >= int64(xv.Len()) || i < 0 {
-			return x
-		}
-		if reusableRCp(xv.rc) {
-			xv.elts = append(xv.elts[:i], xv.elts[i+1:]...)
-			return x
-		}
-		r := deleteiSlice[float64](xv.elts, i)
-		return NewV(&AF{elts: r, flags: xv.flags})
-	case *AS:
-		if i < 0 {
-			i += int64(xv.Len())
-		}
-		if i >= int64(xv.Len()) || i < 0 {
-			return x
-		}
-		if reusableRCp(xv.rc) {
-			xv.elts = append(xv.elts[:i], xv.elts[i+1:]...)
-			return x
-		}
-		r := deleteiSlice[string](xv.elts, i)
-		return NewV(&AS{elts: r, flags: xv.flags})
-	case *AV:
-		if i < 0 {
-			i += int64(xv.Len())
-		}
-		if i >= int64(xv.Len()) || i < 0 {
-			return x
-		}
-		if reusableRCp(xv.rc) {
-			xv.elts = append(xv.elts[:i], xv.elts[i+1:]...)
-			return canonicalFast(x)
-		}
-		r := deleteiSlice[V](xv.elts, i)
-		return NewV(canonicalAV(&AV{elts: r, flags: xv.flags, rc: xv.rc}))
-	case *Dict:
-		rk := deleteI(NewV(xv.keys), i)
-		rk.InitRC()
-		rv := deleteI(NewV(xv.values), i)
-		rv.InitRC()
-		return NewV(&Dict{
-			keys:   rk.value.(array),
-			values: rv.value.(array)})
-	default:
-		return panicType("x_i", "x", x)
 	}
 }
 
