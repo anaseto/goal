@@ -82,7 +82,7 @@ s*i repeat      "a"*3 2 1 0 -> "aaa" "aa" "a" ""
 %X  classify    %7 8 9 7 8 9 -> 0 1 2 0 1 2      %"a" "b" "a" -> 0 1 0
 x%y divide      3%2 -> 1.5          3 4%2 -> 1.5 2
 !i  enum        !5 -> 0 1 2 3 4
-!s  fields      !"a b\tc\nd  e" -> "a" "b" "c" "d" "e"       (unicode space too)
+!s  fields      !"a b\tc\nd  e" -> "a" "b" "c" "d" "e"   (Unicode's White Space)
 !I  odometer    !2 3 -> (0 0 0 1 1 1;0 1 2 0 1 2)
 !d  keys        !"a" "b"!1 2 -> "a" "b"
 i!i range       2!5 -> 2 3 4        5!2 -> !0
