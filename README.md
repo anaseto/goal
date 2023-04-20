@@ -30,7 +30,8 @@ It's main distinctive features are as follows:
   take after K.
 * Unlike in typical array languages, strings are atoms, and common string
   handling functions have been integrated into the primitives, including
-  regular expression functions.
+  regular expression functions. Primitives acting on whole strings are
+  Unicode-aware (like case-folding or Unicode properties in regexps).
 * Error handling makes a distinction between fatal errors (panics) and
   recoverable errors which are handled as values.
 * Integrated support for csv, json, time handling, and basic math.
