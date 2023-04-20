@@ -325,12 +325,11 @@ func (x *AV) atIndices(y *AI) array {
 	}
 	nr := &AV{elts: r}
 	var p *int
-	if !reusableRCp(p) {
+	if reusableRCp(x.rc) {
+		p = x.rc
+	} else {
 		var n int
 		p = &n
-	} else {
-		p = x.rc
-		*p++
 	}
 	nr.InitWithRC(p)
 	a, _ := normalize(nr)

@@ -323,7 +323,7 @@ func (x *AB) applyN(ctx *Context, n int) V {
 		return r
 	default:
 		ctx.dropN(n - 1)
-		return Panicf("X.y : out of depth")
+		return Panicf("X.y : out of depth indexing")
 	}
 }
 
@@ -335,7 +335,7 @@ func (x *AI) applyN(ctx *Context, n int) V {
 		return r
 	default:
 		ctx.dropN(n - 1)
-		return Panicf("X.y : out of depth")
+		return Panicf("X.y : out of depth indexing")
 	}
 }
 
@@ -347,7 +347,7 @@ func (x *AF) applyN(ctx *Context, n int) V {
 		return r
 	default:
 		ctx.dropN(n - 1)
-		return Panicf("X.y : out of depth")
+		return Panicf("X.y : out of depth indexing")
 	}
 }
 
@@ -359,7 +359,7 @@ func (x *AS) applyN(ctx *Context, n int) V {
 		return r
 	default:
 		ctx.dropN(n - 1)
-		return Panicf("X.y : out of depth")
+		return Panicf("X.y : out of depth indexing")
 	}
 }
 
