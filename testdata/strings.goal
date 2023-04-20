@@ -1,6 +1,6 @@
 "abc"[0;1] / "a"
-"abcde" "bcde"[0;2] / "cde"
-"abcde" "bcde"[0;2;2] / "cd"
+"abcde" "bcde"[0]2 / "cde"
+"abcde" "bcde"[0][2;2] / "cd"
 "abc"[0;5] / "abc"
 "abc"[0;1.0] / "a"
 "abc"[0 1;1.0] / "a" "b"

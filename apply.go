@@ -323,7 +323,7 @@ func (x *AB) applyN(ctx *Context, n int) V {
 		return r
 	default:
 		ctx.dropN(n - 1)
-		return Panicf("x . y : out of depth")
+		return Panicf("X.y : out of depth")
 	}
 }
 
@@ -335,7 +335,7 @@ func (x *AI) applyN(ctx *Context, n int) V {
 		return r
 	default:
 		ctx.dropN(n - 1)
-		return Panicf("x . y : out of depth")
+		return Panicf("X.y : out of depth")
 	}
 }
 
@@ -347,7 +347,7 @@ func (x *AF) applyN(ctx *Context, n int) V {
 		return r
 	default:
 		ctx.dropN(n - 1)
-		return Panicf("x . y : out of depth")
+		return Panicf("X.y : out of depth")
 	}
 }
 
@@ -358,13 +358,8 @@ func (x *AS) applyN(ctx *Context, n int) V {
 		r.InitRC()
 		return r
 	default:
-		args := ctx.peekN(n)
-		x.IncrRC()
-		r := ctx.applyArrayArgs(x, args[len(args)-1], args[:len(args)-1])
-		x.DecrRC()
-		r.InitRC()
 		ctx.dropN(n - 1)
-		return r
+		return Panicf("X.y : out of depth")
 	}
 }
 
@@ -377,7 +372,7 @@ func (x *AV) applyN(ctx *Context, n int) V {
 	default:
 		args := ctx.peekN(n)
 		x.IncrRC()
-		r := ctx.applyArrayArgs(x, args[len(args)-1], args[:len(args)-1])
+		r := applyArrayArgs(x, args[len(args)-1], args[:len(args)-1])
 		x.DecrRC()
 		r.InitRC()
 		ctx.dropN(n - 1)
@@ -427,14 +422,14 @@ func (d *Dict) apply(ctx *Context, y V) V {
 	if z.IsI() {
 		i := z.I() // i >= 0
 		if i >= int64(dlen) {
-			return Panicf("d[y] : key not found (%s)", y.Sprint(ctx))
+			return Panicf("d@y : key not found (%s)", y.Sprint(ctx))
 		}
 		return d.values.at(int(i))
 	}
 	azi := z.value.(*AI)
 	_, i, ok := inBoundsInfo(azi, dlen)
 	if !ok {
-		return Panicf("d[y] : key not found (%s)", y.value.(array).at(i).Sprint(ctx))
+		return Panicf("d@y : key not found (%s)", y.value.(array).at(i).Sprint(ctx))
 	}
 	r := d.values.atIndices(azi)
 	initRC(r)
@@ -443,34 +438,31 @@ func (d *Dict) apply(ctx *Context, y V) V {
 
 // applyArray applies an array to a value.
 func applyArray(x array, y V) V {
-	if y.kind == valNil {
-		return NewV(x)
-	}
 	if y.IsI() {
 		i := y.I()
 		if i < 0 {
 			i = int64(x.Len()) + i
 		}
 		if i < 0 || i >= int64(x.Len()) {
-			return Panicf("x[y] : out of bounds index: %d", i)
+			return Panicf("X@i : out of bounds index: %d", i)
 		}
 		return x.at(int(i))
 
 	}
 	if y.IsF() {
 		if !isI(y.F()) {
-			return Panicf("x[y] : non-integer index (%g)", y.F())
+			return Panicf("X@i : non-integer index (%g)", y.F())
 		}
 		i := int64(y.F())
 		if i < 0 {
 			i = int64(x.Len()) + i
 		}
 		if i < 0 || i >= int64(x.Len()) {
-			return Panicf("x[y] : out of bounds index: %d", i)
+			return Panicf("X@i : out of bounds index: %d", i)
 		}
 		return x.at(int(i))
 	}
-	if isStar(y) {
+	if y.kind == valNil || isStar(y) {
 		return NewV(x)
 	}
 	switch yv := y.value.(type) {
@@ -478,7 +470,7 @@ func applyArray(x array, y V) V {
 		xlen := x.Len()
 		i, ok := indicesInBounds(yv, xlen)
 		if !ok {
-			return Panicf("x[y] : index out of bounds: %d (length %d)", i, xlen)
+			return Panicf("X@i : index out of bounds: %d (length %d)", i, xlen)
 		}
 		return NewV(x.atIndices(yv))
 	case *AV:
@@ -495,26 +487,27 @@ func applyArray(x array, y V) V {
 	case array:
 		iy := toIndices(y)
 		if iy.IsPanic() {
-			return Panicf("x[y] : %v", iy.value)
+			return Panicf("X@i : %v", iy.value)
 		}
 		ayi := iy.value.(*AI)
 		xlen := x.Len()
 		i, ok := indicesInBounds(ayi, xlen)
 		if !ok {
-			return Panicf("x[y] : index out of bounds: %d (length %d)", i, xlen)
+			return Panicf("X@i : index out of bounds: %d (length %d)", i, xlen)
 		}
 		r := NewV(x.atIndices(ayi))
 		return r
 	default:
-		return panicType("x[y]", "y", y)
+		return panicType("X@i", "i", y)
 	}
 }
 
-func (ctx *Context) applyArrayArgs(x array, arg V, args []V) V {
+func applyArrayArgs(x array, arg V, args []V) V {
+	// invariant: len(args) > 0
 	if arg.kind == valNil {
 		r := make([]V, x.Len())
 		for i := 0; i < len(r); i++ {
-			ri := ctx.ApplyN(x.at(i), args)
+			ri := applyArrayArgs(x, NewI(int64(i)), args)
 			if ri.IsPanic() {
 				return ri
 			}
@@ -526,7 +519,7 @@ func (ctx *Context) applyArrayArgs(x array, arg V, args []V) V {
 	case array:
 		r := make([]V, argv.Len())
 		for i := 0; i < argv.Len(); i++ {
-			ri := ctx.applyArrayArgs(x, argv.at(i), args)
+			ri := applyArrayArgs(x, argv.at(i), args)
 			if ri.IsPanic() {
 				return ri
 			}
@@ -538,7 +531,15 @@ func (ctx *Context) applyArrayArgs(x array, arg V, args []V) V {
 		if r.IsPanic() {
 			return r
 		}
-		return ctx.ApplyN(r, args)
+		switch rv := r.value.(type) {
+		case array:
+			if len(args) == 1 {
+				return applyArray(rv, args[0])
+			}
+			return applyArrayArgs(rv, args[len(args)-1], args[:len(args)-1])
+		default:
+			return panics("X.y : out of depth indexing")
+		}
 	}
 }
 
