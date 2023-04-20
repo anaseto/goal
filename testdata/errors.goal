@@ -924,3 +924,6 @@ rt.seed "a" / type
 "a" 3.5 2 1_-2 / type
 ("a""b""c""d"!0 3 2 1)_-2 / type
 a:(#;^);a[(0 1;1 0);3 2 1] / out of depth
+1.5@3 / non-integer
+("a""b""c"!(|;*;+))["a""b";1 2] / out of depth
+("a""b""c"!(|;*;+))["a";1 2] / out of depth

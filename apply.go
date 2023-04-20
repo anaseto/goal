@@ -371,9 +371,7 @@ func (x *AV) applyN(ctx *Context, n int) V {
 		return r
 	default:
 		args := ctx.peekN(n)
-		x.IncrRC()
-		r := applyArrayArgs(x, args[len(args)-1], args[:len(args)-1])
-		x.DecrRC()
+		r := ctx.applyArrayArgs(x, args[len(args)-1], args[:len(args)-1])
 		r.InitRC()
 		ctx.dropN(n - 1)
 		return r
@@ -384,36 +382,17 @@ func (d *Dict) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
 		y := ctx.top()
-		return d.apply(ctx, y)
+		return ctx.applyDict(d, y)
 	default:
-		y := ctx.pop()
-		v := d.apply(ctx, y)
-		if v.IsPanic() {
-			return v
-		}
-		va, ok := v.value.(array)
-		if !ok {
-			return v.applyN(ctx, n-1)
-		}
-		args := ctx.peekN(n - 1)
-		r := make([]V, va.Len())
-		for i := 0; i < len(r); i++ {
-			ri := ctx.ApplyN(va.at(i), args)
-			if ri.IsPanic() {
-				return ri
-			}
-			r[i] = ri
-		}
-		if n > 2 {
-			ctx.dropN(n - 2)
-		}
-		rv := &AV{elts: r}
-		initRC(rv)
-		return NewV(canonicalAV(rv))
+		args := ctx.peekN(n)
+		r := ctx.applyDictArgs(d, args[len(args)-1], args[:len(args)-1])
+		r.InitRC()
+		ctx.dropN(n - 1)
+		return r
 	}
 }
 
-func (d *Dict) apply(ctx *Context, y V) V {
+func (ctx *Context) applyDict(d *Dict, y V) V {
 	if y.kind == valNil {
 		return NewV(d.values)
 	}
@@ -434,6 +413,48 @@ func (d *Dict) apply(ctx *Context, y V) V {
 	r := d.values.atIndices(azi)
 	initRC(r)
 	return NewV(r)
+}
+
+func (ctx *Context) applyDictArgs(x *Dict, arg V, args []V) V {
+	if len(args) == 0 {
+		return ctx.applyDict(x, arg)
+	}
+	if arg.kind == valNil {
+		r := make([]V, x.Len())
+		for i := 0; i < len(r); i++ {
+			ri := ctx.applyDictArgs(x, x.keys.at(i), args)
+			if ri.IsPanic() {
+				return ri
+			}
+			r[i] = ri
+		}
+		return NewV(canonicalAV(&AV{elts: r}))
+	}
+	switch argv := arg.value.(type) {
+	case array:
+		r := make([]V, argv.Len())
+		for i := 0; i < argv.Len(); i++ {
+			ri := ctx.applyDictArgs(x, argv.at(i), args)
+			if ri.IsPanic() {
+				return ri
+			}
+			r[i] = ri
+		}
+		return NewV(canonicalAV(&AV{elts: r}))
+	default:
+		r := ctx.applyDict(x, arg)
+		if r.IsPanic() {
+			return r
+		}
+		switch rv := r.value.(type) {
+		case array:
+			return ctx.applyArrayArgs(rv, args[len(args)-1], args[:len(args)-1])
+		case *Dict:
+			return ctx.applyDictArgs(rv, args[len(args)-1], args[:len(args)-1])
+		default:
+			return panics("d.y : out of depth indexing")
+		}
+	}
 }
 
 // applyArray applies an array to a value.
@@ -502,12 +523,14 @@ func applyArray(x array, y V) V {
 	}
 }
 
-func applyArrayArgs(x array, arg V, args []V) V {
-	// invariant: len(args) > 0
+func (ctx *Context) applyArrayArgs(x array, arg V, args []V) V {
+	if len(args) == 0 {
+		return applyArray(x, arg)
+	}
 	if arg.kind == valNil {
 		r := make([]V, x.Len())
 		for i := 0; i < len(r); i++ {
-			ri := applyArrayArgs(x, NewI(int64(i)), args)
+			ri := ctx.applyArrayArgs(x, NewI(int64(i)), args)
 			if ri.IsPanic() {
 				return ri
 			}
@@ -519,7 +542,7 @@ func applyArrayArgs(x array, arg V, args []V) V {
 	case array:
 		r := make([]V, argv.Len())
 		for i := 0; i < argv.Len(); i++ {
-			ri := applyArrayArgs(x, argv.at(i), args)
+			ri := ctx.applyArrayArgs(x, argv.at(i), args)
 			if ri.IsPanic() {
 				return ri
 			}
@@ -533,10 +556,9 @@ func applyArrayArgs(x array, arg V, args []V) V {
 		}
 		switch rv := r.value.(type) {
 		case array:
-			if len(args) == 1 {
-				return applyArray(rv, args[0])
-			}
-			return applyArrayArgs(rv, args[len(args)-1], args[:len(args)-1])
+			return ctx.applyArrayArgs(rv, args[len(args)-1], args[:len(args)-1])
+		case *Dict:
+			return ctx.applyDictArgs(rv, args[len(args)-1], args[:len(args)-1])
 		default:
 			return panics("X.y : out of depth indexing")
 		}
@@ -575,7 +597,7 @@ func (r *rxReplacer) applyN(ctx *Context, n int) V {
 
 func applyI(n int, i int64, y V) V {
 	if n > 1 {
-		return panicRank("i . y")
+		return panicRank("i.y")
 	}
 	switch yv := y.value.(type) {
 	case *Dict:
