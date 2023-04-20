@@ -39,6 +39,7 @@ This release makes quite a few significant changes and improvements.
 + Implement `d.y` for `1<#y`, and `X@d`.
 + Implement `@[f1;x;f2]`, like `.[f1;y;f2]` but doing `f1@x` instead of `f1 .
   y`.
++ Improve at depth indexing of mixed dicts and arrays.
 + Fix default rank of `s/` `s\` `I/` `I\` (used in the case they would be
   followed by a fold or scan, which would be quite rare).
 + When an in-place assignement operation panics, clear the variable (instead of
