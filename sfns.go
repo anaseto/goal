@@ -22,8 +22,8 @@ func reverseSlice[T any](xs []T) {
 	}
 }
 
-func reverseMut(x V) {
-	switch xv := x.value.(type) {
+func reverseMut(x array) {
+	switch xv := x.(type) {
 	case *AB:
 		reverseSlice[bool](xv.elts)
 	case *AF:
@@ -41,8 +41,9 @@ func reverseMut(x V) {
 func reverse(x V) V {
 	switch xv := x.value.(type) {
 	case array:
-		x.value = xv.shallowClone()
-		reverseMut(x)
+		xv = xv.shallowClone()
+		reverseMut(xv)
+		x.value = xv
 		return x
 	case *Dict:
 		k := reverse(NewV(xv.keys))

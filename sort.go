@@ -2,7 +2,6 @@ package goal
 
 import (
 	"sort"
-	"strings"
 )
 
 // Less satisfies the specification of sort.Interface.
@@ -66,13 +65,31 @@ func (x *Dict) Swap(i, j int) {
 	x.values.Swap(i, j)
 }
 
+type sortDictKeys Dict
+
+// Less satisfies the specification of sort.Interface.
+func (x *sortDictKeys) Less(i, j int) bool {
+	return x.keys.Less(i, j)
+}
+
+// Swap satisfies the specification of sort.Interface.
+func (x *sortDictKeys) Swap(i, j int) {
+	x.keys.Swap(i, j)
+	x.values.Swap(i, j)
+}
+
+// Len satisfies the specification of sort.Interface.
+func (x *sortDictKeys) Len() int {
+	return x.keys.Len()
+}
+
 // sortUp returns ^x.
 func sortUp(x V) V {
 	xa, ok := x.value.(array)
 	if !ok {
 		switch xv := x.value.(type) {
 		case *Dict:
-			return NewV(sortUpDict(xv))
+			return NewV(sortUpDictKeys(xv))
 		default:
 			return panicType("^X", "X", x)
 		}
@@ -90,6 +107,21 @@ func sortUp(x V) V {
 	}
 	xa.setFlags(flags | flagAscending)
 	return NewV(xa)
+}
+
+func sortUpDictKeys(d *Dict) *Dict {
+	flags := d.keys.getFlags()
+	if flags.Has(flagAscending) {
+		return d
+	}
+	nk := d.keys.shallowClone()
+	nv := d.values.shallowClone()
+	initRC(nk)
+	initRC(nv)
+	nd := &Dict{keys: nk, values: nv}
+	sort.Stable((*sortDictKeys)(nd))
+	nv.setFlags(flags | flagAscending)
+	return nd
 }
 
 func sortUpDict(d *Dict) *Dict {
@@ -142,7 +174,7 @@ func ascend(x V) V {
 		}
 		return NewAI(p.Perm)
 	case *Dict:
-		return NewV(sortUpDict(xv).keys)
+		return NewV(sortUpDict(xv))
 	default:
 		return panicType("<X", "X", x)
 	}
@@ -150,12 +182,22 @@ func ascend(x V) V {
 
 // descend returns >x.
 func descend(x V) V {
-	p := ascend(x)
-	if p.IsPanic() {
-		return panics(">" + strings.TrimPrefix(string(p.value.(panicV)), "<"))
+	switch xv := x.value.(type) {
+	case array:
+		p := &permutation{Perm: permRange(xv.Len()), X: xv}
+		if !xv.getFlags().Has(flagAscending) {
+			sort.Stable(p)
+		}
+		reverseSlice[int64](p.Perm)
+		return NewAI(p.Perm)
+	case *Dict:
+		d := sortUpDict(xv)
+		reverseMut(d.keys)
+		reverseMut(d.values)
+		return NewV(d)
+	default:
+		return panicType(">X", "X", x)
 	}
-	reverseMut(p)
-	return p
 }
 
 // search implements x$y.
