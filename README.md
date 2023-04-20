@@ -186,10 +186,10 @@ X!Y dict        d:"a" "b"!1 2;d "a" -> 1
 x&y min         2&3 -> 2        4&3 -> 3         "b"&"a" -> "a"
 |X  reverse     |!5 -> 4 3 2 1 0
 x|y max         2|3 -> 3        4|3 -> 4         "b"|"a" -> "b"
-<d  sort up     "a""b""c"!2 3 1 -> "c""a""b"!1 2 3
+<d  sort up     <"a""b""c"!2 3 1 -> "c""a""b"!1 2 3
 <X  ascend      <3 5 4 -> 0 2 1          (index permutation for ascending order)
 x<y less        2<3 -> 1        "c" < "a" -> 0
->d  sort down   "a""b""c"!2 3 1 -> "b""a""c"!3 2 1
+>d  sort down   >"a""b""c"!2 3 1 -> "b""a""c"!3 2 1
 >X  descend     >3 5 4 -> 1 2 0         (index permutation for descending order)
 x>y greater     2>3 -> 0        "c" > "a" -> 1
 =s  lines       ="ab\ncd\r\nef gh" -> "ab" "cd" "ef gh"
