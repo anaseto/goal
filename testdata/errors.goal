@@ -927,3 +927,23 @@ a:(#;^);a[(0 1;1 0);3 2 1] / out of depth
 1.5@3 / non-integer
 ("a""b""c"!(|;*;+))["a""b";1 2] / out of depth
 ("a""b""c"!(|;*;+))["a";1 2] / out of depth
+"a""b""c"[2;3] / out of depth
+("a""b"!1 2;"a""b"!3 4)[;"c"] / not found
+("a""b""c"!(1 2;3 4;4 5))[;5] / out of bounds
+(1 2;3 4)[;5] / out of bounds
+(1 2;3 4)[5;] / out of bounds
+@[1;2;+] / type
+@[1 2;1;+;"a"] / type
+@[1 2;2;+;3] / out of bounds
+@[1 2;*;+;"a"] / type
+@[1 2;(1 2;3 4 5);+;(1 2;3 4;5 6)] / length mismatch
+@[1 2;(1 2;3 4 5);:;(1 2;3 4;5 6)] / length mismatch
+.[1 2;"a" "b";+] / type
+.[1 2;5;+] / out of bounds
+.[42;5;+] / type
+=1.5 2 / non-integer
+{1 2 1 0}=2"b""c" / length mismatch
+{,2}="a" / type
+{,0}="a" / type
+{2.5 0 1}="a""c""e" / non-integer
+&+ / type
