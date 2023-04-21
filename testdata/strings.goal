@@ -135,3 +135,4 @@ a:"a" "b";"$a" / "a b"
 -" abc \n\r" "\t\n" / " abc" ""
 -" abc \n\r" "\t\na" / " abc" "\t\na"
 -"a\tb \r\n" " c d \n" / "a\tb" " c d"
+$42 "ab" 3 / `42 "ab" 3`

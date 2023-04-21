@@ -151,6 +151,19 @@ func (x *AS) Append(ctx *Context, dst []byte) []byte {
 	return dst
 }
 
+func needsParens(x []V) bool {
+	for _, xi := range x {
+		if xi.IsI() || xi.IsF() {
+			continue
+		}
+		if _, ok := xi.value.(S); ok {
+			continue
+		}
+		return true
+	}
+	return false
+}
+
 // Append appends a unique program representation of the value to dst, and
 // returns the extended buffer.
 func (x *AV) Append(ctx *Context, dst []byte) []byte {
@@ -162,12 +175,15 @@ func (x *AV) Append(ctx *Context, dst []byte) []byte {
 		dst = x.At(0).Append(ctx, dst)
 		return dst
 	}
-	dst = append(dst, '(')
-	var sep string
-	if ctx.compactFmt {
-		sep = ";"
-	} else {
-		sep = "\n "
+	sep := " "
+	parens := needsParens(x.elts)
+	if parens {
+		dst = append(dst, '(')
+		if ctx.compactFmt {
+			sep = ";"
+		} else {
+			sep = "\n "
+		}
 	}
 	osc := ctx.compactFmt
 	ctx.compactFmt = true
@@ -182,7 +198,9 @@ func (x *AV) Append(ctx *Context, dst []byte) []byte {
 			dst = append(dst, sep...)
 		}
 	}
-	dst = append(dst, ')')
+	if parens {
+		dst = append(dst, ')')
+	}
 	return dst
 }
 
