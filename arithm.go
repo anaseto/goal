@@ -3,6 +3,7 @@ package goal
 import (
 	"math"
 	"strings"
+	"unicode"
 )
 
 // negate returns -x.
@@ -14,6 +15,8 @@ func negate(x V) V {
 		return NewF(-x.F())
 	}
 	switch xv := x.value.(type) {
+	case S:
+		return NewS(strings.TrimRightFunc(string(xv), unicode.IsSpace))
 	case *AB:
 		r := make([]int64, xv.Len())
 		for i, xi := range xv.elts {
@@ -40,6 +43,12 @@ func negate(x V) V {
 				return ri
 			}
 			r.elts[i] = ri
+		}
+		return NewV(r)
+	case *AS:
+		r := xv.reuse()
+		for i, xi := range xv.elts {
+			r.elts[i] = strings.TrimRightFunc(xi, unicode.IsSpace)
 		}
 		return NewV(r)
 	case *Dict:

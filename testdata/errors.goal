@@ -297,8 +297,8 @@ sqrt'"a" "b" / type
 "a""a"!3 / type
 "a""b"!1 2 3 / length mismatch
 ("a""b"!1 2)+"c" / type
--"a" / type
--(1 2;"a") / type
+-* / type
+-(1 2;*) / type
 sign"a" / type
 sign(1 2;"a") / type
 _* / type

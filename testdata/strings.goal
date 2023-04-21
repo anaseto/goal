@@ -130,3 +130,8 @@ qq/" "/ / `" "`
 ""^"a""b"!"  \nstuff\t" " \n" / "a""b"!"stuff" ""
 ""^("  \nstuff\t" " \n";"a ") / ("stuff" "";"a")
 a:"a" "b";"$a" / "a b"
+-"abc \n\r" / "abc"
+-" abc \n\r" / " abc"
+-" abc \n\r" "\t\n" / " abc" ""
+-" abc \n\r" "\t\na" / " abc" "\t\na"
+-"a\tb \r\n" " c d \n" / "a\tb" " c d"
