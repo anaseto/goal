@@ -56,7 +56,7 @@ func getHelp() map[string]string {
 	help["rshift"] = getBuiltin(helpVerbs, "»", vcols)
 	help["«"] = getBuiltin(helpVerbs, "«", vcols)
 	help["shift"] = getBuiltin(helpVerbs, "«", vcols)
-	for _, v := range []string{"+", "-", "*", "%", "!", "&", "|", "<", ">", "=", "~", ",", "#", "_", "$", "?", "@", "."} {
+	for _, v := range []string{"+", "-", "*", "%", "!", "&", "|", "<", ">", "=", "~", ",", "^", "#", "_", "$", "?", "@", "."} {
 		help[v] = getBuiltin(helpVerbs, v, vcols)
 	}
 	for _, v := range []string{"'", "/", "\\"} {
