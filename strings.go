@@ -516,20 +516,22 @@ func sub3(x, y, z V) V {
 	case S:
 		yv, ok := y.value.(S)
 		if !ok {
-			return panicType("sub[s;y;z]", "y", y)
+			return panicType("sub[s;y;i]", "y", y)
 		}
 		var n int64
 		if z.IsI() {
 			n = z.I()
 		} else if z.IsF() {
 			if !isI(z.F()) {
-				return panicType("sub[s;y;z]", "z", z)
+				return Panicf("sub[s;s;i] : non-integer i (%g)", z.F())
 			}
 			n = int64(z.F())
+		} else {
+			return panicType("sub[s;s;i]", "i", z)
 		}
 		return NewV(&nReplacer{olds: xv, news: yv, n: int(n)})
 	default:
-		return panicType("sub[x;y;z]", "x", x)
+		return panicType("sub[x;s;i]", "x", x)
 	}
 }
 

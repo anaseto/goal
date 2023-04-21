@@ -947,3 +947,24 @@ a:(#;^);a[(0 1;1 0);3 2 1] / out of depth
 {,0}="a" / type
 {2.5 0 1}="a""c""e" / non-integer
 &+ / type
+sub[,"a"] / non-even length
+sub["a";"b";+] / type
+sub["a";"b";2.5] / non-integer
+sub[rx/\s+/;5] / type
+""^42 / type
+""^42 "a" / type
+"abc"[5] / out of bounds
+"abc"[*] / type
+"abc"[5 4] / out of bounds
+"abc"[(2;5 4)] / out of bounds
+"abc"[5.5] / non-integer
+"abc"[5;1] / out of bounds
+"abc"[1;-1] / negative
+"abc"[1;1.5] / non-integer
+"abc"[1;"a" "b"] / type
+"abc"[*;1] / type
+"abc"[5 4;1] / out of bounds
+"abc"[(2;5 4);1] / out of bounds
+"abc"[5.5;1] / non-integer
+""#"a" 5 / type
+5$"a" 5 / type
