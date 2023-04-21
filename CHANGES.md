@@ -37,6 +37,7 @@ This release makes quite a few significant changes and improvements.
   does not have tables, and they are not planned, as making them useful would
   require a lot of work (including some kind of query methods).
 + Implement `d.y` for `1<#y`, and `X@d`.
++ New `.X` self-dict form, equivalent to `{x!x}`.
 + Implement `@[f1;x;f2]`, like `.[f1;y;f2]` but doing `f1@x` instead of `f1 .
   y`.
 + Improve at depth indexing of mixed dicts and arrays.

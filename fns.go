@@ -639,6 +639,8 @@ func get(ctx *Context, x V) V {
 		return xv.V
 	case *Dict:
 		return xv.Values()
+	case array:
+		return NewV(&Dict{keys: xv, values: xv})
 	default:
 		return panicType(".x", "x", x)
 	}

@@ -249,7 +249,8 @@ d@y at key      ("a" "b"!1 2)@"a" -> 1
 X@i at          7 8 9@2 -> 9         7 8 9[2 0] -> 9 7       7 8 9@-2 -> 8
 .s  reval       ."2+3" -> 5    (restricted eval with new context: see also eval)
 .e  get error   .error "msg" -> "msg"
-.d  values      ."a" "b"!1 2 -> 1 2             ("a" "b"!1 2)[] -> 1 2 (special)
+.d  values      ."a""b"!1 2 -> 1 2             ("a" "b"!1 2)[] -> 1 2 (special)
+.X  self-dict   ."a""b" -> "a""b"!"a""b"       .!3 -> 0 1 2!0 1 2
 s.I substr      "abcdef"[2;3] -> "cde"                        (s[offset;length])
 r.y findN       rx/[a-z]/["abc";2] -> "a""b"    rx/[a-z]/["abc";-1] -> "a""b""c"
 r.y findN group rx/[a-z](.)/["abcdef";2] -> ("ab" "b";"cd" "d")
