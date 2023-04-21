@@ -1,7 +1,6 @@
 Features:
 - maybe s$ could be extended into some kind of sprintf/scanf
 - maybe use non-adverbial \ for some kind of statement (no ideas yet)
-- maybe use -s for something (like removing trailing newline)
 
 Tests:
 - improve test coverage for error messages and refactor and improve them along
