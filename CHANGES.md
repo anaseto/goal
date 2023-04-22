@@ -1,6 +1,8 @@
 # v? ?
 
 + New "b"$s for converting a string to and from array of bytes.
++ Return "i" for @i, not "n", because they're actually different types, even
+  though implicit conversions are made when possible.
 + $X returns now stranding representation for mixed lists of strings and
   numbers, without parens.
 
