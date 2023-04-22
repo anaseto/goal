@@ -261,6 +261,15 @@ func cast(s S, y V) V {
 }
 
 func castb(y V) V {
+	if y.IsI() {
+		return NewS(string([]byte{byte(y.I())}))
+	}
+	if y.IsF() {
+		if !isI(y.F()) {
+			return Panicf(`"b"$i : non-integer i (%g)`, y.F())
+		}
+		return NewS(string([]byte{byte(y.F())}))
+	}
 	switch yv := y.value.(type) {
 	case S:
 		return NewAI(toAIBytes(string(yv)))
@@ -270,6 +279,21 @@ func castb(y V) V {
 			r[i] = NewAI(toAIBytes(s))
 		}
 		return NewAV(r)
+	case *AB:
+		return castb(fromABtoAI(yv))
+	case *AI:
+		var sb strings.Builder
+		sb.Grow(yv.Len())
+		for _, xi := range yv.elts {
+			sb.WriteByte(byte(xi))
+		}
+		return NewS(sb.String())
+	case *AF:
+		y := toAI(yv)
+		if y.IsPanic() {
+			return y
+		}
+		return castb(y)
 	case *AV:
 		r := make([]V, yv.Len())
 		for i := range r {

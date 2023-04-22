@@ -1,6 +1,6 @@
 # v? ?
 
-+ New "b"$s for getting the array of bytes from a string.
++ New "b"$s for converting a string to and from array of bytes.
 + $X returns now stranding representation for mixed lists of strings and
   numbers, without parens.
 
