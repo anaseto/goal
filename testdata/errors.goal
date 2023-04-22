@@ -969,4 +969,24 @@ sub[rx/\s+/;5] / type
 ""#"a" 5 / type
 5$"a" 5 / type
 "b"$42.5 / non-integer
+"b"$42.5 0.0 / non-integer
+"c"$42.5 0.0 / non-integer
 "b"$+ / type
+"b"$(*;"c") / type
+"c"$(*;"c") / type
+"x"$42 / unsupported
+"i"$+ / type
+"n"$+ / type
+"i"$(+;*) / type
+"n"$(+;*) / type
+"\n"^+ / type
+"\n"^(+;%) / type
+"\n"_(+;%) / type
+sub[+;"a";"b"] / type
+sub["b";"a";4.3] / non-integer
+(+)in "ab" / type
+(+;%) in "ab" / type
+"abcd"[1 2;3 4 5] / length
+"abcd"[1 2 8;3 4 5] / out of bounds
+"abcd"[1 2 8.5;3 4 5] / non-integer
+"abcd"[1 2 8.5] / non-integer

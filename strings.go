@@ -97,7 +97,7 @@ func applyS(s S, x V) V {
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
-			return Panicf("s[x] : x non-integer (%g)", x.F())
+			return Panicf("s[x] : non-integer x (%g)", x.F())
 		}
 		return applyS(s, NewI(int64(x.F())))
 	}
@@ -140,12 +140,12 @@ func applyS2(s S, x V, y V) V {
 	var l int64
 	if y.IsI() {
 		if y.I() < 0 {
-			return Panicf("s[x;y] : y negative (%d)", y.I())
+			return Panicf("s[x;y] : negative y (%d)", y.I())
 		}
 		l = y.I()
 	} else if y.IsF() {
 		if !isI(y.F()) {
-			return Panicf("s[x;y] : y non-integer (%g)", y.F())
+			return Panicf("s[x;y] : non-integer y (%g)", y.F())
 		}
 		l = int64(y.F())
 	} else {
@@ -156,7 +156,7 @@ func applyS2(s S, x V, y V) V {
 		case *AF:
 			z := toAI(yv)
 			if z.IsPanic() {
-				return z
+				return ppanic("s[x;y] : y ", z)
 			}
 			return applyS2(s, x, z)
 		default:
@@ -171,8 +171,18 @@ func applyS2(s S, x V, y V) V {
 		if xv < 0 || xv > int64(len(s)) {
 			return Panicf("s[i;y] : i out of bounds index (%d)", xv)
 		}
-		if _, ok := y.value.(*AI); ok {
-			return Panicf("s[x;y] : x is an atom but y is an array")
+		if yv, ok := y.value.(*AI); ok {
+			r := make([]string, yv.Len())
+			for i, xi := range yv.elts {
+				if xi < 0 {
+					return Panicf("s[x;y] : negative in y (%d)", xi)
+				}
+				if xv+xi > int64(len(s)) {
+					xi = int64(len(s)) - xv
+				}
+				r[i] = string(s[xv : xv+xi])
+			}
+			return NewAS(r)
 		}
 		if xv+l > int64(len(s)) {
 			l = int64(len(s)) - xv
@@ -182,7 +192,7 @@ func applyS2(s S, x V, y V) V {
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
-			return Panicf("s[x;y] : x non-integer (%g)", x.F())
+			return Panicf("s[x;y] : non-integer x (%g)", x.F())
 		}
 		return applyS2(s, NewI(int64(x.F())), y)
 	}
@@ -248,66 +258,16 @@ func applyS2(s S, x V, y V) V {
 // cast implements s$y.
 func cast(s S, y V) V {
 	switch s {
-	case "b":
-		return castb(y)
 	case "i":
 		return casti(y)
 	case "n":
 		return castn(y)
+	case "b":
+		return castb(y)
 	case "c":
 		return castc(y)
 	default:
 		return Panicf("s$y : unsupported \"%s\" value for s", s)
-	}
-}
-
-func castb(y V) V {
-	if y.IsI() {
-		return NewS(string([]byte{byte(y.I())}))
-	}
-	if y.IsF() {
-		if !isI(y.F()) {
-			return Panicf(`"b"$i : non-integer i (%g)`, y.F())
-		}
-		return NewS(string([]byte{byte(y.F())}))
-	}
-	switch yv := y.value.(type) {
-	case S:
-		return NewAI(toAIBytes(string(yv)))
-	case *AS:
-		r := make([]V, yv.Len())
-		for i, s := range yv.elts {
-			r[i] = NewAI(toAIBytes(s))
-		}
-		return NewAV(r)
-	case *AB:
-		return castb(fromABtoAI(yv))
-	case *AI:
-		var sb strings.Builder
-		sb.Grow(yv.Len())
-		for _, xi := range yv.elts {
-			sb.WriteByte(byte(xi))
-		}
-		return NewS(sb.String())
-	case *AF:
-		y := toAI(yv)
-		if y.IsPanic() {
-			return y
-		}
-		return castb(y)
-	case *AV:
-		r := make([]V, yv.Len())
-		for i := range r {
-			r[i] = castb(yv.At(i))
-			if r[i].IsPanic() {
-				return r[i]
-			}
-		}
-		return NewAV(r)
-	case *Dict:
-		return newDictValues(yv.keys, castb(NewV(yv.values)))
-	default:
-		return panicType("\"b\"$y", "y", y)
 	}
 }
 
@@ -344,10 +304,11 @@ func casti(y V) V {
 	case *AV:
 		r := make([]V, yv.Len())
 		for i := range r {
-			r[i] = casti(yv.At(i))
-			if r[i].IsPanic() {
-				return r[i]
+			ri := casti(yv.At(i))
+			if ri.IsPanic() {
+				return ri
 			}
+			r[i] = ri
 		}
 		return Canonical(NewAV(r))
 	case *Dict:
@@ -358,6 +319,9 @@ func casti(y V) V {
 }
 
 func parseInt(s string) (int64, error) {
+	if s == "0i" {
+		return math.MinInt64, nil
+	}
 	i, errI := strconv.ParseInt(s, 0, 0)
 	if errI == nil {
 		return i, nil
@@ -452,6 +416,55 @@ func castn(y V) V {
 	}
 }
 
+func castb(y V) V {
+	if y.IsI() {
+		return NewS(string([]byte{byte(y.I())}))
+	}
+	if y.IsF() {
+		if !isI(y.F()) {
+			return Panicf(`"b"$i : non-integer i (%g)`, y.F())
+		}
+		return NewS(string([]byte{byte(y.F())}))
+	}
+	switch yv := y.value.(type) {
+	case S:
+		return NewAI(toAIBytes(string(yv)))
+	case *AS:
+		r := make([]V, yv.Len())
+		for i, s := range yv.elts {
+			r[i] = NewAI(toAIBytes(s))
+		}
+		return NewAV(r)
+	case *AB:
+		return castb(fromABtoAI(yv))
+	case *AI:
+		var sb strings.Builder
+		sb.Grow(yv.Len())
+		for _, xi := range yv.elts {
+			sb.WriteByte(byte(xi))
+		}
+		return NewS(sb.String())
+	case *AF:
+		y := toAI(yv)
+		if y.IsPanic() {
+			return ppanic(`"b"$i : `, y)
+		}
+		return castb(y)
+	case *AV:
+		r := make([]V, yv.Len())
+		for i := range r {
+			ri := castb(yv.At(i))
+			if ri.IsPanic() {
+				return ri
+			}
+			r[i] = ri
+		}
+		return NewAV(r)
+	default:
+		return panicType("\"b\"$y", "y", y)
+	}
+}
+
 func castc(y V) V {
 	if y.IsI() {
 		return NewS(string(rune(y.I())))
@@ -471,7 +484,11 @@ func castc(y V) V {
 		}
 		return NewS(sb.String())
 	case *AF:
-		return castc(toAI(yv))
+		y = toAI(yv)
+		if y.IsPanic() {
+			return ppanic(`"c"$i : `, y)
+		}
+		return castc(y)
 	case *AS:
 		r := make([]V, yv.Len())
 		for i, s := range yv.elts {
