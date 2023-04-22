@@ -226,7 +226,8 @@ I_s cut string  1 3_"abcdef" -> "bc" "def"                         (I ascending)
 I_Y cut         2 5_!10 -> (2 3 4;5 6 7 8 9)                       (I ascending)
 $x  string      $2 3 -> "2 3"       $"text" -> "\"text\""
 i$s pad         3$"a" -> "a  "      -3$"1" "23" "456" -> "  1" " 23" "456"
-s$y cast        "i"$2.3 -> 2        "i"$"ab" -> 97 98          "s"$97 98 -> "ab"
+s$y to integer  "i"$2.3 -> 2      "i"$"aπ" -> 97 960      "b"$"aπ" -> 97 207 128
+s$I to string   "s"$97 960 -> "aπ"
 s$s parse num   "n"$"1.5" -> 1.5    "n"$"2" "1e+7" "0b100" -> 2 1e+07 4
 X$y binsearch   2 3 5 7$8 2 7 5 5.5 3 0 -> 4 1 4 3 3 2 0           (x ascending)
 ?i  uniform     ?2 -> 0.6046602879796196 0.9405090880450124    (between 0 and 1)

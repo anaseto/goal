@@ -968,3 +968,4 @@ sub[rx/\s+/;5] / type
 "abc"[5.5;1] / non-integer
 ""#"a" 5 / type
 5$"a" 5 / type
+"b"$42 / type

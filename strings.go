@@ -247,6 +247,8 @@ func applyS2(s S, x V, y V) V {
 // cast implements s$y.
 func cast(s S, y V) V {
 	switch s {
+	case "b":
+		return castb(y)
 	case "i":
 		return casti(y)
 	case "n":
@@ -255,6 +257,32 @@ func cast(s S, y V) V {
 		return casts(y)
 	default:
 		return Panicf("s$y : unsupported \"%s\" value for s", s)
+	}
+}
+
+func castb(y V) V {
+	switch yv := y.value.(type) {
+	case S:
+		return NewAI(toAIBytes(string(yv)))
+	case *AS:
+		r := make([]V, yv.Len())
+		for i, s := range yv.elts {
+			r[i] = NewAI(toAIBytes(s))
+		}
+		return NewAV(r)
+	case *AV:
+		r := make([]V, yv.Len())
+		for i := range r {
+			r[i] = castb(yv.At(i))
+			if r[i].IsPanic() {
+				return r[i]
+			}
+		}
+		return NewAV(r)
+	case *Dict:
+		return newDictValues(yv.keys, castb(NewV(yv.values)))
+	default:
+		return panicType("\"b\"$y", "y", y)
 	}
 }
 
@@ -303,6 +331,14 @@ func toAIrunes(s string) []int64 {
 	for _, c := range s {
 		r[i] = int64(c)
 		i++
+	}
+	return r
+}
+
+func toAIBytes(s string) []int64 {
+	r := make([]int64, len(s))
+	for i := 0; i < len(s); i++ {
+		r[i] = int64(s[i])
 	}
 	return r
 }

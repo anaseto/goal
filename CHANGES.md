@@ -1,3 +1,9 @@
+# v? ?
+
++ New "b"$s for getting the array of bytes from a string.
++ $X returns now stranding representation for mixed lists of strings and
+  numbers, without parens.
+
 # v0.15.0 2023-04-21
 
 This release makes quite a few significant changes and improvements.
