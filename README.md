@@ -224,11 +224,11 @@ s_s trim prefix "pref-"_"pref-name" -> "name"
 f_y weed out    {0 1 1 0}_4 1 5 3 -> 4 3          {x>0}_2 -3 1 -> ,-3
 I_s cut string  1 3_"abcdef" -> "bc" "def"                         (I ascending)
 I_Y cut         2 5_!10 -> (2 3 4;5 6 7 8 9)                       (I ascending)
-$x  string      $2 3 -> "2 3"       $"text" -> "\"text\""
-i$s pad         3$"a" -> "a  "      -3$"1" "23" "456" -> "  1" " 23" "456"
+$x  string      $2 3 -> "2 3"     $"text" -> "\"text\""
+i$s pad         3$"a" -> "a  "    -3$"1" "23" "456" -> "  1" " 23" "456"
 s$y to integer  "i"$2.3 -> 2      "i"$"aπ" -> 97 960      "b"$"aπ" -> 97 207 128
 s$I to string   "s"$97 -> "a"     "s"$97 960 -> "aπ"      "b"$97 207 128 -> "aπ"
-s$s parse num   "n"$"1.5" -> 1.5    "n"$"2" "1e+7" "0b100" -> 2 1e+07 4
+s$s parse num   "n"$"1.5" -> 1.5  "n"$"2" "1e+7" "0b100" -> 2 1e+07 4
 X$y binsearch   2 3 5 7$8 2 7 5 5.5 3 0 -> 4 1 4 3 3 2 0           (x ascending)
 ?i  uniform     ?2 -> 0.6046602879796196 0.9405090880450124    (between 0 and 1)
 ?i  normal      ?-2 -> -1.233758177597947 -0.12634751070237293   (mean 0, dev 1)
