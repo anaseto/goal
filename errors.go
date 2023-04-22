@@ -110,6 +110,10 @@ func panics(s string) V {
 	return V{kind: valPanic, value: panicV(s)}
 }
 
+func panicErr(err error) V {
+	return V{kind: valPanic, value: panicV(err.Error())}
+}
+
 // Panicf returns a formatted fatal error value.
 func Panicf(format string, a ...interface{}) V {
 	return panics(fmt.Sprintf(format, a...))

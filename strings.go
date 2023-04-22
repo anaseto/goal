@@ -1,6 +1,7 @@
 package goal
 
 import (
+	"fmt"
 	"math"
 	"strconv"
 	"strings"
@@ -86,18 +87,15 @@ func (r *replacer) replace(ctx *Context, s string) string {
 
 func applyS(s S, x V) V {
 	if x.IsI() {
-		xv := x.I()
-		if xv < 0 {
-			xv += int64(len(s))
+		r, err := applySI(string(s), x.I())
+		if err != nil {
+			return panicErr(err)
 		}
-		if xv < 0 || xv > int64(len(s)) {
-			return Panicf("s[i] : i out of bounds index (%d)", xv)
-		}
-		return NewV(s[xv:])
+		return NewS(r)
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
-			return Panicf("s[x] : non-integer x (%g)", x.F())
+			return Panicf("s@i : non-integer i (%g)", x.F())
 		}
 		return applyS(s, NewI(int64(x.F())))
 	}
@@ -106,141 +104,66 @@ func applyS(s S, x V) V {
 		return applyS(s, fromABtoAI(xv))
 	case *AI:
 		r := make([]string, xv.Len())
-		for i, n := range xv.elts {
-			if n < 0 {
-				n += int64(len(s))
+		for i, xi := range xv.elts {
+			ri, err := applySI(string(s), xi)
+			if err != nil {
+				return panicErr(err)
 			}
-			if n < 0 || n > int64(len(s)) {
-				return Panicf("s[i] : i out of bounds index (%d)", n)
-			}
-			r[i] = string(s[n:])
+			r[i] = ri
 		}
 		return NewAS(r)
 	case *AF:
-		z := toAI(xv)
-		if z.IsPanic() {
-			return z
+		x := toAI(xv)
+		if x.IsPanic() {
+			return ppanic("s@i : ", x)
 		}
-		return applyS(s, z)
+		return applyS(s, x)
 	case *AV:
 		r := make([]V, xv.Len())
 		for i, xi := range xv.elts {
-			r[i] = applyS(s, xi)
-			if r[i].IsPanic() {
-				return r[i]
+			ri := applyS(s, xi)
+			if ri.IsPanic() {
+				return ri
 			}
+			r[i] = ri
 		}
 		return canonicalFast(NewAV(r))
 	default:
-		return panicType("s[x]", "x", x)
+		return panicType("s@i", "i", x)
 	}
 }
 
-func applyS2(s S, x V, y V) V {
-	var l int64
-	if y.IsI() {
-		if y.I() < 0 {
-			return Panicf("s[x;y] : negative y (%d)", y.I())
-		}
-		l = y.I()
-	} else if y.IsF() {
-		if !isI(y.F()) {
-			return Panicf("s[x;y] : non-integer y (%g)", y.F())
-		}
-		l = int64(y.F())
-	} else {
-		switch yv := y.value.(type) {
-		case *AI:
-		case *AB:
-			return applyS2(s, x, fromABtoAI(yv))
-		case *AF:
-			z := toAI(yv)
-			if z.IsPanic() {
-				return ppanic("s[x;y] : y ", z)
-			}
-			return applyS2(s, x, z)
-		default:
-			return panicType("s[x;y]", "y", y)
-		}
+func applySI(s string, i int64) (string, error) {
+	if i < 0 {
+		i += int64(len(s))
 	}
-	if x.IsI() {
-		xv := x.I()
-		if xv < 0 {
-			xv += int64(len(s))
-		}
-		if xv < 0 || xv > int64(len(s)) {
-			return Panicf("s[i;y] : i out of bounds index (%d)", xv)
-		}
-		if yv, ok := y.value.(*AI); ok {
-			r := make([]string, yv.Len())
-			for i, xi := range yv.elts {
-				if xi < 0 {
-					return Panicf("s[x;y] : negative in y (%d)", xi)
-				}
-				if xv+xi > int64(len(s)) {
-					xi = int64(len(s)) - xv
-				}
-				r[i] = string(s[xv : xv+xi])
-			}
-			return NewAS(r)
-		}
-		if xv+l > int64(len(s)) {
-			l = int64(len(s)) - xv
-		}
-		return NewV(s[xv : xv+l])
+	if i < 0 || i > int64(len(s)) {
+		return "", fmt.Errorf("s@i : out of bounds index i (%d)", i)
+	}
+	return string(s[i:]), nil
+}
 
+func applyS2(s S, x V, y V) V {
+	if x.IsI() {
+		return applyS2I(s, x.I(), y)
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
 			return Panicf("s[x;y] : non-integer x (%g)", x.F())
 		}
-		return applyS2(s, NewI(int64(x.F())), y)
+		return applyS2I(s, int64(x.F()), y)
 	}
 	switch xv := x.value.(type) {
 	case *AB:
 		return applyS2(s, fromABtoAI(xv), y)
 	case *AI:
-		r := make([]string, xv.Len())
-		if z, ok := y.value.(*AI); ok {
-			if z.Len() != xv.Len() {
-				return panicLength("s[x;y]", xv.Len(), z.Len())
-
-			}
-			for i, n := range xv.elts {
-				if n < 0 {
-					n += int64(len(s))
-				}
-				if n < 0 || n > int64(len(s)) {
-					return Panicf("s[i;y] : i out of bounds index (%d)", n)
-				}
-				l := z.At(i)
-				if n+l > int64(len(s)) {
-					l = int64(len(s)) - n
-				}
-				r[i] = string(s[n : n+l])
-			}
-			return NewAS(r)
-		}
-		for i, n := range xv.elts {
-			if n < 0 {
-				n += int64(len(s))
-			}
-			if n < 0 || n > int64(len(s)) {
-				return Panicf("s[i;y] : i out of bounds index (%d)", n)
-			}
-			l := l
-			if n+l > int64(len(s)) {
-				l = int64(len(s)) - n
-			}
-			r[i] = string(s[n : n+l])
-		}
-		return NewAS(r)
+		return applyS2AI(s, xv, y)
 	case *AF:
-		z := toAI(xv)
-		if z.IsPanic() {
-			return z
+		x := toAI(xv)
+		if x.IsPanic() {
+			return ppanic("s[x;y] : x ", x)
 		}
-		return applyS2(s, z, y)
+		return applyS2(s, x, y)
 	case *AV:
 		r := make([]V, xv.Len())
 		for i, xi := range xv.elts {
@@ -253,6 +176,134 @@ func applyS2(s S, x V, y V) V {
 	default:
 		return panicType("s[x;y]", "x", x)
 	}
+}
+
+func applyS2I(s S, i int64, y V) V {
+	if y.IsI() {
+		r, err := applyS2II(string(s), i, y.I())
+		if err != nil {
+			return panicErr(err)
+		}
+		return NewS(r)
+	}
+	if y.IsF() {
+		if !isI(y.F()) {
+			return Panicf("s[i;y] : non-integer y (%g)", y.F())
+		}
+		return applyS2I(s, i, NewI(int64(y.F())))
+	}
+	switch yv := y.value.(type) {
+	case *AB:
+		return applyS2I(s, i, fromABtoAI(yv))
+	case *AI:
+		r := make([]string, yv.Len())
+		for j, yj := range yv.elts {
+			rj, err := applyS2II(string(s), int64(i), yj)
+			if err != nil {
+				return panicErr(err)
+			}
+			r[j] = rj
+		}
+		return NewAS(r)
+	case *AF:
+		y := toAI(yv)
+		if y.IsPanic() {
+			return ppanic("s[i;y] : y ", y)
+		}
+		return applyS2I(s, i, y)
+	case *AV:
+		r := make([]V, yv.Len())
+		for j, yj := range yv.elts {
+			rj := applyS2I(s, int64(i), yj)
+			if rj.IsPanic() {
+				return rj
+			}
+			r[j] = rj
+		}
+		return NewAV(r)
+	default:
+		return panicType("s[i;y]", "y", y)
+	}
+}
+
+func applyS2AI(s S, xv *AI, y V) V {
+	if y.IsI() {
+		l := y.I()
+		r := make([]string, xv.Len())
+		for i, xi := range xv.elts {
+			ri, err := applyS2II(string(s), xi, l)
+			if err != nil {
+				return panicErr(err)
+			}
+			r[i] = ri
+		}
+		return NewAS(r)
+	}
+	if y.IsF() {
+		if !isI(y.F()) {
+			return Panicf("s[i;y] : non-integer y (%g)", y.F())
+		}
+		return applyS2AI(s, xv, NewI(int64(y.F())))
+	}
+	switch yv := y.value.(type) {
+	case *AB:
+		return applyS2AI(s, xv, fromABtoAI(yv))
+	case *AI:
+		if xv.Len() != yv.Len() {
+			return panicLength("s[x;y]", xv.Len(), yv.Len())
+		}
+		r := make([]string, xv.Len())
+		for i, xi := range xv.elts {
+			ri, err := applyS2II(string(s), xi, yv.At(i))
+			if err != nil {
+				return panicErr(err)
+			}
+			r[i] = ri
+		}
+		return NewAS(r)
+	case *AF:
+		y := toAI(yv)
+		if y.IsPanic() {
+			return ppanic("s[i;y] : y ", y)
+		}
+		return applyS2AI(s, xv, y)
+	case *AV:
+		if xv.Len() != yv.Len() {
+			return panicLength("s[x;y]", xv.Len(), yv.Len())
+		}
+		r := make([]V, yv.Len())
+		for i, yi := range yv.elts {
+			ri := applyS2I(s, xv.At(i), yi)
+			if ri.IsPanic() {
+				return ri
+			}
+			r[i] = ri
+		}
+		return NewAV(r)
+	default:
+		return panicType("s[i;y]", "y", y)
+	}
+}
+
+func applyS2II(s string, i, l int64) (string, error) {
+	if i < 0 {
+		i += int64(len(s))
+	}
+	if i < 0 || i > int64(len(s)) {
+		return "", fmt.Errorf("s[i;y] : out of bounds index i (%d)", i)
+	}
+	if l < 0 {
+		to := int64(len(s)) + l
+		if to < i {
+			to = i
+		}
+		return s[i:to], nil
+	}
+	to := i + l
+	if to > int64(len(s)) {
+		to = int64(len(s))
+	}
+	return s[i:to], nil
 }
 
 // cast implements s$y.

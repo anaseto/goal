@@ -959,7 +959,6 @@ sub[rx/\s+/;5] / type
 "abc"[(2;5 4)] / out of bounds
 "abc"[5.5] / non-integer
 "abc"[5;1] / out of bounds
-"abc"[1;-1] / negative
 "abc"[1;1.5] / non-integer
 "abc"[1;"a" "b"] / type
 "abc"[*;1] / type
@@ -989,4 +988,11 @@ sub["b";"a";4.3] / non-integer
 "abcd"[1 2;3 4 5] / length
 "abcd"[1 2 8;3 4 5] / out of bounds
 "abcd"[1 2 8.5;3 4 5] / non-integer
+"abcd"[1 2 3;3 4.5 5] / non-integer
+"abcd"[1 2 3;(3 4.5 5;-2;-7)] / non-integer
+"abcd"[1 2 3;(3 4.5 5;-2)] / length
+"abcd"[1 2 3;*] / type
+"abcd"[1 2 3;4.5] / non-integer
 "abcd"[1 2 8.5] / non-integer
+"abcd"[8;3 4 5] / out of bounds
+"abcd"[8;(3 4 5;-2)] / out of bounds
