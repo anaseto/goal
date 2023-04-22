@@ -332,6 +332,11 @@ func markFirstsSlice[T comparable](xs []T, bruteForceThreshold int) []bool {
 
 // memberOf returns x in y.
 func memberOf(x, y V) V {
+	// XXX: maybe we should make a switch first on x, instead of y, to
+	// handle simple unboxed cases firsts.
+	if xv, ok := x.value.(*Dict); ok {
+		return newDictValues(xv.keys, memberOf(NewV(xv.values), y))
+	}
 	if y.Len() == 0 {
 		switch xv := x.value.(type) {
 		case array:
