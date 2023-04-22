@@ -337,18 +337,6 @@ func memberOf(x, y V) V {
 	if xv, ok := x.value.(*Dict); ok {
 		return newDictValues(xv.keys, memberOf(NewV(xv.values), y))
 	}
-	if y.Len() == 0 {
-		switch xv := x.value.(type) {
-		case array:
-			r := make([]bool, xv.Len())
-			return NewAB(r)
-		default:
-			return NewI(B2I(false))
-		}
-	}
-	if x.Len() == 0 {
-		return NewAB(nil)
-	}
 	switch yv := y.value.(type) {
 	case S:
 		return containedInS(x, string(yv))
