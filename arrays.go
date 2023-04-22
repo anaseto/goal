@@ -160,10 +160,10 @@ func NewAVWithRC(x []V, rc *int) V {
 }
 
 // Type returns the name of the value's type.
-func (x *AB) Type() string { return "N" }
+func (x *AB) Type() string { return "I" }
 
 // Type returns the name of the value's type.
-func (x *AI) Type() string { return "N" }
+func (x *AI) Type() string { return "I" }
 
 // Type returns the name of the value's type.
 func (x *AF) Type() string { return "N" }

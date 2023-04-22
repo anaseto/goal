@@ -129,7 +129,7 @@ func (x V) Type() string {
 	case valNil:
 		return "nil"
 	case valInt:
-		return "n"
+		return "i"
 	case valFloat:
 		return "n"
 	case valVariadic:
