@@ -4,6 +4,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"time"
 	"unicode/utf8"
 )
 
@@ -253,8 +254,8 @@ func cast(s S, y V) V {
 		return casti(y)
 	case "n":
 		return castn(y)
-	case "s":
-		return casts(y)
+	case "c":
+		return castc(y)
 	default:
 		return Panicf("s$y : unsupported \"%s\" value for s", s)
 	}
@@ -319,19 +320,27 @@ func casti(y V) V {
 	}
 	switch yv := y.value.(type) {
 	case S:
-		return NewAI(toAIrunes(string(yv)))
+		xi, err := parseInt(string(yv))
+		if err != nil {
+			return NewI(math.MinInt64)
+		}
+		return NewI(xi)
 	case *AB:
 		return y
 	case *AI:
 		return y
 	case *AS:
-		r := make([]V, yv.Len())
+		r := make([]int64, yv.Len())
 		for i, s := range yv.elts {
-			r[i] = NewAI(toAIrunes(s))
+			n, err := parseInt(string(s))
+			if err != nil {
+				n = math.MinInt64
+			}
+			r[i] = n
 		}
-		return NewAV(r)
+		return NewAI(r)
 	case *AF:
-		return toAI(floor(y).value.(*AF))
+		return castToAI(yv)
 	case *AV:
 		r := make([]V, yv.Len())
 		for i := range r {
@@ -340,12 +349,42 @@ func casti(y V) V {
 				return r[i]
 			}
 		}
-		return NewAV(r)
+		return Canonical(NewAV(r))
 	case *Dict:
 		return newDictValues(yv.keys, casti(NewV(yv.values)))
 	default:
 		return panicType("\"i\"$y", "y", y)
 	}
+}
+
+func parseInt(s string) (int64, error) {
+	i, errI := strconv.ParseInt(s, 0, 0)
+	if errI == nil {
+		return i, nil
+	}
+	d, errT := time.ParseDuration(s)
+	if errT == nil {
+		return int64(d), nil
+	}
+	err := errI.(*strconv.NumError)
+	return 0, err.Err
+}
+
+func parseFloat(s string) (float64, error) {
+	switch s {
+	case "0n":
+		s = "NaN"
+	case "0w":
+		s = "Inf"
+	case "-0w":
+		s = "-Inf"
+	}
+	f, errF := strconv.ParseFloat(s, 64)
+	if errF == nil {
+		return f, nil
+	}
+	err := errF.(*strconv.NumError)
+	return 0, err.Err
 }
 
 func toAIrunes(s string) []int64 {
@@ -368,30 +407,33 @@ func toAIBytes(s string) []int64 {
 }
 
 func castn(y V) V {
-	if y.IsI() || y.IsF() {
+	if y.IsI() {
+		return NewF(float64(y.I()))
+	}
+	if y.IsF() {
 		return y
 	}
 	switch yv := y.value.(type) {
 	case S:
-		xi, err := parseNumber(string(yv))
+		xi, err := parseFloat(string(yv))
 		if err != nil {
 			return NewF(math.NaN())
 		}
-		return xi
+		return NewF(xi)
 	case *AB:
-		return y
+		return fromABtoAF(yv)
 	case *AI:
-		return y
+		return toAF(yv)
 	case *AS:
-		r := make([]V, yv.Len())
+		r := make([]float64, yv.Len())
 		for i, s := range yv.elts {
-			n, err := parseNumber(s)
+			n, err := parseFloat(s)
 			if err != nil {
-				n = NewF(math.NaN())
+				n = math.NaN()
 			}
 			r[i] = n
 		}
-		return Canonical(NewAV(r))
+		return NewAF(r)
 	case *AF:
 		return y
 	case *AV:
@@ -410,16 +452,18 @@ func castn(y V) V {
 	}
 }
 
-func casts(y V) V {
+func castc(y V) V {
 	if y.IsI() {
 		return NewS(string(rune(y.I())))
 	}
 	if y.IsF() {
-		return casts(NewI(int64(y.F())))
+		return castc(NewI(int64(y.F())))
 	}
 	switch yv := y.value.(type) {
+	case S:
+		return NewAI(toAIrunes(string(yv)))
 	case *AB:
-		return casts(fromABtoAI(yv))
+		return castc(fromABtoAI(yv))
 	case *AI:
 		sb := strings.Builder{}
 		for _, i := range yv.elts {
@@ -427,18 +471,24 @@ func casts(y V) V {
 		}
 		return NewS(sb.String())
 	case *AF:
-		return casts(toAI(yv))
+		return castc(toAI(yv))
+	case *AS:
+		r := make([]V, yv.Len())
+		for i, s := range yv.elts {
+			r[i] = NewAI(toAIrunes(s))
+		}
+		return NewAV(r)
 	case *AV:
 		r := make([]V, yv.Len())
 		for i := range r {
-			r[i] = casts(yv.At(i))
+			r[i] = castc(yv.At(i))
 			if r[i].IsPanic() {
 				return r[i]
 			}
 		}
 		return canonicalFast(NewAV(r))
 	default:
-		return panicType("\"s\"$y", "y", y)
+		return panicType("\"c\"$y", "y", y)
 	}
 }
 

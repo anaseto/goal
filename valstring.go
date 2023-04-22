@@ -20,6 +20,13 @@ func appendFloat(ctx *Context, dst []byte, f float64) []byte {
 	}
 }
 
+func appendInt(dst []byte, i int64) []byte {
+	if i == math.MinInt64 {
+		return append(dst, "0i"...)
+	}
+	return strconv.AppendInt(dst, i, 10)
+}
+
 // Sprint returns a matching program string representation of the value.
 func (v V) Sprint(ctx *Context) string {
 	// NOTE: optimize allocation away using unsafe. Caveat: Append should
@@ -35,7 +42,7 @@ func (v V) Sprint(ctx *Context) string {
 func (v V) Append(ctx *Context, dst []byte) []byte {
 	switch v.kind {
 	case valInt:
-		return strconv.AppendInt(dst, v.I(), 10)
+		return appendInt(dst, v.I())
 	case valFloat:
 		return appendFloat(ctx, dst, v.F())
 	case valVariadic:
@@ -79,11 +86,11 @@ func (x *AB) Append(ctx *Context, dst []byte) []byte {
 	}
 	if x.Len() == 1 {
 		dst = append(dst, ',')
-		dst = strconv.AppendInt(dst, B2I(x.At(0)), 10)
+		dst = appendInt(dst, B2I(x.At(0)))
 		return dst
 	}
 	for i, xi := range x.elts {
-		dst = strconv.AppendInt(dst, B2I(xi), 10)
+		dst = appendInt(dst, B2I(xi))
 		if i < x.Len()-1 {
 			dst = append(dst, ' ')
 		}
@@ -99,11 +106,11 @@ func (x *AI) Append(ctx *Context, dst []byte) []byte {
 	}
 	if x.Len() == 1 {
 		dst = append(dst, ',')
-		dst = strconv.AppendInt(dst, x.At(0), 10)
+		dst = appendInt(dst, x.At(0))
 		return dst
 	}
 	for i, xi := range x.elts {
-		dst = strconv.AppendInt(dst, xi, 10)
+		dst = appendInt(dst, xi)
 		if i < x.Len()-1 {
 			dst = append(dst, ' ')
 		}

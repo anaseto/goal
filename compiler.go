@@ -450,11 +450,13 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 func parseNumber(s string) (V, error) {
 	switch s {
 	case "0n":
-		s = "NaN"
+		return NewF(math.NaN()), nil
+	case "0i":
+		return NewI(math.MinInt64), nil
 	case "0w":
-		s = "Inf"
+		return NewF(math.Inf(1)), nil
 	case "-0w":
-		s = "-Inf"
+		return NewF(math.Inf(-1)), nil
 	}
 	i, errI := strconv.ParseInt(s, 0, 0)
 	if errI == nil {

@@ -1,6 +1,9 @@
 # v? ?
 
 + New "b"$s for converting a string to and from array of bytes.
++ New "c"$s for converting a string to and from array of code points, and make
+  "i"$s now be parse int, and "n"$s only parse number (floats).
++ New 0i value, representing the minimum representable integer.
 + Return "i" for @i, not "n", because they're actually different types, even
   though implicit conversions are made when possible.
 + $X returns now stranding representation for mixed lists of strings and

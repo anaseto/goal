@@ -298,6 +298,15 @@ func toAI(x *AF) V {
 	return NewAIWithRC(r, reuseRCp(x.rc))
 }
 
+// castToAI casts AF into AI.
+func castToAI(x *AF) V {
+	r := make([]int64, x.Len())
+	for i, xi := range x.elts {
+		r[i] = int64(xi)
+	}
+	return NewAIWithRC(r, reuseRCp(x.rc))
+}
+
 // toAF converts AI into AF.
 func toAF(x *AI) V {
 	r := make([]float64, x.Len())
