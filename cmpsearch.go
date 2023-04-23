@@ -191,19 +191,34 @@ func uniq(ctx *Context, x V) V {
 		}
 		return NewV(&AB{elts: []bool{b}, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
 	case *AF:
-		r := uniqSlice[float64](xv.elts, bruteForceNumeric)
+		var r []float64
+		if xv.flags.Has(flagAscending) {
+			r = uniqSliceSorted[float64](xv.elts)
+		} else {
+			r = uniqSlice[float64](xv.elts, bruteForceNumeric)
+		}
 		return NewV(&AF{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
 	case *AI:
+		var r []int64
 		min, span, ok := smallRange(xv)
 		if ok {
 			// fast path avoiding hash table
-			r := uniqInts(xv.elts, min, span)
+			r = uniqInts(xv.elts, min, span)
 			return NewV(&AI{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
 		}
-		r := uniqSlice[int64](xv.elts, bruteForceNumeric)
+		if xv.flags.Has(flagAscending) {
+			r = uniqSliceSorted[int64](xv.elts)
+		} else {
+			r = uniqSlice[int64](xv.elts, bruteForceNumeric)
+		}
 		return NewV(&AI{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
 	case *AS:
-		r := uniqSlice[string](xv.elts, bruteForceGeneric)
+		var r []string
+		if xv.flags.Has(flagAscending) {
+			r = uniqSliceSorted[string](xv.elts)
+		} else {
+			r = uniqSlice[string](xv.elts, bruteForceGeneric)
+		}
 		return NewV(&AS{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
 	case *AV:
 		r := []V{}
@@ -285,6 +300,21 @@ func uniqSlice[T comparable](xs []T, bruteForceThreshold int) []T {
 			m[xi] = struct{}{}
 			continue
 		}
+	}
+	return r
+}
+
+func uniqSliceSorted[T comparable](xs []T) []T {
+	prev := xs[0]
+	r := []T{prev}
+	n := 1
+	for _, xi := range xs[1:] {
+		if xi == prev {
+			continue
+		}
+		r = append(r, xi)
+		prev = xi
+		n++
 	}
 	return r
 }
