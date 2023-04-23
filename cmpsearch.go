@@ -35,7 +35,8 @@ func (x V) Matches(y V) bool {
 }
 
 const bruteForceGeneric = 32
-const bruteForceNumeric = 128
+const bruteForceNumeric = 256
+const numericSortedLen = 64
 const smallRangeLen = 16
 const smallRangeSpan = 16
 
@@ -578,7 +579,7 @@ func memberIOfAI(x int64, y *AI) bool {
 
 func memberOfAI(x V, y *AI) V {
 	if x.IsI() {
-		if y.flags.Has(flagAscending) && y.Len() > bruteForceNumeric/2 {
+		if y.flags.Has(flagAscending) && y.Len() > numericSortedLen {
 			return NewI(B2I(memberIOfAI(x.I(), y)))
 		}
 		for _, yi := range y.elts {
@@ -592,7 +593,7 @@ func memberOfAI(x V, y *AI) V {
 		if !isI(x.F()) {
 			return NewI(0)
 		}
-		if y.flags.Has(flagAscending) && y.Len() > bruteForceNumeric/2 {
+		if y.flags.Has(flagAscending) && y.Len() > numericSortedLen {
 			return NewI(B2I(memberIOfAI(int64(x.F()), y)))
 		}
 		for _, yi := range y.elts {
@@ -606,7 +607,7 @@ func memberOfAI(x V, y *AI) V {
 	case *AB:
 		return memberOfAI(fromABtoAI(xv), y)
 	case *AI:
-		if y.flags.Has(flagAscending) && y.Len() > bruteForceNumeric/2 {
+		if y.flags.Has(flagAscending) && y.Len() > numericSortedLen {
 			r := make([]bool, xv.Len())
 			for i, xi := range xv.elts {
 				r[i] = memberIOfAI(xi, y)
@@ -1181,7 +1182,7 @@ func findAII(x *AI, y int64) int64 {
 
 func findAI(x *AI, y V) V {
 	if y.IsI() {
-		if x.flags.Has(flagAscending) && x.Len() > bruteForceNumeric/2 {
+		if x.flags.Has(flagAscending) && x.Len() > numericSortedLen {
 			return NewI(findAII(x, y.I()))
 		}
 		for i, xi := range x.elts {
@@ -1197,7 +1198,7 @@ func findAI(x *AI, y V) V {
 			return NewI(int64(x.Len()))
 		}
 		yI := int64(y.F())
-		if x.flags.Has(flagAscending) && x.Len() > bruteForceNumeric/2 {
+		if x.flags.Has(flagAscending) && x.Len() > numericSortedLen {
 			return NewI(findAII(x, yI))
 		}
 		for i, xi := range x.elts {
@@ -1221,7 +1222,7 @@ func findAI(x *AI, y V) V {
 		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		xlen := int64(x.Len())
-		if x.flags.Has(flagAscending) && xlen > bruteForceNumeric/2 {
+		if x.flags.Has(flagAscending) && xlen > numericSortedLen {
 			r := make([]int64, yv.Len())
 			for i, yi := range yv.elts {
 				r[i] = findAII(x, yi)
