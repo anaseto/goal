@@ -729,7 +729,7 @@ func occurrenceCount(ctx *Context, x V) V {
 	case *AS:
 		return NewAIWithRC(occurrenceCountSlice[string](xv.elts, bruteForceGeneric), reuseRCp(xv.rc))
 	case *AV:
-		if xv.Len() > bruteForceGeneric {
+		if xv.Len() > (2*bruteForceGeneric)/3 {
 			ss := make([]string, xv.Len())
 			for i, xi := range xv.elts {
 				ss[i] = xi.Sprint(ctx)
@@ -771,7 +771,7 @@ func occurrenceCountInts(xs []int64, min, span int64) []int64 {
 
 func occurrenceCountSlice[T comparable](xs []T, bruteForceThreshold int) []int64 {
 	r := make([]int64, len(xs))
-	if len(xs) <= bruteForceThreshold {
+	if len(xs) <= (2*bruteForceThreshold)/3 {
 		for i, xi := range xs {
 			var n int64
 			for _, xj := range xs[:i] {
