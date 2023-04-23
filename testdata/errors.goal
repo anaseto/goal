@@ -996,3 +996,7 @@ sub["b";"a";4.3] / non-integer
 "abcd"[1 2 8.5] / non-integer
 "abcd"[8;3 4 5] / out of bounds
 "abcd"[8;(3 4 5;-2)] / out of bounds
+firsts + / type
+(+)^2 3 / type
+"a"?2 / type
+"a"?(2;*) / type
