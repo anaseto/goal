@@ -422,6 +422,9 @@ func takeN(n int64, y array) V {
 		case *AS:
 			r := make([]string, n)
 			return NewAS(r)
+		case *AF:
+			r := make([]float64, n)
+			return NewAF(r)
 		case *AV:
 			r := make([]V, n)
 			for i := range r {
