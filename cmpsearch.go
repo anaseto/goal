@@ -717,6 +717,11 @@ func occurrenceCount(ctx *Context, x V) V {
 	case *AF:
 		return NewAIWithRC(occurrenceCountSlice[float64](xv.elts, bruteForceNumeric), reuseRCp(xv.rc))
 	case *AI:
+		min, span, ok := smallRange(xv)
+		if ok {
+			// fast path avoiding hash table
+			return NewAIWithRC(occurrenceCountInts(xv.elts, min, span), reuseRCp(xv.rc))
+		}
 		return NewAIWithRC(occurrenceCountSlice[int64](xv.elts, bruteForceNumeric), reuseRCp(xv.rc))
 	case *AS:
 		return NewAIWithRC(occurrenceCountSlice[string](xv.elts, bruteForceGeneric), reuseRCp(xv.rc))
@@ -742,6 +747,23 @@ func occurrenceCount(ctx *Context, x V) V {
 	default:
 		panic("ocount")
 	}
+}
+
+func occurrenceCountInts(xs []int64, min, span int64) []int64 {
+	r := make([]int64, len(xs))
+	offset := -min
+	m := make([]int64, span)
+	for i, xi := range xs {
+		c := m[xi+offset]
+		if c == 0 {
+			m[xi+offset] = 1
+			r[i] = 0
+			continue
+		}
+		m[xi+offset]++
+		r[i] = c
+	}
+	return r
 }
 
 func occurrenceCountSlice[T comparable](xs []T, bruteForceThreshold int) []int64 {
