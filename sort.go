@@ -99,14 +99,59 @@ func sortUp(x V) V {
 		return x
 	}
 	xa = xa.shallowClone()
-	switch xa.(type) {
+	switch xv := xa.(type) {
+	case *AB:
+		sortBools(xv.elts)
+	case *AI:
+		sortInts(xv)
 	case *AV:
-		sort.Stable(xa)
+		sort.Stable(xv)
 	default:
 		sort.Sort(xa)
 	}
 	xa.setFlags(flags | flagAscending)
 	return NewV(xa)
+}
+
+func sortBools(xs []bool) {
+	var freq [2]int
+	for _, xi := range xs {
+		freq[B2I(xi)]++
+	}
+	for i := range xs[:freq[0]] {
+		xs[i] = false
+	}
+	txs := xs[freq[0]:]
+	for i := range txs {
+		txs[i] = true
+	}
+}
+
+func sortInts(xv *AI) {
+	if xv.Len() > 24 {
+		min, max := minMax(xv)
+		span := max - min + 1
+		if span < 256 {
+			sortSmallInts(xv.elts, min)
+			return
+		}
+	}
+	sort.Sort(xv)
+}
+
+func sortSmallInts(xs []int64, min int64) {
+	var freq [256]int
+	offset := -min
+	for _, xi := range xs {
+		freq[xi+offset]++
+	}
+	i := 0
+	for j, n := range freq {
+		for k := i; k < i+n; k++ {
+			xs[k] = int64(j) + min
+		}
+		i += n
+	}
 }
 
 func sortUpDictKeys(d *Dict) *Dict {
