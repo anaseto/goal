@@ -307,12 +307,14 @@ func applyS2II(s string, i, l int64) (string, error) {
 }
 
 // cast implements s$y.
-func cast(s S, y V) V {
+func cast(ctx *Context, s S, y V) V {
 	switch s {
 	case "i":
 		return casti(y)
 	case "n":
 		return castn(y)
+	case "s":
+		return casts(ctx, y)
 	case "b":
 		return castb(y)
 	case "c":
@@ -464,6 +466,25 @@ func castn(y V) V {
 		return newDictValues(yv.keys, castn(NewV(yv.values)))
 	default:
 		return panicType("\"n\"$y", "y", y)
+	}
+}
+
+func casts(ctx *Context, y V) V {
+	switch yv := y.value.(type) {
+	case S:
+		return y
+	case *AS:
+		return y
+	case *AV:
+		r := make([]V, yv.Len())
+		for i, yi := range yv.elts {
+			r[i] = casts(ctx, yi)
+		}
+		return Canonical(NewAV(r))
+	case array:
+		return each2String(ctx, yv)
+	default:
+		return NewS(y.Sprint(ctx))
 	}
 }
 

@@ -406,7 +406,7 @@ func vfCast(ctx *Context, args []V) V {
 		case array:
 			return search(x, y)
 		case S:
-			return cast(xv, y)
+			return cast(ctx, xv, y)
 		default:
 			return panicType("x$y", "x", x)
 		}
@@ -914,7 +914,14 @@ func vfRTTime(ctx *Context, args []V) V {
 			return panicRank(`rt.time[s;n]`)
 		}
 		if len(args) == 2 {
-			n = getN(args[0]).I()
+			nv := getN(args[0])
+			if nv.IsPanic() {
+				return nv
+			}
+			n = nv.I()
+			if n <= 0 {
+				return NewI(0)
+			}
 		}
 		t := time.Now()
 		for i := int64(0); i < n; i++ {
@@ -937,7 +944,14 @@ func vfRTTime(ctx *Context, args []V) V {
 			return panicRank(`rt.time[f;x;n]`)
 		}
 		if len(args) == 3 {
-			n = getN(args[0]).I()
+			nv := getN(args[0])
+			if nv.IsPanic() {
+				return nv
+			}
+			n = nv.I()
+			if n <= 0 {
+				return NewI(0)
+			}
 		}
 		x.IncrRC()
 		av := toArray(y).value.(array)
