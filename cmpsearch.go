@@ -36,14 +36,16 @@ func (x V) Matches(y V) bool {
 
 const bruteForceGeneric = 32
 const bruteForceNumeric = 128
+const smallRangeLen = 16
+const smallRangeSpan = 16
 
 func smallRange(xv *AI) (min, span int64, ok bool) {
 	xlen := int64(xv.Len())
-	if xlen > bruteForceNumeric/2 {
+	if xlen > smallRangeLen {
 		var max int64
 		min, max = minMax(xv)
 		span = max - min + 1
-		if xlen > bruteForceNumeric && span < 2*(xlen+8) || span < xlen+8 {
+		if span < 2*xlen+smallRangeSpan {
 			return min, span, true
 		}
 	}
@@ -1226,10 +1228,10 @@ func findAI(x *AI, y V) V {
 			}
 			return NewAI(r)
 		}
-		if yv.Len() > bruteForceNumeric/2 && xlen > bruteForceNumeric/2 {
+		if yv.Len() > smallRangeLen && xlen > smallRangeLen {
 			min, max := minMax(x)
 			span := max - min + 1
-			if xlen > bruteForceNumeric && span < 2*(xlen+8) || span < xlen+8 {
+			if span < 2*xlen+smallRangeSpan {
 				// fast path avoiding hash table
 				r := findInts(x.elts, yv.elts, min, max)
 				return NewAIWithRC(r, reuseRCp(yv.rc))
