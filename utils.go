@@ -261,10 +261,6 @@ func toArray(x V) V {
 	}
 	if x.IsF() {
 		var n int
-		if isBF(x.F()) {
-			r := &AB{elts: []bool{x.F() != 0}, rc: &n}
-			return NewV(r)
-		}
 		r := &AF{elts: []float64{float64(x.F())}, rc: &n}
 		return NewV(r)
 	}
@@ -539,10 +535,6 @@ func isI(x float64) bool {
 }
 
 func isBI(x int64) bool {
-	return x == 0 || x == 1
-}
-
-func isBF(x float64) bool {
 	return x == 0 || x == 1
 }
 

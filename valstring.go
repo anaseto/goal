@@ -122,7 +122,7 @@ func (x *AI) Append(ctx *Context, dst []byte) []byte {
 // returns the extended buffer.
 func (x *AF) Append(ctx *Context, dst []byte) []byte {
 	if x.Len() == 0 {
-		return append(dst, "!0"...)
+		return append(dst, "0#0.0"...)
 	}
 	if x.Len() == 1 {
 		dst = append(dst, ',')

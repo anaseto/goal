@@ -383,13 +383,6 @@ func takeNAtom(n int64, y V) V {
 	}
 	if y.IsF() {
 		yv := y.F()
-		if isBF(yv) {
-			r := make([]bool, n)
-			for i := range r {
-				r[i] = yv != 0
-			}
-			return NewAB(r)
-		}
 		r := make([]float64, n)
 		for i := range r {
 			r[i] = yv
@@ -608,12 +601,6 @@ func shiftBeforeAB(x V, yv *AB) V {
 		return NewAIWithRC(r, reuseRCp(yv.rc))
 	}
 	if x.IsF() {
-		if isBF(x.F()) {
-			r := yv.reuse()
-			copy(r.elts[max:], ys[:len(ys)-max])
-			r.elts[0] = x.F() == 1
-			return NewV(r)
-		}
 		r := make([]float64, len(ys))
 		for i := max; i < len(ys); i++ {
 			r[i] = B2F(yv.At(i - max))
@@ -921,12 +908,6 @@ func shiftAfterAB(x V, yv *AB) V {
 		r[len(ys)-1] = x.I()
 		return NewAIWithRC(r, reuseRCp(yv.rc))
 	} else if x.IsF() {
-		if isBF(x.F()) {
-			r := yv.reuse()
-			copy(r.elts[:len(ys)-max], ys[max:])
-			r.elts[len(ys)-1] = x.F() == 1
-			return NewV(r)
-		}
 		r := make([]float64, len(ys))
 		for i := max; i < len(ys); i++ {
 			r[i-max] = B2F(yv.At(i))
