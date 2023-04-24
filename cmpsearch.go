@@ -1280,20 +1280,21 @@ func findAF(x *AF, y V) V {
 func findAIboolsIdx(xs []int64) (m [2]int64) {
 	xlen := int64(len(xs))
 	m[0], m[1] = xlen, xlen
+loop:
 	for i, xi := range xs {
 		switch {
 		case xi == 1:
 			if m[1] == xlen {
 				m[1] = int64(i)
 				if m[0] < xlen {
-					break
+					break loop
 				}
 			}
 		case xi == 0:
 			if m[0] == xlen {
 				m[0] = int64(i)
 				if m[1] < xlen {
-					break
+					break loop
 				}
 			}
 		}
