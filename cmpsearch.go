@@ -692,12 +692,28 @@ func memberOfAI(x V, y *AI) V {
 		}
 		return NewABWithRC(r, reuseRCp(xv.rc))
 	case *AI:
-		if y.flags.Has(flagAscending) && y.Len() > numericSortedLen {
+		ylen := int64(y.Len())
+		if y.flags.Has(flagAscending) && ylen > numericSortedLen {
 			r := make([]bool, xv.Len())
 			for i, xi := range xv.elts {
 				r[i] = memberISortedAI(xi, y)
 			}
 			return NewABWithRC(r, reuseRCp(xv.rc))
+		}
+		xlen := int64(xv.Len())
+		if ylen > smallRangeLen && xlen > smallRangeLen || xlen > bruteForceNumeric {
+			// NOTE: heuristics here might need some adjustments:
+			// we used one based on self-search functions, but
+			// member of is more complicated, because there are two
+			// variables (#x influences allocation, while #y
+			// influences number of searches).
+			min, max := minMax(y)
+			span := max - min + 1
+			if span < ylen+xlen+smallRangeSpan {
+				// fast path avoiding hash table
+				r := memberOfInts(xv.elts, y.elts, min, max)
+				return NewABWithRC(r, reuseRCp(xv.rc))
+			}
 		}
 		return NewABWithRC(memberOfSlice[int64](xv.elts, y.elts, bruteForceNumeric), reuseRCp(xv.rc))
 	case *AF:
@@ -707,6 +723,23 @@ func memberOfAI(x V, y *AI) V {
 	default:
 		return NewI(0)
 	}
+}
+
+func memberOfInts(xs, ys []int64, min, max int64) []bool {
+	r := make([]bool, len(xs))
+	offset := -min
+	m := make([]bool, max-min+1)
+	for _, yi := range ys {
+		m[yi+offset] = true
+	}
+	for i, xi := range xs {
+		if xi < min || xi > max {
+			r[i] = false
+			continue
+		}
+		r[i] = m[xi+offset]
+	}
+	return r
 }
 
 func memberSOfAS(x string, y *AS) bool {
@@ -1312,7 +1345,7 @@ func findAI(x *AI, y V) V {
 			for i, yi := range yv.elts {
 				r[i] = findAII(x, yi)
 			}
-			return NewAI(r)
+			return NewAIWithRC(r, reuseRCp(yv.rc))
 		}
 		ylen := int64(yv.Len())
 		if xlen > smallRangeLen && ylen > smallRangeLen || ylen > bruteForceNumeric {
