@@ -129,7 +129,7 @@ func sortBools(xs []bool) {
 
 func sortInts(ctx *Context, xv *AI) {
 	xlen := xv.Len()
-	if xlen > 48 {
+	if xlen > 32 {
 		min, max := minMax(xv)
 		span := max - min + 1
 		if span < 256 {
