@@ -84,7 +84,7 @@ func (x *sortDictKeys) Len() int {
 }
 
 // sortUp returns ^x.
-func sortUp(x V) V {
+func sortUp(ctx *Context, x V) V {
 	xa, ok := x.value.(array)
 	if !ok {
 		switch xv := x.value.(type) {
@@ -103,7 +103,7 @@ func sortUp(x V) V {
 	case *AB:
 		sortBools(xv.elts)
 	case *AI:
-		sortInts(xv)
+		sortInts(ctx, xv)
 	case *AV:
 		sort.Stable(xv)
 	default:
@@ -127,14 +127,24 @@ func sortBools(xs []bool) {
 	}
 }
 
-func sortInts(xv *AI) {
-	if xv.Len() > 24 {
+func sortInts(ctx *Context, xv *AI) {
+	xlen := xv.Len()
+	if xlen > 48 {
 		min, max := minMax(xv)
 		span := max - min + 1
 		if span < 256 {
 			sortSmallInts(xv.elts, min)
 			return
 		}
+		if xlen < 256 {
+			if ctx.sortBuf == nil {
+				ctx.sortBuf = make([]int64, 256)
+			}
+			radixSort(xv.elts, ctx.sortBuf)
+			return
+		}
+		radixSort(xv.elts, make([]int64, xlen))
+		return
 	}
 	sort.Sort(xv)
 }

@@ -335,7 +335,7 @@ func vfJoin(ctx *Context, args []V) V {
 func vfWithout(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return sortUp(args[0])
+		return sortUp(ctx, args[0])
 	case 2:
 		return without(args[1], args[0])
 	default:

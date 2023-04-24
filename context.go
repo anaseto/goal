@@ -75,8 +75,9 @@ type Context struct {
 	rand *rand.Rand
 
 	// miscellaneous
-	assigned   bool // last instruction was opAssignGlobal
-	compactFmt bool // compact value sprint formatting
+	assigned   bool    // last instruction was opAssignGlobal
+	compactFmt bool    // compact value sprint formatting
+	sortBuf    []int64 // radix sort buffer
 
 	Prec int    // floating point formatting precision (default: -1)
 	OFS  string // output field separator (default: " ")
