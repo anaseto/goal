@@ -159,23 +159,11 @@ func where(x V) V {
 		}
 		return NewV(&AI{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
 	case *AF:
-		n := int64(0)
-		for _, xi := range xv.elts {
-			if !isI(xi) {
-				return Panicf("&x : x contains non-integer (%g)", xi)
-			}
-			if xi < 0 {
-				return Panicf("&x : x contains negative (%d)", int64(xi))
-			}
-			n += int64(xi)
+		x := toAI(xv)
+		if x.IsPanic() {
+			return ppanic("&x : ", x)
 		}
-		r := make([]int64, 0, n)
-		for i, xi := range xv.elts {
-			for j := int64(0); j < int64(xi); j++ {
-				r = append(r, int64(i))
-			}
-		}
-		return NewV(&AI{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
+		return where(x)
 	case S:
 		return NewI(int64(len(xv)))
 	case *AS:

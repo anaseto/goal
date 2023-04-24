@@ -182,9 +182,9 @@ func classifySlice[T comparable](xs []T, bruteForceThreshold int) []int64 {
 }
 
 func classifySortedSlice[T comparable](xs []T) []int64 {
-	prev := xs[0]
 	r := make([]int64, len(xs))
 	var n int64
+	prev := xs[0]
 	r[0] = 0
 	i := 1
 	for _, xi := range xs[1:] {
@@ -387,16 +387,35 @@ func markFirsts(ctx *Context, x V) V {
 		}
 		return NewAB(r)
 	case *AF:
-		return NewABWithRC(markFirstsSlice[float64](xv.elts, bruteForceNumeric), reuseRCp(xv.rc))
+		var r []bool
+		if xv.flags.Has(flagAscending) {
+			r = markFirstsSortedSlice[float64](xv.elts)
+		} else {
+			r = markFirstsSlice[float64](xv.elts, bruteForceNumeric)
+		}
+		return NewABWithRC(r, reuseRCp(xv.rc))
 	case *AI:
+		var r []bool
+		if xv.flags.Has(flagAscending) {
+			r = markFirstsSortedSlice[int64](xv.elts)
+			return NewABWithRC(r, reuseRCp(xv.rc))
+		}
 		min, span, ok := smallRange(xv)
 		if ok {
 			// fast path avoiding hash table
-			return NewABWithRC(markFirstsInts(xv.elts, min, span), reuseRCp(xv.rc))
+			r = markFirstsInts(xv.elts, min, span)
+			return NewABWithRC(r, reuseRCp(xv.rc))
 		}
-		return NewABWithRC(markFirstsSlice[int64](xv.elts, bruteForceNumeric), reuseRCp(xv.rc))
+		r = markFirstsSlice[int64](xv.elts, bruteForceNumeric)
+		return NewABWithRC(r, reuseRCp(xv.rc))
 	case *AS:
-		return NewABWithRC(markFirstsSlice[string](xv.elts, bruteForceGeneric), reuseRCp(xv.rc))
+		var r []bool
+		if xv.flags.Has(flagAscending) {
+			r = markFirstsSortedSlice[string](xv.elts)
+		} else {
+			r = markFirstsSlice[string](xv.elts, bruteForceGeneric)
+		}
+		return NewABWithRC(r, reuseRCp(xv.rc))
 	case *AV:
 		if xv.Len() > bruteForceGeneric {
 			ss := make([]string, xv.Len())
@@ -458,6 +477,21 @@ func markFirstsSlice[T comparable](xs []T, bruteForceThreshold int) []bool {
 			m[s] = struct{}{}
 			continue
 		}
+	}
+	return r
+}
+
+func markFirstsSortedSlice[T comparable](xs []T) []bool {
+	r := make([]bool, len(xs))
+	prev := xs[0]
+	r[0] = true
+	i := 1
+	for _, xi := range xs[1:] {
+		if xi != prev {
+			r[i] = true
+		}
+		prev = xi
+		i++
 	}
 	return r
 }
@@ -772,28 +806,43 @@ func occurrenceCount(ctx *Context, x V) V {
 	switch xv := x.value.(type) {
 	case *AB:
 		r := make([]int64, xv.Len())
-		var f, t int64
+		var counts [2]int64
 		for i, xi := range xv.elts {
-			if xi {
-				r[i] = t
-				t++
-				continue
-			}
-			r[i] = f
-			f++
+			j := B2I(xi)
+			r[i] = counts[j]
+			counts[j]++
 		}
 		return NewAIWithRC(r, reuseRCp(xv.rc))
 	case *AF:
-		return NewAIWithRC(occurrenceCountSlice[float64](xv.elts, bruteForceNumeric), reuseRCp(xv.rc))
+		var r []int64
+		if xv.flags.Has(flagAscending) {
+			r = occurrenceCountSortedSlice[float64](xv.elts)
+		} else {
+			r = occurrenceCountSlice[float64](xv.elts, bruteForceNumeric)
+		}
+		return NewAIWithRC(r, reuseRCp(xv.rc))
 	case *AI:
+		var r []int64
+		if xv.flags.Has(flagAscending) {
+			r = occurrenceCountSortedSlice[int64](xv.elts)
+			return NewAIWithRC(r, reuseRCp(xv.rc))
+		}
 		min, span, ok := smallRange(xv)
 		if ok {
 			// fast path avoiding hash table
-			return NewAIWithRC(occurrenceCountInts(xv.elts, min, span), reuseRCp(xv.rc))
+			r = occurrenceCountInts(xv.elts, min, span)
+			return NewAIWithRC(r, reuseRCp(xv.rc))
 		}
-		return NewAIWithRC(occurrenceCountSlice[int64](xv.elts, bruteForceNumeric), reuseRCp(xv.rc))
+		r = occurrenceCountSlice[int64](xv.elts, bruteForceNumeric)
+		return NewAIWithRC(r, reuseRCp(xv.rc))
 	case *AS:
-		return NewAIWithRC(occurrenceCountSlice[string](xv.elts, bruteForceGeneric), reuseRCp(xv.rc))
+		var r []int64
+		if xv.flags.Has(flagAscending) {
+			r = occurrenceCountSortedSlice[string](xv.elts)
+		} else {
+			r = occurrenceCountSlice[string](xv.elts, bruteForceGeneric)
+		}
+		return NewAIWithRC(r, reuseRCp(xv.rc))
 	case *AV:
 		if xv.Len() > (2*bruteForceGeneric)/3 {
 			ss := make([]string, xv.Len())
@@ -858,6 +907,23 @@ func occurrenceCountSlice[T comparable](xs []T, bruteForceThreshold int) []int64
 		}
 		m[xi] = c + 1
 		r[i] = c + 1
+	}
+	return r
+}
+
+func occurrenceCountSortedSlice[T comparable](xs []T) []int64 {
+	r := make([]int64, len(xs))
+	prev := xs[0]
+	r[0] = 0
+	i := 1
+	for _, xi := range xs[1:] {
+		if xi != prev {
+			r[i] = 0
+		} else {
+			r[i] = r[i-1] + 1
+		}
+		prev = xi
+		i++
 	}
 	return r
 }
