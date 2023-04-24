@@ -16,8 +16,6 @@ Optimizations:
 - maybe improve liveness analysis for code with branches, and for global
   variables
 - maybe some remaining special cases in self-search functions
-- improve sorting performance for small-ints (though, because we don't have
-  small-ints, we would need to find min and max, but it would still be worth
-  it in many cases).
-- change bool type into uint8 or byte and use it to save size in the result of
-  some primitives, and use specialized algorithms for a few of them too.
+- maybe change bool type into uint8 or byte and use it to save size in the
+  result of some primitives, and use specialized algorithms for a few of them
+  too.
