@@ -499,7 +499,7 @@ func markFirstsSortedSlice[T comparable](xs []T) []bool {
 // memberOf returns x in y.
 func memberOf(x, y V) V {
 	// XXX: maybe we should make a switch first on x, instead of y, to
-	// handle simple unboxed cases firsts.
+	// handle simple unboxed cases firsts. Same comment for find.
 	if xv, ok := x.value.(*Dict); ok {
 		return newDictValues(xv.keys, memberOf(NewV(xv.values), y))
 	}
@@ -523,101 +523,67 @@ func memberOf(x, y V) V {
 	}
 }
 
-func boolSliceMembers(xs []bool) (t bool, f bool) {
-	for _, xi := range xs {
-		if t && f {
-			break
-		}
-		t, f = t || xi, f || !xi
-	}
-	return
-}
-
 func memberOfAB(x V, y *AB) V {
-	t, f := boolSliceMembers(y.elts)
-	if t && f {
-		switch xv := x.value.(type) {
-		case *AB:
-			r := make([]bool, xv.Len())
-			for i := range r {
-				r[i] = true
+	if x.IsI() {
+		xv := x.I()
+		for _, yi := range y.elts {
+			if xv == B2I(yi) {
+				return NewI(1)
 			}
-			return NewAB(r)
-		case *AS:
-			r := make([]bool, xv.Len())
-			return NewAB(r)
-		case array:
-			r := make([]bool, xv.Len())
-			for i := 0; i < xv.Len(); i++ {
-				xi := xv.at(i)
-				r[i] = xi.IsI() && (xi.n == 0 || xi.n == 1) ||
-					xi.IsF() && (xi.F() == 0 || xi.F() == 1)
-			}
-			return NewAB(r)
-		default:
-			b := x.IsI() && (x.n == 0 || x.n == 1) ||
-				x.IsF() && (x.F() == 0 || x.F() == 1)
-			return NewI(B2I(b))
 		}
+		return NewI(0)
 	}
-	if t {
-		switch xv := x.value.(type) {
-		case *AB:
-			r := make([]bool, xv.Len())
-			copy(r, xv.elts)
-			return NewAB(r)
-		case *AS:
-			r := make([]bool, xv.Len())
-			return NewAB(r)
-		case array:
-			r := make([]bool, xv.Len())
-			for i := 0; i < xv.Len(); i++ {
-				xi := xv.at(i)
-				r[i] = xi.IsI() && xi.n == 1 ||
-					xi.IsF() && xi.F() == 1
-			}
-			return NewAB(r)
-		default:
-			b := x.IsI() && x.n == 1 ||
-				x.IsF() && x.F() == 1
-			return NewI(B2I(b))
+	if x.IsF() {
+		if !isI(x.F()) {
+			return NewI(0)
 		}
+		return memberOfAB(NewI(int64(x.F())), y)
 	}
 	switch xv := x.value.(type) {
 	case *AB:
+		m := bmapAB(y.elts)
 		r := make([]bool, xv.Len())
 		for i, xi := range xv.elts {
-			r[i] = !xi
+			r[i] = m[B2I(xi)]
 		}
 		return NewAB(r)
-	case *AS:
+	case *AI:
+		m := bmapAB(y.elts)
 		r := make([]bool, xv.Len())
+		for i, xi := range xv.elts {
+			if xi != 0 && xi != 1 {
+				r[i] = false
+			} else {
+				r[i] = m[xi]
+			}
+		}
+		return NewAB(r)
+	case *AF:
+		m := bmapAB(y.elts)
+		r := make([]bool, xv.Len())
+		for i, xi := range xv.elts {
+			if xi != 0 && xi != 1 {
+				r[i] = false
+			} else {
+				r[i] = m[int(xi)]
+			}
+		}
 		return NewAB(r)
 	case array:
-		r := make([]bool, xv.Len())
-		for i := 0; i < xv.Len(); i++ {
-			xi := xv.at(i)
-			r[i] = xi.IsI() && xi.n == 0 ||
-				xi.IsF() && xi.F() == 0
-		}
-		return NewAB(r)
+		return memberOfArray(xv, y)
 	default:
-		b := x.IsI() && x.n == 0 ||
-			x.IsF() && x.F() == 0
-		return NewI(B2I(b))
+		return NewI(0)
 	}
 }
 
-func bmapSlice[T comparable](xs []T) map[T]struct{} {
-	m := map[T]struct{}{}
+func bmapAB(xs []bool) (m [2]bool) {
 	for _, xi := range xs {
-		_, ok := m[xi]
-		if !ok {
-			m[xi] = struct{}{}
-			continue
+		if m[0] && m[1] {
+			break
 		}
+		m[1], m[0] = m[1] || xi, m[0] || !xi
 	}
-	return m
+	return
 }
 
 func memberOfSlice[T comparable](xs []T, ys []T, bruteForceThreshold int) []bool {
@@ -638,6 +604,18 @@ func memberOfSlice[T comparable](xs []T, ys []T, bruteForceThreshold int) []bool
 		_, r[i] = m[xi]
 	}
 	return r
+}
+
+func bmapSlice[T comparable](xs []T) map[T]struct{} {
+	m := map[T]struct{}{}
+	for _, xi := range xs {
+		_, ok := m[xi]
+		if !ok {
+			m[xi] = struct{}{}
+			continue
+		}
+	}
+	return m
 }
 
 func memberOfAF(x V, y *AF) V {
@@ -671,7 +649,7 @@ func memberOfAF(x V, y *AF) V {
 	}
 }
 
-func memberIOfAI(x int64, y *AI) bool {
+func memberISortedAI(x int64, y *AI) bool {
 	ylen := y.Len()
 	i := sort.Search(ylen, func(j int) bool { return y.At(j) >= x })
 	return i < ylen && y.At(i) == x
@@ -680,7 +658,7 @@ func memberIOfAI(x int64, y *AI) bool {
 func memberOfAI(x V, y *AI) V {
 	if x.IsI() {
 		if y.flags.Has(flagAscending) && y.Len() > numericSortedLen {
-			return NewI(B2I(memberIOfAI(x.I(), y)))
+			return NewI(B2I(memberISortedAI(x.I(), y)))
 		}
 		for _, yi := range y.elts {
 			if x.I() == yi {
@@ -694,7 +672,7 @@ func memberOfAI(x V, y *AI) V {
 			return NewI(0)
 		}
 		if y.flags.Has(flagAscending) && y.Len() > numericSortedLen {
-			return NewI(B2I(memberIOfAI(int64(x.F()), y)))
+			return NewI(B2I(memberISortedAI(int64(x.F()), y)))
 		}
 		for _, yi := range y.elts {
 			if x.F() == float64(yi) {
@@ -705,12 +683,19 @@ func memberOfAI(x V, y *AI) V {
 	}
 	switch xv := x.value.(type) {
 	case *AB:
-		return memberOfAI(fromABtoAI(xv), y)
+		m := findAIboolsIdx(y.elts)
+		xlen := int64(x.Len())
+		mb := [2]bool{m[0] < xlen, m[1] < xlen}
+		r := make([]bool, xlen)
+		for i, xi := range xv.elts {
+			r[i] = mb[B2I(xi)]
+		}
+		return NewABWithRC(r, reuseRCp(xv.rc))
 	case *AI:
 		if y.flags.Has(flagAscending) && y.Len() > numericSortedLen {
 			r := make([]bool, xv.Len())
 			for i, xi := range xv.elts {
-				r[i] = memberIOfAI(xi, y)
+				r[i] = memberISortedAI(xi, y)
 			}
 			return NewABWithRC(r, reuseRCp(xv.rc))
 		}
@@ -992,6 +977,9 @@ func intersection(x array, y V) V {
 
 // find returns x?y.
 func find(x, y V) V {
+	if yv, ok := y.value.(*Dict); ok {
+		return newDictValues(yv.keys, find(x, NewV(yv.values)))
+	}
 	switch xv := x.value.(type) {
 	case S:
 		return findS(xv, y)
@@ -1224,25 +1212,6 @@ func findSlices[T comparable](xs, ys []T, bruteForceThreshold int) []int64 {
 	return r
 }
 
-func findAFbools(xs []float64) (t int64, f int64) {
-	xlen := int64(len(xs))
-	t, f = xlen, xlen
-	for i, xi := range xs {
-		if xi == 1 && t == xlen {
-			t = int64(i)
-			if f < xlen {
-				break
-			}
-		} else if xi == 0 && f == xlen {
-			f = int64(i)
-			if t < xlen {
-				break
-			}
-		}
-	}
-	return
-}
-
 func findAF(x *AF, y V) V {
 	if y.IsI() {
 		for i, xi := range x.elts {
@@ -1263,16 +1232,7 @@ func findAF(x *AF, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		t, f := findAFbools(x.elts)
-		r := make([]int64, yv.Len())
-		for i, yi := range yv.elts {
-			if yi {
-				r[i] = t
-			} else {
-				r[i] = f
-			}
-		}
-		return NewAIWithRC(r, reuseRCp(yv.rc))
+		return findAF(x, fromABtoAF(yv))
 	case *AI:
 		return findAF(x, toAF(yv))
 	case *AF:
@@ -1284,19 +1244,24 @@ func findAF(x *AF, y V) V {
 	}
 }
 
-func findAIbools(xs []int64) (t int64, f int64) {
+func findAIboolsIdx(xs []int64) (m [2]int64) {
 	xlen := int64(len(xs))
-	t, f = xlen, xlen
+	m[0], m[1] = xlen, xlen
 	for i, xi := range xs {
-		if xi == 1 && t == xlen {
-			t = int64(i)
-			if f < xlen {
-				break
+		switch {
+		case xi == 1:
+			if m[1] == xlen {
+				m[1] = int64(i)
+				if m[0] < xlen {
+					break
+				}
 			}
-		} else if xi == 0 && f == xlen {
-			f = int64(i)
-			if t < xlen {
-				break
+		case xi == 0:
+			if m[0] == xlen {
+				m[0] = int64(i)
+				if m[1] < xlen {
+					break
+				}
 			}
 		}
 	}
@@ -1314,11 +1279,12 @@ func findAII(x *AI, y int64) int64 {
 
 func findAI(x *AI, y V) V {
 	if y.IsI() {
+		yv := y.I()
 		if x.flags.Has(flagAscending) && x.Len() > numericSortedLen {
-			return NewI(findAII(x, y.I()))
+			return NewI(findAII(x, yv))
 		}
 		for i, xi := range x.elts {
-			if xi == y.I() {
+			if xi == yv {
 				return NewI(int64(i))
 			}
 		}
@@ -1329,27 +1295,14 @@ func findAI(x *AI, y V) V {
 		if !isI(y.F()) {
 			return NewI(int64(x.Len()))
 		}
-		yI := int64(y.F())
-		if x.flags.Has(flagAscending) && x.Len() > numericSortedLen {
-			return NewI(findAII(x, yI))
-		}
-		for i, xi := range x.elts {
-			if xi == yI {
-				return NewI(int64(i))
-			}
-		}
-		return NewI(int64(x.Len()))
+		return findAI(x, NewI(int64(y.F())))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		t, f := findAIbools(x.elts)
+		m := findAIboolsIdx(x.elts)
 		r := make([]int64, yv.Len())
 		for i, yi := range yv.elts {
-			if yi {
-				r[i] = t
-			} else {
-				r[i] = f
-			}
+			r[i] = m[B2I(yi)]
 		}
 		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AI:
@@ -1361,10 +1314,16 @@ func findAI(x *AI, y V) V {
 			}
 			return NewAI(r)
 		}
-		if yv.Len() > smallRangeLen && xlen > smallRangeLen {
+		ylen := int64(yv.Len())
+		if xlen > smallRangeLen && ylen > smallRangeLen || ylen > bruteForceNumeric {
+			// NOTE: heuristics here might need some adjustments:
+			// we used one based on self-search functions, but find
+			// is more complicated, because there are two variables
+			// (#x influences allocation, while #y influences
+			// number of searches).
 			min, max := minMax(x)
 			span := max - min + 1
-			if span < 2*xlen+smallRangeSpan {
+			if span < xlen+ylen+smallRangeSpan {
 				// fast path avoiding hash table
 				r := findInts(x.elts, yv.elts, min, max)
 				return NewAIWithRC(r, reuseRCp(yv.rc))
