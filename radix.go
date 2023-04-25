@@ -181,12 +181,14 @@ func radixGradeAI(ctx *Context, x *AI, min, max int64) []int64 {
 		} else {
 			buf = make([]int8, xlen*2)
 		}
-		bufp := make([]int64, xlen*2) // int8 can be optimized to use just xlen
-		for i := range bufp[:xlen] {
-			bufp[i] = int64(i)
+		from := buf[:xlen]
+		to := buf[xlen : xlen*2]
+		p := make([]int64, xlen)
+		for i, xi := range x.elts {
+			from[i] = int8(xi)
 		}
-		r := radixGradeAIWithSize(x, buf, bufp, 8, math.MinInt8)
-		return r
+		radixGradeInt8(from, to, p)
+		return p
 	}
 	if min >= math.MinInt16 && max <= math.MaxInt16 {
 		var buf []int16
@@ -312,4 +314,43 @@ func radixGradeWithBuffer[T signed, S any](from, to []T, fromp, top []S, size ui
 		copy(to, from)
 		copy(top, fromp)
 	}
+}
+
+func radixGradeInt8(from, to []int8, p []int64) {
+	var (
+		offset [256]int // Keep track of where room is made for byte groups in the buffer
+		key    uint8
+	)
+
+	// Compute counts by byte type at current radix
+	for _, elem := range from {
+		key = uint8(elem)
+		offset[key]++
+	}
+
+	// Compute target bucket offsets from counts
+	var watermark int
+	// Negatives
+	for i := 128; i < len(offset); i++ {
+		count := offset[i]
+		offset[i] = watermark
+		watermark += count
+	}
+	// Positives
+	for i := 0; i < 128; i++ {
+		count := offset[i]
+		offset[i] = watermark
+		watermark += count
+	}
+
+	// Swap values between the buffers by radix
+	for i, elem := range from {
+		key = uint8(elem)
+		j := offset[key]
+		offset[key]++
+		to[j] = elem
+		p[j] = int64(i)
+	}
+
+	copy(from, to)
 }
