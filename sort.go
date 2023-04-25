@@ -124,7 +124,7 @@ func sortUp(ctx *Context, x V) V {
 func sortBools(xs []bool) {
 	var freq [2]int
 	for _, xi := range xs {
-		freq[B2I(xi)]++
+		freq[b2i(xi)]++
 	}
 	for i := range xs[:freq[0]] {
 		xs[i] = false
@@ -169,19 +169,25 @@ func sortSmallInts(xs []int64, min int64) {
 	}
 }
 
+func sortBy(keys, values array) *Dict {
+	nk := keys.shallowClone()
+	nv := values.shallowClone()
+	initRC(nk)
+	initRC(nv)
+	nd := &Dict{keys: nk, values: nv}
+	sort.Stable(nd)
+	return nd
+}
+
 func sortUpDictKeys(d *Dict) *Dict {
 	flags := d.keys.getFlags()
 	if flags.Has(flagAscending) {
 		return d
 	}
-	nk := d.keys.shallowClone()
-	nv := d.values.shallowClone()
-	initRC(nk)
-	initRC(nv)
-	nd := &Dict{keys: nk, values: nv}
-	sort.Stable((*sortDictKeys)(nd))
-	nv.setFlags(flags | flagAscending)
-	return nd
+	d = sortBy(d.values, d.keys)
+	d.keys, d.values = d.values, d.keys
+	d.keys.setFlags(flags | flagAscending)
+	return d
 }
 
 func sortUpDict(d *Dict) *Dict {
@@ -189,14 +195,9 @@ func sortUpDict(d *Dict) *Dict {
 	if flags.Has(flagAscending) {
 		return d
 	}
-	nk := d.keys.shallowClone()
-	nv := d.values.shallowClone()
-	initRC(nk)
-	initRC(nv)
-	nd := &Dict{keys: nk, values: nv}
-	sort.Stable(nd)
-	nv.setFlags(flags | flagAscending)
-	return nd
+	d = sortBy(d.keys, d.values)
+	d.values.setFlags(flags | flagAscending)
+	return d
 }
 
 type permutation struct {
@@ -227,6 +228,8 @@ func permRange(n int) []int64 {
 // ascend returns <x.
 func ascend(ctx *Context, x V) V {
 	switch xv := x.value.(type) {
+	case *AB:
+		return NewAI(ascendBools(xv.elts))
 	case *AI:
 		return NewAI(ascendAI(ctx, xv))
 	case array:
@@ -240,6 +243,23 @@ func ascend(ctx *Context, x V) V {
 	default:
 		return panicType("<X", "X", x)
 	}
+}
+
+func ascendBools(xs []bool) []int64 {
+	var offsets [2]int64
+	for _, xi := range xs {
+		offsets[b2i(xi)]++
+	}
+	offsets[1] = offsets[0]
+	offsets[0] = 0
+	r := make([]int64, len(xs))
+	for i, xi := range xs {
+		b := b2i(xi)
+		n := offsets[b]
+		offsets[b]++
+		r[i] = n
+	}
+	return r
 }
 
 func ascendAI(ctx *Context, xv *AI) []int64 {

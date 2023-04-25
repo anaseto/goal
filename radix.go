@@ -316,6 +316,7 @@ func radixGradeWithBuffer[T signed, S any](from, to []T, fromp, top []S, size ui
 	}
 }
 
+// radixGradeInt8 sorts p by from, and puts sorted from into to.
 func radixGradeInt8(from, to []int8, p []int64) {
 	var (
 		offset [256]int // Keep track of where room is made for byte groups in the buffer
@@ -351,6 +352,4 @@ func radixGradeInt8(from, to []int8, p []int64) {
 		to[j] = elem
 		p[j] = int64(i)
 	}
-
-	copy(from, to)
 }

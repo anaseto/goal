@@ -17,7 +17,18 @@ func B2I(b bool) int64 {
 	return i
 }
 
-// b2i converts a boolean to a float.
+// b2i converts a boolean to an integer.
+func b2i(b bool) int {
+	var i int
+	if b {
+		i = 1
+	} else {
+		i = 0
+	}
+	return i
+}
+
+// B2F converts a boolean to a float.
 func B2F(b bool) float64 {
 	var f float64
 	if b {
