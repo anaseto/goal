@@ -225,8 +225,10 @@ func permRange(n int) []int64 {
 }
 
 // ascend returns <x.
-func ascend(x V) V {
+func ascend(ctx *Context, x V) V {
 	switch xv := x.value.(type) {
+	case *AI:
+		return NewAI(ascendAI(ctx, xv))
 	case array:
 		p := &permutation{Perm: permRange(xv.Len()), X: xv}
 		if !xv.getFlags().Has(flagAscending) {
@@ -240,9 +242,31 @@ func ascend(x V) V {
 	}
 }
 
+func ascendAI(ctx *Context, xv *AI) []int64 {
+	xlen := xv.Len()
+	if xv.getFlags().Has(flagAscending) {
+		return permRange(xlen)
+	}
+	if xlen > 32 {
+		min, max := minMax(xv)
+		span := max - min + 1
+		if span == 1 {
+			return permRange(xlen)
+		}
+		return radixGradeAI(ctx, xv, min, max)
+	}
+	p := &permutation{Perm: permRange(xlen), X: xv}
+	sort.Stable(p)
+	return p.Perm
+}
+
 // descend returns >x.
-func descend(x V) V {
+func descend(ctx *Context, x V) V {
 	switch xv := x.value.(type) {
+	case *AI:
+		r := ascendAI(ctx, xv)
+		reverseSlice[int64](r)
+		return NewAI(r)
 	case array:
 		p := &permutation{Perm: permRange(xv.Len()), X: xv}
 		if !xv.getFlags().Has(flagAscending) {

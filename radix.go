@@ -72,19 +72,13 @@ func radixSortAI(ctx *Context, x *AI, min, max int64) *AI {
 }
 
 func radixSortAIWithSize[T signed](x *AI, buf []T, size uint, min T) *AI {
-	xlen := x.Len()
-	from := buf[:xlen]
-	to := buf[xlen : xlen*2]
-	for i, xi := range x.elts {
-		from[i] = T(xi)
-	}
-	radixSortWithBuffer[T](from, to, size, min)
+	from := radixSortIntsWithSize[T](x.elts, buf, size, min)
 	var dst []int64
 	reuse := reusableRCp(x.rc)
 	if reuse {
 		dst = x.elts
 	} else {
-		dst = make([]int64, xlen)
+		dst = make([]int64, x.Len())
 	}
 	for i, n := range from {
 		dst[i] = int64(n)
@@ -93,6 +87,17 @@ func radixSortAIWithSize[T signed](x *AI, buf []T, size uint, min T) *AI {
 		return x
 	}
 	return &AI{elts: dst}
+}
+
+func radixSortIntsWithSize[T signed](x []int64, buf []T, size uint, min T) []T {
+	xlen := len(x)
+	from := buf[:xlen]
+	to := buf[xlen : xlen*2]
+	for i, xi := range x {
+		from[i] = T(xi)
+	}
+	radixSortWithBuffer[T](from, to, size, min)
+	return from
 }
 
 type signed interface {
@@ -161,5 +166,150 @@ func radixSortWithBuffer[T signed](from, to []T, size uint, min T) {
 	// copy from buffer if done during odd turn
 	if radix&keyOffset == radix {
 		copy(to, from)
+	}
+}
+
+func radixGradeAI(ctx *Context, x *AI, min, max int64) []int64 {
+	xlen := x.Len()
+	if min >= math.MinInt8 && max <= math.MaxInt8 {
+		var buf []int8
+		if xlen < cachedLen {
+			if ctx.sortBuf8 == nil {
+				ctx.sortBuf8 = make([]int8, cachedLen*2)
+			}
+			buf = ctx.sortBuf8
+		} else {
+			buf = make([]int8, xlen*2)
+		}
+		bufp := make([]int64, xlen*2) // int8 can be optimized to use just xlen
+		for i := range bufp[:xlen] {
+			bufp[i] = int64(i)
+		}
+		r := radixGradeAIWithSize(x, buf, bufp, 8, math.MinInt8)
+		return r
+	}
+	if min >= math.MinInt16 && max <= math.MaxInt16 {
+		var buf []int16
+		if xlen < cachedLen {
+			if ctx.sortBuf16 == nil {
+				ctx.sortBuf16 = make([]int16, cachedLen*2)
+			}
+			buf = ctx.sortBuf16
+		} else {
+			buf = make([]int16, xlen*2)
+		}
+		bufp := make([]int64, xlen*2) // int16 can be optimized to use just xlen
+		for i := range bufp[:xlen] {
+			bufp[i] = int64(i)
+		}
+		r := radixGradeAIWithSize(x, buf, bufp, 16, math.MinInt16)
+		return r
+	}
+	if min >= math.MinInt32 && max <= math.MaxInt32 {
+		var buf []int32
+		if xlen < cachedLen {
+			if ctx.sortBuf32 == nil {
+				ctx.sortBuf32 = make([]int32, cachedLen*2)
+			}
+			buf = ctx.sortBuf32
+		} else {
+			buf = make([]int32, xlen*2)
+		}
+		bufp := make([]int64, xlen*2) // int32 can be optimized to use just xlen
+		for i := range bufp[:xlen] {
+			bufp[i] = int64(i)
+		}
+		r := radixGradeAIWithSize(x, buf, bufp, 32, math.MinInt32)
+		return r
+	}
+	p := &permutation{Perm: permRange(xlen), X: x}
+	sort.Stable(p)
+	return p.Perm
+}
+
+func radixGradeAIWithSize[T signed](x *AI, buf []T, bufp []int64, size uint, min T) []int64 {
+	_, fromp := radixGradeIntsWithSize[T, int64](x.elts, buf, bufp, size, min)
+	return fromp
+}
+
+func radixGradeIntsWithSize[T signed, S any](x []int64, buf []T, bufp []S, size uint, min T) ([]T, []S) {
+	xlen := len(x)
+	from := buf[:xlen]
+	to := buf[xlen : xlen*2]
+	fromp := bufp[:xlen]
+	top := bufp[xlen : xlen*2]
+	for i, xi := range x {
+		from[i] = T(xi)
+	}
+	radixGradeWithBuffer[T](from, to, fromp, top, size, min)
+	return from, fromp[0:len(fromp):len(fromp)]
+}
+
+// radixGradeWithBuffer sorts from using a radix sort. The to buffer, fromp,
+// top slices should have same length as from, size should be the bitsize of T,
+// and min should be the minimum possible value of type T.
+func radixGradeWithBuffer[T signed, S any](from, to []T, fromp, top []S, size uint, min T) {
+	var keyOffset uint
+	for keyOffset = 0; keyOffset < size; keyOffset += radix {
+		var (
+			offset [256]int // Keep track of where room is made for byte groups in the buffer
+			prev   T        = min
+			key    uint8
+			sorted = true
+		)
+
+		// Compute counts by byte type at current radix
+		for _, elem := range from {
+			key = uint8(elem >> keyOffset)
+			offset[key]++
+			if sorted {
+				sorted = elem >= prev
+				prev = elem
+			}
+		}
+
+		if sorted {
+			break
+		}
+
+		// Compute target bucket offsets from counts
+		var watermark int
+		if keyOffset == size-radix {
+			// Negatives
+			for i := 128; i < len(offset); i++ {
+				count := offset[i]
+				offset[i] = watermark
+				watermark += count
+			}
+			// Positives
+			for i := 0; i < 128; i++ {
+				count := offset[i]
+				offset[i] = watermark
+				watermark += count
+			}
+		} else {
+			for i, count := range offset {
+				offset[i] = watermark
+				watermark += count
+			}
+		}
+
+		// Swap values between the buffers by radix
+		for i, elem := range from {
+			key = uint8(elem >> keyOffset)
+			j := offset[key]
+			offset[key]++
+			to[j] = elem
+			top[j] = fromp[i]
+		}
+
+		from, to = to, from
+		fromp, top = top, fromp
+	}
+
+	// copy from buffer if done during odd turn
+	if radix&keyOffset == radix {
+		copy(to, from)
+		copy(top, fromp)
 	}
 }

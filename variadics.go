@@ -265,7 +265,7 @@ func vfMax(ctx *Context, args []V) V {
 func vfLess(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return ascend(args[0])
+		return ascend(ctx, args[0])
 	case 2:
 		return lesser(args[1], args[0])
 	default:
@@ -277,7 +277,7 @@ func vfLess(ctx *Context, args []V) V {
 func vfMore(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return descend(args[0])
+		return descend(ctx, args[0])
 	case 2:
 		return greater(args[1], args[0])
 	default:
