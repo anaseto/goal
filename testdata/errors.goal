@@ -1000,3 +1000,4 @@ firsts + / type
 (+)^2 3 / type
 "a"?2 / type
 "a"?(2;*) / type
+<42 / type
