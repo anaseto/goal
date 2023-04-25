@@ -337,6 +337,10 @@ func (x *AV) atIndices(y *AI) array {
 }
 
 func (x *AB) shallowClone() array {
+	return shallowCloneAB(x)
+}
+
+func shallowCloneAB(x *AB) *AB {
 	if reusableRCp(x.rc) {
 		x.setFlags(flagNone)
 		return x
@@ -348,6 +352,10 @@ func (x *AB) shallowClone() array {
 }
 
 func (x *AI) shallowClone() array {
+	return shallowCloneAI(x)
+}
+
+func shallowCloneAI(x *AI) *AI {
 	if reusableRCp(x.rc) {
 		x.setFlags(flagNone)
 		return x

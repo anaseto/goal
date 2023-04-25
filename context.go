@@ -77,7 +77,9 @@ type Context struct {
 	// miscellaneous
 	assigned   bool    // last instruction was opAssignGlobal
 	compactFmt bool    // compact value sprint formatting
-	sortBuf    []int64 // radix sort buffer
+	sortBuf32  []int32 // radix sort buffer
+	sortBuf16  []int16 // radix sort buffer
+	sortBuf8   []int8  // radix sort buffer
 
 	Prec int    // floating point formatting precision (default: -1)
 	OFS  string // output field separator (default: " ")

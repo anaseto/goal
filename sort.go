@@ -98,19 +98,27 @@ func sortUp(ctx *Context, x V) V {
 	if flags.Has(flagAscending) {
 		return x
 	}
-	xa = xa.shallowClone()
 	switch xv := xa.(type) {
 	case *AB:
+		xv = shallowCloneAB(xv)
 		sortBools(xv.elts)
+		xv.setFlags(flags | flagAscending)
+		return NewV(xv)
 	case *AI:
-		sortInts(ctx, xv)
+		xv = sortInts(ctx, xv)
+		xv.setFlags(flags | flagAscending)
+		return NewV(xv)
 	case *AV:
-		sort.Stable(xv)
+		xa = xv.shallowClone()
+		sort.Stable(xa)
+		xa.setFlags(flags | flagAscending)
+		return NewV(xa)
 	default:
+		xa = xa.shallowClone()
 		sort.Sort(xa)
+		xa.setFlags(flags | flagAscending)
+		return NewV(xa)
 	}
-	xa.setFlags(flags | flagAscending)
-	return NewV(xa)
 }
 
 func sortBools(xs []bool) {
@@ -127,26 +135,23 @@ func sortBools(xs []bool) {
 	}
 }
 
-func sortInts(ctx *Context, xv *AI) {
-	xlen := xv.Len()
-	if xlen > 32 {
+func sortInts(ctx *Context, xv *AI) *AI {
+	if xv.Len() > 32 {
 		min, max := minMax(xv)
 		span := max - min + 1
+		if span == 1 {
+			return xv
+		}
 		if span < 256 {
+			xv = shallowCloneAI(xv)
 			sortSmallInts(xv.elts, min)
-			return
+			return xv
 		}
-		if xlen < 256 {
-			if ctx.sortBuf == nil {
-				ctx.sortBuf = make([]int64, 256)
-			}
-			radixSort(xv.elts, ctx.sortBuf)
-			return
-		}
-		radixSort(xv.elts, make([]int64, xlen))
-		return
+		return radixSortAI(ctx, xv, min, max)
 	}
+	xv = shallowCloneAI(xv)
 	sort.Sort(xv)
+	return xv
 }
 
 func sortSmallInts(xs []int64, min int64) {
