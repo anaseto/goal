@@ -112,25 +112,23 @@ func radixSortWithBuffer[T signed](from, to []T, size uint, min T) {
 			sorted = true
 		)
 
+		// Compute counts by byte type at current radix
 		for _, elem := range from {
-			// For each elem to sort, fetch the byte at current radix
 			key = uint8(elem >> keyOffset)
-			// inc count of bytes of this type
 			offset[key]++
-			if sorted { // Detect sorted
+			if sorted {
 				sorted = elem >= prev
 				prev = elem
 			}
 		}
 
-		if sorted { // Short-circuit sorted
+		if sorted {
 			break
 		}
 
-		// Find target bucket offsets
+		// Compute target bucket offsets from counts
 		var watermark int
 		if keyOffset == size-radix {
-			// Handle signed values
 			// Negatives
 			for i := 128; i < len(offset); i++ {
 				count := offset[i]
@@ -152,12 +150,11 @@ func radixSortWithBuffer[T signed](from, to []T, size uint, min T) {
 
 		// Swap values between the buffers by radix
 		for _, elem := range from {
-			key = uint8(elem >> keyOffset) // Get the byte of each element at the radix
-			to[offset[key]] = elem         // Copy the element depending on byte offsets
+			key = uint8(elem >> keyOffset)
+			to[offset[key]] = elem
 			offset[key]++
 		}
 
-		// Reverse buffers on each pass
 		from, to = to, from
 	}
 
