@@ -198,7 +198,7 @@ func radixGradeAI(ctx *Context, x *AI, min, max int64) []int64 {
 		} else {
 			buf = make([]int16, xlen*2)
 		}
-		bufp := make([]int64, xlen*2) // int16 can be optimized to use just xlen
+		bufp := make([]int64, xlen*2)
 		for i := range bufp[:xlen] {
 			bufp[i] = int64(i)
 		}
@@ -215,7 +215,7 @@ func radixGradeAI(ctx *Context, x *AI, min, max int64) []int64 {
 		} else {
 			buf = make([]int32, xlen*2)
 		}
-		bufp := make([]int64, xlen*2) // int32 can be optimized to use just xlen
+		bufp := make([]int64, xlen*2)
 		for i := range bufp[:xlen] {
 			bufp[i] = int64(i)
 		}
