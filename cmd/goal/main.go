@@ -66,6 +66,7 @@ func getHelp() map[string]string {
 	for _, v := range []string{"abs", "bytes", "ceil", "error", "eval", "firsts", "json", "ocount", "panic", "sign", "csv", "in", "mod", "nan", "rotate", "sub"} {
 		help[v] = getBuiltin(helpNamedVerbs, v, nvcols)
 	}
+	help["¿"] = getBuiltin(helpNamedVerbs, "firsts", nvcols) + getBuiltin(helpNamedVerbs, "in", nvcols)
 	for _, v := range []string{"chdir", "close", "env", "flush", "import", "open", "print", "read", "run", "say", "shell", "ARGS", "STDIN", "STDOUT", "STDERR"} {
 		help[v] = getBuiltin(helpIO, v, nvcols)
 	}
