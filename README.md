@@ -40,7 +40,7 @@ It's main distinctive features are as follows:
 * Array performance is good enough most of the time, with variable liveness
   analysis that reduces cloning by reusing dead immutable arrays (good in code
   with limited branching), though it is not a goal to reach state-of-the-art
-  (no SIMD, and small-int optimizations for bools only).
+  (no SIMD, and currently only boolean and int64 integer types).
 + Scalar performance is typical for a bytecode-compiled interpreter (without
   JIT), somewhat slower than a C bytecode interpreter: value representation is
   less compact than how it could be done in C, but Goal does have unboxed

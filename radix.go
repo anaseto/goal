@@ -64,8 +64,8 @@ func radixSortAI(ctx *Context, x *AI, min, max int64) *AI {
 		return r
 	}
 	// NOTE: given that Go's stdlib interface-based sort isn't the fastest
-	// on integers, it would often be better to use it for 64bits too, but
-	// the advantage isn't as clear in all cases.
+	// on integers, it would sometimes be better to use radix sort for
+	// 64bits too, but not always.
 	x = shallowCloneAI(x)
 	sort.Sort(x)
 	return x
@@ -132,24 +132,24 @@ func radixSortWithBuffer[T signed](from, to []T, size uint, min T) {
 		}
 
 		// Compute target bucket offsets from counts
-		var watermark int
+		var sum int
 		if keyOffset == size-radix {
 			// Negatives
 			for i := 128; i < len(offset); i++ {
 				count := offset[i]
-				offset[i] = watermark
-				watermark += count
+				offset[i] = sum
+				sum += count
 			}
 			// Positives
 			for i := 0; i < 128; i++ {
 				count := offset[i]
-				offset[i] = watermark
-				watermark += count
+				offset[i] = sum
+				sum += count
 			}
 		} else {
 			for i, count := range offset {
-				offset[i] = watermark
-				watermark += count
+				offset[i] = sum
+				sum += count
 			}
 		}
 
@@ -182,7 +182,6 @@ func radixGradeSmallRange(ctx *Context, x *AI, min, max int64) []int64 {
 	}
 	from := buf[:xlen]
 	to := buf[xlen : xlen*2]
-	p := make([]int64, xlen)
 	if min >= math.MinInt8 && max <= math.MaxInt8 {
 		for i, xi := range x.elts {
 			from[i] = int8(xi)
@@ -191,6 +190,12 @@ func radixGradeSmallRange(ctx *Context, x *AI, min, max int64) []int64 {
 		for i, xi := range x.elts {
 			from[i] = int8(xi - min - math.MinInt8)
 		}
+	}
+	var p []int64
+	if reusableRCp(x.rc) {
+		p = x.elts
+	} else {
+		p = make([]int64, xlen)
 	}
 	radixGradeInt8(from, to, p)
 	return p
@@ -208,11 +213,7 @@ func radixGradeAI(ctx *Context, x *AI, min, max int64) []int64 {
 		} else {
 			buf = make([]int16, xlen*2)
 		}
-		bufp := make([]int64, xlen*2)
-		for i := range bufp[:xlen] {
-			bufp[i] = int64(i)
-		}
-		r := radixGradeAIWithSize(x, buf, bufp, 16, math.MinInt16)
+		r := radixGradeAIWithSize(x, buf, 16, math.MinInt16)
 		return r
 	}
 	if min >= math.MinInt32 && max <= math.MaxInt32 {
@@ -225,11 +226,7 @@ func radixGradeAI(ctx *Context, x *AI, min, max int64) []int64 {
 		} else {
 			buf = make([]int32, xlen*2)
 		}
-		bufp := make([]int64, xlen*2)
-		for i := range bufp[:xlen] {
-			bufp[i] = int64(i)
-		}
-		r := radixGradeAIWithSize(x, buf, bufp, 32, math.MinInt32)
+		r := radixGradeAIWithSize(x, buf, 32, math.MinInt32)
 		return r
 	}
 	p := &permutation{Perm: permRange(xlen), X: x}
@@ -237,28 +234,33 @@ func radixGradeAI(ctx *Context, x *AI, min, max int64) []int64 {
 	return p.Perm
 }
 
-func radixGradeAIWithSize[T signed](x *AI, buf []T, bufp []int64, size uint, min T) []int64 {
-	_, fromp := radixGradeIntsWithSize[T, int64](x.elts, buf, bufp, size, min)
-	return fromp
-}
-
-func radixGradeIntsWithSize[T signed, S any](x []int64, buf []T, bufp []S, size uint, min T) ([]T, []S) {
-	xlen := len(x)
+func radixGradeAIWithSize[T signed](x *AI, buf []T, size uint, min T) []int64 {
+	xlen := x.Len()
 	from := buf[:xlen]
 	to := buf[xlen : xlen*2]
-	fromp := bufp[:xlen]
-	top := bufp[xlen : xlen*2]
-	for i, xi := range x {
+	for i, xi := range x.elts {
 		from[i] = T(xi)
 	}
+	var fromp, top []int64
+	if reusableRCp(x.rc) {
+		fromp = x.elts
+		top = make([]int64, xlen)
+	} else {
+		bufp := make([]int64, xlen*2)
+		fromp = bufp[:xlen]
+		top = bufp[xlen : xlen*2]
+	}
+	for i := range fromp {
+		fromp[i] = int64(i)
+	}
 	radixGradeWithBuffer[T](from, to, fromp, top, size, min)
-	return from, fromp[0:len(fromp):len(fromp)]
+	return fromp
 }
 
 // radixGradeWithBuffer sorts from using a radix sort. The to buffer, fromp,
 // top slices should have same length as from, size should be the bitsize of T,
 // and min should be the minimum possible value of type T.
-func radixGradeWithBuffer[T signed, S any](from, to []T, fromp, top []S, size uint, min T) {
+func radixGradeWithBuffer[T signed](from, to []T, fromp, top []int64, size uint, min T) {
 	var keyOffset uint
 	for keyOffset = 0; keyOffset < size; keyOffset += radix {
 		var (
@@ -283,24 +285,24 @@ func radixGradeWithBuffer[T signed, S any](from, to []T, fromp, top []S, size ui
 		}
 
 		// Compute target bucket offsets from counts
-		var watermark int
+		var sum int
 		if keyOffset == size-radix {
 			// Negatives
 			for i := 128; i < len(offset); i++ {
 				count := offset[i]
-				offset[i] = watermark
-				watermark += count
+				offset[i] = sum
+				sum += count
 			}
 			// Positives
 			for i := 0; i < 128; i++ {
 				count := offset[i]
-				offset[i] = watermark
-				watermark += count
+				offset[i] = sum
+				sum += count
 			}
 		} else {
 			for i, count := range offset {
-				offset[i] = watermark
-				watermark += count
+				offset[i] = sum
+				sum += count
 			}
 		}
 
@@ -338,18 +340,18 @@ func radixGradeInt8(from, to []int8, p []int64) {
 	}
 
 	// Compute target bucket offsets from counts
-	var watermark int
+	var sum int
 	// Negatives
 	for i := 128; i < len(offset); i++ {
 		count := offset[i]
-		offset[i] = watermark
-		watermark += count
+		offset[i] = sum
+		sum += count
 	}
 	// Positives
 	for i := 0; i < 128; i++ {
 		count := offset[i]
-		offset[i] = watermark
-		watermark += count
+		offset[i] = sum
+		sum += count
 	}
 
 	// Swap values between the buffers by radix
