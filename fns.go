@@ -1,6 +1,9 @@
 package goal
 
-import "strings"
+import (
+	"math"
+	"strings"
+)
 
 // enumFieldsKeys returns !x.
 func enumFieldsKeys(x V) V {
@@ -63,8 +66,11 @@ func rangeI(n int64) V {
 func rangeArray(x *AI) V {
 	cols := int64(1)
 	for _, n := range x.elts {
-		if n == 0 {
+		if n <= 0 {
 			return NewAV(nil)
+		}
+		if n > math.MaxInt64/cols {
+			return panics("!I : too big: overflow")
 		}
 		cols *= n
 	}
@@ -72,13 +78,13 @@ func rangeArray(x *AI) V {
 	reps := cols
 	ua := make([]int64, int(cols)*len(r))
 	var n int = 2
-	for i := range r {
+	for i, xi := range x.elts {
 		a := ua[i*int(cols) : (i+1)*int(cols)]
-		reps /= x.At(i)
+		reps /= xi
 		clen := reps * x.At(i)
 		for c := int64(0); c < cols/clen; c++ {
 			col := c * clen
-			for j := int64(0); j < x.At(i); j++ {
+			for j := int64(0); j < xi; j++ {
 				for k := int64(0); k < reps; k++ {
 					a[col+j*reps+k] = j
 				}
