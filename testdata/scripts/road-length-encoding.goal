@@ -1,5 +1,5 @@
 / from https://codegolf.stackexchange.com/questions/49307/road-length-encoding/
-{b:"-"*&c:sub["N""=""PP""- ""P""-"]@+/{x[2]*"n"$x 1}@+rx/(\d+)(.)/[x;-1];"$b\n\n$c\n\n$b"}"4N4P9N7P1N1P2N2P"
+{b:"-"*&c:sub["N""=""PP""- ""P""-"]@+/{x[2]*"i"$x 1}@+rx/(\d+)(.)/[x;-1];"\n\n"/(b;c;b)}"4N4P9N7P1N1P2N2P"
 /RESULT:
 "\n"^`
 ------------------------------
