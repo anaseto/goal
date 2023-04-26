@@ -169,26 +169,36 @@ func radixSortWithBuffer[T signed](from, to []T, size uint, min T) {
 	}
 }
 
-func radixGradeAI(ctx *Context, x *AI, min, max int64) []int64 {
+func radixGradeSmallRange(ctx *Context, x *AI, min, max int64) []int64 {
 	xlen := x.Len()
-	if min >= math.MinInt8 && max <= math.MaxInt8 {
-		var buf []int8
-		if xlen < cachedLen {
-			if ctx.sortBuf8 == nil {
-				ctx.sortBuf8 = make([]int8, cachedLen*2)
-			}
-			buf = ctx.sortBuf8
-		} else {
-			buf = make([]int8, xlen*2)
+	var buf []int8
+	if xlen < cachedLen {
+		if ctx.sortBuf8 == nil {
+			ctx.sortBuf8 = make([]int8, cachedLen*2)
 		}
-		from := buf[:xlen]
-		to := buf[xlen : xlen*2]
-		p := make([]int64, xlen)
+		buf = ctx.sortBuf8
+	} else {
+		buf = make([]int8, xlen*2)
+	}
+	from := buf[:xlen]
+	to := buf[xlen : xlen*2]
+	p := make([]int64, xlen)
+	if min >= math.MinInt8 && max <= math.MaxInt8 {
 		for i, xi := range x.elts {
 			from[i] = int8(xi)
 		}
-		radixGradeInt8(from, to, p)
-		return p
+	} else {
+		for i, xi := range x.elts {
+			from[i] = int8(xi - min - math.MinInt8)
+		}
+	}
+	radixGradeInt8(from, to, p)
+	return p
+}
+
+func radixGradeAI(ctx *Context, x *AI, min, max int64) []int64 {
+	xlen := x.Len()
+	if max-min+1 <= 256 {
 	}
 	if min >= math.MinInt16 && max <= math.MaxInt16 {
 		var buf []int16

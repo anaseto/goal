@@ -13,6 +13,7 @@ func TestRadix(t *testing.T) {
 	t.Run("Int8", func(t *testing.T) { testRadixSortSize(t, ctx, math.MinInt8/2, math.MaxInt8) })
 	t.Run("Int16", func(t *testing.T) { testRadixSortSize(t, ctx, math.MinInt16/2, math.MaxInt16) })
 	t.Run("Int32", func(t *testing.T) { testRadixSortSize(t, ctx, math.MinInt32/2, math.MaxInt32) })
+	t.Run("Int8", func(t *testing.T) { testRadixGradeSize(t, ctx, 100, 256) })
 	t.Run("Int8", func(t *testing.T) { testRadixGradeSize(t, ctx, math.MinInt8/2, math.MaxInt8) })
 	t.Run("Int16", func(t *testing.T) { testRadixGradeSize(t, ctx, math.MinInt16/2, math.MaxInt16) })
 	t.Run("Int32", func(t *testing.T) { testRadixGradeSize(t, ctx, math.MinInt32/2, math.MaxInt32) })

@@ -162,8 +162,9 @@ func sortSmallInts(xs []int64, min int64) {
 	}
 	i := 0
 	for j, n := range freq {
+		xk := int64(j) + min
 		for k := i; k < i+n; k++ {
-			xs[k] = int64(j) + min
+			xs[k] = xk
 		}
 		i += n
 	}
@@ -288,6 +289,9 @@ func ascendAI(ctx *Context, xv *AI) []int64 {
 		span := max - min + 1
 		if span == 1 {
 			return permRange(xlen)
+		}
+		if span <= 256 {
+			return radixGradeSmallRange(ctx, xv, min, max)
 		}
 		return radixGradeAI(ctx, xv, min, max)
 	}
