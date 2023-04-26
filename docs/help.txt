@@ -188,7 +188,7 @@ csv s      csv read     csv "1,2,3" -> ,"1" "2" "3"
 csv A      csv write    csv ,"1" "2" "3" -> "1,2,3\n"
 error x    error        r:error "msg"; (@r;.r) -> "e" "msg"
 eval s     comp/run     a:5;eval "a+2" -> 7         (unrestricted variant of .s)
-firsts X   mark firsts  firsts 0 0 2 3 0 2 3 4 -> 1 0 1 1 0 0 0 1
+firsts X   mark firsts  firsts 0 0 2 3 0 2 3 4 -> 1 0 1 1 0 0 0 1   (same as ¿X)
 json s     parse json   ^json `{"a":true,"b":"text"}` -> "a" "b"!(1;"text")
 nan n      isNaN        nan (0n;2;sqrt -1) -> 1 0 1
 ocount X   occur-count  ocount 3 4 5 3 4 4 7 -> 0 0 0 1 1 2 0
@@ -198,8 +198,8 @@ sign n     sign         sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
 
 s csv s    csv read     " " csv "1 2 3" -> ,"1" "2" "3"       (" " as separator)
 s csv A    csv write    " " csv ,"1" "2" "3" -> "1 2 3\n"     (" " as separator)
-x in s     contained    "bc" "ac" in "abcd" -> 1 0
-x in Y     member of    2 3 in 0 2 4 -> 1 0
+x in s     contained    "bc" "ac" in "abcd" -> 1 0                 (same as x¿s)
+x in Y     member of    2 3 in 0 2 4 -> 1 0                        (same as x¿Y)
 n mod n    modulus      3 mod 5 4 3 -> 2 1 0
 n nan n    fill NaNs    42 nan (1.5;sqrt -1) -> 1.5 42
 i rotate Y rotate       2 rotate 7 8 9 -> 9 7 8         -2 rotate 7 8 9 -> 8 9 7
