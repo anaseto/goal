@@ -261,9 +261,9 @@ func fold2vMax(x V) V {
 		}
 		return NewI(0)
 	case *AI:
-		return NewI(maxAI(xv))
+		return NewI(maxInt64s(xv.elts))
 	case *AF:
-		return NewF(maxAF(xv))
+		return NewF(maxFloat64s(xv.elts))
 	case *AS:
 		max := xv.elts[0]
 		for _, s := range xv.elts[1:] {
@@ -376,9 +376,9 @@ func fold2vMin(x V) V {
 		}
 		return NewI(1)
 	case *AI:
-		return NewI(minAI(xv))
+		return NewI(minInt64s(xv.elts))
 	case *AF:
-		return NewF(minAF(xv))
+		return NewF(minFloat64s(xv.elts))
 	case *AS:
 		min := xv.elts[0]
 		for _, s := range xv.elts[1:] {

@@ -9,7 +9,7 @@ func icountLinesGroup(x V) V {
 		if xv.Len() == 0 {
 			return NewAI(nil)
 		}
-		n := sumAB(xv)
+		n := sumBools(xv.elts)
 		if n == 0 {
 			return NewAI([]int64{int64(xv.Len())})
 		}
@@ -18,7 +18,7 @@ func icountLinesGroup(x V) V {
 		if xv.Len() == 0 {
 			return NewAI(nil)
 		}
-		max := maxAI(xv)
+		max := maxInt64s(xv.elts)
 		if max < 0 {
 			max = -1
 		}
@@ -71,133 +71,23 @@ func groupBy(x, y V) V {
 	}
 	switch xv := x.value.(type) {
 	case *AB:
-		n := int(sumAB(xv))
-		r := make([]V, int(B2I(n > 0)+1))
-		switch yv := y.value.(type) {
-		case *AB:
-			if n == 0 {
-				r[0] = y
-				return NewAVWithRC(r, yv.rc)
-			}
-			rf, rt := groupByBools[bool](xv.elts, yv.elts, n)
-			var nrc int = 2
-			r[0] = NewABWithRC(rf, &nrc)
-			r[1] = NewABWithRC(rt, &nrc)
-			return NewAVWithRC(r, &nrc)
-		case *AI:
-			if n == 0 {
-				r[0] = y
-				return NewAVWithRC(r, yv.rc)
-			}
-			rf, rt := groupByBools[int64](xv.elts, yv.elts, n)
-			var nrc int = 2
-			r[0] = NewAIWithRC(rf, &nrc)
-			r[1] = NewAIWithRC(rt, &nrc)
-			return NewAVWithRC(r, &nrc)
-		case *AF:
-			if n == 0 {
-				r[0] = y
-				return NewAVWithRC(r, yv.rc)
-			}
-			rf, rt := groupByBools[float64](xv.elts, yv.elts, n)
-			var nrc int = 2
-			r[0] = NewAFWithRC(rf, &nrc)
-			r[1] = NewAFWithRC(rt, &nrc)
-			return NewAVWithRC(r, &nrc)
-		case *AS:
-			if n == 0 {
-				r[0] = y
-				return NewAVWithRC(r, yv.rc)
-			}
-			rf, rt := groupByBools[string](xv.elts, yv.elts, n)
-			var nrc int = 2
-			r[0] = NewASWithRC(rf, &nrc)
-			r[1] = NewASWithRC(rt, &nrc)
-			return NewAVWithRC(r, &nrc)
-		case *AV:
-			if n == 0 {
-				r[0] = y
-				return NewAVWithRC(r, yv.rc)
-			}
-			rf, rt := groupByBools[V](xv.elts, yv.elts, n)
-			*yv.rc += 2
-			r[0] = Canonical(NewAVWithRC(rf, yv.rc))
-			r[1] = Canonical(NewAVWithRC(rt, yv.rc))
-			return NewAV(r)
-		default:
-			return panicType("f=Y", "Y", y)
-		}
+		return groupByBoolsV(xv.elts, y)
 	case *AI:
-		max := maxAI(xv)
+		max := maxInt64s(xv.elts)
 		if max < 0 {
-			max = -1
-		}
-		r := make([]V, max+1)
-		// NOTE: we could do a stack-allocating variant for small max.
-		// Also, if groups are big, we could maybe just allocate them
-		// separately.
-		counta := make([]int64, 2*(max+1))
-		icounts := counta[:max+1]
-		countn := 0
-		for _, j := range xv.elts {
-			if j < 0 {
-				countn++
-				continue
-			}
-			icounts[j]++
-		}
-		scounts := counta[max+1:]
-		sn := int64(0)
-		for i, n := range icounts {
-			sn += n
-			scounts[i] = sn
+			return NewAV(nil)
 		}
 		switch yv := y.value.(type) {
 		case *AB:
-			rg := groupByInt64s[bool](xv.elts, icounts, scounts, yv.elts, countn)
-			var n int = 2
-			pj := int64(0)
-			for i := range r {
-				r[i] = NewABWithRC(rg[pj:scounts[i]], &n)
-				pj = scounts[i]
-			}
-			return NewAVWithRC(r, &n)
+			return groupByInt64sBools(xv.elts, yv.elts, max)
 		case *AI:
-			rg := groupByInt64s[int64](xv.elts, icounts, scounts, yv.elts, countn)
-			var n int = 2
-			pj := int64(0)
-			for i := range r {
-				r[i] = NewAIWithRC(rg[pj:scounts[i]], &n)
-				pj = scounts[i]
-			}
-			return NewAVWithRC(r, &n)
+			return groupByInt64sInt64s(xv.elts, yv.elts, max)
 		case *AF:
-			rg := groupByInt64s[float64](xv.elts, icounts, scounts, yv.elts, countn)
-			var n int = 2
-			pj := int64(0)
-			for i := range r {
-				r[i] = NewAFWithRC(rg[pj:scounts[i]], &n)
-				pj = scounts[i]
-			}
-			return NewAVWithRC(r, &n)
+			return groupByInt64sFloat64s(xv.elts, yv.elts, max)
 		case *AS:
-			rg := groupByInt64s[string](xv.elts, icounts, scounts, yv.elts, countn)
-			var n int = 2
-			pj := int64(0)
-			for i := range r {
-				r[i] = NewASWithRC(rg[pj:scounts[i]], &n)
-				pj = scounts[i]
-			}
-			return NewAVWithRC(r, &n)
+			return groupByInt64sStrings(xv.elts, yv.elts, max)
 		case *AV:
-			rg := groupByInt64s[V](xv.elts, icounts, scounts, yv.elts, countn)
-			pj := int64(0)
-			*yv.rc += 2
-			for i := range r {
-				r[i] = Canonical(NewAVWithRC(rg[pj:scounts[i]], yv.rc))
-				pj = scounts[i]
-			}
-			return NewAV(r)
+			return groupByInt64sVs(xv.elts, yv.elts, max, yv.rc)
 		default:
 			return panicType("f=Y", "Y", x)
 		}
@@ -209,6 +99,65 @@ func groupBy(x, y V) V {
 		return groupBy(ix, y)
 	default:
 		return panicType("f=Y", "f[Y]", x)
+	}
+}
+
+func groupByBoolsV(x []bool, y V) V {
+	n := int(sumBools(x))
+	r := make([]V, int(B2I(n > 0)+1))
+	switch yv := y.value.(type) {
+	case *AB:
+		if n == 0 {
+			r[0] = y
+			return NewAVWithRC(r, yv.rc)
+		}
+		rf, rt := groupByBools[bool](x, yv.elts, n)
+		var nrc int = 2
+		r[0] = NewABWithRC(rf, &nrc)
+		r[1] = NewABWithRC(rt, &nrc)
+		return NewAVWithRC(r, &nrc)
+	case *AI:
+		if n == 0 {
+			r[0] = y
+			return NewAVWithRC(r, yv.rc)
+		}
+		rf, rt := groupByBools[int64](x, yv.elts, n)
+		var nrc int = 2
+		r[0] = NewAIWithRC(rf, &nrc)
+		r[1] = NewAIWithRC(rt, &nrc)
+		return NewAVWithRC(r, &nrc)
+	case *AF:
+		if n == 0 {
+			r[0] = y
+			return NewAVWithRC(r, yv.rc)
+		}
+		rf, rt := groupByBools[float64](x, yv.elts, n)
+		var nrc int = 2
+		r[0] = NewAFWithRC(rf, &nrc)
+		r[1] = NewAFWithRC(rt, &nrc)
+		return NewAVWithRC(r, &nrc)
+	case *AS:
+		if n == 0 {
+			r[0] = y
+			return NewAVWithRC(r, yv.rc)
+		}
+		rf, rt := groupByBools[string](x, yv.elts, n)
+		var nrc int = 2
+		r[0] = NewASWithRC(rf, &nrc)
+		r[1] = NewASWithRC(rt, &nrc)
+		return NewAVWithRC(r, &nrc)
+	case *AV:
+		if n == 0 {
+			r[0] = y
+			return NewAVWithRC(r, yv.rc)
+		}
+		rf, rt := groupByBools[V](x, yv.elts, n)
+		*yv.rc += 2
+		r[0] = Canonical(NewAVWithRC(rf, yv.rc))
+		r[1] = Canonical(NewAVWithRC(rt, yv.rc))
+		return NewAV(r)
+	default:
+		return panicType("f=Y", "Y", y)
 	}
 }
 
@@ -229,14 +178,96 @@ func groupByBools[T any](x []bool, y []T, n int) (rf, rt []T) {
 	return rf, rt
 }
 
-func groupByInt64s[T any](x, icounts, scounts []int64, y []T, n int) []T {
-	r := make([]T, len(x)-n)
-	for i, j := range x {
-		if j < 0 {
+func groupByPrepare[T any](x []int64, max int64) ([]V, []int, []T) {
+	r := make([]V, max+1)
+	offset := make([]int, max+1)
+	count := 0
+	for _, xi := range x {
+		if xi < 0 {
 			continue
 		}
-		r[scounts[j]-icounts[j]] = y[i]
-		icounts[j]--
+		count++
+		offset[xi]++
 	}
-	return r
+	yg := make([]T, count)
+	return r, offset, yg
+}
+
+func groupByScatter[T any](x []int64, y []T, yg []T, offset []int) {
+	for i, xi := range x {
+		if xi < 0 {
+			continue
+		}
+		j := offset[xi]
+		offset[xi]++
+		yg[j] = y[i]
+	}
+}
+
+func groupByInt64sBools(x []int64, y []bool, max int64) V {
+	r, offset, yg := groupByPrepare[bool](x, max)
+	var rc int = 2
+	count := 0
+	for i, n := range offset {
+		offset[i] = count
+		r[i] = NewABWithRC(yg[count:count+n], &rc)
+		count += n
+	}
+	groupByScatter[bool](x, y, yg, offset)
+	return NewAVWithRC(r, &rc)
+}
+
+func groupByInt64sInt64s(x []int64, y []int64, max int64) V {
+	r, offset, yg := groupByPrepare[int64](x, max)
+	var rc int = 2
+	count := 0
+	for i, n := range offset {
+		offset[i] = count
+		r[i] = NewAIWithRC(yg[count:count+n], &rc)
+		count += n
+	}
+	groupByScatter[int64](x, y, yg, offset)
+	return NewAVWithRC(r, &rc)
+}
+
+func groupByInt64sFloat64s(x []int64, y []float64, max int64) V {
+	r, offset, yg := groupByPrepare[float64](x, max)
+	var rc int = 2
+	count := 0
+	for i, n := range offset {
+		offset[i] = count
+		r[i] = NewAFWithRC(yg[count:count+n], &rc)
+		count += n
+	}
+	groupByScatter[float64](x, y, yg, offset)
+	return NewAVWithRC(r, &rc)
+}
+
+func groupByInt64sStrings(x []int64, y []string, max int64) V {
+	r, offset, yg := groupByPrepare[string](x, max)
+	var rc int = 2
+	count := 0
+	for i, n := range offset {
+		offset[i] = count
+		r[i] = NewASWithRC(yg[count:count+n], &rc)
+		count += n
+	}
+	groupByScatter[string](x, y, yg, offset)
+	return NewAVWithRC(r, &rc)
+}
+
+func groupByInt64sVs(x []int64, y []V, max int64, rc *int) V {
+	r, offset, yg := groupByPrepare[V](x, max)
+	*rc += 2
+	count := 0
+	for i, n := range offset {
+		offset[i] = count
+		r[i] = NewAVWithRC(yg[count:count+n], rc)
+		count += n
+	}
+	groupByScatter[V](x, y, yg, offset)
+	for i, ri := range r {
+		r[i] = Canonical(ri)
+	}
+	return NewAV(r)
 }

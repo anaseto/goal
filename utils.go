@@ -122,9 +122,9 @@ func minMax(x *AI) (min, max int64) {
 	return
 }
 
-func maxAI(x *AI) int64 {
+func maxInt64s(x []int64) int64 {
 	max := int64(math.MinInt64)
-	for _, xi := range x.elts {
+	for _, xi := range x {
 		if xi > max {
 			max = xi
 		}
@@ -132,9 +132,9 @@ func maxAI(x *AI) int64 {
 	return max
 }
 
-func minAI(x *AI) int64 {
+func minInt64s(x []int64) int64 {
 	min := int64(math.MaxInt64)
-	for _, xi := range x.elts {
+	for _, xi := range x {
 		if xi < min {
 			min = xi
 		}
@@ -142,9 +142,9 @@ func minAI(x *AI) int64 {
 	return min
 }
 
-func maxAF(x *AF) float64 {
+func maxFloat64s(x []float64) float64 {
 	max := math.Inf(-1)
-	for _, xi := range x.elts {
+	for _, xi := range x {
 		// NOTE: not equivalent to math.Max(xi, max) if there are NaNs,
 		// but faster, so keep it this way.
 		if xi > max {
@@ -154,9 +154,9 @@ func maxAF(x *AF) float64 {
 	return max
 }
 
-func minAF(x *AF) float64 {
+func minFloat64s(x []float64) float64 {
 	min := math.Inf(1)
-	for _, xi := range x.elts {
+	for _, xi := range x {
 		// NOTE: not equivalent to math.Min(xi, min) if there are NaNs,
 		// but faster, so keep it this way.
 		if xi < min {
@@ -848,9 +848,9 @@ func cloneArgs(a []V) []V {
 	return args
 }
 
-func sumAB(x *AB) int64 {
+func sumBools(x []bool) int64 {
 	n := int64(0)
-	for _, xi := range x.elts {
+	for _, xi := range x {
 		if xi {
 			n++
 		}
