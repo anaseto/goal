@@ -314,7 +314,7 @@ eval[s;loc;pfx]         like eval s, but provide loc as location (usually a
 utf8 s     is UTF-8     utf8 "aπc" -> 1                        utf8 "a\xff" -> 0
 s utf8 s   to UTF-8     "b" utf8 "a\xff" -> "ab"      (replace invalid with "b")
 
-MATH: atan2[n;n]; cos n; exp n; log n; round n; sin n; sqrt n
+MATH: atan[n;n]; cos n; exp n; log n; round n; sin n; sqrt n
 
 ADVERBS HELP
 f'x    each      #'(4 5;6 7 8) -> 2 3

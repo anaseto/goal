@@ -156,7 +156,7 @@ ops:(
   "minimum" "&"
   "maximum" "|"
   "modulus" " mod "
-  "arctan2" " atan2 "
+  "arctan2" " atan "
 )
 
 types:"B" "F" "I" "S" / atom types

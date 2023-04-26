@@ -132,7 +132,7 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterMonad("sign", vfSign)
 
 	// math
-	ctx.RegisterDyad("atan2", vfAtan2)
+	ctx.RegisterDyad("atan", vfAtan)
 	ctx.RegisterMonad("cos", vfCos)
 	ctx.RegisterMonad("exp", vfExp)
 	ctx.RegisterMonad("log", vfLog)

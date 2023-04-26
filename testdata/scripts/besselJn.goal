@@ -1,4 +1,4 @@
-pi:atan2[-1.0;0.0]
+pi:atan[-1.0;0.0]
 number:40
 step:pi%number
 jn:{[n;x]

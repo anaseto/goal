@@ -4404,7 +4404,7 @@ func modulusAIV(x *AI, y V) V {
 	}
 }
 
-// arctan2 returns x atan2 y.
+// arctan2 returns x atan y.
 func arctan2(x, y V) V {
 	if x.IsI() {
 		return arctan2IV(x.I(), y)
@@ -4430,7 +4430,7 @@ func arctan2(x, y V) V {
 			return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 		case array:
 			if yv.Len() != xv.Len() {
-				return panicLength("x atan2 y", xv.Len(), yv.Len())
+				return panicLength("x atan y", xv.Len(), yv.Len())
 			}
 			r := xv.reuse()
 			for i, xi := range xv.elts {
@@ -4456,7 +4456,7 @@ func arctan2(x, y V) V {
 		if ok {
 			r := dictArith(xv, yv, arctan2)
 			if r.IsPanic() {
-				return ppanic("d atan2 d", r)
+				return ppanic("d atan d", r)
 			}
 			return r
 		}
@@ -4467,7 +4467,7 @@ func arctan2(x, y V) V {
 		v.InitRC()
 		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
 	default:
-		return panicType("x atan2 y", "x", x)
+		return panicType("x atan y", "x", x)
 	}
 }
 
@@ -4515,7 +4515,7 @@ func arctan2FV(x float64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicType("x atan2 y", "y", y)
+		return panicType("x atan y", "y", y)
 	}
 }
 
@@ -4563,7 +4563,7 @@ func arctan2IV(x int64, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicType("x atan2 y", "y", y)
+		return panicType("x atan y", "y", y)
 	}
 }
 
@@ -4585,7 +4585,7 @@ func arctan2ABV(x *AB, y V) V {
 	switch yv := y.value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return panicLength("x atan2 y", x.Len(), yv.Len())
+			return panicLength("x atan y", x.Len(), yv.Len())
 		}
 		r := make([]float64, yv.Len())
 		for i := range r {
@@ -4594,7 +4594,7 @@ func arctan2ABV(x *AB, y V) V {
 		return NewAFWithRC(r, reuseRCp(x.rc))
 	case *AF:
 		if x.Len() != yv.Len() {
-			return panicLength("x atan2 y", x.Len(), yv.Len())
+			return panicLength("x atan y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.elts {
@@ -4603,7 +4603,7 @@ func arctan2ABV(x *AB, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return panicLength("x atan2 y", x.Len(), yv.Len())
+			return panicLength("x atan y", x.Len(), yv.Len())
 		}
 		r := make([]float64, yv.Len())
 		for i := range r {
@@ -4619,7 +4619,7 @@ func arctan2ABV(x *AB, y V) V {
 		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
-			return panicLength("x atan2 y", x.Len(), yv.Len())
+			return panicLength("x atan y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.elts {
@@ -4631,7 +4631,7 @@ func arctan2ABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicType("x atan2 y", "y", y)
+		return panicType("x atan y", "y", y)
 	}
 }
 
@@ -4653,7 +4653,7 @@ func arctan2AFV(x *AF, y V) V {
 	switch yv := y.value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return panicLength("x atan2 y", x.Len(), yv.Len())
+			return panicLength("x atan y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.elts {
@@ -4662,7 +4662,7 @@ func arctan2AFV(x *AF, y V) V {
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
-			return panicLength("x atan2 y", x.Len(), yv.Len())
+			return panicLength("x atan y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.elts {
@@ -4671,7 +4671,7 @@ func arctan2AFV(x *AF, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return panicLength("x atan2 y", x.Len(), yv.Len())
+			return panicLength("x atan y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
 		for i := range r.elts {
@@ -4687,7 +4687,7 @@ func arctan2AFV(x *AF, y V) V {
 		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
-			return panicLength("x atan2 y", x.Len(), yv.Len())
+			return panicLength("x atan y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.elts {
@@ -4699,7 +4699,7 @@ func arctan2AFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicType("x atan2 y", "y", y)
+		return panicType("x atan y", "y", y)
 	}
 }
 
@@ -4721,7 +4721,7 @@ func arctan2AIV(x *AI, y V) V {
 	switch yv := y.value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
-			return panicLength("x atan2 y", x.Len(), yv.Len())
+			return panicLength("x atan y", x.Len(), yv.Len())
 		}
 		r := make([]float64, yv.Len())
 		for i := range r {
@@ -4730,7 +4730,7 @@ func arctan2AIV(x *AI, y V) V {
 		return NewAFWithRC(r, reuseRCp(x.rc))
 	case *AF:
 		if x.Len() != yv.Len() {
-			return panicLength("x atan2 y", x.Len(), yv.Len())
+			return panicLength("x atan y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.elts {
@@ -4739,7 +4739,7 @@ func arctan2AIV(x *AI, y V) V {
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
-			return panicLength("x atan2 y", x.Len(), yv.Len())
+			return panicLength("x atan y", x.Len(), yv.Len())
 		}
 		r := make([]float64, yv.Len())
 		for i := range r {
@@ -4755,7 +4755,7 @@ func arctan2AIV(x *AI, y V) V {
 		return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
 	case *AV:
 		if x.Len() != yv.Len() {
-			return panicLength("x atan2 y", x.Len(), yv.Len())
+			return panicLength("x atan y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
 		for i := range r.elts {
@@ -4767,6 +4767,6 @@ func arctan2AIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	default:
-		return panicType("x atan2 y", "y", y)
+		return panicType("x atan y", "y", y)
 	}
 }

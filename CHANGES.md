@@ -14,6 +14,8 @@
   `>I` when `I` fits into a `[]int8`, `[]int16` or `[]int32` slice).
 + Add ¿ as symbol alternative for in and firsts, the boolean primitives
   counterparts of ?.
++ Rename atan2 into atan, which is now dyadic and accepts either one or two
+  arguments (same simplification as Lua 5.3 did). (breaking change)
 + Fix missing integer overflow check in odometer.
 
 # v0.15.0 2023-04-21
