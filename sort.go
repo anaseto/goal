@@ -124,7 +124,7 @@ func sortInts(ctx *Context, xv *AI) *AI {
 		if span == 1 {
 			return xv
 		}
-		if span < 256 {
+		if span <= 256 {
 			xv = shallowCloneAI(xv)
 			sortSmallInts(xv.elts, min)
 			return xv
@@ -138,9 +138,8 @@ func sortInts(ctx *Context, xv *AI) *AI {
 
 func sortSmallInts(xs []int64, min int64) {
 	var freq [256]int
-	offset := -min
 	for _, xi := range xs {
-		freq[xi+offset]++
+		freq[xi-min]++
 	}
 	i := 0
 	for j, n := range freq {
