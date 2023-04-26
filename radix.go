@@ -198,8 +198,6 @@ func radixGradeSmallRange(ctx *Context, x *AI, min, max int64) []int64 {
 
 func radixGradeAI(ctx *Context, x *AI, min, max int64) []int64 {
 	xlen := x.Len()
-	if max-min+1 <= 256 {
-	}
 	if min >= math.MinInt16 && max <= math.MaxInt16 {
 		var buf []int16
 		if xlen < cachedLen {

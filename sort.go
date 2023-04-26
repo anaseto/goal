@@ -65,24 +65,6 @@ func (x *Dict) Swap(i, j int) {
 	x.values.Swap(i, j)
 }
 
-type sortDictKeys Dict
-
-// Less satisfies the specification of sort.Interface.
-func (x *sortDictKeys) Less(i, j int) bool {
-	return x.keys.Less(i, j)
-}
-
-// Swap satisfies the specification of sort.Interface.
-func (x *sortDictKeys) Swap(i, j int) {
-	x.keys.Swap(i, j)
-	x.values.Swap(i, j)
-}
-
-// Len satisfies the specification of sort.Interface.
-func (x *sortDictKeys) Len() int {
-	return x.keys.Len()
-}
-
 // sortUp returns ^x.
 func sortUp(ctx *Context, x V) V {
 	xa, ok := x.value.(array)
