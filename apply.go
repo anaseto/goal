@@ -410,7 +410,7 @@ func (ctx *Context) applyDict(d *Dict, y V) V {
 	if !ok {
 		return Panicf("d@y : key not found (%s)", y.value.(array).at(i).Sprint(ctx))
 	}
-	r := d.values.atIndices(azi)
+	r := d.values.atInts(azi.elts)
 	initRC(r)
 	return NewV(r)
 }

@@ -18,6 +18,7 @@ type array interface {
 	setFlags(flags)
 	set(i int, y V)
 	atIndices(y *AI) array // x[y] (goal code)
+	atInts([]int64) array
 	shallowClone() array
 }
 
@@ -321,6 +322,56 @@ func (x *AV) atIndices(y *AI) array {
 		if yi < 0 {
 			yi += xlen
 		}
+		r[i] = x.At(int(yi))
+	}
+	nr := &AV{elts: r}
+	var p *int
+	if reusableRCp(x.rc) {
+		p = x.rc
+	} else {
+		var n int
+		p = &n
+	}
+	nr.InitWithRC(p)
+	a, _ := normalize(nr)
+	return a
+}
+
+func (x *AB) atInts(y []int64) array {
+	r := make([]bool, len(y))
+	for i, yi := range y {
+		r[i] = x.At(int(yi))
+	}
+	return &AB{elts: r}
+}
+
+func (x *AI) atInts(y []int64) array {
+	r := make([]int64, len(y))
+	for i, yi := range y {
+		r[i] = x.At(int(yi))
+	}
+	return &AI{elts: r}
+}
+
+func (x *AF) atInts(y []int64) array {
+	r := make([]float64, len(y))
+	for i, yi := range y {
+		r[i] = x.At(int(yi))
+	}
+	return &AF{elts: r}
+}
+
+func (x *AS) atInts(y []int64) array {
+	r := make([]string, len(y))
+	for i, yi := range y {
+		r[i] = x.At(int(yi))
+	}
+	return &AS{elts: r}
+}
+
+func (x *AV) atInts(y []int64) array {
+	r := make([]V, len(y))
+	for i, yi := range y {
 		r[i] = x.At(int(yi))
 	}
 	nr := &AV{elts: r}

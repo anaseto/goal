@@ -89,7 +89,7 @@ func sortUp(ctx *Context, x V) V {
 	if !ok {
 		switch xv := x.value.(type) {
 		case *Dict:
-			return NewV(sortUpDictKeys(xv))
+			return NewV(sortUpDictKeys(ctx, xv))
 		default:
 			return panicType("^X", "X", x)
 		}
@@ -169,33 +169,49 @@ func sortSmallInts(xs []int64, min int64) {
 	}
 }
 
-func sortBy(keys, values array) *Dict {
-	nk := keys.shallowClone()
-	nv := values.shallowClone()
+func sortBy(ctx *Context, keys, values array) *Dict {
+	idxs := ascendArray(ctx, values)
+	nk := keys.atInts(idxs)
 	initRC(nk)
+	nv := values.atInts(idxs)
 	initRC(nv)
-	nd := &Dict{keys: nk, values: nv}
-	sort.Stable(nd)
-	return nd
+	return &Dict{keys: nk, values: nv}
 }
 
-func sortUpDictKeys(d *Dict) *Dict {
+func ascendArray(ctx *Context, x array) []int64 {
+	switch xv := x.(type) {
+	case *AB:
+		return ascendBools(xv.elts)
+	case *AI:
+		return ascendAI(ctx, xv)
+	case array:
+		p := &permutation{Perm: permRange(xv.Len()), X: xv}
+		if !xv.getFlags().Has(flagAscending) {
+			sort.Stable(p)
+		}
+		return p.Perm
+	default:
+		panic("ascendArray")
+	}
+}
+
+func sortUpDictKeys(ctx *Context, d *Dict) *Dict {
 	flags := d.keys.getFlags()
 	if flags.Has(flagAscending) {
 		return d
 	}
-	d = sortBy(d.values, d.keys)
+	d = sortBy(ctx, d.values, d.keys)
 	d.keys, d.values = d.values, d.keys
 	d.keys.setFlags(flags | flagAscending)
 	return d
 }
 
-func sortUpDict(d *Dict) *Dict {
+func sortUpDict(ctx *Context, d *Dict) *Dict {
 	flags := d.values.getFlags()
 	if flags.Has(flagAscending) {
 		return d
 	}
-	d = sortBy(d.keys, d.values)
+	d = sortBy(ctx, d.keys, d.values)
 	d.values.setFlags(flags | flagAscending)
 	return d
 }
@@ -239,7 +255,7 @@ func ascend(ctx *Context, x V) V {
 		}
 		return NewAI(p.Perm)
 	case *Dict:
-		return NewV(sortUpDict(xv))
+		return NewV(sortUpDict(ctx, xv))
 	default:
 		return panicType("<X", "X", x)
 	}
@@ -295,7 +311,7 @@ func descend(ctx *Context, x V) V {
 		reverseSlice[int64](p.Perm)
 		return NewAI(p.Perm)
 	case *Dict:
-		d := sortUpDict(xv)
+		d := sortUpDict(ctx, xv)
 		reverseMut(d.keys)
 		reverseMut(d.values)
 		return NewV(d)

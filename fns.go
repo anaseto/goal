@@ -195,19 +195,19 @@ func where(x V) V {
 			if r.IsPanic() {
 				return r
 			}
-			return NewV(xv.keys.atIndices(r.value.(*AI)))
+			return NewV(xv.keys.atInts(r.value.(*AI).elts))
 		case *AI:
 			r := where(NewV(xv.values))
 			if r.IsPanic() {
 				return r
 			}
-			return NewV(xv.keys.atIndices(r.value.(*AI)))
+			return NewV(xv.keys.atInts(r.value.(*AI).elts))
 		case *AF:
 			r := where(NewV(xv.values))
 			if r.IsPanic() {
 				return r
 			}
-			return NewV(xv.keys.atIndices(r.value.(*AI)))
+			return NewV(xv.keys.atInts(r.value.(*AI).elts))
 		default:
 			return newDictValues(xv.keys, where(NewV(xv.values)))
 		}
