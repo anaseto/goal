@@ -306,7 +306,7 @@ func scanAny(s *Scanner) stateFn {
 		}
 		return s.emitOp(DYAD)
 	case '+', '*', '%', '!', '&', '|', '<', '>',
-		'=', '~', ',', '^', '#', '_', '$', '?', '@', '.', '»', '«':
+		'=', '~', ',', '^', '#', '_', '$', '?', '@', '.', '»', '«', '¿':
 		return scanDyadOp
 	case '"':
 		s.qr = s.r

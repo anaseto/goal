@@ -31,6 +31,7 @@ const (
 	vDrop                     // _
 	vCast                     // $
 	vFind                     // ?
+	vInFirsts                 // ¿
 	vApply                    // @
 	vApplyN                   // .
 	vList                     // (...;...;...)
@@ -62,6 +63,7 @@ func init() {
 		vDrop:     vfDrop,
 		vCast:     vfCast,
 		vFind:     vfFind,
+		vInFirsts: vfInFirsts,
 		vApply:    vfApply,
 		vApplyN:   vfApplyN,
 		vList:     vfList,
@@ -91,6 +93,7 @@ var vStrings = [...]string{
 	vDrop:     "_",
 	vCast:     "$",
 	vFind:     "?",
+	vInFirsts: "¿",
 	vApply:    "@",
 	vApplyN:   ".",
 	vList:     "list",
@@ -140,12 +143,12 @@ func (ctx *Context) initVariadics() {
 	// dyads
 	ctx.RegisterDyad("and", vfAnd)
 	ctx.RegisterDyad("csv", vfCSV)
-	ctx.RegisterDyad("in", vfIn)
+	v := ctx.RegisterDyad("in", vfIn)
 	ctx.RegisterDyad("or", vfOr)
 	ctx.RegisterDyad("mod", vfMod)
 	ctx.RegisterDyad("nan", vfNaN)
 	ctx.RegisterDyad("rotate", vfRotate)
-	v := ctx.RegisterDyad("rshift", vfRShift)
+	v = ctx.RegisterDyad("rshift", vfRShift)
 	ctx.vNames["»"] = v.variadic()
 	v = ctx.RegisterDyad("shift", vfShift)
 	ctx.vNames["«"] = v.variadic()
@@ -684,6 +687,18 @@ func vfIn(ctx *Context, args []V) V {
 		return memberOf(args[1], args[0])
 	default:
 		return panicRank("in")
+	}
+}
+
+// vfInFirsts implements the ¿ variadic verb.
+func vfInFirsts(ctx *Context, args []V) V {
+	switch len(args) {
+	case 1:
+		return markFirsts(ctx, args[0])
+	case 2:
+		return memberOf(args[1], args[0])
+	default:
+		return panicRank("¿")
 	}
 }
 
