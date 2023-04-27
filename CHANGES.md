@@ -2,16 +2,16 @@
 
 + New `"b"$s` for converting a string to and from array of bytes.
 + New `"c"$s` for converting a string to and from array of code points, and make
-  `"i"$s` now be parse int, and "n"$s only parse number (floats).
+  `"i"$s` now be parse int, and `"n"$s` only parse number (floats).
 + New `"s"$y` form that formats in a default way non-strings elements.
 + New `0i` value, representing the minimum representable integer.
 + Return `"i"` for `@i`, not `"n"`, because they're actually different types, even
   though implicit conversions are made when possible.
 + `$X` returns now stranding representation for mixed lists of strings and
   numbers, without parens.
-+ Add ¿ as symbol alternative for in and firsts, the boolean primitives
-  counterparts of ?.
-+ Rename atan2 into atan, which is now dyadic and accepts either one or two
++ Add `¿` as symbol alternative for in and firsts, the boolean primitive
+  counterparts of `?`.
++ Rename `atan2` into `atan`, which is now dyadic and accepts either one or two
   arguments (same simplification as Lua 5.3 did). (breaking change)
 + Improvements in sorting of integers, depending on the range, using either
   counting sort (`^I` for small-range) or radix sort (for `^I`, `<I`, and

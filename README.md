@@ -18,7 +18,7 @@ It's main distinctive features are as follows:
 
 * Syntax inspired mainly from the K language, but with quite a few deviations.
   For example, backquotes produce Go-like raw strings instead of symbols,
-  rx/[a-z]/ is a compile-time regular expression literal, and there is
+  `rx/\s+/` is a compile-time regular expression literal, and there is
   Perl-style string interpolation. On the other side, there are no tacit
   compositions, and digraph operator verbs and adverbs are gone or done
   differently (except for global assignment with ::).
@@ -89,10 +89,12 @@ written in Goal.
 # Documentation
 
 Documentation consists of the REPL help system with a short description and/or
-examples for all implemented features. Some prior knowledge of another array
+examples for all implemented features. The full contents are replicated below
+and in [help.txt](docs/help.txt).  Some prior knowledge of another array
 language, in particular K, can be useful, but not necessary: the best way to
-learn and discover the language is to play with it in the REPL. The full
-contents are replicated below. See also this short [FAQ](docs/FAQ.md).
+learn and discover the language is to play with it in the REPL. See also this
+short [FAQ](docs/FAQ.md), and the [Changelog](Changes.md) changes between
+releases.
 
 ```
 TOPICS HELP
