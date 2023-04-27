@@ -9,13 +9,16 @@
   though implicit conversions are made when possible.
 + `$X` returns now stranding representation for mixed lists of strings and
   numbers, without parens.
-+ Improvements in sorting of integers, depending on the range, using either
-  counting sort (`^I` for small-range) or radix sort (for `^I`, `<I`, and
-  `>I` when `I` fits into a `[]int8`, `[]int16` or `[]int32` slice).
 + Add ¿ as symbol alternative for in and firsts, the boolean primitives
   counterparts of ?.
 + Rename atan2 into atan, which is now dyadic and accepts either one or two
   arguments (same simplification as Lua 5.3 did). (breaking change)
++ Improvements in sorting of integers, depending on the range, using either
+  counting sort (`^I` for small-range) or radix sort (for `^I`, `<I`, and
+  `>I` when `I` fits into a `[]int8`, `[]int16` or `[]int32` slice).
++ Recognize `x:op x` assignement as potential in-place operation for global
+  variables too (previously only `x op:y` form was recognized for global
+  variables).
 + Fix missing integer overflow check in odometer.
 
 # v0.15.0 2023-04-21

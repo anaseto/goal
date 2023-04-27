@@ -13,8 +13,7 @@ Documentation:
 
 Optimizations:
 - maybe special code for more uncommon op/ and op\ and op'
-- maybe improve liveness analysis for code with branches, and for global
-  variables
+- maybe improve liveness analysis for code with branches
 - maybe some remaining special cases in self-search functions (all common uses
   already done)
 - maybe change bool type into uint8 or byte and use it to save size in the

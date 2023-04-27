@@ -145,7 +145,7 @@ func (c *compiler) ParseCompile() error {
 		err := c.ParseCompileNext()
 		if err != nil {
 			if err == io.EOF {
-				//c = nil
+				globalMonadicAssignOpAnalysis(c.ctx.gCode.Body)
 				return nil
 			}
 			return err
@@ -832,7 +832,8 @@ func (c *compiler) doLambda(b *astLambda, n int) error {
 	lc.Source = c.ctx.sources[c.ctx.fname][lc.StartPos:b.EndPos]
 	lc.Filename = c.ctx.fname
 	c.ctx.resolveLambda(lc)
-	c.ctx.analyzeLambdaLiveness(lc)
+	analyzeLambdaLiveness(lc)
+	globalMonadicAssignOpAnalysis(lc.Body)
 	c.push2(opLambda, opcode(id))
 	c.applyAtN(b.EndPos-1, n)
 	return nil
@@ -919,7 +920,7 @@ type lastUse struct {
 	opIdx  int32 // opcode index of last use
 }
 
-func (ctx *Context) analyzeLambdaLiveness(lc *lambdaCode) {
+func analyzeLambdaLiveness(lc *lambdaCode) {
 	// We do a simple and fast one-pass analysis for now, to optimize
 	// common cases, handling only def-use in the same basic block.
 	// Branches with uneven use of variables might lead to some refcounts
@@ -1010,6 +1011,44 @@ func (ctx *Context) analyzeLambdaLiveness(lc *lambdaCode) {
 	// free unused data after this pass
 	lc.joinPoints = nil
 	lc.lastUses = nil
+}
+
+// globalMonadicAssignOpAnalysis recognizes assignments of the form x:op x,
+// where op is a variadic and x a global variable, as potential in-place
+// operations (by decreasing reference count appropiately). Note that dyadic
+// assignements operations of the form x op: y are already recognized from
+// parsing, and local variables use a more powerful analysis.
+func globalMonadicAssignOpAnalysis(ops []opcode) {
+	for ip := 0; ip < len(ops); {
+		op := ops[ip]
+		switch op {
+		case opGlobal:
+			gp := ip
+			gn := ops[ip+1]
+			ip += op.argc() + 1
+			if ip >= len(ops) {
+				break
+			}
+			op = ops[ip]
+			switch op {
+			case opApplyV:
+				ip += op.argc() + 1
+				if ip >= len(ops) {
+					break
+				}
+				op = ops[ip]
+				if op == opAssignGlobal {
+					if ops[ip+1] == gn {
+						ops[gp] = opGlobalLast
+					}
+				}
+			default:
+				ip += op.argc() + 1
+			}
+		default:
+			ip += op.argc() + 1
+		}
+	}
 }
 
 func (c *compiler) doApply2(a *astApply2, n int) error {
