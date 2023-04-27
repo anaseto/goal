@@ -405,12 +405,12 @@ func (ctx *Context) applyDict(d *Dict, y V) V {
 		}
 		return d.values.at(int(i))
 	}
-	azi := ky.value.(*AI)
-	i, ok := inBoundsInfo(azi, int64(dlen))
+	kyv := ky.value.(*AI)
+	i, ok := inBoundsInfo(kyv, int64(dlen))
 	if !ok {
 		return Panicf("d@y : key not found (%s)", y.value.(array).at(i).Sprint(ctx))
 	}
-	r := d.values.atInts(azi.elts)
+	r := d.values.atInts(kyv.elts)
 	initRC(r)
 	return NewV(r)
 }
