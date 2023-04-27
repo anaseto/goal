@@ -235,28 +235,16 @@ func toIndicesRec(x V) V {
 	}
 }
 
-func indicesInBounds(x *AI, l int) (int64, bool) {
-	for _, xi := range x.elts {
+func inBoundsInfo(x *AI, l int64) (int, bool) {
+	for i, xi := range x.elts {
 		if xi < 0 {
-			xi += int64(l)
+			xi += l
 		}
-		if xi < 0 || xi >= int64(l) {
-			return xi, false
+		if xi < 0 || xi >= l {
+			return i, false
 		}
 	}
 	return 0, true
-}
-
-func inBoundsInfo(x *AI, l int) (int64, int, bool) {
-	for i, xi := range x.elts {
-		if xi < 0 {
-			xi += int64(l)
-		}
-		if xi < 0 || xi >= int64(l) {
-			return xi, i, false
-		}
-	}
-	return 0, 0, true
 }
 
 // toArray converts atoms into 1-length arrays. It returns arrays as-is.

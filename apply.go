@@ -406,7 +406,7 @@ func (ctx *Context) applyDict(d *Dict, y V) V {
 		return d.values.at(int(i))
 	}
 	azi := z.value.(*AI)
-	_, i, ok := inBoundsInfo(azi, dlen)
+	i, ok := inBoundsInfo(azi, int64(dlen))
 	if !ok {
 		return Panicf("d@y : key not found (%s)", y.value.(array).at(i).Sprint(ctx))
 	}
@@ -487,37 +487,29 @@ func applyArray(x array, y V) V {
 		return NewV(x)
 	}
 	switch yv := y.value.(type) {
-	case *AI:
-		xlen := x.Len()
-		i, ok := indicesInBounds(yv, xlen)
-		if !ok {
-			return Panicf("X@i : index out of bounds: %d (length %d)", i, xlen)
+	case *AB:
+		y = fromABtoAI(yv)
+		return x.atIndices(y.value.(*AI))
+	case *AF:
+		y = toAI(yv)
+		if y.IsPanic() {
+			return ppanic("X@i : ", y)
 		}
-		return NewV(x.atIndices(yv))
+		return applyArray(x, y)
+	case *AI:
+		return x.atIndices(yv)
 	case *AV:
 		r := make([]V, yv.Len())
 		for i, yi := range yv.elts {
-			r[i] = applyArray(x, yi)
-			if r[i].IsPanic() {
-				return r[i]
+			ri := applyArray(x, yi)
+			if ri.IsPanic() {
+				return ri
 			}
+			r[i] = ri
 		}
 		return NewV(canonicalAV(&AV{elts: r}))
 	case *Dict:
 		return newDictValues(yv.keys, applyArray(x, NewV(yv.values)))
-	case array:
-		iy := toIndices(y)
-		if iy.IsPanic() {
-			return Panicf("X@i : %v", iy.value)
-		}
-		ayi := iy.value.(*AI)
-		xlen := x.Len()
-		i, ok := indicesInBounds(ayi, xlen)
-		if !ok {
-			return Panicf("X@i : index out of bounds: %d (length %d)", i, xlen)
-		}
-		r := NewV(x.atIndices(ayi))
-		return r
 	default:
 		return panicType("X@i", "i", y)
 	}

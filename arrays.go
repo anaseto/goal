@@ -17,7 +17,7 @@ type array interface {
 	getFlags() flags
 	setFlags(flags)
 	set(i int, y V)
-	atIndices(y *AI) array // x[y] (goal code)
+	atIndices(y *AI) V // x[y] (goal code)
 	atInts([]int64) array
 	shallowClone() array
 }
@@ -267,74 +267,83 @@ func (x *AV) set(i int, y V) {
 	x.elts[i] = y
 }
 
-func (x *AB) atIndices(y *AI) array {
+func (x *AB) atIndices(y *AI) V {
 	r := make([]bool, y.Len())
 	xlen := int64(x.Len())
 	for i, yi := range y.elts {
 		if yi < 0 {
 			yi += xlen
 		}
+		if yi < 0 || yi >= xlen {
+			return Panicf("X@i : index out of bounds: %d (length %d)", yi, xlen)
+		}
 		r[i] = x.At(int(yi))
 	}
-	return &AB{elts: r}
+	return NewAB(r)
 }
 
-func (x *AI) atIndices(y *AI) array {
+func (x *AI) atIndices(y *AI) V {
 	r := make([]int64, y.Len())
 	xlen := int64(x.Len())
 	for i, yi := range y.elts {
 		if yi < 0 {
 			yi += xlen
 		}
+		if yi < 0 || yi >= xlen {
+			return Panicf("X@i : index out of bounds: %d (length %d)", yi, xlen)
+		}
 		r[i] = x.At(int(yi))
 	}
-	return &AI{elts: r}
+	return NewAI(r)
 }
 
-func (x *AF) atIndices(y *AI) array {
+func (x *AF) atIndices(y *AI) V {
 	r := make([]float64, y.Len())
 	xlen := int64(x.Len())
 	for i, yi := range y.elts {
 		if yi < 0 {
 			yi += xlen
 		}
+		if yi < 0 || yi >= xlen {
+			return Panicf("X@i : index out of bounds: %d (length %d)", yi, xlen)
+		}
 		r[i] = x.At(int(yi))
 	}
-	return &AF{elts: r}
+	return NewAF(r)
 }
 
-func (x *AS) atIndices(y *AI) array {
+func (x *AS) atIndices(y *AI) V {
 	r := make([]string, y.Len())
 	xlen := int64(x.Len())
 	for i, yi := range y.elts {
 		if yi < 0 {
 			yi += xlen
 		}
+		if yi < 0 || yi >= xlen {
+			return Panicf("X@i : index out of bounds: %d (length %d)", yi, xlen)
+		}
 		r[i] = x.At(int(yi))
 	}
-	return &AS{elts: r}
+	return NewAS(r)
 }
 
-func (x *AV) atIndices(y *AI) array {
+func (x *AV) atIndices(y *AI) V {
 	r := make([]V, y.Len())
 	xlen := int64(x.Len())
 	for i, yi := range y.elts {
 		if yi < 0 {
 			yi += xlen
 		}
+		if yi < 0 || yi >= xlen {
+			return Panicf("X@i : index out of bounds: %d (length %d)", yi, xlen)
+		}
 		r[i] = x.At(int(yi))
 	}
 	nr := &AV{elts: r}
-	var p *int
-	if reusableRCp(x.rc) {
-		p = x.rc
-	} else {
-		var n int
-		p = &n
-	}
-	nr.InitWithRC(p)
+	var n int
+	nr.InitWithRC(&n)
 	a, _ := normalize(nr)
-	return a
+	return NewV(a)
 }
 
 func (x *AB) atInts(y []int64) array {
