@@ -397,15 +397,15 @@ func (ctx *Context) applyDict(d *Dict, y V) V {
 		return NewV(d.values)
 	}
 	dlen := d.keys.Len()
-	z := findArray(d.keys, y)
-	if z.IsI() {
-		i := z.I() // i >= 0
+	ky := findArray(d.keys, y)
+	if ky.IsI() {
+		i := ky.I() // i >= 0
 		if i >= int64(dlen) {
 			return Panicf("d@y : key not found (%s)", y.Sprint(ctx))
 		}
 		return d.values.at(int(i))
 	}
-	azi := z.value.(*AI)
+	azi := ky.value.(*AI)
 	i, ok := inBoundsInfo(azi, int64(dlen))
 	if !ok {
 		return Panicf("d@y : key not found (%s)", y.value.(array).at(i).Sprint(ctx))

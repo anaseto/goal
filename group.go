@@ -30,11 +30,11 @@ func icountLinesGroup(x V) V {
 		}
 		return NewAI(icounts)
 	case *AF:
-		z := toAI(xv)
-		if z.IsPanic() {
-			return ppanic("=x : ", z)
+		x = toAI(xv)
+		if x.IsPanic() {
+			return ppanic("=x : ", x)
 		}
-		return icountLinesGroup(z)
+		return icountLinesGroup(x)
 	case *AS:
 		r := make([]V, xv.Len())
 		for i, xi := range xv.elts {

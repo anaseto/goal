@@ -221,8 +221,8 @@ func toIndicesRec(x V) V {
 		return toAI(xv)
 	case *AV:
 		r := make([]V, xv.Len())
-		for i, z := range xv.elts {
-			r[i] = toIndicesRec(z)
+		for i, xi := range xv.elts {
+			r[i] = toIndicesRec(xi)
 			if r[i].IsPanic() {
 				return r[i]
 			}

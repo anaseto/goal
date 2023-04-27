@@ -220,11 +220,11 @@ func drop(x, y V) V {
 			return panicType("I_y", "y", y)
 		}
 	case *AF:
-		z := toAI(xv)
-		if z.IsPanic() {
-			return z
+		x = toAI(xv)
+		if x.IsPanic() {
+			return x
 		}
-		return drop(z, y)
+		return drop(x, y)
 	default:
 		return panicType("x_y", "x", x)
 	}
