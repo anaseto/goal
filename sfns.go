@@ -283,7 +283,7 @@ func cutAIarray(x *AI, y array) V {
 	ylen := int64(y.Len())
 	for _, i := range x.elts {
 		if i < 0 || i > ylen {
-			return Panicf("I_y : I contains out of bound index (%d)", i)
+			return Panicf("I_y : I contains out of bounds index (%d)", i)
 		}
 	}
 	xlen := x.Len()
@@ -311,7 +311,7 @@ func cutAIS(x *AI, y S) V {
 	ylen := int64(len(y))
 	for _, i := range x.elts {
 		if i < 0 || i > ylen {
-			return Panicf("I_s : I contains out of bound index (%d)", i)
+			return Panicf("I_s : I contains out of bounds index (%d)", i)
 		}
 	}
 	xlen := x.Len()
@@ -370,8 +370,10 @@ func takeNAtom(n int64, y V) V {
 		yv := y.I()
 		if isBI(yv) {
 			r := make([]bool, n)
-			for i := range r {
-				r[i] = yv != 0
+			if yv != 0 {
+				for i := range r {
+					r[i] = true
+				}
 			}
 			return NewAB(r)
 		}
@@ -396,14 +398,6 @@ func takeNAtom(n int64, y V) V {
 			r[i] = string(yv)
 		}
 		return NewAS(r)
-	case RefCountHolder:
-		rc := yv.RC()
-		*rc += 2
-		r := make([]V, n)
-		for i := range r {
-			r[i] = y
-		}
-		return NewAVWithRC(r, rc)
 	default:
 		r := make([]V, n)
 		for i := range r {
@@ -506,7 +500,6 @@ func takePadN(n int64, x array) V {
 		}
 		return Canonical(NewV(x.slice(x.Len()+int(n), x.Len())))
 	}
-	return NewI(0)
 }
 
 func padArrayN(n int64, x array) V {

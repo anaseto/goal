@@ -1000,3 +1000,15 @@ firsts + / type
 "a"?2 / type
 "a"?(2;*) / type
 <42 / type
+5»3 / type
+5«3 / type
+2.5!2 3 / non-integer
+2.5!3 / non-integer
+2!+ / type
+5!"a""b"!(0 1;%) / range
+5!"a""b"!(+;0 1) / range
+rx/[a-z]/#3 5 / type
+3_+ / type
+3 5_+ / type
+0 5_"a""b"!(0 1;%) / bounds
+0 5_"a""b"!(+;0 1) / bounds
