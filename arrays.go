@@ -339,11 +339,10 @@ func (x *AV) atIndices(y *AI) V {
 		}
 		r[i] = x.At(int(yi))
 	}
-	nr := &AV{elts: r}
+	rv := &AV{elts: r}
 	var n int
-	nr.InitWithRC(&n)
-	a, _ := normalize(nr)
-	return NewV(a)
+	rv.InitWithRC(&n)
+	return NewV(canonicalAV(rv))
 }
 
 func (x *AB) atInts(y []int64) array {
