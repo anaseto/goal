@@ -8,7 +8,7 @@ func uniform(ctx *Context, x V) V {
 		n = x.I()
 	} else {
 		if !isI(x.F()) {
-			return Panicf("?i : not an integer (%g)", x.F())
+			return Panicf("?i : non-integer i (%g)", x.F())
 		}
 		n = int64(x.F())
 	}
@@ -35,7 +35,7 @@ func rolldeal(ctx *Context, x, y V) V {
 		n = x.I()
 	} else {
 		if !isI(x.F()) {
-			return Panicf("i?y : i not an integer (%g)", x.F())
+			return Panicf("i?y : non-integer y (%g)", x.F())
 		}
 		n = int64(x.F())
 	}
@@ -62,18 +62,37 @@ func rollSlice[T any](ctx *Context, n int64, y []T) []T {
 
 func roll(ctx *Context, n int64, y V) V {
 	if y.IsI() {
-		if y.I() <= 0 {
-			return Panicf("i?i : i non-positive (%d)", y.I())
+		yv := y.I()
+		if yv <= 0 {
+			return Panicf("i?y : non-positive y (%d)", yv)
 		}
-		r := make([]int64, n)
-		for i := range r {
-			r[i] = ctx.rand.Int63n(y.I())
+		if yv == 2 {
+			r := make([]bool, n)
+			var i int64
+		loop:
+			for {
+				u := ctx.rand.Uint64()
+				for j := 0; j < 64; j += 8 {
+					if i >= n {
+						break loop
+					}
+					b := uint8(u>>j) >> 7
+					r[i] = b != 0
+					i++
+				}
+			}
+			return NewAB(r)
+		} else {
+			r := make([]int64, n)
+			for i := range r {
+				r[i] = ctx.rand.Int63n(yv)
+			}
+			return NewAI(r)
 		}
-		return NewAI(r)
 	}
 	if y.IsF() {
 		if !isI(y.F()) {
-			return Panicf("i?i : i not an integer (%g)", y.F())
+			return Panicf("i?y : non-integer y (%g)", y.F())
 		}
 		return roll(ctx, n, NewI(int64(y.F())))
 	}
@@ -130,7 +149,7 @@ func deal(ctx *Context, n int64, y V) V {
 	if y.IsI() {
 		yv := y.I()
 		if yv <= 0 {
-			return Panicf("(-i)?y : y non-positive (%d)", yv)
+			return Panicf("(-i)?y : non-positive y (%d)", yv)
 		}
 		if n > yv {
 			return Panicf("(-i)?y : i > y (%d vs %d)", n, yv)
@@ -165,7 +184,7 @@ func deal(ctx *Context, n int64, y V) V {
 	}
 	if y.IsF() {
 		if !isI(y.F()) {
-			return Panicf("(-i)?y : y not an integer (%g)", y.F())
+			return Panicf("(-i)?y : non-integer y (%g)", y.F())
 		}
 		return deal(ctx, n, NewI(int64(y.F())))
 	}
@@ -175,7 +194,7 @@ func deal(ctx *Context, n int64, y V) V {
 	}
 	ylen := ya.Len()
 	if ylen == 0 {
-		return panics("(-i)?Y : Y is empty")
+		return panics("(-i)?Y : empty Y")
 	}
 	if n > int64(ylen) {
 		return Panicf("(-i)?Y : i > #Y (%d vs %d)", n, ylen)
@@ -208,7 +227,7 @@ func seed(ctx *Context, x V) V {
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
-			return Panicf(`goal.seed i : i not an integer (%g)`, x.F())
+			return Panicf(`goal.seed i : non-integer i (%g)`, x.F())
 		}
 		if ctx.rand == nil {
 			ctx.rand = rand.New(rand.NewSource(int64(x.F())))

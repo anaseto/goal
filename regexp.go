@@ -164,7 +164,7 @@ func applyRx2(x *rx, y, z V) V {
 		n = z.I()
 	} else if z.IsF() {
 		if !isI(z.F()) {
-			return Panicf("r[x;y] : y not an integer (%g)", z.F())
+			return Panicf("r[x;y] : non-integer y (%g)", z.F())
 		}
 		n = int64(z.F())
 	} else {

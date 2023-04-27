@@ -144,18 +144,18 @@ sqrt[1;2] / too many arguments
 @[1 2;0 1;:;5 2 3] / length mismatch
 @[1 2;"a";+;5] / type
 @[2;"a";+;5] / type
-?3.5 / not an integer
-1.5?10 / not an integer
+?3.5 / non-integer
+1.5?10 / non-integer
 3?-10 / non-positive
 3?0 / non-positive
 -3?0 / non-positive
 -3?2 / i > y
--3?4.5 / not an integer
-3?0.5 / not an integer
+-3?4.5 / non-integer
+3?0.5 / non-integer
 (+)?4.5 / type
 2?(+) / type
 -2?(+) / type
-rt.seed 2.5 / not an integer
+rt.seed 2.5 / non-integer
 time 2 / type
 time "invalid" / unknown command
 "unix"  time 2.5 / non-integer
@@ -880,7 +880,7 @@ rx "\4" / syntax
 rx["a";"b"] / too many arguments
 rx/[a-z]/42 / type
 rx/[a-z]/["abc";*] / type
-rx/[a-z]/["abc";1.5] / not an integer
+rx/[a-z]/["abc";1.5] / non-integer
 rx/([a-z])/["abc" 42;-1] / type
 rx/([a-z])/[*;-1] / type
 rx/[a-z]/["abc" 42;-1] / type
