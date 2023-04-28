@@ -56,6 +56,13 @@ func rangeI(n int64) V {
 	if n < 0 {
 		return panics("!i : i negative")
 	}
+	if n < 256 {
+		r := make([]byte, n)
+		for i := range r {
+			r[i] = byte(i)
+		}
+		return NewV(&AB{elts: r, flags: flagAscending | flagUnique})
+	}
 	r := make([]int64, n)
 	for i := range r {
 		r[i] = int64(i)
@@ -99,6 +106,13 @@ func rangeArray(x *AI) V {
 func rangeII(from, to int64) V {
 	if from > to {
 		return NewAI(nil)
+	}
+	if from >= 0 && to < 256 {
+		r := make([]byte, to-from)
+		for i := range r {
+			r[i] = from + byte(i)
+		}
+		return NewV(&AB{elts: r, flags: flagAscending | flagUnique})
 	}
 	r := make([]int64, to-from)
 	for i := range r {

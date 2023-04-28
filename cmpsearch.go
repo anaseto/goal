@@ -170,8 +170,8 @@ func classify(ctx *Context, x V) V {
 			}
 			return NewAI(classifySlice[string, int64](ss))
 		}
-		r := make([]int64, xv.Len())
-		n := int64(0)
+		r := make([]byte, xv.Len())
+		n := byte(0)
 	loop:
 		for i, xi := range xv.elts {
 			for j := range xv.elts[:i] {
@@ -183,7 +183,7 @@ func classify(ctx *Context, x V) V {
 			r[i] = n
 			n++
 		}
-		return NewAI(r)
+		return NewAB(r)
 	default:
 		panic("classify")
 	}
@@ -1049,7 +1049,7 @@ func occurrenceCount(ctx *Context, x V) V {
 			}
 			return NewAIWithRC(occurrenceCountSlice[string](ss, bruteForceGeneric), reuseRCp(xv.rc))
 		}
-		r := make([]int64, xv.Len())
+		r := make([]byte, xv.Len())
 	loop:
 		for i, xi := range xv.elts {
 			for j := i - 1; j >= 0; j-- {
@@ -1059,7 +1059,7 @@ func occurrenceCount(ctx *Context, x V) V {
 				}
 			}
 		}
-		return NewAI(r)
+		return NewAB(r)
 	default:
 		panic("ocount")
 	}
