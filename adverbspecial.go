@@ -46,7 +46,7 @@ func fold2vAdd(x V) V {
 		return NewS(sb.String())
 	case *AV:
 		if xv.Len() == 0 {
-			return NewI(0)
+			return x
 		}
 		r := xv.At(0)
 		for _, xi := range xv.elts[1:] {
@@ -113,10 +113,10 @@ func scan2vAdd(x V) V {
 		}
 		return NewV(r)
 	case *AV:
-		r := xv.reuse()
 		if xv.Len() == 0 {
 			return x
 		}
+		r := xv.reuse()
 		r.elts[0] = xv.elts[0]
 		for i, xi := range xv.elts[1:] {
 			last := r.elts[i]
@@ -183,7 +183,7 @@ func fold2vSubtract(x V) V {
 		return NewS(r)
 	case *AV:
 		if xv.Len() == 0 {
-			return NewI(0)
+			return x
 		}
 		r := xv.At(0)
 		for _, xi := range xv.elts[1:] {
@@ -231,7 +231,7 @@ func fold2vMultiply(x V) V {
 		return panics("*/x : bad type in x (S)")
 	case *AV:
 		if xv.Len() == 0 {
-			return NewI(1)
+			return x
 		}
 		r := xv.At(0)
 		for _, xi := range xv.elts[1:] {
@@ -247,13 +247,13 @@ func fold2vMultiply(x V) V {
 }
 
 func fold2vMax(x V) V {
-	if x.Len() == 0 {
-		return NewF(math.Inf(-1))
-	}
 	switch xv := x.value.(type) {
 	case *Dict:
 		return fold2vMax(NewV(xv.values))
 	case *AB:
+		if xv.Len() == 0 {
+			return NewI(math.MinInt64)
+		}
 		for _, b := range xv.elts {
 			if b {
 				return NewI(1)
@@ -261,10 +261,19 @@ func fold2vMax(x V) V {
 		}
 		return NewI(0)
 	case *AI:
+		if xv.Len() == 0 {
+			return NewI(math.MinInt64)
+		}
 		return NewI(maxInt64s(xv.elts))
 	case *AF:
+		if xv.Len() == 0 {
+			return NewF(math.Inf(-1))
+		}
 		return NewF(maxFloat64s(xv.elts))
 	case *AS:
+		if xv.Len() == 0 {
+			return NewS("")
+		}
 		max := xv.elts[0]
 		for _, s := range xv.elts[1:] {
 			if s > max {
@@ -273,6 +282,9 @@ func fold2vMax(x V) V {
 		}
 		return NewS(max)
 	case *AV:
+		if xv.Len() == 0 {
+			return x
+		}
 		r := xv.At(0)
 		for _, xi := range xv.elts[1:] {
 			r = maximum(r, xi)
@@ -362,13 +374,13 @@ func scan2vMax(x V) V {
 }
 
 func fold2vMin(x V) V {
-	if x.Len() == 0 {
-		return NewF(math.Inf(1))
-	}
 	switch xv := x.value.(type) {
 	case *Dict:
 		return fold2vMin(NewV(xv.values))
 	case *AB:
+		if xv.Len() == 0 {
+			return NewI(math.MaxInt64)
+		}
 		for _, b := range xv.elts {
 			if !b {
 				return NewI(0)
@@ -376,10 +388,19 @@ func fold2vMin(x V) V {
 		}
 		return NewI(1)
 	case *AI:
+		if xv.Len() == 0 {
+			return NewI(math.MaxInt64)
+		}
 		return NewI(minInt64s(xv.elts))
 	case *AF:
+		if x.Len() == 0 {
+			return NewF(math.Inf(1))
+		}
 		return NewF(minFloat64s(xv.elts))
 	case *AS:
+		if xv.Len() == 0 {
+			return NewS("")
+		}
 		min := xv.elts[0]
 		for _, s := range xv.elts[1:] {
 			if s < min {
@@ -388,6 +409,9 @@ func fold2vMin(x V) V {
 		}
 		return NewS(min)
 	case *AV:
+		if xv.Len() == 0 {
+			return x
+		}
 		r := xv.At(0)
 		for _, xi := range xv.elts[1:] {
 			r = minimum(r, xi)

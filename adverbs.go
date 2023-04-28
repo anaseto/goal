@@ -55,6 +55,10 @@ func foldfx(ctx *Context, f, x V) V {
 			switch xv.(type) {
 			case *AS:
 				return NewS("")
+			case *AV:
+				return NewAV(nil)
+			case *AF:
+				return NewF(0)
 			default:
 				return NewI(0)
 			}

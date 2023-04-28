@@ -13,6 +13,10 @@
   counterparts of `?`.
 + Rename `atan2` into `atan`, which is now dyadic and accepts either one or two
   arguments (same simplification as Lua 5.3 did). (breaking change)
++ More consistent results in `op/x` for empty list `x`. Now we use the default
+  zero value for the given list type, except for a few special reductions where
+  a different neutral element is clear (like `*/`, `&/`, and `|/` for
+  non-generic lists).
 + Improvements in sorting of integers, depending on the range, using either
   counting sort (`^I` for small-range) or radix sort (for `^I`, `<I`, and
   `>I` when `I` fits into a `[]int8`, `[]int16` or `[]int32` slice).
