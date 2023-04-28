@@ -82,17 +82,14 @@ func classify(ctx *Context, x V) V {
 		}
 		if xv.flags.Has(flagAscending) {
 			if xv.Len() < 256 {
-				r := make([]byte, xv.Len())
-				classifySortedSlice(xv.elts, r)
+				r := classifySortedSlice[byte, byte](xv.elts)
 				return NewABWithRC(r, reuseRCp(xv.rc))
 			}
-			r := make([]int64, xv.Len())
-			classifySortedSlice(xv.elts, r)
+			r := classifySortedSlice[byte, int64](xv.elts)
 			return NewAIWithRC(r, reuseRCp(xv.rc))
 		}
 		if xv.Len() < bruteForceBytes {
-			r := make([]byte, xv.Len())
-			classifyBrute(xv.elts, r)
+			r := classifyBrute(xv.elts)
 			return NewABWithRC(r, reuseRCp(xv.rc))
 		}
 		if xv.Len() < 256 {
@@ -102,18 +99,16 @@ func classify(ctx *Context, x V) V {
 	case *AI:
 		if xv.flags.Has(flagAscending) {
 			if xv.Len() < 256 {
-				r := make([]byte, xv.Len())
-				classifySortedSlice(xv.elts, r)
+				r := classifySortedSlice[int64, byte](xv.elts)
 				return NewABWithRC(r, reuseRCp(xv.rc))
 			}
-			r := make([]int64, xv.Len())
-			classifySortedSlice(xv.elts, r)
+			r := classifySortedSlice[int64, int64](xv.elts)
 			return NewAIWithRC(r, reuseRCp(xv.rc))
 		}
 		min, span, ok := smallRange(xv)
 		if ok {
 			// fast path avoiding hash table
-			if span < 256 {
+			if span < 256 || xv.Len() < 256 {
 				r := classifyInts[byte](xv.elts, min, span)
 				return NewABWithRC(r, reuseRCp(xv.rc))
 			}
@@ -121,47 +116,44 @@ func classify(ctx *Context, x V) V {
 			return NewAIWithRC(r, reuseRCp(xv.rc))
 		}
 		if xv.Len() <= bruteForceNumeric {
-			r := make([]byte, len(xv.elts))
-			classifyBrute(xv.elts, r)
+			r := classifyBrute(xv.elts)
 			return NewABWithRC(r, reuseRCp(xv.rc))
 		}
-		r := classifySlice(xv.elts)
+		r := classifySlice[int64, int64](xv.elts)
 		return NewAIWithRC(r, reuseRCp(xv.rc))
 	case *AF:
 		if xv.flags.Has(flagAscending) {
 			if xv.Len() < 256 {
-				r := make([]byte, xv.Len())
-				classifySortedSlice(xv.elts, r)
+				r := classifySortedSlice[float64, byte](xv.elts)
 				return NewABWithRC(r, reuseRCp(xv.rc))
 			}
-			r := make([]int64, xv.Len())
-			classifySortedSlice(xv.elts, r)
+			r := classifySortedSlice[float64, int64](xv.elts)
 			return NewAIWithRC(r, reuseRCp(xv.rc))
 		}
 		if xv.Len() <= bruteForceNumeric {
-			r := make([]byte, len(xv.elts))
-			classifyBrute(xv.elts, r)
+			r := classifyBrute(xv.elts)
 			return NewABWithRC(r, reuseRCp(xv.rc))
 		}
-		r := classifySlice(xv.elts)
+		r := classifySlice[float64, int64](xv.elts)
 		return NewAIWithRC(r, reuseRCp(xv.rc))
 	case *AS:
 		if xv.flags.Has(flagAscending) {
 			if xv.Len() < 256 {
-				r := make([]byte, xv.Len())
-				classifySortedSlice(xv.elts, r)
+				r := classifySortedSlice[string, byte](xv.elts)
 				return NewABWithRC(r, reuseRCp(xv.rc))
 			}
-			r := make([]int64, xv.Len())
-			classifySortedSlice(xv.elts, r)
+			r := classifySortedSlice[string, int64](xv.elts)
 			return NewAIWithRC(r, reuseRCp(xv.rc))
 		}
 		if xv.Len() <= bruteForceGeneric {
-			r := make([]byte, len(xv.elts))
-			classifyBrute(xv.elts, r)
+			r := classifyBrute(xv.elts)
 			return NewABWithRC(r, reuseRCp(xv.rc))
 		}
-		r := classifySlice(xv.elts)
+		if xv.Len() < 256 {
+			r := classifySlice[string, byte](xv.elts)
+			return NewABWithRC(r, reuseRCp(xv.rc))
+		}
+		r := classifySlice[string, int64](xv.elts)
 		return NewAIWithRC(r, reuseRCp(xv.rc))
 	case *AV:
 		if xv.Len() > bruteForceGeneric {
@@ -170,11 +162,13 @@ func classify(ctx *Context, x V) V {
 				ss[i] = xi.Sprint(ctx)
 			}
 			if xv.Len() <= bruteForceGeneric {
-				r := make([]byte, len(ss))
-				classifyBrute(ss, r)
+				r := classifyBrute(ss)
 				return NewABWithRC(r, reuseRCp(xv.rc))
 			}
-			return NewAI(classifySlice[string](ss))
+			if xv.Len() < 256 {
+				return NewAB(classifySlice[string, byte](ss))
+			}
+			return NewAI(classifySlice[string, int64](ss))
 		}
 		r := make([]int64, xv.Len())
 		n := int64(0)
@@ -230,10 +224,10 @@ func classifyInts[T integer](xs []int64, min, span int64) []T {
 	return r
 }
 
-func classifySlice[T comparable](xs []T) []int64 {
-	r := make([]int64, len(xs))
-	m := map[T]int64{}
-	n := int64(0)
+func classifySlice[T comparable, I integer](xs []T) []I {
+	r := make([]I, len(xs))
+	m := map[T]I{}
+	n := I(0)
 	for i, xi := range xs {
 		c, ok := m[xi]
 		if !ok {
@@ -247,7 +241,8 @@ func classifySlice[T comparable](xs []T) []int64 {
 	return r
 }
 
-func classifyBrute[T comparable](xs []T, r []byte) {
+func classifyBrute[T comparable](xs []T) []byte {
+	r := make([]byte, len(xs))
 	var n byte
 loop:
 	for i, xi := range xs {
@@ -260,9 +255,11 @@ loop:
 		r[i] = n
 		n++
 	}
+	return r
 }
 
-func classifySortedSlice[T comparable, I integer](xs []T, r []I) {
+func classifySortedSlice[T comparable, I integer](xs []T) []I {
+	r := make([]I, len(xs))
 	var n I
 	prev := xs[0]
 	r[0] = 0
@@ -275,6 +272,7 @@ func classifySortedSlice[T comparable, I integer](xs []T, r []I) {
 		prev = xi
 		i++
 	}
+	return r
 }
 
 // uniq returns ?x.
