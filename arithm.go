@@ -235,19 +235,20 @@ func not(x V) V {
 		for i, xi := range xv.elts {
 			r.elts[i] = b2B(xi == 0)
 		}
+		xv.flags = flagBool
 		return NewV(r)
 	case *AI:
 		r := make([]byte, xv.Len())
 		for i, xi := range xv.elts {
 			r[i] = b2B(xi == 0)
 		}
-		return NewABWithRC(r, reuseRCp(xv.rc))
+		return newABbWithRC(r, reuseRCp(xv.rc))
 	case *AF:
 		r := make([]byte, xv.Len())
 		for i, xi := range xv.elts {
 			r[i] = b2B(xi == 0)
 		}
-		return NewABWithRC(r, reuseRCp(xv.rc))
+		return newABbWithRC(r, reuseRCp(xv.rc))
 	case *AV:
 		r := xv.reuse()
 		for i, xi := range xv.elts {

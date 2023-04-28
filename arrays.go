@@ -50,6 +50,12 @@ func NewAB(x []byte) V {
 	return NewV(&AB{elts: x})
 }
 
+// newABb returns a new byte array with boolean flag. It does not initialize
+// the reference counter.
+func newABb(x []byte) V {
+	return NewV(&AB{elts: x, flags: flagBool})
+}
+
 // IsBoolean returns true when the array of bytes is known to contain only 1s
 // and 0s.
 func (x *AB) IsBoolean() bool {
@@ -66,6 +72,11 @@ func (x *AB) Slice() []byte {
 // NewABWithRC returns a new byte array.
 func NewABWithRC(x []byte, rc *int) V {
 	return NewV(&AB{elts: x, rc: rc})
+}
+
+// newABbWithRC returns a new byte array.
+func newABbWithRC(x []byte, rc *int) V {
+	return NewV(&AB{elts: x, rc: rc, flags: flagBool})
 }
 
 // AI represents an array of integers.
@@ -413,15 +424,14 @@ func (x *AB) shallowClone() array {
 	return shallowCloneAB(x)
 }
 
-// shallowCloneAB returns a clone of x, preserving its flags.
 func shallowCloneAB(x *AB) *AB {
 	if reusableRCp(x.rc) {
+		x.setFlags(flagNone)
 		return x
 	}
 	var n int
 	r := &AB{elts: make([]byte, x.Len()), rc: &n}
 	copy(r.elts, x.elts)
-	r.flags = x.flags
 	return r
 }
 
@@ -429,14 +439,13 @@ func (x *AI) shallowClone() array {
 	return shallowCloneAI(x)
 }
 
-// shallowCloneAI returns a clone of x, preserving its flags.
 func shallowCloneAI(x *AI) *AI {
 	if reusableRCp(x.rc) {
+		x.setFlags(flagNone)
 		return x
 	}
 	var n int
 	r := &AI{elts: make([]int64, x.Len()), rc: &n}
-	r.flags = x.flags
 	copy(r.elts, x.elts)
 	return r
 }

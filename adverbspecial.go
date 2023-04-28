@@ -295,6 +295,10 @@ type ordered interface {
 	~float64 | ~string | integer
 }
 
+type numeric interface {
+	~float64 | integer
+}
+
 func scan2vMaxSlice[T ordered](dst, xs []T) {
 	max := xs[0]
 	dst[0] = max

@@ -36,6 +36,7 @@ func (x V) Matches(y V) bool {
 
 const bruteForceGeneric = 32
 const bruteForceNumeric = 256
+const bruteForceBytes = 12
 const numericSortedLen = 64
 const smallRangeLen = 16
 const smallRangeSpan = 16
@@ -68,41 +69,51 @@ func classify(ctx *Context, x V) V {
 	default:
 		return panicType("%X", "X", x)
 	}
+	// TODO: classify could often return []bytes instead of []int64
 	switch xv := x.value.(type) {
 	case *AB:
-		if !xv.At(0) {
-			return NewV(xv)
+		if xv.IsBoolean() {
+			if xv.At(0) == 0 {
+				return x
+			}
+			return not(x)
 		}
-		return not(x)
-	case *AF:
-		var r []int64
 		if xv.flags.Has(flagAscending) {
-			r = classifySortedSlice[float64](xv.elts)
-		} else {
-			r = classifySlice[float64](xv.elts, bruteForceNumeric)
+			r := classifySortedSlice[byte](xv.elts)
+			return NewAIWithRC(r, reuseRCp(xv.rc))
 		}
+		if xv.Len() < bruteForceBytes {
+			r := make([]int64, xv.Len())
+			classifyBrute(xv.elts, r)
+			return NewAIWithRC(r, reuseRCp(xv.rc))
+		}
+		return NewAIWithRC(classifyBytes(xv.elts), reuseRCp(xv.rc))
+	case *AF:
+		if xv.flags.Has(flagAscending) {
+			r := classifySortedSlice[float64](xv.elts)
+			return NewAIWithRC(r, reuseRCp(xv.rc))
+		}
+		r := classifySlice[float64](xv.elts, bruteForceNumeric)
 		return NewAIWithRC(r, reuseRCp(xv.rc))
 	case *AI:
-		var r []int64
 		if xv.flags.Has(flagAscending) {
-			r = classifySortedSlice[int64](xv.elts)
+			r := classifySortedSlice[int64](xv.elts)
 			return NewAIWithRC(r, reuseRCp(xv.rc))
 		}
 		min, span, ok := smallRange(xv)
 		if ok {
 			// fast path avoiding hash table
-			r = classifyInts(xv.elts, min, span)
+			r := classifyInts(xv.elts, min, span)
 			return NewAIWithRC(r, reuseRCp(xv.rc))
 		}
-		r = classifySlice[int64](xv.elts, bruteForceNumeric)
+		r := classifySlice[int64](xv.elts, bruteForceNumeric)
 		return NewAIWithRC(r, reuseRCp(xv.rc))
 	case *AS:
-		var r []int64
 		if xv.flags.Has(flagAscending) {
-			r = classifySortedSlice[string](xv.elts)
-		} else {
-			r = classifySlice[string](xv.elts, bruteForceGeneric)
+			r := classifySortedSlice[string](xv.elts)
+			return NewAIWithRC(r, reuseRCp(xv.rc))
 		}
+		r := classifySlice[string](xv.elts, bruteForceGeneric)
 		return NewAIWithRC(r, reuseRCp(xv.rc))
 	case *AV:
 		if xv.Len() > bruteForceGeneric {
@@ -131,6 +142,23 @@ func classify(ctx *Context, x V) V {
 	}
 }
 
+func classifyBytes(xs []byte) []int64 {
+	var m [256]int64
+	var n int64
+	r := make([]int64, len(xs))
+	for i, xi := range xs {
+		c := m[xi]
+		if c == 0 {
+			r[i] = n
+			m[xi] = n + 1
+			n++
+			continue
+		}
+		r[i] = c - 1
+	}
+	return r
+}
+
 func classifyInts(xs []int64, min, span int64) []int64 {
 	r := make([]int64, len(xs))
 	var n int64
@@ -152,18 +180,7 @@ func classifyInts(xs []int64, min, span int64) []int64 {
 func classifySlice[T comparable](xs []T, bruteForceThreshold int) []int64 {
 	r := make([]int64, len(xs))
 	if len(xs) <= bruteForceThreshold {
-		n := int64(0)
-	loop:
-		for i, xi := range xs {
-			for j, xj := range xs[:i] {
-				if xi == xj {
-					r[i] = r[j]
-					continue loop
-				}
-			}
-			r[i] = n
-			n++
-		}
+		classifyBrute(xs, r)
 		return r
 	}
 	m := map[T]int64{}
@@ -179,6 +196,21 @@ func classifySlice[T comparable](xs []T, bruteForceThreshold int) []int64 {
 		r[i] = c
 	}
 	return r
+}
+
+func classifyBrute[T comparable](xs []T, r []int64) {
+	n := int64(0)
+loop:
+	for i, xi := range xs {
+		for j, xj := range xs[:i] {
+			if xi == xj {
+				r[i] = r[j]
+				continue loop
+			}
+		}
+		r[i] = n
+		n++
+	}
 }
 
 func classifySortedSlice[T comparable](xs []T) []int64 {
@@ -219,13 +251,25 @@ func uniq(ctx *Context, x V) V {
 	}
 	switch xv := x.value.(type) {
 	case *AB:
-		b := xv.At(0)
-		for i := 1; i < xv.Len(); i++ {
-			if xv.At(i) != b {
-				return NewV(&AB{elts: []byte{b, xv.At(i)}, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
+		if xv.IsBoolean() {
+			b := xv.At(0)
+			for i := 1; i < xv.Len(); i++ {
+				if xv.At(i) != b {
+					return NewV(&AB{elts: []byte{b, xv.At(i)}, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
+				}
 			}
+			return NewV(&AB{elts: []byte{b}, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
 		}
-		return NewV(&AB{elts: []byte{b}, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
+		if xv.flags.Has(flagAscending) {
+			r := uniqSortedSlice[byte](xv.elts)
+			return NewV(&AB{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
+		}
+		if xv.Len() < bruteForceBytes {
+			r := make([]byte, xv.Len())
+			uniqBrute(xv.elts, r)
+			return NewV(&AB{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
+		}
+		return NewV(&AB{elts: uniqBytes(xv.elts), rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
 	case *AF:
 		var r []float64
 		if xv.flags.Has(flagAscending) {
@@ -291,7 +335,7 @@ func uniq(ctx *Context, x V) V {
 
 func uniqInts(xs []int64, min, span int64) []int64 {
 	offset := -min
-	m := make([]byte, span)
+	m := make([]bool, span)
 	n := 0
 	for _, xi := range xs {
 		c := m[xi+offset]
@@ -314,18 +358,34 @@ func uniqInts(xs []int64, min, span int64) []int64 {
 	return r
 }
 
+func uniqBytes(xs []byte) []byte {
+	var m [256]bool
+	n := 0
+	for _, xi := range xs {
+		c := m[xi]
+		if !c {
+			n++
+			m[xi] = true
+			continue
+		}
+	}
+	r := make([]byte, n)
+	n = 0
+	for _, xi := range xs {
+		c := m[xi]
+		if c {
+			r[n] = xi
+			m[xi] = false
+			n++
+		}
+	}
+	return r
+}
+
 func uniqSlice[T comparable](xs []T, bruteForceThreshold int) []T {
 	r := []T{}
 	if len(xs) <= bruteForceThreshold {
-	loop:
-		for i, xi := range xs {
-			for _, xj := range xs[:i] {
-				if xi == xj {
-					continue loop
-				}
-			}
-			r = append(r, xi)
-		}
+		uniqBrute(xs, r)
 		return r
 	}
 	m := map[T]struct{}{}
@@ -338,6 +398,18 @@ func uniqSlice[T comparable](xs []T, bruteForceThreshold int) []T {
 		}
 	}
 	return r
+}
+
+func uniqBrute[T comparable](xs, r []T) {
+loop:
+	for i, xi := range xs {
+		for _, xj := range xs[:i] {
+			if xi == xj {
+				continue loop
+			}
+		}
+		r = append(r, xi)
+	}
 }
 
 func uniqSortedSlice[T comparable](xs []T) []T {
@@ -367,25 +439,37 @@ func markFirsts(ctx *Context, x V) V {
 		if xv.getFlags().Has(flagUnique) {
 			r := make([]byte, xv.Len())
 			for i := range r {
-				r[i] = true
+				r[i] = 1
 			}
-			return NewAB(r)
+			return newABb(r)
 		}
 	default:
 		return panicType("firsts X", "X", x)
 	}
 	switch xv := x.value.(type) {
 	case *AB:
-		r := make([]byte, xv.Len())
-		r[0] = true
-		x0 := xv.At(0)
-		for i := 1; i < xv.Len(); i++ {
-			if xv.At(i) != x0 {
-				r[i] = true
-				break
+		if xv.IsBoolean() {
+			r := make([]byte, xv.Len())
+			r[0] = 1
+			x0 := xv.At(0)
+			for i := 1; i < xv.Len(); i++ {
+				if xv.At(i) != x0 {
+					r[i] = 1
+					break
+				}
 			}
+			return newABbWithRC(r, reuseRCp(xv.rc))
 		}
-		return NewAB(r)
+		if xv.flags.Has(flagAscending) {
+			r := markFirstsSortedSlice[byte](xv.elts)
+			return newABbWithRC(r, reuseRCp(xv.rc))
+		}
+		if xv.Len() < bruteForceBytes {
+			r := make([]byte, xv.Len())
+			markFirstsBrute(xv.elts, r)
+			return newABbWithRC(r, reuseRCp(xv.rc))
+		}
+		return newABbWithRC(markFirstsBytes(xv.elts), reuseRCp(xv.rc))
 	case *AF:
 		var r []byte
 		if xv.flags.Has(flagAscending) {
@@ -393,21 +477,21 @@ func markFirsts(ctx *Context, x V) V {
 		} else {
 			r = markFirstsSlice[float64](xv.elts, bruteForceNumeric)
 		}
-		return NewABWithRC(r, reuseRCp(xv.rc))
+		return newABbWithRC(r, reuseRCp(xv.rc))
 	case *AI:
 		var r []byte
 		if xv.flags.Has(flagAscending) {
 			r = markFirstsSortedSlice[int64](xv.elts)
-			return NewABWithRC(r, reuseRCp(xv.rc))
+			return newABbWithRC(r, reuseRCp(xv.rc))
 		}
 		min, span, ok := smallRange(xv)
 		if ok {
 			// fast path avoiding hash table
 			r = markFirstsInts(xv.elts, min, span)
-			return NewABWithRC(r, reuseRCp(xv.rc))
+			return newABbWithRC(r, reuseRCp(xv.rc))
 		}
 		r = markFirstsSlice[int64](xv.elts, bruteForceNumeric)
-		return NewABWithRC(r, reuseRCp(xv.rc))
+		return newABbWithRC(r, reuseRCp(xv.rc))
 	case *AS:
 		var r []byte
 		if xv.flags.Has(flagAscending) {
@@ -415,14 +499,14 @@ func markFirsts(ctx *Context, x V) V {
 		} else {
 			r = markFirstsSlice[string](xv.elts, bruteForceGeneric)
 		}
-		return NewABWithRC(r, reuseRCp(xv.rc))
+		return newABbWithRC(r, reuseRCp(xv.rc))
 	case *AV:
 		if xv.Len() > bruteForceGeneric {
 			ss := make([]string, xv.Len())
 			for i, xi := range xv.elts {
 				ss[i] = xi.Sprint(ctx)
 			}
-			return NewABWithRC(markFirstsSlice[string](ss, bruteForceGeneric), reuseRCp(xv.rc))
+			return newABbWithRC(markFirstsSlice[string](ss, bruteForceGeneric), reuseRCp(xv.rc))
 		}
 		r := make([]byte, xv.Len())
 	loop:
@@ -432,9 +516,9 @@ func markFirsts(ctx *Context, x V) V {
 					continue loop
 				}
 			}
-			r[i] = true
+			r[i] = 1
 		}
-		return NewAB(r)
+		return newABbWithRC(r, reuseRCp(xv.rc))
 	default:
 		panic("firsts")
 	}
@@ -443,12 +527,26 @@ func markFirsts(ctx *Context, x V) V {
 func markFirstsInts(xs []int64, min, span int64) []byte {
 	r := make([]byte, len(xs))
 	offset := -min
-	m := make([]byte, span)
+	m := make([]bool, span)
 	for i, xi := range xs {
 		c := m[xi+offset]
 		if !c {
-			r[i] = true
+			r[i] = 1
 			m[xi+offset] = true
+			continue
+		}
+	}
+	return r
+}
+
+func markFirstsBytes(xs []byte) []byte {
+	var m [256]bool
+	r := make([]byte, len(xs))
+	for i, xi := range xs {
+		c := m[xi]
+		if !c {
+			r[i] = 1
+			m[xi] = true
 			continue
 		}
 	}
@@ -458,22 +556,14 @@ func markFirstsInts(xs []int64, min, span int64) []byte {
 func markFirstsSlice[T comparable](xs []T, bruteForceThreshold int) []byte {
 	r := make([]byte, len(xs))
 	if len(xs) <= bruteForceThreshold {
-	loop:
-		for i, xi := range xs {
-			for _, xj := range xs[:i] {
-				if xi == xj {
-					continue loop
-				}
-			}
-			r[i] = true
-		}
+		markFirstsBrute(xs, r)
 		return r
 	}
 	m := map[T]struct{}{}
 	for i, s := range xs {
 		_, ok := m[s]
 		if !ok {
-			r[i] = true
+			r[i] = 1
 			m[s] = struct{}{}
 			continue
 		}
@@ -481,14 +571,26 @@ func markFirstsSlice[T comparable](xs []T, bruteForceThreshold int) []byte {
 	return r
 }
 
+func markFirstsBrute[T comparable](xs []T, r []byte) {
+loop:
+	for i, xi := range xs {
+		for _, xj := range xs[:i] {
+			if xi == xj {
+				continue loop
+			}
+		}
+		r[i] = 1
+	}
+}
+
 func markFirstsSortedSlice[T comparable](xs []T) []byte {
 	r := make([]byte, len(xs))
 	prev := xs[0]
-	r[0] = true
+	r[0] = 1
 	i := 1
 	for _, xi := range xs[1:] {
 		if xi != prev {
-			r[i] = true
+			r[i] = 1
 		}
 		prev = xi
 		i++
@@ -527,7 +629,7 @@ func memberOfAB(x V, y *AB) V {
 	if x.IsI() {
 		xv := x.I()
 		for _, yi := range y.elts {
-			if xv == b2I(yi) {
+			if xv == int64(yi) {
 				return NewI(1)
 			}
 		}
@@ -541,34 +643,13 @@ func memberOfAB(x V, y *AB) V {
 	}
 	switch xv := x.value.(type) {
 	case *AB:
-		m := bmapAB(y.elts)
-		r := make([]byte, xv.Len())
-		for i, xi := range xv.elts {
-			r[i] = m[b2I(xi)]
-		}
-		return NewAB(r)
+		r := memberOfBB(xv.elts, y.elts)
+		return newABb(r)
 	case *AI:
-		m := bmapAB(y.elts)
-		r := make([]byte, xv.Len())
-		for i, xi := range xv.elts {
-			if xi != 0 && xi != 1 {
-				r[i] = false
-			} else {
-				r[i] = m[xi]
-			}
-		}
-		return NewAB(r)
+		r := memberOfIB(xv.elts, y.elts)
+		return newABb(r)
 	case *AF:
-		m := bmapAB(y.elts)
-		r := make([]byte, xv.Len())
-		for i, xi := range xv.elts {
-			if xi != 0 && xi != 1 {
-				r[i] = false
-			} else {
-				r[i] = m[int(xi)]
-			}
-		}
-		return NewAB(r)
+		return memberOf(x, fromABtoAF(y))
 	case array:
 		return memberOfArray(xv, y)
 	default:
@@ -576,34 +657,57 @@ func memberOfAB(x V, y *AB) V {
 	}
 }
 
-func bmapAB(xs []byte) (m [2]bool) {
-	for _, xi := range xs {
-		if m[0] && m[1] {
-			break
-		}
-		m[1], m[0] = m[1] || xi, m[0] || !xi
+func memberOfBB(xs []byte, ys []byte) []byte {
+	var m [256]bool
+	for _, yi := range ys {
+		m[yi] = true
 	}
-	return
+	r := make([]byte, len(xs))
+	for i, xi := range xs {
+		if m[xi] {
+			r[i] = 1
+		}
+	}
+	return r
+}
+
+func memberOfIB(xs []int64, ys []byte) []byte {
+	var m [256]bool
+	for _, yi := range ys {
+		m[yi] = true
+	}
+	r := make([]byte, len(xs))
+	for i, xi := range xs {
+		if xi >= 0 && xi < 256 && m[xi] {
+			r[i] = 1
+		}
+	}
+	return r
 }
 
 func memberOfSlice[T comparable](xs []T, ys []T, bruteForceThreshold int) []byte {
 	r := make([]byte, len(xs))
 	if len(xs) <= bruteForceThreshold || len(ys) <= bruteForceThreshold {
-		for i, xi := range xs {
-			for _, yi := range ys {
-				if xi == yi {
-					r[i] = true
-					break
-				}
-			}
-		}
+		memberOfSliceBrute(xs, ys, r)
 		return r
 	}
 	m := bmapSlice[T](ys)
 	for i, xi := range xs {
-		_, r[i] = m[xi]
+		_, ok := m[xi]
+		r[i] = b2B(ok)
 	}
 	return r
+}
+
+func memberOfSliceBrute[T comparable](xs []T, ys []T, r []byte) {
+	for i, xi := range xs {
+		for _, yi := range ys {
+			if xi == yi {
+				r[i] = 1
+				break
+			}
+		}
+	}
 }
 
 func bmapSlice[T comparable](xs []T) map[T]struct{} {
@@ -641,7 +745,7 @@ func memberOfAF(x V, y *AF) V {
 	case *AI:
 		return memberOfAF(toAF(xv), y)
 	case *AF:
-		return NewABWithRC(memberOfSlice[float64](xv.elts, y.elts, bruteForceNumeric), reuseRCp(xv.rc))
+		return newABbWithRC(memberOfSlice[float64](xv.elts, y.elts, bruteForceNumeric), reuseRCp(xv.rc))
 	case array:
 		return memberOfArray(xv, y)
 	default:
@@ -683,22 +787,26 @@ func memberOfAI(x V, y *AI) V {
 	}
 	switch xv := x.value.(type) {
 	case *AB:
-		m := findAIboolsIdx(y.elts)
-		xlen := int64(x.Len())
-		mb := [2]bool{m[0] < xlen, m[1] < xlen}
-		r := make([]byte, xlen)
-		for i, xi := range xv.elts {
-			r[i] = mb[b2I(xi)]
+		if xv.IsBoolean() {
+			m := findAIboolsIdx(y.elts)
+			xlen := int64(x.Len())
+			mb := [2]byte{b2B(m[0] < xlen), b2B(m[1] < xlen)}
+			r := make([]byte, xlen)
+			for i, xi := range xv.elts {
+				r[i] = mb[xi]
+			}
+			return newABbWithRC(r, reuseRCp(xv.rc))
 		}
-		return NewABWithRC(r, reuseRCp(xv.rc))
+		r := memberOfBI(xv.elts, y.elts)
+		return newABbWithRC(r, reuseRCp(xv.rc))
 	case *AI:
 		ylen := int64(y.Len())
 		if y.flags.Has(flagAscending) && ylen > numericSortedLen {
 			r := make([]byte, xv.Len())
 			for i, xi := range xv.elts {
-				r[i] = memberISortedAI(xi, y)
+				r[i] = b2B(memberISortedAI(xi, y))
 			}
-			return NewABWithRC(r, reuseRCp(xv.rc))
+			return newABbWithRC(r, reuseRCp(xv.rc))
 		}
 		xlen := int64(xv.Len())
 		if ylen > smallRangeLen && xlen > smallRangeLen || xlen > bruteForceNumeric {
@@ -711,11 +819,11 @@ func memberOfAI(x V, y *AI) V {
 			span := max - min + 1
 			if span < ylen+xlen+smallRangeSpan {
 				// fast path avoiding hash table
-				r := memberOfInts(xv.elts, y.elts, min, max)
-				return NewABWithRC(r, reuseRCp(xv.rc))
+				r := memberOfII(xv.elts, y.elts, min, max)
+				return newABbWithRC(r, reuseRCp(xv.rc))
 			}
 		}
-		return NewABWithRC(memberOfSlice[int64](xv.elts, y.elts, bruteForceNumeric), reuseRCp(xv.rc))
+		return newABbWithRC(memberOfSlice[int64](xv.elts, y.elts, bruteForceNumeric), reuseRCp(xv.rc))
 	case *AF:
 		return memberOf(x, toAF(y))
 	case array:
@@ -725,16 +833,31 @@ func memberOfAI(x V, y *AI) V {
 	}
 }
 
-func memberOfInts(xs, ys []int64, min, max int64) []byte {
+func memberOfBI(xs []byte, ys []int64) []byte {
+	var m [256]bool
+	for _, yi := range ys {
+		if yi >= 0 && yi < 256 {
+			m[yi] = true
+		}
+	}
+	r := make([]byte, len(xs))
+	for i, xi := range xs {
+		if m[xi] {
+			r[i] = 1
+		}
+	}
+	return r
+}
+
+func memberOfII(xs, ys []int64, min, max int64) []byte {
 	r := make([]byte, len(xs))
 	offset := -min
 	m := make([]byte, max-min+1)
 	for _, yi := range ys {
-		m[yi+offset] = true
+		m[yi+offset] = 1
 	}
 	for i, xi := range xs {
 		if xi < min || xi > max {
-			r[i] = false
 			continue
 		}
 		r[i] = m[xi+offset]
@@ -764,11 +887,11 @@ func memberOfAS(x V, y *AS) V {
 		if y.flags.Has(flagAscending) && y.Len() > bruteForceGeneric/4 {
 			r := make([]byte, xv.Len())
 			for i, xi := range xv.elts {
-				r[i] = memberSOfAS(xi, y)
+				r[i] = b2B(memberSOfAS(xi, y))
 			}
-			return NewABWithRC(r, reuseRCp(xv.rc))
+			return newABbWithRC(r, reuseRCp(xv.rc))
 		}
-		return NewABWithRC(memberOfSlice[string](xv.elts, y.elts, bruteForceGeneric), reuseRCp(xv.rc))
+		return newABbWithRC(memberOfSlice[string](xv.elts, y.elts, bruteForceGeneric), reuseRCp(xv.rc))
 	case array:
 		return memberOfArray(xv, y)
 	default:
@@ -797,12 +920,12 @@ func memberOfArray(x, y array) V {
 	for i := 0; i < x.Len(); i++ {
 		for j := 0; j < y.Len(); j++ {
 			if x.at(i).Matches(y.at(j)) {
-				r[i] = true
+				r[i] = 1
 				break
 			}
 		}
 	}
-	return NewAB(r)
+	return newABb(r)
 }
 
 // OccurrenceCount returns ocount x.
@@ -816,28 +939,32 @@ func occurrenceCount(ctx *Context, x V) V {
 		}
 		if xv.getFlags().Has(flagUnique) {
 			r := make([]byte, xv.Len())
-			return NewAB(r)
+			return newABb(r)
 		}
 	default:
 		return panicType("ocount X", "X", x)
 	}
+	// TODO: occurrence count could often return []bytes instead of []int64
 	switch xv := x.value.(type) {
 	case *AB:
-		r := make([]int64, xv.Len())
-		var counts [2]int64
-		for i, xi := range xv.elts {
-			j := b2I(xi)
-			r[i] = counts[j]
-			counts[j]++
+		if xv.IsBoolean() {
+			r := make([]int64, xv.Len())
+			var counts [2]int64
+			for i, xi := range xv.elts {
+				r[i] = counts[xi]
+				counts[xi]++
+			}
+			return NewAIWithRC(r, reuseRCp(xv.rc))
 		}
-		return NewAIWithRC(r, reuseRCp(xv.rc))
-	case *AF:
-		var r []int64
 		if xv.flags.Has(flagAscending) {
-			r = occurrenceCountSortedSlice[float64](xv.elts)
-		} else {
-			r = occurrenceCountSlice[float64](xv.elts, bruteForceNumeric)
+			r := occurrenceCountSortedSlice[byte](xv.elts)
+			return NewAIWithRC(r, reuseRCp(xv.rc))
 		}
+		if xv.Len() < bruteForceBytes {
+			r := occurrenceCountSlice[byte](xv.elts, bruteForceNumeric)
+			return NewAIWithRC(r, reuseRCp(xv.rc))
+		}
+		r := occurrenceCountBytes(xv.elts)
 		return NewAIWithRC(r, reuseRCp(xv.rc))
 	case *AI:
 		var r []int64
@@ -852,6 +979,14 @@ func occurrenceCount(ctx *Context, x V) V {
 			return NewAIWithRC(r, reuseRCp(xv.rc))
 		}
 		r = occurrenceCountSlice[int64](xv.elts, bruteForceNumeric)
+		return NewAIWithRC(r, reuseRCp(xv.rc))
+	case *AF:
+		var r []int64
+		if xv.flags.Has(flagAscending) {
+			r = occurrenceCountSortedSlice[float64](xv.elts)
+		} else {
+			r = occurrenceCountSlice[float64](xv.elts, bruteForceNumeric)
+		}
 		return NewAIWithRC(r, reuseRCp(xv.rc))
 	case *AS:
 		var r []int64
@@ -883,6 +1018,22 @@ func occurrenceCount(ctx *Context, x V) V {
 	default:
 		panic("ocount")
 	}
+}
+
+func occurrenceCountBytes(xs []byte) []int64 {
+	var m [256]int64
+	r := make([]int64, len(xs))
+	for i, xi := range xs {
+		c := m[xi]
+		if c == 0 {
+			m[xi] = 1
+			r[i] = 0
+			continue
+		}
+		m[xi]++
+		r[i] = c
+	}
+	return r
 }
 
 func occurrenceCountInts(xs []int64, min, span int64) []int64 {
@@ -976,7 +1127,7 @@ func without(x, y V) V {
 		switch bres := r.value.(type) {
 		case *AB:
 			for i, b := range bres.elts {
-				bres.elts[i] = !b
+				bres.elts[i] = 1 - b
 			}
 		}
 		return replicate(r, y)
@@ -990,7 +1141,7 @@ func withoutDict(x V, y *Dict) V {
 	switch bres := r.value.(type) {
 	case *AB:
 		for i, b := range bres.elts {
-			bres.elts[i] = !b
+			bres.elts[i] = 1 - b
 		}
 	}
 	return NewDict(replicate(r, NewV(y.keys)), replicate(r, NewV(y.values)))
@@ -1138,22 +1289,6 @@ func findS(s S, y V) V {
 	}
 }
 
-func imapAB(x *AB) (m [2]int64) {
-	m[0] = int64(x.Len())
-	m[1] = int64(x.Len())
-	if x.Len() == 0 {
-		return m
-	}
-	m[b2I(x.At(0))] = 0
-	for i, xi := range x.elts[1:] {
-		if xi != x.At(0) {
-			m[b2I(xi)] = int64(i) + 1
-			break
-		}
-	}
-	return m
-}
-
 func imapSlice[T comparable](xs []T) map[T]int64 {
 	m := map[T]int64{}
 	for i, xi := range xs {
@@ -1169,7 +1304,7 @@ func imapSlice[T comparable](xs []T) map[T]int64 {
 func findAB(x *AB, y V) V {
 	if y.IsI() {
 		for i, xi := range x.elts {
-			if b2I(xi) == y.I() {
+			if int64(xi) == y.I() {
 				return NewI(int64(i))
 			}
 		}
@@ -1183,34 +1318,18 @@ func findAB(x *AB, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		m := imapAB(x)
-		r := make([]int64, yv.Len())
-		for i, yi := range yv.elts {
-			r[i] = m[b2I(yi)]
+		if y.Len() < bruteForceBytes {
+			r := make([]byte, y.Len())
+			findSlicesBrute(x.elts, yv.elts, r)
+			return NewAB(r)
 		}
+		r := findBB(x.elts, yv.elts)
 		return NewAI(r)
 	case *AI:
-		m := imapAB(x)
-		r := make([]int64, yv.Len())
-		for i, yi := range yv.elts {
-			if yi != 0 && yi != 1 {
-				r[i] = int64(x.Len())
-			} else {
-				r[i] = m[yi]
-			}
-		}
+		r := findBI(x.elts, yv.elts)
 		return NewAI(r)
 	case *AF:
-		m := imapAB(x)
-		r := make([]int64, yv.Len())
-		for i, yi := range yv.elts {
-			if yi != 0 && yi != 1 {
-				r[i] = int64(x.Len())
-			} else {
-				r[i] = m[int(yi)]
-			}
-		}
-		return NewAI(r)
+		return find(fromABtoAF(x), y)
 	case array:
 		return findArrays(x, yv)
 	default:
@@ -1218,19 +1337,45 @@ func findAB(x *AB, y V) V {
 	}
 }
 
+func findBB(xs []byte, ys []byte) []int64 {
+	var m [256]int64
+	for i, xi := range xs {
+		m[xi] = int64(i) + 1
+	}
+	ylen := int64(len(ys))
+	r := make([]int64, ylen)
+	for i, yi := range ys {
+		if m[yi] != 0 {
+			r[i] = m[yi] - 1
+		} else {
+			r[i] = ylen
+		}
+	}
+	return r
+}
+
+func findBI(xs []byte, ys []int64) []int64 {
+	var m [256]int64
+	for i, xi := range xs {
+		m[xi] = int64(i) + 1
+	}
+	ylen := int64(len(ys))
+	r := make([]int64, ylen)
+	for i, yi := range ys {
+		if yi >= 0 && yi < 256 && m[yi] != 0 {
+			r[i] = m[yi] - 1
+		} else {
+			r[i] = ylen
+		}
+	}
+	return r
+}
+
 func findSlices[T comparable](xs, ys []T, bruteForceThreshold int) []int64 {
 	r := make([]int64, len(ys))
 	xlen := int64(len(xs))
 	if len(ys) <= bruteForceThreshold || len(xs) <= bruteForceThreshold {
-		for i, yi := range ys {
-			r[i] = xlen
-			for j, xi := range xs {
-				if yi == xi {
-					r[i] = int64(j)
-					break
-				}
-			}
-		}
+		findSlicesBrute(xs, ys, r)
 		return r
 	}
 	m := imapSlice[T](xs)
@@ -1243,6 +1388,19 @@ func findSlices[T comparable](xs, ys []T, bruteForceThreshold int) []int64 {
 		}
 	}
 	return r
+}
+
+func findSlicesBrute[T comparable, I integer](xs, ys []T, r []I) {
+	xlen := I(len(xs))
+	for i, yi := range ys {
+		for j, xi := range xs {
+			if yi == xi {
+				r[i] = I(j)
+				break
+			}
+		}
+		r[i] = xlen
+	}
 }
 
 func findAF(x *AF, y V) V {
@@ -1333,11 +1491,15 @@ func findAI(x *AI, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		m := findAIboolsIdx(x.elts)
-		r := make([]int64, yv.Len())
-		for i, yi := range yv.elts {
-			r[i] = m[b2I(yi)]
+		if yv.IsBoolean() {
+			m := findAIboolsIdx(x.elts)
+			r := make([]int64, yv.Len())
+			for i, yi := range yv.elts {
+				r[i] = m[yi]
+			}
+			return NewAIWithRC(r, reuseRCp(yv.rc))
 		}
+		r := findIB(x.elts, yv.elts)
 		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		xlen := int64(x.Len())
@@ -1359,7 +1521,7 @@ func findAI(x *AI, y V) V {
 			span := max - min + 1
 			if span < xlen+ylen+smallRangeSpan {
 				// fast path avoiding hash table
-				r := findInts(x.elts, yv.elts, min, max)
+				r := findII(x.elts, yv.elts, min, max)
 				return NewAIWithRC(r, reuseRCp(yv.rc))
 			}
 		}
@@ -1373,7 +1535,26 @@ func findAI(x *AI, y V) V {
 	}
 }
 
-func findInts(xs, ys []int64, min, max int64) []int64 {
+func findIB(xs []int64, ys []byte) []int64 {
+	var m [256]int64
+	xlen := int64(len(xs))
+	r := make([]int64, len(ys))
+	for i, xi := range xs {
+		if xi >= 0 && xi < 256 && m[xi] == 0 {
+			m[xi] = int64(i) + 1
+		}
+	}
+	for i, yi := range ys {
+		if m[yi] > 0 {
+			r[i] = m[yi] - 1
+		} else {
+			r[i] = xlen
+		}
+	}
+	return r
+}
+
+func findII(xs, ys []int64, min, max int64) []int64 {
 	xlen := int64(len(xs))
 	r := make([]int64, len(ys))
 	offset := -min
