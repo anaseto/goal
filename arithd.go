@@ -80,30 +80,33 @@ func equal(x, y V) V {
 
 func equalFV(x float64, y V) V {
 	if y.IsI() {
-		return NewI(b2I(x == float64(y.I())))
+		return NewI(int64(b2B(x == float64(y.I()))))
 	}
 	if y.IsF() {
-		return NewI(b2I(x == y.F()))
+		return NewI(int64(b2B(x == y.F())))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(x == b2F(yv.At(i)))
+		r.flags |= flagBool
+		for i, yi := range yv.elts {
+			r.elts[i] = byte(b2B(x == float64(yi)))
 		}
 		return NewV(r)
 	case *AF:
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(x == yv.At(i))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(yv.rc)}
+		r.flags |= flagBool
+		for i, yi := range yv.elts {
+			r.elts[i] = byte(b2B(x == yi))
 		}
-		return NewABWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AI:
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(x == float64(yv.At(i)))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(yv.rc)}
+		r.flags |= flagBool
+		for i, yi := range yv.elts {
+			r.elts[i] = byte(b2B(x == float64(yi)))
 		}
-		return NewABWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *Dict:
 		v := equalFV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -128,30 +131,33 @@ func equalFV(x float64, y V) V {
 
 func equalIV(x int64, y V) V {
 	if y.IsI() {
-		return NewI(b2I(x == y.I()))
+		return NewI(int64(b2B(x == y.I())))
 	}
 	if y.IsF() {
-		return NewI(b2I(float64(x) == y.F()))
+		return NewI(int64(b2B(float64(x) == y.F())))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(x == b2I(yv.At(i)))
+		r.flags |= flagBool
+		for i, yi := range yv.elts {
+			r.elts[i] = byte(b2B(x == int64(yi)))
 		}
 		return NewV(r)
 	case *AF:
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(float64(x) == yv.At(i))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(yv.rc)}
+		r.flags |= flagBool
+		for i, yi := range yv.elts {
+			r.elts[i] = byte(b2B(float64(x) == yi))
 		}
-		return NewABWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AI:
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(x == yv.At(i))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(yv.rc)}
+		r.flags |= flagBool
+		for i, yi := range yv.elts {
+			r.elts[i] = byte(b2B(x == yi))
 		}
-		return NewABWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *Dict:
 		v := equalIV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -177,13 +183,14 @@ func equalIV(x int64, y V) V {
 func equalSV(x S, y V) V {
 	switch yv := y.value.(type) {
 	case S:
-		return NewI(int64(b2I(S(x) == S(yv))))
+		return NewI(int64(int64(b2B(S(x) == S(yv)))))
 	case *AS:
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(S(x) == S(yv.At(i)))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(yv.rc)}
+		r.flags |= flagBool
+		for i, yi := range yv.elts {
+			r.elts[i] = byte(b2B(S(x) == S(yi)))
 		}
-		return NewABWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *Dict:
 		v := equalSV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -209,15 +216,17 @@ func equalSV(x S, y V) V {
 func equalABV(x *AB, y V) V {
 	if y.IsI() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(b2I(x.At(i)) == int64(y.I()))
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(int64(xi) == int64(y.I())))
 		}
 		return NewV(r)
 	}
 	if y.IsF() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(b2F(x.At(i)) == float64(y.F()))
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(float64(xi) == float64(y.F())))
 		}
 		return NewV(r)
 	}
@@ -227,8 +236,9 @@ func equalABV(x *AB, y V) V {
 			return panicLength("x=y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(x.At(i) == yv.At(i))
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi == yv.At(i)))
 		}
 		return NewV(r)
 	case *AF:
@@ -236,8 +246,9 @@ func equalABV(x *AB, y V) V {
 			return panicLength("x=y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(b2F(x.At(i)) == yv.At(i))
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(float64(xi) == yv.At(i)))
 		}
 		return NewV(r)
 	case *AI:
@@ -245,8 +256,9 @@ func equalABV(x *AB, y V) V {
 			return panicLength("x=y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(b2I(x.At(i)) == yv.At(i))
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(int64(xi) == yv.At(i)))
 		}
 		return NewV(r)
 	case *Dict:
@@ -262,7 +274,7 @@ func equalABV(x *AB, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.elts {
-			ri := equalIV(b2I(x.At(i)), yv.At(i))
+			ri := equalIV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
 				return ri
 			}
@@ -276,18 +288,20 @@ func equalABV(x *AB, y V) V {
 
 func equalAFV(x *AF, y V) V {
 	if y.IsI() {
-		r := make([]byte, x.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) == float64(int64(y.I())))
+		r := &AB{elts: make([]byte, x.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi == float64(int64(y.I()))))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	if y.IsF() {
-		r := make([]byte, x.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) == float64(y.F()))
+		r := &AB{elts: make([]byte, x.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi == float64(y.F())))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -295,28 +309,31 @@ func equalAFV(x *AF, y V) V {
 			return panicLength("x=y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(x.At(i) == b2F(yv.At(i)))
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi == float64(yv.At(i))))
 		}
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
 			return panicLength("x=y", x.Len(), yv.Len())
 		}
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) == yv.At(i))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi == yv.At(i)))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
 			return panicLength("x=y", x.Len(), yv.Len())
 		}
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) == float64(yv.At(i)))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi == float64(yv.At(i))))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *Dict:
 		v := equalAFV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -344,18 +361,20 @@ func equalAFV(x *AF, y V) V {
 
 func equalAIV(x *AI, y V) V {
 	if y.IsI() {
-		r := make([]byte, x.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) == int64(y.I()))
+		r := &AB{elts: make([]byte, x.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi == int64(y.I())))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	if y.IsF() {
-		r := make([]byte, x.Len())
-		for i := range r {
-			r[i] = bool(float64(x.At(i)) == float64(y.F()))
+		r := &AB{elts: make([]byte, x.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(float64(xi) == float64(y.F())))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -363,28 +382,31 @@ func equalAIV(x *AI, y V) V {
 			return panicLength("x=y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(x.At(i) == b2I(yv.At(i)))
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi == int64(yv.At(i))))
 		}
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
 			return panicLength("x=y", x.Len(), yv.Len())
 		}
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(float64(x.At(i)) == yv.At(i))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(float64(xi) == yv.At(i)))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
 			return panicLength("x=y", x.Len(), yv.Len())
 		}
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) == yv.At(i))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi == yv.At(i)))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *Dict:
 		v := equalAIV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -413,20 +435,21 @@ func equalAIV(x *AI, y V) V {
 func equalASV(x *AS, y V) V {
 	switch yv := y.value.(type) {
 	case S:
-		r := make([]byte, x.Len())
-		for i := range r {
-			r[i] = bool(S(x.At(i)) == S(yv))
+		r := &AB{elts: make([]byte, x.Len()), rc: reuseRCp(x.rc)}
+		for i := range r.elts {
+			r.elts[i] = byte(b2B(S(x.At(i)) == S(yv)))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *AS:
 		if x.Len() != yv.Len() {
 			return panicLength("x=y", x.Len(), yv.Len())
 		}
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(S(x.At(i)) == S(yv.At(i)))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(S(xi) == S(yv.At(i))))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *Dict:
 		v := equalASV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -525,30 +548,33 @@ func lesser(x, y V) V {
 
 func lesserFV(x float64, y V) V {
 	if y.IsI() {
-		return NewI(b2I(x < float64(y.I())))
+		return NewI(int64(b2B(x < float64(y.I()))))
 	}
 	if y.IsF() {
-		return NewI(b2I(x < y.F()))
+		return NewI(int64(b2B(x < y.F())))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(x < b2F(yv.At(i)))
+		r.flags |= flagBool
+		for i, yi := range yv.elts {
+			r.elts[i] = byte(b2B(x < float64(yi)))
 		}
 		return NewV(r)
 	case *AF:
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(x < yv.At(i))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(yv.rc)}
+		r.flags |= flagBool
+		for i, yi := range yv.elts {
+			r.elts[i] = byte(b2B(x < yi))
 		}
-		return NewABWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AI:
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(x < float64(yv.At(i)))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(yv.rc)}
+		r.flags |= flagBool
+		for i, yi := range yv.elts {
+			r.elts[i] = byte(b2B(x < float64(yi)))
 		}
-		return NewABWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *Dict:
 		v := lesserFV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -573,30 +599,33 @@ func lesserFV(x float64, y V) V {
 
 func lesserIV(x int64, y V) V {
 	if y.IsI() {
-		return NewI(b2I(x < y.I()))
+		return NewI(int64(b2B(x < y.I())))
 	}
 	if y.IsF() {
-		return NewI(b2I(float64(x) < y.F()))
+		return NewI(int64(b2B(float64(x) < y.F())))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(x < b2I(yv.At(i)))
+		r.flags |= flagBool
+		for i, yi := range yv.elts {
+			r.elts[i] = byte(b2B(x < int64(yi)))
 		}
 		return NewV(r)
 	case *AF:
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(float64(x) < yv.At(i))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(yv.rc)}
+		r.flags |= flagBool
+		for i, yi := range yv.elts {
+			r.elts[i] = byte(b2B(float64(x) < yi))
 		}
-		return NewABWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AI:
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(x < yv.At(i))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(yv.rc)}
+		r.flags |= flagBool
+		for i, yi := range yv.elts {
+			r.elts[i] = byte(b2B(x < yi))
 		}
-		return NewABWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *Dict:
 		v := lesserIV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -622,13 +651,14 @@ func lesserIV(x int64, y V) V {
 func lesserSV(x S, y V) V {
 	switch yv := y.value.(type) {
 	case S:
-		return NewI(int64(b2I(S(x) < S(yv))))
+		return NewI(int64(int64(b2B(S(x) < S(yv)))))
 	case *AS:
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(S(x) < S(yv.At(i)))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(yv.rc)}
+		r.flags |= flagBool
+		for i, yi := range yv.elts {
+			r.elts[i] = byte(b2B(S(x) < S(yi)))
 		}
-		return NewABWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *Dict:
 		v := lesserSV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -654,15 +684,17 @@ func lesserSV(x S, y V) V {
 func lesserABV(x *AB, y V) V {
 	if y.IsI() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(b2I(x.At(i)) < int64(y.I()))
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(int64(xi) < int64(y.I())))
 		}
 		return NewV(r)
 	}
 	if y.IsF() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(b2F(x.At(i)) < float64(y.F()))
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(float64(xi) < float64(y.F())))
 		}
 		return NewV(r)
 	}
@@ -672,8 +704,9 @@ func lesserABV(x *AB, y V) V {
 			return panicLength("x<y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(!x.At(i) && yv.At(i))
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi < yv.At(i)))
 		}
 		return NewV(r)
 	case *AF:
@@ -681,8 +714,9 @@ func lesserABV(x *AB, y V) V {
 			return panicLength("x<y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(b2F(x.At(i)) < yv.At(i))
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(float64(xi) < yv.At(i)))
 		}
 		return NewV(r)
 	case *AI:
@@ -690,8 +724,9 @@ func lesserABV(x *AB, y V) V {
 			return panicLength("x<y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(b2I(x.At(i)) < yv.At(i))
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(int64(xi) < yv.At(i)))
 		}
 		return NewV(r)
 	case *Dict:
@@ -707,7 +742,7 @@ func lesserABV(x *AB, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.elts {
-			ri := lesserIV(b2I(x.At(i)), yv.At(i))
+			ri := lesserIV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
 				return ri
 			}
@@ -721,18 +756,20 @@ func lesserABV(x *AB, y V) V {
 
 func lesserAFV(x *AF, y V) V {
 	if y.IsI() {
-		r := make([]byte, x.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) < float64(int64(y.I())))
+		r := &AB{elts: make([]byte, x.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi < float64(int64(y.I()))))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	if y.IsF() {
-		r := make([]byte, x.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) < float64(y.F()))
+		r := &AB{elts: make([]byte, x.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi < float64(y.F())))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -740,28 +777,31 @@ func lesserAFV(x *AF, y V) V {
 			return panicLength("x<y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(x.At(i) < b2F(yv.At(i)))
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi < float64(yv.At(i))))
 		}
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
 			return panicLength("x<y", x.Len(), yv.Len())
 		}
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) < yv.At(i))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi < yv.At(i)))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
 			return panicLength("x<y", x.Len(), yv.Len())
 		}
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) < float64(yv.At(i)))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi < float64(yv.At(i))))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *Dict:
 		v := lesserAFV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -789,18 +829,20 @@ func lesserAFV(x *AF, y V) V {
 
 func lesserAIV(x *AI, y V) V {
 	if y.IsI() {
-		r := make([]byte, x.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) < int64(y.I()))
+		r := &AB{elts: make([]byte, x.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi < int64(y.I())))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	if y.IsF() {
-		r := make([]byte, x.Len())
-		for i := range r {
-			r[i] = bool(float64(x.At(i)) < float64(y.F()))
+		r := &AB{elts: make([]byte, x.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(float64(xi) < float64(y.F())))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -808,28 +850,31 @@ func lesserAIV(x *AI, y V) V {
 			return panicLength("x<y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(x.At(i) < b2I(yv.At(i)))
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi < int64(yv.At(i))))
 		}
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
 			return panicLength("x<y", x.Len(), yv.Len())
 		}
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(float64(x.At(i)) < yv.At(i))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(float64(xi) < yv.At(i)))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
 			return panicLength("x<y", x.Len(), yv.Len())
 		}
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) < yv.At(i))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi < yv.At(i)))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *Dict:
 		v := lesserAIV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -858,20 +903,21 @@ func lesserAIV(x *AI, y V) V {
 func lesserASV(x *AS, y V) V {
 	switch yv := y.value.(type) {
 	case S:
-		r := make([]byte, x.Len())
-		for i := range r {
-			r[i] = bool(S(x.At(i)) < S(yv))
+		r := &AB{elts: make([]byte, x.Len()), rc: reuseRCp(x.rc)}
+		for i := range r.elts {
+			r.elts[i] = byte(b2B(S(x.At(i)) < S(yv)))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *AS:
 		if x.Len() != yv.Len() {
 			return panicLength("x<y", x.Len(), yv.Len())
 		}
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(S(x.At(i)) < S(yv.At(i)))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(S(xi) < S(yv.At(i))))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *Dict:
 		v := lesserASV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -970,30 +1016,33 @@ func greater(x, y V) V {
 
 func greaterFV(x float64, y V) V {
 	if y.IsI() {
-		return NewI(b2I(x > float64(y.I())))
+		return NewI(int64(b2B(x > float64(y.I()))))
 	}
 	if y.IsF() {
-		return NewI(b2I(x > y.F()))
+		return NewI(int64(b2B(x > y.F())))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(x > b2F(yv.At(i)))
+		r.flags |= flagBool
+		for i, yi := range yv.elts {
+			r.elts[i] = byte(b2B(x > float64(yi)))
 		}
 		return NewV(r)
 	case *AF:
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(x > yv.At(i))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(yv.rc)}
+		r.flags |= flagBool
+		for i, yi := range yv.elts {
+			r.elts[i] = byte(b2B(x > yi))
 		}
-		return NewABWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AI:
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(x > float64(yv.At(i)))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(yv.rc)}
+		r.flags |= flagBool
+		for i, yi := range yv.elts {
+			r.elts[i] = byte(b2B(x > float64(yi)))
 		}
-		return NewABWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *Dict:
 		v := greaterFV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -1018,30 +1067,33 @@ func greaterFV(x float64, y V) V {
 
 func greaterIV(x int64, y V) V {
 	if y.IsI() {
-		return NewI(b2I(x > y.I()))
+		return NewI(int64(b2B(x > y.I())))
 	}
 	if y.IsF() {
-		return NewI(b2I(float64(x) > y.F()))
+		return NewI(int64(b2B(float64(x) > y.F())))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(x > b2I(yv.At(i)))
+		r.flags |= flagBool
+		for i, yi := range yv.elts {
+			r.elts[i] = byte(b2B(x > int64(yi)))
 		}
 		return NewV(r)
 	case *AF:
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(float64(x) > yv.At(i))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(yv.rc)}
+		r.flags |= flagBool
+		for i, yi := range yv.elts {
+			r.elts[i] = byte(b2B(float64(x) > yi))
 		}
-		return NewABWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AI:
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(x > yv.At(i))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(yv.rc)}
+		r.flags |= flagBool
+		for i, yi := range yv.elts {
+			r.elts[i] = byte(b2B(x > yi))
 		}
-		return NewABWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *Dict:
 		v := greaterIV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -1067,13 +1119,14 @@ func greaterIV(x int64, y V) V {
 func greaterSV(x S, y V) V {
 	switch yv := y.value.(type) {
 	case S:
-		return NewI(int64(b2I(S(x) > S(yv))))
+		return NewI(int64(int64(b2B(S(x) > S(yv)))))
 	case *AS:
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(S(x) > S(yv.At(i)))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(yv.rc)}
+		r.flags |= flagBool
+		for i, yi := range yv.elts {
+			r.elts[i] = byte(b2B(S(x) > S(yi)))
 		}
-		return NewABWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *Dict:
 		v := greaterSV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -1099,15 +1152,17 @@ func greaterSV(x S, y V) V {
 func greaterABV(x *AB, y V) V {
 	if y.IsI() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(b2I(x.At(i)) > int64(y.I()))
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(int64(xi) > int64(y.I())))
 		}
 		return NewV(r)
 	}
 	if y.IsF() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(b2F(x.At(i)) > float64(y.F()))
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(float64(xi) > float64(y.F())))
 		}
 		return NewV(r)
 	}
@@ -1117,8 +1172,9 @@ func greaterABV(x *AB, y V) V {
 			return panicLength("x>y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(x.At(i) && !yv.At(i))
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi > yv.At(i)))
 		}
 		return NewV(r)
 	case *AF:
@@ -1126,8 +1182,9 @@ func greaterABV(x *AB, y V) V {
 			return panicLength("x>y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(b2F(x.At(i)) > yv.At(i))
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(float64(xi) > yv.At(i)))
 		}
 		return NewV(r)
 	case *AI:
@@ -1135,8 +1192,9 @@ func greaterABV(x *AB, y V) V {
 			return panicLength("x>y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(b2I(x.At(i)) > yv.At(i))
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(int64(xi) > yv.At(i)))
 		}
 		return NewV(r)
 	case *Dict:
@@ -1152,7 +1210,7 @@ func greaterABV(x *AB, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.elts {
-			ri := greaterIV(b2I(x.At(i)), yv.At(i))
+			ri := greaterIV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
 				return ri
 			}
@@ -1166,18 +1224,20 @@ func greaterABV(x *AB, y V) V {
 
 func greaterAFV(x *AF, y V) V {
 	if y.IsI() {
-		r := make([]byte, x.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) > float64(int64(y.I())))
+		r := &AB{elts: make([]byte, x.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi > float64(int64(y.I()))))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	if y.IsF() {
-		r := make([]byte, x.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) > float64(y.F()))
+		r := &AB{elts: make([]byte, x.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi > float64(y.F())))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -1185,28 +1245,31 @@ func greaterAFV(x *AF, y V) V {
 			return panicLength("x>y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(x.At(i) > b2F(yv.At(i)))
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi > float64(yv.At(i))))
 		}
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
 			return panicLength("x>y", x.Len(), yv.Len())
 		}
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) > yv.At(i))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi > yv.At(i)))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
 			return panicLength("x>y", x.Len(), yv.Len())
 		}
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) > float64(yv.At(i)))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi > float64(yv.At(i))))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *Dict:
 		v := greaterAFV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -1234,18 +1297,20 @@ func greaterAFV(x *AF, y V) V {
 
 func greaterAIV(x *AI, y V) V {
 	if y.IsI() {
-		r := make([]byte, x.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) > int64(y.I()))
+		r := &AB{elts: make([]byte, x.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi > int64(y.I())))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	if y.IsF() {
-		r := make([]byte, x.Len())
-		for i := range r {
-			r[i] = bool(float64(x.At(i)) > float64(y.F()))
+		r := &AB{elts: make([]byte, x.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(float64(xi) > float64(y.F())))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -1253,28 +1318,31 @@ func greaterAIV(x *AI, y V) V {
 			return panicLength("x>y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(x.At(i) > b2I(yv.At(i)))
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi > int64(yv.At(i))))
 		}
 		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
 			return panicLength("x>y", x.Len(), yv.Len())
 		}
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(float64(x.At(i)) > yv.At(i))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(float64(xi) > yv.At(i)))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
 			return panicLength("x>y", x.Len(), yv.Len())
 		}
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(x.At(i) > yv.At(i))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(xi > yv.At(i)))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *Dict:
 		v := greaterAIV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -1303,20 +1371,21 @@ func greaterAIV(x *AI, y V) V {
 func greaterASV(x *AS, y V) V {
 	switch yv := y.value.(type) {
 	case S:
-		r := make([]byte, x.Len())
-		for i := range r {
-			r[i] = bool(S(x.At(i)) > S(yv))
+		r := &AB{elts: make([]byte, x.Len()), rc: reuseRCp(x.rc)}
+		for i := range r.elts {
+			r.elts[i] = byte(b2B(S(x.At(i)) > S(yv)))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *AS:
 		if x.Len() != yv.Len() {
 			return panicLength("x>y", x.Len(), yv.Len())
 		}
-		r := make([]byte, yv.Len())
-		for i := range r {
-			r[i] = bool(S(x.At(i)) > S(yv.At(i)))
+		r := &AB{elts: make([]byte, yv.Len()), rc: reuseRCp(x.rc)}
+		r.flags |= flagBool
+		for i, xi := range x.elts {
+			r.elts[i] = byte(b2B(S(xi) > S(yv.At(i))))
 		}
-		return NewABWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *Dict:
 		v := greaterASV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -1422,23 +1491,23 @@ func addFV(x float64, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(x + b2F(yv.At(i)))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(x + float64(yi))
 		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AF:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(x + yv.At(i))
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(x + yi)
 		}
 		return NewV(r)
 	case *AI:
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(x + float64(yv.At(i)))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(x + float64(yi))
 		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *Dict:
 		v := addFV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -1470,21 +1539,21 @@ func addIV(x int64, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		r := make([]int64, yv.Len())
-		for i := range r {
-			r[i] = int64(x + b2I(yv.At(i)))
+		r := &AI{elts: make([]int64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = int64(x + int64(yi))
 		}
-		return NewAIWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AF:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(float64(x) + yv.At(i))
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(float64(x) + yi)
 		}
 		return NewV(r)
 	case *AI:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(x + yv.At(i))
+		for i, yi := range yv.elts {
+			r.elts[i] = int64(x + yi)
 		}
 		return NewV(r)
 	case *Dict:
@@ -1515,8 +1584,8 @@ func addSV(x S, y V) V {
 		return NewV(S(S(x) + S(yv)))
 	case *AS:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = string(S(x) + S(yv.At(i)))
+		for i, yi := range yv.elts {
+			r.elts[i] = string(S(x) + S(yi))
 		}
 		return NewV(r)
 	case *Dict:
@@ -1543,36 +1612,36 @@ func addSV(x S, y V) V {
 
 func addABV(x *AB, y V) V {
 	if y.IsI() {
-		r := make([]int64, x.Len())
-		for i := range r {
-			r[i] = int64(b2I(x.At(i)) + int64(y.I()))
+		r := &AI{elts: make([]int64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = int64(int64(xi) + int64(y.I()))
 		}
-		return NewAIWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	if y.IsF() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(b2F(x.At(i)) + float64(y.F()))
+		r := &AF{elts: make([]float64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(float64(xi) + float64(y.F()))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
 			return panicLength("x+y", x.Len(), yv.Len())
 		}
-		r := make([]int64, yv.Len())
-		for i := range r {
-			r[i] = int64(b2I(x.At(i)) + b2I(yv.At(i)))
+		r := &AI{elts: make([]int64, yv.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = int64(int64(xi) + int64(yv.At(i)))
 		}
-		return NewAIWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
 			return panicLength("x+y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(b2F(x.At(i)) + yv.At(i))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(float64(xi) + yv.At(i))
 		}
 		return NewV(r)
 	case *AI:
@@ -1580,8 +1649,8 @@ func addABV(x *AB, y V) V {
 			return panicLength("x+y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(b2I(x.At(i)) + yv.At(i))
+		for i, xi := range x.elts {
+			r.elts[i] = int64(int64(xi) + yv.At(i))
 		}
 		return NewV(r)
 	case *Dict:
@@ -1597,7 +1666,7 @@ func addABV(x *AB, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.elts {
-			ri := addIV(b2I(x.At(i)), yv.At(i))
+			ri := addIV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
 				return ri
 			}
@@ -1612,15 +1681,15 @@ func addABV(x *AB, y V) V {
 func addAFV(x *AF, y V) V {
 	if y.IsI() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(x.At(i) + float64(int64(y.I())))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(xi + float64(int64(y.I())))
 		}
 		return NewV(r)
 	}
 	if y.IsF() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(x.At(i) + float64(y.F()))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(xi + float64(y.F()))
 		}
 		return NewV(r)
 	}
@@ -1630,8 +1699,8 @@ func addAFV(x *AF, y V) V {
 			return panicLength("x+y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(x.At(i) + b2F(yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(xi + float64(yv.At(i)))
 		}
 		return NewV(r)
 	case *AF:
@@ -1639,8 +1708,8 @@ func addAFV(x *AF, y V) V {
 			return panicLength("x+y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(x.At(i) + yv.At(i))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(xi + yv.At(i))
 		}
 		return NewV(r)
 	case *AI:
@@ -1648,8 +1717,8 @@ func addAFV(x *AF, y V) V {
 			return panicLength("x+y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(x.At(i) + float64(yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(xi + float64(yv.At(i)))
 		}
 		return NewV(r)
 	case *Dict:
@@ -1680,17 +1749,17 @@ func addAFV(x *AF, y V) V {
 func addAIV(x *AI, y V) V {
 	if y.IsI() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(x.At(i) + int64(y.I()))
+		for i, xi := range x.elts {
+			r.elts[i] = int64(xi + int64(y.I()))
 		}
 		return NewV(r)
 	}
 	if y.IsF() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(float64(x.At(i)) + float64(y.F()))
+		r := &AF{elts: make([]float64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(float64(xi) + float64(y.F()))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -1698,8 +1767,8 @@ func addAIV(x *AI, y V) V {
 			return panicLength("x+y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(x.At(i) + b2I(yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = int64(xi + int64(yv.At(i)))
 		}
 		return NewV(r)
 	case *AF:
@@ -1707,8 +1776,8 @@ func addAIV(x *AI, y V) V {
 			return panicLength("x+y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(float64(x.At(i)) + yv.At(i))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(float64(xi) + yv.At(i))
 		}
 		return NewV(r)
 	case *AI:
@@ -1716,8 +1785,8 @@ func addAIV(x *AI, y V) V {
 			return panicLength("x+y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(x.At(i) + yv.At(i))
+		for i, xi := range x.elts {
+			r.elts[i] = int64(xi + yv.At(i))
 		}
 		return NewV(r)
 	case *Dict:
@@ -1758,8 +1827,8 @@ func addASV(x *AS, y V) V {
 			return panicLength("x+y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = string(S(x.At(i)) + S(yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = string(S(xi) + S(yv.At(i)))
 		}
 		return NewV(r)
 	case *Dict:
@@ -1867,23 +1936,23 @@ func subtractFV(x float64, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(x - b2F(yv.At(i)))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(x - float64(yi))
 		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AF:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(x - yv.At(i))
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(x - yi)
 		}
 		return NewV(r)
 	case *AI:
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(x - float64(yv.At(i)))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(x - float64(yi))
 		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *Dict:
 		v := subtractFV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -1915,21 +1984,21 @@ func subtractIV(x int64, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		r := make([]int64, yv.Len())
-		for i := range r {
-			r[i] = int64(x - b2I(yv.At(i)))
+		r := &AI{elts: make([]int64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = int64(x - int64(yi))
 		}
-		return NewAIWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AF:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(float64(x) - yv.At(i))
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(float64(x) - yi)
 		}
 		return NewV(r)
 	case *AI:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(x - yv.At(i))
+		for i, yi := range yv.elts {
+			r.elts[i] = int64(x - yi)
 		}
 		return NewV(r)
 	case *Dict:
@@ -1960,8 +2029,8 @@ func subtractSV(x S, y V) V {
 		return NewV(S(strings.TrimSuffix(string(S(x)), string(S(yv)))))
 	case *AS:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = string(strings.TrimSuffix(string(S(x)), string(S(yv.At(i)))))
+		for i, yi := range yv.elts {
+			r.elts[i] = string(strings.TrimSuffix(string(S(x)), string(S(yi))))
 		}
 		return NewV(r)
 	case *Dict:
@@ -1988,36 +2057,36 @@ func subtractSV(x S, y V) V {
 
 func subtractABV(x *AB, y V) V {
 	if y.IsI() {
-		r := make([]int64, x.Len())
-		for i := range r {
-			r[i] = int64(b2I(x.At(i)) - int64(y.I()))
+		r := &AI{elts: make([]int64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = int64(int64(xi) - int64(y.I()))
 		}
-		return NewAIWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	if y.IsF() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(b2F(x.At(i)) - float64(y.F()))
+		r := &AF{elts: make([]float64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(float64(xi) - float64(y.F()))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
 			return panicLength("x-y", x.Len(), yv.Len())
 		}
-		r := make([]int64, yv.Len())
-		for i := range r {
-			r[i] = int64(b2I(x.At(i)) - b2I(yv.At(i)))
+		r := &AI{elts: make([]int64, yv.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = int64(int64(xi) - int64(yv.At(i)))
 		}
-		return NewAIWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
 			return panicLength("x-y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(b2F(x.At(i)) - yv.At(i))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(float64(xi) - yv.At(i))
 		}
 		return NewV(r)
 	case *AI:
@@ -2025,8 +2094,8 @@ func subtractABV(x *AB, y V) V {
 			return panicLength("x-y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(b2I(x.At(i)) - yv.At(i))
+		for i, xi := range x.elts {
+			r.elts[i] = int64(int64(xi) - yv.At(i))
 		}
 		return NewV(r)
 	case *Dict:
@@ -2042,7 +2111,7 @@ func subtractABV(x *AB, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.elts {
-			ri := subtractIV(b2I(x.At(i)), yv.At(i))
+			ri := subtractIV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
 				return ri
 			}
@@ -2057,15 +2126,15 @@ func subtractABV(x *AB, y V) V {
 func subtractAFV(x *AF, y V) V {
 	if y.IsI() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(x.At(i) - float64(int64(y.I())))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(xi - float64(int64(y.I())))
 		}
 		return NewV(r)
 	}
 	if y.IsF() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(x.At(i) - float64(y.F()))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(xi - float64(y.F()))
 		}
 		return NewV(r)
 	}
@@ -2075,8 +2144,8 @@ func subtractAFV(x *AF, y V) V {
 			return panicLength("x-y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(x.At(i) - b2F(yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(xi - float64(yv.At(i)))
 		}
 		return NewV(r)
 	case *AF:
@@ -2084,8 +2153,8 @@ func subtractAFV(x *AF, y V) V {
 			return panicLength("x-y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(x.At(i) - yv.At(i))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(xi - yv.At(i))
 		}
 		return NewV(r)
 	case *AI:
@@ -2093,8 +2162,8 @@ func subtractAFV(x *AF, y V) V {
 			return panicLength("x-y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(x.At(i) - float64(yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(xi - float64(yv.At(i)))
 		}
 		return NewV(r)
 	case *Dict:
@@ -2125,17 +2194,17 @@ func subtractAFV(x *AF, y V) V {
 func subtractAIV(x *AI, y V) V {
 	if y.IsI() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(x.At(i) - int64(y.I()))
+		for i, xi := range x.elts {
+			r.elts[i] = int64(xi - int64(y.I()))
 		}
 		return NewV(r)
 	}
 	if y.IsF() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(float64(x.At(i)) - float64(y.F()))
+		r := &AF{elts: make([]float64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(float64(xi) - float64(y.F()))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -2143,8 +2212,8 @@ func subtractAIV(x *AI, y V) V {
 			return panicLength("x-y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(x.At(i) - b2I(yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = int64(xi - int64(yv.At(i)))
 		}
 		return NewV(r)
 	case *AF:
@@ -2152,8 +2221,8 @@ func subtractAIV(x *AI, y V) V {
 			return panicLength("x-y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(float64(x.At(i)) - yv.At(i))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(float64(xi) - yv.At(i))
 		}
 		return NewV(r)
 	case *AI:
@@ -2161,8 +2230,8 @@ func subtractAIV(x *AI, y V) V {
 			return panicLength("x-y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(x.At(i) - yv.At(i))
+		for i, xi := range x.elts {
+			r.elts[i] = int64(xi - yv.At(i))
 		}
 		return NewV(r)
 	case *Dict:
@@ -2203,8 +2272,8 @@ func subtractASV(x *AS, y V) V {
 			return panicLength("x-y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = string(strings.TrimSuffix(string(S(x.At(i))), string(S(yv.At(i)))))
+		for i, xi := range x.elts {
+			r.elts[i] = string(strings.TrimSuffix(string(S(xi)), string(S(yv.At(i)))))
 		}
 		return NewV(r)
 	case *Dict:
@@ -2314,27 +2383,27 @@ func multiplyFV(x float64, y V) V {
 	case S:
 		return NewV(S(srepeat(S(yv), int64(x))))
 	case *AB:
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(x * b2F(yv.At(i)))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(x * float64(yi))
 		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AF:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(x * yv.At(i))
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(x * yi)
 		}
 		return NewV(r)
 	case *AI:
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(x * float64(yv.At(i)))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(x * float64(yi))
 		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AS:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = string(srepeat(S(yv.At(i)), int64(x)))
+		for i, yi := range yv.elts {
+			r.elts[i] = string(srepeat(S(yi), int64(x)))
 		}
 		return NewV(r)
 	case *Dict:
@@ -2370,27 +2439,27 @@ func multiplyIV(x int64, y V) V {
 	case S:
 		return NewV(S(srepeat(S(yv), x)))
 	case *AB:
-		r := make([]int64, yv.Len())
-		for i := range r {
-			r[i] = int64(x * b2I(yv.At(i)))
+		r := &AI{elts: make([]int64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = int64(x * int64(yi))
 		}
-		return NewAIWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AF:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(float64(x) * yv.At(i))
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(float64(x) * yi)
 		}
 		return NewV(r)
 	case *AI:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(x * yv.At(i))
+		for i, yi := range yv.elts {
+			r.elts[i] = int64(x * yi)
 		}
 		return NewV(r)
 	case *AS:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = string(srepeat(S(yv.At(i)), x))
+		for i, yi := range yv.elts {
+			r.elts[i] = string(srepeat(S(yi), x))
 		}
 		return NewV(r)
 	case *Dict:
@@ -2424,23 +2493,23 @@ func multiplySV(x S, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		r := make([]string, yv.Len())
-		for i := range r {
-			r[i] = string(srepeat(S(x), b2I(yv.At(i))))
+		r := &AS{elts: make([]string, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = string(srepeat(S(x), int64(yi)))
 		}
-		return NewASWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AF:
-		r := make([]string, yv.Len())
-		for i := range r {
-			r[i] = string(srepeat(S(x), int64(yv.At(i))))
+		r := &AS{elts: make([]string, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = string(srepeat(S(x), int64(yi)))
 		}
-		return NewASWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AI:
-		r := make([]string, yv.Len())
-		for i := range r {
-			r[i] = string(srepeat(S(x), yv.At(i)))
+		r := &AS{elts: make([]string, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = string(srepeat(S(x), yi))
 		}
-		return NewASWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *Dict:
 		v := multiplySV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -2465,33 +2534,33 @@ func multiplySV(x S, y V) V {
 
 func multiplyABV(x *AB, y V) V {
 	if y.IsI() {
-		r := make([]int64, x.Len())
-		for i := range r {
-			r[i] = int64(b2I(x.At(i)) * int64(y.I()))
+		r := &AI{elts: make([]int64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = int64(int64(xi) * int64(y.I()))
 		}
-		return NewAIWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	if y.IsF() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(b2F(x.At(i)) * float64(y.F()))
+		r := &AF{elts: make([]float64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(float64(xi) * float64(y.F()))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	switch yv := y.value.(type) {
 	case S:
-		r := make([]string, x.Len())
-		for i := range r {
-			r[i] = string(srepeat(S(yv), b2I(x.At(i))))
+		r := &AS{elts: make([]string, x.Len()), rc: reuseRCp(x.rc)}
+		for i := range r.elts {
+			r.elts[i] = string(srepeat(S(yv), int64(x.At(i))))
 		}
-		return NewASWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *AB:
 		if x.Len() != yv.Len() {
 			return panicLength("x*y", x.Len(), yv.Len())
 		}
-		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(x.At(i) && yv.At(i))
+		r := &AI{elts: make([]int64, yv.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = int64(int64(xi) * int64(yv.At(i)))
 		}
 		return NewV(r)
 	case *AF:
@@ -2499,8 +2568,8 @@ func multiplyABV(x *AB, y V) V {
 			return panicLength("x*y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(b2F(x.At(i)) * yv.At(i))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(float64(xi) * yv.At(i))
 		}
 		return NewV(r)
 	case *AI:
@@ -2508,8 +2577,8 @@ func multiplyABV(x *AB, y V) V {
 			return panicLength("x*y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(b2I(x.At(i)) * yv.At(i))
+		for i, xi := range x.elts {
+			r.elts[i] = int64(int64(xi) * yv.At(i))
 		}
 		return NewV(r)
 	case *AS:
@@ -2517,8 +2586,8 @@ func multiplyABV(x *AB, y V) V {
 			return panicLength("x*y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = string(srepeat(S(yv.At(i)), b2I(x.At(i))))
+		for i, xi := range x.elts {
+			r.elts[i] = string(srepeat(S(yv.At(i)), int64(xi)))
 		}
 		return NewV(r)
 	case *Dict:
@@ -2534,7 +2603,7 @@ func multiplyABV(x *AB, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.elts {
-			ri := multiplyIV(b2I(x.At(i)), yv.At(i))
+			ri := multiplyIV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
 				return ri
 			}
@@ -2549,32 +2618,32 @@ func multiplyABV(x *AB, y V) V {
 func multiplyAFV(x *AF, y V) V {
 	if y.IsI() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(x.At(i) * float64(int64(y.I())))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(xi * float64(int64(y.I())))
 		}
 		return NewV(r)
 	}
 	if y.IsF() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(x.At(i) * float64(y.F()))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(xi * float64(y.F()))
 		}
 		return NewV(r)
 	}
 	switch yv := y.value.(type) {
 	case S:
-		r := make([]string, x.Len())
-		for i := range r {
-			r[i] = string(srepeat(S(yv), int64(x.At(i))))
+		r := &AS{elts: make([]string, x.Len()), rc: reuseRCp(x.rc)}
+		for i := range r.elts {
+			r.elts[i] = string(srepeat(S(yv), int64(x.At(i))))
 		}
-		return NewASWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *AB:
 		if x.Len() != yv.Len() {
 			return panicLength("x*y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(x.At(i) * b2F(yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(xi * float64(yv.At(i)))
 		}
 		return NewV(r)
 	case *AF:
@@ -2582,8 +2651,8 @@ func multiplyAFV(x *AF, y V) V {
 			return panicLength("x*y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(x.At(i) * yv.At(i))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(xi * yv.At(i))
 		}
 		return NewV(r)
 	case *AI:
@@ -2591,8 +2660,8 @@ func multiplyAFV(x *AF, y V) V {
 			return panicLength("x*y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(x.At(i) * float64(yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(xi * float64(yv.At(i)))
 		}
 		return NewV(r)
 	case *AS:
@@ -2600,8 +2669,8 @@ func multiplyAFV(x *AF, y V) V {
 			return panicLength("x*y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = string(srepeat(S(yv.At(i)), int64(x.At(i))))
+		for i, xi := range x.elts {
+			r.elts[i] = string(srepeat(S(yv.At(i)), int64(xi)))
 		}
 		return NewV(r)
 	case *Dict:
@@ -2632,32 +2701,32 @@ func multiplyAFV(x *AF, y V) V {
 func multiplyAIV(x *AI, y V) V {
 	if y.IsI() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(x.At(i) * int64(y.I()))
+		for i, xi := range x.elts {
+			r.elts[i] = int64(xi * int64(y.I()))
 		}
 		return NewV(r)
 	}
 	if y.IsF() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(float64(x.At(i)) * float64(y.F()))
+		r := &AF{elts: make([]float64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(float64(xi) * float64(y.F()))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	switch yv := y.value.(type) {
 	case S:
-		r := make([]string, x.Len())
-		for i := range r {
-			r[i] = string(srepeat(S(yv), x.At(i)))
+		r := &AS{elts: make([]string, x.Len()), rc: reuseRCp(x.rc)}
+		for i := range r.elts {
+			r.elts[i] = string(srepeat(S(yv), x.At(i)))
 		}
-		return NewASWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *AB:
 		if x.Len() != yv.Len() {
 			return panicLength("x*y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(x.At(i) * b2I(yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = int64(xi * int64(yv.At(i)))
 		}
 		return NewV(r)
 	case *AF:
@@ -2665,8 +2734,8 @@ func multiplyAIV(x *AI, y V) V {
 			return panicLength("x*y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(float64(x.At(i)) * yv.At(i))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(float64(xi) * yv.At(i))
 		}
 		return NewV(r)
 	case *AI:
@@ -2674,8 +2743,8 @@ func multiplyAIV(x *AI, y V) V {
 			return panicLength("x*y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(x.At(i) * yv.At(i))
+		for i, xi := range x.elts {
+			r.elts[i] = int64(xi * yv.At(i))
 		}
 		return NewV(r)
 	case *AS:
@@ -2683,8 +2752,8 @@ func multiplyAIV(x *AI, y V) V {
 			return panicLength("x*y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = string(srepeat(S(yv.At(i)), x.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = string(srepeat(S(yv.At(i)), xi))
 		}
 		return NewV(r)
 	case *Dict:
@@ -2715,15 +2784,15 @@ func multiplyAIV(x *AI, y V) V {
 func multiplyASV(x *AS, y V) V {
 	if y.IsI() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = string(srepeat(S(x.At(i)), int64(y.I())))
+		for i, xi := range x.elts {
+			r.elts[i] = string(srepeat(S(xi), int64(y.I())))
 		}
 		return NewV(r)
 	}
 	if y.IsF() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = string(srepeat(S(x.At(i)), int64(float64(y.F()))))
+		for i, xi := range x.elts {
+			r.elts[i] = string(srepeat(S(xi), int64(float64(y.F()))))
 		}
 		return NewV(r)
 	}
@@ -2733,8 +2802,8 @@ func multiplyASV(x *AS, y V) V {
 			return panicLength("x*y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = string(srepeat(S(x.At(i)), b2I(yv.At(i))))
+		for i, xi := range x.elts {
+			r.elts[i] = string(srepeat(S(xi), int64(yv.At(i))))
 		}
 		return NewV(r)
 	case *AF:
@@ -2742,8 +2811,8 @@ func multiplyASV(x *AS, y V) V {
 			return panicLength("x*y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = string(srepeat(S(x.At(i)), int64(yv.At(i))))
+		for i, xi := range x.elts {
+			r.elts[i] = string(srepeat(S(xi), int64(yv.At(i))))
 		}
 		return NewV(r)
 	case *AI:
@@ -2751,8 +2820,8 @@ func multiplyASV(x *AS, y V) V {
 			return panicLength("x*y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = string(srepeat(S(x.At(i)), yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = string(srepeat(S(xi), yv.At(i)))
 		}
 		return NewV(r)
 	case *Dict:
@@ -2856,23 +2925,23 @@ func divideFV(x float64, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(divideF(x, b2F(yv.At(i))))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(divideF(x, float64(yi)))
 		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AF:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(divideF(x, yv.At(i)))
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(divideF(x, yi))
 		}
 		return NewV(r)
 	case *AI:
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(divideF(x, float64(yv.At(i))))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(divideF(x, float64(yi)))
 		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *Dict:
 		v := divideFV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -2904,23 +2973,23 @@ func divideIV(x int64, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(divideF(float64(x), b2F(yv.At(i))))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(divideF(float64(x), float64(yi)))
 		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AF:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(divideF(float64(x), yv.At(i)))
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(divideF(float64(x), yi))
 		}
 		return NewV(r)
 	case *AI:
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(divideF(float64(x), float64(yv.At(i))))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(divideF(float64(x), float64(yi)))
 		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *Dict:
 		v := divideIV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -2945,47 +3014,47 @@ func divideIV(x int64, y V) V {
 
 func divideABV(x *AB, y V) V {
 	if y.IsI() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(divideF(b2F(x.At(i)), float64(int64(y.I()))))
+		r := &AF{elts: make([]float64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(divideF(float64(xi), float64(int64(y.I()))))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	if y.IsF() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(divideF(b2F(x.At(i)), float64(y.F())))
+		r := &AF{elts: make([]float64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(divideF(float64(xi), float64(y.F())))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
 			return panicLength("x%y", x.Len(), yv.Len())
 		}
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(divideF(b2F(x.At(i)), b2F(yv.At(i))))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(divideF(float64(xi), float64(yv.At(i))))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
 			return panicLength("x%y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(divideF(b2F(x.At(i)), yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(divideF(float64(xi), yv.At(i)))
 		}
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
 			return panicLength("x%y", x.Len(), yv.Len())
 		}
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(divideF(b2F(x.At(i)), float64(yv.At(i))))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(divideF(float64(xi), float64(yv.At(i))))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *Dict:
 		v := divideABV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -2999,7 +3068,7 @@ func divideABV(x *AB, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.elts {
-			ri := divideIV(b2I(x.At(i)), yv.At(i))
+			ri := divideIV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
 				return ri
 			}
@@ -3014,15 +3083,15 @@ func divideABV(x *AB, y V) V {
 func divideAFV(x *AF, y V) V {
 	if y.IsI() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(divideF(x.At(i), float64(int64(y.I()))))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(divideF(xi, float64(int64(y.I()))))
 		}
 		return NewV(r)
 	}
 	if y.IsF() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(divideF(x.At(i), float64(y.F())))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(divideF(xi, float64(y.F())))
 		}
 		return NewV(r)
 	}
@@ -3032,8 +3101,8 @@ func divideAFV(x *AF, y V) V {
 			return panicLength("x%y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(divideF(x.At(i), b2F(yv.At(i))))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(divideF(xi, float64(yv.At(i))))
 		}
 		return NewV(r)
 	case *AF:
@@ -3041,8 +3110,8 @@ func divideAFV(x *AF, y V) V {
 			return panicLength("x%y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(divideF(x.At(i), yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(divideF(xi, yv.At(i)))
 		}
 		return NewV(r)
 	case *AI:
@@ -3050,8 +3119,8 @@ func divideAFV(x *AF, y V) V {
 			return panicLength("x%y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(divideF(x.At(i), float64(yv.At(i))))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(divideF(xi, float64(yv.At(i))))
 		}
 		return NewV(r)
 	case *Dict:
@@ -3081,47 +3150,47 @@ func divideAFV(x *AF, y V) V {
 
 func divideAIV(x *AI, y V) V {
 	if y.IsI() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(divideF(float64(x.At(i)), float64(int64(y.I()))))
+		r := &AF{elts: make([]float64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(divideF(float64(xi), float64(int64(y.I()))))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	if y.IsF() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(divideF(float64(x.At(i)), float64(y.F())))
+		r := &AF{elts: make([]float64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(divideF(float64(xi), float64(y.F())))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
 			return panicLength("x%y", x.Len(), yv.Len())
 		}
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(divideF(float64(x.At(i)), b2F(yv.At(i))))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(divideF(float64(xi), float64(yv.At(i))))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
 			return panicLength("x%y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(divideF(float64(x.At(i)), yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(divideF(float64(xi), yv.At(i)))
 		}
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
 			return panicLength("x%y", x.Len(), yv.Len())
 		}
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(divideF(float64(x.At(i)), float64(yv.At(i))))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(divideF(float64(xi), float64(yv.At(i))))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *Dict:
 		v := divideAIV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -3227,23 +3296,23 @@ func minimumFV(x float64, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(math.Min(x, b2F(yv.At(i))))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(math.Min(x, float64(yi)))
 		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AF:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Min(x, float64(yv.At(i))))
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(math.Min(x, float64(yi)))
 		}
 		return NewV(r)
 	case *AI:
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(math.Min(x, float64(yv.At(i))))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(math.Min(x, float64(yi)))
 		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *Dict:
 		v := minimumFV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -3275,21 +3344,21 @@ func minimumIV(x int64, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		r := make([]int64, yv.Len())
-		for i := range r {
-			r[i] = int64(minI(x, b2I(yv.At(i))))
+		r := &AI{elts: make([]int64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = int64(minI(x, int64(yi)))
 		}
-		return NewAIWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AF:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Min(float64(x), yv.At(i)))
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(math.Min(float64(x), yi))
 		}
 		return NewV(r)
 	case *AI:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(minI(x, yv.At(i)))
+		for i, yi := range yv.elts {
+			r.elts[i] = int64(minI(x, yi))
 		}
 		return NewV(r)
 	case *Dict:
@@ -3320,8 +3389,8 @@ func minimumSV(x S, y V) V {
 		return NewV(S(minS(S(x), S(yv))))
 	case *AS:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = string(minS(S(x), S(yv.At(i))))
+		for i, yi := range yv.elts {
+			r.elts[i] = string(minS(S(x), S(yi)))
 		}
 		return NewV(r)
 	case *Dict:
@@ -3348,18 +3417,18 @@ func minimumSV(x S, y V) V {
 
 func minimumABV(x *AB, y V) V {
 	if y.IsI() {
-		r := make([]int64, x.Len())
-		for i := range r {
-			r[i] = int64(minI(b2I(x.At(i)), int64(y.I())))
+		r := &AI{elts: make([]int64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = int64(minI(int64(xi), int64(y.I())))
 		}
-		return NewAIWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	if y.IsF() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(math.Min(b2F(x.At(i)), float64(y.F())))
+		r := &AF{elts: make([]float64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Min(float64(xi), float64(y.F())))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -3367,8 +3436,8 @@ func minimumABV(x *AB, y V) V {
 			return panicLength("x&y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(x.At(i) && yv.At(i))
+		for i, xi := range x.elts {
+			r.elts[i] = byte(maxB(xi, yv.At(i)))
 		}
 		return NewV(r)
 	case *AF:
@@ -3376,8 +3445,8 @@ func minimumABV(x *AB, y V) V {
 			return panicLength("x&y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Min(b2F(x.At(i)), yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Min(float64(xi), yv.At(i)))
 		}
 		return NewV(r)
 	case *AI:
@@ -3385,8 +3454,8 @@ func minimumABV(x *AB, y V) V {
 			return panicLength("x&y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(minI(b2I(x.At(i)), yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = int64(minI(int64(xi), yv.At(i)))
 		}
 		return NewV(r)
 	case *Dict:
@@ -3402,7 +3471,7 @@ func minimumABV(x *AB, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.elts {
-			ri := minimumIV(b2I(x.At(i)), yv.At(i))
+			ri := minimumIV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
 				return ri
 			}
@@ -3417,15 +3486,15 @@ func minimumABV(x *AB, y V) V {
 func minimumAFV(x *AF, y V) V {
 	if y.IsI() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Min(x.At(i), float64(int64(y.I()))))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Min(xi, float64(int64(y.I()))))
 		}
 		return NewV(r)
 	}
 	if y.IsF() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Min(x.At(i), float64(float64(y.F()))))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Min(xi, float64(float64(y.F()))))
 		}
 		return NewV(r)
 	}
@@ -3435,8 +3504,8 @@ func minimumAFV(x *AF, y V) V {
 			return panicLength("x&y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Min(x.At(i), b2F(yv.At(i))))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Min(xi, float64(yv.At(i))))
 		}
 		return NewV(r)
 	case *AF:
@@ -3444,8 +3513,8 @@ func minimumAFV(x *AF, y V) V {
 			return panicLength("x&y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Min(x.At(i), float64(yv.At(i))))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Min(xi, float64(yv.At(i))))
 		}
 		return NewV(r)
 	case *AI:
@@ -3453,8 +3522,8 @@ func minimumAFV(x *AF, y V) V {
 			return panicLength("x&y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Min(x.At(i), float64(yv.At(i))))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Min(xi, float64(yv.At(i))))
 		}
 		return NewV(r)
 	case *Dict:
@@ -3485,17 +3554,17 @@ func minimumAFV(x *AF, y V) V {
 func minimumAIV(x *AI, y V) V {
 	if y.IsI() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(minI(x.At(i), int64(y.I())))
+		for i, xi := range x.elts {
+			r.elts[i] = int64(minI(xi, int64(y.I())))
 		}
 		return NewV(r)
 	}
 	if y.IsF() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(math.Min(float64(x.At(i)), float64(y.F())))
+		r := &AF{elts: make([]float64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Min(float64(xi), float64(y.F())))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -3503,8 +3572,8 @@ func minimumAIV(x *AI, y V) V {
 			return panicLength("x&y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(minI(x.At(i), b2I(yv.At(i))))
+		for i, xi := range x.elts {
+			r.elts[i] = int64(minI(xi, int64(yv.At(i))))
 		}
 		return NewV(r)
 	case *AF:
@@ -3512,8 +3581,8 @@ func minimumAIV(x *AI, y V) V {
 			return panicLength("x&y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Min(float64(x.At(i)), yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Min(float64(xi), yv.At(i)))
 		}
 		return NewV(r)
 	case *AI:
@@ -3521,8 +3590,8 @@ func minimumAIV(x *AI, y V) V {
 			return panicLength("x&y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(minI(x.At(i), yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = int64(minI(xi, yv.At(i)))
 		}
 		return NewV(r)
 	case *Dict:
@@ -3563,8 +3632,8 @@ func minimumASV(x *AS, y V) V {
 			return panicLength("x&y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = string(minS(S(x.At(i)), S(yv.At(i))))
+		for i, xi := range x.elts {
+			r.elts[i] = string(minS(S(xi), S(yv.At(i))))
 		}
 		return NewV(r)
 	case *Dict:
@@ -3672,23 +3741,23 @@ func maximumFV(x float64, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(math.Max(x, b2F(yv.At(i))))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(math.Max(x, float64(yi)))
 		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AF:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Max(x, float64(yv.At(i))))
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(math.Max(x, float64(yi)))
 		}
 		return NewV(r)
 	case *AI:
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(math.Max(x, float64(yv.At(i))))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(math.Max(x, float64(yi)))
 		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *Dict:
 		v := maximumFV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -3720,21 +3789,21 @@ func maximumIV(x int64, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		r := make([]int64, yv.Len())
-		for i := range r {
-			r[i] = int64(maxI(x, b2I(yv.At(i))))
+		r := &AI{elts: make([]int64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = int64(maxI(x, int64(yi)))
 		}
-		return NewAIWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AF:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Max(float64(x), yv.At(i)))
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(math.Max(float64(x), yi))
 		}
 		return NewV(r)
 	case *AI:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(maxI(x, yv.At(i)))
+		for i, yi := range yv.elts {
+			r.elts[i] = int64(maxI(x, yi))
 		}
 		return NewV(r)
 	case *Dict:
@@ -3765,8 +3834,8 @@ func maximumSV(x S, y V) V {
 		return NewV(S(maxS(S(x), S(yv))))
 	case *AS:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = string(maxS(S(x), S(yv.At(i))))
+		for i, yi := range yv.elts {
+			r.elts[i] = string(maxS(S(x), S(yi)))
 		}
 		return NewV(r)
 	case *Dict:
@@ -3793,18 +3862,18 @@ func maximumSV(x S, y V) V {
 
 func maximumABV(x *AB, y V) V {
 	if y.IsI() {
-		r := make([]int64, x.Len())
-		for i := range r {
-			r[i] = int64(maxI(b2I(x.At(i)), int64(y.I())))
+		r := &AI{elts: make([]int64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = int64(maxI(int64(xi), int64(y.I())))
 		}
-		return NewAIWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	if y.IsF() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(math.Max(b2F(x.At(i)), float64(y.F())))
+		r := &AF{elts: make([]float64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Max(float64(xi), float64(y.F())))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -3812,8 +3881,8 @@ func maximumABV(x *AB, y V) V {
 			return panicLength("x|y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = bool(x.At(i) || yv.At(i))
+		for i, xi := range x.elts {
+			r.elts[i] = byte(minB(xi, yv.At(i)))
 		}
 		return NewV(r)
 	case *AF:
@@ -3821,8 +3890,8 @@ func maximumABV(x *AB, y V) V {
 			return panicLength("x|y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Max(b2F(x.At(i)), yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Max(float64(xi), yv.At(i)))
 		}
 		return NewV(r)
 	case *AI:
@@ -3830,8 +3899,8 @@ func maximumABV(x *AB, y V) V {
 			return panicLength("x|y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(maxI(b2I(x.At(i)), yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = int64(maxI(int64(xi), yv.At(i)))
 		}
 		return NewV(r)
 	case *Dict:
@@ -3847,7 +3916,7 @@ func maximumABV(x *AB, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.elts {
-			ri := maximumIV(b2I(x.At(i)), yv.At(i))
+			ri := maximumIV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
 				return ri
 			}
@@ -3862,15 +3931,15 @@ func maximumABV(x *AB, y V) V {
 func maximumAFV(x *AF, y V) V {
 	if y.IsI() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Max(x.At(i), float64(int64(y.I()))))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Max(xi, float64(int64(y.I()))))
 		}
 		return NewV(r)
 	}
 	if y.IsF() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Max(x.At(i), float64(float64(y.F()))))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Max(xi, float64(float64(y.F()))))
 		}
 		return NewV(r)
 	}
@@ -3880,8 +3949,8 @@ func maximumAFV(x *AF, y V) V {
 			return panicLength("x|y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Max(x.At(i), b2F(yv.At(i))))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Max(xi, float64(yv.At(i))))
 		}
 		return NewV(r)
 	case *AF:
@@ -3889,8 +3958,8 @@ func maximumAFV(x *AF, y V) V {
 			return panicLength("x|y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Max(x.At(i), float64(yv.At(i))))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Max(xi, float64(yv.At(i))))
 		}
 		return NewV(r)
 	case *AI:
@@ -3898,8 +3967,8 @@ func maximumAFV(x *AF, y V) V {
 			return panicLength("x|y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Max(x.At(i), float64(yv.At(i))))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Max(xi, float64(yv.At(i))))
 		}
 		return NewV(r)
 	case *Dict:
@@ -3930,17 +3999,17 @@ func maximumAFV(x *AF, y V) V {
 func maximumAIV(x *AI, y V) V {
 	if y.IsI() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(maxI(x.At(i), int64(y.I())))
+		for i, xi := range x.elts {
+			r.elts[i] = int64(maxI(xi, int64(y.I())))
 		}
 		return NewV(r)
 	}
 	if y.IsF() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(math.Max(float64(x.At(i)), float64(y.F())))
+		r := &AF{elts: make([]float64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Max(float64(xi), float64(y.F())))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -3948,8 +4017,8 @@ func maximumAIV(x *AI, y V) V {
 			return panicLength("x|y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(maxI(x.At(i), b2I(yv.At(i))))
+		for i, xi := range x.elts {
+			r.elts[i] = int64(maxI(xi, int64(yv.At(i))))
 		}
 		return NewV(r)
 	case *AF:
@@ -3957,8 +4026,8 @@ func maximumAIV(x *AI, y V) V {
 			return panicLength("x|y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Max(float64(x.At(i)), yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Max(float64(xi), yv.At(i)))
 		}
 		return NewV(r)
 	case *AI:
@@ -3966,8 +4035,8 @@ func maximumAIV(x *AI, y V) V {
 			return panicLength("x|y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(maxI(x.At(i), yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = int64(maxI(xi, yv.At(i)))
 		}
 		return NewV(r)
 	case *Dict:
@@ -4008,8 +4077,8 @@ func maximumASV(x *AS, y V) V {
 			return panicLength("x|y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = string(maxS(S(x.At(i)), S(yv.At(i))))
+		for i, xi := range x.elts {
+			r.elts[i] = string(maxS(S(xi), S(yv.At(i))))
 		}
 		return NewV(r)
 	case *Dict:
@@ -4113,23 +4182,23 @@ func modulusFV(x float64, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(modF(x, b2F(yv.At(i))))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(modF(x, float64(yi)))
 		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AF:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(modF(x, yv.At(i)))
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(modF(x, yi))
 		}
 		return NewV(r)
 	case *AI:
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(modF(x, float64(yv.At(i))))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(modF(x, float64(yi)))
 		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *Dict:
 		v := modulusFV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -4161,21 +4230,21 @@ func modulusIV(x int64, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		r := make([]int64, yv.Len())
-		for i := range r {
-			r[i] = int64(modI(x, b2I(yv.At(i))))
+		r := &AI{elts: make([]int64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = int64(modI(x, int64(yi)))
 		}
-		return NewAIWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AF:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(modF(float64(x), yv.At(i)))
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(modF(float64(x), yi))
 		}
 		return NewV(r)
 	case *AI:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(modI(x, yv.At(i)))
+		for i, yi := range yv.elts {
+			r.elts[i] = int64(modI(x, yi))
 		}
 		return NewV(r)
 	case *Dict:
@@ -4202,36 +4271,36 @@ func modulusIV(x int64, y V) V {
 
 func modulusABV(x *AB, y V) V {
 	if y.IsI() {
-		r := make([]int64, x.Len())
-		for i := range r {
-			r[i] = int64(modI(b2I(x.At(i)), int64(y.I())))
+		r := &AI{elts: make([]int64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = int64(modI(int64(xi), int64(y.I())))
 		}
-		return NewAIWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	if y.IsF() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(modF(b2F(x.At(i)), float64(y.F())))
+		r := &AF{elts: make([]float64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(modF(float64(xi), float64(y.F())))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
 			return panicLength("x mod y", x.Len(), yv.Len())
 		}
-		r := make([]int64, yv.Len())
-		for i := range r {
-			r[i] = int64(modI(b2I(x.At(i)), b2I(yv.At(i))))
+		r := &AI{elts: make([]int64, yv.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = int64(modI(int64(xi), int64(yv.At(i))))
 		}
-		return NewAIWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
 			return panicLength("x mod y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(modF(b2F(x.At(i)), yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(modF(float64(xi), yv.At(i)))
 		}
 		return NewV(r)
 	case *AI:
@@ -4239,8 +4308,8 @@ func modulusABV(x *AB, y V) V {
 			return panicLength("x mod y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(modI(b2I(x.At(i)), yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = int64(modI(int64(xi), yv.At(i)))
 		}
 		return NewV(r)
 	case *Dict:
@@ -4256,7 +4325,7 @@ func modulusABV(x *AB, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.elts {
-			ri := modulusIV(b2I(x.At(i)), yv.At(i))
+			ri := modulusIV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
 				return ri
 			}
@@ -4271,15 +4340,15 @@ func modulusABV(x *AB, y V) V {
 func modulusAFV(x *AF, y V) V {
 	if y.IsI() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(modF(x.At(i), float64(int64(y.I()))))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(modF(xi, float64(int64(y.I()))))
 		}
 		return NewV(r)
 	}
 	if y.IsF() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(modF(x.At(i), float64(y.F())))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(modF(xi, float64(y.F())))
 		}
 		return NewV(r)
 	}
@@ -4289,8 +4358,8 @@ func modulusAFV(x *AF, y V) V {
 			return panicLength("x mod y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(modF(x.At(i), b2F(yv.At(i))))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(modF(xi, float64(yv.At(i))))
 		}
 		return NewV(r)
 	case *AF:
@@ -4298,8 +4367,8 @@ func modulusAFV(x *AF, y V) V {
 			return panicLength("x mod y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(modF(x.At(i), yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(modF(xi, yv.At(i)))
 		}
 		return NewV(r)
 	case *AI:
@@ -4307,8 +4376,8 @@ func modulusAFV(x *AF, y V) V {
 			return panicLength("x mod y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(modF(x.At(i), float64(yv.At(i))))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(modF(xi, float64(yv.At(i))))
 		}
 		return NewV(r)
 	case *Dict:
@@ -4339,17 +4408,17 @@ func modulusAFV(x *AF, y V) V {
 func modulusAIV(x *AI, y V) V {
 	if y.IsI() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(modI(x.At(i), int64(y.I())))
+		for i, xi := range x.elts {
+			r.elts[i] = int64(modI(xi, int64(y.I())))
 		}
 		return NewV(r)
 	}
 	if y.IsF() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(modF(float64(x.At(i)), float64(y.F())))
+		r := &AF{elts: make([]float64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(modF(float64(xi), float64(y.F())))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -4357,8 +4426,8 @@ func modulusAIV(x *AI, y V) V {
 			return panicLength("x mod y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(modI(x.At(i), b2I(yv.At(i))))
+		for i, xi := range x.elts {
+			r.elts[i] = int64(modI(xi, int64(yv.At(i))))
 		}
 		return NewV(r)
 	case *AF:
@@ -4366,8 +4435,8 @@ func modulusAIV(x *AI, y V) V {
 			return panicLength("x mod y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(modF(float64(x.At(i)), yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(modF(float64(xi), yv.At(i)))
 		}
 		return NewV(r)
 	case *AI:
@@ -4375,8 +4444,8 @@ func modulusAIV(x *AI, y V) V {
 			return panicLength("x mod y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = int64(modI(x.At(i), yv.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = int64(modI(xi, yv.At(i)))
 		}
 		return NewV(r)
 	case *Dict:
@@ -4480,23 +4549,23 @@ func arctan2FV(x float64, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(math.Atan2(b2F(yv.At(i)), x))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(math.Atan2(float64(yi), x))
 		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AF:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Atan2(yv.At(i), x))
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(math.Atan2(yi, x))
 		}
 		return NewV(r)
 	case *AI:
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(math.Atan2(float64(yv.At(i)), x))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(math.Atan2(float64(yi), x))
 		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *Dict:
 		v := arctan2FV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -4528,23 +4597,23 @@ func arctan2IV(x int64, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(math.Atan2(b2F(yv.At(i)), float64(x)))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(math.Atan2(float64(yi), float64(x)))
 		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *AF:
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Atan2(yv.At(i), float64(x)))
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(math.Atan2(yi, float64(x)))
 		}
 		return NewV(r)
 	case *AI:
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(math.Atan2(float64(yv.At(i)), float64(x)))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(yv.rc)}
+		for i, yi := range yv.elts {
+			r.elts[i] = float64(math.Atan2(float64(yi), float64(x)))
 		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewV(r)
 	case *Dict:
 		v := arctan2IV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -4569,47 +4638,47 @@ func arctan2IV(x int64, y V) V {
 
 func arctan2ABV(x *AB, y V) V {
 	if y.IsI() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(math.Atan2(float64(int64(y.I())), b2F(x.At(i))))
+		r := &AF{elts: make([]float64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Atan2(float64(int64(y.I())), float64(xi)))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	if y.IsF() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(math.Atan2(float64(y.F()), b2F(x.At(i))))
+		r := &AF{elts: make([]float64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Atan2(float64(y.F()), float64(xi)))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
 			return panicLength("x atan y", x.Len(), yv.Len())
 		}
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(math.Atan2(b2F(yv.At(i)), b2F(x.At(i))))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Atan2(float64(yv.At(i)), float64(xi)))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
 			return panicLength("x atan y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Atan2(yv.At(i), b2F(x.At(i))))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Atan2(yv.At(i), float64(xi)))
 		}
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
 			return panicLength("x atan y", x.Len(), yv.Len())
 		}
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(math.Atan2(float64(yv.At(i)), b2F(x.At(i))))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Atan2(float64(yv.At(i)), float64(xi)))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *Dict:
 		v := arctan2ABV(x, NewV(yv.values))
 		if v.IsPanic() {
@@ -4623,7 +4692,7 @@ func arctan2ABV(x *AB, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.elts {
-			ri := arctan2IV(b2I(x.At(i)), yv.At(i))
+			ri := arctan2IV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
 				return ri
 			}
@@ -4638,15 +4707,15 @@ func arctan2ABV(x *AB, y V) V {
 func arctan2AFV(x *AF, y V) V {
 	if y.IsI() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Atan2(float64(int64(y.I())), x.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Atan2(float64(int64(y.I())), xi))
 		}
 		return NewV(r)
 	}
 	if y.IsF() {
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Atan2(float64(y.F()), x.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Atan2(float64(y.F()), xi))
 		}
 		return NewV(r)
 	}
@@ -4656,8 +4725,8 @@ func arctan2AFV(x *AF, y V) V {
 			return panicLength("x atan y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Atan2(b2F(yv.At(i)), x.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Atan2(float64(yv.At(i)), xi))
 		}
 		return NewV(r)
 	case *AF:
@@ -4665,8 +4734,8 @@ func arctan2AFV(x *AF, y V) V {
 			return panicLength("x atan y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Atan2(yv.At(i), x.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Atan2(yv.At(i), xi))
 		}
 		return NewV(r)
 	case *AI:
@@ -4674,8 +4743,8 @@ func arctan2AFV(x *AF, y V) V {
 			return panicLength("x atan y", x.Len(), yv.Len())
 		}
 		r := x.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Atan2(float64(yv.At(i)), x.At(i)))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Atan2(float64(yv.At(i)), xi))
 		}
 		return NewV(r)
 	case *Dict:
@@ -4705,47 +4774,47 @@ func arctan2AFV(x *AF, y V) V {
 
 func arctan2AIV(x *AI, y V) V {
 	if y.IsI() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(math.Atan2(float64(int64(y.I())), float64(x.At(i))))
+		r := &AF{elts: make([]float64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Atan2(float64(int64(y.I())), float64(xi)))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	if y.IsF() {
-		r := make([]float64, x.Len())
-		for i := range r {
-			r[i] = float64(math.Atan2(float64(y.F()), float64(x.At(i))))
+		r := &AF{elts: make([]float64, x.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Atan2(float64(y.F()), float64(xi)))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
 			return panicLength("x atan y", x.Len(), yv.Len())
 		}
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(math.Atan2(b2F(yv.At(i)), float64(x.At(i))))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Atan2(float64(yv.At(i)), float64(xi)))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *AF:
 		if x.Len() != yv.Len() {
 			return panicLength("x atan y", x.Len(), yv.Len())
 		}
 		r := yv.reuse()
-		for i := range r.elts {
-			r.elts[i] = float64(math.Atan2(yv.At(i), float64(x.At(i))))
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Atan2(yv.At(i), float64(xi)))
 		}
 		return NewV(r)
 	case *AI:
 		if x.Len() != yv.Len() {
 			return panicLength("x atan y", x.Len(), yv.Len())
 		}
-		r := make([]float64, yv.Len())
-		for i := range r {
-			r[i] = float64(math.Atan2(float64(yv.At(i)), float64(x.At(i))))
+		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(x.rc)}
+		for i, xi := range x.elts {
+			r.elts[i] = float64(math.Atan2(float64(yv.At(i)), float64(xi)))
 		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewV(r)
 	case *Dict:
 		v := arctan2AIV(x, NewV(yv.values))
 		if v.IsPanic() {

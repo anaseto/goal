@@ -20,7 +20,7 @@ func negate(x V) V {
 	case *AB:
 		r := make([]int64, xv.Len())
 		for i, xi := range xv.elts {
-			r[i] = -b2I(xi)
+			r[i] = -int64(xi)
 		}
 		return NewAIWithRC(r, reuseRCp(xv.rc))
 	case *AI:
@@ -90,7 +90,16 @@ func sign(x V) V {
 	}
 	switch xv := x.value.(type) {
 	case *AB:
-		return x
+		if xv.IsBoolean() {
+			return x
+		}
+		r := xv.reuse()
+		for i, xi := range xv.elts {
+			if xi > 1 {
+				r.elts[i] = 1
+			}
+		}
+		return NewV(r)
 	case *AI:
 		r := xv.reuse()
 		for i, xi := range xv.elts {
@@ -224,19 +233,19 @@ func not(x V) V {
 	case *AB:
 		r := xv.reuse()
 		for i, xi := range xv.elts {
-			r.elts[i] = !xi
+			r.elts[i] = b2B(xi == 0)
 		}
 		return NewV(r)
 	case *AI:
 		r := make([]byte, xv.Len())
 		for i, xi := range xv.elts {
-			r[i] = xi == 0
+			r[i] = b2B(xi == 0)
 		}
 		return NewABWithRC(r, reuseRCp(xv.rc))
 	case *AF:
 		r := make([]byte, xv.Len())
 		for i, xi := range xv.elts {
-			r[i] = xi == 0
+			r[i] = b2B(xi == 0)
 		}
 		return NewABWithRC(r, reuseRCp(xv.rc))
 	case *AV:

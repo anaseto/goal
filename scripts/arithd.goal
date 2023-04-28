@@ -11,40 +11,40 @@ import (
 
 keys:"xt" "yt" "expr" "rt"
 equal:keys!+(
-  "B" "B" "x == y" "B"
-  "B" "I" "int64(x) == y" "B"
-  "B" "F" "float64(x) == y" "B"
-  "I" "B" "x == int64(y)" "B"
-  "I" "I" "x == y" "B"
-  "I" "F" "float64(x) == y" "B"
-  "F" "B" "x == float64(y)" "B"
-  "F" "I" "x == float64(y)" "B"
-  "F" "F" "x == y" "B"
-  "S" "S" "x == y" "B"
+  "B" "B" "b2B(x == y)" "B"
+  "B" "I" "b2B(int64(x) == y)" "B"
+  "B" "F" "b2B(float64(x) == y)" "B"
+  "I" "B" "b2B(x == int64(y))" "B"
+  "I" "I" "b2B(x == y)" "B"
+  "I" "F" "b2B(float64(x) == y)" "B"
+  "F" "B" "b2B(x == float64(y))" "B"
+  "F" "I" "b2B(x == float64(y))" "B"
+  "F" "F" "b2B(x == y)" "B"
+  "S" "S" "b2B(x == y)" "B"
 )
 lesser:keys!+(
-  "B" "B" "!x && y" "B"
-  "B" "I" "int64(x) < y" "B"
-  "B" "F" "float64(x) < y" "B"
-  "I" "B" "x < int64(y)" "B"
-  "I" "I" "x < y" "B"
-  "I" "F" "float64(x) < y" "B"
-  "F" "B" "x < float64(y)" "B"
-  "F" "I" "x < float64(y)" "B"
-  "F" "F" "x < y" "B"
-  "S" "S" "x < y" "B"
+  "B" "B" "b2B(x < y)" "B"
+  "B" "I" "b2B(int64(x) < y)" "B"
+  "B" "F" "b2B(float64(x) < y)" "B"
+  "I" "B" "b2B(x < int64(y))" "B"
+  "I" "I" "b2B(x < y)" "B"
+  "I" "F" "b2B(float64(x) < y)" "B"
+  "F" "B" "b2B(x < float64(y))" "B"
+  "F" "I" "b2B(x < float64(y))" "B"
+  "F" "F" "b2B(x < y)" "B"
+  "S" "S" "b2B(x < y)" "B"
 )
 greater:keys!+(
-  "B" "B" "x && !y" "B"
-  "B" "I" "int64(x) > y" "B"
-  "B" "F" "float64(x) > y" "B"
-  "I" "B" "x > int64(y)" "B"
-  "I" "I" "x > y" "B"
-  "I" "F" "float64(x) > y" "B"
-  "F" "B" "x > float64(y)" "B"
-  "F" "I" "x > float64(y)" "B"
-  "F" "F" "x > y" "B"
-  "S" "S" "x > y" "B"
+  "B" "B" "b2B(x > y)" "B"
+  "B" "I" "b2B(int64(x) > y)" "B"
+  "B" "F" "b2B(float64(x) > y)" "B"
+  "I" "B" "b2B(x > int64(y))" "B"
+  "I" "I" "b2B(x > y)" "B"
+  "I" "F" "b2B(float64(x) > y)" "B"
+  "F" "B" "b2B(x > float64(y))" "B"
+  "F" "I" "b2B(x > float64(y))" "B"
+  "F" "F" "b2B(x > y)" "B"
+  "S" "S" "b2B(x > y)" "B"
 )
 add:keys!+(
   "B" "B" "int64(x) + int64(y)" "I"
@@ -159,6 +159,7 @@ ops:(
   "arctan2" " atan "
 )
 
+cmps:"=" "<" ">"
 types:"B" "F" "I" "S" / atom types
 ntypes:"B" "F" "I" / numeric atom types
 itypes:"B" "I" / integer atom types
@@ -265,7 +266,7 @@ doxUy:{[yt;e;t]
   "if y.Is$yt() { return $e; }"
 }
 doxBy:{[yt;e;t]
-  e:?[t~"B";qq/int64($e)/;e]
+  e:?[t~"B";"int64($e)";e]
   nt:?[t in itypes;"I";t~"F";"F";"V"]
   e:doExpr[e;yt;"x";"yv"]
   t:nt2go t
@@ -273,23 +274,18 @@ doxBy:{[yt;e;t]
   "  case $yt: return New$nt($t($e))"
 }
 doxY:{[yt;e;t]
-  e:doExpr[e;yt;"x";"yv.At(i)"]
+  e:doExpr[e;yt;"x";"yi"]
   rt:t2go t
-  ?[yt~t
-   "\n"_qq/
+  rs:?[yt~t;"yv.reuse()";"&A${t}{elts: make([]$rt, yv.Len()), rc: reuseRCp(yv.rc)}"]
+  rs:?[op¿cmps;"$rs; r.flags |= flagBool";rs]
+  / TODO: add flagBool in & and | when possible
+  "\n"_qq/
     case *A$yt:
-        r := yv.reuse()
-        for i := range r.elts {
+        r := $rs
+        for i, yi := range yv.elts {
                 r.elts[i] = $rt($e)
         }
         return NewV(r)/
-   "\n"_qq/
-    case *A$yt:
-        r := make([]$rt, yv.Len())
-        for i := range r {
-                r[i] = $rt($e)
-        }
-        return NewA${t}WithRC(r, reuseRCp(yv.rc))/]
 }
 doxdAV:{
   "\n"_qq/
@@ -332,47 +328,35 @@ doX:{
     /
 }
 doXUy:{[yt;e;t]
-  e:doExpr[e;t2go yt;"x.At(i)";qq/y.$yt()/]
+  e:doExpr[e;t2go yt;"xi";qq/y.$yt()/]
   rt:t2go t
-  ?[xt~t
-    "\n"_qq/
+  rs:?[xt~t;"x.reuse()";"&A${t}{elts: make([]$rt, x.Len()), rc: reuseRCp(x.rc)}"]
+  rs:?[op¿cmps;"$rs; r.flags |= flagBool";rs]
+  / TODO: add flagBool in & and | when possible
+  "\n"_qq/
       if y.Is$yt() {
-          r := x.reuse()
-          for i := range r.elts {
+          r := $rs
+          for i, xi := range x.elts {
                   r.elts[i] = $rt($e)
           }
           return NewV(r)
       }/
-   "\n"_qq/
-      if y.Is$yt() {
-          r := make([]$rt, x.Len())
-          for i := range r {
-                  r[i] = $rt($e)
-          }
-          return NewA${t}WithRC(r, reuseRCp(x.rc))
-      }/]
 }
 doXBy:{[yt;e;t]
   e:doExpr[e;yt;"x.At(i)";"yv"]
   rt:t2go t
-  ?[xt~t
-    "\n"_qq/
+  rs:?[xt~t;"x.reuse()";"&A${t}{elts: make([]$rt, x.Len()), rc: reuseRCp(x.rc)}"]
+  / currently, yt~"S" in thoses cases
+  "\n"_qq/
       case $yt:
-              r := x.reuse()
+              r := $rs
               for i := range r.elts {
                       r.elts[i] = $rt($e)
               }
               return NewV(r)/
-    "\n"_qq/
-      case $yt:
-              r := make([]$rt, x.Len())
-              for i := range r {
-                      r[i] = $rt($e)
-              }
-              return NewA${t}WithRC(r, reuseRCp(x.rc))/]
 }
 doXY:{[yt;e;t]
-  e:doExpr[e;yt;"x.At(i)";"yv.At(i)"]
+  e:doExpr[e;yt;"xi";"yv.At(i)"]
   rt:t2go t
   fmtop:escp op
   s1:"\n"_qq/
@@ -380,19 +364,16 @@ doXY:{[yt;e;t]
             if x.Len() != yv.Len() {
                     return panicLength("x${op}y", x.Len(), yv.Len())
             }/
-  s2:?[t in xt,yt
-    sub["{XY}";?[xt~t;"x";"yv"]]"\n"_qq/
-          r := {XY}.reuse()
-          for i := range r.elts {
+  xy:?[xt~t;"x";"yv"]
+  rs:?[t¿xt,yt;"${xy}.reuse()";"&A${t}{elts: make([]$rt, yv.Len()), rc: reuseRCp(x.rc)}"]
+  rs:?[op¿cmps;"$rs; r.flags |= flagBool";rs]
+  / TODO: add flagBool in & and | when possible
+  s2:"\n"_qq/
+          r := $rs
+          for i, xi := range x.elts {
                   r.elts[i] = $rt($e)
           }
           return NewV(r)/
-    "\n"_qq/
-          r := make([]$rt, yv.Len())
-          for i := range r {
-                  r[i] = $rt($e)
-          }
-          return NewA${t}WithRC(r, reuseRCp(x.rc))/]
   "\n"/(s1;s2)
 }
 doXdAV:{

@@ -14,12 +14,12 @@ type array interface {
 	sort.Interface
 	at(i int) V           // x[i]
 	slice(i, j int) array // x[i:j]
-	getFlags() flags
-	setFlags(flags)
-	set(i int, y V)
-	atIndices(y *AI) V // x[y] (goal code)
-	atInts([]int64) array
-	shallowClone() array
+	getFlags() flags      // get the array's flags
+	setFlags(flags)       // set the array's flags
+	set(i int, y V)       // puts y at indix i, assuming compatibility
+	atIndices(y *AI) V    // x[y] (like in goal code)
+	atInts([]int64) array // like x[y] but assumes valid positive indices
+	shallowClone() array  // shallow clone, erases flags
 }
 
 type flags int32
@@ -35,20 +35,23 @@ func (f flags) Has(ff flags) bool {
 	return f&ff != 0
 }
 
-// AB represents an array of booleans, that is an array of zeros (false) and
-// ones (true).
+// AB represents an array of bytes. From Goal's perspective, it's the same as
+// AI. It's used as an optimization to save space for small-integers, in
+// particular for arrays of booleans (0s and 1s).
 type AB struct {
 	flags flags
 	rc    *int
 	elts  []byte
 }
 
-// NewAB returns a new boolean array. It does not initialize the reference
+// NewAB returns a new byte array. It does not initialize the reference
 // counter.
 func NewAB(x []byte) V {
 	return NewV(&AB{elts: x})
 }
 
+// IsBoolean returns true when the array of bytes is known to contain only 1s
+// and 0s.
 func (x *AB) IsBoolean() bool {
 	return x.flags.Has(flagBool)
 }
@@ -60,7 +63,7 @@ func (x *AB) Slice() []byte {
 	return x.elts
 }
 
-// NewABWithRC returns a new boolean array.
+// NewABWithRC returns a new byte array.
 func NewABWithRC(x []byte, rc *int) V {
 	return NewV(&AB{elts: x, rc: rc})
 }
@@ -165,19 +168,19 @@ func NewAVWithRC(x []V, rc *int) V {
 	return NewV(&AV{elts: x, rc: rc})
 }
 
-// Type returns the name of the value's type.
+// Type returns the name of the value's type ("I").
 func (x *AB) Type() string { return "I" }
 
-// Type returns the name of the value's type.
+// Type returns the name of the value's type ("I").
 func (x *AI) Type() string { return "I" }
 
-// Type returns the name of the value's type.
+// Type returns the name of the value's type ("N").
 func (x *AF) Type() string { return "N" }
 
-// Type returns the name of the value's type.
+// Type returns the name of the value's type ("S").
 func (x *AS) Type() string { return "S" }
 
-// Type returns the name of the value's type.
+// Type returns the name of the value's type ("A").
 func (x *AV) Type() string { return "A" }
 
 // Len returns the length of the array.
@@ -195,7 +198,7 @@ func (x *AS) Len() int { return len(x.elts) }
 // Len returns the length of the array.
 func (x *AV) Len() int { return len(x.elts) }
 
-func (x *AB) at(i int) V { return NewI(b2I(x.elts[i])) }
+func (x *AB) at(i int) V { return NewI(int64(x.elts[i])) }
 func (x *AI) at(i int) V { return NewI(x.elts[i]) }
 func (x *AF) at(i int) V { return NewF(x.elts[i]) }
 func (x *AS) at(i int) V { return NewS(x.elts[i]) }
@@ -234,16 +237,16 @@ func (x *AF) setFlags(f flags) { x.flags = f }
 func (x *AS) setFlags(f flags) { x.flags = f }
 func (x *AV) setFlags(f flags) { x.flags = f }
 
-// set changes x at i with y (in place).
+// set changes x at i with y (in place), assuming the value is compatible.
 func (x *AB) set(i int, y V) {
 	if y.IsI() {
-		x.elts[i] = y.n != 0
+		x.elts[i] = byte(y.n)
 	} else {
-		x.elts[i] = y.F() != 0
+		x.elts[i] = byte(y.F())
 	}
 }
 
-// set changes x at i with y (in place).
+// set changes x at i with y (in place), assuming the value is compatible.
 func (x *AI) set(i int, y V) {
 	if y.IsI() {
 		x.elts[i] = y.n
@@ -252,7 +255,7 @@ func (x *AI) set(i int, y V) {
 	}
 }
 
-// set changes x at i with y (in place).
+// set changes x at i with y (in place), assuming the value is compatible.
 func (x *AF) set(i int, y V) {
 	if y.IsI() {
 		x.elts[i] = float64(y.I())
@@ -261,7 +264,7 @@ func (x *AF) set(i int, y V) {
 	}
 }
 
-// set changes x at i with y (in place).
+// set changes x at i with y (in place), assuming the value is compatible.
 func (x *AS) set(i int, y V) {
 	x.elts[i] = string(y.value.(S))
 }
@@ -273,7 +276,10 @@ func (x *AV) set(i int, y V) {
 }
 
 func (x *AB) atIndices(y *AI) V {
-	r := make([]byte, y.Len())
+	r := &AB{elts: make([]byte, y.Len())}
+	if x.IsBoolean() {
+		r.flags |= flagBool
+	}
 	xlen := int64(x.Len())
 	for i, yi := range y.elts {
 		if yi < 0 {
@@ -282,9 +288,9 @@ func (x *AB) atIndices(y *AI) V {
 		if yi < 0 || yi >= xlen {
 			return Panicf("X@i : index out of bounds: %d (length %d)", yi, xlen)
 		}
-		r[i] = x.At(int(yi))
+		r.elts[i] = x.At(int(yi))
 	}
-	return NewAB(r)
+	return NewV(r)
 }
 
 func (x *AI) atIndices(y *AI) V {
@@ -351,11 +357,14 @@ func (x *AV) atIndices(y *AI) V {
 }
 
 func (x *AB) atInts(y []int64) array {
-	r := make([]byte, len(y))
-	for i, yi := range y {
-		r[i] = x.At(int(yi))
+	r := &AB{elts: make([]byte, len(y))}
+	if x.IsBoolean() {
+		r.flags |= flagBool
 	}
-	return &AB{elts: r}
+	for i, yi := range y {
+		r.elts[i] = x.At(int(yi))
+	}
+	return r
 }
 
 func (x *AI) atInts(y []int64) array {
@@ -404,14 +413,15 @@ func (x *AB) shallowClone() array {
 	return shallowCloneAB(x)
 }
 
+// shallowCloneAB returns a clone of x, preserving its flags.
 func shallowCloneAB(x *AB) *AB {
 	if reusableRCp(x.rc) {
-		x.setFlags(flagNone)
 		return x
 	}
 	var n int
 	r := &AB{elts: make([]byte, x.Len()), rc: &n}
 	copy(r.elts, x.elts)
+	r.flags = x.flags
 	return r
 }
 
@@ -419,13 +429,14 @@ func (x *AI) shallowClone() array {
 	return shallowCloneAI(x)
 }
 
+// shallowCloneAI returns a clone of x, preserving its flags.
 func shallowCloneAI(x *AI) *AI {
 	if reusableRCp(x.rc) {
-		x.setFlags(flagNone)
 		return x
 	}
 	var n int
 	r := &AI{elts: make([]int64, x.Len()), rc: &n}
+	r.flags = x.flags
 	copy(r.elts, x.elts)
 	return r
 }
@@ -583,7 +594,7 @@ func matchAB(x, y *AB) bool {
 
 func matchABAI(x *AB, y *AI) bool {
 	for i, yi := range y.elts {
-		if yi != b2I(x.At(i)) {
+		if yi != int64(x.At(i)) {
 			return false
 		}
 	}
@@ -592,7 +603,7 @@ func matchABAI(x *AB, y *AI) bool {
 
 func matchABAF(x *AB, y *AF) bool {
 	for i, yi := range y.elts {
-		if yi != b2F(x.At(i)) {
+		if yi != float64(x.At(i)) {
 			return false
 		}
 	}
