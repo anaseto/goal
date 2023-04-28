@@ -20,7 +20,7 @@ func negate(x V) V {
 	case *AB:
 		r := make([]int64, xv.Len())
 		for i, xi := range xv.elts {
-			r[i] = -B2I(xi)
+			r[i] = -b2I(xi)
 		}
 		return NewAIWithRC(r, reuseRCp(xv.rc))
 	case *AI:
@@ -213,14 +213,14 @@ func ceil(x V) V {
 // not returns ~x.
 func not(x V) V {
 	if x.IsI() {
-		return NewI(B2I(x.I() == 0))
+		return NewI(b2I(x.I() == 0))
 	}
 	if x.IsF() {
-		return NewI(B2I(x.F() == 0))
+		return NewI(b2I(x.F() == 0))
 	}
 	switch xv := x.value.(type) {
 	case S:
-		return NewI(B2I(xv == ""))
+		return NewI(b2I(xv == ""))
 	case *AB:
 		r := xv.reuse()
 		for i, xi := range xv.elts {
@@ -228,13 +228,13 @@ func not(x V) V {
 		}
 		return NewV(r)
 	case *AI:
-		r := make([]bool, xv.Len())
+		r := make([]byte, xv.Len())
 		for i, xi := range xv.elts {
 			r[i] = xi == 0
 		}
 		return NewABWithRC(r, reuseRCp(xv.rc))
 	case *AF:
-		r := make([]bool, xv.Len())
+		r := make([]byte, xv.Len())
 		for i, xi := range xv.elts {
 			r[i] = xi == 0
 		}
@@ -249,7 +249,7 @@ func not(x V) V {
 	case *Dict:
 		return newDictValues(xv.keys, not(NewV(xv.values)))
 	default:
-		return NewI(B2I(!x.IsTrue()))
+		return NewI(b2I(!x.IsTrue()))
 	}
 }
 

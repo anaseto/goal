@@ -140,13 +140,13 @@ func where(x V) V {
 	case *AB:
 		n := int64(0)
 		for _, xi := range xv.elts {
-			n += B2I(xi)
+			n += b2I(xi)
 		}
 		r := make([]int64, n+1)
 		j := int64(0)
 		for i, xi := range xv.elts {
 			r[j] = int64(i)
-			j += B2I(xi)
+			j += b2I(xi)
 		}
 		return NewV(&AI{elts: r[:len(r)-1], rc: reuseRCp(xv.rc), flags: flagAscending})
 	case *AI:
@@ -257,7 +257,7 @@ func replicate(x, y V) V {
 func replicateI(n int64, y V) V {
 	if y.IsI() {
 		if isBI(y.I()) {
-			r := make([]bool, n)
+			r := make([]byte, n)
 			for i := range r {
 				r[i] = y.I() == 1
 			}
@@ -284,7 +284,7 @@ func replicateI(n int64, y V) V {
 		}
 		return NewAS(r)
 	case *AB:
-		r := make([]bool, n*int64(yv.Len()))
+		r := make([]byte, n*int64(yv.Len()))
 		for i, yi := range yv.elts {
 			in := int64(i) * n
 			for j := int64(0); j < n; j++ {
@@ -344,11 +344,11 @@ func replicateI(n int64, y V) V {
 func replicateAB(x *AB, y V) V {
 	n := int64(0)
 	for _, xi := range x.elts {
-		n += B2I(xi)
+		n += b2I(xi)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		r := make([]bool, 0, n)
+		r := make([]byte, 0, n)
 		for i, xi := range x.elts {
 			if xi {
 				r = append(r, yv.At(i))
@@ -412,7 +412,7 @@ func replicateAI(x *AI, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		r := make([]bool, 0, n)
+		r := make([]byte, 0, n)
 		for i, xi := range x.elts {
 			for j := int64(0); j < xi; j++ {
 				r = append(r, yv.At(i))
@@ -505,11 +505,11 @@ func weedOut(x, y V) V {
 func weedOutAB(x *AB, y V) V {
 	n := int64(0)
 	for _, xi := range x.elts {
-		n += 1 - B2I(xi)
+		n += 1 - b2I(xi)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		r := make([]bool, 0, n)
+		r := make([]byte, 0, n)
 		for i, xi := range x.elts {
 			if !xi {
 				r = append(r, yv.At(i))
@@ -566,11 +566,11 @@ func weedOutAB(x *AB, y V) V {
 func weedOutAI(x *AI, y V) V {
 	n := int64(0)
 	for _, xi := range x.elts {
-		n += B2I(xi == 0)
+		n += b2I(xi == 0)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		r := make([]bool, 0, n)
+		r := make([]byte, 0, n)
 		for i, xi := range x.elts {
 			if xi == 0 {
 				r = append(r, yv.At(i))

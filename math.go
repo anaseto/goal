@@ -17,10 +17,10 @@ func vfNaN(ctx *Context, args []V) V {
 
 func isNaN(x V) V {
 	if x.IsI() {
-		return NewI(B2I(false))
+		return NewI(b2I(false))
 	}
 	if x.IsF() {
-		return NewF(B2F(math.IsNaN(x.F())))
+		return NewF(b2F(math.IsNaN(x.F())))
 	}
 	switch xv := x.value.(type) {
 	case *AB:
@@ -30,10 +30,10 @@ func isNaN(x V) V {
 		}
 		return NewV(r)
 	case *AI:
-		r := make([]bool, xv.Len())
+		r := make([]byte, xv.Len())
 		return NewABWithRC(r, reuseRCp(xv.rc))
 	case *AF:
-		r := make([]bool, xv.Len())
+		r := make([]byte, xv.Len())
 		for i, xi := range xv.elts {
 			r[i] = math.IsNaN(xi)
 		}

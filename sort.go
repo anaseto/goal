@@ -103,7 +103,7 @@ func sortUp(ctx *Context, x V) V {
 	}
 }
 
-func sortBools(xs []bool) {
+func sortBools(xs []byte) {
 	var freq [2]int
 	for _, xi := range xs {
 		freq[b2i(xi)]++
@@ -243,7 +243,7 @@ func ascend(ctx *Context, x V) V {
 	}
 }
 
-func ascendBools(xs []bool) []int64 {
+func ascendBools(xs []byte) []int64 {
 	var offsets [2]int64
 	for _, xi := range xs {
 		offsets[b2i(xi)]++
@@ -375,7 +375,7 @@ func searchAI(x *AI, y V) V {
 	case *AB:
 		r := make([]int64, yv.Len())
 		for i, yi := range yv.elts {
-			r[i] = searchAII(x, B2I(yi))
+			r[i] = searchAII(x, b2I(yi))
 		}
 		return NewAI(r)
 	case *AI:
@@ -413,7 +413,7 @@ func searchAF(x *AF, y V) V {
 	case *AB:
 		r := make([]int64, yv.Len())
 		for i, yi := range yv.elts {
-			r[i] = searchAFI(x, B2I(yi))
+			r[i] = searchAFI(x, b2I(yi))
 		}
 		return NewAI(r)
 	case *AI:

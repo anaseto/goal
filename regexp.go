@@ -111,9 +111,9 @@ func applyRx(x *rx, y V) V {
 func applyRxMatch(x *rx, y V) V {
 	switch yv := y.value.(type) {
 	case S:
-		return NewI(B2I(x.Regexp.MatchString(string(yv))))
+		return NewI(b2I(x.Regexp.MatchString(string(yv))))
 	case *AS:
-		r := make([]bool, yv.Len())
+		r := make([]byte, yv.Len())
 		for i, s := range yv.elts {
 			r[i] = x.Regexp.MatchString(s)
 		}

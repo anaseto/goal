@@ -67,7 +67,7 @@ func roll(ctx *Context, n int64, y V) V {
 			return Panicf("i?y : non-positive y (%d)", yv)
 		}
 		if yv == 2 {
-			r := make([]bool, n)
+			r := make([]byte, n)
 			var i int64
 		loop:
 			for {

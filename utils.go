@@ -6,9 +6,20 @@ import (
 	"reflect"
 )
 
-// B2I converts a boolean to an integer.
-func B2I(b bool) int64 {
+// b2I converts a boolean to a 64-bit integer.
+func b2I(b bool) int64 {
 	var i int64
+	if b {
+		i = 1
+	} else {
+		i = 0
+	}
+	return i
+}
+
+// b2B converts a boolean to a byte.
+func b2B(b bool) byte {
+	var i byte
 	if b {
 		i = 1
 	} else {
@@ -28,8 +39,8 @@ func b2i(b bool) int {
 	return i
 }
 
-// B2F converts a boolean to a float.
-func B2F(b bool) float64 {
+// b2F converts a boolean to a float.
+func b2F(b bool) float64 {
 	var f float64
 	if b {
 		f = 1
@@ -70,6 +81,13 @@ func minI(x, y int64) int64 {
 	return y
 }
 
+func minB(x, y byte) byte {
+	if x < y {
+		return x
+	}
+	return y
+}
+
 func minInt(x, y int) int {
 	if x < y {
 		return x
@@ -78,6 +96,13 @@ func minInt(x, y int) int {
 }
 
 func maxI(x, y int64) int64 {
+	if x < y {
+		return y
+	}
+	return x
+}
+
+func maxB(x, y byte) byte {
 	if x < y {
 		return y
 	}
@@ -122,8 +147,8 @@ func minMax(x *AI) (min, max int64) {
 	return
 }
 
-func maxInt64s(x []int64) int64 {
-	max := int64(math.MinInt64)
+func maxBytes(x []byte) byte {
+	var max byte
 	for _, xi := range x {
 		if xi > max {
 			max = xi
@@ -132,8 +157,8 @@ func maxInt64s(x []int64) int64 {
 	return max
 }
 
-func minInt64s(x []int64) int64 {
-	min := int64(math.MaxInt64)
+func minBytes(x []byte) byte {
+	var min byte = math.MaxUint8
 	for _, xi := range x {
 		if xi < min {
 			min = xi
@@ -252,7 +277,7 @@ func toArray(x V) V {
 	if x.IsI() {
 		var n int
 		if isBI(x.I()) {
-			r := &AB{elts: []bool{x.I() != 0}, rc: &n}
+			r := &AB{elts: []byte{x.I() != 0}, rc: &n}
 			return NewV(r)
 		}
 		r := &AI{elts: []int64{x.I()}, rc: &n}
@@ -315,7 +340,7 @@ func toAF(x *AI) V {
 func fromABtoAF(x *AB) V {
 	r := make([]float64, x.Len())
 	for i, xi := range x.elts {
-		r[i] = float64(B2I(xi))
+		r[i] = float64(b2I(xi))
 	}
 	return NewAFWithRC(r, reuseRCp(x.rc))
 }
@@ -325,7 +350,7 @@ func fromABtoAF(x *AB) V {
 func fromABtoAI(x *AB) V {
 	r := make([]int64, x.Len())
 	for i := range r {
-		r[i] = B2I(x.At(i))
+		r[i] = b2I(x.At(i))
 	}
 	return NewAIWithRC(r, reuseRCp(x.rc))
 }
@@ -582,7 +607,7 @@ func normalizeRec(x *AV) (array, bool) {
 	t := eType(x)
 	switch t {
 	case tB:
-		r := make([]bool, x.Len())
+		r := make([]byte, x.Len())
 		for i, xi := range x.elts {
 			r[i] = xi.I() != 0
 		}
@@ -626,7 +651,7 @@ func normalize(x *AV) (array, bool) {
 	t := eType(x)
 	switch t {
 	case tB:
-		r := make([]bool, x.Len())
+		r := make([]byte, x.Len())
 		for i, xi := range x.elts {
 			r[i] = xi.I() != 0
 		}
@@ -837,14 +862,4 @@ func cloneArgs(a []V) []V {
 	args := make([]V, len(a))
 	copy(args, a)
 	return args
-}
-
-func sumBools(x []bool) int64 {
-	n := int64(0)
-	for _, xi := range x {
-		if xi {
-			n++
-		}
-	}
-	return n
 }

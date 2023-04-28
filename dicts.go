@@ -143,7 +143,7 @@ func takeKeys(x array, y *Dict) V {
 	var xv array
 	switch yv := y.values.(type) {
 	case *AB:
-		xv = &AB{elts: make([]bool, x.Len())}
+		xv = &AB{elts: make([]byte, x.Len())}
 	case *AI:
 		xv = &AI{elts: make([]int64, x.Len())}
 	case *AF:

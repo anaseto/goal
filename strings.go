@@ -764,9 +764,9 @@ func (ctx *Context) replace(f stringReplacer, x V) V {
 func containedInS(x V, s string) V {
 	switch xv := x.value.(type) {
 	case S:
-		return NewI(B2I(strings.Contains(s, string(xv))))
+		return NewI(b2I(strings.Contains(s, string(xv))))
 	case *AS:
-		r := make([]bool, xv.Len())
+		r := make([]byte, xv.Len())
 		for i, xi := range xv.elts {
 			r[i] = strings.Contains(s, xi)
 		}

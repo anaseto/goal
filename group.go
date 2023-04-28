@@ -9,7 +9,7 @@ func icountLinesGroup(x V) V {
 		if xv.Len() == 0 {
 			return NewAI(nil)
 		}
-		n := sumBools(xv.elts)
+		n := sumIntegers(xv.elts)
 		if n == 0 {
 			return NewAI([]int64{int64(xv.Len())})
 		}
@@ -18,7 +18,7 @@ func icountLinesGroup(x V) V {
 		if xv.Len() == 0 {
 			return NewAI(nil)
 		}
-		max := maxInt64s(xv.elts)
+		max := maxIntegers(xv.elts)
 		if max < 0 {
 			max = -1
 		}
@@ -73,7 +73,7 @@ func groupBy(x, y V) V {
 	case *AB:
 		return groupByBoolsV(xv.elts, y)
 	case *AI:
-		max := maxInt64s(xv.elts)
+		max := maxIntegers(xv.elts)
 		if max < 0 {
 			return NewAV(nil)
 		}
@@ -102,9 +102,9 @@ func groupBy(x, y V) V {
 	}
 }
 
-func groupByBoolsV(x []bool, y V) V {
-	n := int(sumBools(x))
-	r := make([]V, int(B2I(n > 0)+1))
+func groupByBoolsV(x []byte, y V) V {
+	n := int(sumIntegers(x))
+	r := make([]V, int(b2I(n > 0)+1))
 	switch yv := y.value.(type) {
 	case *AB:
 		if n == 0 {
@@ -161,7 +161,7 @@ func groupByBoolsV(x []bool, y V) V {
 	}
 }
 
-func groupByBools[T any](x []bool, y []T, n int) (rf, rt []T) {
+func groupByBools[T any](x []byte, y []T, n int) (rf, rt []T) {
 	r := make([]T, len(x))
 	rf = r[:len(r)-n]
 	rt = r[len(r)-n:]
@@ -204,7 +204,7 @@ func groupByScatter[T any](x []int64, y []T, yg []T, offset []int) {
 	}
 }
 
-func groupByInt64sBools(x []int64, y []bool, max int64) V {
+func groupByInt64sBools(x []int64, y []byte, max int64) V {
 	r, offset, yg := groupByPrepare[bool](x, max)
 	var rc int = 2
 	count := 0

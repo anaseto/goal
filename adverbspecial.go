@@ -11,19 +11,9 @@ func fold2vAdd(x V) V {
 	case *Dict:
 		return fold2vAdd(NewV(xv.values))
 	case *AB:
-		n := int64(0)
-		for _, b := range xv.elts {
-			if b {
-				n++
-			}
-		}
-		return NewI(n)
+		return NewI(sumIntegers(xv.elts))
 	case *AI:
-		n := int64(0)
-		for _, xi := range xv.elts {
-			n += xi
-		}
-		return NewI(n)
+		return NewI(sumIntegers(xv.elts))
 	case *AF:
 		n := 0.0
 		for _, xi := range xv.elts {
@@ -61,23 +51,39 @@ func fold2vAdd(x V) V {
 	}
 }
 
+func sumIntegers[T integer](x []T) int64 {
+	var n int64
+	for _, xi := range x {
+		n += int64(xi)
+	}
+	return n
+}
+
 func scan2vAdd(x V) V {
 	switch xv := x.value.(type) {
 	case *Dict:
 		return newDictValues(xv.keys, scan2vAdd(NewV(xv.values)))
 	case *AB:
-		r := make([]int64, xv.Len())
-		n := int64(0)
-		for i, b := range xv.elts {
-			if b {
-				n++
+		if xv.IsBoolean() && xv.Len() < 256 {
+			r := xv.reuse()
+			var n byte
+			for i, xi := range xv.elts {
+				n += xi
+				r.elts[i] = n
 			}
-			r[i] = n
+			return NewV(r)
+		} else {
+			r := make([]int64, xv.Len())
+			var n int64
+			for i, xi := range xv.elts {
+				n += int64(xi)
+				r[i] = n
+			}
+			return NewAI(r)
 		}
-		return NewAI(r)
 	case *AI:
 		r := xv.reuse()
-		n := int64(0)
+		var n int64
 		for i, xi := range xv.elts {
 			n += xi
 			r.elts[i] = n
@@ -144,14 +150,9 @@ func fold2vSubtract(x V) V {
 		if xv.Len() == 0 {
 			return NewI(0)
 		}
-		var n int64
-		if xv.elts[0] {
-			n++
-		}
-		for _, b := range xv.elts[1:] {
-			if b {
-				n--
-			}
+		n := int64(xv.elts[0])
+		for _, xi := range xv.elts[1:] {
+			n -= int64(xi)
 		}
 		return NewI(n)
 	case *AI:
@@ -203,27 +204,12 @@ func fold2vMultiply(x V) V {
 	case *Dict:
 		return fold2vMultiply(NewV(xv.values))
 	case *AB:
-		for _, b := range xv.elts {
-			if !b {
-				return NewI(0)
-			}
-		}
-		return NewI(1)
+		return NewI(multiplyIntegers(xv.elts))
 	case *AI:
-		if xv.Len() == 0 {
-			return NewI(1)
-		}
-		var n int64 = xv.elts[0]
-		for _, xi := range xv.elts[1:] {
-			n *= xi
-		}
-		return NewI(n)
+		return NewI(multiplyIntegers(xv.elts))
 	case *AF:
-		if xv.Len() == 0 {
-			return NewI(1)
-		}
-		var n float64 = xv.elts[0]
-		for _, xi := range xv.elts[1:] {
+		var n float64 = 1.0
+		for _, xi := range xv.elts {
 			n *= xi
 		}
 		return NewF(n)
@@ -246,25 +232,22 @@ func fold2vMultiply(x V) V {
 	}
 }
 
+func multiplyIntegers[T integer](x []T) int64 {
+	var n int64 = 1
+	for _, xi := range x {
+		n *= int64(xi)
+	}
+	return n
+}
+
 func fold2vMax(x V) V {
 	switch xv := x.value.(type) {
 	case *Dict:
 		return fold2vMax(NewV(xv.values))
 	case *AB:
-		if xv.Len() == 0 {
-			return NewI(math.MinInt64)
-		}
-		for _, b := range xv.elts {
-			if b {
-				return NewI(1)
-			}
-		}
-		return NewI(0)
+		return NewI(maxIntegers(xv.elts))
 	case *AI:
-		if xv.Len() == 0 {
-			return NewI(math.MinInt64)
-		}
-		return NewI(maxInt64s(xv.elts))
+		return NewI(maxIntegers(xv.elts))
 	case *AF:
 		if xv.Len() == 0 {
 			return NewF(math.Inf(-1))
@@ -298,8 +281,18 @@ func fold2vMax(x V) V {
 	}
 }
 
+func maxIntegers[T integer](x []T) int64 {
+	var max int64 = math.MinInt64
+	for _, xi := range x {
+		if int64(xi) > max {
+			max = int64(xi)
+		}
+	}
+	return max
+}
+
 type ordered interface {
-	float64 | int64 | string
+	~float64 | ~string | integer
 }
 
 func scan2vMaxSlice[T ordered](dst, xs []T) {
@@ -318,15 +311,11 @@ func scan2vMax(x V) V {
 	case *Dict:
 		return newDictValues(xv.keys, scan2vMax(NewV(xv.values)))
 	case *AB:
-		r := xv.reuse()
-		for i, b := range xv.elts {
-			if b {
-				for j := i; j < xv.Len(); j++ {
-					r.elts[j] = true
-				}
-				break
-			}
+		if xv.Len() == 0 {
+			return x
 		}
+		r := xv.reuse()
+		scan2vMaxSlice[byte](r.elts, xv.elts)
 		return NewV(r)
 	case *AI:
 		if xv.Len() == 0 {
@@ -378,20 +367,9 @@ func fold2vMin(x V) V {
 	case *Dict:
 		return fold2vMin(NewV(xv.values))
 	case *AB:
-		if xv.Len() == 0 {
-			return NewI(math.MaxInt64)
-		}
-		for _, b := range xv.elts {
-			if !b {
-				return NewI(0)
-			}
-		}
-		return NewI(1)
+		return NewI(minIntegers(xv.elts))
 	case *AI:
-		if xv.Len() == 0 {
-			return NewI(math.MaxInt64)
-		}
-		return NewI(minInt64s(xv.elts))
+		return NewI(minIntegers(xv.elts))
 	case *AF:
 		if x.Len() == 0 {
 			return NewF(math.Inf(1))
@@ -425,6 +403,16 @@ func fold2vMin(x V) V {
 	}
 }
 
+func minIntegers[T integer](x []T) int64 {
+	var min int64 = math.MaxInt64
+	for _, xi := range x {
+		if int64(xi) < min {
+			min = int64(xi)
+		}
+	}
+	return min
+}
+
 func scan2vMinSlice[T ordered](dst, xs []T) {
 	min := xs[0]
 	for i, xi := range xs[1:] {
@@ -440,16 +428,11 @@ func scan2vMin(x V) V {
 	case *Dict:
 		return newDictValues(xv.keys, scan2vMin(NewV(xv.values)))
 	case *AB:
-		r := xv.reuse()
-		for i, b := range xv.elts {
-			if !b {
-				for j := i; j < len(r.elts); j++ {
-					r.elts[j] = false
-				}
-				break
-			}
-			r.elts[i] = true
+		if xv.Len() == 0 {
+			return x
 		}
+		r := xv.reuse()
+		scan2vMinSlice[byte](r.elts, xv.elts)
 		return NewV(r)
 	case *AI:
 		if xv.Len() == 0 {
@@ -517,9 +500,9 @@ func fold2vJoin(x V) V {
 func each2String(ctx *Context, x array) V {
 	switch xv := x.(type) {
 	case *AB:
-		return NewAS(stringBools(xv.elts))
+		return NewAS(stringIntegers(xv.elts))
 	case *AI:
-		return NewAS(stringInt64s(xv.elts))
+		return NewAS(stringIntegers(xv.elts))
 	case *AF:
 		return NewAS(stringFloat64s(xv.elts, ctx.Prec))
 	case *AS:
@@ -535,18 +518,10 @@ func each2String(ctx *Context, x array) V {
 	}
 }
 
-func stringBools(x []bool) []string {
+func stringIntegers[T integer](x []T) []string {
 	r := make([]string, len(x))
 	for i, xi := range x {
-		r[i] = strconv.FormatInt(B2I(xi), 10)
-	}
-	return r
-}
-
-func stringInt64s(x []int64) []string {
-	r := make([]string, len(x))
-	for i, xi := range x {
-		r[i] = strconv.FormatInt(xi, 10)
+		r[i] = strconv.FormatInt(int64(xi), 10)
 	}
 	return r
 }
@@ -599,6 +574,12 @@ func each2Length(x array) V {
 
 func each2Type(x array) V {
 	switch xv := x.(type) {
+	case *AF:
+		r := make([]string, x.Len())
+		for i := range r {
+			r[i] = "n"
+		}
+		return NewAS(r)
 	case *AS:
 		r := xv.reuse()
 		for i := range r.elts {
@@ -614,7 +595,7 @@ func each2Type(x array) V {
 	default:
 		r := make([]string, x.Len())
 		for i := range r {
-			r[i] = "n"
+			r[i] = "i"
 		}
 		return NewAS(r)
 	}

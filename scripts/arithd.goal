@@ -12,135 +12,135 @@ import (
 keys:"xt" "yt" "expr" "rt"
 equal:keys!+(
   "B" "B" "x == y" "B"
-  "B" "I" "B2I(x) == y" "B"
-  "B" "F" "B2F(x) == y" "B"
-  "I" "B" "x == B2I(y)" "B"
+  "B" "I" "int64(x) == y" "B"
+  "B" "F" "float64(x) == y" "B"
+  "I" "B" "x == int64(y)" "B"
   "I" "I" "x == y" "B"
   "I" "F" "float64(x) == y" "B"
-  "F" "B" "x == B2F(y)" "B"
+  "F" "B" "x == float64(y)" "B"
   "F" "I" "x == float64(y)" "B"
   "F" "F" "x == y" "B"
   "S" "S" "x == y" "B"
 )
 lesser:keys!+(
   "B" "B" "!x && y" "B"
-  "B" "I" "B2I(x) < y" "B"
-  "B" "F" "B2F(x) < y" "B"
-  "I" "B" "x < B2I(y)" "B"
+  "B" "I" "int64(x) < y" "B"
+  "B" "F" "float64(x) < y" "B"
+  "I" "B" "x < int64(y)" "B"
   "I" "I" "x < y" "B"
   "I" "F" "float64(x) < y" "B"
-  "F" "B" "x < B2F(y)" "B"
+  "F" "B" "x < float64(y)" "B"
   "F" "I" "x < float64(y)" "B"
   "F" "F" "x < y" "B"
   "S" "S" "x < y" "B"
 )
 greater:keys!+(
   "B" "B" "x && !y" "B"
-  "B" "I" "B2I(x) > y" "B"
-  "B" "F" "B2F(x) > y" "B"
-  "I" "B" "x > B2I(y)" "B"
+  "B" "I" "int64(x) > y" "B"
+  "B" "F" "float64(x) > y" "B"
+  "I" "B" "x > int64(y)" "B"
   "I" "I" "x > y" "B"
   "I" "F" "float64(x) > y" "B"
-  "F" "B" "x > B2F(y)" "B"
+  "F" "B" "x > float64(y)" "B"
   "F" "I" "x > float64(y)" "B"
   "F" "F" "x > y" "B"
   "S" "S" "x > y" "B"
 )
 add:keys!+(
-  "B" "B" "B2I(x) + B2I(y)" "I"
-  "B" "I" "B2I(x) + y" "I"
-  "B" "F" "B2F(x) + y" "F"
-  "I" "B" "x + B2I(y)" "I"
+  "B" "B" "int64(x) + int64(y)" "I"
+  "B" "I" "int64(x) + y" "I"
+  "B" "F" "float64(x) + y" "F"
+  "I" "B" "x + int64(y)" "I"
   "I" "I" "x + y" "I"
   "I" "F" "float64(x) + y" "F"
-  "F" "B" "x + B2F(y)" "F"
+  "F" "B" "x + float64(y)" "F"
   "F" "I" "x + float64(y)" "F"
   "F" "F" "x + y" "F"
   "S" "S" "x + y" "S"
 )
 subtract:keys!+(
-  "B" "B" "B2I(x) - B2I(y)" "I"
-  "B" "I" "B2I(x) - y" "I"
-  "B" "F" "B2F(x) - y" "F"
-  "I" "B" "x - B2I(y)" "I"
+  "B" "B" "int64(x) - int64(y)" "I"
+  "B" "I" "int64(x) - y" "I"
+  "B" "F" "float64(x) - y" "F"
+  "I" "B" "x - int64(y)" "I"
   "I" "I" "x - y" "I"
   "I" "F" "float64(x) - y" "F"
-  "F" "B" "x - B2F(y)" "F"
+  "F" "B" "x - float64(y)" "F"
   "F" "I" "x - float64(y)" "F"
   "F" "F" "x - y" "F"
   "S" "S" "strings.TrimSuffix(string(x), string(y))" "S"
 )
 multiply:keys!+(
-  "B" "B" "x && y" "B"
-  "B" "I" "B2I(x) * y" "I"
-  "B" "F" "B2F(x) * y" "F"
-  "B" "S" "srepeat(y, B2I(x))" "S"
-  "I" "B" "x * B2I(y)" "I"
+  "B" "B" "int64(x) * int64(y)" "I"
+  "B" "I" "int64(x) * y" "I"
+  "B" "F" "float64(x) * y" "F"
+  "B" "S" "srepeat(y, int64(x))" "S"
+  "I" "B" "x * int64(y)" "I"
   "I" "I" "x * y" "I"
   "I" "F" "float64(x) * y" "F"
   "I" "S" "srepeat(y, x)" "S"
-  "F" "B" "x * B2F(y)" "F"
+  "F" "B" "x * float64(y)" "F"
   "F" "I" "x * float64(y)" "F"
   "F" "F" "x * y" "F"
   "F" "S" "srepeat(y, int64(x))" "S"
-  "S" "B" "srepeat(x, B2I(y))" "S"
+  "S" "B" "srepeat(x, int64(y))" "S"
   "S" "I" "srepeat(x, y)" "S"
   "S" "F" "srepeat(x, int64(y))" "S"
 )
 divide:keys!+(
-  "B" "B" "divideF(B2F(x), B2F(y))" "F"
-  "B" "I" "divideF(B2F(x), float64(y))" "F"
-  "B" "F" "divideF(B2F(x), y)" "F"
-  "I" "B" "divideF(float64(x), B2F(y))" "F"
+  "B" "B" "divideF(float64(x), float64(y))" "F"
+  "B" "I" "divideF(float64(x), float64(y))" "F"
+  "B" "F" "divideF(float64(x), y)" "F"
+  "I" "B" "divideF(float64(x), float64(y))" "F"
   "I" "I" "divideF(float64(x), float64(y))" "F"
   "I" "F" "divideF(float64(x), y)" "F"
-  "F" "B" "divideF(x, B2F(y))" "F"
+  "F" "B" "divideF(x, float64(y))" "F"
   "F" "I" "divideF(x, float64(y))" "F"
   "F" "F" "divideF(x, y)" "F"
 )
 minimum:keys!+(
-  "B" "B" "x && y" "B"
-  "B" "I" "minI(B2I(x), y)" "I"
-  "B" "F" "math.Min(B2F(x), y)" "F"
-  "I" "B" "minI(x, B2I(y))" "I"
+  "B" "B" "maxB(x,y)" "B"
+  "B" "I" "minI(int64(x), y)" "I"
+  "B" "F" "math.Min(float64(x), y)" "F"
+  "I" "B" "minI(x, int64(y))" "I"
   "I" "I" "minI(x, y)" "I"
   "I" "F" "math.Min(float64(x), y)" "F"
-  "F" "B" "math.Min(x, B2F(y))" "F"
+  "F" "B" "math.Min(x, float64(y))" "F"
   "F" "I" "math.Min(x, float64(y))" "F"
   "F" "F" "math.Min(x, float64(y))" "F"
   "S" "S" "minS(x, y)" "S"
 )
 maximum:keys!+(
-  "B" "B" "x || y" "B"
-  "B" "I" "maxI(B2I(x), y)" "I"
-  "B" "F" "math.Max(B2F(x), y)" "F"
-  "I" "B" "maxI(x, B2I(y))" "I"
+  "B" "B" "minB(x,y)" "B"
+  "B" "I" "maxI(int64(x), y)" "I"
+  "B" "F" "math.Max(float64(x), y)" "F"
+  "I" "B" "maxI(x, int64(y))" "I"
   "I" "I" "maxI(x, y)" "I"
   "I" "F" "math.Max(float64(x), y)" "F"
-  "F" "B" "math.Max(x, B2F(y))" "F"
+  "F" "B" "math.Max(x, float64(y))" "F"
   "F" "I" "math.Max(x, float64(y))" "F"
   "F" "F" "math.Max(x, float64(y))" "F"
   "S" "S" "maxS(x, y)" "S"
 )
 modulus:keys!+(
-  "B" "B" "modI(B2I(x), B2I(y))" "I"
-  "B" "I" "modI(B2I(x), y)" "I"
-  "B" "F" "modF(B2F(x), y)" "F"
-  "I" "B" "modI(x, B2I(y))" "I"
+  "B" "B" "modI(int64(x), int64(y))" "I"
+  "B" "I" "modI(int64(x), y)" "I"
+  "B" "F" "modF(float64(x), y)" "F"
+  "I" "B" "modI(x, int64(y))" "I"
   "I" "I" "modI(x, y)" "I"
   "I" "F" "modF(float64(x), y)" "F"
-  "F" "B" "modF(x, B2F(y))" "F"
+  "F" "B" "modF(x, float64(y))" "F"
   "F" "I" "modF(x, float64(y))" "F"
   "F" "F" "modF(x, y)" "F"
 )
 arctan2:keys!+(
-  "B" "B" "math.Atan2(B2F(y), B2F(x))" "F"
-  "B" "I" "math.Atan2(float64(y), B2F(x))" "F"
-  "B" "F" "math.Atan2(y, B2F(x))" "F"
-  "I" "B" "math.Atan2(B2F(y), float64(x))" "F"
+  "B" "B" "math.Atan2(float64(y), float64(x))" "F"
+  "B" "I" "math.Atan2(float64(y), float64(x))" "F"
+  "B" "F" "math.Atan2(y, float64(x))" "F"
+  "I" "B" "math.Atan2(float64(y), float64(x))" "F"
   "I" "I" "math.Atan2(float64(y), float64(x))" "F"
   "I" "F" "math.Atan2(y, float64(x))" "F"
-  "F" "B" "math.Atan2(B2F(y), x)" "F"
+  "F" "B" "math.Atan2(float64(y), x)" "F"
   "F" "I" "math.Atan2(float64(y), x)" "F"
   "F" "F" "math.Atan2(y, x)" "F"
 )
@@ -162,8 +162,8 @@ ops:(
 types:"B" "F" "I" "S" / atom types
 ntypes:"B" "F" "I" / numeric atom types
 itypes:"B" "I" / integer atom types
-gotypes:"bool" "float64" "int64" "string" / concrete types
-gontypes:"bool" "float64" "int64" "S" / concrete numeric types
+gotypes:"byte" "float64" "int64" "string" / concrete types
+gontypes:"byte" "float64" "int64" "S" / concrete numeric types
 utypes:"F" "I" / atom unboxed types
 t2go:types!gotypes / type to concrete go type
 nt2go:types!gontypes / type to concrete go type
@@ -258,18 +258,18 @@ dox:{
     /
 }
 doxUy:{[yt;e;t]
-  e:?[t~"B";"B2I($e)";e]
+  e:?[t~"B";"int64($e)";e]
   e:sub[rx/\by\b/;"y.$yt()"]e
   t:?[t~"B";"I";t]
   e:?[t in utypes;"New$t($e)";"NewV($t($e))"]
   "if y.Is$yt() { return $e; }"
 }
 doxBy:{[yt;e;t]
-  e:?[t~"B";qq/B2I($e)/;e]
+  e:?[t~"B";qq/int64($e)/;e]
   nt:?[t in itypes;"I";t~"F";"F";"V"]
   e:doExpr[e;yt;"x";"yv"]
   t:nt2go t
-  t:?[t~"bool";"int64";t]
+  t:?[t~"byte";"int64";t]
   "  case $yt: return New$nt($t($e))"
 }
 doxY:{[yt;e;t]
@@ -397,7 +397,7 @@ doXY:{[yt;e;t]
 }
 doXdAV:{
   nxt:?[xt~"B";"I";xt]
-  xct:?[xt~"B";"B2I";xt~"I";"int64";xt~"F";"float64";xt]
+  xct:?[xt~"B";"int64";xt~"I";"int64";xt~"F";"float64";xt]
   fmtop:escp op
   "\n"_qq/
     case *Dict:

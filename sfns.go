@@ -71,7 +71,7 @@ func rotate(x, y V) V {
 	case *AB:
 		r := make([]V, xv.Len())
 		for i, xi := range xv.elts {
-			ri := rotateI(B2I(xi), y)
+			ri := rotateI(b2I(xi), y)
 			if ri.IsPanic() {
 				return ri
 			}
@@ -369,7 +369,7 @@ func takeNAtom(n int64, y V) V {
 	if y.IsI() {
 		yv := y.I()
 		if isBI(yv) {
-			r := make([]bool, n)
+			r := make([]byte, n)
 			if yv != 0 {
 				for i := range r {
 					r[i] = true
@@ -426,7 +426,7 @@ func takeN(n int64, y array) V {
 			}
 			return NewAV(r)
 		default:
-			r := make([]bool, n)
+			r := make([]byte, n)
 			return NewAB(r)
 		}
 	}
@@ -591,7 +591,7 @@ func shiftBeforeAB(x V, yv *AB) V {
 		}
 		r := make([]int64, len(ys))
 		for i := max; i < len(ys); i++ {
-			r[i] = B2I(yv.At(i - max))
+			r[i] = b2I(yv.At(i - max))
 		}
 		r[0] = x.I()
 		return NewAIWithRC(r, reuseRCp(yv.rc))
@@ -599,7 +599,7 @@ func shiftBeforeAB(x V, yv *AB) V {
 	if x.IsF() {
 		r := make([]float64, len(ys))
 		for i := max; i < len(ys); i++ {
-			r[i] = B2F(yv.At(i - max))
+			r[i] = b2F(yv.At(i - max))
 		}
 		r[0] = x.F()
 		return NewAFWithRC(r, reuseRCp(yv.rc))
@@ -613,14 +613,14 @@ func shiftBeforeAB(x V, yv *AB) V {
 	case *AF:
 		r := make([]float64, len(ys))
 		for i := max; i < len(ys); i++ {
-			r[i] = B2F(ys[i-max])
+			r[i] = b2F(ys[i-max])
 		}
 		copy(r[:max], xv.elts)
 		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		r := make([]int64, len(ys))
 		for i := max; i < len(ys); i++ {
-			r[i] = B2I(yv.At(i - max))
+			r[i] = b2I(yv.At(i - max))
 		}
 		copy(r[:max], xv.elts)
 		return NewAIWithRC(r, reuseRCp(yv.rc))
@@ -663,7 +663,7 @@ func shiftBeforeAI(x V, yv *AI) V {
 		r := yv.reuse()
 		copy(r.elts[max:], ys[:len(ys)-max])
 		for i := 0; i < max; i++ {
-			r.elts[i] = B2I(xv.At(i))
+			r.elts[i] = b2I(xv.At(i))
 		}
 		return NewV(r)
 	case *AF:
@@ -711,7 +711,7 @@ func shiftBeforeAF(x V, yv *AF) V {
 		r := yv.reuse()
 		copy(r.elts[max:], ys[:len(ys)-max])
 		for i := 0; i < max; i++ {
-			r.elts[i] = float64(B2F(xv.At(i)))
+			r.elts[i] = float64(b2F(xv.At(i)))
 		}
 		return NewV(r)
 	case *AF:
@@ -899,14 +899,14 @@ func shiftAfterAB(x V, yv *AB) V {
 		}
 		r := make([]int64, len(ys))
 		for i := max; i < len(ys); i++ {
-			r[i-max] = B2I(yv.At(i))
+			r[i-max] = b2I(yv.At(i))
 		}
 		r[len(ys)-1] = x.I()
 		return NewAIWithRC(r, reuseRCp(yv.rc))
 	} else if x.IsF() {
 		r := make([]float64, len(ys))
 		for i := max; i < len(ys); i++ {
-			r[i-max] = B2F(yv.At(i))
+			r[i-max] = b2F(yv.At(i))
 		}
 		r[len(ys)-1] = x.F()
 		return NewAFWithRC(r, reuseRCp(yv.rc))
@@ -920,14 +920,14 @@ func shiftAfterAB(x V, yv *AB) V {
 	case *AF:
 		r := make([]float64, len(ys))
 		for i := max; i < len(ys); i++ {
-			r[i-max] = B2F(ys[i])
+			r[i-max] = b2F(ys[i])
 		}
 		copy(r[len(ys)-max:], xv.elts)
 		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		r := make([]int64, len(ys))
 		for i := max; i < len(ys); i++ {
-			r[i-max] = B2I(yv.At(i))
+			r[i-max] = b2I(yv.At(i))
 		}
 		copy(r[len(ys)-max:], xv.elts)
 		return NewAIWithRC(r, reuseRCp(yv.rc))
@@ -970,7 +970,7 @@ func shiftAfterAI(x V, yv *AI) V {
 		r := yv.reuse()
 		copy(r.elts[:len(ys)-max], ys[max:])
 		for i := 0; i < max; i++ {
-			r.elts[len(ys)-max+i] = B2I(xv.At(i))
+			r.elts[len(ys)-max+i] = b2I(xv.At(i))
 		}
 		return NewV(r)
 	case *AF:
@@ -1018,7 +1018,7 @@ func shiftAfterAF(x V, yv *AF) V {
 		r := yv.reuse()
 		copy(r.elts[:len(ys)-max], ys[max:])
 		for i := 0; i < max; i++ {
-			r.elts[len(ys)-max+i] = float64(B2F(xv.At(i)))
+			r.elts[len(ys)-max+i] = float64(b2F(xv.At(i)))
 		}
 		return NewV(r)
 	case *AF:

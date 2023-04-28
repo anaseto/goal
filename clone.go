@@ -49,7 +49,7 @@ func (x *AB) CloneWithRC(rc *int) Value {
 		x.rc = rc
 		return x
 	}
-	r := &AB{elts: make([]bool, x.Len()), rc: rc}
+	r := &AB{elts: make([]byte, x.Len()), rc: rc}
 	copy(r.elts, x.elts)
 	return r
 }

@@ -122,7 +122,7 @@ func joinToAB(x *AB, y V, left bool) V {
 	if y.IsI() {
 		if isBI(y.I()) {
 			if left {
-				r := make([]bool, x.Len()+1)
+				r := make([]byte, x.Len()+1)
 				r[0] = y.I() == 1
 				copy(r[1:], x.elts)
 				return NewABWithRC(r, reuseRCp(x.rc))
@@ -132,7 +132,7 @@ func joinToAB(x *AB, y V, left bool) V {
 				x.flags = flagNone
 				return NewV(x)
 			}
-			r := make([]bool, x.Len()+1)
+			r := make([]byte, x.Len()+1)
 			r[len(r)-1] = y.I() == 1
 			copy(r[:len(r)-1], x.elts)
 			return NewAB(r)
@@ -141,12 +141,12 @@ func joinToAB(x *AB, y V, left bool) V {
 		if left {
 			r[0] = y.I()
 			for i := 1; i < len(r); i++ {
-				r[i] = B2I(x.At(i - 1))
+				r[i] = b2I(x.At(i - 1))
 			}
 		} else {
 			r[len(r)-1] = y.I()
 			for i := 0; i < len(r)-1; i++ {
-				r[i] = B2I(x.At(i))
+				r[i] = b2I(x.At(i))
 			}
 		}
 		return NewAIWithRC(r, reuseRCp(x.rc))
@@ -156,12 +156,12 @@ func joinToAB(x *AB, y V, left bool) V {
 		if left {
 			r[0] = y.F()
 			for i := 1; i < len(r); i++ {
-				r[i] = B2F(x.At(i - 1))
+				r[i] = b2F(x.At(i - 1))
 			}
 		} else {
 			r[len(r)-1] = y.F()
 			for i := 0; i < len(r)-1; i++ {
-				r[i] = B2F(x.At(i))
+				r[i] = b2F(x.At(i))
 			}
 		}
 		return NewAFWithRC(r, reuseRCp(x.rc))
@@ -295,7 +295,7 @@ func joinABAB(x *AB, y *AB) V {
 		x.flags = flagNone
 		return NewV(x)
 	}
-	r := make([]bool, y.Len()+x.Len())
+	r := make([]byte, y.Len()+x.Len())
 	copy(r[:x.Len()], x.elts)
 	copy(r[x.Len():], y.elts)
 	return NewAB(r)
@@ -328,7 +328,7 @@ func joinAFAF(x *AF, y *AF) V {
 func joinABAI(x *AB, y *AI) V {
 	r := make([]int64, x.Len()+y.Len())
 	for i := 0; i < x.Len(); i++ {
-		r[i] = B2I(x.At(i))
+		r[i] = b2I(x.At(i))
 	}
 	copy(r[x.Len():], y.elts)
 	return NewAIWithRC(r, reuseRCp(x.rc))
@@ -337,7 +337,7 @@ func joinABAI(x *AB, y *AI) V {
 func joinAIAB(x *AI, y *AB) V {
 	if reusableRCp(x.RC()) {
 		for _, yi := range y.elts {
-			x.elts = append(x.elts, B2I(yi))
+			x.elts = append(x.elts, b2I(yi))
 		}
 		x.flags = flagNone
 		return NewV(x)
@@ -345,7 +345,7 @@ func joinAIAB(x *AI, y *AB) V {
 	r := make([]int64, x.Len()+y.Len())
 	copy(r[:x.Len()], x.elts)
 	for i := x.Len(); i < len(r); i++ {
-		r[i] = B2I(y.At(i - x.Len()))
+		r[i] = b2I(y.At(i - x.Len()))
 	}
 	return NewAI(r)
 }
@@ -353,7 +353,7 @@ func joinAIAB(x *AI, y *AB) V {
 func joinABAF(x *AB, y *AF) V {
 	r := make([]float64, x.Len()+y.Len())
 	for i := 0; i < x.Len(); i++ {
-		r[i] = float64(B2F(x.At(i)))
+		r[i] = float64(b2F(x.At(i)))
 	}
 	copy(r[x.Len():], y.elts)
 	return NewAFWithRC(r, reuseRCp(x.rc))
@@ -362,7 +362,7 @@ func joinABAF(x *AB, y *AF) V {
 func joinAFAB(x *AF, y *AB) V {
 	if reusableRCp(x.RC()) {
 		for _, yi := range y.elts {
-			x.elts = append(x.elts, float64(B2I(yi)))
+			x.elts = append(x.elts, float64(b2I(yi)))
 		}
 		x.flags = flagNone
 		return NewV(x)
@@ -370,7 +370,7 @@ func joinAFAB(x *AF, y *AB) V {
 	r := make([]float64, x.Len()+y.Len())
 	copy(r[:x.Len()], x.elts)
 	for i := x.Len(); i < len(r); i++ {
-		r[i] = float64(B2F(y.At(i - x.Len())))
+		r[i] = float64(b2F(y.At(i - x.Len())))
 	}
 	return NewAF(r)
 }
@@ -515,7 +515,7 @@ func joinAtomToArray(x V, y array, left bool) V {
 func enlist(x V) V {
 	if x.IsI() {
 		if isBI(x.I()) {
-			return NewAB([]bool{x.I() == 1})
+			return NewAB([]byte{x.I() == 1})
 		}
 		return NewAI([]int64{x.I()})
 	}

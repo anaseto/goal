@@ -104,6 +104,14 @@ type signed interface {
 	~int | ~int8 | ~int16 | ~int32 | ~int64
 }
 
+type unsigned interface {
+	~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64
+}
+
+type integer interface {
+	signed | unsigned
+}
+
 // radixSortWithBuffer sorts from using a radix sort. The to buffer slice
 // should have same length as from, size should be the bitsize of T, and min
 // should be the minimum possible value of type T.

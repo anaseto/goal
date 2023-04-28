@@ -147,7 +147,7 @@ func (x *AB) reuse() *AB {
 		x.flags = flagNone
 		return x
 	}
-	return &AB{elts: make([]bool, x.Len())}
+	return &AB{elts: make([]byte, x.Len())}
 }
 
 func (x *AI) reuse() *AI {

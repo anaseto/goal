@@ -72,7 +72,7 @@ func padArrayMut(n int, x array) array {
 	switch xv := x.(type) {
 	case *AB:
 		for i := 0; i < n; i++ {
-			xv.elts = append(xv.elts, false)
+			xv.elts = append(xv.elts, 0)
 		}
 	case *AI:
 		for i := 0; i < n; i++ {
@@ -392,14 +392,14 @@ func amendrAI(x array, yv *AI, z V) (array, error) {
 func amendrAIatomMut(x array, yv *AI, z V) {
 	switch xv := x.(type) {
 	case *AB:
-		var zb bool
+		var zi byte
 		if z.IsI() {
-			zb = z.I() != 0
+			zi = byte(z.I())
 		} else {
-			zb = z.F() != 0
+			zi = byte(z.F())
 		}
 		for _, yi := range yv.elts {
-			xv.elts[int(yi)] = zb
+			xv.elts[int(yi)] = zi
 		}
 	case *AI:
 		var zi int64

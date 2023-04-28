@@ -25,9 +25,9 @@ func vfUTF8(ctx *Context, args []V) V {
 func utf8valid(x V) V {
 	switch xv := x.value.(type) {
 	case S:
-		return NewI(B2I(utf8.ValidString(string(xv))))
+		return NewI(b2I(utf8.ValidString(string(xv))))
 	case *AS:
-		r := make([]bool, xv.Len())
+		r := make([]byte, xv.Len())
 		for i, s := range xv.elts {
 			r[i] = utf8.ValidString(s)
 		}

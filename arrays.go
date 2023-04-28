@@ -25,9 +25,10 @@ type array interface {
 type flags int32
 
 const (
-	flagNone      flags = 0b00
-	flagAscending flags = 0b01
-	flagUnique    flags = 0b10 // unused for now
+	flagNone      flags = 0b000
+	flagAscending flags = 0b001
+	flagUnique    flags = 0b010
+	flagBool      flags = 0b100
 )
 
 func (f flags) Has(ff flags) bool {
@@ -39,24 +40,28 @@ func (f flags) Has(ff flags) bool {
 type AB struct {
 	flags flags
 	rc    *int
-	elts  []bool
+	elts  []byte
 }
 
 // NewAB returns a new boolean array. It does not initialize the reference
 // counter.
-func NewAB(x []bool) V {
+func NewAB(x []byte) V {
 	return NewV(&AB{elts: x})
+}
+
+func (x *AB) IsBoolean() bool {
+	return x.flags.Has(flagBool)
 }
 
 // Slice returns the underlying immutable slice of values. It should not be
 // modified unless the value's refcount pointer is reusable, and even then, you
 // should normally return a new array with the modified slice.
-func (x *AB) Slice() []bool {
+func (x *AB) Slice() []byte {
 	return x.elts
 }
 
 // NewABWithRC returns a new boolean array.
-func NewABWithRC(x []bool, rc *int) V {
+func NewABWithRC(x []byte, rc *int) V {
 	return NewV(&AB{elts: x, rc: rc})
 }
 
@@ -190,14 +195,14 @@ func (x *AS) Len() int { return len(x.elts) }
 // Len returns the length of the array.
 func (x *AV) Len() int { return len(x.elts) }
 
-func (x *AB) at(i int) V { return NewI(B2I(x.elts[i])) }
+func (x *AB) at(i int) V { return NewI(b2I(x.elts[i])) }
 func (x *AI) at(i int) V { return NewI(x.elts[i]) }
 func (x *AF) at(i int) V { return NewF(x.elts[i]) }
 func (x *AS) at(i int) V { return NewS(x.elts[i]) }
 func (x *AV) at(i int) V { return x.elts[i] }
 
 // At returns array value at the given index.
-func (x *AB) At(i int) bool { return x.elts[i] }
+func (x *AB) At(i int) byte { return x.elts[i] }
 
 // At returns array value at the given index.
 func (x *AI) At(i int) int64 { return x.elts[i] }
@@ -268,7 +273,7 @@ func (x *AV) set(i int, y V) {
 }
 
 func (x *AB) atIndices(y *AI) V {
-	r := make([]bool, y.Len())
+	r := make([]byte, y.Len())
 	xlen := int64(x.Len())
 	for i, yi := range y.elts {
 		if yi < 0 {
@@ -346,7 +351,7 @@ func (x *AV) atIndices(y *AI) V {
 }
 
 func (x *AB) atInts(y []int64) array {
-	r := make([]bool, len(y))
+	r := make([]byte, len(y))
 	for i, yi := range y {
 		r[i] = x.At(int(yi))
 	}
@@ -405,7 +410,7 @@ func shallowCloneAB(x *AB) *AB {
 		return x
 	}
 	var n int
-	r := &AB{elts: make([]bool, x.Len()), rc: &n}
+	r := &AB{elts: make([]byte, x.Len()), rc: &n}
 	copy(r.elts, x.elts)
 	return r
 }
@@ -578,7 +583,7 @@ func matchAB(x, y *AB) bool {
 
 func matchABAI(x *AB, y *AI) bool {
 	for i, yi := range y.elts {
-		if yi != B2I(x.At(i)) {
+		if yi != b2I(x.At(i)) {
 			return false
 		}
 	}
@@ -587,7 +592,7 @@ func matchABAI(x *AB, y *AI) bool {
 
 func matchABAF(x *AB, y *AF) bool {
 	for i, yi := range y.elts {
-		if yi != B2F(x.At(i)) {
+		if yi != b2F(x.At(i)) {
 			return false
 		}
 	}

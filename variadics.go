@@ -316,7 +316,7 @@ func vfMatch(ctx *Context, args []V) V {
 	case 1:
 		return not(args[0])
 	case 2:
-		return NewI(B2I(args[1].Matches(args[0])))
+		return NewI(b2I(args[1].Matches(args[0])))
 	default:
 		return panicRank("~")
 	}

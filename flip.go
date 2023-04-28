@@ -70,7 +70,7 @@ func (x V) getAB() *AB {
 }
 
 func flipAB(x *AV) V {
-	r := make([]bool, x.Len())
+	r := make([]byte, x.Len())
 	for i, xi := range x.elts {
 		if xi.IsI() {
 			r[i] = xi.I() == 1
@@ -83,7 +83,7 @@ func flipAB(x *AV) V {
 
 func flipAVAB(x *AV, lines int) V {
 	r := make([]V, lines)
-	a := make([]bool, lines*x.Len())
+	a := make([]byte, lines*x.Len())
 	xlen := x.Len()
 	var n int = 2
 	rc := &n
@@ -120,7 +120,7 @@ func flipAF(x *AV) V {
 		}
 		switch xiv := xi.value.(type) {
 		case *AB:
-			r[i] = float64(B2F(xiv.At(0)))
+			r[i] = float64(b2F(xiv.At(0)))
 		case *AF:
 			r[i] = xiv.At(0)
 		case *AI:
@@ -154,7 +154,7 @@ func flipAVAF(x *AV, lines int) V {
 		switch xiv := xi.value.(type) {
 		case *AB:
 			for j := 0; j < lines; j++ {
-				a[i+j*xlen] = float64(B2F(xiv.At(j)))
+				a[i+j*xlen] = float64(b2F(xiv.At(j)))
 			}
 		case *AF:
 			for j := 0; j < lines; j++ {
@@ -182,7 +182,7 @@ func flipAI(x *AV) V {
 		}
 		switch xiv := xi.value.(type) {
 		case *AB:
-			r[i] = B2I(xiv.At(0))
+			r[i] = b2I(xiv.At(0))
 		case *AI:
 			r[i] = xiv.At(0)
 		}
@@ -207,7 +207,7 @@ func flipAVAI(x *AV, lines int) V {
 		switch xiv := xi.value.(type) {
 		case *AB:
 			for j := 0; j < lines; j++ {
-				a[i+j*xlen] = B2I(xiv.At(j))
+				a[i+j*xlen] = b2I(xiv.At(j))
 			}
 		case *AI:
 			for j := 0; j < lines; j++ {

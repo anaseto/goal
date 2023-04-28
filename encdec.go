@@ -184,7 +184,7 @@ func decode(f V, x V) V {
 		case *AB:
 			var r, n int64 = 0, 1
 			for i := xv.Len() - 1; i >= 0; i-- {
-				r += B2I(xv.At(i)) * n
+				r += b2I(xv.At(i)) * n
 				n *= f.I()
 			}
 			return NewI(r)
