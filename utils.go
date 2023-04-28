@@ -758,6 +758,36 @@ func canonicalFast(x V) V {
 	}
 }
 
+func protoV(x V) V {
+	if x.IsI() {
+		return NewI(0)
+	}
+	if x.IsF() {
+		return NewF(0)
+	}
+	switch xv := x.value.(type) {
+	case S:
+		return NewS("")
+	case *AB:
+		return NewAB(nil)
+	case *AI:
+		return NewAI(nil)
+	case *AF:
+		return NewAF(nil)
+	case *AS:
+		return NewAS(nil)
+	case *AV:
+		return NewAV(nil)
+	case *Dict:
+		return NewDict(protoArray(xv.keys), protoArray(xv.values))
+	default:
+		if x.IsFunction() {
+			return newVariadic(vRight)
+		}
+		return NewError(NewS("fill"))
+	}
+}
+
 func protoArray(x array) V {
 	switch x.(type) {
 	case *AB:
@@ -779,34 +809,7 @@ func proto(x []V) V {
 	if len(x) == 0 {
 		return NewAV(nil)
 	}
-	x0 := x[0]
-	if x0.IsI() {
-		return NewI(0)
-	}
-	if x0.IsF() {
-		return NewF(0)
-	}
-	switch x0v := x0.value.(type) {
-	case S:
-		return NewS("")
-	case *AB:
-		return NewAB(nil)
-	case *AI:
-		return NewAI(nil)
-	case *AF:
-		return NewAF(nil)
-	case *AS:
-		return NewAS(nil)
-	case *AV:
-		return NewAV(nil)
-	case *Dict:
-		return NewDict(protoArray(x0v.keys), protoArray(x0v.values))
-	default:
-		if x0.IsFunction() {
-			return newVariadic(vRight)
-		}
-		return NewError(NewS("fill"))
-	}
+	return protoV(x[0])
 }
 
 // hasNil returns true if there is a nil value in the given array.

@@ -56,7 +56,7 @@ func foldfx(ctx *Context, f, x V) V {
 			case *AS:
 				return NewS("")
 			case *AV:
-				return NewAV(nil)
+				return x
 			case *AF:
 				return NewF(0)
 			default:
@@ -338,7 +338,7 @@ func scanfx(ctx *Context, f, x V) V {
 		return newDictValues(xv.keys, scanfx(ctx, f, NewV(xv.values)))
 	case array:
 		if xv.Len() == 0 {
-			return NewAV(nil)
+			return x
 		}
 		r := make([]V, xv.Len())
 		r[0] = xv.at(0)
@@ -438,7 +438,7 @@ func scanxfy(ctx *Context, x, f, y V) V {
 		return newDictValues(yv.keys, scanxfy(ctx, x, f, NewV(yv.values)))
 	case array:
 		if yv.Len() == 0 {
-			return NewAV(nil)
+			return y
 		}
 		f.IncrRC()
 		ctx.pushNoRC(V{})
@@ -487,7 +487,7 @@ func scanN(ctx *Context, args []V) V {
 	}
 	x := args[len(args)-2]
 	if mlen == 0 {
-		return NewAV(nil)
+		return protoV(args[len(args)-3])
 	}
 	f.IncrRC()
 	ctx.pushNoRC(V{})
