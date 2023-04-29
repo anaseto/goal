@@ -245,7 +245,10 @@ func fold2vMax(x V) V {
 	case *Dict:
 		return fold2vMax(NewV(xv.values))
 	case *AB:
-		return NewI(maxIntegers(xv.elts))
+		if xv.Len() == 0 {
+			return NewI(0)
+		}
+		return NewI(int64(maxBytes(xv.elts)))
 	case *AI:
 		return NewI(maxIntegers(xv.elts))
 	case *AF:
@@ -281,7 +284,7 @@ func fold2vMax(x V) V {
 	}
 }
 
-func maxIntegers[T integer](x []T) int64 {
+func maxIntegers(x []int64) int64 {
 	var max int64 = math.MinInt64
 	for _, xi := range x {
 		if int64(xi) > max {
@@ -291,12 +294,26 @@ func maxIntegers[T integer](x []T) int64 {
 	return max
 }
 
-type ordered interface {
-	~float64 | ~string | integer
+func maxBytes(x []byte) byte {
+	var max byte
+	for _, xi := range x {
+		if xi > max {
+			max = xi
+		}
+	}
+	return max
 }
 
-type numeric interface {
-	~float64 | integer
+func maxFloat64s(x []float64) float64 {
+	max := math.Inf(-1)
+	for _, xi := range x {
+		// NOTE: not equivalent to math.Max(xi, max) if there are NaNs,
+		// but faster, so keep it this way.
+		if xi > max {
+			max = xi
+		}
+	}
+	return max
 }
 
 func scan2vMaxSlice[T ordered](dst, xs []T) {
@@ -371,7 +388,7 @@ func fold2vMin(x V) V {
 	case *Dict:
 		return fold2vMin(NewV(xv.values))
 	case *AB:
-		return NewI(minIntegers(xv.elts))
+		return NewI(int64(minBytes(xv.elts)))
 	case *AI:
 		return NewI(minIntegers(xv.elts))
 	case *AF:
@@ -412,6 +429,28 @@ func minIntegers[T integer](x []T) int64 {
 	for _, xi := range x {
 		if int64(xi) < min {
 			min = int64(xi)
+		}
+	}
+	return min
+}
+
+func minBytes(x []byte) byte {
+	var min byte = math.MaxUint8
+	for _, xi := range x {
+		if xi < min {
+			min = xi
+		}
+	}
+	return min
+}
+
+func minFloat64s(x []float64) float64 {
+	min := math.Inf(1)
+	for _, xi := range x {
+		// NOTE: not equivalent to math.Min(xi, min) if there are NaNs,
+		// but faster, so keep it this way.
+		if xi < min {
+			min = xi
 		}
 	}
 	return min

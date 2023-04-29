@@ -383,3 +383,15 @@ func (r *derivedVerb) Matches(x Value) bool {
 	xr, ok := x.(*derivedVerb)
 	return ok && r.Fun == xr.Fun && r.Arg.Matches(xr.Arg)
 }
+
+type integer interface {
+	signed | unsigned
+}
+
+type ordered interface {
+	~float64 | ~string | integer
+}
+
+type numeric interface {
+	~float64 | integer
+}

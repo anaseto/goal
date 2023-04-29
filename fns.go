@@ -410,11 +410,7 @@ func replicateAB(x *AB, y V) V {
 	case *AB:
 		if x.IsBoolean() {
 			r := replicateBools(x.elts, yv.elts)
-			var fl flags
-			if yv.IsBoolean() {
-				fl = flagBool
-			}
-			return NewV(&AB{elts: r, rc: reuseRCp(yv.rc), flags: fl})
+			return NewV(&AB{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
 		}
 		r := replicateBytes(x.elts, yv.elts)
 		var fl flags
@@ -425,28 +421,28 @@ func replicateAB(x *AB, y V) V {
 	case *AI:
 		if x.IsBoolean() {
 			r := replicateBools(x.elts, yv.elts)
-			return NewAIWithRC(r, reuseRCp(yv.rc))
+			return NewV(&AI{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
 		}
 		r := replicateBytes(x.elts, yv.elts)
 		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AF:
 		if x.IsBoolean() {
 			r := replicateBools(x.elts, yv.elts)
-			return NewAFWithRC(r, reuseRCp(yv.rc))
+			return NewV(&AF{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
 		}
 		r := replicateBytes(x.elts, yv.elts)
 		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AS:
 		if x.IsBoolean() {
 			r := replicateBools(x.elts, yv.elts)
-			return NewASWithRC(r, reuseRCp(yv.rc))
+			return NewV(&AS{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
 		}
 		r := replicateBytes(x.elts, yv.elts)
 		return NewASWithRC(r, reuseRCp(yv.rc))
 	case *AV:
 		if x.IsBoolean() {
 			r := replicateBools(x.elts, yv.elts)
-			return NewAVWithRC(r, yv.rc)
+			return NewV(&AV{elts: r, rc: yv.rc, flags: yv.flags})
 		}
 		*yv.rc += 2
 		r := replicateBytes(x.elts, yv.elts)
@@ -471,7 +467,10 @@ func replicateBools[T any](x []byte, y []T) []T {
 	for _, xi := range x {
 		n += int64(xi)
 	}
-	r := make([]T, 0, n)
+	if n == int64(len(y)) {
+		return y
+	}
+	r := make([]T, n)
 	n = 0
 	for i, xi := range x {
 		if xi > 0 {
@@ -487,7 +486,7 @@ func replicateBytes[T any](x []byte, y []T) []T {
 	for _, xi := range x {
 		n += int64(xi)
 	}
-	r := make([]T, 0, n)
+	r := make([]T, n)
 	n = 0
 	for i, xi := range x {
 		for j := byte(0); j < xi; j++ {
@@ -558,7 +557,7 @@ func replicateInts[T any](x []int64, y []T) ([]T, error) {
 		}
 		n += int64(xi)
 	}
-	r := make([]T, 0, n)
+	r := make([]T, n)
 	n = 0
 	for i, xi := range x {
 		for j := int64(0); j < xi; j++ {
@@ -606,51 +605,22 @@ func weedOut(x, y V) V {
 }
 
 func weedOutAB(x *AB, y V) V {
-	var n int64
-	for _, xi := range x.elts {
-		n += 1 - int64(xi)
-	}
 	switch yv := y.value.(type) {
 	case *AB:
-		r := make([]byte, 0, n)
-		for i, xi := range x.elts {
-			if !xi {
-				r = append(r, yv.At(i))
-			}
-		}
-		return NewABWithRC(r, reuseRCp(yv.rc))
-	case *AF:
-		r := make([]float64, 0, n)
-		for i, xi := range x.elts {
-			if !xi {
-				r = append(r, yv.At(i))
-			}
-		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		r := weedOutIntegers(x.elts, yv.elts)
+		return NewV(&AB{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
 	case *AI:
-		r := make([]int64, 0, n)
-		for i, xi := range x.elts {
-			if !xi {
-				r = append(r, yv.At(i))
-			}
-		}
-		return NewAIWithRC(r, reuseRCp(yv.rc))
+		r := weedOutIntegers(x.elts, yv.elts)
+		return NewV(&AI{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
+	case *AF:
+		r := weedOutIntegers(x.elts, yv.elts)
+		return NewV(&AF{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
 	case *AS:
-		r := make([]string, 0, n)
-		for i, xi := range x.elts {
-			if !xi {
-				r = append(r, yv.At(i))
-			}
-		}
-		return NewASWithRC(r, reuseRCp(yv.rc))
+		r := weedOutIntegers(x.elts, yv.elts)
+		return NewV(&AS{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
 	case *AV:
-		r := make([]V, 0, n)
-		for i, xi := range x.elts {
-			if !xi {
-				r = append(r, yv.at(i))
-			}
-		}
-		return NewV(canonicalAV(&AV{elts: r, rc: yv.rc}))
+		r := weedOutIntegers(x.elts, yv.elts)
+		return NewV(canonicalAV(&AV{elts: r, rc: yv.rc, flags: yv.flags}))
 	case *Dict:
 		keys := weedOutAB(x, NewV(yv.keys))
 		if keys.IsPanic() {
@@ -666,52 +636,39 @@ func weedOutAB(x *AB, y V) V {
 	}
 }
 
-func weedOutAI(x *AI, y V) V {
-	n := int64(0)
-	for _, xi := range x.elts {
+func weedOutIntegers[I integer, T any](x []I, y []T) []T {
+	var n int64
+	for _, xi := range x {
 		n += b2I(xi == 0)
 	}
+	r := make([]T, n)
+	n = 0
+	for i, xi := range x {
+		if xi == 0 {
+			r[n] = y[i]
+			n++
+		}
+	}
+	return r
+}
+
+func weedOutAI(x *AI, y V) V {
 	switch yv := y.value.(type) {
 	case *AB:
-		r := make([]byte, 0, n)
-		for i, xi := range x.elts {
-			if xi == 0 {
-				r = append(r, yv.At(i))
-			}
-		}
-		return NewABWithRC(r, reuseRCp(yv.rc))
-	case *AF:
-		r := make([]float64, 0, n)
-		for i, xi := range x.elts {
-			if xi == 0 {
-				r = append(r, yv.At(i))
-			}
-		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		r := weedOutIntegers(x.elts, yv.elts)
+		return NewV(&AB{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
 	case *AI:
-		r := make([]int64, 0, n)
-		for i, xi := range x.elts {
-			if xi == 0 {
-				r = append(r, yv.At(i))
-			}
-		}
-		return NewAIWithRC(r, reuseRCp(yv.rc))
+		r := weedOutIntegers(x.elts, yv.elts)
+		return NewV(&AI{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
+	case *AF:
+		r := weedOutIntegers(x.elts, yv.elts)
+		return NewV(&AF{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
 	case *AS:
-		r := make([]string, 0, n)
-		for i, xi := range x.elts {
-			if xi == 0 {
-				r = append(r, yv.At(i))
-			}
-		}
-		return NewASWithRC(r, reuseRCp(yv.rc))
+		r := weedOutIntegers(x.elts, yv.elts)
+		return NewV(&AS{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
 	case *AV:
-		r := make([]V, 0, n)
-		for i, xi := range x.elts {
-			if xi == 0 {
-				r = append(r, yv.At(i))
-			}
-		}
-		return NewV(canonicalAV(&AV{elts: r, rc: yv.rc}))
+		r := weedOutIntegers(x.elts, yv.elts)
+		return NewV(canonicalAV(&AV{elts: r, rc: yv.rc, flags: yv.flags}))
 	case *Dict:
 		keys := weedOutAI(x, NewV(yv.keys))
 		if keys.IsPanic() {

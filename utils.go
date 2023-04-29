@@ -151,50 +151,6 @@ func minMaxIntegers[I integer](x []I) (min, max I) {
 	return
 }
 
-func maxBytes(x []byte) byte {
-	var max byte
-	for _, xi := range x {
-		if xi > max {
-			max = xi
-		}
-	}
-	return max
-}
-
-func minBytes(x []byte) byte {
-	var min byte = math.MaxUint8
-	for _, xi := range x {
-		if xi < min {
-			min = xi
-		}
-	}
-	return min
-}
-
-func maxFloat64s(x []float64) float64 {
-	max := math.Inf(-1)
-	for _, xi := range x {
-		// NOTE: not equivalent to math.Max(xi, max) if there are NaNs,
-		// but faster, so keep it this way.
-		if xi > max {
-			max = xi
-		}
-	}
-	return max
-}
-
-func minFloat64s(x []float64) float64 {
-	min := math.Inf(1)
-	for _, xi := range x {
-		// NOTE: not equivalent to math.Min(xi, min) if there are NaNs,
-		// but faster, so keep it this way.
-		if xi < min {
-			min = xi
-		}
-	}
-	return min
-}
-
 func isStar(x V) bool {
 	return x.kind == valVariadic && x.variadic() == vMultiply
 }
