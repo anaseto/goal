@@ -20,7 +20,7 @@ func enumFieldsKeys(x V) V {
 	case S:
 		return NewAS(strings.Fields(string(xv)))
 	case *AB:
-		return enumFieldsKeys(fromABtoAI(xv))
+		return odometer(xv.elts)
 	case *AF:
 		x := toAI(xv)
 		if x.IsPanic() {
@@ -28,7 +28,7 @@ func enumFieldsKeys(x V) V {
 		}
 		return enumFieldsKeys(x)
 	case *AI:
-		return rangeArray(xv)
+		return odometer(xv.elts)
 	case *AS:
 		r := make([]V, xv.Len())
 		for i, xi := range xv.elts {
@@ -70,37 +70,60 @@ func rangeI(n int64) V {
 	return NewV(&AI{elts: r, flags: flagAscending | flagUnique})
 }
 
-func rangeArray(x *AI) V {
+func odometer[I integer](x []I) V {
 	cols := int64(1)
-	for _, n := range x.elts {
+	bsize := true
+	for _, n := range x {
 		if n <= 0 {
 			return NewAV(nil)
 		}
-		if n > math.MaxInt64/cols {
+		if int64(n) > math.MaxInt64/cols {
 			return panics("!I : too big: overflow")
 		}
-		cols *= n
-	}
-	r := make([]V, x.Len())
-	reps := cols
-	ua := make([]int64, int(cols)*len(r))
-	var n int = 2
-	for i, xi := range x.elts {
-		a := ua[i*int(cols) : (i+1)*int(cols)]
-		reps /= xi
-		clen := reps * x.At(i)
-		for c := int64(0); c < cols/clen; c++ {
-			col := c * clen
-			for j := int64(0); j < xi; j++ {
-				for k := int64(0); k < reps; k++ {
-					a[col+j*reps+k] = j
-				}
-			}
+		if int64(n) >= 256 || int64(n) < 0 {
+			bsize = false
 		}
-		r[i] = NewAIWithRC(a, &n)
+		cols *= int64(n)
+	}
+	if bsize {
+		a := odometerWithCols[I, byte](x, cols)
+		r := make([]V, len(x))
+		var n int = 2
+		for i := range r {
+			ai := a[i*int(cols) : (i+1)*int(cols)]
+			r[i] = NewABWithRC(ai, &n)
+		}
+		var rn int
+		return NewAVWithRC(r, &rn)
+	}
+	a := odometerWithCols[I, int64](x, cols)
+	r := make([]V, len(x))
+	var n int = 2
+	for i := range r {
+		ai := a[i*int(cols) : (i+1)*int(cols)]
+		r[i] = NewAIWithRC(ai, &n)
 	}
 	var rn int
 	return NewAVWithRC(r, &rn)
+}
+
+func odometerWithCols[I integer, J integer](x []I, cols int64) []J {
+	reps := cols
+	a := make([]J, int(cols)*len(x))
+	for i, xi := range x {
+		ai := a[i*int(cols) : (i+1)*int(cols)]
+		reps /= int64(xi)
+		clen := reps * int64(x[i])
+		for c := int64(0); c < cols/clen; c++ {
+			col := c * clen
+			for j := int64(0); j < int64(xi); j++ {
+				for k := int64(0); k < reps; k++ {
+					ai[col+j*reps+k] = J(j)
+				}
+			}
+		}
+	}
+	return a
 }
 
 func rangeII(from, to int64) V {
