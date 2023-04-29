@@ -1,6 +1,7 @@
 package goal
 
 import (
+	"fmt"
 	"math"
 	"strings"
 )
@@ -151,54 +152,45 @@ func where(x V) V {
 		case x.I() < 0:
 			return Panicf("&x : x negative (%d)", x.I())
 		case x.I() == 0:
-			return NewAI(nil)
+			return NewAB(nil)
 		default:
-			r := make([]int64, x.I())
-			return NewAI(r)
+			r := make([]byte, x.I())
+			return newABb(r)
 		}
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
 			return Panicf("&x : x non-integer (%g)", x.F())
 		}
-		n := int64(x.F())
-		switch {
-		case n < 0:
-			return Panicf("&x : x negative (%d)", n)
-		case n == 0:
-			return NewAI(nil)
-		default:
-			r := make([]int64, n)
-			return NewAI(r)
-		}
-
+		return where(NewI(int64(x.F())))
 	}
 	switch xv := x.value.(type) {
 	case *AB:
-		n := int64(0)
-		for _, xi := range xv.elts {
-			n += b2I(xi)
+		if xv.IsBoolean() {
+			if xv.Len() < 256 {
+				r := whereBools[byte](xv.elts)
+				return NewV(&AB{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
+			}
+			r := whereBools[int64](xv.elts)
+			return NewV(&AI{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
 		}
-		r := make([]int64, n+1)
-		j := int64(0)
-		for i, xi := range xv.elts {
-			r[j] = int64(i)
-			j += b2I(xi)
+		if xv.Len() < 256 {
+			r := whereBytes[byte](xv.elts)
+			return NewV(&AB{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
 		}
-		return NewV(&AI{elts: r[:len(r)-1], rc: reuseRCp(xv.rc), flags: flagAscending})
+		r := whereBytes[int64](xv.elts)
+		return NewV(&AI{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
 	case *AI:
-		n := int64(0)
-		for _, xi := range xv.elts {
-			if xi < 0 {
-				return Panicf("&x : x contains negative integer (%d)", xv)
+		if xv.Len() < 256 {
+			r, err := whereInts[byte](xv.elts)
+			if err != nil {
+				return panicErr(err)
 			}
-			n += xi
+			return NewV(&AB{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
 		}
-		r := make([]int64, 0, n)
-		for i, xi := range xv.elts {
-			for j := int64(0); j < xi; j++ {
-				r = append(r, int64(i))
-			}
+		r, err := whereInts[int64](xv.elts)
+		if err != nil {
+			return panicErr(err)
 		}
 		return NewV(&AI{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
 	case *AF:
@@ -253,6 +245,55 @@ func where(x V) V {
 	}
 }
 
+func whereBools[I integer](x []byte) []I {
+	var n int64
+	for _, xi := range x {
+		n += int64(xi)
+	}
+	r := make([]I, n+1)
+	n = 0
+	for i, xi := range x {
+		r[n] = I(i)
+		n += int64(xi)
+	}
+	return r[:len(r)-1]
+}
+
+func whereBytes[I integer](x []byte) []I {
+	var n int64
+	for _, xi := range x {
+		n += int64(xi)
+	}
+	r := make([]I, n)
+	n = 0
+	for i, xi := range x {
+		for j := byte(0); j < xi; j++ {
+			r[n] = I(i)
+			n++
+		}
+	}
+	return r
+}
+
+func whereInts[I integer](x []int64) ([]I, error) {
+	var n int64
+	for _, xi := range x {
+		if xi < 0 {
+			return nil, fmt.Errorf("&x : x contains negative integer (%d)", xi)
+		}
+		n += xi
+	}
+	r := make([]I, n)
+	n = 0
+	for i, xi := range x {
+		for j := int64(0); j < xi; j++ {
+			r[n] = I(i)
+			n++
+		}
+	}
+	return r, nil
+}
+
 // replicate returns {x}#y.
 func replicate(x, y V) V {
 	if x.IsI() {
@@ -296,7 +337,7 @@ func replicateI(n int64, y V) V {
 		if isBI(y.n) {
 			r := make([]byte, n)
 			for i := range r {
-				r[i] = y.n
+				r[i] = byte(y.n)
 			}
 			var fl flags
 			if isbI(y.n) {
@@ -365,51 +406,51 @@ func replicateISlice[T any](n int64, ys []T) []T {
 }
 
 func replicateAB(x *AB, y V) V {
-	n := int64(0)
-	for _, xi := range x.elts {
-		n += b2I(xi)
-	}
 	switch yv := y.value.(type) {
 	case *AB:
-		r := make([]byte, 0, n)
-		for i, xi := range x.elts {
-			if xi {
-				r = append(r, yv.At(i))
+		if x.IsBoolean() {
+			r := replicateBools(x.elts, yv.elts)
+			var fl flags
+			if yv.IsBoolean() {
+				fl = flagBool
 			}
+			return NewV(&AB{elts: r, rc: reuseRCp(yv.rc), flags: fl})
 		}
-		return NewABWithRC(r, reuseRCp(yv.rc))
-	case *AF:
-		r := make([]float64, 0, n)
-		for i, xi := range x.elts {
-			if xi {
-				r = append(r, yv.At(i))
-			}
+		r := replicateBytes(x.elts, yv.elts)
+		var fl flags
+		if yv.IsBoolean() {
+			fl = flagBool
 		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewV(&AB{elts: r, rc: reuseRCp(yv.rc), flags: fl})
 	case *AI:
-		r := make([]int64, 0, n)
-		for i, xi := range x.elts {
-			if xi {
-				r = append(r, yv.At(i))
-			}
+		if x.IsBoolean() {
+			r := replicateBools(x.elts, yv.elts)
+			return NewAIWithRC(r, reuseRCp(yv.rc))
 		}
+		r := replicateBytes(x.elts, yv.elts)
 		return NewAIWithRC(r, reuseRCp(yv.rc))
-	case *AS:
-		r := make([]string, 0, n)
-		for i, xi := range x.elts {
-			if xi {
-				r = append(r, yv.At(i))
-			}
+	case *AF:
+		if x.IsBoolean() {
+			r := replicateBools(x.elts, yv.elts)
+			return NewAFWithRC(r, reuseRCp(yv.rc))
 		}
+		r := replicateBytes(x.elts, yv.elts)
+		return NewAFWithRC(r, reuseRCp(yv.rc))
+	case *AS:
+		if x.IsBoolean() {
+			r := replicateBools(x.elts, yv.elts)
+			return NewASWithRC(r, reuseRCp(yv.rc))
+		}
+		r := replicateBytes(x.elts, yv.elts)
 		return NewASWithRC(r, reuseRCp(yv.rc))
 	case *AV:
-		r := make([]V, 0, n)
-		for i, xi := range x.elts {
-			if xi {
-				r = append(r, yv.at(i))
-			}
+		if x.IsBoolean() {
+			r := replicateBools(x.elts, yv.elts)
+			return NewAVWithRC(r, yv.rc)
 		}
-		return NewV(canonicalAV(&AV{elts: r, rc: yv.rc}))
+		*yv.rc += 2
+		r := replicateBytes(x.elts, yv.elts)
+		return NewAVWithRC(r, yv.rc)
 	case *Dict:
 		keys := replicateAB(x, NewV(yv.keys))
 		if keys.IsPanic() {
@@ -425,55 +466,75 @@ func replicateAB(x *AB, y V) V {
 	}
 }
 
-func replicateAI(x *AI, y V) V {
-	n := int64(0)
-	for _, xi := range x.elts {
-		if xi < 0 {
-			return Panicf("f#y : f[y] contains negative integer (%d)", xi)
-		}
-		n += xi
+func replicateBools[T any](x []byte, y []T) []T {
+	var n int64
+	for _, xi := range x {
+		n += int64(xi)
 	}
+	r := make([]T, 0, n)
+	n = 0
+	for i, xi := range x {
+		if xi > 0 {
+			r[n] = y[i]
+			n++
+		}
+	}
+	return r
+}
+
+func replicateBytes[T any](x []byte, y []T) []T {
+	var n int64
+	for _, xi := range x {
+		n += int64(xi)
+	}
+	r := make([]T, 0, n)
+	n = 0
+	for i, xi := range x {
+		for j := byte(0); j < xi; j++ {
+			r[n] = y[i]
+			n++
+		}
+	}
+	return r
+}
+
+func replicateAI(x *AI, y V) V {
 	switch yv := y.value.(type) {
 	case *AB:
-		r := make([]byte, 0, n)
-		for i, xi := range x.elts {
-			for j := int64(0); j < xi; j++ {
-				r = append(r, yv.At(i))
-			}
+		r, err := replicateInts(x.elts, yv.elts)
+		if err != nil {
+			return panicErr(err)
 		}
-		return NewABWithRC(r, reuseRCp(yv.rc))
-	case *AF:
-		r := make([]float64, 0, n)
-		for i, xi := range x.elts {
-			for j := int64(0); j < xi; j++ {
-				r = append(r, yv.At(i))
-			}
+		var fl flags
+		if yv.IsBoolean() {
+			fl = flagBool
 		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewV(&AB{elts: r, rc: reuseRCp(yv.rc), flags: fl})
 	case *AI:
-		r := make([]int64, 0, n)
-		for i, xi := range x.elts {
-			for j := int64(0); j < xi; j++ {
-				r = append(r, yv.At(i))
-			}
+		r, err := replicateInts(x.elts, yv.elts)
+		if err != nil {
+			return panicErr(err)
 		}
 		return NewAIWithRC(r, reuseRCp(yv.rc))
+	case *AF:
+		r, err := replicateInts(x.elts, yv.elts)
+		if err != nil {
+			return panicErr(err)
+		}
+		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AS:
-		r := make([]string, 0, n)
-		for i, xi := range x.elts {
-			for j := int64(0); j < xi; j++ {
-				r = append(r, yv.At(i))
-			}
+		r, err := replicateInts(x.elts, yv.elts)
+		if err != nil {
+			return panicErr(err)
 		}
 		return NewASWithRC(r, reuseRCp(yv.rc))
 	case *AV:
-		r := make([]V, 0, n)
-		for i, xi := range x.elts {
-			for j := int64(0); j < xi; j++ {
-				r = append(r, yv.At(i))
-			}
+		r, err := replicateInts(x.elts, yv.elts)
+		if err != nil {
+			return panicErr(err)
 		}
-		return NewV(canonicalAV(&AV{elts: r, rc: yv.rc}))
+		*yv.rc += 2
+		return NewAVWithRC(r, yv.rc)
 	case *Dict:
 		keys := replicateAI(x, NewV(yv.keys))
 		if keys.IsPanic() {
@@ -487,6 +548,25 @@ func replicateAI(x *AI, y V) V {
 	default:
 		return panicType("f#y", "y", y)
 	}
+}
+
+func replicateInts[T any](x []int64, y []T) ([]T, error) {
+	var n int64
+	for _, xi := range x {
+		if xi < 0 {
+			return nil, fmt.Errorf("f#y : f[y] contains negative integer (%d)", xi)
+		}
+		n += int64(xi)
+	}
+	r := make([]T, 0, n)
+	n = 0
+	for i, xi := range x {
+		for j := int64(0); j < xi; j++ {
+			r[n] = y[i]
+			n++
+		}
+	}
+	return r, nil
 }
 
 // weedOut implements {x}_y
@@ -526,9 +606,9 @@ func weedOut(x, y V) V {
 }
 
 func weedOutAB(x *AB, y V) V {
-	n := int64(0)
+	var n int64
 	for _, xi := range x.elts {
-		n += 1 - b2I(xi)
+		n += 1 - int64(xi)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
