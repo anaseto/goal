@@ -25,7 +25,7 @@ func reverseSlice[T any](xs []T) {
 func reverseMut(x array) {
 	switch xv := x.(type) {
 	case *AB:
-		reverseSlice[bool](xv.elts)
+		reverseSlice[byte](xv.elts)
 	case *AF:
 		reverseSlice[float64](xv.elts)
 	case *AI:
@@ -41,8 +41,10 @@ func reverseMut(x array) {
 func reverse(x V) V {
 	switch xv := x.value.(type) {
 	case array:
+		flags := xv.getFlags() &^ flagAscending
 		xv = xv.shallowClone()
 		reverseMut(xv)
+		xv.setFlags(flags)
 		x.value = xv
 		return x
 	case *Dict:
@@ -71,7 +73,7 @@ func rotate(x, y V) V {
 	case *AB:
 		r := make([]V, xv.Len())
 		for i, xi := range xv.elts {
-			ri := rotateI(b2I(xi), y)
+			ri := rotateI(int64(xi), y)
 			if ri.IsPanic() {
 				return ri
 			}
@@ -116,15 +118,6 @@ func rotate(x, y V) V {
 	}
 }
 
-func rotateSlice[T any](i int64, ys []T) []T {
-	ylen := int64(len(ys))
-	r := make([]T, ylen)
-	for j := int64(0); j < ylen; j++ {
-		r[j] = ys[int((j+i)%ylen)]
-	}
-	return r
-}
-
 func rotateI(i int64, y V) V {
 	ylen := int64(y.Len())
 	if ylen == 0 {
@@ -136,15 +129,20 @@ func rotateI(i int64, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		return NewABWithRC(rotateSlice[bool](i, yv.elts), reuseRCp(yv.rc))
+		fl := yv.flags &^ flagAscending
+		return NewV(&AB{elts: rotateSlice[byte](i, yv.elts), rc: reuseRCp(yv.rc), flags: fl})
 	case *AF:
-		return NewAFWithRC(rotateSlice[float64](i, yv.elts), reuseRCp(yv.rc))
+		fl := yv.flags &^ flagAscending
+		return NewV(&AF{elts: rotateSlice[float64](i, yv.elts), rc: reuseRCp(yv.rc), flags: fl})
 	case *AI:
-		return NewAIWithRC(rotateSlice[int64](i, yv.elts), reuseRCp(yv.rc))
+		fl := yv.flags &^ flagAscending
+		return NewV(&AI{elts: rotateSlice[int64](i, yv.elts), rc: reuseRCp(yv.rc), flags: fl})
 	case *AS:
-		return NewASWithRC(rotateSlice[string](i, yv.elts), reuseRCp(yv.rc))
+		fl := yv.flags &^ flagAscending
+		return NewV(&AS{elts: rotateSlice[string](i, yv.elts), rc: reuseRCp(yv.rc), flags: fl})
 	case *AV:
-		return NewAVWithRC(rotateSlice[V](i, yv.elts), yv.rc)
+		fl := yv.flags &^ flagAscending
+		return NewV(&AV{elts: rotateSlice[V](i, yv.elts), rc: yv.rc, flags: fl})
 	case *Dict:
 		k := rotateI(i, NewV(yv.keys))
 		if k.IsPanic() {
@@ -162,12 +160,23 @@ func rotateI(i int64, y V) V {
 	}
 }
 
+func rotateSlice[T any](i int64, ys []T) []T {
+	ylen := int64(len(ys))
+	r := make([]T, ylen)
+	for j := int64(0); j < ylen; j++ {
+		r[j] = ys[int((j+i)%ylen)]
+	}
+	return r
+}
+
 // first returns *x.
 func first(x V) V {
 	switch xv := x.value.(type) {
 	case array:
 		if xv.Len() == 0 {
 			switch xv.(type) {
+			case *AF:
+				return NewF(0)
 			case *AS:
 				return NewS("")
 			case *AV:
@@ -199,7 +208,24 @@ func drop(x, y V) V {
 	case S:
 		return dropS(xv, y)
 	case *AB:
-		return drop(fromABtoAI(xv), y)
+		switch yv := y.value.(type) {
+		case S:
+			return cutABS(xv, yv)
+		case array:
+			return cutABarray(xv, yv)
+		case *Dict:
+			k := cutABarray(xv, yv.keys)
+			if k.IsPanic() {
+				return k
+			}
+			v := cutABarray(xv, yv.values)
+			if v.IsPanic() {
+				return v
+			}
+			return NewDict(k, v)
+		default:
+			return panicType("I_y", "y", y)
+		}
 	case *AI:
 		switch yv := y.value.(type) {
 		case S:
@@ -290,17 +316,43 @@ func cutAIarray(x *AI, y array) V {
 	if xlen == 0 {
 		return NewAVWithRC(nil, reuseRCp(x.rc))
 	}
+	r := cutIntsArray(x.elts, y)
+	return NewAVWithRC(r, reuseRCp(x.rc))
+}
+
+func cutABarray(x *AB, y array) V {
+	if !x.flags.Has(flagAscending) && !sort.IsSorted(x) {
+		return panics("I_y : non-ascending I")
+	}
+	x.flags |= flagAscending
+	ylen := int64(y.Len())
+	for _, i := range x.elts {
+		if int64(i) > ylen {
+			return Panicf("I_y : I contains out of bounds index (%d)", i)
+		}
+	}
+	xlen := x.Len()
+	if xlen == 0 {
+		return NewAVWithRC(nil, reuseRCp(x.rc))
+	}
+	r := cutIntsArray(x.elts, y)
+	return NewAVWithRC(r, reuseRCp(x.rc))
+}
+
+func cutIntsArray[I integer](x []I, y array) []V {
+	xlen := len(x)
+	ylen := int64(y.Len())
 	r := make([]V, xlen)
 	rc := y.RC()
 	*rc += 2
-	for i, from := range x.elts {
+	for i, from := range x {
 		to := ylen
 		if i+1 < xlen {
-			to = x.At(i + 1)
+			to = int64(x[i+1])
 		}
 		r[i] = Canonical(NewV(y.slice(int(from), int(to))))
 	}
-	return NewAVWithRC(r, reuseRCp(x.rc))
+	return r
 }
 
 func cutAIS(x *AI, y S) V {
@@ -318,15 +370,41 @@ func cutAIS(x *AI, y S) V {
 	if xlen == 0 {
 		return NewASWithRC(nil, reuseRCp(x.rc))
 	}
+	r := cutIntsS(x.elts, y)
+	return NewASWithRC(r, reuseRCp(x.rc))
+}
+
+func cutABS(x *AB, y S) V {
+	if !x.flags.Has(flagAscending) && !sort.IsSorted(x) {
+		return panics("I_s : non-ascending I")
+	}
+	x.flags |= flagAscending
+	ylen := int64(len(y))
+	for _, i := range x.elts {
+		if int64(i) > ylen {
+			return Panicf("I_s : I contains out of bounds index (%d)", i)
+		}
+	}
+	xlen := x.Len()
+	if xlen == 0 {
+		return NewASWithRC(nil, reuseRCp(x.rc))
+	}
+	r := cutIntsS(x.elts, y)
+	return NewASWithRC(r, reuseRCp(x.rc))
+}
+
+func cutIntsS[I integer](x []I, y S) []string {
+	xlen := len(x)
+	ylen := int64(len(y))
 	r := make([]string, xlen)
-	for i, from := range x.elts {
+	for i, from := range x {
 		to := ylen
 		if i+1 < xlen {
-			to = x.At(i + 1)
+			to = int64(x[i+1])
 		}
 		r[i] = string(y[from:to])
 	}
-	return NewASWithRC(r, reuseRCp(x.rc))
+	return r
 }
 
 // take returns i#y.
@@ -369,42 +447,45 @@ func takeNAtom(n int64, y V) V {
 	if y.IsI() {
 		yv := y.I()
 		if isBI(yv) {
-			r := make([]byte, n)
-			if yv != 0 {
-				for i := range r {
-					r[i] = true
+			if isbI(yv) {
+				r := make([]byte, n)
+				if yv != 0 {
+					for i := range r {
+						r[i] = 1
+					}
 				}
+				return newABb(r)
 			}
+			r := constArray(n, byte(yv))
 			return NewAB(r)
 		}
-		r := make([]int64, n)
-		for i := range r {
-			r[i] = yv
-		}
+		r := constArray(n, yv)
 		return NewAI(r)
 	}
 	if y.IsF() {
 		yv := y.F()
-		r := make([]float64, n)
-		for i := range r {
-			r[i] = yv
-		}
+		r := constArray(n, yv)
 		return NewAF(r)
 	}
 	switch yv := y.value.(type) {
 	case S:
-		r := make([]string, n)
-		for i := range r {
-			r[i] = string(yv)
-		}
+		r := constArray(n, string(yv))
 		return NewAS(r)
 	default:
-		r := make([]V, n)
-		for i := range r {
-			r[i] = y
-		}
-		return NewAV(r)
+		r := constArray(n, y)
+		rv := &AV{elts: r}
+		var n = 2
+		rv.InitWithRC(&n)
+		return NewV(rv)
 	}
+}
+
+func constArray[T any](n int64, y T) []T {
+	r := make([]T, n)
+	for i := range r {
+		r[i] = y
+	}
+	return r
 }
 
 func takeN(n int64, y array) V {
@@ -472,7 +553,7 @@ func takeCyclicSlice[T any](n int64, ys []T) []T {
 func takeCyclic(n int64, y array) V {
 	switch yv := y.(type) {
 	case *AB:
-		return NewABWithRC(takeCyclicSlice[bool](n, yv.elts), reuseRCp(yv.rc))
+		return NewABWithRC(takeCyclicSlice[byte](n, yv.elts), reuseRCp(yv.rc))
 	case *AI:
 		return NewAIWithRC(takeCyclicSlice[int64](n, yv.elts), reuseRCp(yv.rc))
 	case *AF:
@@ -505,7 +586,7 @@ func takePadN(n int64, x array) V {
 func padArrayN(n int64, x array) V {
 	switch xv := x.(type) {
 	case *AB:
-		return NewAB(padNSlice[bool](n, xv.elts))
+		return NewAB(padNSlice[byte](n, xv.elts))
 	case *AI:
 		return NewAI(padNSlice[int64](n, xv.elts))
 	case *AF:
@@ -584,14 +665,19 @@ func shiftBeforeAB(x V, yv *AB) V {
 	ys := yv.elts
 	if x.IsI() {
 		if isBI(x.I()) {
+			var fl flags
+			if yv.IsBoolean() && isbI(x.I()) {
+				fl = flagBool
+			}
 			r := yv.reuse()
 			copy(r.elts[max:], ys[:len(ys)-max])
-			r.elts[0] = x.I() == 1
+			r.elts[0] = byte(x.I())
+			r.flags = fl
 			return NewV(r)
 		}
 		r := make([]int64, len(ys))
 		for i := max; i < len(ys); i++ {
-			r[i] = b2I(yv.At(i - max))
+			r[i] = int64(yv.At(i - max))
 		}
 		r[0] = x.I()
 		return NewAIWithRC(r, reuseRCp(yv.rc))
@@ -599,28 +685,30 @@ func shiftBeforeAB(x V, yv *AB) V {
 	if x.IsF() {
 		r := make([]float64, len(ys))
 		for i := max; i < len(ys); i++ {
-			r[i] = b2F(yv.At(i - max))
+			r[i] = float64(yv.At(i - max))
 		}
 		r[0] = x.F()
 		return NewAFWithRC(r, reuseRCp(yv.rc))
 	}
 	switch xv := x.value.(type) {
 	case *AB:
+		fl := xv.flags & yv.flags & flagBool
 		r := yv.reuse()
 		copy(r.elts[max:], ys[:len(ys)-max])
 		copy(r.elts[:max], xv.elts)
+		r.flags = fl
 		return NewV(r)
 	case *AF:
 		r := make([]float64, len(ys))
 		for i := max; i < len(ys); i++ {
-			r[i] = b2F(ys[i-max])
+			r[i] = float64(ys[i-max])
 		}
 		copy(r[:max], xv.elts)
 		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		r := make([]int64, len(ys))
 		for i := max; i < len(ys); i++ {
-			r[i] = b2I(yv.At(i - max))
+			r[i] = int64(yv.At(i - max))
 		}
 		copy(r[:max], xv.elts)
 		return NewAIWithRC(r, reuseRCp(yv.rc))
@@ -663,7 +751,7 @@ func shiftBeforeAI(x V, yv *AI) V {
 		r := yv.reuse()
 		copy(r.elts[max:], ys[:len(ys)-max])
 		for i := 0; i < max; i++ {
-			r.elts[i] = b2I(xv.At(i))
+			r.elts[i] = int64(xv.At(i))
 		}
 		return NewV(r)
 	case *AF:
@@ -711,7 +799,7 @@ func shiftBeforeAF(x V, yv *AF) V {
 		r := yv.reuse()
 		copy(r.elts[max:], ys[:len(ys)-max])
 		for i := 0; i < max; i++ {
-			r.elts[i] = float64(b2F(xv.At(i)))
+			r.elts[i] = float64(xv.At(i))
 		}
 		return NewV(r)
 	case *AF:
@@ -831,9 +919,11 @@ func nudge(x V) V {
 	}
 	switch xv := x.value.(type) {
 	case *AB:
+		fl := xv.flags & flagBool
 		r := xv.reuse()
 		copy(r.elts[1:], xv.elts[:xv.Len()-1])
-		r.elts[0] = false
+		r.elts[0] = 0
+		r.flags = fl
 		return NewV(r)
 	case *AI:
 		r := xv.reuse()
@@ -892,42 +982,49 @@ func shiftAfterAB(x V, yv *AB) V {
 	ys := yv.elts
 	if x.IsI() {
 		if isBI(x.I()) {
+			var fl flags
+			if yv.IsBoolean() && isbI(x.I()) {
+				fl = flagBool
+			}
 			r := yv.reuse()
 			copy(r.elts[:len(ys)-max], ys[max:])
-			r.elts[len(ys)-1] = x.I() == 1
+			r.elts[len(ys)-1] = byte(x.I())
+			r.flags = fl
 			return NewV(r)
 		}
 		r := make([]int64, len(ys))
 		for i := max; i < len(ys); i++ {
-			r[i-max] = b2I(yv.At(i))
+			r[i-max] = int64(yv.At(i))
 		}
 		r[len(ys)-1] = x.I()
 		return NewAIWithRC(r, reuseRCp(yv.rc))
 	} else if x.IsF() {
 		r := make([]float64, len(ys))
 		for i := max; i < len(ys); i++ {
-			r[i-max] = b2F(yv.At(i))
+			r[i-max] = float64(yv.At(i))
 		}
 		r[len(ys)-1] = x.F()
 		return NewAFWithRC(r, reuseRCp(yv.rc))
 	}
 	switch xv := x.value.(type) {
 	case *AB:
+		fl := xv.flags & yv.flags & flagBool
 		r := yv.reuse()
 		copy(r.elts[:len(ys)-max], ys[max:])
 		copy(r.elts[len(ys)-max:], xv.elts)
+		r.flags = fl
 		return NewV(r)
 	case *AF:
 		r := make([]float64, len(ys))
 		for i := max; i < len(ys); i++ {
-			r[i-max] = b2F(ys[i])
+			r[i-max] = float64(ys[i])
 		}
 		copy(r[len(ys)-max:], xv.elts)
 		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		r := make([]int64, len(ys))
 		for i := max; i < len(ys); i++ {
-			r[i-max] = b2I(yv.At(i))
+			r[i-max] = int64(yv.At(i))
 		}
 		copy(r[len(ys)-max:], xv.elts)
 		return NewAIWithRC(r, reuseRCp(yv.rc))
@@ -970,7 +1067,7 @@ func shiftAfterAI(x V, yv *AI) V {
 		r := yv.reuse()
 		copy(r.elts[:len(ys)-max], ys[max:])
 		for i := 0; i < max; i++ {
-			r.elts[len(ys)-max+i] = b2I(xv.At(i))
+			r.elts[len(ys)-max+i] = int64(xv.At(i))
 		}
 		return NewV(r)
 	case *AF:
@@ -1018,7 +1115,7 @@ func shiftAfterAF(x V, yv *AF) V {
 		r := yv.reuse()
 		copy(r.elts[:len(ys)-max], ys[max:])
 		for i := 0; i < max; i++ {
-			r.elts[len(ys)-max+i] = float64(b2F(xv.At(i)))
+			r.elts[len(ys)-max+i] = float64(xv.At(i))
 		}
 		return NewV(r)
 	case *AF:
@@ -1138,9 +1235,11 @@ func nudgeBack(x V) V {
 	}
 	switch xv := x.value.(type) {
 	case *AB:
+		fl := xv.flags & flagBool
 		r := xv.reuse()
 		copy(r.elts[0:xv.Len()-1], xv.elts[1:])
-		r.elts[xv.Len()-1] = false
+		r.elts[xv.Len()-1] = 0
+		r.flags = fl
 		return NewV(r)
 	case *AI:
 		r := xv.reuse()

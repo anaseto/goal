@@ -22,7 +22,7 @@ type array interface {
 	shallowClone() array  // shallow clone, erases flags
 }
 
-type flags int32
+type flags uint32
 
 const (
 	flagNone      flags = 0b000
