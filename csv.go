@@ -75,10 +75,10 @@ func fCSV(ctx *Context, comma rune, x V) V {
 			case *AS:
 				csvw.Write(xiv.elts)
 			case *AB:
-				r := stringBools(xiv.elts)
+				r := stringIntegers(xiv.elts)
 				csvw.Write(r)
 			case *AI:
-				r := stringInt64s(xiv.elts)
+				r := stringIntegers(xiv.elts)
 				csvw.Write(r)
 			case *AF:
 				r := stringFloat64s(xiv.elts, ctx.Prec)

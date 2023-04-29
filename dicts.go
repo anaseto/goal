@@ -138,18 +138,22 @@ func dictArithAmend(x array, yv *AI, f func(V, V) V, z array) (array, error) {
 func takeKeys(x array, y *Dict) V {
 	b := memberOf(NewV(y.keys), NewV(x))
 	b.InitRC()
-	kv := replicate(b, NewV(y.keys))
-	yv := replicate(b, NewV(y.values))
-	var xv array
+	xyk := replicate(b, NewV(y.keys))
+	xyv := replicate(b, NewV(y.values))
+	var nv array
+	var bools bool
 	switch yv := y.values.(type) {
 	case *AB:
-		xv = &AB{elts: make([]byte, x.Len())}
+		if yv.IsBoolean() {
+			bools = true
+		}
+		nv = &AB{elts: make([]byte, x.Len())}
 	case *AI:
-		xv = &AI{elts: make([]int64, x.Len())}
+		nv = &AI{elts: make([]int64, x.Len())}
 	case *AF:
-		xv = &AF{elts: make([]float64, x.Len())}
+		nv = &AF{elts: make([]float64, x.Len())}
 	case *AS:
-		xv = &AS{elts: make([]string, x.Len())}
+		nv = &AS{elts: make([]string, x.Len())}
 	case *AV:
 		pad := proto(yv.elts)
 		var n int = 2
@@ -158,13 +162,16 @@ func takeKeys(x array, y *Dict) V {
 		for i := range r {
 			r[i] = pad
 		}
-		xv = &AV{elts: r}
+		nv = &AV{elts: r}
 	}
-	ky := findArray(x, kv)
-	v, err := amendr(xv, ky, yv)
+	ky := findArray(x, xyk)
+	v, err := amendr(nv, ky, xyv)
 	if err != nil {
 		// should not happen
 		return Panicf("X#d : %v", err)
+	}
+	if bools {
+		v.setFlags(flagBool)
 	}
 	initRC(v)
 	return NewV(&Dict{keys: x, values: v})

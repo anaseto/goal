@@ -110,7 +110,7 @@ func rangeII(from, to int64) V {
 	if from >= 0 && to < 256 {
 		r := make([]byte, to-from)
 		for i := range r {
-			r[i] = from + byte(i)
+			r[i] = byte(from) + byte(i)
 		}
 		return NewV(&AB{elts: r, flags: flagAscending | flagUnique})
 	}
@@ -270,16 +270,20 @@ func replicate(x, y V) V {
 
 func replicateI(n int64, y V) V {
 	if y.IsI() {
-		if isBI(y.I()) {
+		if isBI(y.n) {
 			r := make([]byte, n)
 			for i := range r {
-				r[i] = y.I() == 1
+				r[i] = y.n
 			}
-			return NewAB(r)
+			var fl flags
+			if isbI(y.n) {
+				fl |= flagBool
+			}
+			return NewV(&AB{elts: r, flags: fl})
 		}
 		r := make([]int64, n)
 		for i := range r {
-			r[i] = y.I()
+			r[i] = y.n
 		}
 		return NewAI(r)
 	}
@@ -298,50 +302,21 @@ func replicateI(n int64, y V) V {
 		}
 		return NewAS(r)
 	case *AB:
-		r := make([]byte, n*int64(yv.Len()))
-		for i, yi := range yv.elts {
-			in := int64(i) * n
-			for j := int64(0); j < n; j++ {
-				r[in+j] = yi
-			}
-		}
+		r := replicateISlice(n, yv.elts)
 		return NewABWithRC(r, reuseRCp(yv.rc))
 	case *AI:
-		r := make([]int64, n*int64(yv.Len()))
-		for i, yi := range yv.elts {
-			in := int64(i) * n
-			for j := int64(0); j < n; j++ {
-				r[in+j] = yi
-			}
-		}
+		r := replicateISlice(n, yv.elts)
 		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AF:
-		r := make([]float64, n*int64(yv.Len()))
-		for i, yi := range yv.elts {
-			in := int64(i) * n
-			for j := int64(0); j < n; j++ {
-				r[in+j] = yi
-			}
-		}
+		r := replicateISlice(n, yv.elts)
 		return NewAFWithRC(r, reuseRCp(yv.rc))
 	case *AS:
-		r := make([]string, n*int64(yv.Len()))
-		for i, yi := range yv.elts {
-			in := int64(i) * n
-			for j := int64(0); j < n; j++ {
-				r[in+j] = yi
-			}
-		}
+		r := replicateISlice(n, yv.elts)
 		return NewASWithRC(r, reuseRCp(yv.rc))
 	case *AV:
-		r := make([]V, n*int64(yv.Len()))
-		for i, yi := range yv.elts {
-			in := int64(i) * n
-			for j := int64(0); j < n; j++ {
-				r[in+j] = yi
-			}
-		}
-		return NewAVWithRC(r, reuseRCp(yv.rc))
+		r := replicateISlice(n, yv.elts)
+		*yv.rc += 2
+		return NewAVWithRC(r, yv.rc)
 	case *Dict:
 		keys := replicateI(n, NewV(yv.keys))
 		values := replicateI(n, NewV(yv.values))
@@ -353,6 +328,17 @@ func replicateI(n int64, y V) V {
 		}
 		return NewAV(r)
 	}
+}
+
+func replicateISlice[T any](n int64, ys []T) []T {
+	r := make([]T, n*int64(len(ys)))
+	for i, yi := range ys {
+		in := int64(i) * n
+		for j := int64(0); j < n; j++ {
+			r[in+j] = yi
+		}
+	}
+	return r
 }
 
 func replicateAB(x *AB, y V) V {

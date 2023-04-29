@@ -131,12 +131,16 @@ func maxS(x, y S) S {
 }
 
 func minMax(x *AI) (min, max int64) {
-	if x.Len() == 0 {
+	return minMaxIntegers(x.elts)
+}
+
+func minMaxIntegers[I integer](x []I) (min, max I) {
+	if len(x) == 0 {
 		return
 	}
-	min = x.At(0)
+	min = x[0]
 	max = min
-	for _, xi := range x.elts[1:] {
+	for _, xi := range x[1:] {
 		switch {
 		case xi > max:
 			max = xi
@@ -340,7 +344,7 @@ func toAF(x *AI) V {
 func fromABtoAF(x *AB) V {
 	r := make([]float64, x.Len())
 	for i, xi := range x.elts {
-		r[i] = float64(b2I(xi))
+		r[i] = float64(xi)
 	}
 	return NewAFWithRC(r, reuseRCp(x.rc))
 }
@@ -349,8 +353,8 @@ func fromABtoAF(x *AB) V {
 // unfrequent code).
 func fromABtoAI(x *AB) V {
 	r := make([]int64, x.Len())
-	for i := range r {
-		r[i] = b2I(x.At(i))
+	for i, xi := range x.elts {
+		r[i] = int64(xi)
 	}
 	return NewAIWithRC(r, reuseRCp(x.rc))
 }
@@ -397,23 +401,28 @@ func (x V) IsTrue() bool {
 type vType int32
 
 const (
-	tV  vType = 0b00000
-	tB  vType = 0b00111
-	tI  vType = 0b00011
-	tF  vType = 0b00001
-	tS  vType = 0b01000
-	tAB vType = 0b10111
-	tAI vType = 0b10011
-	tAF vType = 0b10001
-	tAS vType = 0b11000
-	tAV vType = 0b10000
+	tV  vType = 0b000000
+	tb  vType = 0b001111
+	tB  vType = 0b000111
+	tI  vType = 0b000011
+	tF  vType = 0b000001
+	tS  vType = 0b010000
+	tAb vType = 0b101111
+	tAB vType = 0b100111
+	tAI vType = 0b100011
+	tAF vType = 0b100001
+	tAS vType = 0b110000
+	tAV vType = 0b100000
 )
 
 // getType returns the vType of x.
 func getType(x V) vType {
 	if x.IsI() {
-		switch x.I() {
-		case 0, 1:
+		switch {
+		case x.n >= 0 && x.n < 256:
+			if x.n < 2 {
+				return tb
+			}
 			return tB
 		default:
 			return tI
@@ -422,10 +431,13 @@ func getType(x V) vType {
 	if x.IsF() {
 		return tF
 	}
-	switch x.value.(type) {
+	switch xv := x.value.(type) {
 	case S:
 		return tS
 	case *AB:
+		if xv.IsBoolean() {
+			return tAb
+		}
 		return tAB
 	case *AF:
 		return tAF
@@ -444,8 +456,11 @@ func getType(x V) vType {
 // cannot be packed in an unboxed array.
 func getAtomType(x V) vType {
 	if x.IsI() {
-		switch x.I() {
-		case 0, 1:
+		switch {
+		case x.n >= 0 && x.n < 256:
+			if x.n < 2 {
+				return tb
+			}
 			return tB
 		default:
 			return tI
@@ -559,6 +574,10 @@ func isI(x float64) bool {
 }
 
 func isBI(x int64) bool {
+	return x >= 0 && x < 256
+}
+
+func isbI(x int64) bool {
 	return x == 0 || x == 1
 }
 
@@ -577,7 +596,7 @@ func isCanonical(x V) bool {
 func isCanonicalAV(x *AV) (vType, bool) {
 	t := eType(x)
 	switch t {
-	case tB, tI, tF, tS:
+	case tb, tB, tI, tF, tS:
 		return t, false
 	case tV, tAV:
 		for _, xi := range x.elts {
@@ -606,12 +625,16 @@ func (ctx *Context) assertCanonical(x V) {
 func normalizeRec(x *AV) (array, bool) {
 	t := eType(x)
 	switch t {
-	case tB:
+	case tb, tB:
 		r := make([]byte, x.Len())
 		for i, xi := range x.elts {
 			r[i] = xi.I() != 0
 		}
-		return &AB{elts: r, rc: x.rc}, true
+		var fl flags
+		if t == tb {
+			fl = flagBool
+		}
+		return &AB{elts: r, rc: x.rc, flags: fl}, true
 	case tI:
 		r := make([]int64, x.Len())
 		for i, xi := range x.elts {
@@ -650,12 +673,16 @@ func normalizeRec(x *AV) (array, bool) {
 func normalize(x *AV) (array, bool) {
 	t := eType(x)
 	switch t {
-	case tB:
+	case tb, tB:
 		r := make([]byte, x.Len())
 		for i, xi := range x.elts {
 			r[i] = xi.I() != 0
 		}
-		return &AB{elts: r, rc: reuseRCp(x.rc), flags: x.flags}, true
+		flags := x.flags
+		if t == tb {
+			flags |= flagBool
+		}
+		return &AB{elts: r, rc: reuseRCp(x.rc), flags: flags}, true
 	case tI:
 		r := make([]int64, x.Len())
 		for i, xi := range x.elts {
