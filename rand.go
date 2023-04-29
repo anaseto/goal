@@ -76,10 +76,15 @@ func roll(ctx *Context, n int64, y V) V {
 					if i >= n {
 						break loop
 					}
-					b := uint8(u>>j) >> 7
-					r[i] = b != 0
+					r[i] = uint8(u>>j) >> 7
 					i++
 				}
+			}
+			return newABb(r)
+		} else if yv < 256 {
+			r := make([]byte, n)
+			for i := range r {
+				r[i] = byte(ctx.rand.Int63n(yv))
 			}
 			return NewAB(r)
 		} else {
@@ -98,7 +103,11 @@ func roll(ctx *Context, n int64, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		return NewAB(rollSlice[bool](ctx, n, yv.elts))
+		var fl flags
+		if yv.IsBoolean() {
+			fl |= flagBool
+		}
+		return NewV(&AB{elts: rollSlice[byte](ctx, n, yv.elts), flags: fl})
 	case *AI:
 		return NewAI(rollSlice[int64](ctx, n, yv.elts))
 	case *AF:
@@ -201,7 +210,11 @@ func deal(ctx *Context, n int64, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		return NewV(&AB{elts: dealSlice[bool](ctx, n, yv.elts), flags: flagUnique})
+		fl := flagUnique
+		if yv.IsBoolean() {
+			fl |= flagBool
+		}
+		return NewV(&AB{elts: dealSlice[byte](ctx, n, yv.elts), flags: fl})
 	case *AI:
 		return NewV(&AI{elts: dealSlice[int64](ctx, n, yv.elts), flags: flagUnique})
 	case *AF:

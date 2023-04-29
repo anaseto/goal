@@ -26,18 +26,19 @@ func isNaN(x V) V {
 	case *AB:
 		r := xv.reuse()
 		for i := range r.elts {
-			r.elts[i] = false
+			r.elts[i] = 0
 		}
+		r.flags = flagBool
 		return NewV(r)
 	case *AI:
 		r := make([]byte, xv.Len())
-		return NewABWithRC(r, reuseRCp(xv.rc))
+		return newABbWithRC(r, reuseRCp(xv.rc))
 	case *AF:
 		r := make([]byte, xv.Len())
 		for i, xi := range xv.elts {
-			r[i] = math.IsNaN(xi)
+			r[i] = b2B(math.IsNaN(xi))
 		}
-		return NewABWithRC(r, reuseRCp(xv.rc))
+		return newABbWithRC(r, reuseRCp(xv.rc))
 	case *AV:
 		r := xv.reuse()
 		for i, xi := range xv.elts {

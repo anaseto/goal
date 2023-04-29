@@ -60,23 +60,10 @@ func (x *AB) LessT(y Value) bool {
 			return x.Len() < yv.Len()
 		}
 		for i := 0; i < x.Len(); i++ {
-			if !x.At(i) && yv.At(i) {
+			if x.At(i) < yv.At(i) {
 				return true
 			}
-			if x.At(i) && !yv.At(i) {
-				return false
-			}
-		}
-		return false
-	case *AF:
-		if x.Len() != yv.Len() {
-			return x.Len() < yv.Len()
-		}
-		for i := 0; i < x.Len(); i++ {
-			if b2F(x.At(i)) < yv.At(i) {
-				return true
-			}
-			if b2F(x.At(i)) > yv.At(i) {
+			if x.At(i) > yv.At(i) {
 				return false
 			}
 		}
@@ -86,10 +73,23 @@ func (x *AB) LessT(y Value) bool {
 			return x.Len() < yv.Len()
 		}
 		for i := 0; i < x.Len(); i++ {
-			if b2I(x.At(i)) < yv.At(i) {
+			if int64(x.At(i)) < yv.At(i) {
 				return true
 			}
-			if b2I(x.At(i)) > yv.At(i) {
+			if int64(x.At(i)) > yv.At(i) {
+				return false
+			}
+		}
+		return false
+	case *AF:
+		if x.Len() != yv.Len() {
+			return x.Len() < yv.Len()
+		}
+		for i := 0; i < x.Len(); i++ {
+			if float64(x.At(i)) < yv.At(i) {
+				return true
+			}
+			if float64(x.At(i)) > yv.At(i) {
 				return false
 			}
 		}
@@ -107,10 +107,23 @@ func (x *AI) LessT(y Value) bool {
 			return x.Len() < yv.Len()
 		}
 		for i := 0; i < x.Len() && i < yv.Len(); i++ {
-			if x.At(i) < b2I(yv.At(i)) {
+			if x.At(i) < int64(yv.At(i)) {
 				return true
 			}
-			if x.At(i) > b2I(yv.At(i)) {
+			if x.At(i) > int64(yv.At(i)) {
+				return false
+			}
+		}
+		return false
+	case *AI:
+		if x.Len() != yv.Len() {
+			return x.Len() < yv.Len()
+		}
+		for i := 0; i < x.Len() && i < yv.Len(); i++ {
+			if x.At(i) < yv.At(i) {
+				return true
+			}
+			if x.At(i) > yv.At(i) {
 				return false
 			}
 		}
@@ -128,19 +141,6 @@ func (x *AI) LessT(y Value) bool {
 			}
 		}
 		return false
-	case *AI:
-		if x.Len() != yv.Len() {
-			return x.Len() < yv.Len()
-		}
-		for i := 0; i < x.Len() && i < yv.Len(); i++ {
-			if x.At(i) < yv.At(i) {
-				return true
-			}
-			if x.At(i) > yv.At(i) {
-				return false
-			}
-		}
-		return false
 	default:
 		return x.Type() < y.Type()
 	}
@@ -154,23 +154,10 @@ func (x *AF) LessT(y Value) bool {
 			return x.Len() < yv.Len()
 		}
 		for i := 0; i < x.Len() && i < yv.Len(); i++ {
-			if x.At(i) < b2F(yv.At(i)) {
+			if x.At(i) < float64(yv.At(i)) {
 				return true
 			}
-			if x.At(i) > b2F(yv.At(i)) {
-				return false
-			}
-		}
-		return false
-	case *AF:
-		if x.Len() != yv.Len() {
-			return x.Len() < yv.Len()
-		}
-		for i := 0; i < x.Len() && i < yv.Len(); i++ {
-			if x.At(i) < yv.At(i) {
-				return true
-			}
-			if x.At(i) > yv.At(i) {
+			if x.At(i) > float64(yv.At(i)) {
 				return false
 			}
 		}
@@ -184,6 +171,19 @@ func (x *AF) LessT(y Value) bool {
 				return true
 			}
 			if x.At(i) > float64(yv.At(i)) {
+				return false
+			}
+		}
+		return false
+	case *AF:
+		if x.Len() != yv.Len() {
+			return x.Len() < yv.Len()
+		}
+		for i := 0; i < x.Len() && i < yv.Len(); i++ {
+			if x.At(i) < yv.At(i) {
+				return true
+			}
+			if x.At(i) > yv.At(i) {
 				return false
 			}
 		}

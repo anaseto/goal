@@ -115,7 +115,7 @@ func applyRxMatch(x *rx, y V) V {
 	case *AS:
 		r := make([]byte, yv.Len())
 		for i, s := range yv.elts {
-			r[i] = x.Regexp.MatchString(s)
+			r[i] = b2B(x.Regexp.MatchString(s))
 		}
 		return NewAB(r)
 	case *AV:

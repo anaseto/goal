@@ -367,3 +367,30 @@ func radixGradeInt8(from, to []int8, p []int64) {
 		p[j] = int64(i)
 	}
 }
+
+// radixGradeUint8 sorts p by from, and puts sorted from into to.
+func radixGradeUint8(from, to []uint8, p []int64) {
+	var (
+		offset [256]int // Keep track of where room is made for byte groups in the buffer
+	)
+
+	// Compute counts by byte type at current radix
+	for _, elem := range from {
+		offset[elem]++
+	}
+
+	// Compute target bucket offsets from counts
+	var sum int
+	for i, count := range offset {
+		offset[i] = sum
+		sum += count
+	}
+
+	// Swap values between the buffers by radix
+	for i, elem := range from {
+		j := offset[elem]
+		offset[elem]++
+		to[j] = elem
+		p[j] = int64(i)
+	}
+}
