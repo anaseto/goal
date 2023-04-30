@@ -284,6 +284,21 @@ func fold2vMax(x V) V {
 	}
 }
 
+// maxIndices returns the maximum index, assuming V is an array of indices.
+func maxIndices(x V) int64 {
+	switch xv := x.value.(type) {
+	case *AB:
+		if xv.Len() == 0 {
+			return 0
+		}
+		return int64(maxBytes(xv.elts))
+	case *AI:
+		return maxIntegers(xv.elts)
+	default:
+		panic("maxIndices")
+	}
+}
+
 func maxIntegers(x []int64) int64 {
 	var max int64 = math.MinInt64
 	for _, xi := range x {

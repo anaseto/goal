@@ -1,7 +1,6 @@
 package goal
 
 import (
-	"math"
 	"sort"
 	"strings"
 )
@@ -1235,55 +1234,11 @@ func findDict(d *Dict, y V) V {
 	if idx.IsI() {
 		i := idx.I()
 		if i == int64(l) {
-			switch d.keys.(type) {
-			case *AB:
-				return NewF(math.NaN())
-			case *AI:
-				return NewF(math.NaN())
-			case *AF:
-				return NewF(math.NaN())
-			default:
-				return NewS("")
-			}
+			return arrayProtoV(d.keys)
 		}
 		return d.keys.at(int(i))
 	}
-	idxv := idx.value.(*AI)
-	switch keys := d.keys.(type) {
-	case *AS:
-		r := make([]string, idxv.Len())
-		for j := range r {
-			i := idxv.At(j)
-			if i == int64(l) {
-				r[j] = ""
-			} else {
-				r[j] = keys.At(int(i))
-			}
-		}
-		return NewAS(r)
-	default:
-		var zero V
-		switch d.keys.(type) {
-		case *AB:
-			zero = NewF(math.NaN())
-		case *AI:
-			zero = NewF(math.NaN())
-		case *AF:
-			zero = NewF(math.NaN())
-		default:
-			zero = NewS("")
-		}
-		r := make([]V, idxv.Len())
-		for j := range r {
-			i := idxv.At(j)
-			if i == int64(l) {
-				r[j] = zero
-			} else {
-				r[j] = d.keys.at(int(i))
-			}
-		}
-		return Canonical(NewAV(r))
-	}
+	return vArrayAtV(d.keys, idx)
 }
 
 func findArray(x array, y V) V {

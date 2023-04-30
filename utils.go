@@ -165,6 +165,8 @@ func isIndices(x V) bool {
 		return true
 	}
 	switch xv := x.value.(type) {
+	case *AB:
+		return true
 	case *AI:
 		return true
 	case *AV:
@@ -200,8 +202,6 @@ func toIndicesRec(x V) V {
 		return x
 	}
 	switch xv := x.value.(type) {
-	case *AB:
-		return fromABtoAI(xv)
 	case *AF:
 		return toAI(xv)
 	case *AV:
@@ -220,12 +220,24 @@ func toIndicesRec(x V) V {
 	}
 }
 
-func inBoundsInfo(x *AI, l int64) (int, bool) {
-	for i, xi := range x.elts {
+func inBoundsInts(x []int64, l int64) (int, bool) {
+	for i, xi := range x {
 		if xi < 0 {
 			xi += l
 		}
 		if xi < 0 || xi >= l {
+			return i, false
+		}
+	}
+	return 0, true
+}
+
+func inBoundsBytes(x []byte, l int) (int, bool) {
+	if l >= 256 {
+		return 0, true
+	}
+	for i, xi := range x {
+		if int(xi) >= l {
 			return i, false
 		}
 	}
@@ -237,7 +249,10 @@ func toArray(x V) V {
 	if x.IsI() {
 		var n int
 		if isBI(x.I()) {
-			r := &AB{elts: []byte{x.I() != 0}, rc: &n}
+			r := &AB{elts: []byte{byte(x.I())}, rc: &n}
+			if isbI(x.I()) {
+				r.flags |= flagBool
+			}
 			return NewV(r)
 		}
 		r := &AI{elts: []int64{x.I()}, rc: &n}
@@ -584,7 +599,7 @@ func normalizeRec(x *AV) (array, bool) {
 	case tb, tB:
 		r := make([]byte, x.Len())
 		for i, xi := range x.elts {
-			r[i] = xi.I() != 0
+			r[i] = byte(xi.I())
 		}
 		var fl flags
 		if t == tb {
@@ -632,7 +647,7 @@ func normalize(x *AV) (array, bool) {
 	case tb, tB:
 		r := make([]byte, x.Len())
 		for i, xi := range x.elts {
-			r[i] = xi.I() != 0
+			r[i] = byte(xi.I())
 		}
 		flags := x.flags
 		if t == tb {
@@ -808,6 +823,23 @@ func protoArray(x array) V {
 		return NewAS(nil)
 	case *AV:
 		return NewAV(nil)
+	default:
+		panic("protoArray")
+	}
+}
+
+func arrayProtoV(x array) V {
+	switch xv := x.(type) {
+	case *AB:
+		return NewI(0)
+	case *AI:
+		return NewI(0)
+	case *AF:
+		return NewF(0)
+	case *AS:
+		return NewS("")
+	case *AV:
+		return proto(xv.elts)
 	default:
 		panic("protoArray")
 	}

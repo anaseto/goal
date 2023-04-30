@@ -17,7 +17,8 @@ type array interface {
 	getFlags() flags      // get the array's flags
 	setFlags(flags)       // set the array's flags
 	set(i int, y V)       // puts y at indix i, assuming compatibility
-	atIndices(y *AI) V    // x[y] (like in goal code)
+	vAtInts(y *AI) V      // x[y] (like in goal code)
+	vAtBytes(y *AB) V     // x[y] (like in goal code)
 	atInts([]int64) array // like x[y] but assumes valid positive indices
 	atBytes([]byte) array // like x[y] but assumes valid positive indices
 	shallowClone() array  // shallow clone, erases flags
@@ -287,7 +288,7 @@ func (x *AV) set(i int, y V) {
 	x.elts[i] = y
 }
 
-func (x *AB) atIndices(y *AI) V {
+func (x *AB) vAtInts(y *AI) V {
 	r := &AB{elts: make([]byte, y.Len())}
 	if x.IsBoolean() {
 		r.flags |= flagBool
@@ -297,70 +298,146 @@ func (x *AB) atIndices(y *AI) V {
 		if yi < 0 {
 			yi += xlen
 		}
-		if yi < 0 || yi >= xlen {
-			return Panicf("X@i : index out of bounds: %d (length %d)", yi, xlen)
+		if yi >= 0 && yi < xlen {
+			r.elts[i] = x.elts[yi]
+		} else {
+			r.elts[i] = 0
 		}
-		r.elts[i] = x.At(int(yi))
 	}
 	return NewV(r)
 }
 
-func (x *AI) atIndices(y *AI) V {
+func (x *AI) vAtInts(y *AI) V {
 	r := make([]int64, y.Len())
 	xlen := int64(x.Len())
 	for i, yi := range y.elts {
 		if yi < 0 {
 			yi += xlen
 		}
-		if yi < 0 || yi >= xlen {
-			return Panicf("X@i : index out of bounds: %d (length %d)", yi, xlen)
+		if yi >= 0 && yi < xlen {
+			r[i] = x.elts[yi]
+		} else {
+			r[i] = 0
 		}
-		r[i] = x.At(int(yi))
 	}
 	return NewAI(r)
 }
 
-func (x *AF) atIndices(y *AI) V {
+func (x *AF) vAtInts(y *AI) V {
 	r := make([]float64, y.Len())
 	xlen := int64(x.Len())
 	for i, yi := range y.elts {
 		if yi < 0 {
 			yi += xlen
 		}
-		if yi < 0 || yi >= xlen {
-			return Panicf("X@i : index out of bounds: %d (length %d)", yi, xlen)
+		if yi >= 0 && yi < xlen {
+			r[i] = x.elts[yi]
+		} else {
+			r[i] = 0
 		}
-		r[i] = x.At(int(yi))
 	}
 	return NewAF(r)
 }
 
-func (x *AS) atIndices(y *AI) V {
+func (x *AS) vAtInts(y *AI) V {
 	r := make([]string, y.Len())
 	xlen := int64(x.Len())
 	for i, yi := range y.elts {
 		if yi < 0 {
 			yi += xlen
 		}
-		if yi < 0 || yi >= xlen {
-			return Panicf("X@i : index out of bounds: %d (length %d)", yi, xlen)
+		if yi >= 0 && yi < xlen {
+			r[i] = x.elts[yi]
+		} else {
+			r[i] = ""
 		}
-		r[i] = x.At(int(yi))
 	}
 	return NewAS(r)
 }
 
-func (x *AV) atIndices(y *AI) V {
+func (x *AV) vAtInts(y *AI) V {
 	r := make([]V, y.Len())
 	xlen := int64(x.Len())
 	for i, yi := range y.elts {
 		if yi < 0 {
 			yi += xlen
 		}
-		if yi < 0 || yi >= xlen {
-			return Panicf("X@i : index out of bounds: %d (length %d)", yi, xlen)
+		if yi >= 0 && yi < xlen {
+			r[i] = x.elts[yi]
+		} else {
+			r[i] = proto(x.elts)
 		}
-		r[i] = x.At(int(yi))
+	}
+	rv := &AV{elts: r}
+	var n int
+	rv.InitWithRC(&n)
+	return NewV(canonicalAV(rv))
+}
+
+func (x *AB) vAtBytes(y *AB) V {
+	r := &AB{elts: make([]byte, y.Len())}
+	if x.IsBoolean() {
+		r.flags |= flagBool
+	}
+	xlen := x.Len()
+	for i, yi := range y.elts {
+		if int(yi) < xlen {
+			r.elts[i] = x.elts[yi]
+		} else {
+			r.elts[i] = 0
+		}
+	}
+	return NewV(r)
+}
+
+func (x *AI) vAtBytes(y *AB) V {
+	r := make([]int64, y.Len())
+	xlen := x.Len()
+	for i, yi := range y.elts {
+		if int(yi) < xlen {
+			r[i] = x.elts[yi]
+		} else {
+			r[i] = 0
+		}
+	}
+	return NewAI(r)
+}
+
+func (x *AF) vAtBytes(y *AB) V {
+	r := make([]float64, y.Len())
+	xlen := x.Len()
+	for i, yi := range y.elts {
+		if int(yi) < xlen {
+			r[i] = x.elts[yi]
+		} else {
+			r[i] = 0
+		}
+	}
+	return NewAF(r)
+}
+
+func (x *AS) vAtBytes(y *AB) V {
+	r := make([]string, y.Len())
+	xlen := x.Len()
+	for i, yi := range y.elts {
+		if int(yi) < xlen {
+			r[i] = x.elts[yi]
+		} else {
+			r[i] = ""
+		}
+	}
+	return NewAS(r)
+}
+
+func (x *AV) vAtBytes(y *AB) V {
+	r := make([]V, y.Len())
+	xlen := x.Len()
+	for i, yi := range y.elts {
+		if int(yi) < xlen {
+			r[i] = x.elts[yi]
+		} else {
+			r[i] = proto(x.elts)
+		}
 	}
 	rv := &AV{elts: r}
 	var n int
@@ -706,5 +783,27 @@ func initArrayFlags(x array) {
 	flags := x.getFlags()
 	if !flags.Has(flagAscending) && sort.IsSorted(x) {
 		x.setFlags(flags | flagAscending)
+	}
+}
+
+func arrayAtV(x array, y V) array {
+	switch yv := y.value.(type) {
+	case *AB:
+		return x.atBytes(yv.elts)
+	case *AI:
+		return x.atInts(yv.elts)
+	default:
+		panic("arrayAtV")
+	}
+}
+
+func vArrayAtV(x array, y V) V {
+	switch yv := y.value.(type) {
+	case *AB:
+		return x.vAtBytes(yv)
+	case *AI:
+		return x.vAtInts(yv)
+	default:
+		panic("arrayAtV")
 	}
 }

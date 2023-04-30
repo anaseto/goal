@@ -405,14 +405,26 @@ func (ctx *Context) applyDict(d *Dict, y V) V {
 		}
 		return d.values.at(int(i))
 	}
-	kyv := ky.value.(*AI)
-	i, ok := inBoundsInfo(kyv, int64(dlen))
-	if !ok {
-		return Panicf("d@y : key not found (%s)", y.value.(array).at(i).Sprint(ctx))
+	switch kyv := ky.value.(type) {
+	case *AB:
+		i, ok := inBoundsBytes(kyv.elts, dlen)
+		if !ok {
+			return Panicf("d@y : key not found (%s)", y.value.(array).at(i).Sprint(ctx))
+		}
+		r := d.values.atBytes(kyv.elts)
+		initRC(r)
+		return NewV(r)
+	case *AI:
+		i, ok := inBoundsInts(kyv.elts, int64(dlen))
+		if !ok {
+			return Panicf("d@y : key not found (%s)", y.value.(array).at(i).Sprint(ctx))
+		}
+		r := d.values.atInts(kyv.elts)
+		initRC(r)
+		return NewV(r)
+	default:
+		panic("applyDict")
 	}
-	r := d.values.atInts(kyv.elts)
-	initRC(r)
-	return NewV(r)
 }
 
 func (ctx *Context) applyDictArgs(x *Dict, arg V, args []V) V {
@@ -488,8 +500,7 @@ func applyArray(x array, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		y = fromABtoAI(yv)
-		return x.atIndices(y.value.(*AI))
+		return x.vAtBytes(yv)
 	case *AF:
 		y = toAI(yv)
 		if y.IsPanic() {
@@ -497,7 +508,7 @@ func applyArray(x array, y V) V {
 		}
 		return applyArray(x, y)
 	case *AI:
-		return x.atIndices(yv)
+		return x.vAtInts(yv)
 	case *AV:
 		r := make([]V, yv.Len())
 		for i, yi := range yv.elts {

@@ -86,11 +86,11 @@ func (x *AB) Append(ctx *Context, dst []byte) []byte {
 	}
 	if x.Len() == 1 {
 		dst = append(dst, ',')
-		dst = appendInt(dst, b2I(x.At(0)))
+		dst = appendInt(dst, int64(x.At(0)))
 		return dst
 	}
 	for i, xi := range x.elts {
-		dst = appendInt(dst, b2I(xi))
+		dst = appendInt(dst, int64(xi))
 		if i < x.Len()-1 {
 			dst = append(dst, ' ')
 		}

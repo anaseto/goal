@@ -40,7 +40,7 @@ func testRadixSortSize(t *testing.T, ctx *Context, min, span int64) {
 	}
 }
 
-func testRadixGradeSize(t *testing.T, ctx *Context, min, span int64, f func(*Context, *AI, int64, int64) []int64) {
+func testRadixGradeSize(t *testing.T, ctx *Context, min, span int64, f func(*Context, *AI, int64, int64) V) {
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for i := 0; i < 300; i++ {
 		x := make([]int64, i)
@@ -52,13 +52,11 @@ func testRadixGradeSize(t *testing.T, ctx *Context, min, span int64, f func(*Con
 		xv := &AI{elts: x}
 		xg := f(ctx, xv, min, min+span-1)
 		yv := &AI{elts: y}
-		p := &permutation{Perm: permRange(len(y)), X: yv}
+		p := &permutation[int64]{Perm: permRange[int64](len(y)), X: yv}
 		sort.Stable(p)
-		yg := p.Perm
-		for i := range xg {
-			if xg[i] != yg[i] {
-				t.Fatalf("mismatch at index %d (%d vs %d)", i, xg[i], yg[i])
-			}
+		yg := NewV(&AI{elts: p.Perm})
+		if !yg.Matches(xg) {
+			t.Fatalf("mismatch:\n%s\nvs\n%s", xg.Sprint(ctx), yg.Sprint(ctx))
 		}
 	}
 }

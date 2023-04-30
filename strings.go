@@ -101,17 +101,9 @@ func applyS(s S, x V) V {
 	}
 	switch xv := x.value.(type) {
 	case *AB:
-		return applyS(s, fromABtoAI(xv))
+		return applySIntegers(string(s), xv.elts)
 	case *AI:
-		r := make([]string, xv.Len())
-		for i, xi := range xv.elts {
-			ri, err := applySI(string(s), xi)
-			if err != nil {
-				return panicErr(err)
-			}
-			r[i] = ri
-		}
-		return NewAS(r)
+		return applySIntegers(string(s), xv.elts)
 	case *AF:
 		x := toAI(xv)
 		if x.IsPanic() {
@@ -131,6 +123,18 @@ func applyS(s S, x V) V {
 	default:
 		return panicType("s@i", "i", x)
 	}
+}
+
+func applySIntegers[I integer](s string, x []I) V {
+	r := make([]string, len(x))
+	for i, xi := range x {
+		ri, err := applySI(string(s), int64(xi))
+		if err != nil {
+			return panicErr(err)
+		}
+		r[i] = ri
+	}
+	return NewAS(r)
 }
 
 func applySI(s string, i int64) (string, error) {
@@ -155,9 +159,9 @@ func applyS2(s S, x V, y V) V {
 	}
 	switch xv := x.value.(type) {
 	case *AB:
-		return applyS2(s, fromABtoAI(xv), y)
+		return applyS2Is(s, xv.elts, y)
 	case *AI:
-		return applyS2AI(s, xv, y)
+		return applyS2Is(s, xv.elts, y)
 	case *AF:
 		x := toAI(xv)
 		if x.IsPanic() {
@@ -194,17 +198,9 @@ func applyS2I(s S, i int64, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		return applyS2I(s, i, fromABtoAI(yv))
+		return applyS2IIs(string(s), i, yv.elts)
 	case *AI:
-		r := make([]string, yv.Len())
-		for j, yj := range yv.elts {
-			rj, err := applyS2II(string(s), int64(i), yj)
-			if err != nil {
-				return panicErr(err)
-			}
-			r[j] = rj
-		}
-		return NewAS(r)
+		return applyS2IIs(string(s), i, yv.elts)
 	case *AF:
 		y := toAI(yv)
 		if y.IsPanic() {
@@ -226,12 +222,24 @@ func applyS2I(s S, i int64, y V) V {
 	}
 }
 
-func applyS2AI(s S, xv *AI, y V) V {
+func applyS2IIs[I integer](s string, x int64, y []I) V {
+	r := make([]string, len(y))
+	for i, yi := range y {
+		ri, err := applyS2II(string(s), int64(i), int64(yi))
+		if err != nil {
+			return panicErr(err)
+		}
+		r[i] = ri
+	}
+	return NewAS(r)
+}
+
+func applyS2Is[I integer](s S, x []I, y V) V {
 	if y.IsI() {
 		l := y.I()
-		r := make([]string, xv.Len())
-		for i, xi := range xv.elts {
-			ri, err := applyS2II(string(s), xi, l)
+		r := make([]string, len(x))
+		for i, xi := range x {
+			ri, err := applyS2II(string(s), int64(xi), l)
 			if err != nil {
 				return panicErr(err)
 			}
@@ -243,37 +251,26 @@ func applyS2AI(s S, xv *AI, y V) V {
 		if !isI(y.F()) {
 			return Panicf("s[i;y] : non-integer y (%g)", y.F())
 		}
-		return applyS2AI(s, xv, NewI(int64(y.F())))
+		return applyS2Is(s, x, NewI(int64(y.F())))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		return applyS2AI(s, xv, fromABtoAI(yv))
+		return applyS2IsIs(string(s), x, yv.elts)
 	case *AI:
-		if xv.Len() != yv.Len() {
-			return panicLength("s[x;y]", xv.Len(), yv.Len())
-		}
-		r := make([]string, xv.Len())
-		for i, xi := range xv.elts {
-			ri, err := applyS2II(string(s), xi, yv.At(i))
-			if err != nil {
-				return panicErr(err)
-			}
-			r[i] = ri
-		}
-		return NewAS(r)
+		return applyS2IsIs(string(s), x, yv.elts)
 	case *AF:
 		y := toAI(yv)
 		if y.IsPanic() {
 			return ppanic("s[i;y] : y ", y)
 		}
-		return applyS2AI(s, xv, y)
+		return applyS2Is(s, x, y)
 	case *AV:
-		if xv.Len() != yv.Len() {
-			return panicLength("s[x;y]", xv.Len(), yv.Len())
+		if len(x) != yv.Len() {
+			return panicLength("s[x;y]", len(x), yv.Len())
 		}
 		r := make([]V, yv.Len())
 		for i, yi := range yv.elts {
-			ri := applyS2I(s, xv.At(i), yi)
+			ri := applyS2I(s, int64(x[i]), yi)
 			if ri.IsPanic() {
 				return ri
 			}
@@ -283,6 +280,21 @@ func applyS2AI(s S, xv *AI, y V) V {
 	default:
 		return panicType("s[i;y]", "y", y)
 	}
+}
+
+func applyS2IsIs[I integer, J integer](s string, x []I, y []J) V {
+	if len(x) != len(y) {
+		return panicLength("s[x;y]", len(x), len(y))
+	}
+	r := make([]string, len(x))
+	for i, xi := range x {
+		ri, err := applyS2II(string(s), int64(xi), int64(y[i]))
+		if err != nil {
+			return panicErr(err)
+		}
+		r[i] = ri
+	}
+	return NewAS(r)
 }
 
 func applyS2II(s string, i, l int64) (string, error) {
@@ -387,42 +399,6 @@ func parseInt(s string) (int64, error) {
 	return 0, err.Err
 }
 
-func parseFloat(s string) (float64, error) {
-	switch s {
-	case "0n":
-		s = "NaN"
-	case "0w":
-		s = "Inf"
-	case "-0w":
-		s = "-Inf"
-	}
-	f, errF := strconv.ParseFloat(s, 64)
-	if errF == nil {
-		return f, nil
-	}
-	err := errF.(*strconv.NumError)
-	return 0, err.Err
-}
-
-func toAIrunes(s string) []int64 {
-	n := utf8.RuneCountInString(s)
-	r := make([]int64, n)
-	i := 0
-	for _, c := range s {
-		r[i] = int64(c)
-		i++
-	}
-	return r
-}
-
-func toAIBytes(s string) []int64 {
-	r := make([]int64, len(s))
-	for i := 0; i < len(s); i++ {
-		r[i] = int64(s[i])
-	}
-	return r
-}
-
 func castn(y V) V {
 	if y.IsI() {
 		return NewF(float64(y.I()))
@@ -469,6 +445,23 @@ func castn(y V) V {
 	}
 }
 
+func parseFloat(s string) (float64, error) {
+	switch s {
+	case "0n":
+		s = "NaN"
+	case "0w":
+		s = "Inf"
+	case "-0w":
+		s = "-Inf"
+	}
+	f, errF := strconv.ParseFloat(s, 64)
+	if errF == nil {
+		return f, nil
+	}
+	err := errF.(*strconv.NumError)
+	return 0, err.Err
+}
+
 func casts(ctx *Context, y V) V {
 	switch yv := y.value.(type) {
 	case S:
@@ -500,15 +493,15 @@ func castb(y V) V {
 	}
 	switch yv := y.value.(type) {
 	case S:
-		return NewAI(toAIBytes(string(yv)))
+		return NewAB([]byte(string(yv)))
 	case *AS:
 		r := make([]V, yv.Len())
 		for i, s := range yv.elts {
-			r[i] = NewAI(toAIBytes(s))
+			r[i] = NewAB([]byte(s))
 		}
 		return NewAV(r)
 	case *AB:
-		return castb(fromABtoAI(yv))
+		return NewS(string(yv.elts))
 	case *AI:
 		var sb strings.Builder
 		sb.Grow(yv.Len())
@@ -546,9 +539,13 @@ func castc(y V) V {
 	}
 	switch yv := y.value.(type) {
 	case S:
-		return NewAI(toAIrunes(string(yv)))
+		return castcString(string(yv))
 	case *AB:
-		return castc(fromABtoAI(yv))
+		sb := strings.Builder{}
+		for _, i := range yv.elts {
+			sb.WriteRune(rune(i))
+		}
+		return NewS(sb.String())
 	case *AI:
 		sb := strings.Builder{}
 		for _, i := range yv.elts {
@@ -564,7 +561,7 @@ func castc(y V) V {
 	case *AS:
 		r := make([]V, yv.Len())
 		for i, s := range yv.elts {
-			r[i] = NewAI(toAIrunes(s))
+			r[i] = castcString(s)
 		}
 		return NewAV(r)
 	case *AV:
@@ -579,6 +576,27 @@ func castc(y V) V {
 	default:
 		return panicType("\"c\"$y", "y", y)
 	}
+}
+
+func castcString(s string) V {
+	var ascii bool = true
+	for i := 0; i < len(s); i++ {
+		if s[i] >= utf8.RuneSelf {
+			ascii = false
+			break
+		}
+	}
+	if ascii {
+		return NewAB([]byte(s))
+	}
+	n := utf8.RuneCountInString(s)
+	r := make([]int64, n)
+	i := 0
+	for _, c := range s {
+		r[i] = int64(c)
+		i++
+	}
+	return NewAI(r)
 }
 
 func dropS(s S, y V) V {
@@ -768,9 +786,9 @@ func containedInS(x V, s string) V {
 	case *AS:
 		r := make([]byte, xv.Len())
 		for i, xi := range xv.elts {
-			r[i] = strings.Contains(s, xi)
+			r[i] = b2B(strings.Contains(s, xi))
 		}
-		return NewAB(r)
+		return newABb(r)
 	case *AV:
 		r := xv.reuse()
 		for i, xi := range xv.elts {

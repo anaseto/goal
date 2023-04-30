@@ -1,7 +1,6 @@
 package goal
 
 import (
-	"math"
 	"sort"
 )
 

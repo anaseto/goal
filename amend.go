@@ -32,13 +32,11 @@ func amend3Dict(ctx *Context, d *Dict, y, f V) V {
 	ky := findArray(keys, y)
 	switch y.value.(type) {
 	case array:
-		kyv := ky.value.(*AI)
 		nkeys := keys.Len()
-		for _, kyi := range kyv.elts {
-			if kyi == int64(nkeys) {
-				keys = uniq(ctx, joinTo(NewV(keys), y)).value.(array)
-				break
-			}
+		max := maxIndices(ky)
+		if max == int64(nkeys) {
+			keys = uniq(ctx, joinTo(NewV(keys), y)).value.(array)
+			break
 		}
 		if keys.Len() > nkeys {
 			values = padArrayMut(keys.Len()-nkeys, values)
@@ -139,15 +137,10 @@ func (ctx *Context) amend3array(x array, y, f V) (array, error) {
 		return x, nil
 	}
 	switch yv := y.value.(type) {
+	case *AB:
+		return amend3arrayAtIntegers(ctx, x, yv.elts, f)
 	case *AI:
-		var err error
-		for _, yi := range yv.elts {
-			x, err = ctx.amend3arrayI(x, yi, f)
-			if err != nil {
-				return x, err
-			}
-		}
-		return x, nil
+		return amend3arrayAtIntegers(ctx, x, yv.elts, f)
 	case *AV:
 		var err error
 		for _, yi := range yv.elts {
@@ -160,6 +153,17 @@ func (ctx *Context) amend3array(x array, y, f V) (array, error) {
 	default:
 		panic("amend3array: y bad type")
 	}
+}
+
+func amend3arrayAtIntegers[I integer](ctx *Context, x array, y []I, f V) (array, error) {
+	var err error
+	for _, yi := range y {
+		x, err = ctx.amend3arrayI(x, int64(yi), f)
+		if err != nil {
+			return x, err
+		}
+	}
+	return x, nil
 }
 
 // amend4 implements @[X;i;f;z].
@@ -196,13 +200,11 @@ func amend4Dict(ctx *Context, d *Dict, y, f, z V) V {
 	ky := findArray(keys, y)
 	switch y.value.(type) {
 	case array:
-		kyv := ky.value.(*AI)
 		nkeys := keys.Len()
-		for _, kyi := range kyv.elts {
-			if kyi == int64(nkeys) {
-				keys = uniq(ctx, joinTo(NewV(keys), y)).value.(array)
-				break
-			}
+		max := maxIndices(ky)
+		if max == int64(nkeys) {
+			keys = uniq(ctx, joinTo(NewV(keys), y)).value.(array)
+			break
 		}
 		if keys.Len() > nkeys {
 			values = padArrayMut(keys.Len()-nkeys, values)
@@ -253,30 +255,10 @@ func (ctx *Context) amend4array(x array, y, f, z V) (array, error) {
 		y = rangeI(int64(x.Len()))
 	}
 	switch yv := y.value.(type) {
+	case *AB:
+		return amend4arrayAtIntegers(ctx, x, yv.elts, f, z)
 	case *AI:
-		var err error
-		za, ok := z.value.(array)
-		if !ok {
-			for _, yi := range yv.elts {
-				x, err = ctx.amend4arrayI(x, yi, f, z)
-				if err != nil {
-					return x, err
-				}
-			}
-			return x, nil
-		}
-		if za.Len() != yv.Len() {
-			return x, fmt.Errorf("length mismatch between y and z (%d vs %d)",
-				yv.Len(), za.Len())
-
-		}
-		for i, yi := range yv.elts {
-			x, err = ctx.amend4arrayI(x, yi, f, za.at(i))
-			if err != nil {
-				return x, err
-			}
-		}
-		return x, nil
+		return amend4arrayAtIntegers(ctx, x, yv.elts, f, z)
 	case *AV:
 		var err error
 		za, ok := z.value.(array)
@@ -306,6 +288,32 @@ func (ctx *Context) amend4array(x array, y, f, z V) (array, error) {
 	}
 }
 
+func amend4arrayAtIntegers[I integer](ctx *Context, x array, y []I, f, z V) (array, error) {
+	var err error
+	za, ok := z.value.(array)
+	if !ok {
+		for _, yi := range y {
+			x, err = ctx.amend4arrayI(x, int64(yi), f, z)
+			if err != nil {
+				return x, err
+			}
+		}
+		return x, nil
+	}
+	if za.Len() != len(y) {
+		return x, fmt.Errorf("length mismatch between y and z (%d vs %d)",
+			len(y), za.Len())
+
+	}
+	for i, yi := range y {
+		x, err = ctx.amend4arrayI(x, int64(yi), f, za.at(i))
+		if err != nil {
+			return x, err
+		}
+	}
+	return x, nil
+}
+
 func outOfBounds(y int64, l int) bool {
 	return y < 0 || y >= int64(l)
 }
@@ -333,7 +341,7 @@ func amendr(x array, y, z V) (array, error) {
 	}
 	switch yv := y.value.(type) {
 	case *AI:
-		return amendrAI(x, yv, z)
+		return amendrIntegers(x, yv, z)
 	case *AV:
 		return amendrAV(x, yv, z)
 	default:
@@ -341,9 +349,9 @@ func amendr(x array, y, z V) (array, error) {
 	}
 }
 
-func amendrAI(x array, yv *AI, z V) (array, error) {
+func amendrIntegers[I integer](x array, y []I, z V) (array, error) {
 	xlen := x.Len()
-	for _, yi := range yv.elts {
+	for _, yi := range y {
 		if outOfBounds(yi, xlen) {
 			return x, fmt.Errorf("out of bounds index (%d)", yi)
 		}
@@ -360,7 +368,7 @@ func amendrAI(x array, yv *AI, z V) (array, error) {
 		}
 		rc := x.RC()
 		z.InitWithRC(rc)
-		for _, yi := range yv.elts {
+		for _, yi := range y {
 			r[yi] = z
 		}
 		return &AV{elts: r, rc: rc}, nil
@@ -373,7 +381,7 @@ func amendrAI(x array, yv *AI, z V) (array, error) {
 		amendrAIarrayMut(x, yv, za)
 		return x, nil
 	}
-	for i := range yv.elts {
+	for i := range y {
 		if !isEltType(x, za.at(i)) {
 			r := make([]V, xlen)
 			for i := range r {
@@ -383,7 +391,7 @@ func amendrAI(x array, yv *AI, z V) (array, error) {
 			break
 		}
 	}
-	for i, yi := range yv.elts {
+	for i, yi := range y {
 		x.set(int(yi), za.at(i))
 	}
 	return x, nil

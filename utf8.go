@@ -29,9 +29,9 @@ func utf8valid(x V) V {
 	case *AS:
 		r := make([]byte, xv.Len())
 		for i, s := range xv.elts {
-			r[i] = utf8.ValidString(s)
+			r[i] = b2B(utf8.ValidString(s))
 		}
-		return NewAB(r)
+		return newABb(r)
 	case *AV:
 		r := make([]V, xv.Len())
 		for i, xi := range xv.elts {

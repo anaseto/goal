@@ -87,26 +87,24 @@ func dictArith(xd, yd *Dict, f func(V, V) V) V {
 	xk, xv := xd.keys, xd.values
 	yk, yv := yd.keys, yd.values
 	ky := findArray(xk, NewV(yk))
-	kyv := ky.value.(*AI)
 	nkeys := xk.Len()
-	for _, kyi := range kyv.elts {
-		if kyi == int64(nkeys) {
-			bnk := memberOf(NewV(yk), NewV(xk))
-			bnk.InitRC()
-			bnk.incrRC2()
-			notbnk := not(bnk)
-			bnk.decrRC2()
-			nk := replicate(notbnk, NewV(yk))
-			nv := replicate(notbnk, NewV(yv))
-			yv = replicate(bnk, NewV(yv)).value.(array)
-			xk = joinTo(NewV(xk), nk).value.(array)
-			initRC(xk)
-			xv = joinTo(NewV(xv), nv).value.(array)
-			ky = without(NewAI([]int64{int64(nkeys)}), ky)
-			break
-		}
+	max := maxIndices(ky) // *AB or *AI -> I
+	if max == int64(nkeys) {
+		bnk := memberOf(NewV(yk), NewV(xk))
+		bnk.InitRC()
+		bnk.incrRC2()
+		notbnk := not(bnk)
+		bnk.decrRC2()
+		nk := replicate(notbnk, NewV(yk))
+		nv := replicate(notbnk, NewV(yv))
+		yv = replicate(bnk, NewV(yv)).value.(array)
+		xk = joinTo(NewV(xk), nk).value.(array)
+		initRC(xk)
+		xv = joinTo(NewV(xv), nv).value.(array)
+		ky = without(NewAI([]int64{int64(nkeys)}), ky)
+		break
 	}
-	r, err := dictArithAmend(xv, ky.value.(*AI), f, yv)
+	r, err := dictArithAmend(xv, ky.value.(array), f, yv)
 	if err != nil {
 		return Panicf("%v", err)
 	}
@@ -123,15 +121,29 @@ func dictArithAmendI(x array, y int64, f func(V, V) V, z V) (array, error) {
 	return amendArrayAt(x, int(y), repl), nil
 }
 
-func dictArithAmend(x array, yv *AI, f func(V, V) V, z array) (array, error) {
-	var err error
-	for i, yi := range yv.elts {
-		x, err = dictArithAmendI(x, yi, f, z.at(i))
-		if err != nil {
-			return x, err
+func dictArithAmend(x array, y array, f func(V, V) V, z array) (array, error) {
+	switch yv := y.(type) {
+	case *AB:
+		var err error
+		for i, yi := range yv.elts {
+			x, err = dictArithAmendI(x, int64(yi), f, z.at(i))
+			if err != nil {
+				return x, err
+			}
 		}
+		return x, nil
+	case *AI:
+		var err error
+		for i, yi := range yv.elts {
+			x, err = dictArithAmendI(x, yi, f, z.at(i))
+			if err != nil {
+				return x, err
+			}
+		}
+		return x, nil
+	default:
+		panic("dictArithAmend")
 	}
-	return x, nil
 }
 
 // takeKeys implements X#d.
