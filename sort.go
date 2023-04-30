@@ -6,7 +6,7 @@ import (
 
 // Less satisfies the specification of sort.Interface.
 func (x *AB) Less(i, j int) bool {
-	return x.elts[j] < x.elts[i]
+	return x.elts[i] < x.elts[j]
 }
 
 // Swap satisfies the specification of sort.Interface.

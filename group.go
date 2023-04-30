@@ -215,7 +215,7 @@ func groupByBools[T any](x []byte, y []T, n int) (rf, rt []T) {
 	for i, xi := range x {
 		j := offset[xi]
 		offset[xi]++
-		rt[j] = y[i]
+		r[j] = y[i]
 	}
 	return rf, rt
 }

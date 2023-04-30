@@ -102,7 +102,6 @@ func dictArith(xd, yd *Dict, f func(V, V) V) V {
 		initRC(xk)
 		xv = joinTo(NewV(xv), nv).value.(array)
 		ky = without(NewAI([]int64{int64(nkeys)}), ky)
-		break
 	}
 	r, err := dictArithAmend(xv, ky.value.(array), f, yv)
 	if err != nil {

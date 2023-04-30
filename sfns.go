@@ -317,7 +317,7 @@ func cutAIarray(x *AI, y array) V {
 		return NewAVWithRC(nil, reuseRCp(x.rc))
 	}
 	r := cutIntsArray(x.elts, y)
-	return NewAVWithRC(r, reuseRCp(x.rc))
+	return NewAV(r)
 }
 
 func cutABarray(x *AB, y array) V {
@@ -325,18 +325,18 @@ func cutABarray(x *AB, y array) V {
 		return panics("I_y : non-ascending I")
 	}
 	x.flags |= flagAscending
-	ylen := int64(y.Len())
-	for _, i := range x.elts {
-		if int64(i) > ylen {
-			return Panicf("I_y : I contains out of bounds index (%d)", i)
+	ylen := int(y.Len())
+	for _, xi := range x.elts {
+		if int(xi) > ylen {
+			return Panicf("I_y : I contains out of bounds index (%d)", xi)
 		}
 	}
 	xlen := x.Len()
 	if xlen == 0 {
-		return NewAVWithRC(nil, reuseRCp(x.rc))
+		return NewAV(nil)
 	}
 	r := cutIntsArray(x.elts, y)
-	return NewAVWithRC(r, reuseRCp(x.rc))
+	return NewAV(r)
 }
 
 func cutIntsArray[I integer](x []I, y array) []V {

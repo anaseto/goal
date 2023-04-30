@@ -36,7 +36,6 @@ func amend3Dict(ctx *Context, d *Dict, y, f V) V {
 		max := maxIndices(ky)
 		if max == int64(nkeys) {
 			keys = uniq(ctx, joinTo(NewV(keys), y)).value.(array)
-			break
 		}
 		if keys.Len() > nkeys {
 			values = padArrayMut(keys.Len()-nkeys, values)
@@ -204,7 +203,6 @@ func amend4Dict(ctx *Context, d *Dict, y, f, z V) V {
 		max := maxIndices(ky)
 		if max == int64(nkeys) {
 			keys = uniq(ctx, joinTo(NewV(keys), y)).value.(array)
-			break
 		}
 		if keys.Len() > nkeys {
 			values = padArrayMut(keys.Len()-nkeys, values)
@@ -340,8 +338,10 @@ func amendr(x array, y, z V) (array, error) {
 		y = rangeI(int64(x.Len()))
 	}
 	switch yv := y.value.(type) {
+	case *AB:
+		return amendrIntegers(x, yv.elts, z)
 	case *AI:
-		return amendrIntegers(x, yv, z)
+		return amendrIntegers(x, yv.elts, z)
 	case *AV:
 		return amendrAV(x, yv, z)
 	default:
@@ -352,14 +352,14 @@ func amendr(x array, y, z V) (array, error) {
 func amendrIntegers[I integer](x array, y []I, z V) (array, error) {
 	xlen := x.Len()
 	for _, yi := range y {
-		if outOfBounds(yi, xlen) {
+		if outOfBounds(int64(yi), xlen) {
 			return x, fmt.Errorf("out of bounds index (%d)", yi)
 		}
 	}
 	za, ok := z.value.(array)
 	if !ok {
 		if isEltType(x, z) {
-			amendrAIatomMut(x, yv, z)
+			amendrIntegersAtomMut(x, y, z)
 			return x, nil
 		}
 		r := make([]V, xlen)
@@ -373,12 +373,12 @@ func amendrIntegers[I integer](x array, y []I, z V) (array, error) {
 		}
 		return &AV{elts: r, rc: rc}, nil
 	}
-	if za.Len() != yv.Len() {
+	if za.Len() != len(y) {
 		return x, fmt.Errorf("length mismatch between y and z (%d vs %d)",
-			yv.Len(), za.Len())
+			len(y), za.Len())
 	}
 	if sameType(x, za) {
-		amendrAIarrayMut(x, yv, za)
+		amendrIntegersMut(x, y, za)
 		return x, nil
 	}
 	for i := range y {
@@ -397,7 +397,7 @@ func amendrIntegers[I integer](x array, y []I, z V) (array, error) {
 	return x, nil
 }
 
-func amendrAIatomMut(x array, yv *AI, z V) {
+func amendrIntegersAtomMut[I integer](x array, y []I, z V) {
 	switch xv := x.(type) {
 	case *AB:
 		var zi byte
@@ -406,8 +406,8 @@ func amendrAIatomMut(x array, yv *AI, z V) {
 		} else {
 			zi = byte(z.F())
 		}
-		for _, yi := range yv.elts {
-			xv.elts[int(yi)] = zi
+		for _, yi := range y {
+			xv.elts[yi] = zi
 		}
 	case *AI:
 		var zi int64
@@ -416,7 +416,7 @@ func amendrAIatomMut(x array, yv *AI, z V) {
 		} else {
 			zi = int64(z.F())
 		}
-		for _, yi := range yv.elts {
+		for _, yi := range y {
 			xv.elts[yi] = zi
 		}
 	case *AF:
@@ -426,49 +426,49 @@ func amendrAIatomMut(x array, yv *AI, z V) {
 		} else {
 			zf = z.F()
 		}
-		for _, yi := range yv.elts {
+		for _, yi := range y {
 			xv.elts[yi] = zf
 		}
 	case *AS:
 		zs := string(z.value.(S))
-		for _, yi := range yv.elts {
+		for _, yi := range y {
 			xv.elts[yi] = zs
 		}
 	case *AV:
 		rc := x.RC()
 		z.InitWithRC(rc)
-		for _, yi := range yv.elts {
+		for _, yi := range y {
 			xv.elts[yi] = z
 		}
 	}
 }
 
-func amendrAIarrayMut(x array, yv *AI, za array) {
+func amendrIntegersMut[I integer](x array, y []I, za array) {
 	switch xv := x.(type) {
 	case *AB:
 		zv := za.(*AB)
-		for i, yi := range yv.elts {
+		for i, yi := range y {
 			xv.elts[yi] = zv.elts[i]
 		}
 	case *AI:
 		zv := za.(*AI)
-		for i, yi := range yv.elts {
+		for i, yi := range y {
 			xv.elts[yi] = zv.elts[i]
 		}
 	case *AF:
 		zv := za.(*AF)
-		for i, yi := range yv.elts {
+		for i, yi := range y {
 			xv.elts[yi] = zv.elts[i]
 		}
 	case *AS:
 		zv := za.(*AS)
-		for i, yi := range yv.elts {
+		for i, yi := range y {
 			xv.elts[yi] = zv.elts[i]
 		}
 	case *AV:
 		zv := za.(*AV)
 		rc := x.RC()
-		for i, yi := range yv.elts {
+		for i, yi := range y {
 			zi := zv.elts[i]
 			zi.InitWithRC(rc)
 			xv.elts[yi] = zi
