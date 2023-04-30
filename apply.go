@@ -401,30 +401,13 @@ func (ctx *Context) applyDict(d *Dict, y V) V {
 	if ky.IsI() {
 		i := ky.I() // i >= 0
 		if i >= int64(dlen) {
-			return Panicf("d@y : key not found (%s)", y.Sprint(ctx))
+			return arrayProtoV(d.values)
 		}
 		return d.values.at(int(i))
 	}
-	switch kyv := ky.value.(type) {
-	case *AB:
-		i, ok := inBoundsBytes(kyv.elts, dlen)
-		if !ok {
-			return Panicf("d@y : key not found (%s)", y.value.(array).at(i).Sprint(ctx))
-		}
-		r := d.values.atBytes(kyv.elts)
-		initRC(r)
-		return NewV(r)
-	case *AI:
-		i, ok := inBoundsInts(kyv.elts, int64(dlen))
-		if !ok {
-			return Panicf("d@y : key not found (%s)", y.value.(array).at(i).Sprint(ctx))
-		}
-		r := d.values.atInts(kyv.elts)
-		initRC(r)
-		return NewV(r)
-	default:
-		panic("applyDict")
-	}
+	r := vArrayAtV(d.values, ky)
+	r.InitRC()
+	return r
 }
 
 func (ctx *Context) applyDictArgs(x *Dict, arg V, args []V) V {
@@ -477,7 +460,7 @@ func applyArray(x array, y V) V {
 			i = int64(x.Len()) + i
 		}
 		if i < 0 || i >= int64(x.Len()) {
-			return Panicf("X@i : out of bounds index: %d", i)
+			return arrayProtoV(x)
 		}
 		return x.at(int(i))
 
@@ -486,14 +469,7 @@ func applyArray(x array, y V) V {
 		if !isI(y.F()) {
 			return Panicf("X@i : non-integer index (%g)", y.F())
 		}
-		i := int64(y.F())
-		if i < 0 {
-			i = int64(x.Len()) + i
-		}
-		if i < 0 || i >= int64(x.Len()) {
-			return Panicf("X@i : out of bounds index: %d", i)
-		}
-		return x.at(int(i))
+		return applyArray(x, NewI(int64(y.F())))
 	}
 	if y.kind == valNil || isStar(y) {
 		return NewV(x)

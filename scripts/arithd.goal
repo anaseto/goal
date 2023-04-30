@@ -99,7 +99,7 @@ divide:keys!+(
   "F" "F" "divideF(x, y)" "F"
 )
 minimum:keys!+(
-  "B" "B" "maxB(x,y)" "B"
+  "B" "B" "minB(x,y)" "B"
   "B" "I" "minI(int64(x), y)" "I"
   "B" "F" "math.Min(float64(x), y)" "F"
   "I" "B" "minI(x, int64(y))" "I"
@@ -111,7 +111,7 @@ minimum:keys!+(
   "S" "S" "minS(x, y)" "S"
 )
 maximum:keys!+(
-  "B" "B" "minB(x,y)" "B"
+  "B" "B" "maxB(x,y)" "B"
   "B" "I" "maxI(int64(x), y)" "I"
   "B" "F" "math.Max(float64(x), y)" "F"
   "I" "B" "maxI(x, int64(y))" "I"

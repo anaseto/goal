@@ -248,7 +248,7 @@ func fold2vMax(x V) V {
 		if xv.Len() == 0 {
 			return NewI(0)
 		}
-		return NewI(int64(maxBytes(xv.elts)))
+		return NewI(maxIntegers(xv.elts))
 	case *AI:
 		return NewI(maxIntegers(xv.elts))
 	case *AF:
@@ -284,36 +284,11 @@ func fold2vMax(x V) V {
 	}
 }
 
-// maxIndices returns the maximum index, assuming V is an array of indices.
-func maxIndices(x V) int64 {
-	switch xv := x.value.(type) {
-	case *AB:
-		if xv.Len() == 0 {
-			return 0
-		}
-		return int64(maxBytes(xv.elts))
-	case *AI:
-		return maxIntegers(xv.elts)
-	default:
-		panic("maxIndices")
-	}
-}
-
-func maxIntegers(x []int64) int64 {
+func maxIntegers[I integer](x []I) int64 {
 	var max int64 = math.MinInt64
 	for _, xi := range x {
 		if int64(xi) > max {
 			max = int64(xi)
-		}
-	}
-	return max
-}
-
-func maxBytes(x []byte) byte {
-	var max byte
-	for _, xi := range x {
-		if xi > max {
-			max = xi
 		}
 	}
 	return max
@@ -403,7 +378,7 @@ func fold2vMin(x V) V {
 	case *Dict:
 		return fold2vMin(NewV(xv.values))
 	case *AB:
-		return NewI(int64(minBytes(xv.elts)))
+		return NewI(minIntegers(xv.elts))
 	case *AI:
 		return NewI(minIntegers(xv.elts))
 	case *AF:
@@ -444,16 +419,6 @@ func minIntegers[T integer](x []T) int64 {
 	for _, xi := range x {
 		if int64(xi) < min {
 			min = int64(xi)
-		}
-	}
-	return min
-}
-
-func minBytes(x []byte) byte {
-	var min byte = math.MaxUint8
-	for _, xi := range x {
-		if xi < min {
-			min = xi
 		}
 	}
 	return min

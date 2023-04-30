@@ -309,8 +309,7 @@ func uniq(ctx *Context, x V) V {
 			return NewV(&AB{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
 		}
 		if xv.Len() < bruteForceBytes {
-			r := make([]byte, xv.Len())
-			uniqBrute(xv.elts, r)
+			r := uniqBrute(xv.elts)
 			return NewV(&AB{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
 		}
 		return NewV(&AB{elts: uniqBytes(xv.elts), rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
@@ -394,8 +393,8 @@ func uniqInts(xs []int64, min, span int64) []int64 {
 	for _, xi := range xs {
 		c := m[xi+offset]
 		if c {
-			r[n] = xi
 			m[xi+offset] = false
+			r[n] = xi
 			n++
 		}
 	}
@@ -406,8 +405,7 @@ func uniqBytes(xs []byte) []byte {
 	var m [256]bool
 	n := 0
 	for _, xi := range xs {
-		c := m[xi]
-		if !c {
+		if !m[xi] {
 			n++
 			m[xi] = true
 			continue
@@ -416,10 +414,9 @@ func uniqBytes(xs []byte) []byte {
 	r := make([]byte, n)
 	n = 0
 	for _, xi := range xs {
-		c := m[xi]
-		if c {
-			r[n] = xi
+		if m[xi] {
 			m[xi] = false
+			r[n] = xi
 			n++
 		}
 	}
@@ -427,11 +424,10 @@ func uniqBytes(xs []byte) []byte {
 }
 
 func uniqSlice[T comparable](xs []T, bruteForceThreshold int) []T {
-	r := []T{}
 	if len(xs) <= bruteForceThreshold {
-		uniqBrute(xs, r)
-		return r
+		return uniqBrute(xs)
 	}
+	r := []T{}
 	m := map[T]struct{}{}
 	for _, xi := range xs {
 		_, ok := m[xi]
@@ -444,7 +440,8 @@ func uniqSlice[T comparable](xs []T, bruteForceThreshold int) []T {
 	return r
 }
 
-func uniqBrute[T comparable](xs, r []T) {
+func uniqBrute[T comparable](xs []T) []T {
+	r := []T{}
 loop:
 	for i, xi := range xs {
 		for _, xj := range xs[:i] {
@@ -454,6 +451,7 @@ loop:
 		}
 		r = append(r, xi)
 	}
+	return r
 }
 
 func uniqSortedSlice[T comparable](xs []T) []T {
@@ -1392,11 +1390,12 @@ func findSlices[T comparable](xs, ys []T, bruteForceThreshold int) []int64 {
 
 func findSlicesBrute[T comparable, I integer](xs, ys []T, r []I) {
 	xlen := I(len(xs))
+loop:
 	for i, yi := range ys {
 		for j, xi := range xs {
 			if yi == xi {
 				r[i] = I(j)
-				break
+				continue loop
 			}
 		}
 		r[i] = xlen

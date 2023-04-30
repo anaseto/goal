@@ -1,7 +1,6 @@
 package goal
 
 import (
-	"fmt"
 	"math"
 	"strconv"
 	"strings"
@@ -137,14 +136,14 @@ func applySIntegers[I integer](s string, x []I) V {
 	return NewAS(r)
 }
 
-func applySI(s string, i int64) (string, error) {
-	if i < 0 {
-		i += int64(len(s))
+func applySI(s string, x int64) (string, error) {
+	if x < 0 {
+		x += int64(len(s))
 	}
-	if i < 0 || i > int64(len(s)) {
-		return "", fmt.Errorf("s@i : out of bounds index i (%d)", i)
+	if x < 0 || x > int64(len(s)) {
+		return "", nil
 	}
-	return string(s[i:]), nil
+	return string(s[x:]), nil
 }
 
 func applyS2(s S, x V, y V) V {
@@ -182,9 +181,9 @@ func applyS2(s S, x V, y V) V {
 	}
 }
 
-func applyS2I(s S, i int64, y V) V {
+func applyS2I(s S, x int64, y V) V {
 	if y.IsI() {
-		r, err := applyS2II(string(s), i, y.I())
+		r, err := applyS2II(string(s), x, y.I())
 		if err != nil {
 			return panicErr(err)
 		}
@@ -194,23 +193,23 @@ func applyS2I(s S, i int64, y V) V {
 		if !isI(y.F()) {
 			return Panicf("s[i;y] : non-integer y (%g)", y.F())
 		}
-		return applyS2I(s, i, NewI(int64(y.F())))
+		return applyS2I(s, x, NewI(int64(y.F())))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		return applyS2IIs(string(s), i, yv.elts)
+		return applyS2IIs(string(s), x, yv.elts)
 	case *AI:
-		return applyS2IIs(string(s), i, yv.elts)
+		return applyS2IIs(string(s), x, yv.elts)
 	case *AF:
 		y := toAI(yv)
 		if y.IsPanic() {
 			return ppanic("s[i;y] : y ", y)
 		}
-		return applyS2I(s, i, y)
+		return applyS2I(s, x, y)
 	case *AV:
 		r := make([]V, yv.Len())
 		for j, yj := range yv.elts {
-			rj := applyS2I(s, int64(i), yj)
+			rj := applyS2I(s, int64(x), yj)
 			if rj.IsPanic() {
 				return rj
 			}
@@ -225,7 +224,7 @@ func applyS2I(s S, i int64, y V) V {
 func applyS2IIs[I integer](s string, x int64, y []I) V {
 	r := make([]string, len(y))
 	for i, yi := range y {
-		ri, err := applyS2II(string(s), int64(i), int64(yi))
+		ri, err := applyS2II(s, int64(x), int64(yi))
 		if err != nil {
 			return panicErr(err)
 		}
@@ -302,7 +301,7 @@ func applyS2II(s string, i, l int64) (string, error) {
 		i += int64(len(s))
 	}
 	if i < 0 || i > int64(len(s)) {
-		return "", fmt.Errorf("s[i;y] : out of bounds index i (%d)", i)
+		return "", nil
 	}
 	if l < 0 {
 		to := int64(len(s)) + l

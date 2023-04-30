@@ -436,11 +436,11 @@ func replicateAB(x *AB, y V) V {
 	case *AV:
 		if x.IsBoolean() {
 			r := replicateBools(x.elts, yv.elts)
-			return NewV(&AV{elts: r, rc: yv.rc, flags: yv.flags})
+			return NewV(canonicalAV(&AV{elts: r, rc: yv.rc, flags: yv.flags}))
 		}
 		*yv.rc += 2
 		r := replicateBytes(x.elts, yv.elts)
-		return NewAVWithRC(r, yv.rc)
+		return Canonical(NewAVWithRC(r, yv.rc))
 	case *Dict:
 		keys := replicateAB(x, NewV(yv.keys))
 		if keys.IsPanic() {
@@ -527,7 +527,7 @@ func replicateAI(x *AI, y V) V {
 			return panicErr(err)
 		}
 		*yv.rc += 2
-		return NewAVWithRC(r, yv.rc)
+		return Canonical(NewAVWithRC(r, yv.rc))
 	case *Dict:
 		keys := replicateAI(x, NewV(yv.keys))
 		if keys.IsPanic() {
@@ -566,15 +566,15 @@ func replicateInts[T any](x []int64, y []T) ([]T, error) {
 func weedOut(x, y V) V {
 	if x.IsI() {
 		if x.I() != 0 {
-			return NewAV(nil)
+			return protoArrayForV(y)
 		}
 		return toArray(y)
 	}
 	if x.IsF() {
-		if x.F() != 0 {
-			return NewAV(nil)
+		if !isI(x.F()) {
+			return Panicf(`f_y : non-integer f[y] (%g)`, x.F())
 		}
-		return toArray(y)
+		return weedOut(NewI(int64(x.F())), y)
 	}
 	switch xv := x.value.(type) {
 	case *AB:

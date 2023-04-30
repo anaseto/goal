@@ -1,9 +1,5 @@
 {x}[2;3] / too many arguments
 {x+y}[2][2;3] / too many arguments
-(!5)[7] / out of bounds
-2.3 5[7] / out of bounds
-"a" "b"[7] / out of bounds
-0 1 0[7] / out of bounds
 (!5)[`a`] / type
 { / EOF
 ) / unexpected ) without opening
@@ -69,8 +65,8 @@ f:{x+y};f[1;2;3] / too many arguments
 "a" "b"_2 3 4 / type
 "a"_1 2 / type
 2 1_!10 / non-ascending
-20 40_!10 / out of bound
 2 0_"a" / non-ascending
+20 40_!10 / out of bound
 0 5_"a" / out of bound
 1.5#!10 / non-integer
 1 2 3#4 / type
@@ -87,13 +83,8 @@ shift 2 / type
 +[][2;3;4] / too many arguments
 "s"[1;2;3] / too many arguments
 1 2[0.5] / non-integer index
-1 2[-4.0] / out of bound
 1 2[+] / type
 {x+y}[1;][2;3] / too many arguments
-(,1)[,1] / out of bound
-(,1)[,2] / out of bound
-(,1)[,2.0] / out of bound
-(,"a")[,2.0] / out of bound
 a,:: / assignment operation without expression right
 ,:2 / assignment operation without identifier left
 a: / assignment without expression right
@@ -237,8 +228,6 @@ rshift[1;2;3] / too many arguments
 ?+ / type
 ocount+ / type
 1.5^2 3 / non-integer
-d:"a" "b"!1 2;d["a" "c" "b"] / not found
-d:"a" "b"!1 2;d["c"] / not found
 1 1\4 / base
 1\4 / base
 rt.prec 3.5 / non-integer
@@ -808,9 +797,8 @@ sub["b" "a" "d" "c"]["a";"b"] / too many arguments
 0 1[0;1] / out of depth
 2 1[0;1] / out of depth
 2.5 1[0;1] / out of depth
-("a""b"!1 2)[1;2] / key not found
-(1 2;3 4)[(5 2;7 3)] / out of bounds
 (1 2;3 4)["a" "b"] / type
+("a""b"!1 2)[1;2] / out of depth
 !* / type
 &-3.0 2 / negative
 &"a""b"!-3.0 2 / negative
@@ -927,10 +915,6 @@ a:(#;^);a[(0 1;1 0);3 2 1] / out of depth
 ("a""b""c"!(|;*;+))["a""b";1 2] / out of depth
 ("a""b""c"!(|;*;+))["a";1 2] / out of depth
 "a""b""c"[2;3] / out of depth
-("a""b"!1 2;"a""b"!3 4)[;"c"] / not found
-("a""b""c"!(1 2;3 4;4 5))[;5] / out of bounds
-(1 2;3 4)[;5] / out of bounds
-(1 2;3 4)[5;] / out of bounds
 @[1;2;+] / type
 @[1 2;1;+;"a"] / type
 @[1 2;2;+;3] / out of bounds
@@ -952,17 +936,11 @@ sub["a";"b";2.5] / non-integer
 sub[rx/\s+/;5] / type
 ""^42 / type
 ""^42 "a" / type
-"abc"[5] / out of bounds
 "abc"[*] / type
-"abc"[5 4] / out of bounds
-"abc"[(2;5 4)] / out of bounds
 "abc"[5.5] / non-integer
-"abc"[5;1] / out of bounds
 "abc"[1;1.5] / non-integer
 "abc"[1;"a" "b"] / type
 "abc"[*;1] / type
-"abc"[5 4;1] / out of bounds
-"abc"[(2;5 4);1] / out of bounds
 "abc"[5.5;1] / non-integer
 ""#"a" 5 / type
 5$"a" 5 / type
@@ -985,7 +963,6 @@ sub["b";"a";4.3] / non-integer
 (+)in "ab" / type
 (+;%) in "ab" / type
 "abcd"[1 2;3 4 5] / length
-"abcd"[1 2 8;3 4 5] / out of bounds
 "abcd"[1 2 8.5;3 4 5] / non-integer
 "abcd"[1 2 3;3 4.5 5] / non-integer
 "abcd"[1 2 3;(3 4.5 5;-2;-7)] / non-integer
@@ -993,8 +970,6 @@ sub["b";"a";4.3] / non-integer
 "abcd"[1 2 3;*] / type
 "abcd"[1 2 3;4.5] / non-integer
 "abcd"[1 2 8.5] / non-integer
-"abcd"[8;3 4 5] / out of bounds
-"abcd"[8;(3 4 5;-2)] / out of bounds
 firsts + / type
 (+)^2 3 / type
 "a"?2 / type

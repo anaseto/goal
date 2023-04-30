@@ -3437,7 +3437,7 @@ func minimumABV(x *AB, y V) V {
 		}
 		r := x.reuse()
 		for i, xi := range x.elts {
-			r.elts[i] = byte(maxB(xi, yv.At(i)))
+			r.elts[i] = byte(minB(xi, yv.At(i)))
 		}
 		return NewV(r)
 	case *AF:
@@ -3882,7 +3882,7 @@ func maximumABV(x *AB, y V) V {
 		}
 		r := x.reuse()
 		for i, xi := range x.elts {
-			r.elts[i] = byte(minB(xi, yv.At(i)))
+			r.elts[i] = byte(maxB(xi, yv.At(i)))
 		}
 		return NewV(r)
 	case *AF:

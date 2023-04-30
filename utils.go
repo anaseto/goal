@@ -811,6 +811,29 @@ func protoV(x V) V {
 	}
 }
 
+func protoArrayForV(x V) V {
+	if x.IsI() {
+		return NewAB(nil)
+	}
+	if x.IsF() {
+		return NewAF(nil)
+	}
+	switch x.value.(type) {
+	case S:
+		return NewAS(nil)
+	case *AB:
+		return NewAB(nil)
+	case *AI:
+		return NewAI(nil)
+	case *AF:
+		return NewAF(nil)
+	case *AS:
+		return NewAS(nil)
+	default:
+		return NewAV(nil)
+	}
+}
+
 func protoArray(x array) V {
 	switch x.(type) {
 	case *AB:
@@ -877,4 +900,29 @@ func cloneArgs(a []V) []V {
 	args := make([]V, len(a))
 	copy(args, a)
 	return args
+}
+
+// maxIndices returns the maximum index, assuming V is an array of indices.
+func maxIndices(x V) int64 {
+	switch xv := x.value.(type) {
+	case *AB:
+		if xv.Len() == 0 {
+			return 0
+		}
+		return int64(maxBytes(xv.elts))
+	case *AI:
+		return maxIntegers(xv.elts)
+	default:
+		panic("maxIndices")
+	}
+}
+
+func maxBytes(x []byte) byte {
+	var max byte
+	for _, xi := range x {
+		if xi > max {
+			max = xi
+		}
+	}
+	return max
 }
