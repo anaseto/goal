@@ -58,16 +58,10 @@ func rangeI(n int64) V {
 		return panics("!i : i negative")
 	}
 	if n < 256 {
-		r := make([]byte, n)
-		for i := range r {
-			r[i] = byte(i)
-		}
+		r := permRange[byte](int(n))
 		return NewV(&AB{elts: r, flags: flagAscending | flagUnique})
 	}
-	r := make([]int64, n)
-	for i := range r {
-		r[i] = int64(i)
-	}
+	r := permRange[int64](int(n))
 	return NewV(&AI{elts: r, flags: flagAscending | flagUnique})
 }
 

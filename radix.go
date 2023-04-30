@@ -173,7 +173,7 @@ func radixSortWithBuffer[T signed](from, to []T, size uint, min T) {
 	}
 }
 
-func radixGradeSmallRange(ctx *Context, x *AI, min, max int64) []int64 {
+func radixGradeSmallRange(ctx *Context, x *AI, min, max int64) V {
 	xlen := x.Len()
 	var buf []int8
 	if xlen < cachedLen {
@@ -195,6 +195,11 @@ func radixGradeSmallRange(ctx *Context, x *AI, min, max int64) []int64 {
 			from[i] = int8(xi - min - math.MinInt8)
 		}
 	}
+	if xlen < 256 {
+		p := make([]byte, xlen)
+		radixGradeInt8(from, to, p)
+		return NewAB(p)
+	}
 	var p []int64
 	if reusableRCp(x.rc) {
 		p = x.elts
@@ -202,10 +207,10 @@ func radixGradeSmallRange(ctx *Context, x *AI, min, max int64) []int64 {
 		p = make([]int64, xlen)
 	}
 	radixGradeInt8(from, to, p)
-	return p
+	return NewAI(p)
 }
 
-func radixGradeAI(ctx *Context, x *AI, min, max int64) []int64 {
+func radixGradeAI(ctx *Context, x *AI, min, max int64) V {
 	xlen := x.Len()
 	if min >= math.MinInt16 && max <= math.MaxInt16 {
 		var buf []int16
@@ -217,8 +222,12 @@ func radixGradeAI(ctx *Context, x *AI, min, max int64) []int64 {
 		} else {
 			buf = make([]int16, xlen*2)
 		}
-		r := radixGradeAIWithSize(x, buf, 16, math.MinInt16)
-		return r
+		if xlen < 256 {
+			r := radixGradeAIBytes[int16](x, buf, 16, math.MinInt16)
+			return NewAB(r)
+		}
+		r := radixGradeAIInts[int16](x, buf, 16, math.MinInt16)
+		return NewAI(r)
 	}
 	if min >= math.MinInt32 && max <= math.MaxInt32 {
 		var buf []int32
@@ -230,15 +239,24 @@ func radixGradeAI(ctx *Context, x *AI, min, max int64) []int64 {
 		} else {
 			buf = make([]int32, xlen*2)
 		}
-		r := radixGradeAIWithSize(x, buf, 32, math.MinInt32)
-		return r
+		if xlen < 256 {
+			r := radixGradeAIBytes[int32](x, buf, 32, math.MinInt32)
+			return NewAB(r)
+		}
+		r := radixGradeAIInts[int32](x, buf, 32, math.MinInt32)
+		return NewAI(r)
 	}
-	p := &permutation{Perm: permRange(xlen), X: x}
+	if xlen < 256 {
+		p := &permutation[byte]{Perm: permRange[byte](xlen), X: x}
+		sort.Stable(p)
+		return NewAB(p.Perm)
+	}
+	p := &permutation[int64]{Perm: permRange[int64](xlen), X: x}
 	sort.Stable(p)
-	return p.Perm
+	return NewAI(p.Perm)
 }
 
-func radixGradeAIWithSize[T signed](x *AI, buf []T, size uint, min T) []int64 {
+func radixGradeAIInts[T signed](x *AI, buf []T, size uint, min T) []int64 {
 	xlen := x.Len()
 	from := buf[:xlen]
 	to := buf[xlen : xlen*2]
@@ -257,19 +275,36 @@ func radixGradeAIWithSize[T signed](x *AI, buf []T, size uint, min T) []int64 {
 	for i := range fromp {
 		fromp[i] = int64(i)
 	}
-	radixGradeWithBuffer[T](from, to, fromp, top, size, min)
+	radixGradeWithBuffer[T, int64](from, to, fromp, top, size, min)
+	return fromp
+}
+
+func radixGradeAIBytes[T signed](x *AI, buf []T, size uint, min T) []byte {
+	xlen := x.Len()
+	from := buf[:xlen]
+	to := buf[xlen : xlen*2]
+	for i, xi := range x.elts {
+		from[i] = T(xi)
+	}
+	bufp := make([]byte, xlen*2)
+	fromp := bufp[:xlen]
+	top := bufp[xlen : xlen*2]
+	for i := range fromp {
+		fromp[i] = byte(i)
+	}
+	radixGradeWithBuffer[T, byte](from, to, fromp, top, size, min)
 	return fromp
 }
 
 // radixGradeWithBuffer sorts from using a radix sort. The to buffer, fromp,
 // top slices should have same length as from, size should be the bitsize of T,
 // and min should be the minimum possible value of type T.
-func radixGradeWithBuffer[T signed](from, to []T, fromp, top []int64, size uint, min T) {
+func radixGradeWithBuffer[T signed, I integer](from, to []T, fromp, top []I, size uint, min T) {
 	var keyOffset uint
 	for keyOffset = 0; keyOffset < size; keyOffset += radix {
 		var (
-			offset [256]int // Keep track of where room is made for byte groups in the buffer
-			prev   T        = min
+			offset [256]I // Keep track of where room is made for byte groups in the buffer
+			prev   T      = min
 			key    uint8
 			sorted = true
 		)
@@ -289,7 +324,7 @@ func radixGradeWithBuffer[T signed](from, to []T, fromp, top []int64, size uint,
 		}
 
 		// Compute target bucket offsets from counts
-		var sum int
+		var sum I
 		if keyOffset == size-radix {
 			// Negatives
 			for i := 128; i < len(offset); i++ {
@@ -331,9 +366,9 @@ func radixGradeWithBuffer[T signed](from, to []T, fromp, top []int64, size uint,
 }
 
 // radixGradeInt8 sorts p by from, and puts sorted from into to.
-func radixGradeInt8(from, to []int8, p []int64) {
+func radixGradeInt8[I integer](from, to []int8, p []I) {
 	var (
-		offset [256]int // Keep track of where room is made for byte groups in the buffer
+		offset [256]I // Keep track of where room is made for byte groups in the buffer
 		key    uint8
 	)
 
@@ -344,7 +379,7 @@ func radixGradeInt8(from, to []int8, p []int64) {
 	}
 
 	// Compute target bucket offsets from counts
-	var sum int
+	var sum I
 	// Negatives
 	for i := 128; i < len(offset); i++ {
 		count := offset[i]
@@ -364,14 +399,14 @@ func radixGradeInt8(from, to []int8, p []int64) {
 		j := offset[key]
 		offset[key]++
 		to[j] = elem
-		p[j] = int64(i)
+		p[j] = I(i)
 	}
 }
 
 // radixGradeUint8 sorts p by from, and puts sorted from into to.
-func radixGradeUint8(from, to []uint8, p []int64) {
+func radixGradeUint8[I integer](from, to []uint8, p []I) {
 	var (
-		offset [256]int // Keep track of where room is made for byte groups in the buffer
+		offset [256]I // Keep track of where room is made for byte groups in the buffer
 	)
 
 	// Compute counts by byte type at current radix
@@ -380,7 +415,7 @@ func radixGradeUint8(from, to []uint8, p []int64) {
 	}
 
 	// Compute target bucket offsets from counts
-	var sum int
+	var sum I
 	for i, count := range offset {
 		offset[i] = sum
 		sum += count
@@ -391,6 +426,6 @@ func radixGradeUint8(from, to []uint8, p []int64) {
 		j := offset[elem]
 		offset[elem]++
 		to[j] = elem
-		p[j] = int64(i)
+		p[j] = I(i)
 	}
 }

@@ -19,6 +19,7 @@ type array interface {
 	set(i int, y V)       // puts y at indix i, assuming compatibility
 	atIndices(y *AI) V    // x[y] (like in goal code)
 	atInts([]int64) array // like x[y] but assumes valid positive indices
+	atBytes([]byte) array // like x[y] but assumes valid positive indices
 	shallowClone() array  // shallow clone, erases flags
 }
 
@@ -373,7 +374,7 @@ func (x *AB) atInts(y []int64) array {
 		r.flags |= flagBool
 	}
 	for i, yi := range y {
-		r.elts[i] = x.At(int(yi))
+		r.elts[i] = x.elts[yi]
 	}
 	return r
 }
@@ -381,7 +382,7 @@ func (x *AB) atInts(y []int64) array {
 func (x *AI) atInts(y []int64) array {
 	r := make([]int64, len(y))
 	for i, yi := range y {
-		r[i] = x.At(int(yi))
+		r[i] = x.elts[yi]
 	}
 	return &AI{elts: r}
 }
@@ -389,7 +390,7 @@ func (x *AI) atInts(y []int64) array {
 func (x *AF) atInts(y []int64) array {
 	r := make([]float64, len(y))
 	for i, yi := range y {
-		r[i] = x.At(int(yi))
+		r[i] = x.elts[yi]
 	}
 	return &AF{elts: r}
 }
@@ -397,7 +398,7 @@ func (x *AF) atInts(y []int64) array {
 func (x *AS) atInts(y []int64) array {
 	r := make([]string, len(y))
 	for i, yi := range y {
-		r[i] = x.At(int(yi))
+		r[i] = x.elts[yi]
 	}
 	return &AS{elts: r}
 }
@@ -405,7 +406,60 @@ func (x *AS) atInts(y []int64) array {
 func (x *AV) atInts(y []int64) array {
 	r := make([]V, len(y))
 	for i, yi := range y {
-		r[i] = x.At(int(yi))
+		r[i] = x.elts[yi]
+	}
+	nr := &AV{elts: r}
+	var p *int
+	if reusableRCp(x.rc) {
+		p = x.rc
+	} else {
+		var n int
+		p = &n
+	}
+	nr.InitWithRC(p)
+	a, _ := normalize(nr)
+	return a
+}
+
+func (x *AB) atBytes(y []byte) array {
+	r := &AB{elts: make([]byte, len(y))}
+	if x.IsBoolean() {
+		r.flags |= flagBool
+	}
+	for i, yi := range y {
+		r.elts[i] = x.elts[yi]
+	}
+	return r
+}
+
+func (x *AI) atBytes(y []byte) array {
+	r := make([]int64, len(y))
+	for i, yi := range y {
+		r[i] = x.elts[yi]
+	}
+	return &AI{elts: r}
+}
+
+func (x *AF) atBytes(y []byte) array {
+	r := make([]float64, len(y))
+	for i, yi := range y {
+		r[i] = x.elts[yi]
+	}
+	return &AF{elts: r}
+}
+
+func (x *AS) atBytes(y []byte) array {
+	r := make([]string, len(y))
+	for i, yi := range y {
+		r[i] = x.elts[yi]
+	}
+	return &AS{elts: r}
+}
+
+func (x *AV) atBytes(y []byte) array {
+	r := make([]V, len(y))
+	for i, yi := range y {
+		r[i] = x.elts[yi]
 	}
 	nr := &AV{elts: r}
 	var p *int
