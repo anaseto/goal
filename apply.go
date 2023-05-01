@@ -382,7 +382,7 @@ func (d *Dict) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
 		y := ctx.top()
-		return ctx.applyDict(d, y)
+		return applyDict(d, y)
 	default:
 		args := ctx.peekN(n)
 		r := ctx.applyDictArgs(d, args[len(args)-1], args[:len(args)-1])
@@ -392,7 +392,7 @@ func (d *Dict) applyN(ctx *Context, n int) V {
 	}
 }
 
-func (ctx *Context) applyDict(d *Dict, y V) V {
+func applyDict(d *Dict, y V) V {
 	if y.kind == valNil {
 		return NewV(d.values)
 	}
@@ -412,7 +412,7 @@ func (ctx *Context) applyDict(d *Dict, y V) V {
 
 func (ctx *Context) applyDictArgs(x *Dict, arg V, args []V) V {
 	if len(args) == 0 {
-		return ctx.applyDict(x, arg)
+		return applyDict(x, arg)
 	}
 	if arg.kind == valNil {
 		r := make([]V, x.Len())
@@ -437,7 +437,7 @@ func (ctx *Context) applyDictArgs(x *Dict, arg V, args []V) V {
 		}
 		return NewV(canonicalAV(&AV{elts: r}))
 	default:
-		r := ctx.applyDict(x, arg)
+		r := applyDict(x, arg)
 		// applyDict never panics
 		switch rv := r.value.(type) {
 		case array:
