@@ -80,21 +80,14 @@ func classify(ctx *Context, x V) V {
 			return not(x)
 		}
 		if xv.flags.Has(flagAscending) {
-			if xv.Len() < 256 {
-				r := classifySortedSlice[byte, byte](xv.elts)
-				return NewABWithRC(r, reuseRCp(xv.rc))
-			}
-			r := classifySortedSlice[byte, int64](xv.elts)
-			return NewAIWithRC(r, reuseRCp(xv.rc))
+			r := classifySortedSlice[byte, byte](xv.elts)
+			return NewABWithRC(r, reuseRCp(xv.rc))
 		}
 		if xv.Len() < bruteForceBytes {
 			r := classifyBrute(xv.elts)
 			return NewABWithRC(r, reuseRCp(xv.rc))
 		}
-		if xv.Len() < 256 {
-			return NewABWithRC(classifyBytes[byte](xv.elts), reuseRCp(xv.rc))
-		}
-		return NewAIWithRC(classifyBytes[int64](xv.elts), reuseRCp(xv.rc))
+		return NewABWithRC(classifyBytes(xv.elts), reuseRCp(xv.rc))
 	case *AI:
 		if xv.flags.Has(flagAscending) {
 			if xv.Len() < 256 {
@@ -184,24 +177,25 @@ func classify(ctx *Context, x V) V {
 	}
 }
 
-func classifyBytes[T integer](xs []byte) []T {
-	var m [256]T
-	var n T
-	r := make([]T, len(xs))
+func classifyBytes(xs []byte) []byte {
+	var m [256]int
+	var n int
+	r := make([]byte, len(xs))
 	for i, xi := range xs {
 		c := m[xi]
 		if c == 0 {
-			r[i] = n
+			r[i] = byte(n)
 			m[xi] = n + 1
 			n++
 			continue
 		}
-		r[i] = c - 1
+		r[i] = byte(c - 1)
 	}
 	return r
 }
 
 func classifyInts[T integer](xs []int64, min, span int64) []T {
+	// len(xs) <= MaxIntT so that n+1 fits in T
 	r := make([]T, len(xs))
 	var n T
 	offset := -min
@@ -237,6 +231,7 @@ func classifySlice[T comparable, I integer](xs []T) []I {
 }
 
 func classifyBrute[T comparable](xs []T) []byte {
+	// pre-condition: len(xs) < 256
 	r := make([]byte, len(xs))
 	var n byte
 loop:
@@ -255,7 +250,7 @@ loop:
 
 func classifySortedSlice[T comparable, I integer](xs []T) []I {
 	r := make([]I, len(xs))
-	var n I
+	var n int
 	prev := xs[0]
 	r[0] = 0
 	i := 1
@@ -263,7 +258,7 @@ func classifySortedSlice[T comparable, I integer](xs []T) []I {
 		if xi != prev {
 			n++
 		}
-		r[i] = n
+		r[i] = I(n)
 		prev = xi
 		i++
 	}
@@ -1345,6 +1340,7 @@ loop:
 }
 
 func findBsBs[I integer](xs []byte, ys []byte) []I {
+	// len(xs) <= MaxIntT so that i+1 fits in T
 	var m [256]I
 	for i, xi := range xs {
 		m[xi] = I(i) + 1
@@ -1362,6 +1358,7 @@ func findBsBs[I integer](xs []byte, ys []byte) []I {
 }
 
 func findBsIs[I integer](xs []byte, ys []int64) []I {
+	// len(xs) <= MaxIntT so that i+1 fits in T
 	var m [256]I
 	for i, xi := range xs {
 		m[xi] = I(i) + 1
@@ -1542,6 +1539,7 @@ func findIsBbs[I integer](xs []int64, ys []byte) []I {
 }
 
 func findIsBs[I integer](xs []int64, ys []byte) []I {
+	// len(xs) <= MaxIntT so that i+1 fits in T
 	var m [256]I
 	xlen := I(len(xs))
 	r := make([]I, len(ys))

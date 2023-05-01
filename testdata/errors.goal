@@ -843,6 +843,7 @@ sub["b";"a"]["a";"b"] / too many arguments
 sub["b" "a" "d" "c"]["a";"b"] / too many arguments
 0 1[0;1] / out of depth
 2 1[0;1] / out of depth
+(1+2 1)[0;1] / out of depth
 2.5 1[0;1] / out of depth
 (1 2;3 4)["a" "b"] / type
 ("a""b"!1 2)[1;2] / out of depth
@@ -961,6 +962,7 @@ a:(#;^);a[(0 1;1 0);3 2 1] / out of depth
 1.5@3 / non-integer
 ("a""b""c"!(|;*;+))["a""b";1 2] / out of depth
 ("a""b""c"!(|;*;+))["a";1 2] / out of depth
+("a""b""c"!(|;*;+))[;1 2] / out of depth
 "a""b""c"[2;3] / out of depth
 @[1;2;+] / type
 @[1 2;1;+;"a"] / type
@@ -1046,3 +1048,7 @@ rx/[a-z]/#3 5 / type
 0 5_"a""b"!(+;0 1) / bounds
 (1+-1 4)_"a""b"!(0 1;%) / bounds
 (1+-1 4)_"a""b"!(+;0 1) / bounds
+1 2[2.5 3] / non-integer
+1 2[(1;2.5 3)] / non-integer
+(1 2;3 4)[;2.5 3] / non-integer
+(1 2;3 4)[0;2.5 3] / non-integer

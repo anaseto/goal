@@ -438,9 +438,7 @@ func (ctx *Context) applyDictArgs(x *Dict, arg V, args []V) V {
 		return NewV(canonicalAV(&AV{elts: r}))
 	default:
 		r := ctx.applyDict(x, arg)
-		if r.IsPanic() {
-			return r
-		}
+		// applyDict never panics
 		switch rv := r.value.(type) {
 		case array:
 			return ctx.applyArrayArgs(rv, args[len(args)-1], args[:len(args)-1])
