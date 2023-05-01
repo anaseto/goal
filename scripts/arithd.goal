@@ -365,11 +365,21 @@ doXY:{[yt;e;t]
                     return panicLength("x${op}y", x.Len(), yv.Len())
             }/
   xy:?[xt~t;"x";"yv"]
-  rs:?[t¿xt,yt;"${xy}.reuse()";"&A${t}{elts: make([]$rt, yv.Len()), rc: reuseRCp(x.rc)}"]
+  rs:?[t¿xt,yt;"r := ${xy}.reuse()";"r := &A${t}{elts: make([]$rt, yv.Len()), rc: reuseRCp(x.rc)}"]
   rs:?[op¿cmps;"$rs; r.flags |= flagBool";rs]
-  / TODO: add flagBool in & and | when possible
+  rs:?[and[op¿"&""|";xt~"B";yt~"B"]
+          qq/b := x.IsBoolean() && yv.IsBoolean(); $rs
+          if b {
+                for i, xi := range x.elts {
+                        r.elts[i] = xi $op yv.At(i)
+                }
+                r.flags |= flagBool
+                return NewV(r)
+          }
+          /
+          rs]
   s2:"\n"_qq/
-          r := $rs
+          $rs
           for i, xi := range x.elts {
                   r.elts[i] = $rt($e)
           }

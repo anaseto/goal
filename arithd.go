@@ -3435,7 +3435,15 @@ func minimumABV(x *AB, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x&y", x.Len(), yv.Len())
 		}
+		b := x.IsBoolean() && yv.IsBoolean()
 		r := x.reuse()
+		if b {
+			for i, xi := range x.elts {
+				r.elts[i] = xi & yv.At(i)
+			}
+			r.flags |= flagBool
+			return NewV(r)
+		}
 		for i, xi := range x.elts {
 			r.elts[i] = byte(minB(xi, yv.At(i)))
 		}
@@ -3880,7 +3888,15 @@ func maximumABV(x *AB, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x|y", x.Len(), yv.Len())
 		}
+		b := x.IsBoolean() && yv.IsBoolean()
 		r := x.reuse()
+		if b {
+			for i, xi := range x.elts {
+				r.elts[i] = xi | yv.At(i)
+			}
+			r.flags |= flagBool
+			return NewV(r)
+		}
 		for i, xi := range x.elts {
 			r.elts[i] = byte(maxB(xi, yv.At(i)))
 		}
