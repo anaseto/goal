@@ -245,6 +245,12 @@ func fold2vMax(x V) V {
 	case *Dict:
 		return fold2vMax(NewV(xv.values))
 	case *AB:
+		if xv.Len() == 0 {
+			return NewI(math.MinInt64)
+		}
+		if xv.IsBoolean() {
+			return NewI(maxBools(xv.elts))
+		}
 		return NewI(maxIntegers(xv.elts))
 	case *AI:
 		return NewI(maxIntegers(xv.elts))
@@ -279,6 +285,14 @@ func fold2vMax(x V) V {
 	default:
 		return x
 	}
+}
+
+func maxBools(x []byte) int64 {
+	var max byte
+	for _, xi := range x {
+		max |= xi
+	}
+	return int64(max)
 }
 
 func maxIntegers[I integer](x []I) int64 {
@@ -375,6 +389,12 @@ func fold2vMin(x V) V {
 	case *Dict:
 		return fold2vMin(NewV(xv.values))
 	case *AB:
+		if xv.Len() == 0 {
+			return NewI(math.MaxInt64)
+		}
+		if xv.IsBoolean() {
+			return NewI(minBools(xv.elts))
+		}
 		return NewI(minIntegers(xv.elts))
 	case *AI:
 		return NewI(minIntegers(xv.elts))
@@ -409,6 +429,14 @@ func fold2vMin(x V) V {
 	default:
 		return x
 	}
+}
+
+func minBools(x []byte) int64 {
+	var min byte = 1
+	for _, xi := range x {
+		min &= xi
+	}
+	return int64(min)
 }
 
 func minIntegers[T integer](x []T) int64 {
