@@ -245,9 +245,6 @@ func fold2vMax(x V) V {
 	case *Dict:
 		return fold2vMax(NewV(xv.values))
 	case *AB:
-		if xv.Len() == 0 {
-			return NewI(0)
-		}
 		return NewI(maxIntegers(xv.elts))
 	case *AI:
 		return NewI(maxIntegers(xv.elts))
@@ -438,6 +435,7 @@ func minFloat64s(x []float64) float64 {
 
 func scan2vMinSlice[T ordered](dst, xs []T) {
 	min := xs[0]
+	dst[0] = min
 	for i, xi := range xs[1:] {
 		if xi < min {
 			min = xi
