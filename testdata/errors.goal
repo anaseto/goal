@@ -512,6 +512,7 @@ abs(1 2;*) / type
 (0;1;1 2.5 3)atan 1.5 2  / length mismatch
 "a""b"*0 1 0 / length mismatch
 "a""b"*2 1 0 / length mismatch
+"a""b"*1+1 0 -1 / length mismatch
 "a""b"*2 1 3.5 / length mismatch
 "a""b"+"b""c""d" / length mismatch
 "a""b"*"b""c""d" / type
@@ -533,6 +534,7 @@ abs(1 2;*) / type
 "a""b"|("d";"e";"b""c""d") / length mismatch
 "a""b"=("d";"e";"b""c""d") / length mismatch
 "a""b""c"=1 2 3 / type
+"a""b""c"=* / type
 "a""b""c"+1 2 3 / type
 "a""b""c"** / type
 "a""b""c"-1 2 3 / type
@@ -731,6 +733,7 @@ abs(1 2;*) / type
 1 3.5|"a""b"!(*;%) / type
 1 3.5 mod "a""b"!(*;%) / type
 1 3.5 atan "a""b"!(*;%) / type
+-1 3=* / type
 -1 3=(*;%) / type
 -1 3+(*;%) / type
 -1 3*(*;%) / type
