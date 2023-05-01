@@ -1,6 +1,7 @@
 # v? ?
 
-+ Make out-indexing return the zero value of the array, in the same as padding.
++ Make out-indexing valid and return the zero value of the array, in the same
+  way as padding.
 + New `"b"$s` for converting a string to and from array of bytes.
 + New `"c"$s` for converting a string to and from array of code points, and make
   `"i"$s` now be parse int, and `"n"$s` only parse number (floats).
