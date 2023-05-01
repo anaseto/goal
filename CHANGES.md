@@ -1,5 +1,6 @@
 # v? ?
 
++ Make out-indexing return the zero value of the array, in the same as padding.
 + New `"b"$s` for converting a string to and from array of bytes.
 + New `"c"$s` for converting a string to and from array of code points, and make
   `"i"$s` now be parse int, and `"n"$s` only parse number (floats).
@@ -20,6 +21,11 @@
 + Improvements in sorting of integers, depending on the range, using either
   counting sort (`^I` for small-range) or radix sort (for `^I`, `<I`, and
   `>I` when `I` fits into a `[]int8`, `[]int16` or `[]int32` slice).
++ Arrays of small integers (0-255) are now represented as arrays of bytes,
+  saving memory (in particular when converting a string to bytes, or even
+  codepoints if the string is ascii), and facilitating small-range
+  optimizations for searching and sorting. Previously, only booleans where
+  stored more compactly.
 + Recognize `x:op x` assignement as potential in-place operation for global
   variables too (previously only `x op:y` form was recognized for global
   variables).
