@@ -160,10 +160,6 @@ func classify(ctx *Context, x V) V {
 			for i, xi := range xv.elts {
 				ss[i] = xi.Sprint(ctx)
 			}
-			if xv.Len() <= bruteForceGeneric {
-				r := classifyBrute(ss)
-				return NewABWithRC(r, reuseRCp(xv.rc))
-			}
 			if xv.Len() < 256 {
 				return NewAB(classifySlice[string, byte](ss))
 			}
@@ -830,7 +826,7 @@ func memberOfAI(x V, y *AI) V {
 	switch xv := x.value.(type) {
 	case *AB:
 		if xv.IsBoolean() {
-			m := findAIboolsIdx(y.elts)
+			m := findAIboolsIdx[int64](y.elts)
 			xlen := int64(x.Len())
 			mb := [2]byte{b2B(m[0] < xlen), b2B(m[1] < xlen)}
 			r := make([]byte, xlen)
@@ -1304,20 +1300,31 @@ func findAB(x *AB, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		if y.Len() < bruteForceBytes {
+		if x.Len() < bruteForceBytes {
 			r := make([]byte, y.Len())
 			findSlicesBrute(x.elts, yv.elts, r)
 			return NewAB(r)
 		}
-		r := findBB(x.elts, yv.elts)
+		if x.Len() < 256 {
+			r := findBsBs[byte](x.elts, yv.elts)
+			return NewAB(r)
+		}
+		r := findBsBs[int64](x.elts, yv.elts)
 		return NewAI(r)
 	case *AI:
-		r := findBI(x.elts, yv.elts)
+		if x.Len() < 256 {
+			r := findBsIs[byte](x.elts, yv.elts)
+			return NewAB(r)
+		}
+		r := findBsIs[int64](x.elts, yv.elts)
 		return NewAI(r)
 	case *AF:
 		return find(fromABtoAF(x), y)
 	case array:
-		return findArrays(x, yv)
+		if x.Len() < 256 {
+			return NewAB(findArrays[byte](x, yv))
+		}
+		return NewAI(findArrays[int64](x, yv))
 	default:
 		return NewI(int64(x.Len()))
 	}
@@ -1337,13 +1344,13 @@ loop:
 	}
 }
 
-func findBB(xs []byte, ys []byte) []int64 {
-	var m [256]int64
+func findBsBs[I integer](xs []byte, ys []byte) []I {
+	var m [256]I
 	for i, xi := range xs {
-		m[xi] = int64(i) + 1
+		m[xi] = I(i) + 1
 	}
-	xlen := int64(len(xs))
-	r := make([]int64, len(ys))
+	xlen := I(len(xs))
+	r := make([]I, len(ys))
 	for i, yi := range ys {
 		if m[yi] != 0 {
 			r[i] = m[yi] - 1
@@ -1354,13 +1361,13 @@ func findBB(xs []byte, ys []byte) []int64 {
 	return r
 }
 
-func findBI(xs []byte, ys []int64) []int64 {
-	var m [256]int64
+func findBsIs[I integer](xs []byte, ys []int64) []I {
+	var m [256]I
 	for i, xi := range xs {
-		m[xi] = int64(i) + 1
+		m[xi] = I(i) + 1
 	}
-	xlen := int64(len(xs))
-	r := make([]int64, len(ys))
+	xlen := I(len(xs))
+	r := make([]I, len(ys))
 	for i, yi := range ys {
 		if yi >= 0 && yi < 256 && m[yi] != 0 {
 			r[i] = m[yi] - 1
@@ -1375,7 +1382,7 @@ func findAI(x *AI, y V) V {
 	if y.IsI() {
 		yv := y.I()
 		if x.flags.Has(flagAscending) && x.Len() > numericSortedLen {
-			return NewI(findAII(x, yv))
+			return NewI(findIs(x.elts, yv))
 		}
 		for i, xi := range x.elts {
 			if xi == yv {
@@ -1394,22 +1401,27 @@ func findAI(x *AI, y V) V {
 	switch yv := y.value.(type) {
 	case *AB:
 		if yv.IsBoolean() {
-			m := findAIboolsIdx(x.elts)
-			r := make([]int64, yv.Len())
-			for i, yi := range yv.elts {
-				r[i] = m[yi]
+			if x.Len() < 256 {
+				r := findIsBbs[byte](x.elts, yv.elts)
+				return NewABWithRC(r, reuseRCp(yv.rc))
 			}
+			r := findIsBbs[int64](x.elts, yv.elts)
 			return NewAIWithRC(r, reuseRCp(yv.rc))
 		}
-		r := findIsBs(x.elts, yv.elts)
+		if x.Len() < 256 {
+			r := findIsBs[byte](x.elts, yv.elts)
+			return NewABWithRC(r, reuseRCp(yv.rc))
+		}
+		r := findIsBs[int64](x.elts, yv.elts)
 		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		xlen := int64(x.Len())
 		if x.flags.Has(flagAscending) && xlen > numericSortedLen {
-			r := make([]int64, yv.Len())
-			for i, yi := range yv.elts {
-				r[i] = findAII(x, yi)
+			if xlen < 256 {
+				r := findSortedIsIs[byte](x.elts, yv.elts)
+				return NewABWithRC(r, reuseRCp(yv.rc))
 			}
+			r := findSortedIsIs[int64](x.elts, yv.elts)
 			return NewAIWithRC(r, reuseRCp(yv.rc))
 		}
 		ylen := int64(yv.Len())
@@ -1423,36 +1435,54 @@ func findAI(x *AI, y V) V {
 			span := max - min + 1
 			if span < xlen+ylen+smallRangeSpan {
 				// fast path avoiding hash table
-				r := findIsIs(x.elts, yv.elts, min, max)
+				if xlen < 256 {
+					r := findIsIs[byte](x.elts, yv.elts, min, max)
+					return NewABWithRC(r, reuseRCp(yv.rc))
+				}
+				r := findIsIs[int64](x.elts, yv.elts, min, max)
 				return NewAIWithRC(r, reuseRCp(yv.rc))
 			}
 		}
-		return NewAIWithRC(findSlices[int64](x.elts, yv.elts, bruteForceNumeric), reuseRCp(yv.rc))
+		if xlen < 256 {
+			return NewABWithRC(findSlices[int64, byte](x.elts, yv.elts, bruteForceNumeric), reuseRCp(yv.rc))
+		}
+		return NewAIWithRC(findSlices[int64, int64](x.elts, yv.elts, bruteForceNumeric), reuseRCp(yv.rc))
 	case *AF:
 		return findAF(toAF(x).value.(*AF), y)
 	case array:
-		return findArrays(x, yv)
+		if x.Len() < 256 {
+			return NewAB(findArrays[byte](x, yv))
+		}
+		return NewAI(findArrays[int64](x, yv))
 	default:
 		return NewI(int64(x.Len()))
 	}
 }
 
-func findAIboolsIdx(xs []int64) (m [2]int64) {
-	xlen := int64(len(xs))
+func findSortedIsIs[I integer](xs, ys []int64) []I {
+	r := make([]I, len(ys))
+	for i, yi := range ys {
+		r[i] = I(findIs(xs, yi))
+	}
+	return r
+}
+
+func findAIboolsIdx[I integer](xs []int64) (m [2]I) {
+	xlen := I(len(xs))
 	m[0], m[1] = xlen, xlen
 loop:
 	for i, xi := range xs {
 		switch {
 		case xi == 1:
 			if m[1] == xlen {
-				m[1] = int64(i)
+				m[1] = I(i)
 				if m[0] < xlen {
 					break loop
 				}
 			}
 		case xi == 0:
 			if m[0] == xlen {
-				m[0] = int64(i)
+				m[0] = I(i)
 				if m[1] < xlen {
 					break loop
 				}
@@ -1462,14 +1492,14 @@ loop:
 	return
 }
 
-func findSlices[T comparable](xs, ys []T, bruteForceThreshold int) []int64 {
-	r := make([]int64, len(ys))
-	xlen := int64(len(xs))
+func findSlices[T comparable, I integer](xs, ys []T, bruteForceThreshold int) []I {
+	r := make([]I, len(ys))
+	xlen := I(len(xs))
 	if len(ys) <= bruteForceThreshold || len(xs) <= bruteForceThreshold {
 		findSlicesBrute(xs, ys, r)
 		return r
 	}
-	m := imapSlice[T](xs)
+	m := imapSlice[T, I](xs)
 	for i, yi := range ys {
 		j, ok := m[yi]
 		if ok {
@@ -1481,34 +1511,43 @@ func findSlices[T comparable](xs, ys []T, bruteForceThreshold int) []int64 {
 	return r
 }
 
-func imapSlice[T comparable](xs []T) map[T]int64 {
-	m := map[T]int64{}
+func imapSlice[T comparable, I integer](xs []T) map[T]I {
+	m := map[T]I{}
 	for i, xi := range xs {
 		_, ok := m[xi]
 		if !ok {
-			m[xi] = int64(i)
+			m[xi] = I(i)
 			continue
 		}
 	}
 	return m
 }
 
-func findAII(x *AI, y int64) int64 {
-	xlen := x.Len()
-	i := int64(sort.Search(xlen, func(i int) bool { return x.At(i) >= y }))
-	if i < int64(xlen) && x.At(int(i)) == y {
+func findIs(x []int64, y int64) int64 {
+	xlen := len(x)
+	i := int64(sort.Search(xlen, func(i int) bool { return x[i] >= y }))
+	if i < int64(xlen) && x[i] == y {
 		return i
 	}
 	return int64(xlen)
 }
 
-func findIsBs(xs []int64, ys []byte) []int64 {
-	var m [256]int64
-	xlen := int64(len(xs))
-	r := make([]int64, len(ys))
+func findIsBbs[I integer](xs []int64, ys []byte) []I {
+	m := findAIboolsIdx[I](xs)
+	r := make([]I, len(ys))
+	for i, yi := range ys {
+		r[i] = m[yi]
+	}
+	return r
+}
+
+func findIsBs[I integer](xs []int64, ys []byte) []I {
+	var m [256]I
+	xlen := I(len(xs))
+	r := make([]I, len(ys))
 	for i, xi := range xs {
 		if xi >= 0 && xi < 256 && m[xi] == 0 {
-			m[xi] = int64(i) + 1
+			m[xi] = I(i) + 1
 		}
 	}
 	for i, yi := range ys {
@@ -1521,15 +1560,15 @@ func findIsBs(xs []int64, ys []byte) []int64 {
 	return r
 }
 
-func findIsIs(xs, ys []int64, min, max int64) []int64 {
-	xlen := int64(len(xs))
-	r := make([]int64, len(ys))
+func findIsIs[I integer](xs, ys []int64, min, max int64) []I {
+	xlen := I(len(xs))
+	r := make([]I, len(ys))
 	offset := -min
-	m := make([]int64, max-min+1)
+	m := make([]I, max-min+1)
 	for i, xi := range xs {
 		c := m[xi+offset]
 		if c == 0 {
-			m[xi+offset] = int64(i) + 1
+			m[xi+offset] = I(i) + 1
 			continue
 		}
 	}
@@ -1572,18 +1611,24 @@ func findAF(x *AF, y V) V {
 	case *AI:
 		return findAF(x, toAF(yv))
 	case *AF:
-		return NewAIWithRC(findSlices[float64](x.elts, yv.elts, bruteForceNumeric), reuseRCp(yv.rc))
+		if x.Len() < 256 {
+			return NewABWithRC(findSlices[float64, byte](x.elts, yv.elts, bruteForceNumeric), reuseRCp(yv.rc))
+		}
+		return NewAIWithRC(findSlices[float64, int64](x.elts, yv.elts, bruteForceNumeric), reuseRCp(yv.rc))
 	case array:
-		return findArrays(x, yv)
+		if x.Len() < 256 {
+			return NewAB(findArrays[byte](x, yv))
+		}
+		return NewAI(findArrays[int64](x, yv))
 	default:
 		return NewI(int64(x.Len()))
 	}
 }
 
-func findASS(x *AS, y S) int64 {
-	xlen := x.Len()
-	i := int64(sort.Search(xlen, func(i int) bool { return S(x.At(i)) >= y }))
-	if i < int64(xlen) && x.At(int(i)) == string(y) {
+func findSs(x []string, y string) int64 {
+	xlen := len(x)
+	i := int64(sort.Search(xlen, func(i int) bool { return x[i] >= y }))
+	if i < int64(xlen) && x[i] == y {
 		return i
 	}
 	return int64(xlen)
@@ -1593,7 +1638,7 @@ func findAS(x *AS, y V) V {
 	switch yv := y.value.(type) {
 	case S:
 		if x.flags.Has(flagAscending) && x.Len() > bruteForceGeneric/4 {
-			return NewI(findASS(x, yv))
+			return NewI(findSs(x.elts, string(yv)))
 		}
 		for i, xi := range x.elts {
 			if S(xi) == yv {
@@ -1603,42 +1648,60 @@ func findAS(x *AS, y V) V {
 		return NewI(int64(x.Len()))
 	case *AS:
 		if x.flags.Has(flagAscending) && x.Len() > bruteForceGeneric/4 {
-			r := make([]int64, yv.Len())
-			for i, yi := range yv.elts {
-				r[i] = findASS(x, S(yi))
+			if x.Len() < 256 {
+				r := findSortedSsSs[byte](x.elts, yv.elts)
+				return NewABWithRC(r, reuseRCp(yv.rc))
 			}
+			r := findSortedSsSs[int64](x.elts, yv.elts)
 			return NewAIWithRC(r, reuseRCp(yv.rc))
 		}
-		return NewAIWithRC(findSlices[string](x.elts, yv.elts, bruteForceGeneric), reuseRCp(yv.rc))
+		if x.Len() < 256 {
+			return NewABWithRC(findSlices[string, byte](x.elts, yv.elts, bruteForceGeneric), reuseRCp(yv.rc))
+		}
+		return NewAIWithRC(findSlices[string, int64](x.elts, yv.elts, bruteForceGeneric), reuseRCp(yv.rc))
 	case array:
-		return findArrays(x, yv)
+		if x.Len() < 256 {
+			return NewAB(findArrays[byte](x, yv))
+		}
+		return NewAI(findArrays[int64](x, yv))
 	default:
 		return NewI(int64(x.Len()))
 	}
 }
 
-func findArrays(x, y array) V {
+func findSortedSsSs[I integer](xs, ys []string) []I {
+	r := make([]I, len(ys))
+	for i, yi := range ys {
+		r[i] = I(findSs(xs, yi))
+	}
+	return r
+}
+
+func findArrays[I integer](x, y array) []I {
 	// NOTE: quadratic algorithm, worst case complexity could be
 	// improved by sorting or string hashing.
-	r := make([]int64, y.Len())
+	r := make([]I, y.Len())
 	for i := range r {
-		r[i] = int64(x.Len())
+		r[i] = I(x.Len())
 	}
 	for i := 0; i < y.Len(); i++ {
 		for j := 0; j < x.Len(); j++ {
 			if y.at(i).Matches(x.at(j)) {
-				r[i] = int64(j)
+				r[i] = I(j)
 				break
 			}
 		}
 	}
-	return NewAI(r)
+	return r
 }
 
 func findAV(x *AV, y V) V {
 	switch yv := y.value.(type) {
 	case array:
-		return findArrays(x, yv)
+		if x.Len() < 256 {
+			return NewAB(findArrays[byte](x, yv))
+		}
+		return NewAI(findArrays[int64](x, yv))
 	default:
 		for i, xi := range x.elts {
 			if y.Matches(xi) {

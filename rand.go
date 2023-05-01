@@ -81,7 +81,7 @@ func roll(ctx *Context, n int64, y V) V {
 				}
 			}
 			return newABb(r)
-		} else if yv < 256 {
+		} else if yv <= 256 {
 			r := make([]byte, n)
 			for i := range r {
 				r[i] = byte(ctx.rand.Int63n(yv))
