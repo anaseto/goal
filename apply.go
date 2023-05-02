@@ -257,8 +257,13 @@ func (p *projection) applyN(ctx *Context, n int) V {
 				nilc++
 			}
 		}
+		// argument stack len: n+(#p.Args)+n-nilN
 		r := p.Fun.applyN(ctx, len(p.Args)+n-nilN)
-		ctx.dropNnoRC(n)
+		ctx.drop()
+		// argument stack len: n
+		ctx.dropNnoRC(n - 1)
+		// restore refcount of remaining last argument on the stack
+		args[0].IncrRC()
 		return r
 	default:
 		vargs := cloneArgs(p.Args)

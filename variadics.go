@@ -298,11 +298,13 @@ func vfEqual(ctx *Context, args []V) V {
 		if x.IsFunction() {
 			ctx.push(y)
 			r := x.applyN(ctx, 1)
-			ctx.drop()
 			if r.IsPanic() {
+				ctx.drop()
 				return r
 			}
-			return groupBy(r, y)
+			r = groupBy(r, y)
+			ctx.drop()
+			return r
 		}
 		return equal(x, y)
 	default:
@@ -356,11 +358,13 @@ func vfTake(ctx *Context, args []V) V {
 		if x.IsFunction() {
 			ctx.push(y)
 			r := x.applyN(ctx, 1)
-			ctx.drop()
 			if r.IsPanic() {
+				ctx.drop()
 				return r
 			}
-			return replicate(r, y)
+			r = replicate(r, y)
+			ctx.drop()
+			return r
 		}
 		return take(x, y)
 	default:
@@ -378,11 +382,13 @@ func vfDrop(ctx *Context, args []V) V {
 		if x.IsFunction() {
 			ctx.push(y)
 			r := x.applyN(ctx, 1)
-			ctx.drop()
 			if r.IsPanic() {
+				ctx.drop()
 				return r
 			}
-			return weedOut(r, y)
+			r = weedOut(r, y)
+			ctx.drop()
+			return r
 		}
 		return drop(x, y)
 	default:
