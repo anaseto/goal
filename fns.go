@@ -75,7 +75,7 @@ func odometer[I integer](x []I) V {
 		if int64(n) > math.MaxInt64/cols {
 			return panics("!I : too big: overflow")
 		}
-		if int64(n) >= 256 || int64(n) < 0 {
+		if int64(n) >= 256 {
 			bsize = false
 		}
 		cols *= int64(n)

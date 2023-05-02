@@ -341,6 +341,7 @@ json`"a"` `"b"` / "a" "b"
 json(`"a"` `"b"`;`"c"`) / ("a" "b";"c")
 ^json rq#{"a":true,"b":"text"}# / "a" "b"!(1;"text")
 0<rt.time[+/;,!10;10] / 1
+0<rt.time[+/;,!10;10.0] / 1
 0<rt.time[+/;,!10] / 1
 0<rt.time["+/!10";10] / 1
 0<rt.time["+/!10"] / 1
