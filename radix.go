@@ -178,14 +178,13 @@ func radixGradeSmallRange(ctx *Context, x *AI, min, max int64) V {
 	var buf []int8
 	if xlen < cachedLen {
 		if ctx.sortBuf8 == nil {
-			ctx.sortBuf8 = make([]int8, cachedLen*2)
+			ctx.sortBuf8 = make([]int8, cachedLen)
 		}
 		buf = ctx.sortBuf8
 	} else {
-		buf = make([]int8, xlen*2)
+		buf = make([]int8, xlen)
 	}
 	from := buf[:xlen]
-	to := buf[xlen : xlen*2]
 	if min >= math.MinInt8 && max <= math.MaxInt8 {
 		for i, xi := range x.elts {
 			from[i] = int8(xi)
@@ -197,7 +196,7 @@ func radixGradeSmallRange(ctx *Context, x *AI, min, max int64) V {
 	}
 	if xlen < 256 {
 		p := make([]byte, xlen)
-		radixGradeInt8(from, to, p)
+		radixGradeInt8(from, p)
 		return NewAB(p)
 	}
 	var p []int64
@@ -206,7 +205,7 @@ func radixGradeSmallRange(ctx *Context, x *AI, min, max int64) V {
 	} else {
 		p = make([]int64, xlen)
 	}
-	radixGradeInt8(from, to, p)
+	radixGradeInt8(from, p)
 	return NewAI(p)
 }
 
@@ -366,7 +365,7 @@ func radixGradeWithBuffer[T signed, I integer](from, to []T, fromp, top []I, siz
 }
 
 // radixGradeInt8 sorts p by from, and puts sorted from into to.
-func radixGradeInt8[I integer](from, to []int8, p []I) {
+func radixGradeInt8[I integer](from []int8, p []I) {
 	var (
 		offset [256]I // Keep track of where room is made for byte groups in the buffer
 		key    uint8
@@ -398,13 +397,12 @@ func radixGradeInt8[I integer](from, to []int8, p []I) {
 		key = uint8(elem)
 		j := offset[key]
 		offset[key]++
-		to[j] = elem
 		p[j] = I(i)
 	}
 }
 
-// radixGradeUint8 sorts p by from, and puts sorted from into to.
-func radixGradeUint8[I integer](from, to []uint8, p []I) {
+// radixGradeUint8 sorts p by from.
+func radixGradeUint8[I integer](from []uint8, p []I) {
 	var (
 		offset [256]I // Keep track of where room is made for byte groups in the buffer
 	)
@@ -425,7 +423,6 @@ func radixGradeUint8[I integer](from, to []uint8, p []I) {
 	for i, elem := range from {
 		j := offset[elem]
 		offset[elem]++
-		to[j] = elem
 		p[j] = I(i)
 	}
 }

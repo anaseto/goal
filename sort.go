@@ -224,15 +224,13 @@ func ascendAB(xv *AB) V {
 		}
 		return NewAI(ascendBools[int64](xv.elts))
 	}
-	to := make([]byte, xv.Len())
-	copy(to, xv.elts)
 	if xv.Len() < 256 {
 		p := permRange[byte](xv.Len())
-		radixGradeUint8[byte](xv.elts, to, p)
+		radixGradeUint8[byte](xv.elts, p)
 		return NewAB(p)
 	}
 	p := permRange[int64](xv.Len())
-	radixGradeUint8[int64](xv.elts, to, p)
+	radixGradeUint8[int64](xv.elts, p)
 	return NewAI(p)
 }
 
@@ -247,7 +245,7 @@ func ascendBools[I integer](xs []byte) []I {
 	for i, xi := range xs {
 		n := offsets[xi]
 		offsets[xi]++
-		r[i] = n
+		r[n] = I(i)
 	}
 	return r
 }

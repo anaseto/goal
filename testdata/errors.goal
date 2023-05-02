@@ -931,6 +931,7 @@ rx/([a-z])/42"b" / type
 rx/[a-z]/\42 / type
 rx/[a-z]/\42"b" / type
 4 2$"?" / non-ascending
+4 -2$"?" / non-ascending
 4.5 2$"?" / non-ascending
 1 0$"?" / non-ascending
 "c" "b"$"?" / non-ascending
@@ -1062,3 +1063,9 @@ rx/[a-z]/#3 5 / type
 !9999999999999 9999999 99999 9999999 / overflow
 atan "a" / type
 cos "a" 3 / type
+rt.ofs[1;2] / too many arguments
+rt.ofs[1] / type
+rt.vars[1] / type
+rt.vars["invalid"] / invalid
+rt.time[%;,2;3.5] / non-integer
+rt.time["%,2";3.5] / non-integer

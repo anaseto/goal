@@ -357,3 +357,5 @@ rt.ofs"\t";a:"a""b";"$a" / "a\tb"
 rt.ofs"\t" / " "
 rt.ofs"\t";rt.ofs" " / "\t"
 {i:=(!#x)!x;y:++y;@[*y;i;:;y@'i]}[0 1 0;("a""b""c";!3)] / "a" 1 "c"
+rt.time[%;,2;0] / 0
+rt.time["%,2";0] / 0
