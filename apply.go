@@ -583,19 +583,19 @@ func applyI(n int, i int64, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *Dict:
-		rk := takeN(i, yv.keys)
+		rk := takePadN(i, yv.keys)
 		rk.InitRC()
-		rv := takeN(i, yv.values)
+		rv := takePadN(i, yv.values)
 		rv.InitRC()
 		return NewV(&Dict{
 			keys:   rk.value.(array),
 			values: rv.value.(array)})
 	case array:
-		r := takeN(i, yv)
+		r := takePadN(i, yv)
 		r.InitRC()
 		return r
 	default:
-		r := takeNAtom(i, y)
+		r := takePadN(i, toArray(y).value.(array))
 		r.InitRC()
 		return r
 	}

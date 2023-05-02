@@ -429,17 +429,17 @@ func take(x, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *Dict:
-		rk := takePadN(n, yv.keys)
+		rk := takeN(n, yv.keys)
 		rk.InitRC()
-		rv := takePadN(n, yv.values)
+		rv := takeN(n, yv.values)
 		rv.InitRC()
 		return NewV(&Dict{
 			keys:   rk.value.(array),
 			values: rv.value.(array)})
 	case array:
-		return takePadN(n, yv)
+		return takeN(n, yv)
 	default:
-		return takePadN(n, toArray(y).value.(array))
+		return takeNAtom(n, y)
 	}
 }
 
@@ -466,6 +466,88 @@ func takeCyclicSlice[T any](n int64, ys []T) []T {
 		copy(r[i:n], ys[:n-i])
 	}
 	return r
+}
+
+func takeNAtom(n int64, y V) V {
+	if y.IsI() {
+		yv := y.I()
+		if isBI(yv) {
+			if isbI(yv) {
+				r := make([]byte, n)
+				if yv != 0 {
+					for i := range r {
+						r[i] = 1
+					}
+				}
+				return newABb(r)
+			}
+			r := constArray(n, byte(yv))
+			return NewAB(r)
+		}
+		r := constArray(n, yv)
+		return NewAI(r)
+	}
+	if y.IsF() {
+		yv := y.F()
+		r := constArray(n, yv)
+		return NewAF(r)
+	}
+	switch yv := y.value.(type) {
+	case S:
+		r := constArray(n, string(yv))
+		return NewAS(r)
+	default:
+		r := constArray(n, y)
+		rv := &AV{elts: r}
+		var n = 2
+		rv.InitWithRC(&n)
+		return NewV(rv)
+	}
+}
+
+func constArray[T any](n int64, y T) []T {
+	r := make([]T, n)
+	for i := range r {
+		r[i] = y
+	}
+	return r
+}
+
+func takeN(n int64, y array) V {
+	if y.Len() == 0 {
+		if n < 0 {
+			n = -n
+		}
+		switch y.(type) {
+		case *AS:
+			r := make([]string, n)
+			return NewAS(r)
+		case *AF:
+			r := make([]float64, n)
+			return NewAF(r)
+		case *AV:
+			r := make([]V, n)
+			for i := range r {
+				r[i] = NewAV(nil)
+			}
+			return NewAV(r)
+		default:
+			r := make([]byte, n)
+			return newABb(r)
+		}
+	}
+	switch {
+	case n >= 0:
+		if n > int64(y.Len()) {
+			return takeCyclic(n, y)
+		}
+		return Canonical(NewV(y.slice(0, int(n))))
+	default:
+		if n < int64(-y.Len()) {
+			return takeCyclic(n, y)
+		}
+		return Canonical(NewV(y.slice(y.Len()+int(n), y.Len())))
+	}
 }
 
 func takeCyclic(n int64, y array) V {
@@ -557,88 +639,6 @@ func padNSliceVs(n int64, ys []V) []V {
 		}
 	}
 	return r
-}
-
-func takeNAtom(n int64, y V) V {
-	if y.IsI() {
-		yv := y.I()
-		if isBI(yv) {
-			if isbI(yv) {
-				r := make([]byte, n)
-				if yv != 0 {
-					for i := range r {
-						r[i] = 1
-					}
-				}
-				return newABb(r)
-			}
-			r := constArray(n, byte(yv))
-			return NewAB(r)
-		}
-		r := constArray(n, yv)
-		return NewAI(r)
-	}
-	if y.IsF() {
-		yv := y.F()
-		r := constArray(n, yv)
-		return NewAF(r)
-	}
-	switch yv := y.value.(type) {
-	case S:
-		r := constArray(n, string(yv))
-		return NewAS(r)
-	default:
-		r := constArray(n, y)
-		rv := &AV{elts: r}
-		var n = 2
-		rv.InitWithRC(&n)
-		return NewV(rv)
-	}
-}
-
-func constArray[T any](n int64, y T) []T {
-	r := make([]T, n)
-	for i := range r {
-		r[i] = y
-	}
-	return r
-}
-
-func takeN(n int64, y array) V {
-	if y.Len() == 0 {
-		if n < 0 {
-			n = -n
-		}
-		switch y.(type) {
-		case *AS:
-			r := make([]string, n)
-			return NewAS(r)
-		case *AF:
-			r := make([]float64, n)
-			return NewAF(r)
-		case *AV:
-			r := make([]V, n)
-			for i := range r {
-				r[i] = NewAV(nil)
-			}
-			return NewAV(r)
-		default:
-			r := make([]byte, n)
-			return newABb(r)
-		}
-	}
-	switch {
-	case n >= 0:
-		if n > int64(y.Len()) {
-			return takeCyclic(n, y)
-		}
-		return Canonical(NewV(y.slice(0, int(n))))
-	default:
-		if n < int64(-y.Len()) {
-			return takeCyclic(n, y)
-		}
-		return Canonical(NewV(y.slice(y.Len()+int(n), y.Len())))
-	}
 }
 
 // ShiftBefore returns x rshift y.

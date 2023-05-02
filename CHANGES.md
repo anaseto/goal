@@ -1,7 +1,12 @@
 v? ?
 
 + Make out-indexing valid and return the zero value of the array, in the same
-  way as padding.
+  way as padding does.
++ Now that `X@i` does pad on outdexing, invert `i@Y` and `i#Y` swap from
+  previous realease to be more compatible with K, as it's now quite natural
+  that `i@Y` is the same as `Y@!i` (except for being more efficient by not
+  actually generating indices). Also, new mnemonic: @ looks like a bit like a
+  zero, so it pads.
 + New `"b"$s` for converting a string to and from array of bytes.
 + New `"c"$s` for converting a string to and from array of code points, and make
   `"i"$s` now be parse int, and `"n"$s` only parse number (floats).
@@ -48,7 +53,8 @@ This release makes quite a few significant changes and improvements.
   missing.  `@` in kind of a circle, which is a good mnemonic for the cyclic
   behavior (which also feels to me more like an apply action than just padding
   would). Also, because new `X#d` does padding for new keys, it's expected that
-  `i#y` does too for out of bound indices. (breaking change)
+  `i#y` does too for out of bound indices. (breaking change: Actually `i#y`
+  swapped to K normal behavior in next release, so that `i@y` does padding)
 + Make `i^Y`, `i^s`, `i!s`, `i!Y` use `i` as the length of the result, and use
   `-i` for the old behavior (breaking change). This was suggested by @Marshall
   on the aplfarm matrix channel.

@@ -115,7 +115,7 @@ s^s trim        " []"^"  [text]  " -> "text"      ""^" \nstuff\t" -> "stuff"
 X^d w/o keys    (,"b")^"a""b""c"!0 1 2 -> "a""c"!0 2
 X^Y w/o values  2 3^1 1 2 3 3 4 -> 1 1 4
 #x  length      #2 4 5 -> 3       #"ab" "cd" -> 2       #42 -> 1      #"ab" -> 1
-i#y take/pad    2#6 7 8 -> 6 7    4#6 7 8 -> 6 7 8 0    -4#6 7 8 -> 0 6 7 8
+i#y take/repeat 2#6 7 8 -> 6 7    4#6 7 8 -> 6 7 8 6 (cyclic)       3#1 -> 1 1 1
 s#s count       "ab"#"cabdab" "cd" "deab" -> 2 0 1      ""#"αβγ" -> 4
 f#y replicate   {0 1 2 0}#4 1 5 3 -> 1 5 5        {x>0}#2 -3 1 -> 2 1
 X#d with keys   "a""c""e"#"a""b""c""a"!2 3 4 5 -> "a""c""a"!2 4 5
@@ -148,7 +148,7 @@ s?s index       "a = a + 1"?"=" "+" -> 2 6
 d?y find key    ("a" "b"!3 4)?4 -> "b"       ("a" "b"!3 4)?5 -> ""
 X?y find        9 8 7?8 -> 1                 9 8 7?6 -> 3
 @x  type        @2 -> "i"   @1.5 -> "n"   @"ab" -> "s"   @2 3 -> "I"   @+ -> "f"
-i@y take/repeat 2@6 7 8 -> 6 7    4@6 7 8 -> 6 7 8 6 (cyclic)       3@1 -> 1 1 1
+i@y take/pad    2@6 7 8 -> 6 7    4@6 7 8 -> 6 7 8 0    -4@6 7 8 -> 0 6 7 8
 s@i substr      "abcdef"@2  -> "cdef"                                (s[offset])
 r@s match       rx/^[a-z]+$/"abc" -> 1       rx/\s/"abc" -> 0
 r@s find group  rx/([a-z])(.)/"&a+c" -> "a+" "a" "+"     (whole match, group(s))
