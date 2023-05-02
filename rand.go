@@ -48,52 +48,10 @@ func rolldeal(ctx *Context, x, y V) V {
 	return roll(ctx, n, y)
 }
 
-func rollSlice[T any](ctx *Context, n int64, y []T) []T {
-	r := make([]T, n)
-	ylen := len(y)
-	if ylen == 0 {
-		return nil
-	}
-	for i := range r {
-		r[i] = y[ctx.rand.Intn(ylen)]
-	}
-	return r
-}
-
 func roll(ctx *Context, n int64, y V) V {
 	if y.IsI() {
 		yv := y.I()
-		if yv <= 0 {
-			return Panicf("i?y : non-positive y (%d)", yv)
-		}
-		if yv == 2 {
-			r := make([]byte, n)
-			var i int64
-		loop:
-			for {
-				u := ctx.rand.Uint64()
-				for j := 0; j < 64; j += 8 {
-					if i >= n {
-						break loop
-					}
-					r[i] = uint8(u>>j) >> 7
-					i++
-				}
-			}
-			return newABb(r)
-		} else if yv <= 256 {
-			r := make([]byte, n)
-			for i := range r {
-				r[i] = byte(ctx.rand.Int63n(yv))
-			}
-			return NewAB(r)
-		} else {
-			r := make([]int64, n)
-			for i := range r {
-				r[i] = ctx.rand.Int63n(yv)
-			}
-			return NewAI(r)
-		}
+		return rollI(ctx, n, yv)
 	}
 	if y.IsF() {
 		if !isI(y.F()) {
@@ -122,35 +80,49 @@ func roll(ctx *Context, n int64, y V) V {
 	}
 }
 
-func dealSlice[T any](ctx *Context, n int64, y []T) []T {
+func rollI(ctx *Context, n, y int64) V {
+	if y <= 0 {
+		return Panicf("i?y : non-positive y (%d)", y)
+	}
+	if y == 2 {
+		r := make([]byte, n)
+		var i int64
+	loop:
+		for {
+			u := ctx.rand.Uint64()
+			for j := 0; j < 64; j += 8 {
+				if i >= n {
+					break loop
+				}
+				r[i] = uint8(u>>j) >> 7
+				i++
+			}
+		}
+		return newABb(r)
+	}
+	if y <= 256 { // <= because up to y (excluded)
+		r := make([]byte, n)
+		for i := range r {
+			r[i] = byte(ctx.rand.Int63n(y))
+		}
+		return NewAB(r)
+	}
+	r := make([]int64, n)
+	for i := range r {
+		r[i] = ctx.rand.Int63n(y)
+	}
+	return NewAI(r)
+}
+
+func rollSlice[T any](ctx *Context, n int64, y []T) []T {
+	r := make([]T, n)
 	ylen := len(y)
-	if n == 0 {
+	if ylen == 0 {
 		return nil
 	}
-	if n*4+8 < int64(ylen) {
-		r := make([]T, n)
-		// For small n, we use hashing, not the fastest
-		// algorithm, but not too bad either.
-		m := map[int]struct{}{}
-		var i int64
-		for i < n {
-			k := ctx.rand.Intn(ylen)
-			_, ok := m[k]
-			if ok {
-				continue
-			}
-			m[k] = struct{}{}
-			r[i] = y[k]
-			i++
-		}
-		return r
+	for i := range r {
+		r[i] = y[ctx.rand.Intn(ylen)]
 	}
-	r := make([]T, ylen)
-	copy(r, y)
-	ctx.rand.Shuffle(ylen, func(i, j int) {
-		r[i], r[j] = r[j], r[i]
-	})
-	r = r[:n]
 	return r
 }
 
@@ -163,32 +135,11 @@ func deal(ctx *Context, n int64, y V) V {
 		if n > yv {
 			return Panicf("(-i)?y : i > y (%d vs %d)", n, yv)
 		}
-		if n*4+8 < yv {
-			// For small n, we use hashing, not the fastest
-			// algorithm, but not too bad either.
-			r := make([]int64, n)
-			m := map[int64]struct{}{}
-			var i int64
-			for i < n {
-				k := ctx.rand.Int63n(yv)
-				_, ok := m[k]
-				if ok {
-					continue
-				}
-				m[k] = struct{}{}
-				r[i] = k
-				i++
-			}
-			return NewV(&AI{elts: r, flags: flagUnique})
+		if yv <= 256 { // <= because up to yv (excluded)
+			r := dealI[byte](ctx, n, yv)
+			return NewV(&AB{elts: r, flags: flagUnique})
 		}
-		r := make([]int64, yv)
-		for i := range r {
-			r[i] = int64(i)
-		}
-		ctx.rand.Shuffle(int(yv), func(i, j int) {
-			r[i], r[j] = r[j], r[i]
-		})
-		r = r[:n]
+		r := dealI[int64](ctx, n, yv)
 		return NewV(&AI{elts: r, flags: flagUnique})
 	}
 	if y.IsF() {
@@ -227,6 +178,65 @@ func deal(ctx *Context, n int64, y V) V {
 	default:
 		panic("deal")
 	}
+}
+
+func dealI[I integer](ctx *Context, n, y int64) []I {
+	if n*4+8 < y {
+		// For small n, we use hashing, not the fastest
+		// algorithm, but not too bad either.
+		r := make([]I, n)
+		m := map[I]struct{}{}
+		var i int64
+		for i < n {
+			k := I(ctx.rand.Int63n(y))
+			_, ok := m[k]
+			if ok {
+				continue
+			}
+			m[k] = struct{}{}
+			r[i] = k
+			i++
+		}
+		return r
+	}
+	r := make([]I, y)
+	for i := range r {
+		r[i] = I(i)
+	}
+	ctx.rand.Shuffle(int(y), func(i, j int) {
+		r[i], r[j] = r[j], r[i]
+	})
+	r = r[:n]
+	return r
+}
+
+func dealSlice[T any](ctx *Context, n int64, y []T) []T {
+	ylen := len(y)
+	if n*4+8 < int64(ylen) {
+		r := make([]T, n)
+		// For small n, we use hashing, not the fastest
+		// algorithm, but not too bad either.
+		m := map[int]struct{}{}
+		var i int64
+		for i < n {
+			k := ctx.rand.Intn(ylen)
+			_, ok := m[k]
+			if ok {
+				continue
+			}
+			m[k] = struct{}{}
+			r[i] = y[k]
+			i++
+		}
+		return r
+	}
+	r := make([]T, ylen)
+	copy(r, y)
+	ctx.rand.Shuffle(ylen, func(i, j int) {
+		r[i], r[j] = r[j], r[i]
+	})
+	r = r[:n]
+	return r
 }
 
 func seed(ctx *Context, x V) V {
