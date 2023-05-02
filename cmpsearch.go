@@ -1342,8 +1342,8 @@ loop:
 func findBsBs[I integer](xs []byte, ys []byte) []I {
 	// len(xs) <= MaxIntT so that i+1 fits in T
 	var m [256]I
-	for i, xi := range xs {
-		m[xi] = I(i) + 1
+	for i := len(xs) - 1; i >= 0; i-- {
+		m[xs[i]] = I(i) + 1
 	}
 	xlen := I(len(xs))
 	r := make([]I, len(ys))
@@ -1360,8 +1360,8 @@ func findBsBs[I integer](xs []byte, ys []byte) []I {
 func findBsIs[I integer](xs []byte, ys []int64) []I {
 	// len(xs) <= MaxIntT so that i+1 fits in T
 	var m [256]I
-	for i, xi := range xs {
-		m[xi] = I(i) + 1
+	for i := len(xs) - 1; i >= 0; i-- {
+		m[xs[i]] = I(i) + 1
 	}
 	xlen := I(len(xs))
 	r := make([]I, len(ys))
