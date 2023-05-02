@@ -5,7 +5,7 @@ v? ?
 + Now that `X@i` does pad on outdexing, invert `i@Y` and `i#Y` swap from
   previous realease to be more compatible with K, as it's now quite natural
   that `i@Y` is the same as `Y@!i` (except for being more efficient by not
-  actually generating indices). Also, new mnemonic: @ looks like a bit like a
+  actually generating indices). Also, new mnemonic: `@` looks like a bit like a
   zero, so it pads.
 + New `"b"$s` for converting a string to and from array of bytes.
 + New `"c"$s` for converting a string to and from array of code points, and make
@@ -32,13 +32,14 @@ v? ?
   `>I` when `I` fits into a `[]int8`, `[]int16` or `[]int32` slice).
 + Arrays of small integers (0-255) are now represented as arrays of bytes,
   saving memory (in particular when converting a string to bytes, or even
-  codepoints if the string is ascii), and facilitating small-range
+  codepoints if the string is ASCII), and facilitating small-range
   optimizations for searching and sorting. Previously, only booleans where
   stored more compactly.
 + Recognize `x:op x` assignement as potential in-place operation for global
   variables too (previously only `x op:y` form was recognized for global
   variables).
-+ Fix missing integer overflow check in odometer.
++ Fix missing integer overflow check in odometer, a regression in boolean
+  grade, as well as other minor issues.
 
 # v0.15.0 2023-04-21
 

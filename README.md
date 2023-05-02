@@ -39,9 +39,9 @@ It's main distinctive features are as follows:
 * Easily embeddable and extensible in Go.
 * Array performance is quite decent, with specialized algorithms depending on
   inputs (type, size, range), and variable liveness analysis that reduces
-  cloning by reusing dead immutable arrays (good in code with limited
-  branching). It is, though, not a goal to reach state-of-the-art (no SIMD, and
-  no bit booleans, fitting integers in either uint8 or int64).
+  cloning by reusing dead immutable arrays (in code with limited branching).
+  However, it is not a goal to reach state-of-the-art (no SIMD, and no bit
+  booleans, fitting integers in arrays using either uint8 or int64 elements).
 + Scalar performance is typical for a bytecode-compiled interpreter (without
   JIT), somewhat slower than a C bytecode interpreter: value representation is
   less compact than how it could be done in C, but Goal does have unboxed
