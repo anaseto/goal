@@ -553,7 +553,9 @@ func takeN(n int64, y array) V {
 func takeCyclic(n int64, y array) V {
 	switch yv := y.(type) {
 	case *AB:
-		return NewABWithRC(takeCyclicSlice[byte](n, yv.elts), reuseRCp(yv.rc))
+		fl := yv.flags & flagBool
+		r := takeCyclicSlice[byte](n, yv.elts)
+		return NewV(&AB{elts: r, rc: reuseRCp(yv.rc), flags: fl})
 	case *AI:
 		return NewAIWithRC(takeCyclicSlice[int64](n, yv.elts), reuseRCp(yv.rc))
 	case *AF:
