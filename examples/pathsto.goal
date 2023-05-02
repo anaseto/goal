@@ -6,7 +6,7 @@ succ:{=x[;1]!x[;0]}@{nodes?x}'edges
 TO:-1
 next:{
   ((TO~x -1)|LEN<#x)and:,x
-  s:in[;x]_succ x -1; (0~#s)and:,x
+  s:x^succ x -1; (0~#s)and:,x
   (x,)'s
 }
 paths:{[from;len]

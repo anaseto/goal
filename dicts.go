@@ -145,8 +145,8 @@ func dictArithAmend(x array, y array, f func(V, V) V, z array) (array, error) {
 	}
 }
 
-// takeKeys implements X#d.
-func takeKeys(x array, y *Dict) V {
-	v := applyDict(y, NewV(x))
-	return NewDict(NewV(x), v)
+// withKeys implements X#d.
+func withKeys(x array, y *Dict) V {
+	r := memberOf(NewV(y.keys), NewV(x))
+	return NewDict(replicate(r, NewV(y.keys)), replicate(r, NewV(y.values)))
 }

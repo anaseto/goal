@@ -1186,7 +1186,7 @@ func intersection(x array, y V) V {
 	case array:
 		return replicate(memberOf(y, NewV(x)), y)
 	case *Dict:
-		return takeKeys(x, yv)
+		return withKeys(x, yv)
 	default:
 		return panicType("X#Y", "Y", y)
 	}

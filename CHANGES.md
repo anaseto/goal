@@ -1,4 +1,4 @@
-# v? ?
+v? ?
 
 + Make out-indexing valid and return the zero value of the array, in the same
   way as padding.
@@ -19,6 +19,9 @@
   zero value for the given list type, except for a few special reductions where
   a different neutral element is clear (like `*/`, `&/`, and `|/` for
   non-generic lists).
++ Make X#d follow same semantics as X^d (except for being the negation of it).
+  This means that padding a dictionary should either be done with merge or
+  individually to its arrays.
 + Improvements in sorting of integers, depending on the range, using either
   counting sort (`^I` for small-range) or radix sort (for `^I`, `<I`, and
   `>I` when `I` fits into a `[]int8`, `[]int16` or `[]int32` slice).

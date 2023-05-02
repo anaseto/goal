@@ -243,7 +243,7 @@ genOp:{[opname;opsym] / globals o,op,xt,h
 
 dox:{
   xt::x; rts:orts[::o;xt]; xct:nt2go xt
-  xUy:"\n"/{(e;t):getET[::o;x];doxUy[x;e;t]}'¿[;utypes]#rts
+  xUy:"\n"/{(e;t):getET[::o;x];doxUy[x;e;t]}'utypes#rts
   xBy:"\n"/{(e;t):getET[::o;x];doxBy[x;e;t]}'^ntypes^rts
   xY:"\n"/{(e;t):getET[::o;x];doxY[x;e;t]}'^rts
   xdAV:doxdAV""
@@ -312,7 +312,7 @@ doxdAV:{
 
 doX:{
   xt::x; rts:orts[::o;xt]; xct:t2go xt
-  XUy:"\n"/{(e;t):getET[::o;x];doXUy[x;e;t]}'¿[;utypes]#rts
+  XUy:"\n"/{(e;t):getET[::o;x];doXUy[x;e;t]}'utypes#rts
   XBy:"\n"/{(e;t):getET[::o;x];doXBy[x;e;t]}'^ntypes^rts
   XY:"\n"/{(e;t):getET[::o;x];doXY[x;e;t]}'^rts
   XdAV:doXdAV""
