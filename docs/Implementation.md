@@ -1,4 +1,4 @@
-*Last updated: 2023-04-15*
+*Last updated: 2023-05-02*
 
 # Implementation notes
 
@@ -139,16 +139,20 @@ Array languages face a major difficulty with primitives, in that most of them
 have to handle various different specialized array types, for performance
 reasons.
 
-For example, there's a type for arrays of booleans (AB), another for arrays of
-int64 (AI), another for arrays of float64 (AF), and one for generic arrays
-(AV), which can contain any values (like arrays of arrays, and mixed values of
-any kind).  Goal's user does not have to think about this, and can treat
-booleans as 0 and 1, use 4.0 as an integer, and perform many operations on
-these types without doing any manual conversions.  The implementation, though,
-must handle each case for each operand, which can quickly become daunting. And
-there's no really any way, except for heavy macro usage, to avoid handling all
-the cases (generics almost wouldn't help here, as we're dealing with many type
-combinations, not with similar types separately).
+For example, there's a type for arrays of bytes (AB), another for arrays of
+64-bit integers (AI), another for arrays of 64-bit floats (AF), and one for
+generic arrays (AV), which can contain any values (like arrays of arrays, and
+mixed values of any kind).  Goal's user does not have to think about this, and
+can treat booleans as 0 and 1 without worring whether they're stored compactly
+as a byte or an int64. One can also use 4.0 as an integer (but not 4.5), and
+generally perform most operations on numeric types without doing any manual
+conversions.  The implementation, though, must handle each case for each
+operand, which can quickly become daunting. And there's no really any way,
+except for heavy macro usage, to avoid handling all the cases: generics do help
+to some extent to abstract some algorithms, but not much to deal with many type
+combinations simultaneously, and often specific types have better algorithms
+than a generic one (for example sort and search for arrays of byte-sized
+integers).
 
 For simple unary functions, a variadic function looks like this:
 
@@ -176,30 +180,30 @@ func negate(x V) V {
 	switch xv := x.value.(type) {
 	case *AB:
 		r := make([]int64, xv.Len())
-		for i, xi := range xv.Slice {
-			r[i] = -b2i(xi)
+		for i, xi := range xv.elts {
+			r[i] = -int64(xi)
 		}
 		return NewAI(r)
 	case *AI:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
-			r.Slice[i] = -xi
+		for i, xi := range xv.elts {
+			r.elts[i] = -xi
 		}
 		return NewV(r)
 	case *AF:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
-			r.Slice[i] = -xi
+		for i, xi := range xv.elts {
+			r.elts[i] = -xi
 		}
 		return NewV(r)
 	case *AV:
 		r := xv.reuse()
-		for i, xi := range xv.Slice {
+		for i, xi := range xv.elts {
 			ri := negate(xi)
 			if ri.IsPanic() {
 				return ri
 			}
-			r.Slice[i] = ri
+			r.elts[i] = ri
 		}
 		return NewV(r)
 	default:
@@ -228,9 +232,9 @@ In our case, some things were even a bit more verbose than they would have been
 in C, because in Go type conversions have to be explicit all the time, and
 there are no macros, meaning more code duplication for the various numeric
 types.  In the end, it was not as bad as expected, and for extreme cases, like
-arithmetic primitives, I used some code generation, which is similar to how
-they're usually done in C array language interpreters by using macros. The
-somewhat unsightly result is in `arithd.go`.
+arithmetic primitives, I used some code generation (written in Goal), which is
+similar to how they're usually done in C array language interpreters by using
+macros.  The somewhat unsightly result is in `arithd.go`.
 
 Other than that, some array primitives do require some algorithmic work, in
 particular self-search functions, though there's no way I'm going to explain
