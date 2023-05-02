@@ -81,6 +81,7 @@ f:{x+y};f[1;2;3] / too many arguments
 2 -3_"a" / non-ascending
 20 40_!10 / out of bound
 0 5_"a" / out of bound
+-1 5_"a" / out of bound
 1.5#!10 / non-integer
 1 2 3#4 / type
 1 -2 3#4 / type
@@ -192,8 +193,10 @@ a:!10;a[1;2]:2 / out of depth
 a:!10;a[1]: / without expression right
 nan[1;2;3] / too many arguments
 nan "a" / type
+nan "a" 3 / type
 "b" nan 2.5 / type
 2 nan "a" / type
+2 nan "a" 3 / type
 panic[1;2] / too many arguments
 panic[1] / type
 panic["msg"] / msg
@@ -202,6 +205,7 @@ panic["msg"] / msg
 60 -60/2 42 / non positive
 2 csv "1,2,3" / type
 "ab" csv "1,2,3" / not a code point character
+"\xff" csv "1,2,3" / not a valid code point character
 csv (1 2;3) / type
 csv 3 / type
 "\t" csv 3 / type
@@ -1056,3 +1060,5 @@ rx/[a-z]/#3 5 / type
 (1 2;3 4)[;2.5 3] / non-integer
 (1 2;3 4)[0;2.5 3] / non-integer
 !9999999999999 9999999 99999 9999999 / overflow
+atan "a" / type
+cos "a" 3 / type
