@@ -22,6 +22,7 @@ type array interface {
 	atInts([]int64) array // like x[y] but assumes valid positive indices
 	atBytes([]byte) array // like x[y] but assumes valid positive indices
 	shallowClone() array  // shallow clone, erases flags
+	generic() bool        // generic array
 }
 
 type flags uint32
@@ -284,7 +285,7 @@ func (x *AS) set(i int, y V) {
 
 // set changes x at i with y (in place).
 func (x *AV) set(i int, y V) {
-	y.InitWithRC(x.rc)
+	y.immutable()
 	x.elts[i] = y
 }
 
@@ -807,3 +808,9 @@ func vArrayAtV(x array, y V) V {
 		panic("arrayAtV")
 	}
 }
+
+func (x *AB) generic() bool { return false }
+func (x *AI) generic() bool { return false }
+func (x *AF) generic() bool { return false }
+func (x *AS) generic() bool { return false }
+func (x *AV) generic() bool { return true }

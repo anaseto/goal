@@ -214,9 +214,9 @@ func toIndicesRec(x V) V {
 		}
 		return NewAV(r)
 	case *AS:
-		return Panicf("bad type \"%s\"", x.Type())
+		return Panicf("bad type \"%s\" as index", x.Type())
 	default:
-		return Panicf("bad type \"%s\"", x.Type())
+		return Panicf("bad type \"%s\" as index", x.Type())
 	}
 }
 
@@ -901,4 +901,16 @@ func maxBytes(x []byte) byte {
 		}
 	}
 	return max
+}
+
+func (x V) isFlatArray() bool {
+	if x.kind != valBoxed {
+		return false
+	}
+	switch xv := x.value.(type) {
+	case array:
+		return !xv.generic()
+	default:
+		return false
+	}
 }

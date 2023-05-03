@@ -14,7 +14,15 @@ func (ctx *Context) amend3(x, y, f V) V {
 		xv = xv.shallowClone()
 		y = toIndices(y)
 		if y.IsPanic() {
-			return ppanic("@[X;i;f] : i ", y)
+			return ppanic("@[X;i;f] : ", y)
+		}
+		if f.kind == valVariadic && !xv.generic() && y.isFlatArray() {
+			switch f.variadic() {
+			case vMatch:
+				return amend3NotV(xv, y)
+			case vSubtract:
+				return amend3NegateV(xv, y)
+			}
 		}
 		r, err := ctx.amend3array(xv, y, f)
 		if err != nil {
@@ -65,6 +73,10 @@ func amend3Dict(ctx *Context, d *Dict, y, f V) V {
 	}
 }
 
+func outOfBounds(y int64, l int) bool {
+	return y < 0 || y >= int64(l)
+}
+
 func padArrayMut(n int, x array) array {
 	switch xv := x.(type) {
 	case *AB:
@@ -85,8 +97,7 @@ func padArrayMut(n int, x array) array {
 		}
 	case *AV:
 		pad := proto(xv.elts)
-		var rc int = 2
-		pad.InitWithRC(&rc)
+		pad.immutable()
 		for i := 0; i < n; i++ {
 			xv.elts = append(xv.elts, pad)
 		}
@@ -104,7 +115,7 @@ func amendArrayAt(x array, y int, z V) array {
 		a[i] = x.at(i)
 	}
 	rc := x.RC()
-	z.InitWithRC(rc)
+	z.immutable()
 	a[y] = z
 	return &AV{elts: a, rc: rc}
 }
@@ -174,10 +185,10 @@ func (ctx *Context) amend4(x, y, f, z V) V {
 		xv = xv.shallowClone()
 		y = toIndices(y)
 		if y.IsPanic() {
-			return ppanic("@[X;i;f;z] : i ", y)
+			return ppanic("@[X;i;f;z] : ", y)
 		}
 		if f.kind == valVariadic && variadic(f.n) == vRight {
-			r, err := amendr(xv, y, z)
+			r, err := amend4Right(xv, y, z)
 			if err != nil {
 				return Panicf("@[X;i;:;z] : %v", err)
 			}
@@ -209,6 +220,13 @@ func amend4Dict(ctx *Context, d *Dict, y, f, z V) V {
 			ky = findArray(keys, y)
 		}
 		y.DecrRC()
+		if f.kind == valVariadic && variadic(f.n) == vRight {
+			r, err := amend4Right(values, ky, z)
+			if err != nil {
+				return Panicf("@[d;y;f;z] : %v", err)
+			}
+			return NewV(&Dict{keys: keys, values: canonicalArray(r)})
+		}
 		r, err := ctx.amend4array(values, ky, f, z)
 		if err != nil {
 			return Panicf("@[d;y;f;z] : %v", err)
@@ -225,6 +243,14 @@ func amend4Dict(ctx *Context, d *Dict, y, f, z V) V {
 			ky = findArray(keys, y)
 		}
 		y.DecrRC()
+		if f.kind == valVariadic && variadic(f.n) == vRight {
+			r, err := amend4Right(values, ky, z)
+			if err != nil {
+				// never happens because of key padding
+				return Panicf("@[d;y;f;z] : %v", err)
+			}
+			return NewV(&Dict{keys: keys, values: canonicalArray(r)})
+		}
 		r, err := ctx.amend4arrayI(values, ky.I(), f, z)
 		if err != nil {
 			return Panicf("@[d;y;f;z] : %v", err)
@@ -312,196 +338,6 @@ func amend4arrayAtIntegers[I integer](ctx *Context, x array, y []I, f, z V) (arr
 	return x, nil
 }
 
-func outOfBounds(y int64, l int) bool {
-	return y < 0 || y >= int64(l)
-}
-
-func amendr(x array, y, z V) (array, error) {
-	if y.IsI() {
-		if outOfBounds(y.I(), x.Len()) {
-			return x, fmt.Errorf("y out of bounds (%d)", y.I())
-		}
-		if isEltType(x, z) {
-			x.set(int(y.I()), z)
-			return x, nil
-		}
-		r := make([]V, x.Len())
-		for i := range r {
-			r[i] = x.at(i)
-		}
-		rc := x.RC()
-		z.InitWithRC(rc)
-		r[y.I()] = z
-		return &AV{elts: r, rc: rc}, nil
-	}
-	if isStar(y) {
-		y = rangeI(int64(x.Len()))
-	}
-	switch yv := y.value.(type) {
-	case *AB:
-		return amendrIntegers(x, yv.elts, z)
-	case *AI:
-		return amendrIntegers(x, yv.elts, z)
-	case *AV:
-		return amendrAV(x, yv, z)
-	default:
-		panic("amendr: y bad type")
-	}
-}
-
-func amendrIntegers[I integer](x array, y []I, z V) (array, error) {
-	xlen := x.Len()
-	for _, yi := range y {
-		if outOfBounds(int64(yi), xlen) {
-			return x, fmt.Errorf("out of bounds index (%d)", yi)
-		}
-	}
-	za, ok := z.value.(array)
-	if !ok {
-		if isEltType(x, z) {
-			amendrIntegersAtomMut(x, y, z)
-			return x, nil
-		}
-		r := make([]V, xlen)
-		for i := range r {
-			r[i] = x.at(i)
-		}
-		rc := x.RC()
-		z.InitWithRC(rc)
-		for _, yi := range y {
-			r[yi] = z
-		}
-		return &AV{elts: r, rc: rc}, nil
-	}
-	if za.Len() != len(y) {
-		return x, fmt.Errorf("length mismatch between y and z (%d vs %d)",
-			len(y), za.Len())
-	}
-	if sameType(x, za) {
-		amendrIntegersMut(x, y, za)
-		return x, nil
-	}
-	for i := range y {
-		if !isEltType(x, za.at(i)) {
-			r := make([]V, xlen)
-			for i := range r {
-				r[i] = x.at(i)
-			}
-			x = &AV{elts: r, rc: x.RC()}
-			break
-		}
-	}
-	for i, yi := range y {
-		x.set(int(yi), za.at(i))
-	}
-	return x, nil
-}
-
-func amendrIntegersAtomMut[I integer](x array, y []I, z V) {
-	switch xv := x.(type) {
-	case *AB:
-		var zi byte
-		if z.IsI() {
-			zi = byte(z.I())
-		} else {
-			zi = byte(z.F())
-		}
-		for _, yi := range y {
-			xv.elts[yi] = zi
-		}
-	case *AI:
-		var zi int64
-		if z.IsI() {
-			zi = z.I()
-		} else {
-			zi = int64(z.F())
-		}
-		for _, yi := range y {
-			xv.elts[yi] = zi
-		}
-	case *AF:
-		var zf float64
-		if z.IsI() {
-			zf = float64(z.I())
-		} else {
-			zf = z.F()
-		}
-		for _, yi := range y {
-			xv.elts[yi] = zf
-		}
-	case *AS:
-		zs := string(z.value.(S))
-		for _, yi := range y {
-			xv.elts[yi] = zs
-		}
-	case *AV:
-		rc := x.RC()
-		z.InitWithRC(rc)
-		for _, yi := range y {
-			xv.elts[yi] = z
-		}
-	}
-}
-
-func amendrIntegersMut[I integer](x array, y []I, za array) {
-	switch xv := x.(type) {
-	case *AB:
-		zv := za.(*AB)
-		for i, yi := range y {
-			xv.elts[yi] = zv.elts[i]
-		}
-	case *AI:
-		zv := za.(*AI)
-		for i, yi := range y {
-			xv.elts[yi] = zv.elts[i]
-		}
-	case *AF:
-		zv := za.(*AF)
-		for i, yi := range y {
-			xv.elts[yi] = zv.elts[i]
-		}
-	case *AS:
-		zv := za.(*AS)
-		for i, yi := range y {
-			xv.elts[yi] = zv.elts[i]
-		}
-	case *AV:
-		zv := za.(*AV)
-		rc := x.RC()
-		for i, yi := range y {
-			zi := zv.elts[i]
-			zi.InitWithRC(rc)
-			xv.elts[yi] = zi
-		}
-	}
-}
-
-func amendrAV(x array, yv *AV, z V) (array, error) {
-	var err error
-	za, ok := z.value.(array)
-	if !ok {
-		for _, yi := range yv.elts {
-			x, err = amendr(x, yi, z)
-			if err != nil {
-				return x, err
-			}
-		}
-		return x, nil
-	}
-	if za.Len() != yv.Len() {
-		return x, fmt.Errorf("length mismatch between y and z (%d vs %d)",
-			yv.Len(), za.Len())
-
-	}
-	for i, yi := range yv.elts {
-		x, err = amendr(x, yi, za.at(i))
-		if err != nil {
-			return x, err
-		}
-	}
-	return x, nil
-}
-
 // deepAmend3 implements .[X;y;f].
 func (ctx *Context) deepAmend3(x, y, f V) V {
 	x = x.Clone()
@@ -509,7 +345,7 @@ func (ctx *Context) deepAmend3(x, y, f V) V {
 	case array:
 		y = toIndices(y)
 		if y.IsPanic() {
-			return ppanic(".[X;y;f] : y ", y)
+			return ppanic(".[X;y;f] : ", y)
 		}
 		x, err := ctx.deepAmend3array(xv, y, f)
 		if err != nil {
@@ -579,7 +415,7 @@ func (ctx *Context) deepAmend4(x, y, f, z V) V {
 	case array:
 		y = toIndices(y)
 		if y.IsPanic() {
-			return ppanic(".[X;y;f] : y ", y)
+			return ppanic(".[X;y;f] : ", y)
 		}
 		x, err := ctx.deepAmend4array(xv, y, f, z)
 		if err != nil {

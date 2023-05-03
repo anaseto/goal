@@ -249,6 +249,12 @@ func not(x V) V {
 			r[i] = b2B(xi == 0)
 		}
 		return newABbWithRC(r, reuseRCp(xv.rc))
+	case *AS:
+		r := make([]byte, xv.Len())
+		for i, xi := range xv.elts {
+			r[i] = b2B(xi == "")
+		}
+		return newABbWithRC(r, reuseRCp(xv.rc))
 	case *AV:
 		r := xv.reuse()
 		for i, xi := range xv.elts {

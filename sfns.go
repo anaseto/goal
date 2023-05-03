@@ -497,10 +497,10 @@ func takeNAtom(n int64, y V) V {
 		r := constArray(n, string(yv))
 		return NewAS(r)
 	default:
+		y.immutable()
 		r := constArray(n, y)
-		rv := &AV{elts: r}
-		var n = 2
-		rv.InitWithRC(&n)
+		var n int
+		rv := &AV{elts: r, rc: &n}
 		return NewV(rv)
 	}
 }
@@ -627,8 +627,7 @@ func padNSliceVs(n int64, ys []V) []V {
 	}
 	r := make([]V, l)
 	pad := proto(ys)
-	var rc int = 2
-	pad.InitWithRC(&rc)
+	pad.immutable()
 	if n >= 0 {
 		copy(r[:len(ys)], ys)
 		for i := len(ys); i < len(r); i++ {

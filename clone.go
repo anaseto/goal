@@ -171,3 +171,25 @@ func (r *rxReplacer) CloneWithRC(rc *int) Value {
 	}
 	return r
 }
+
+func (x V) immutable() {
+	if x.kind != valBoxed {
+		return
+	}
+	xh, ok := x.value.(RefCountHolder)
+	if !ok {
+		xc, ok := x.value.(RefCounter)
+		if ok {
+			var n int = 2
+			xc.InitWithRC(&n)
+		}
+		return
+	}
+	rc := xh.RC()
+	if rc != nil {
+		*rc += 2
+	} else {
+		var n int = 2
+		xh.InitWithRC(&n)
+	}
+}
