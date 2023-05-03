@@ -27,6 +27,7 @@ v? ?
 + Make X#d follow same semantics as X^d (except for being the negation of it).
   This means that padding a dictionary should either be done with merge or
   individually to its arrays.
++ Implement !i for negative integers too.
 + Improvements in sorting of integers, depending on the range, using either
   counting sort (`^I` for small-range) or radix sort (for `^I`, `<I`, and
   `>I` when `I` fits into a `[]int8`, `[]int16` or `[]int32` slice).

@@ -55,7 +55,11 @@ func enumFieldsKeys(x V) V {
 
 func rangeI(n int64) V {
 	if n < 0 {
-		return panics("!i : i negative")
+		r := make([]int64, -n)
+		for i := range r {
+			r[i] = n + int64(i)
+		}
+		return NewV(&AI{elts: r, flags: flagAscending | flagUnique})
 	}
 	if n < 256 {
 		r := permRange[byte](int(n))
