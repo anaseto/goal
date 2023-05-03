@@ -114,6 +114,7 @@ a: / assignment without expression right
 2 1/2.5 / non-integer
 2 1/5 3 5 / length mismatch
 (1+1 0)/5 3 5 / length mismatch
+(1+1 0)/-1+1+5 3 5 / length mismatch
 2 1/(+) / type
 (1+1 0)/(+) / type
 "a"{x}/"a" / type
@@ -1069,3 +1070,22 @@ rt.vars[1] / type
 rt.vars["invalid"] / invalid
 rt.time[%;,2;3.5] / non-integer
 rt.time["%,2";3.5] / non-integer
+2.0\-6 / negative
+2\5 -6 / negative
+2\5.5 / non-integer
+2\5.5 5 / non-integer
+2\* / type
+2.5\6 / non-integer
+2\(5.5 5;3) / non-integer
+2 2\5.5 / non-integer
+2 2\5 -6 / negative
+2.5 2\5 3 / non-integer
+2.5 2\5 3 / non-integer
+2 2\5.5 3 / non-integer
+2 2\* / type
+2 2\(5.5 3;4) / non-integer
+2/2.5 3 / non-integer
+2/(2.5 3;2) / non-integer
+2 2/2.5 3 / non-integer
+2 2/(2.5 3;2) / non-integer
+2.5 2/(4 3;2) / non-integer

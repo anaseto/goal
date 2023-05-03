@@ -1,9 +1,6 @@
 package goal
 
 func encodeBaseDigits(b int64, x int64) int {
-	if x < 0 {
-		x = -x
-	}
 	n := 1
 	for x >= b {
 		x /= b
@@ -12,19 +9,151 @@ func encodeBaseDigits(b int64, x int64) int {
 	return n
 }
 
+func encodeIIv(f int64, x int64) V {
+	if x < 0 {
+		return Panicf(`i\i : negative integer (%d)`, x)
+	}
+	if f <= 256 {
+		r := encodeII[byte](f, x)
+		var fl flags
+		if f == 2 {
+			fl |= flagBool
+		}
+		return NewV(&AB{elts: r, flags: fl})
+	}
+	r := encodeII[int64](f, x)
+	return NewAI(r)
+}
+
+func encodeII[I integer](f int64, x int64) []I {
+	n := encodeBaseDigits(f, x)
+	r := make([]I, n)
+	for i := n - 1; i >= 0; i-- {
+		r[i] = I(x % f)
+		x /= f
+	}
+	return r
+}
+
+func encodeIInts(f int64, x []int64) V {
+	min, max := minMaxIntegers(x)
+	if min < 0 {
+		return Panicf(`i\I : negative integer (%d)`, min)
+	}
+	n := encodeBaseDigits(f, max)
+	a := make([]int64, n*len(x))
+	copy(a[(n-1)*len(x):], x)
+	encodeIIs(f, a, len(x), n)
+	r := make([]V, n)
+	for i := range r {
+		r[i] = NewAI(a[i*len(x) : (i+1)*len(x)])
+	}
+	return NewAV(r)
+}
+
+func encodeIBytes(f int64, x []byte) V {
+	max := int64(maxBytes(x))
+	n := encodeBaseDigits(f, max)
+	a := make([]byte, n*len(x))
+	copy(a[(n-1)*len(x):], x)
+	encodeIIs(f, a, len(x), n)
+	r := make([]V, n)
+	var fl flags
+	if f == 2 {
+		fl |= flagBool
+	}
+	for i := range r {
+		r[i] = NewV(&AB{elts: a[i*len(x) : (i+1)*len(x)], flags: fl})
+	}
+	return NewAV(r)
+}
+
+func encodeIIs[I integer](f int64, a []I, cols, n int) {
+	for i := n - 1; i >= 0; i-- {
+		for j := 0; j < cols; j++ {
+			ox := a[i*cols+j]
+			a[i*cols+j] = I(int64(ox) % f)
+			if i > 0 {
+				a[(i-1)*cols+j] = I(int64(ox) / f)
+			}
+		}
+	}
+}
+
+func encodeIsIv[I integer](f []I, x int64) V {
+	max := maxIntegers(f)
+	if max <= 256 {
+		r := encodeIsI[I, byte](f, x)
+		return NewAB(r)
+	}
+	r := encodeIsI[I, int64](f, x)
+	return NewAI(r)
+}
+
+func encodeIsI[I integer, J integer](f []I, x int64) []J {
+	n := len(f)
+	r := make([]J, n)
+	for i := n - 1; i >= 0; i-- {
+		fi := int64(f[i])
+		r[i] = J(x % fi)
+		x /= fi
+	}
+	return r
+}
+
+func encodeIsBytes[I integer](f []I, x []byte) V {
+	n := len(f)
+	a := make([]byte, n*len(x))
+	copy(a[(n-1)*len(x):], x)
+	encodeIsIs(f, a, len(x))
+	r := make([]V, n)
+	var fl flags
+	min, max := minMaxIntegers(f)
+	if min == 2 && max == 2 {
+		fl |= flagBool
+	}
+	for i := range r {
+		r[i] = NewV(&AB{elts: a[i*len(x) : (i+1)*len(x)], flags: fl})
+	}
+	return NewAV(r)
+}
+
+func encodeIsInts[I integer](f []I, x []int64) V {
+	min := minIntegers(x)
+	if min < 0 {
+		return Panicf(`I\I : negative integer (%d)`, min)
+	}
+	n := len(f)
+	a := make([]int64, n*len(x))
+	copy(a[(n-1)*len(x):], x)
+	encodeIsIs(f, a, len(x))
+	r := make([]V, n)
+	for i := range r {
+		r[i] = NewAI(a[i*len(x) : (i+1)*len(x)])
+	}
+	return NewAV(r)
+}
+
+func encodeIsIs[I integer, J integer](f []I, a []J, cols int) {
+	for i := len(f) - 1; i >= 0; i-- {
+		fi := int64(f[i])
+		for j := 0; j < cols; j++ {
+			ox := a[i*cols+j]
+			a[i*cols+j] = J(int64(ox) % fi)
+			if i > 0 {
+				a[(i-1)*cols+j] = J(int64(ox) / fi)
+			}
+		}
+	}
+}
+
 func encode(f V, x V) V {
 	if f.IsI() {
 		if f.I() <= 1 {
 			return panics("i\\x : base i is not > 1")
 		}
 		if x.IsI() {
-			n := encodeBaseDigits(f.I(), x.I())
-			r := make([]int64, n)
-			for i := n - 1; i >= 0; i-- {
-				r[i] = x.I() % f.I()
-				x.n /= f.I()
-			}
-			return NewAI(r)
+			return encodeIIv(f.I(), x.I())
 		}
 		if x.IsF() {
 			if !isI(x.F()) {
@@ -34,19 +163,9 @@ func encode(f V, x V) V {
 		}
 		switch xv := x.value.(type) {
 		case *AI:
-			a, n := encodeIIs(f.I(), xv.elts)
-			r := make([]V, n)
-			for i := range r {
-				r[i] = NewAI(a[i*xv.Len() : (i+1)*xv.Len()])
-			}
-			return NewAV(r)
+			return encodeIInts(f.I(), xv.elts)
 		case *AB:
-			a, n := encodeIIs(f.I(), xv.elts)
-			r := make([]V, n)
-			for i := range r {
-				r[i] = NewAB(a[i*xv.Len() : (i+1)*xv.Len()])
-			}
-			return NewAV(r)
+			return encodeIBytes(f.I(), xv.elts)
 		case *AF:
 			aix := toAI(xv)
 			if aix.IsPanic() {
@@ -82,14 +201,7 @@ func encode(f V, x V) V {
 			}
 		}
 		if x.IsI() {
-			n := fv.Len()
-			r := make([]int64, n)
-			for i := n - 1; i >= 0 && x.I() > 0; i-- {
-				fi := fv.At(i)
-				r[i] = x.I() % fi
-				x.n /= fi
-			}
-			return NewAI(r)
+			return encodeIsIv(fv.elts, x.I())
 		}
 		if x.IsF() {
 			if !isI(x.F()) {
@@ -99,26 +211,9 @@ func encode(f V, x V) V {
 		}
 		switch xv := x.value.(type) {
 		case *AI:
-			n := fv.Len()
-			ai := make([]int64, n*xv.Len())
-			copy(ai[(n-1)*xv.Len():], xv.elts)
-			for i := n - 1; i >= 0; i-- {
-				for j := 0; j < xv.Len(); j++ {
-					fi := fv.At(i)
-					ox := ai[i*xv.Len()+j]
-					ai[i*xv.Len()+j] = ox % fi
-					if i > 0 {
-						ai[(i-1)*xv.Len()+j] = ox / fi
-					}
-				}
-			}
-			r := make([]V, n)
-			for i := range r {
-				r[i] = NewAI(ai[i*xv.Len() : (i+1)*xv.Len()])
-			}
-			return NewAV(r)
+			return encodeIsInts(fv.elts, xv.elts)
 		case *AB:
-			return encode(f, fromABtoAI(xv))
+			return encodeIsBytes(fv.elts, xv.elts)
 		case *AF:
 			aix := toAI(xv)
 			if aix.IsPanic() {
@@ -149,24 +244,6 @@ func encode(f V, x V) V {
 	}
 }
 
-func encodeIIs[I integer](f int64, x []I) ([]I, int) {
-	min, max := minMaxIntegers(x)
-	max = I(maxI(absI(int64(min)), absI(int64(max))))
-	n := encodeBaseDigits(f, int64(max))
-	a := make([]I, n*len(x))
-	copy(a[(n-1)*len(x):], x)
-	for i := n - 1; i >= 0; i-- {
-		for j := 0; j < len(x); j++ {
-			ox := a[i*len(x)+j]
-			a[i*len(x)+j] = ox % I(f)
-			if i > 0 {
-				a[(i-1)*len(x)+j] = ox / I(f)
-			}
-		}
-	}
-	return a, n
-}
-
 func decode(f V, x V) V {
 	if f.IsI() {
 		if f.I() <= 0 {
@@ -183,19 +260,9 @@ func decode(f V, x V) V {
 		}
 		switch xv := x.value.(type) {
 		case *AI:
-			var r, n int64 = 0, 1
-			for i := xv.Len() - 1; i >= 0; i-- {
-				r += xv.At(i) * n
-				n *= f.I()
-			}
-			return NewI(r)
+			return NewI(decodeIIs(f.I(), xv.elts))
 		case *AB:
-			var r, n int64 = 0, 1
-			for i := xv.Len() - 1; i >= 0; i-- {
-				r += int64(xv.At(i)) * n
-				n *= f.I()
-			}
-			return NewI(r)
+			return NewI(decodeIIs(f.I(), xv.elts))
 		case *AF:
 			aix := toAI(xv)
 			if aix.IsPanic() {
@@ -232,12 +299,7 @@ func decode(f V, x V) V {
 			}
 		}
 		if x.IsI() {
-			var r, n int64 = 0, 1
-			for i := fv.Len() - 1; i >= 0; i-- {
-				r += x.I() * n
-				n *= fv.At(i)
-			}
-			return NewI(r)
+			return NewI(decodeIsI(fv.elts, x.I()))
 		}
 		if x.IsF() {
 			if !isI(x.F()) {
@@ -250,14 +312,12 @@ func decode(f V, x V) V {
 			if fv.Len() != xv.Len() {
 				return panicLength("I/x", fv.Len(), xv.Len())
 			}
-			var r, n int64 = 0, 1
-			for i := xv.Len() - 1; i >= 0; i-- {
-				r += xv.At(i) * n
-				n *= fv.At(i)
-			}
-			return NewI(r)
+			return NewI(decodeIsIs(fv.elts, xv.elts))
 		case *AB:
-			return decode(f, fromABtoAI(xv))
+			if fv.Len() != xv.Len() {
+				return panicLength("I/x", fv.Len(), xv.Len())
+			}
+			return NewI(decodeIsIs(fv.elts, xv.elts))
 		case *AF:
 			aix := toAI(xv)
 			if aix.IsPanic() {
@@ -286,4 +346,31 @@ func decode(f V, x V) V {
 		// should not happen
 		return panicType("I/x", "I", f)
 	}
+}
+
+func decodeIsIs[I integer, J integer](f []I, x []J) int64 {
+	var r, n int64 = 0, 1
+	for i := len(x) - 1; i >= 0; i-- {
+		r += int64(x[i]) * n
+		n *= int64(f[i])
+	}
+	return r
+}
+
+func decodeIIs[I integer, J integer](f I, x []J) int64 {
+	var r, n int64 = 0, 1
+	for i := len(x) - 1; i >= 0; i-- {
+		r += int64(x[i]) * n
+		n *= int64(f)
+	}
+	return r
+}
+
+func decodeIsI[I integer, J integer](f []I, x J) int64 {
+	var r, n int64 = 0, 1
+	for i := len(f) - 1; i >= 0; i-- {
+		r += int64(x) * n
+		n *= int64(f[i])
+	}
+	return r
 }
