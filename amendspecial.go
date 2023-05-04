@@ -179,19 +179,24 @@ func amend3NegateIntegers[I integer](x array, y []I) array {
 
 func amend4Right(x array, y, z V) (array, error) {
 	if y.IsI() {
-		return amend4RightIV(x, y.I(), z)
+		return amend4RightI(x, y.I(), z)
+	}
+	if isStar(y) {
+		return amend4Right(x, rangeI(int64(x.Len())), z)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		return amend4RightIntegers(x, yv.elts, z)
+		return amend4RightIs(x, yv.elts, z)
 	case *AI:
-		return amend4RightIntegers(x, yv.elts, z)
+		return amend4RightIs(x, yv.elts, z)
+	case *AV:
+		return amend4RightAV(x, yv, z)
 	default:
 		panic("amend4Right")
 	}
 }
 
-func amend4RightIV(x array, y int64, z V) (array, error) {
+func amend4RightI(x array, y int64, z V) (array, error) {
 	if outOfBounds(y, x.Len()) {
 		return x, fmt.Errorf("out of bounds index (%d)", y)
 	}
@@ -209,7 +214,7 @@ func amend4RightIV(x array, y int64, z V) (array, error) {
 	return &AV{elts: r, rc: rc}, nil
 }
 
-func amend4RightIntegers[I integer](x array, y []I, z V) (array, error) {
+func amend4RightIs[I integer](x array, y []I, z V) (array, error) {
 	xlen := x.Len()
 	for _, yi := range y {
 		if outOfBounds(int64(yi), xlen) {
@@ -274,6 +279,12 @@ func amend4RightIntegersAtom[I integer](x array, y []I, z V) {
 			zf = z.F()
 		}
 		amendSlice(xv.elts, y, zf)
+	case *AS:
+		zs := string(z.value.(S))
+		amendSlice(xv.elts, y, zs)
+	case *AV:
+		z.immutable()
+		amendSlice(xv.elts, y, z)
 	}
 }
 
@@ -293,6 +304,13 @@ func amend4RightIntegersSlice[I integer](x array, y []I, za array) {
 		amend4RightSlices(xv.elts, y, zv.elts)
 	case *AF:
 		zv := za.(*AF)
+		amend4RightSlices(xv.elts, y, zv.elts)
+	case *AS:
+		zv := za.(*AS)
+		amend4RightSlices(xv.elts, y, zv.elts)
+	case *AV:
+		zv := za.(*AV)
+		*zv.rc += 2
 		amend4RightSlices(xv.elts, y, zv.elts)
 	}
 }
@@ -316,6 +334,32 @@ func amend4RightIntegersArrays[I integer](x array, y []I, z array) (array, error
 	}
 	for i, yi := range y {
 		x.set(int(yi), z.at(i))
+	}
+	return x, nil
+}
+
+func amend4RightAV(x array, yv *AV, z V) (array, error) {
+	var err error
+	za, ok := z.value.(array)
+	if !ok {
+		for _, yi := range yv.elts {
+			x, err = amend4Right(x, yi, z)
+			if err != nil {
+				return x, err
+			}
+		}
+		return x, nil
+	}
+	if za.Len() != yv.Len() {
+		return x, fmt.Errorf("length mismatch between y and z (%d vs %d)",
+			yv.Len(), za.Len())
+
+	}
+	for i, yi := range yv.elts {
+		x, err = amend4Right(x, yi, za.at(i))
+		if err != nil {
+			return x, err
+		}
 	}
 	return x, nil
 }

@@ -211,8 +211,11 @@ func (ctx *Context) amend4(x, y, f, z V) V {
 }
 
 func (ctx *Context) amend4array(x array, y, f, z V) (array, error) {
-	if f.kind == valVariadic && x.numeric() && z.numeric() && y.nonGenericIndices() && f.variadic() == vRight {
-		return amend4Right(x, y, z)
+	if f.kind == valVariadic {
+		switch f.variadic() {
+		case vRight:
+			return amend4Right(x, y, z)
+		}
 	}
 	return ctx.amend4arrayGeneric(x, y, f, z)
 }
