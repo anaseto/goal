@@ -1,6 +1,7 @@
 package goal
 
 import (
+	"fmt"
 	"math"
 	"strconv"
 	"strings"
@@ -331,7 +332,7 @@ func cast(ctx *Context, s S, y V) V {
 	case "c":
 		return castc(y)
 	default:
-		return Panicf("s$y : unsupported \"%s\" value for s", s)
+		return castFormat(ctx, string(s), y)
 	}
 }
 
@@ -596,6 +597,120 @@ func castcString(s string) V {
 		i++
 	}
 	return NewAI(r)
+}
+
+func castFormat(ctx *Context, s string, y V) V {
+	n := strings.Count(s, "%")
+	ne := strings.Count(s, "%%")
+	nv := n - 2*ne
+	if nv == 0 {
+		return Panicf(`s$y : unsupported "%s" for s`, s)
+	}
+	if nv > 1 {
+		return castFormatN(ctx, s, y, nv)
+	}
+	if len(s) > 0 && s[0] == '%' && s[len(s)-1] == 'v' {
+		i, err := strconv.ParseInt(s[1:len(s)-1], 10, 0)
+		if err == nil {
+			y = casts(ctx, y)
+			return padStrings(int(i), y)
+		}
+	}
+	return castFormat1(ctx, s, y)
+}
+
+func castFormat1(ctx *Context, s string, y V) V {
+	if y.IsI() {
+		return NewS(fmt.Sprintf(s, y.I()))
+	}
+	if y.IsF() {
+		return NewS(fmt.Sprintf(s, y.F()))
+	}
+	switch yv := y.value.(type) {
+	case S:
+		return NewS(fmt.Sprintf(s, string(yv)))
+	case *AB:
+		return NewAS(format1Array(s, yv.elts))
+	case *AI:
+		return NewAS(format1Array(s, yv.elts))
+	case *AF:
+		return NewAS(format1Array(s, yv.elts))
+	case *AS:
+		r := yv.reuse()
+		for i, yi := range yv.elts {
+			r.elts[i] = fmt.Sprintf(s, yi)
+		}
+		return NewV(r)
+	case *AV:
+		r := make([]V, yv.Len())
+		for i, yi := range yv.elts {
+			r[i] = castFormat1(ctx, s, yi)
+		}
+		return Canonical(NewAV(r))
+	default:
+		return NewS(fmt.Sprintf(s, y.Sprint(ctx)))
+	}
+}
+
+func format1Array[T any](s string, y []T) []string {
+	r := make([]string, len(y))
+	for i, yi := range y {
+		r[i] = fmt.Sprintf(s, yi)
+	}
+	return r
+}
+
+func castFormatN(ctx *Context, s string, y V, n int) V {
+	if y.IsI() {
+		return NewS(fmt.Sprintf(s, y.I()))
+	}
+	if y.IsF() {
+		return NewS(fmt.Sprintf(s, y.F()))
+	}
+	switch yv := y.value.(type) {
+	case S:
+		return NewS(fmt.Sprintf(s, string(yv)))
+	case *AB:
+		return NewS(formatNArray(s, yv.elts, n))
+	case *AI:
+		return NewS(formatNArray(s, yv.elts, n))
+	case *AF:
+		return NewS(formatNArray(s, yv.elts, n))
+	case *AS:
+		return NewS(formatNArray(s, yv.elts, n))
+	case *AV:
+		r := make([]any, yv.Len())
+		for i, yi := range yv.elts {
+			r[i] = valueToAny(ctx, yi)
+		}
+		return NewS(fmt.Sprintf(s, r...))
+	default:
+		return NewS(fmt.Sprintf(s, y.Sprint(ctx)))
+	}
+}
+
+func valueToAny(ctx *Context, x V) any {
+	if x.IsI() {
+		return x.I()
+	}
+	if x.IsF() {
+		return x.F()
+	}
+	switch xv := x.value.(type) {
+	case S:
+		return string(xv)
+	default:
+		return x.Sprint(ctx)
+	}
+}
+
+func formatNArray[T any](s string, y []T, n int) string {
+	buf := make([]any, 0, n)
+	to := minInt(n, len(y))
+	for i := 0; i < to; i++ {
+		buf = append(buf, y[i])
+	}
+	return fmt.Sprintf(s, buf...)
 }
 
 func dropS(s S, y V) V {
@@ -925,18 +1040,18 @@ func padString(x int, s string) string {
 	case len(s) < x:
 		var sb strings.Builder
 		sb.Grow(x)
-		sb.WriteString(s)
 		for i := 0; i < x-len(s); i++ {
 			sb.WriteByte(' ')
 		}
+		sb.WriteString(s)
 		return sb.String()
 	case len(s) < -x:
 		var sb strings.Builder
 		sb.Grow(-x)
+		sb.WriteString(s)
 		for i := 0; i < -x-len(s); i++ {
 			sb.WriteByte(' ')
 		}
-		sb.WriteString(s)
 		return sb.String()
 	default:
 		return s
