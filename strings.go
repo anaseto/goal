@@ -469,11 +469,11 @@ func casts(ctx *Context, y V) V {
 	case *AS:
 		return y
 	case *AV:
-		r := make([]V, yv.Len())
+		r := yv.reuse()
 		for i, yi := range yv.elts {
-			r[i] = casts(ctx, yi)
+			r.elts[i] = casts(ctx, yi)
 		}
-		return Canonical(NewAV(r))
+		return NewV(canonicalAV(r))
 	case array:
 		return each2String(ctx, yv)
 	default:
@@ -609,7 +609,8 @@ func castFormat(ctx *Context, s string, y V) V {
 	if nv > 1 {
 		return castFormatN(ctx, s, y, nv)
 	}
-	if len(s) > 0 && s[0] == '%' && s[len(s)-1] == 'v' {
+	if len(s) > 0 && s[0] == '%' && s[len(s)-1] == 'v' &&
+		!(s[1] == '0' || s[1] == '+' && s[2] == 0 || s[1] == '-' && s[2] == 0) {
 		i, err := strconv.ParseInt(s[1:len(s)-1], 10, 0)
 		if err == nil {
 			y = casts(ctx, y)
