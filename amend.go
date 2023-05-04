@@ -27,7 +27,7 @@ func (ctx *Context) amend3(x, y, f V) V {
 }
 
 func (ctx *Context) amend3array(x array, y, f V) (array, error) {
-	if f.kind == valVariadic && !x.generic() && y.nonGenericIndices() {
+	if f.kind == valVariadic && x.numeric() && y.nonGenericIndices() {
 		switch f.variadic() {
 		case vMatch:
 			return amend3NotV(x, y)
@@ -126,7 +126,7 @@ func padArrayMut(n int, x array) array {
 }
 
 func amendArrayAt(x array, y int, z V) array {
-	if isEltType(x, z) {
+	if x.canSet(z) {
 		x.set(y, z)
 		return x
 	}
@@ -211,7 +211,7 @@ func (ctx *Context) amend4(x, y, f, z V) V {
 }
 
 func (ctx *Context) amend4array(x array, y, f, z V) (array, error) {
-	if f.kind == valVariadic && !x.generic() && !z.generic() && y.nonGenericIndices() && f.variadic() == vRight {
+	if f.kind == valVariadic && x.numeric() && z.numeric() && y.nonGenericIndices() && f.variadic() == vRight {
 		return amend4Right(x, y, z)
 	}
 	return ctx.amend4arrayGeneric(x, y, f, z)

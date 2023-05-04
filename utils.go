@@ -495,26 +495,6 @@ func sameType(x, y array) bool {
 	return reflect.TypeOf(x) == reflect.TypeOf(y)
 }
 
-// isEltType returns true if the type of y is compatible with the type of x
-// elements.
-func isEltType(x array, y V) bool {
-	switch x.(type) {
-	case *AB:
-		return y.IsI() && y.n >= 0 && y.n < 256
-	case *AI:
-		return y.IsI()
-	case *AF:
-		return y.IsF()
-	case *AS:
-		_, ok := y.value.(S)
-		return ok
-	case *AV:
-		return true
-	default:
-		return false
-	}
-}
-
 func isI(x float64) bool {
 	return x == float64(int64(x))
 }
@@ -902,21 +882,18 @@ func maxBytes(x []byte) byte {
 	return max
 }
 
-// generic returns true for all values that cannot be stored in a non-generic
-// array.
-func (x V) generic() bool {
+// numeric returns true for atomic and flat array numeric values.
+func (x V) numeric() bool {
 	if x.IsI() {
-		return false
+		return true
 	}
 	if x.IsF() {
-		return false
+		return true
 	}
 	switch xv := x.value.(type) {
-	case S:
-		return false
 	case array:
-		return xv.generic()
+		return xv.numeric()
 	default:
-		return true
+		return false
 	}
 }

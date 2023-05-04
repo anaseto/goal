@@ -2,8 +2,6 @@ package goal
 
 import (
 	"fmt"
-	"strings"
-	"unicode"
 )
 
 // inBoundsV returns true if it contains only indexes within [0,l), and false
@@ -88,13 +86,6 @@ func amend3NotI(x array, y int64) array {
 	case *AF:
 		xv.elts[y] = b2F(xv.elts[y] == 0)
 		return x
-	case *AS:
-		r := make([]V, xv.Len())
-		for i, xi := range xv.elts {
-			r[i] = NewS(xi)
-		}
-		r[y] = NewI(b2I(r[y].IsFalse()))
-		return &AV{elts: r, rc: x.RC()}
 	default:
 		panic("amend3NotI")
 	}
@@ -117,15 +108,6 @@ func amend3NotIntegers[I integer](x array, y []I) array {
 			xv.elts[yi] = b2F(xv.elts[yi] == 0)
 		}
 		return x
-	case *AS:
-		r := make([]V, xv.Len())
-		for i, xi := range xv.elts {
-			r[i] = NewS(xi)
-		}
-		for _, yi := range y {
-			r[yi] = NewI(b2I(r[yi].IsFalse()))
-		}
-		return &AV{elts: r, rc: x.RC()}
 	default:
 		panic("amend3NotIntegers")
 	}
@@ -164,9 +146,6 @@ func amend3NegateI(x array, y int64) array {
 	case *AF:
 		xv.elts[y] = -xv.elts[y]
 		return x
-	case *AS:
-		xv.elts[y] = strings.TrimRightFunc(xv.elts[y], unicode.IsSpace)
-		return x
 	default:
 		panic("amend3NegateI")
 	}
@@ -193,11 +172,6 @@ func amend3NegateIntegers[I integer](x array, y []I) array {
 			xv.elts[yi] = -xv.elts[yi]
 		}
 		return x
-	case *AS:
-		for _, yi := range y {
-			xv.elts[yi] = strings.TrimRightFunc(xv.elts[yi], unicode.IsSpace)
-		}
-		return x
 	default:
 		panic("amend3NegateIntegers")
 	}
@@ -205,10 +179,7 @@ func amend3NegateIntegers[I integer](x array, y []I) array {
 
 func amend4Right(x array, y, z V) (array, error) {
 	if y.IsI() {
-		return amend4RightI(x, y.I(), z)
-	}
-	if isStar(y) {
-		y = rangeI(int64(x.Len()))
+		return amend4RightIV(x, y.I(), z)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -220,11 +191,11 @@ func amend4Right(x array, y, z V) (array, error) {
 	}
 }
 
-func amend4RightI(x array, y int64, z V) (array, error) {
+func amend4RightIV(x array, y int64, z V) (array, error) {
 	if outOfBounds(y, x.Len()) {
-		return x, fmt.Errorf("y out of bounds (%d)", y)
+		return x, fmt.Errorf("out of bounds index (%d)", y)
 	}
-	if isEltType(x, z) {
+	if x.canSet(z) {
 		x.set(int(y), z)
 		return x, nil
 	}
@@ -247,43 +218,34 @@ func amend4RightIntegers[I integer](x array, y []I, z V) (array, error) {
 	}
 	za, ok := z.value.(array)
 	if !ok {
-		if isEltType(x, z) {
-			amend4RightIntegersAtom(x, y, z)
-			return x, nil
-		}
-		r := make([]V, xlen)
-		for i := range r {
-			r[i] = x.at(i)
-		}
-		rc := x.RC()
-		z.immutable()
-		for _, yi := range y {
-			r[yi] = z
-		}
-		return &AV{elts: r, rc: rc}, nil
+		return amend4RightIsV(x, y, z)
 	}
 	if za.Len() != len(y) {
 		return x, fmt.Errorf("length mismatch between y and z (%d vs %d)",
 			len(y), za.Len())
 	}
 	if sameType(x, za) {
-		amend4RightIntegersMut(x, y, za)
+		amend4RightIntegersSlice(x, y, za)
 		return x, nil
 	}
-	for i := range y {
-		if !isEltType(x, za.at(i)) {
-			r := make([]V, xlen)
-			for i := range r {
-				r[i] = x.at(i)
-			}
-			x = &AV{elts: r, rc: x.RC()}
-			break
-		}
+	return amend4RightIntegersArrays(x, y, za)
+}
+
+func amend4RightIsV[I integer](x array, y []I, z V) (array, error) {
+	if x.canSet(z) {
+		amend4RightIntegersAtom(x, y, z)
+		return x, nil
 	}
-	for i, yi := range y {
-		x.set(int(yi), za.at(i))
+	r := make([]V, x.Len())
+	for i := range r {
+		r[i] = x.at(i)
 	}
-	return x, nil
+	rc := x.RC()
+	z.immutable()
+	for _, yi := range y {
+		r[yi] = z
+	}
+	return &AV{elts: r, rc: rc}, nil
 }
 
 func amend4RightIntegersAtom[I integer](x array, y []I, z V) {
@@ -312,9 +274,6 @@ func amend4RightIntegersAtom[I integer](x array, y []I, z V) {
 			zf = z.F()
 		}
 		amendSlice(xv.elts, y, zf)
-	case *AS:
-		zs := string(z.value.(S))
-		amendSlice(xv.elts, y, zs)
 	}
 }
 
@@ -324,7 +283,7 @@ func amendSlice[I integer, T any](x []T, y []I, z T) {
 	}
 }
 
-func amend4RightIntegersMut[I integer](x array, y []I, za array) {
+func amend4RightIntegersSlice[I integer](x array, y []I, za array) {
 	switch xv := x.(type) {
 	case *AB:
 		zv := za.(*AB)
@@ -335,9 +294,6 @@ func amend4RightIntegersMut[I integer](x array, y []I, za array) {
 	case *AF:
 		zv := za.(*AF)
 		amend4RightSlices(xv.elts, y, zv.elts)
-	case *AS:
-		zv := za.(*AS)
-		amend4RightSlices(xv.elts, y, zv.elts)
 	}
 }
 
@@ -345,4 +301,21 @@ func amend4RightSlices[I integer, T any](x []T, y []I, z []T) {
 	for i, yi := range y {
 		x[yi] = z[i]
 	}
+}
+
+func amend4RightIntegersArrays[I integer](x array, y []I, z array) (array, error) {
+	for i := range y {
+		if !x.canSet(z.at(i)) {
+			r := make([]V, x.Len())
+			for i := range r {
+				r[i] = x.at(i)
+			}
+			x = &AV{elts: r, rc: x.RC()}
+			break
+		}
+	}
+	for i, yi := range y {
+		x.set(int(yi), z.at(i))
+	}
+	return x, nil
 }

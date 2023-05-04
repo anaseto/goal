@@ -22,7 +22,8 @@ type array interface {
 	atInts([]int64) array // like x[y] but assumes valid positive indices
 	atBytes([]byte) array // like x[y] but assumes valid positive indices
 	shallowClone() array  // shallow clone, erases flags
-	generic() bool        // generic array
+	numeric() bool        // flat numeric array
+	canSet(y V) bool      // compatible type for set
 }
 
 type flags uint32
@@ -797,8 +798,14 @@ func vArrayAtV(x array, y V) V {
 	}
 }
 
-func (x *AB) generic() bool { return false }
-func (x *AI) generic() bool { return false }
-func (x *AF) generic() bool { return false }
-func (x *AS) generic() bool { return false }
-func (x *AV) generic() bool { return true }
+func (x *AB) numeric() bool { return true }
+func (x *AI) numeric() bool { return true }
+func (x *AF) numeric() bool { return true }
+func (x *AS) numeric() bool { return false }
+func (x *AV) numeric() bool { return false }
+
+func (x *AB) canSet(y V) bool { return y.IsI() && y.n >= 0 && y.n < 256 }
+func (x *AI) canSet(y V) bool { return y.IsI() }
+func (x *AF) canSet(y V) bool { return y.IsF() }
+func (x *AS) canSet(y V) bool { _, ok := y.value.(S); return ok }
+func (x *AV) canSet(y V) bool { return true }
