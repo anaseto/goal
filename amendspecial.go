@@ -59,22 +59,48 @@ func inBoundsI(y int64, l int) (int64, bool) {
 	return 0, true
 }
 
-func amend3NotV(x array, y V) V {
+func amend3NotV(x array, y V) (array, error) {
 	yi, ok := inBoundsV(y, x.Len())
 	if !ok {
-		return Panicf("@[X;i;f] : out of bounds index (%d)", yi)
+		return x, fmt.Errorf("out of bounds index (%d)", yi)
+	}
+	if y.IsI() {
+		return amend3NotI(x, y.I()), nil
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		return NewV(amend3Not(x, yv.elts))
+		return amend3NotIntegers(x, yv.elts), nil
 	case *AI:
-		return NewV(amend3Not(x, yv.elts))
+		return amend3NotIntegers(x, yv.elts), nil
 	default:
 		panic("amend3NotV")
 	}
 }
 
-func amend3Not[I integer](x array, y []I) array {
+func amend3NotI(x array, y int64) array {
+	switch xv := x.(type) {
+	case *AB:
+		xv.elts[y] = b2B(xv.elts[y] == 0)
+		return x
+	case *AI:
+		xv.elts[y] = b2I(xv.elts[y] == 0)
+		return x
+	case *AF:
+		xv.elts[y] = b2F(xv.elts[y] == 0)
+		return x
+	case *AS:
+		r := make([]V, xv.Len())
+		for i, xi := range xv.elts {
+			r[i] = NewS(xi)
+		}
+		r[y] = NewI(b2I(r[y].IsFalse()))
+		return &AV{elts: r, rc: x.RC()}
+	default:
+		panic("amend3NotI")
+	}
+}
+
+func amend3NotIntegers[I integer](x array, y []I) array {
 	switch xv := x.(type) {
 	case *AB:
 		for _, yi := range y {
@@ -97,30 +123,56 @@ func amend3Not[I integer](x array, y []I) array {
 			r[i] = NewS(xi)
 		}
 		for _, yi := range y {
-			r[yi] = NewI(b2I(xv.elts[yi] == ""))
+			r[yi] = NewI(b2I(r[yi].IsFalse()))
 		}
 		return &AV{elts: r, rc: x.RC()}
 	default:
-		panic("amend3Not")
+		panic("amend3NotIntegers")
 	}
 }
 
-func amend3NegateV(x array, y V) V {
+func amend3NegateV(x array, y V) (array, error) {
 	yi, ok := inBoundsV(y, x.Len())
 	if !ok {
-		return Panicf("@[X;i;f] : out of bounds index (%d)", yi)
+		return x, fmt.Errorf("out of bounds index (%d)", yi)
+	}
+	if y.IsI() {
+		return amend3NegateI(x, y.I()), nil
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		return NewV(amend3Negate(x, yv.elts))
+		return amend3NegateIntegers(x, yv.elts), nil
 	case *AI:
-		return NewV(amend3Negate(x, yv.elts))
+		return amend3NegateIntegers(x, yv.elts), nil
 	default:
-		panic("amend3NotV")
+		panic("amend3NegateV")
 	}
 }
 
-func amend3Negate[I integer](x array, y []I) array {
+func amend3NegateI(x array, y int64) array {
+	switch xv := x.(type) {
+	case *AB:
+		r := make([]int64, xv.Len())
+		for i, xi := range xv.elts {
+			r[i] = int64(xi)
+		}
+		r[y] = -r[y]
+		return &AI{elts: r, rc: x.RC()}
+	case *AI:
+		xv.elts[y] = -xv.elts[y]
+		return x
+	case *AF:
+		xv.elts[y] = -xv.elts[y]
+		return x
+	case *AS:
+		xv.elts[y] = strings.TrimRightFunc(xv.elts[y], unicode.IsSpace)
+		return x
+	default:
+		panic("amend3NegateI")
+	}
+}
+
+func amend3NegateIntegers[I integer](x array, y []I) array {
 	switch xv := x.(type) {
 	case *AB:
 		r := make([]int64, xv.Len())
@@ -147,27 +199,13 @@ func amend3Negate[I integer](x array, y []I) array {
 		}
 		return x
 	default:
-		panic("amend3Negate")
+		panic("amend3NegateIntegers")
 	}
 }
 
 func amend4Right(x array, y, z V) (array, error) {
 	if y.IsI() {
-		if outOfBounds(y.I(), x.Len()) {
-			return x, fmt.Errorf("y out of bounds (%d)", y.I())
-		}
-		if isEltType(x, z) {
-			x.set(int(y.I()), z)
-			return x, nil
-		}
-		r := make([]V, x.Len())
-		for i := range r {
-			r[i] = x.at(i)
-		}
-		rc := x.RC()
-		z.InitWithRC(rc)
-		r[y.I()] = z
-		return &AV{elts: r, rc: rc}, nil
+		return amend4RightI(x, y.I(), z)
 	}
 	if isStar(y) {
 		y = rangeI(int64(x.Len()))
@@ -180,8 +218,26 @@ func amend4Right(x array, y, z V) (array, error) {
 	case *AV:
 		return amend4RightAV(x, yv, z)
 	default:
-		panic("amend4Right: y bad type")
+		panic("amend4Right")
 	}
+}
+
+func amend4RightI(x array, y int64, z V) (array, error) {
+	if outOfBounds(y, x.Len()) {
+		return x, fmt.Errorf("y out of bounds (%d)", y)
+	}
+	if isEltType(x, z) {
+		x.set(int(y), z)
+		return x, nil
+	}
+	r := make([]V, x.Len())
+	for i := range r {
+		r[i] = x.at(i)
+	}
+	rc := x.RC()
+	z.InitWithRC(rc)
+	r[y] = z
+	return &AV{elts: r, rc: rc}, nil
 }
 
 func amend4RightIntegers[I integer](x array, y []I, z V) (array, error) {

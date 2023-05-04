@@ -903,14 +903,21 @@ func maxBytes(x []byte) byte {
 	return max
 }
 
-func (x V) isFlatArray() bool {
-	if x.kind != valBoxed {
+// generic returns true for all values that cannot be stored in a non-generic
+// array.
+func (x V) generic() bool {
+	if x.IsI() {
+		return false
+	}
+	if x.IsF() {
 		return false
 	}
 	switch xv := x.value.(type) {
-	case array:
-		return !xv.generic()
-	default:
+	case S:
 		return false
+	case array:
+		return xv.generic()
+	default:
+		return true
 	}
 }

@@ -16,14 +16,6 @@ func (ctx *Context) amend3(x, y, f V) V {
 		if y.IsPanic() {
 			return ppanic("@[X;i;f] : ", y)
 		}
-		if f.kind == valVariadic && !xv.generic() && y.isFlatArray() {
-			switch f.variadic() {
-			case vMatch:
-				return amend3NotV(xv, y)
-			case vSubtract:
-				return amend3NegateV(xv, y)
-			}
-		}
 		r, err := ctx.amend3array(xv, y, f)
 		if err != nil {
 			return Panicf("@[X;i;f] : %v", err)
@@ -31,6 +23,34 @@ func (ctx *Context) amend3(x, y, f V) V {
 		return canonicalFast(NewV(r))
 	default:
 		return panicType("@[X;i;f]", "X", x)
+	}
+}
+
+func (ctx *Context) amend3array(x array, y, f V) (array, error) {
+	if f.kind == valVariadic && !x.generic() && y.nonGenericIndices() {
+		switch f.variadic() {
+		case vMatch:
+			return amend3NotV(x, y)
+		case vSubtract:
+			return amend3NegateV(x, y)
+		}
+	}
+	return ctx.amend3arrayGeneric(x, y, f)
+}
+
+// nonGenericIndices returns true if indices represented by x are either an
+// atom or a flat array.
+func (x V) nonGenericIndices() bool {
+	if x.IsI() {
+		return true
+	}
+	switch x.value.(type) {
+	case *AB:
+		return true
+	case *AI:
+		return true
+	default:
+		return false
 	}
 }
 
@@ -132,7 +152,7 @@ func (ctx *Context) amend3arrayI(x array, y int64, f V) (array, error) {
 	return amendArrayAt(x, int(y), repl), nil
 }
 
-func (ctx *Context) amend3array(x array, y, f V) (array, error) {
+func (ctx *Context) amend3arrayGeneric(x array, y, f V) (array, error) {
 	if y.IsI() {
 		return ctx.amend3arrayI(x, y.I(), f)
 	}
@@ -194,7 +214,7 @@ func (ctx *Context) amend4(x, y, f, z V) V {
 			}
 			return canonicalFast(NewV(r))
 		}
-		r, err := ctx.amend4array(xv, y, f, z)
+		r, err := ctx.amend4arrayGeneric(xv, y, f, z)
 		if err != nil {
 			return Panicf("@[X;i;f;z] : %v", err)
 		}
@@ -227,7 +247,7 @@ func amend4Dict(ctx *Context, d *Dict, y, f, z V) V {
 			}
 			return NewV(&Dict{keys: keys, values: canonicalArray(r)})
 		}
-		r, err := ctx.amend4array(values, ky, f, z)
+		r, err := ctx.amend4arrayGeneric(values, ky, f, z)
 		if err != nil {
 			return Panicf("@[d;y;f;z] : %v", err)
 		}
@@ -271,7 +291,7 @@ func (ctx *Context) amend4arrayI(x array, y int64, f, z V) (array, error) {
 	return amendArrayAt(x, int(y), repl), nil
 }
 
-func (ctx *Context) amend4array(x array, y, f, z V) (array, error) {
+func (ctx *Context) amend4arrayGeneric(x array, y, f, z V) (array, error) {
 	if y.IsI() {
 		return ctx.amend4arrayI(x, y.I(), f, z)
 	}
@@ -288,7 +308,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) (array, error) {
 		za, ok := z.value.(array)
 		if !ok {
 			for _, yi := range yv.elts {
-				x, err = ctx.amend4array(x, yi, f, z)
+				x, err = ctx.amend4arrayGeneric(x, yi, f, z)
 				if err != nil {
 					return x, err
 				}
@@ -301,7 +321,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) (array, error) {
 
 		}
 		for i, yi := range yv.elts {
-			x, err = ctx.amend4array(x, yi, f, za.at(i))
+			x, err = ctx.amend4arrayGeneric(x, yi, f, za.at(i))
 			if err != nil {
 				return x, err
 			}
@@ -433,7 +453,7 @@ func (ctx *Context) deepAmend4array(x array, y, f, z V) (array, error) {
 	}
 	yv := y.value.(array)
 	if yv.Len() == 0 {
-		return ctx.amend4array(x, rangeI(int64(x.Len())), f, z)
+		return ctx.amend4arrayGeneric(x, rangeI(int64(x.Len())), f, z)
 	}
 	return ctx.deepAmend4rec(x, yv.at(0), yv.slice(1, yv.Len()), f, z)
 }
@@ -450,7 +470,7 @@ func (ctx *Context) deepAmend4rec(x array, y0 V, y array, f, z V) (array, error)
 		return x, nil
 	}
 	if y.Len() == 0 {
-		return ctx.amend4array(x, y0, f, z)
+		return ctx.amend4arrayGeneric(x, y0, f, z)
 	}
 	if y0.IsI() {
 		if outOfBounds(y0.I(), x.Len()) {
