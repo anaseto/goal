@@ -4305,9 +4305,9 @@ func modulusABV(x *AB, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x mod y", x.Len(), yv.Len())
 		}
-		r := &AI{elts: make([]int64, yv.Len()), rc: reuseRCp(x.rc)}
+		r := x.reuse()
 		for i, xi := range x.elts {
-			r.elts[i] = int64(modI(int64(xi), int64(yv.At(i))))
+			r.elts[i] = byte(modB(xi, yv.At(i)))
 		}
 		return NewV(r)
 	case *AF:

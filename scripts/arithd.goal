@@ -123,7 +123,7 @@ maximum:keys!+(
   "S" "S" "maxS(x, y)" "S"
 )
 modulus:keys!+(
-  "B" "B" "modI(int64(x), int64(y))" "I"
+  "B" "B" "modB(x, y)" "B"
   "B" "I" "modI(int64(x), y)" "I"
   "B" "F" "modF(float64(x), y)" "F"
   "I" "B" "modI(x, int64(y))" "I"
@@ -276,12 +276,11 @@ doxBy:{[yt;e;t]
 doxY:{[yt;e;t]
   e:doExpr[e;yt;"x";"yi"]
   rt:t2go t
-  rs:?[yt~t;"yv.reuse()";"&A${t}{elts: make([]$rt, yv.Len()), rc: reuseRCp(yv.rc)}"]
+  rs:?[yt~t;"r := yv.reuse()";"r := &A${t}{elts: make([]$rt, yv.Len()), rc: reuseRCp(yv.rc)}"]
   rs:?[op¿cmps;"$rs; r.flags |= flagBool";rs]
-  / TODO: add flagBool in & and | when possible
   "\n"_qq/
     case *A$yt:
-        r := $rs
+        $rs
         for i, yi := range yv.elts {
                 r.elts[i] = $rt($e)
         }

@@ -58,6 +58,14 @@ func divideF(x, y float64) float64 {
 	return x / y
 }
 
+// modB returns y % x or y if x is zero
+func modB(x, y byte) byte {
+	if x == 0 {
+		return y
+	}
+	return y % x
+}
+
 // modI returns y % x or y if x is zero
 func modI(x, y int64) int64 {
 	if x == 0 {
