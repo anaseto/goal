@@ -215,8 +215,6 @@ func amend4Right(x array, y, z V) (array, error) {
 		return amend4RightIntegers(x, yv.elts, z)
 	case *AI:
 		return amend4RightIntegers(x, yv.elts, z)
-	case *AV:
-		return amend4RightAV(x, yv, z)
 	default:
 		panic("amend4Right")
 	}
@@ -317,9 +315,6 @@ func amend4RightIntegersAtom[I integer](x array, y []I, z V) {
 	case *AS:
 		zs := string(z.value.(S))
 		amendSlice(xv.elts, y, zs)
-	case *AV:
-		z.immutable()
-		amendSlice(xv.elts, y, z)
 	}
 }
 
@@ -343,10 +338,6 @@ func amend4RightIntegersMut[I integer](x array, y []I, za array) {
 	case *AS:
 		zv := za.(*AS)
 		amend4RightSlices(xv.elts, y, zv.elts)
-	case *AV:
-		zv := za.(*AV)
-		*zv.rc += 2
-		amend4RightSlices(xv.elts, y, zv.elts)
 	}
 }
 
@@ -354,30 +345,4 @@ func amend4RightSlices[I integer, T any](x []T, y []I, z []T) {
 	for i, yi := range y {
 		x[yi] = z[i]
 	}
-}
-
-func amend4RightAV(x array, yv *AV, z V) (array, error) {
-	var err error
-	za, ok := z.value.(array)
-	if !ok {
-		for _, yi := range yv.elts {
-			x, err = amend4Right(x, yi, z)
-			if err != nil {
-				return x, err
-			}
-		}
-		return x, nil
-	}
-	if za.Len() != yv.Len() {
-		return x, fmt.Errorf("length mismatch between y and z (%d vs %d)",
-			yv.Len(), za.Len())
-
-	}
-	for i, yi := range yv.elts {
-		x, err = amend4Right(x, yi, za.at(i))
-		if err != nil {
-			return x, err
-		}
-	}
-	return x, nil
 }

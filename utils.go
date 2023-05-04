@@ -500,10 +500,9 @@ func sameType(x, y array) bool {
 func isEltType(x array, y V) bool {
 	switch x.(type) {
 	case *AB:
-		return y.IsI() && (y.n == 0 || y.n == 1) || y.IsF() &&
-			(y.F() == 0 || y.F() == 1)
+		return y.IsI() && y.n >= 0 && y.n < 256
 	case *AI:
-		return y.IsI() || y.IsF() && isI(y.F())
+		return y.IsI()
 	case *AF:
 		return y.IsF()
 	case *AS:

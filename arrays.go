@@ -253,29 +253,17 @@ func (x *AV) setFlags(f flags) { x.flags = f }
 
 // set changes x at i with y (in place), assuming the value is compatible.
 func (x *AB) set(i int, y V) {
-	if y.IsI() {
-		x.elts[i] = byte(y.n)
-	} else {
-		x.elts[i] = byte(y.F())
-	}
+	x.elts[i] = byte(y.n)
 }
 
 // set changes x at i with y (in place), assuming the value is compatible.
 func (x *AI) set(i int, y V) {
-	if y.IsI() {
-		x.elts[i] = y.n
-	} else {
-		x.elts[i] = int64(y.F())
-	}
+	x.elts[i] = y.n
 }
 
 // set changes x at i with y (in place), assuming the value is compatible.
 func (x *AF) set(i int, y V) {
-	if y.IsI() {
-		x.elts[i] = float64(y.I())
-	} else {
-		x.elts[i] = y.F()
-	}
+	x.elts[i] = y.F()
 }
 
 // set changes x at i with y (in place), assuming the value is compatible.
