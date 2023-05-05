@@ -1318,31 +1318,32 @@ func windowsArray(i int64, y array) V {
 	return NewAVWithRC(r, &n)
 }
 
-// cutShape returns i!y.
-func cutShape(x V, y V) V {
-	var i int64
+func shape(ctx *Context, x, y V) V {
 	if x.IsI() {
-		i = x.I()
-	} else {
-		// x.IsF() should be true
-		f := x.F()
-		if !isI(f) {
-			return Panicf("i!y : non-integer i (%g)", f)
-		}
-		i = int64(f)
+		return cutShapeI(x.I(), y)
 	}
-	return cutShapeI(i, y)
+	if x.IsF() {
+		if !isI(x.F()) {
+			return Panicf("i$y : non-integer i (%g)", x.F())
+		}
+		return cutShapeI(int64(x.F()), y)
+	}
+	switch xv := x.value.(type) {
+	case S:
+		return cast(ctx, xv, y)
+	case array:
+		return search(x, y)
+	default:
+		return panicType("x$y", "x", x)
+	}
 }
 
 func cutShapeI(i int64, y V) V {
 	if y.IsI() {
-		return rangeII(i, y.I())
-	} else if y.IsF() {
-		f := y.F()
-		if !isI(f) {
-			return Panicf("i!i : non-integer up bound (%g)", f)
-		}
-		return rangeII(i, int64(f))
+		return NewI(1 + y.I() - i)
+	}
+	if y.IsF() {
+		return NewF(1 + y.F() - float64(i))
 	}
 	switch yv := y.value.(type) {
 	case S:
@@ -1352,7 +1353,7 @@ func cutShapeI(i int64, y V) V {
 		if i > 0 && i < int64(len(yv))+1 {
 			return cutLinesString(int(i), string(yv))
 		}
-		return Panicf("i!s : out of range i (%d)", i)
+		return Panicf("i$s : out of range i (%d)", i)
 	case array:
 		if i < 0 && -i < int64(yv.Len())+1 {
 			return cutColsArray(-i, yv)
@@ -1360,7 +1361,7 @@ func cutShapeI(i int64, y V) V {
 		if i > 0 && i < int64(yv.Len())+1 {
 			return cutLinesArray(int(i), yv)
 		}
-		return Panicf("i!Y : out of range i (%d)", i)
+		return Panicf("i$Y : out of range i (%d)", i)
 	case *Dict:
 		k := cutShapeI(i, NewV(yv.keys))
 		if k.IsPanic() {
@@ -1372,7 +1373,7 @@ func cutShapeI(i int64, y V) V {
 		}
 		return NewDict(k, v)
 	default:
-		return panicType("i!y", "y", y)
+		return panicType("i$y", "y", y)
 	}
 }
 

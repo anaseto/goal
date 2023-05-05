@@ -28,17 +28,6 @@ func b2B(b bool) byte {
 	return i
 }
 
-// b2i converts a boolean to an integer.
-func b2i(b bool) int {
-	var i int
-	if b {
-		i = 1
-	} else {
-		i = 0
-	}
-	return i
-}
-
 // b2F converts a boolean to a float.
 func b2F(b bool) float64 {
 	var f float64
@@ -60,26 +49,39 @@ func divideF(x, y float64) float64 {
 
 // modB returns y % x or y if x is zero
 func modB(x, y byte) byte {
-	if x == 0 {
-		return y
-	}
 	return y % x
 }
 
 // modI returns y % x or y if x is zero
 func modI(x, y int64) int64 {
-	if x == 0 {
-		return y
+	y = y % x
+	if y < 0 {
+		y += x
 	}
-	return y % x
+	return y
 }
 
 // modF returns y % x or y if x is zero
 func modF(x, y float64) float64 {
-	if x == 0 {
-		return y
+	y = math.Mod(float64(y), float64(x))
+	if y < 0 {
+		y += x
 	}
-	return math.Mod(float64(y), float64(x))
+	return y
+}
+
+func divI(x, y int64) int64 {
+	if y >= 0 {
+		return y / x
+	}
+	if y%x == 0 {
+		return y / x
+	}
+	return (y / x) - 1
+}
+
+func divF(x, y float64) float64 {
+	return math.Floor(y / x)
 }
 
 func minI(x, y int64) int64 {
@@ -755,9 +757,9 @@ func protoV(x V) V {
 	case S:
 		return NewS("")
 	case *AB:
-		return NewAB(nil)
+		return newABb(nil)
 	case *AI:
-		return NewAI(nil)
+		return newABb(nil)
 	case *AF:
 		return NewAF(nil)
 	case *AS:
@@ -776,7 +778,7 @@ func protoV(x V) V {
 
 func protoArrayForV(x V) V {
 	if x.IsI() {
-		return NewAB(nil)
+		return newABb(nil)
 	}
 	if x.IsF() {
 		return NewAF(nil)
@@ -785,9 +787,9 @@ func protoArrayForV(x V) V {
 	case S:
 		return NewAS(nil)
 	case *AB:
-		return NewAB(nil)
+		return newABb(nil)
 	case *AI:
-		return NewAI(nil)
+		return newABb(nil)
 	case *AF:
 		return NewAF(nil)
 	case *AS:
@@ -800,9 +802,9 @@ func protoArrayForV(x V) V {
 func protoArray(x array) V {
 	switch x.(type) {
 	case *AB:
-		return NewAB(nil)
+		return newABb(nil)
 	case *AI:
-		return NewAI(nil)
+		return newABb(nil)
 	case *AF:
 		return NewAF(nil)
 	case *AS:

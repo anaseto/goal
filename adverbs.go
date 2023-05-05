@@ -621,7 +621,7 @@ func each2(ctx *Context, f, x V) V {
 func eachfx(ctx *Context, f V, x array) V {
 	if f.kind == valVariadic {
 		switch f.variadic() {
-		case vCast:
+		case vShape:
 			return each2String(ctx, x)
 		case vTake:
 			return each2Length(x)

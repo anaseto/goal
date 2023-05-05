@@ -315,3 +315,157 @@ func absI(x int64) int64 {
 	}
 	return x
 }
+
+func moddivpad(x int64, y V) V {
+	if x == 0 {
+		return y
+	}
+	if x < 0 {
+		return divpad(-x, y)
+	}
+	return modpad(x, y)
+}
+
+func modpad(x int64, y V) V {
+	if y.IsI() {
+		return NewI(modI(x, y.I()))
+	}
+	if y.IsF() {
+		return NewF(modF(float64(x), y.F()))
+	}
+	switch yv := y.value.(type) {
+	case S:
+		return NewS(padStringRight(int(x), string(yv)))
+	case *AB:
+		if x >= 256 {
+			return y
+		}
+		xb := byte(x)
+		r := yv.reuse()
+		if xb&(xb-1) == 0 {
+			xb = xb - 1
+			for i, yi := range yv.elts {
+				r.elts[i] = xb & yi
+			}
+			if xb == 1 {
+				r.flags |= flagBool
+			}
+			return NewV(r)
+		}
+		for i, yi := range yv.elts {
+			r.elts[i] = modB(xb, yi)
+		}
+		return NewV(r)
+	case *AI:
+		if x <= 256 {
+			r := make([]byte, yv.Len())
+			modIntegers(x, yv.elts, r)
+			if x == 2 {
+				return newABb(r)
+			}
+			return NewAB(r)
+		}
+		r := yv.reuse()
+		modIntegers(x, yv.elts, r.elts)
+		return NewV(r)
+	case *AF:
+		r := yv.reuse()
+		xf := float64(x)
+		for i, yi := range yv.elts {
+			r.elts[i] = modF(xf, yi)
+		}
+		return NewV(r)
+	case *AS:
+		r := yv.reuse()
+		for i, yi := range yv.elts {
+			r.elts[i] = padStringRight(int(x), yi)
+		}
+		return NewV(r)
+	case *AV:
+		r := yv.reuse()
+		for i, yi := range yv.elts {
+			ri := modpad(x, yi)
+			if ri.IsPanic() {
+				return ri
+			}
+			r.elts[i] = ri
+		}
+		return NewV(r)
+	case *Dict:
+		return newDictValues(yv.keys, modpad(x, NewV(yv.values)))
+	default:
+		return panicType("i!y", "y", y)
+	}
+}
+
+func modIntegers[I integer](x int64, y []int64, r []I) {
+	if x&(x-1) == 0 {
+		x = x - 1
+		for i, yi := range y {
+			r[i] = I(x & yi)
+		}
+		return
+	}
+	for i, yi := range y {
+		r[i] = I(modI(x, yi))
+	}
+}
+
+func divpad(x int64, y V) V {
+	if y.IsI() {
+		return NewI(divI(x, y.I()))
+	}
+	if y.IsF() {
+		return NewF(divF(float64(x), y.F()))
+	}
+	switch yv := y.value.(type) {
+	case S:
+		return NewS(padStringLeft(int(x), string(yv)))
+	case *AB:
+		r := yv.reuse()
+		if x >= 256 {
+			for i := range r.elts {
+				r.elts[i] = 0
+			}
+			return NewV(r)
+		}
+		xb := byte(x)
+		for i, yi := range yv.elts {
+			r.elts[i] = yi / xb
+		}
+		return NewV(r)
+	case *AI:
+		r := yv.reuse()
+		for i, yi := range yv.elts {
+			r.elts[i] = divI(x, yi)
+		}
+		return NewV(r)
+	case *AF:
+		r := yv.reuse()
+		xf := float64(x)
+		for i, yi := range yv.elts {
+			r.elts[i] = divF(xf, yi)
+		}
+		return NewV(r)
+	case *AS:
+		r := yv.reuse()
+		for i, yi := range yv.elts {
+			r.elts[i] = padStringLeft(int(x), yi)
+		}
+		return NewV(r)
+	case *AV:
+		r := yv.reuse()
+		for i, yi := range yv.elts {
+			ri := divpad(x, yi)
+			if ri.IsPanic() {
+				return ri
+			}
+			r.elts[i] = ri
+		}
+		return NewV(r)
+	case *Dict:
+		return newDictValues(yv.keys, divpad(x, NewV(yv.values)))
+	default:
+		return panicType("i!y", "y", y)
+	}
+}

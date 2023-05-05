@@ -1,6 +1,6 @@
 / Solution for https://rosettacode.org/wiki/100_doors
 nums:1+!#doors:100#0
-visit:{@[x;&0=y mod nums;~]}
+visit:{@[x;&0=y!nums;~]}
 1+&doors visit/nums
 /RESULT:
 1 4 9 16 25 36 49 64 81 100

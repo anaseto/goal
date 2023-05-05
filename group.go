@@ -7,7 +7,7 @@ func icountLinesGroup(x V) V {
 		return NewAS(lineSplit(string(xv)))
 	case *AB:
 		if xv.Len() == 0 {
-			return NewAB(nil)
+			return newABb(nil)
 		}
 		if xv.IsBoolean() {
 			n := sumIntegers(xv.elts)
@@ -28,7 +28,7 @@ func icountLinesGroup(x V) V {
 		return NewAIWithRC(icountBytes[int64](xv.elts), reuseRCp(xv.rc))
 	case *AI:
 		if xv.Len() == 0 {
-			return NewAB(nil)
+			return newABb(nil)
 		}
 		if xv.Len() < 256 {
 			return NewABWithRC(icountInts[byte](xv.elts), reuseRCp(xv.rc))

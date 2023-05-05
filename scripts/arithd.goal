@@ -122,17 +122,6 @@ maximum:keys!+(
   "F" "F" "math.Max(x, float64(y))" "F"
   "S" "S" "maxS(x, y)" "S"
 )
-modulus:keys!+(
-  "B" "B" "modB(x, y)" "B"
-  "B" "I" "modI(int64(x), y)" "I"
-  "B" "F" "modF(float64(x), y)" "F"
-  "I" "B" "modI(x, int64(y))" "I"
-  "I" "I" "modI(x, y)" "I"
-  "I" "F" "modF(float64(x), y)" "F"
-  "F" "B" "modF(x, float64(y))" "F"
-  "F" "I" "modF(x, float64(y))" "F"
-  "F" "F" "modF(x, y)" "F"
-)
 arctan2:keys!+(
   "B" "B" "math.Atan2(float64(y), float64(x))" "F"
   "B" "I" "math.Atan2(float64(y), float64(x))" "F"
@@ -155,7 +144,6 @@ ops:(
   "divide" "%"
   "minimum" "&"
   "maximum" "|"
-  "modulus" " mod "
   "arctan2" " atan "
 )
 

@@ -125,24 +125,6 @@ func odometerWithCols[I integer, J integer](x []I, cols int64) []J {
 	return a
 }
 
-func rangeII(from, to int64) V {
-	if from > to {
-		return NewAI(nil)
-	}
-	if from >= 0 && to < 256 {
-		r := make([]byte, to-from)
-		for i := range r {
-			r[i] = byte(from) + byte(i)
-		}
-		return NewV(&AB{elts: r, flags: flagAscending | flagUnique})
-	}
-	r := make([]int64, to-from)
-	for i := range r {
-		r[i] = from + int64(i)
-	}
-	return NewV(&AI{elts: r, flags: flagAscending | flagUnique})
-}
-
 // where returns &x.
 func where(x V) V {
 	if x.IsI() {
@@ -150,7 +132,7 @@ func where(x V) V {
 		case x.I() < 0:
 			return Panicf("&x : x negative (%d)", x.I())
 		case x.I() == 0:
-			return NewAB(nil)
+			return newABb(nil)
 		default:
 			r := make([]byte, x.I())
 			return newABb(r)

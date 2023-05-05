@@ -18,7 +18,7 @@ const (
 	vSubtract                 // -
 	vMultiply                 // *
 	vDivide                   // %
-	vKey                      // !
+	vDict                     // !
 	vMin                      // &
 	vMax                      // |
 	vLess                     // <
@@ -29,9 +29,9 @@ const (
 	vWithout                  // ^
 	vTake                     // #
 	vDrop                     // _
-	vCast                     // $
+	vShape                    // $
 	vFind                     // ?
-	vInFirsts                 // ¿
+	vIn                       // ¿
 	vApply                    // @
 	vApplyN                   // .
 	vList                     // (...;...;...)
@@ -50,7 +50,7 @@ func init() {
 		vSubtract: vfSubtract,
 		vMultiply: vfMultiply,
 		vDivide:   vfDivide,
-		vKey:      vfKey,
+		vDict:     vfDict,
 		vMin:      vfMin,
 		vMax:      vfMax,
 		vLess:     vfLess,
@@ -61,9 +61,9 @@ func init() {
 		vWithout:  vfWithout,
 		vTake:     vfTake,
 		vDrop:     vfDrop,
-		vCast:     vfCast,
+		vShape:    vfShape,
 		vFind:     vfFind,
-		vInFirsts: vfInFirsts,
+		vIn:       vfIn,
 		vApply:    vfApply,
 		vApplyN:   vfApplyN,
 		vList:     vfList,
@@ -80,7 +80,7 @@ var vStrings = [...]string{
 	vSubtract: "-",
 	vMultiply: "*",
 	vDivide:   "%",
-	vKey:      "!",
+	vDict:     "!",
 	vMin:      "&",
 	vMax:      "|",
 	vLess:     "<",
@@ -91,9 +91,9 @@ var vStrings = [...]string{
 	vWithout:  "^",
 	vTake:     "#",
 	vDrop:     "_",
-	vCast:     "$",
+	vShape:    "$",
 	vFind:     "?",
-	vInFirsts: "¿",
+	vIn:       "¿",
 	vApply:    "@",
 	vApplyN:   ".",
 	vList:     "list",
@@ -143,9 +143,8 @@ func (ctx *Context) initVariadics() {
 	// dyads
 	ctx.RegisterDyad("and", vfAnd)
 	ctx.RegisterDyad("csv", vfCSV)
-	v := ctx.RegisterDyad("in", vfIn)
+	v := ctx.RegisterDyad("in", vfInKeyword)
 	ctx.RegisterDyad("or", vfOr)
-	ctx.RegisterDyad("mod", vfMod)
 	ctx.RegisterDyad("nan", vfNaN)
 	ctx.RegisterDyad("rotate", vfRotate)
 	v = ctx.RegisterDyad("rshift", vfRShift)
@@ -224,16 +223,12 @@ func vfDivide(ctx *Context, args []V) V {
 	}
 }
 
-// vfKey implements the ! variadic verb.
-func vfKey(ctx *Context, args []V) V {
+// vfDict implements the ! variadic verb.
+func vfDict(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return enumFieldsKeys(args[0])
 	case 2:
-		x, y := args[1], args[0]
-		if x.IsI() || x.IsF() {
-			return cutShape(x, y)
-		}
 		return dict(args[1], args[0])
 	default:
 		return panicRank("!")
@@ -396,29 +391,13 @@ func vfDrop(ctx *Context, args []V) V {
 	}
 }
 
-// vfCast implements the $ variadic verb.
-func vfCast(ctx *Context, args []V) V {
+// vfShape implements the $ variadic verb.
+func vfShape(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return NewS(args[0].Sprint(ctx))
 	case 2:
-		x, y := args[1], args[0]
-		if x.IsI() {
-			return padStrings(int(x.I()), y)
-		} else if x.IsF() {
-			if !isI(x.F()) {
-				return Panicf("i$y : non-integer i (%g)", x.F())
-			}
-			return padStrings(int(x.F()), y)
-		}
-		switch xv := x.value.(type) {
-		case array:
-			return search(x, y)
-		case S:
-			return cast(ctx, xv, y)
-		default:
-			return panicType("x$y", "x", x)
-		}
+		return shape(ctx, args[1], args[0])
 	default:
 		return panicRank("$")
 	}
@@ -684,8 +663,8 @@ func vfFirsts(ctx *Context, args []V) V {
 	}
 }
 
-// vfIn implements the "in" variadic verb.
-func vfIn(ctx *Context, args []V) V {
+// vfInKeyword implements the "in" variadic verb.
+func vfInKeyword(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return panics("in : not enough arguments")
@@ -696,8 +675,8 @@ func vfIn(ctx *Context, args []V) V {
 	}
 }
 
-// vfInFirsts implements the ¿ variadic verb.
-func vfInFirsts(ctx *Context, args []V) V {
+// vfIn implements the ¿ variadic verb.
+func vfIn(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		return markFirsts(ctx, args[0])
@@ -715,18 +694,6 @@ func vfOCount(ctx *Context, args []V) V {
 		return occurrenceCount(ctx, args[0])
 	default:
 		return panicRank("ocount")
-	}
-}
-
-// vfMod implements the mod variadic verb.
-func vfMod(ctx *Context, args []V) V {
-	switch len(args) {
-	case 1:
-		return panics("mod : not enough arguments")
-	case 2:
-		return modulus(args[1], args[0])
-	default:
-		return panicRank("mod")
 	}
 }
 

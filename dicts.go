@@ -68,6 +68,15 @@ func (d *Dict) Len() int {
 }
 
 func dict(x, y V) V {
+	if x.IsI() {
+		return moddivpad(x.I(), y)
+	}
+	if x.IsF() {
+		if !isI(x.F()) {
+			return Panicf("i!y : non-integer i (%g)", x.F())
+		}
+		return moddivpad(int64(x.F()), y)
+	}
 	xv, ok := x.value.(array)
 	if !ok {
 		return panicType("X!Y", "X", x)

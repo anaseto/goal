@@ -609,14 +609,6 @@ func castFormat(ctx *Context, s string, y V) V {
 	if nv > 1 {
 		return castFormatN(ctx, s, y, nv)
 	}
-	if len(s) > 0 && s[0] == '%' && s[len(s)-1] == 'v' &&
-		!(s[1] == '0' || s[1] == '+' && s[2] == 0 || s[1] == '-' && s[2] == 0) {
-		i, err := strconv.ParseInt(s[1:len(s)-1], 10, 0)
-		if err == nil {
-			y = casts(ctx, y)
-			return padStrings(int(i), y)
-		}
-	}
 	return castFormat1(ctx, s, y)
 }
 
@@ -1008,35 +1000,22 @@ func dropCR(s string) string {
 	return s
 }
 
-func padStrings(x int, y V) V {
-	switch yv := y.value.(type) {
-	case S:
-		if len(yv) < x || len(yv) < -x {
-			return NewS(padString(x, string(yv)))
+func padStringRight(x int, s string) string {
+	switch {
+	case len(s) < x:
+		var sb strings.Builder
+		sb.Grow(x)
+		sb.WriteString(s)
+		for i := 0; i < x-len(s); i++ {
+			sb.WriteByte(' ')
 		}
-		return y
-	case *AS:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			r.elts[i] = padString(x, yi)
-		}
-		return NewV(r)
-	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := padStrings(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return sb.String()
 	default:
-		return panicType("i$y", "y", y)
+		return s
 	}
 }
 
-func padString(x int, s string) string {
+func padStringLeft(x int, s string) string {
 	switch {
 	case len(s) < x:
 		var sb strings.Builder
@@ -1045,14 +1024,6 @@ func padString(x int, s string) string {
 			sb.WriteByte(' ')
 		}
 		sb.WriteString(s)
-		return sb.String()
-	case len(s) < -x:
-		var sb strings.Builder
-		sb.Grow(-x)
-		sb.WriteString(s)
-		for i := 0; i < -x-len(s); i++ {
-			sb.WriteByte(' ')
-		}
 		return sb.String()
 	default:
 		return s

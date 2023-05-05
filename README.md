@@ -181,9 +181,8 @@ x%y divide      3%2 -> 1.5          3 4%2 -> 1.5 2
 !s  fields      !"a b\tc\nd  e" -> "a" "b" "c" "d" "e"   (Unicode's White Space)
 !I  odometer    !2 3 -> (0 0 0 1 1 1;0 1 2 0 1 2)
 !d  keys        !"a" "b"!1 2 -> "a" "b"
-i!i range       2!5 -> 2 3 4        5!2 -> !0
-i!s cut shape   3!"abcdefghijk" -> "abc" "defg" "hijk"
-i!Y cut shape   3!!6 -> (0 1;2 3;4 5)            -3!!6 -> (0 1 2;3 4 5)
+i!n mod/div     3!9 8 7 -> 0 2 1          -3!9 8 7 -> 3 2 2
+i!s pad fields  3$"a" -> "a  "            -3$"1" "23" "456" -> "  1" " 23" "456"
 X!Y dict        d:"a" "b"!1 2;d "a" -> 1
 &s  byte-count  &"abc" -> 3     &"π" -> 2        &"αβγ" -> 6
 &I  where       &0 0 1 0 0 0 1 -> 2 6            &2 3 -> 0 0 1 1 1
@@ -200,7 +199,7 @@ x>y greater     2>3 -> 0        "c" > "a" -> 1
 =s  lines       ="ab\ncd\r\nef gh" -> "ab" "cd" "ef gh"
 =I  index-count =1 0 0 2 2 3 -1 2 1 1 1 -> 2 4 3 1
 =d  group keys  ="a""b""c"!0 1 0 -> ("a" "c";,"b")         ="a""b"!0 -1 -> ,,"a"
-f=Y group by    (2 mod)=!10 -> (0 2 4 6 8;1 3 5 7 9)
+f=Y group by    (2!)=!10 -> (0 2 4 6 8;1 3 5 7 9)
 x=y equal       2 3 4=3 -> 0 1 0        "ab" = "ba" -> 0
 ~x  not         ~0 1 2 -> 1 0 0         ~"a" "" "0" -> 0 1 0
 x~y match       3~3 -> 1        2 3~3 2 -> 0             ("a";%)~'("b";%) -> 0 1
@@ -229,11 +228,14 @@ f_y weed out    {0 1 1 0}_4 1 5 3 -> 4 3          {x>0}_2 -3 1 -> ,-3
 I_s cut string  1 3_"abcdef" -> "bc" "def"                         (I ascending)
 I_Y cut         2 5_!10 -> (2 3 4;5 6 7 8 9)                       (I ascending)
 $x  string      $2 3 -> "2 3"     $"text" -> "\"text\""
+i$i span        2$5 -> 4          3+!3$5 -> 3 4 5                (same as 1+y-x)
+i$s cut shape   3$"abcdefghijk" -> "abc" "defg" "hijk"
+i$Y cut shape   3$!6 -> (0 1;2 3;4 5)            -3$!6 -> (0 1 2;3 4 5)
 s$y strings     "s"$(1;"c";+) -> "1""c""+"
 s$s chars/bytes "c"$"aπ" -> 97 960             "b"$"aπ" -> 97 207 128
 s$i to string   "c"$97 960 -> "aπ"             "b"$97 207 128 -> "aπ"
 s$n cast        "i"$2.3 -> 2                   @"n"$42 -> "n"
-s$s parse num   "i"$"42" "0b100" -> 42 4       "n"$"2.5" "1e+7" -> 2.5 1e+07
+s$s parse       "i"$"42" "0b100" -> 42 4       "n"$"2.5" "1e+7" -> 2.5 1e+07
 s$y format      "%.2g"1 4%3 -> "0.33" "1.3"    "%s=%03d"$"a" 42 -> "a=042"
 X$y binsearch   2 3 5 7$8 2 7 5 5.5 3 0 -> 4 1 4 3 3 2 0           (x ascending)
 ?i  uniform     ?2 -> 0.6046602879796196 0.9405090880450124    (between 0 and 1)
@@ -300,7 +302,6 @@ s csv s    csv read     " " csv "1 2 3" -> ,"1" "2" "3"       (" " as separator)
 s csv A    csv write    " " csv ,"1" "2" "3" -> "1 2 3\n"     (" " as separator)
 x in s     contained    "bc" "ac" in "abcd" -> 1 0                 (same as x¿s)
 x in Y     member of    2 3 in 0 2 4 -> 1 0                        (same as x¿Y)
-n mod n    modulus      3 mod 5 4 3 -> 2 1 0
 n nan n    fill NaNs    42 nan (1.5;sqrt -1) -> 1.5 42
 i rotate Y rotate       2 rotate 7 8 9 -> 9 7 8         -2 rotate 7 8 9 -> 8 9 7
 
