@@ -613,11 +613,11 @@ func each2Length(x array) V {
 		}
 		return NewAI(r)
 	default:
-		r := make([]int64, xv.Len())
+		r := make([]byte, xv.Len())
 		for i := range r {
 			r[i] = 1
 		}
-		return NewAI(r)
+		return newABb(r)
 	}
 }
 

@@ -198,28 +198,14 @@ func where(x V) V {
 		}
 		return canonicalFast(NewAV(r))
 	case *Dict:
-		switch xv.values.(type) {
-		case *AB:
+		if xv.values.numeric() {
 			r := where(NewV(xv.values))
 			if r.IsPanic() {
 				return r
 			}
 			return NewV(arrayAtV(xv.keys, r))
-		case *AI:
-			r := where(NewV(xv.values))
-			if r.IsPanic() {
-				return r
-			}
-			return NewV(arrayAtV(xv.keys, r))
-		case *AF:
-			r := where(NewV(xv.values))
-			if r.IsPanic() {
-				return r
-			}
-			return NewV(arrayAtV(xv.keys, r))
-		default:
-			return newDictValues(xv.keys, where(NewV(xv.values)))
 		}
+		return newDictValues(xv.keys, where(NewV(xv.values)))
 	default:
 		return panicType("&x", "x", x)
 	}

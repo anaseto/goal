@@ -56,8 +56,8 @@ there are some [implementation notes](docs/Implementation.md) too.
 
 To install the command line interpreter, first do the following:
 
-+ Install the [go compiler](https://golang.org/).
-+ Add `$(go env GOPATH)/bin` to your `$PATH` (for example `export PATH="$PATH:$(go env GOPATH)/bin"`).
+* Install the [go compiler](https://golang.org/).
+* Add `$(go env GOPATH)/bin` to your `$PATH` (for example `export PATH="$PATH:$(go env GOPATH)/bin"`).
 
 Then you can build the intepreter with:
 
@@ -76,7 +76,7 @@ goal`.
 
 # Editor support
 
-- [vim-goal](https://codeberg.org/anaseto/vim-goal) : vim files for Goal.
+* [vim-goal](https://codeberg.org/anaseto/vim-goal) : vim files for Goal.
 
 # Examples
 

@@ -356,12 +356,28 @@ func casti(y V) V {
 		return y
 	case *AS:
 		r := make([]int64, yv.Len())
+		bo, by := true, true
 		for i, s := range yv.elts {
 			n, err := parseInt(string(s))
 			if err != nil {
 				n = math.MinInt64
 			}
+			if n < 0 || n >= 256 {
+				by = false
+			} else if n > 1 {
+				bo = false
+			}
 			r[i] = n
+		}
+		if by {
+			rb := &AB{elts: make([]byte, yv.Len())}
+			for i, ri := range r {
+				rb.elts[i] = byte(ri)
+			}
+			if bo {
+				rb.flags = flagBool
+			}
+			return NewV(rb)
 		}
 		return NewAI(r)
 	case *AF:
@@ -476,6 +492,8 @@ func casts(ctx *Context, y V) V {
 		return NewV(canonicalAV(r))
 	case array:
 		return each2String(ctx, yv)
+	case *Dict:
+		return newDictValues(yv.keys, casts(ctx, NewV(yv.values)))
 	default:
 		return NewS(y.Sprint(ctx))
 	}
@@ -640,6 +658,8 @@ func castFormat1(ctx *Context, s string, y V) V {
 			r[i] = castFormat1(ctx, s, yi)
 		}
 		return Canonical(NewAV(r))
+	case *Dict:
+		return newDictValues(yv.keys, castFormat1(ctx, s, NewV(yv.values)))
 	default:
 		return NewS(fmt.Sprintf(s, y.Sprint(ctx)))
 	}
@@ -713,7 +733,7 @@ func dropS(s S, y V) V {
 	case *AS:
 		r := make([]string, yv.Len())
 		for i, yi := range yv.elts {
-			r[i] = strings.TrimPrefix(string(yi), string(s))
+			r[i] = strings.TrimPrefix(yi, string(s))
 		}
 		return NewAS(r)
 	case *AV:
@@ -727,6 +747,45 @@ func dropS(s S, y V) V {
 		return NewAV(r)
 	case *Dict:
 		return newDictValues(yv.keys, dropS(s, NewV(yv.values)))
+	default:
+		return panicType("s_y", "y", y)
+	}
+}
+
+func dropAS(x *AS, y V) V {
+	switch yv := y.value.(type) {
+	case S:
+		r := make([]string, x.Len())
+		for i, xi := range x.elts {
+			r[i] = strings.TrimPrefix(string(yv), xi)
+		}
+		return NewAS(r)
+	case *AS:
+		if x.Len() != yv.Len() {
+			return panicLength("S_S", x.Len(), yv.Len())
+		}
+		r := make([]string, yv.Len())
+		for i, yi := range yv.elts {
+			r[i] = strings.TrimPrefix(string(yi), x.At(i))
+		}
+		return NewAS(r)
+	case *AV:
+		if x.Len() != yv.Len() {
+			return panicLength("S_S", x.Len(), yv.Len())
+		}
+		r := make([]V, yv.Len())
+		for i, yi := range yv.elts {
+			r[i] = dropS(S(x.At(i)), yi)
+			if r[i].IsPanic() {
+				return r[i]
+			}
+		}
+		return NewAV(r)
+	case *Dict:
+		if x.Len() != yv.Len() {
+			return panicLength("S_S", x.Len(), yv.Len())
+		}
+		return newDictValues(yv.keys, dropAS(x, NewV(yv.values)))
 	default:
 		return panicType("s_y", "y", y)
 	}
@@ -793,6 +852,8 @@ func sub1(x V) V {
 			return panics("sub[S] : non-even length array")
 		}
 		return NewV(&replacer{r: strings.NewReplacer(xv.elts...), oldnew: xv})
+	case *Dict:
+		return sub2(NewV(xv.keys), NewV(xv.values))
 	default:
 		return panicType("sub[x]", "x", x)
 	}

@@ -1051,3 +1051,8 @@ rt.time["%,2";3.5] / non-integer
 @[1 2 3;0 2 30;-] / out of bounds
 2!(*;3) / type
 -2!(*;3) / type
+"a""b"_,"c" / length
+"a""b"_(,"d")!,"c" / length
+"a""b"_("c";"d" "e";"f" "g" "h") / length
+"a""b"_(*;"d" "e") / type
+"a""b"_* / type

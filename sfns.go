@@ -251,6 +251,8 @@ func drop(x, y V) V {
 			return x
 		}
 		return drop(x, y)
+	case *AS:
+		return dropAS(xv, y)
 	default:
 		return panicType("x_y", "x", x)
 	}
