@@ -1,5 +1,5 @@
 Features:
-- maybe s$ could be extended into some kind of sprintf/scanf
+- maybe s!s could be a sort of scanf
 - maybe add “case” x I'y
 - maybe use non-adverbial \ for some kind of statement (no ideas yet)
 
@@ -14,7 +14,7 @@ Documentation:
 - maybe write some introductory guide (in addition to the current help and FAQ)
 
 Optimizations:
-- maybe special code for more uncommon op/ and op\ and op'
+- maybe special code for more uncommon op/ and op\ and op', as well as amend
 - maybe improve liveness analysis for code with branches
 - maybe some remaining special cases in self-search functions (all common uses
   already done)
