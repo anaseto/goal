@@ -187,9 +187,9 @@ X!Y dict        d:"a" "b"!1 2;d "a" -> 1
 &s  byte-count  &"abc" -> 3     &"π" -> 2        &"αβγ" -> 6
 &I  where       &0 0 1 0 0 0 1 -> 2 6            &2 3 -> 0 0 1 1 1
 &d  keys where  &"a""b""c""d"!0 1 1 0 -> "b" "c"
-x&y min         2&3 -> 2        4&3 -> 3         "b"&"a" -> "a"
+x&y min/and     2&3 -> 2        4&3 -> 3         "b"&"a" -> "a"         0&1 -> 0
 |X  reverse     |!5 -> 4 3 2 1 0
-x|y max         2|3 -> 3        4|3 -> 4         "b"|"a" -> "b"
+x|y max/or      2|3 -> 3        4|3 -> 4         "b"|"a" -> "b"         0|1 -> 1
 <d  sort up     <"a""b""c"!2 3 1 -> "c""a""b"!1 2 3
 <X  ascend      <3 5 4 -> 0 2 1          (index permutation for ascending order)
 x<y less        2<3 -> 1        "c" < "a" -> 0

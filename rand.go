@@ -1,6 +1,9 @@
 package goal
 
-import "math/rand"
+import (
+	"math"
+	"math/rand"
+)
 
 func uniform(ctx *Context, x V) V {
 	var n int64
@@ -158,6 +161,9 @@ func deal(ctx *Context, n int64, y V) V {
 	}
 	if n > int64(ylen) {
 		return Panicf("(-i)?Y : i > #Y (%d vs %d)", n, ylen)
+	}
+	if n == math.MinInt64 {
+		n = int64(ylen)
 	}
 	switch yv := y.value.(type) {
 	case *AB:

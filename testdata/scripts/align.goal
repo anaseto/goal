@@ -7,13 +7,13 @@ f,,function
 e,,error
 ,A,generic array`
 records:","\'"\n"\" \n"^csvs
-padc:{n:x-l:&y;r:l+ceil n%2;"%${x}v"$"%-${r}v"$y}
+padc:{n:x-l:&y;r:l+ceil n%2;(-x)!r!y}
 colw:|/&records
 res:(
  / Justify left
- {{"%-${x}v"$y}'[colw;x]}'records
+ {colw!'x}'records
  / Justify right
- {{"%${x}v"$y}'[colw;x]}'records
+ {(-colw)!'x}'records
  / Justify center
  {padc'[colw;x]}'records
 )
