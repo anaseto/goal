@@ -18,7 +18,9 @@
 * New `"c"$s` for converting a string to and from array of code points, and make
   `"i"$s` now be parse int, and `"n"$s` only parse number (floats).
 * New `"s"$y` form that formats in a default way non-strings elements.
-* New `0i` value, representing the minimum representable integer.
+* New `0i` value, representing the minimum representable integer. It's used in
+  `"i"$s` when parsing an integer with invalid syntax, as well as in the
+  special shortcut `0i?Y` for doing a shuffle.
 * Return `"i"` for `@i`, not `"n"`, because they're actually different types, even
   though implicit conversions are made when possible.
 * `$X` returns now stranding representation for mixed lists of strings and
