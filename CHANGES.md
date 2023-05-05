@@ -1,40 +1,53 @@
-# v? ?
+# v0.16.0 2023-05-05
 
-* Make out-indexing valid and return the zero value of the array, in the same
-  way as padding does.
+* Make out-indexing valid and return the zero value of the array or dict, in
+  the same way as padding does (0s for numeric arrays, empty strings for string
+  arrays, and zero value based on first element type for generic arrays, or
+  an empty generic array if it's empty). In particular, outdexing results
+  returned by group will return an empty array as expected.
 * Now that `X@i` does pad on outdexing, invert `i@Y` and `i#Y` swap from
-  previous realease to be more compatible with K, as it's now quite natural
-  that `i@Y` is the same as `Y@!i` (except for being more efficient by not
-  actually generating indices). Also, new mnemonic: `@` looks like a bit like a
-  zero, so it pads.
-* Make `i!n` mod/div, and remove mod, both for better compatibility with ngn/k,
-  and because only `i!I` is easy to vectorize (for example for powers of two, and
-  to produce a result with smaller type for small i). As a result, cut shape is
-  now `i$y`, and padding is done with `i!s` (though it can be done too with
-  format new `s$y`). Also, span `i$i` replaces range `i!i`, which was not very
-  composable (albeit convenient).
-* New format `s$y` form that provides classic sprintf-like functionality.
+  previous realease to keep more compatibility with K. It's also now quite
+  natural that `i@Y` is the same as `Y@!i` (except for being more efficient by
+  not actually generating indices). Also, new mnemonic: `@` looks like a bit
+  like a zero, so it pads.
+* Make `i!n` mod/div, and remove `mod` keyword, both for better compatibility
+  with ngn/k, and because only `i!I` is easy to vectorize (for example for
+  powers of two, and to produce a result with smaller type for small i). As a
+  result, cut shape is now `i$y` (used in `J` too for reshape), and string
+  padding is done with `i!s` (though it can be done too with new sprintf-like
+  format `s$y`).  Also, span `i$i` replaces range `i!i`, which was not very
+  composable (albeit convenient). (breaking changes)
+* New format `s$y` form that provides classic sprintf-like functionality, for
+  when more advanced formatting than just space padding is useful. Formatting
+  works element-wise when `s` contains a single formatting word, like `"%03d"`,
+  and list-wise when it contains more, like `"%s=%.4f"` (expecting `2~#y`).
 * New `"b"$s` for converting a string to and from array of bytes.
 * New `"c"$s` for converting a string to and from array of code points, and make
-  `"i"$s` now be parse int, and `"n"$s` only parse number (floats).
-* New `"s"$y` form that formats in a default way non-strings elements.
+  old `"i"$s` now just be parse/cast to int, and `"n"$s` only parse/cast to
+  number (floats).
+* New `"s"$y` form that formats in a default way non-strings element-wise,
+  instead of just the whole `y` like in `$y`. Also, it leaves strings as-is,
+  unlike `$y` which quotes them with escapes.
+* Return `"i"` for `@i`, not `"n"`, because integers and floats are different
+  types, even though implicit conversions are made when possible.
 * New `0i` value, representing the minimum representable integer. It's used in
   `"i"$s` when parsing an integer with invalid syntax, as well as in the
-  special shortcut `0i?Y` for doing a shuffle.
-* Return `"i"` for `@i`, not `"n"`, because they're actually different types, even
-  though implicit conversions are made when possible.
+  special shortcut `0i?Y` for doing a shuffle. We use `0i` for consistency,
+  instead of `0N`, because `i` is the name of the integer type.
 * `$X` returns now stranding representation for mixed lists of strings and
   numbers, without parens.
 * Add `¿` as symbol alternative for in and firsts, the boolean primitive
   counterparts of `?`.
-* Rename `atan2` into `atan`, which is now dyadic and accepts either one or two
-  arguments (same simplification as Lua 5.3 did). (breaking change)
+* Rename `atan2` into `atan`, which now accepts either one or two arguments
+  (same simplification as Lua 5.3 did). (breaking change)
 * More consistent results in `op/x` for empty list `x`. Now we use the default
   zero value for the given list type, except for a few special reductions where
   a different neutral element is clear (like `*/`, `&/`, and `|/` for
-  non-generic lists).
-* Make X#d follow same semantics as X^d (except for being the negation of it).
-  This means that padding a dictionary should either be done with merge or
+  non-generic numeric lists).
+* Make `X#d` follow same semantics as `X^d` (except for being the negation
+  of it), returning a dictionary derived from `d`, preserving duplicate keys,
+  but with keys not in `X` removed. In particular, it does not add new keys to
+  `d` anymore, so dictionary padding should either be done with merge or
   individually to its arrays.
 * Implement !i for negative integers too.
 * Improvements in sorting of integers, depending on the range, using either
@@ -49,7 +62,7 @@
   variables too (previously only `x op:y` form was recognized for global
   variables).
 * Fix missing integer overflow check in odometer, a regression in boolean
-  grade, as well as other minor issues.
+  grade (maybe posterior to 0.15.0), as well as other minor issues.
 
 # v0.15.0 2023-04-21
 
