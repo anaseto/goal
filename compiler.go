@@ -615,10 +615,6 @@ func (c *compiler) doAssignOp(e *astAssignOp, n int) error {
 	if lc == nil || e.Global {
 		id, ok := c.ctx.gIDs[e.Name]
 		if !ok {
-			if lc == nil {
-				return c.perrorf(e.Pos,
-					"undefined global in assignement operation: %s", e.Name)
-			}
 			id = c.ctx.global(e.Name)
 		}
 		c.push2(opGlobalLast, opcode(id))
@@ -658,10 +654,6 @@ func (c *compiler) doAssignAmendOp(e *astAssignAmendOp, n int) error {
 	if lc == nil || e.Global {
 		id, ok := c.ctx.gIDs[e.Name]
 		if !ok {
-			if lc == nil {
-				return c.perrorf(e.Pos,
-					"undefined global in assignement amend operation: %s", e.Name)
-			}
 			id = c.ctx.global(e.Name)
 		}
 		c.push2(opGlobalLast, opcode(id))
@@ -698,10 +690,6 @@ func (c *compiler) doAssignDeepAmendOp(e *astAssignDeepAmendOp, n int) error {
 	if lc == nil || e.Global {
 		id, ok := c.ctx.gIDs[e.Name]
 		if !ok {
-			if lc == nil {
-				return c.perrorf(e.Pos,
-					"undefined global in assignement amend operation: %s", e.Name)
-			}
 			id = c.ctx.global(e.Name)
 		}
 		c.push2(opGlobalLast, opcode(id))

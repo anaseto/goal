@@ -373,6 +373,8 @@ func (ctx *Context) storeConst(x V) int {
 func (ctx *Context) global(s string) int {
 	if ctx.gPrefix != "" && !strings.ContainsRune(s, '.') {
 		s = ctx.gPrefix + "." + s
+	} else {
+		s = strings.TrimPrefix(s, "main.") // main namespace
 	}
 	id, ok := ctx.gIDs[s]
 	if ok {
