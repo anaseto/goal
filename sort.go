@@ -387,8 +387,32 @@ func search(x V, y V) V {
 	}
 }
 
+func searchSlice[T ordered](x []T, y T) int64 {
+	i, j := 0, len(x)
+	for i < j {
+		h := int(uint(i+j) >> 1)
+		// i ≤ h < j
+		if x[h] <= y {
+			i = h + 1
+		} else {
+			j = h
+		}
+	}
+	return int64(i)
+}
+
 func searchABI(x *AB, y int64) int64 {
-	return int64(sort.Search(x.Len(), func(i int) bool { return int64(x.At(i)) > y }))
+	if y < 0 {
+		return 0
+	}
+	if y >= 256 {
+		return int64(x.Len())
+	}
+	return searchSlice(x.elts, byte(y))
+}
+
+func searchABB(x *AB, y byte) int64 {
+	return searchSlice(x.elts, y)
 }
 
 func searchABF(x *AB, y float64) int64 {
@@ -396,7 +420,7 @@ func searchABF(x *AB, y float64) int64 {
 }
 
 func searchAII(x *AI, y int64) int64 {
-	return int64(sort.Search(x.Len(), func(i int) bool { return x.At(i) > y }))
+	return searchSlice(x.elts, y)
 }
 
 func searchAIF(x *AI, y float64) int64 {
@@ -408,11 +432,11 @@ func searchAFI(x *AF, y int64) int64 {
 }
 
 func searchAFF(x *AF, y float64) int64 {
-	return int64(sort.Search(x.Len(), func(i int) bool { return x.At(i) > y }))
+	return searchSlice(x.elts, y)
 }
 
 func searchASS(x *AS, y S) int64 {
-	return int64(sort.Search(x.Len(), func(i int) bool { return S(x.At(i)) > y }))
+	return searchSlice(x.elts, string(y))
 }
 
 func searchAB(x *AB, y V) V {
@@ -438,7 +462,7 @@ func searchABArray[I integer](x *AB, y array) []I {
 	case *AB:
 		r := make([]I, yv.Len())
 		for i, yi := range yv.elts {
-			r[i] = I(searchABI(x, int64(yi)))
+			r[i] = I(searchABB(x, yi))
 		}
 		return r
 	case *AI:

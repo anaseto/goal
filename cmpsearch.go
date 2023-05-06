@@ -1,7 +1,6 @@
 package goal
 
 import (
-	"sort"
 	"strings"
 )
 
@@ -787,9 +786,22 @@ func memberOfAF(x V, y *AF) V {
 }
 
 func memberISortedAI(x int64, y *AI) bool {
-	ylen := y.Len()
-	i := sort.Search(ylen, func(j int) bool { return y.At(j) >= x })
-	return i < ylen && y.At(i) == x
+	i := findSortedSlice(y.elts, x)
+	return i < y.Len() && y.At(i) == x
+}
+
+func findSortedSlice[T ordered](x []T, y T) int {
+	i, j := 0, len(x)
+	for i < j {
+		h := int(uint(i+j) >> 1)
+		// i ≤ h < j
+		if x[h] < y {
+			i = h + 1
+		} else {
+			j = h
+		}
+	}
+	return i
 }
 
 func memberOfAI(x V, y *AI) V {
@@ -900,7 +912,7 @@ func memberOfII(xs, ys []int64, min, max int64) []byte {
 
 func memberSOfAS(x string, y *AS) bool {
 	ylen := y.Len()
-	i := sort.Search(ylen, func(j int) bool { return y.At(j) >= x })
+	i := findSortedSlice(y.elts, x)
 	return i < ylen && y.At(i) == x
 }
 
@@ -1522,9 +1534,9 @@ func imapSlice[T comparable, I integer](xs []T) map[T]I {
 
 func findIs(x []int64, y int64) int64 {
 	xlen := len(x)
-	i := int64(sort.Search(xlen, func(i int) bool { return x[i] >= y }))
-	if i < int64(xlen) && x[i] == y {
-		return i
+	i := findSortedSlice(x, y)
+	if i < xlen && x[i] == y {
+		return int64(i)
 	}
 	return int64(xlen)
 }
@@ -1625,9 +1637,9 @@ func findAF(x *AF, y V) V {
 
 func findSs(x []string, y string) int64 {
 	xlen := len(x)
-	i := int64(sort.Search(xlen, func(i int) bool { return x[i] >= y }))
-	if i < int64(xlen) && x[i] == y {
-		return i
+	i := findSortedSlice(x, y)
+	if i < xlen && x[i] == y {
+		return int64(i)
 	}
 	return int64(xlen)
 }
