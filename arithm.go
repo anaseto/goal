@@ -131,8 +131,6 @@ func floor(x V) V {
 	case *AF:
 		r := xv.reuse()
 		for i, xi := range xv.elts {
-			// NOTE: we assume conversion is possible, leaving
-			// handling NaN, INF or big floats to the program.
 			r.elts[i] = math.Floor(xi)
 		}
 		return NewV(r)
