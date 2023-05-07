@@ -8,42 +8,37 @@ well how some things ended up in a way or another.
 
 # Choosing the implementation language
 
-That was the first choice.  To be honest, among suitable languages, I probably
-mainly chose Go because I know it very well and feel comfortable with it. It
-might not be the usual go-to language for implementing interpreters, but it
-does a good job at it, and has quite a few good points:
+To be honest, among suitable languages, I chose Go because I know it very well
+and feel comfortable with it. It might not be the usual go-to language for
+implementing interpreters, but it has quite a few good points for such task:
 
 * A comprehensive standard library, without requiring more external
   dependencies.
 * Higher-level language for embedding than what C provides, so that it's easier
   to extend.
-* Fast compilation.
 * Low-level enough that things go fast.
+* Fast compilation.
 
-Among languages I know well, I could have chosen OCaml too, which is
-well-suited for compilation, though less for the interpretation part. That said,
-I haven't used it lately, and I never really liked its standard library, nor
-its mutable array support. I mean, Goal has only immutable arrays, but
-for implementing them you want friendly support for mutable arrays or even
-better, slices. Of course, given current trends, I did think of other new non-C
-fast languages that would facilitate better optimizations (think SIMD), like
-Zig or Rust (with it's excellent regexp library), but I only know the first on
-the surface, I don't feel comfortable with the second, and such optimizations
-come at quite a cost in code complexity and portability anyway.
+Among languages I know well, OCaml mostly fits too, except for the first point.
+Of course, given current trends, I did think of languages like Zig (built-in
+SIMD) and Rust (with it's excellent regexp library), but I only know the first
+on the surface, I don't feel comfortable with the second, and SIMD comes at
+quite a cost in code complexity and portability anyway.
 
-As a bonus, Go gives us excellent garbage collection out of the box, which is
-quite a good thing, as my knowledge about garbage collection implementation is
-limited.  I know there are GC libraries for most non-GC languages, but it's
-still one less thing to worry about. As a tradeoff, we cannot catch out of
-memory errors reliably in programs. Also, Go slices, strings and interface
-types are a good match for representing Goal's datatypes, as we discuss later
-on.
+Also, Go gives us excellent garbage collection out of the box, which is quite a
+good thing, as my knowledge about garbage collection implementation is limited.
+I know there are GC libraries for most non-GC languages, but it's still one
+less thing to worry about. As a tradeoff, we cannot catch out of memory errors
+reliably in programs.
 
-Finally, interestingly, while Go and Goal are quite the opposite in terms of
-conciseness due to the gap between scalar and array paradigms, they both
-encourage idioms over abstraction, and writing executable code over writing
-types: this might explain why this in only the third project for an array
-language in Go.
+Even counting the recent generics addition, a downside of Go for implementing
+an interpreter might be the lack of macros, but code generation helps, and
+given Goal's somewhat minimalist design, it's not a blocker for me.
+
+Interestingly, while Go and Goal are quite the opposite in terms of conciseness
+due to the gap between scalar and array paradigms, they both encourage idioms
+over abstraction, and writing executable code over writing types: this might
+explain why this in only the third project for an array language in Go.
 
 # Context
 
