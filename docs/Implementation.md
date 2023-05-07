@@ -1,4 +1,4 @@
-*Last updated: 2023-05-02*
+*Last updated: 2023-05-07*
 
 # Implementation notes
 
@@ -17,6 +17,7 @@ does a good job at it, and has quite a few good points:
   dependencies.
 * Higher-level language for embedding than what C provides, so that it's easier
   to extend.
+* Fast compilation.
 * Low-level enough that things go fast.
 
 Among languages I know well, I could have chosen OCaml too, which is
@@ -27,16 +28,22 @@ for implementing them you want friendly support for mutable arrays or even
 better, slices. Of course, given current trends, I did think of other new non-C
 fast languages that would facilitate better optimizations (think SIMD), like
 Zig or Rust (with it's excellent regexp library), but I only know the first on
-the surface, and I don't feel comfortable with the second.
+the surface, I don't feel comfortable with the second, and such optimizations
+come at quite a cost in code complexity and portability anyway.
 
 As a bonus, Go gives us excellent garbage collection out of the box, which is
 quite a good thing, as my knowledge about garbage collection implementation is
 limited.  I know there are GC libraries for most non-GC languages, but it's
 still one less thing to worry about. As a tradeoff, we cannot catch out of
-memory errors reliably in programs.
+memory errors reliably in programs. Also, Go slices, strings and interface
+types are a good match for representing Goal's datatypes, as we discuss later
+on.
 
-Also, Go slices, strings and interface types are a good match for representing
-Goal's datatypes, as we discuss later on.
+Finally, interestingly, while Go and Goal are quite the opposite in terms of
+conciseness due to the gap between scalar and array paradigms, they both
+encourage idioms over abstraction, and writing executable code over writing
+types: this might explain why this in only the third project for an array
+language in Go.
 
 # Context
 
