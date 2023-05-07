@@ -1077,7 +1077,7 @@ func (c *compiler) doApply2(a *astApply2, n int) error {
 		if err != nil {
 			return err
 		}
-		if e.Text == "@" {
+		if e.Text == "@" && nonEmpty(a.Right) {
 			opos := c.pos
 			c.pos = e.Pos
 			c.push(opApply)
