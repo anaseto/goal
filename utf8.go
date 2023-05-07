@@ -33,14 +33,7 @@ func utf8valid(x V) V {
 		}
 		return newABb(r)
 	case *AV:
-		r := make([]V, xv.Len())
-		for i, xi := range xv.elts {
-			r[i] = utf8valid(xi)
-			if r[i].IsPanic() {
-				return r[i]
-			}
-		}
-		return Canonical(NewAV(r))
+		return Canonical(monadAV(xv, utf8valid))
 	default:
 		return panicType("utf8 s", "s", x)
 	}

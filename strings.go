@@ -383,15 +383,7 @@ func casti(y V) V {
 	case *AF:
 		return castToAI(yv)
 	case *AV:
-		r := make([]V, yv.Len())
-		for i := range r {
-			ri := casti(yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			r[i] = ri
-		}
-		return Canonical(NewAV(r))
+		return Canonical(monadAV(yv, casti))
 	case *Dict:
 		return newDictValues(yv.keys, casti(NewV(yv.values)))
 	default:
@@ -446,14 +438,7 @@ func castn(y V) V {
 	case *AF:
 		return y
 	case *AV:
-		r := make([]V, yv.Len())
-		for i := range r {
-			r[i] = castn(yv.At(i))
-			if r[i].IsPanic() {
-				return r[i]
-			}
-		}
-		return Canonical(NewAV(r))
+		return Canonical(monadAV(yv, castn))
 	case *Dict:
 		return newDictValues(yv.keys, castn(NewV(yv.values)))
 	default:
@@ -534,15 +519,7 @@ func castb(y V) V {
 		}
 		return castb(y)
 	case *AV:
-		r := make([]V, yv.Len())
-		for i := range r {
-			ri := castb(yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			r[i] = ri
-		}
-		return NewAV(r)
+		return canonicalFast(monadAV(yv, castb))
 	default:
 		return panicType("\"b\"$y", "y", y)
 	}
@@ -583,14 +560,7 @@ func castc(y V) V {
 		}
 		return NewAV(r)
 	case *AV:
-		r := make([]V, yv.Len())
-		for i := range r {
-			r[i] = castc(yv.At(i))
-			if r[i].IsPanic() {
-				return r[i]
-			}
-		}
-		return canonicalFast(NewAV(r))
+		return canonicalFast(monadAV(yv, castc))
 	default:
 		return panicType("\"c\"$y", "y", y)
 	}
@@ -830,14 +800,7 @@ func trimSpaces(y V) V {
 		}
 		return NewAS(r)
 	case *AV:
-		r := make([]V, yv.Len())
-		for i, yi := range yv.elts {
-			r[i] = trimSpaces(yi)
-			if r[i].IsPanic() {
-				return r[i]
-			}
-		}
-		return NewAV(r)
+		return monadAV(yv, trimSpaces)
 	case *Dict:
 		return newDictValues(yv.keys, trimSpaces(NewV(yv.values)))
 	default:
