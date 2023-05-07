@@ -30,10 +30,8 @@ import (
 	"sort"
 )
 
-const (
-	radix     uint = 8
-	cachedLen      = 256
-)
+const radix uint = 8
+const cachedLen = 256
 
 func radixSortAI(ctx *Context, x *AI, min, max int64) *AI {
 	xlen := x.Len()

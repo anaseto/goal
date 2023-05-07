@@ -391,7 +391,3 @@ type integer interface {
 type ordered interface {
 	~float64 | ~string | integer
 }
-
-type numeric interface {
-	~float64 | integer
-}

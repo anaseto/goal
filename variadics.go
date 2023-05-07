@@ -143,11 +143,11 @@ func (ctx *Context) initVariadics() {
 	// dyads
 	ctx.RegisterDyad("and", vfAnd)
 	ctx.RegisterDyad("csv", vfCSV)
-	v := ctx.RegisterDyad("in", vfInKeyword)
+	ctx.RegisterDyad("in", vfInKeyword)
 	ctx.RegisterDyad("or", vfOr)
 	ctx.RegisterDyad("nan", vfNaN)
 	ctx.RegisterDyad("rotate", vfRotate)
-	v = ctx.RegisterDyad("rshift", vfRShift)
+	v := ctx.RegisterDyad("rshift", vfRShift)
 	ctx.vNames["»"] = v.variadic()
 	v = ctx.RegisterDyad("shift", vfShift)
 	ctx.vNames["«"] = v.variadic()
