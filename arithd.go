@@ -29,35 +29,14 @@ func equal(x, y V) V {
 	case *AV:
 		switch yv := y.value.(type) {
 		case *Dict:
-			v := equal(x, NewV(yv.values))
-			if v.IsPanic() {
-				return v
-			}
-			v.InitRC()
-			return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
+			return newDictValues(yv.keys, equal(x, NewV(yv.values)))
 		case array:
 			if yv.Len() != xv.Len() {
 				return panicLength("x=y", xv.Len(), yv.Len())
 			}
-			r := xv.reuse()
-			for i, xi := range xv.elts {
-				ri := equal(xi, yv.at(i))
-				if ri.IsPanic() {
-					return ri
-				}
-				r.elts[i] = ri
-			}
-			return NewV(r)
+			return dyadAVarray(xv, yv, equal)
 		}
-		r := xv.reuse()
-		for i, xi := range xv.elts {
-			ri := equal(xi, y)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return dyadAVV(xv, y, equal)
 	case *Dict:
 		yv, ok := y.value.(*Dict)
 		if ok {
@@ -67,12 +46,7 @@ func equal(x, y V) V {
 			}
 			return r
 		}
-		v := equal(NewV(xv.values), y)
-		if v.IsPanic() {
-			return v
-		}
-		v.InitRC()
-		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
+		return newDictValues(xv.keys, equal(NewV(xv.values), y))
 	default:
 		return panicType("x=y", "x", x)
 	}
@@ -497,35 +471,14 @@ func lesser(x, y V) V {
 	case *AV:
 		switch yv := y.value.(type) {
 		case *Dict:
-			v := lesser(x, NewV(yv.values))
-			if v.IsPanic() {
-				return v
-			}
-			v.InitRC()
-			return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
+			return newDictValues(yv.keys, lesser(x, NewV(yv.values)))
 		case array:
 			if yv.Len() != xv.Len() {
 				return panicLength("x<y", xv.Len(), yv.Len())
 			}
-			r := xv.reuse()
-			for i, xi := range xv.elts {
-				ri := lesser(xi, yv.at(i))
-				if ri.IsPanic() {
-					return ri
-				}
-				r.elts[i] = ri
-			}
-			return NewV(r)
+			return dyadAVarray(xv, yv, lesser)
 		}
-		r := xv.reuse()
-		for i, xi := range xv.elts {
-			ri := lesser(xi, y)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return dyadAVV(xv, y, lesser)
 	case *Dict:
 		yv, ok := y.value.(*Dict)
 		if ok {
@@ -535,12 +488,7 @@ func lesser(x, y V) V {
 			}
 			return r
 		}
-		v := lesser(NewV(xv.values), y)
-		if v.IsPanic() {
-			return v
-		}
-		v.InitRC()
-		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
+		return newDictValues(xv.keys, lesser(NewV(xv.values), y))
 	default:
 		return panicType("x<y", "x", x)
 	}
@@ -965,35 +913,14 @@ func greater(x, y V) V {
 	case *AV:
 		switch yv := y.value.(type) {
 		case *Dict:
-			v := greater(x, NewV(yv.values))
-			if v.IsPanic() {
-				return v
-			}
-			v.InitRC()
-			return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
+			return newDictValues(yv.keys, greater(x, NewV(yv.values)))
 		case array:
 			if yv.Len() != xv.Len() {
 				return panicLength("x>y", xv.Len(), yv.Len())
 			}
-			r := xv.reuse()
-			for i, xi := range xv.elts {
-				ri := greater(xi, yv.at(i))
-				if ri.IsPanic() {
-					return ri
-				}
-				r.elts[i] = ri
-			}
-			return NewV(r)
+			return dyadAVarray(xv, yv, greater)
 		}
-		r := xv.reuse()
-		for i, xi := range xv.elts {
-			ri := greater(xi, y)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return dyadAVV(xv, y, greater)
 	case *Dict:
 		yv, ok := y.value.(*Dict)
 		if ok {
@@ -1003,12 +930,7 @@ func greater(x, y V) V {
 			}
 			return r
 		}
-		v := greater(NewV(xv.values), y)
-		if v.IsPanic() {
-			return v
-		}
-		v.InitRC()
-		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
+		return newDictValues(xv.keys, greater(NewV(xv.values), y))
 	default:
 		return panicType("x>y", "x", x)
 	}
@@ -1433,35 +1355,14 @@ func add(x, y V) V {
 	case *AV:
 		switch yv := y.value.(type) {
 		case *Dict:
-			v := add(x, NewV(yv.values))
-			if v.IsPanic() {
-				return v
-			}
-			v.InitRC()
-			return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
+			return newDictValues(yv.keys, add(x, NewV(yv.values)))
 		case array:
 			if yv.Len() != xv.Len() {
 				return panicLength("x+y", xv.Len(), yv.Len())
 			}
-			r := xv.reuse()
-			for i, xi := range xv.elts {
-				ri := add(xi, yv.at(i))
-				if ri.IsPanic() {
-					return ri
-				}
-				r.elts[i] = ri
-			}
-			return NewV(r)
+			return dyadAVarray(xv, yv, add)
 		}
-		r := xv.reuse()
-		for i, xi := range xv.elts {
-			ri := add(xi, y)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return dyadAVV(xv, y, add)
 	case *Dict:
 		yv, ok := y.value.(*Dict)
 		if ok {
@@ -1471,12 +1372,7 @@ func add(x, y V) V {
 			}
 			return r
 		}
-		v := add(NewV(xv.values), y)
-		if v.IsPanic() {
-			return v
-		}
-		v.InitRC()
-		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
+		return newDictValues(xv.keys, add(NewV(xv.values), y))
 	default:
 		return panicType("x+y", "x", x)
 	}
@@ -1878,35 +1774,14 @@ func subtract(x, y V) V {
 	case *AV:
 		switch yv := y.value.(type) {
 		case *Dict:
-			v := subtract(x, NewV(yv.values))
-			if v.IsPanic() {
-				return v
-			}
-			v.InitRC()
-			return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
+			return newDictValues(yv.keys, subtract(x, NewV(yv.values)))
 		case array:
 			if yv.Len() != xv.Len() {
 				return panicLength("x-y", xv.Len(), yv.Len())
 			}
-			r := xv.reuse()
-			for i, xi := range xv.elts {
-				ri := subtract(xi, yv.at(i))
-				if ri.IsPanic() {
-					return ri
-				}
-				r.elts[i] = ri
-			}
-			return NewV(r)
+			return dyadAVarray(xv, yv, subtract)
 		}
-		r := xv.reuse()
-		for i, xi := range xv.elts {
-			ri := subtract(xi, y)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return dyadAVV(xv, y, subtract)
 	case *Dict:
 		yv, ok := y.value.(*Dict)
 		if ok {
@@ -1916,12 +1791,7 @@ func subtract(x, y V) V {
 			}
 			return r
 		}
-		v := subtract(NewV(xv.values), y)
-		if v.IsPanic() {
-			return v
-		}
-		v.InitRC()
-		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
+		return newDictValues(xv.keys, subtract(NewV(xv.values), y))
 	default:
 		return panicType("x-y", "x", x)
 	}
@@ -2323,35 +2193,14 @@ func multiply(x, y V) V {
 	case *AV:
 		switch yv := y.value.(type) {
 		case *Dict:
-			v := multiply(x, NewV(yv.values))
-			if v.IsPanic() {
-				return v
-			}
-			v.InitRC()
-			return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
+			return newDictValues(yv.keys, multiply(x, NewV(yv.values)))
 		case array:
 			if yv.Len() != xv.Len() {
 				return panicLength("x*y", xv.Len(), yv.Len())
 			}
-			r := xv.reuse()
-			for i, xi := range xv.elts {
-				ri := multiply(xi, yv.at(i))
-				if ri.IsPanic() {
-					return ri
-				}
-				r.elts[i] = ri
-			}
-			return NewV(r)
+			return dyadAVarray(xv, yv, multiply)
 		}
-		r := xv.reuse()
-		for i, xi := range xv.elts {
-			ri := multiply(xi, y)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return dyadAVV(xv, y, multiply)
 	case *Dict:
 		yv, ok := y.value.(*Dict)
 		if ok {
@@ -2361,12 +2210,7 @@ func multiply(x, y V) V {
 			}
 			return r
 		}
-		v := multiply(NewV(xv.values), y)
-		if v.IsPanic() {
-			return v
-		}
-		v.InitRC()
-		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
+		return newDictValues(xv.keys, multiply(NewV(xv.values), y))
 	default:
 		return panicType("x*y", "x", x)
 	}
@@ -2867,35 +2711,14 @@ func divide(x, y V) V {
 	case *AV:
 		switch yv := y.value.(type) {
 		case *Dict:
-			v := divide(x, NewV(yv.values))
-			if v.IsPanic() {
-				return v
-			}
-			v.InitRC()
-			return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
+			return newDictValues(yv.keys, divide(x, NewV(yv.values)))
 		case array:
 			if yv.Len() != xv.Len() {
 				return panicLength("x%y", xv.Len(), yv.Len())
 			}
-			r := xv.reuse()
-			for i, xi := range xv.elts {
-				ri := divide(xi, yv.at(i))
-				if ri.IsPanic() {
-					return ri
-				}
-				r.elts[i] = ri
-			}
-			return NewV(r)
+			return dyadAVarray(xv, yv, divide)
 		}
-		r := xv.reuse()
-		for i, xi := range xv.elts {
-			ri := divide(xi, y)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return dyadAVV(xv, y, divide)
 	case *Dict:
 		yv, ok := y.value.(*Dict)
 		if ok {
@@ -2905,12 +2728,7 @@ func divide(x, y V) V {
 			}
 			return r
 		}
-		v := divide(NewV(xv.values), y)
-		if v.IsPanic() {
-			return v
-		}
-		v.InitRC()
-		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
+		return newDictValues(xv.keys, divide(NewV(xv.values), y))
 	default:
 		return panicType("x%y", "x", x)
 	}
@@ -3238,35 +3056,14 @@ func minimum(x, y V) V {
 	case *AV:
 		switch yv := y.value.(type) {
 		case *Dict:
-			v := minimum(x, NewV(yv.values))
-			if v.IsPanic() {
-				return v
-			}
-			v.InitRC()
-			return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
+			return newDictValues(yv.keys, minimum(x, NewV(yv.values)))
 		case array:
 			if yv.Len() != xv.Len() {
 				return panicLength("x&y", xv.Len(), yv.Len())
 			}
-			r := xv.reuse()
-			for i, xi := range xv.elts {
-				ri := minimum(xi, yv.at(i))
-				if ri.IsPanic() {
-					return ri
-				}
-				r.elts[i] = ri
-			}
-			return NewV(r)
+			return dyadAVarray(xv, yv, minimum)
 		}
-		r := xv.reuse()
-		for i, xi := range xv.elts {
-			ri := minimum(xi, y)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return dyadAVV(xv, y, minimum)
 	case *Dict:
 		yv, ok := y.value.(*Dict)
 		if ok {
@@ -3276,12 +3073,7 @@ func minimum(x, y V) V {
 			}
 			return r
 		}
-		v := minimum(NewV(xv.values), y)
-		if v.IsPanic() {
-			return v
-		}
-		v.InitRC()
-		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
+		return newDictValues(xv.keys, minimum(NewV(xv.values), y))
 	default:
 		return panicType("x&y", "x", x)
 	}
@@ -3691,35 +3483,14 @@ func maximum(x, y V) V {
 	case *AV:
 		switch yv := y.value.(type) {
 		case *Dict:
-			v := maximum(x, NewV(yv.values))
-			if v.IsPanic() {
-				return v
-			}
-			v.InitRC()
-			return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
+			return newDictValues(yv.keys, maximum(x, NewV(yv.values)))
 		case array:
 			if yv.Len() != xv.Len() {
 				return panicLength("x|y", xv.Len(), yv.Len())
 			}
-			r := xv.reuse()
-			for i, xi := range xv.elts {
-				ri := maximum(xi, yv.at(i))
-				if ri.IsPanic() {
-					return ri
-				}
-				r.elts[i] = ri
-			}
-			return NewV(r)
+			return dyadAVarray(xv, yv, maximum)
 		}
-		r := xv.reuse()
-		for i, xi := range xv.elts {
-			ri := maximum(xi, y)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return dyadAVV(xv, y, maximum)
 	case *Dict:
 		yv, ok := y.value.(*Dict)
 		if ok {
@@ -3729,12 +3500,7 @@ func maximum(x, y V) V {
 			}
 			return r
 		}
-		v := maximum(NewV(xv.values), y)
-		if v.IsPanic() {
-			return v
-		}
-		v.InitRC()
-		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
+		return newDictValues(xv.keys, maximum(NewV(xv.values), y))
 	default:
 		return panicType("x|y", "x", x)
 	}
@@ -4140,35 +3906,14 @@ func arctan2(x, y V) V {
 	case *AV:
 		switch yv := y.value.(type) {
 		case *Dict:
-			v := arctan2(x, NewV(yv.values))
-			if v.IsPanic() {
-				return v
-			}
-			v.InitRC()
-			return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
+			return newDictValues(yv.keys, arctan2(x, NewV(yv.values)))
 		case array:
 			if yv.Len() != xv.Len() {
 				return panicLength("x atan y", xv.Len(), yv.Len())
 			}
-			r := xv.reuse()
-			for i, xi := range xv.elts {
-				ri := arctan2(xi, yv.at(i))
-				if ri.IsPanic() {
-					return ri
-				}
-				r.elts[i] = ri
-			}
-			return NewV(r)
+			return dyadAVarray(xv, yv, arctan2)
 		}
-		r := xv.reuse()
-		for i, xi := range xv.elts {
-			ri := arctan2(xi, y)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return dyadAVV(xv, y, arctan2)
 	case *Dict:
 		yv, ok := y.value.(*Dict)
 		if ok {
@@ -4178,12 +3923,7 @@ func arctan2(x, y V) V {
 			}
 			return r
 		}
-		v := arctan2(NewV(xv.values), y)
-		if v.IsPanic() {
-			return v
-		}
-		v.InitRC()
-		return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
+		return newDictValues(xv.keys, arctan2(NewV(xv.values), y))
 	default:
 		return panicType("x atan y", "x", x)
 	}

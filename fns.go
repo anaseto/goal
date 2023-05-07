@@ -37,15 +37,7 @@ func enumFieldsKeys(x V) V {
 		}
 		return NewAV(r)
 	case *AV:
-		r := make([]V, xv.Len())
-		for i, xi := range xv.elts {
-			ri := enumFieldsKeys(xi)
-			if ri.IsPanic() {
-				return ri
-			}
-			r[i] = ri
-		}
-		return NewAV(r)
+		return monadAV(xv, enumFieldsKeys)
 	case *Dict:
 		return xv.Keys()
 	default:
@@ -188,15 +180,7 @@ func where(x V) V {
 		}
 		return NewAI(r)
 	case *AV:
-		r := make([]V, xv.Len())
-		for i, xi := range xv.elts {
-			ri := where(xi)
-			if ri.IsPanic() {
-				return ri
-			}
-			r[i] = ri
-		}
-		return canonicalFast(NewAV(r))
+		return canonicalFast(monadAV(xv, where))
 	case *Dict:
 		if xv.values.numeric() {
 			r := where(NewV(xv.values))

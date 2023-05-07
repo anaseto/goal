@@ -181,29 +181,14 @@ genOp:{[opname;opsym] / globals o,op,xt,h
     case *AV:
         switch yv := y.value.(type) {
         case *Dict:
-              v := $o(x, NewV(yv.values))
-              if v.IsPanic() {
-                      return v
-              }
-              v.InitRC()
-              return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
+              return newDictValues(yv.keys, $o(x, NewV(yv.values)))
         case array:
               if yv.Len() != xv.Len() {
                       return panicLength("x${op}y", xv.Len(), yv.Len())
               }/
-  tplAV:{[yi]"\n"_qq/
-    r := xv.reuse()
-    for i, xi := range xv.elts {
-            ri := $o(xi, $yi)
-            if ri.IsPanic() {
-                    return ri
-            }
-            r.elts[i] = ri
-    }
-    return NewV(r)/}
-  h say tplAV["yv.at(i)"]
+  h say "return dyadAVarray(xv, yv, $o)"
   h say `}`
-  h say tplAV["y"]
+  h say "return dyadAVV(xv, y, $o)"
   h say "\n"_qq/
     case *Dict:
         yv, ok := y.value.(*Dict)
@@ -214,12 +199,7 @@ genOp:{[opname;opsym] / globals o,op,xt,h
             }
             return r
         }
-        v := $o(NewV(xv.values), y)
-        if v.IsPanic() {
-                return v
-        }
-        v.InitRC()
-        return NewV(&Dict{keys: xv.keys, values: v.value.(array)})
+        return newDictValues(xv.keys, $o(NewV(xv.values), y))
     default:
           return panicType("x${op}y", "x", x)
     }

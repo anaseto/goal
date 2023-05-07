@@ -907,3 +907,39 @@ func (x V) numeric() bool {
 		return false
 	}
 }
+
+func monadAV(x *AV, f func(V) V) V {
+	r := x.reuse()
+	for i, xi := range x.elts {
+		ri := f(xi)
+		if ri.IsPanic() {
+			return ri
+		}
+		r.elts[i] = ri
+	}
+	return NewV(r)
+}
+
+func dyadAVV(x *AV, y V, f func(V, V) V) V {
+	r := x.reuse()
+	for i, xi := range x.elts {
+		ri := f(xi, y)
+		if ri.IsPanic() {
+			return ri
+		}
+		r.elts[i] = ri
+	}
+	return NewV(r)
+}
+
+func dyadAVarray(x *AV, y array, f func(V, V) V) V {
+	r := x.reuse()
+	for i, xi := range x.elts {
+		ri := f(xi, y.at(i))
+		if ri.IsPanic() {
+			return ri
+		}
+		r.elts[i] = ri
+	}
+	return NewV(r)
+}

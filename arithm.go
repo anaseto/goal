@@ -35,22 +35,14 @@ func negate(x V) V {
 			r.elts[i] = -xi
 		}
 		return NewV(r)
-	case *AV:
-		r := xv.reuse()
-		for i, xi := range xv.elts {
-			ri := negate(xi)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
 	case *AS:
 		r := xv.reuse()
 		for i, xi := range xv.elts {
 			r.elts[i] = strings.TrimRightFunc(xi, unicode.IsSpace)
 		}
 		return NewV(r)
+	case *AV:
+		return monadAV(xv, negate)
 	case *Dict:
 		return newDictValues(xv.keys, negate(NewV(xv.values)))
 	default:
@@ -113,15 +105,7 @@ func sign(x V) V {
 		}
 		return NewAIWithRC(r, reuseRCp(xv.rc))
 	case *AV:
-		r := xv.reuse()
-		for i, xi := range xv.elts {
-			ri := sign(xi)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(xv, sign)
 	case *Dict:
 		return newDictValues(xv.keys, sign(NewV(xv.values)))
 	default:
@@ -159,15 +143,7 @@ func floor(x V) V {
 		}
 		return NewV(r)
 	case *AV:
-		r := xv.reuse()
-		for i, xi := range xv.elts {
-			ri := floor(xi)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(xv, floor)
 	case *Dict:
 		return newDictValues(xv.keys, floor(NewV(xv.values)))
 	default:
@@ -203,15 +179,7 @@ func ceil(x V) V {
 		}
 		return NewV(r)
 	case *AV:
-		r := xv.reuse()
-		for i, xi := range xv.elts {
-			ri := ceil(xi)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(xv, ceil)
 	case *Dict:
 		return newDictValues(xv.keys, ceil(NewV(xv.values)))
 	default:
@@ -293,15 +261,7 @@ func abs(x V) V {
 		}
 		return NewV(r)
 	case *AV:
-		r := xv.reuse()
-		for i, xi := range xv.elts {
-			ri := abs(xi)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(xv, abs)
 	case *Dict:
 		return newDictValues(xv.keys, abs(NewV(xv.values)))
 	default:

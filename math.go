@@ -40,15 +40,7 @@ func isNaN(x V) V {
 		}
 		return newABbWithRC(r, reuseRCp(xv.rc))
 	case *AV:
-		r := xv.reuse()
-		for i, xi := range xv.elts {
-			ri := isNaN(xi)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(xv, isNaN)
 	case *Dict:
 		return newDictValues(xv.keys, isNaN(NewV(xv.values)))
 	default:

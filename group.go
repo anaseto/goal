@@ -49,15 +49,7 @@ func icountLinesGroup(x V) V {
 	case *Dict:
 		return groupBy(NewV(xv.values), NewV(xv.keys))
 	case *AV:
-		r := make([]V, xv.Len())
-		for i, xi := range xv.elts {
-			ri := icountLinesGroup(xi)
-			if ri.IsPanic() {
-				return ri
-			}
-			r[i] = ri
-		}
-		return NewAV(r)
+		return monadAV(xv, icountLinesGroup)
 	default:
 		return panicType("=x", "x", x)
 	}
