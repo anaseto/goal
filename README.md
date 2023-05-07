@@ -74,9 +74,11 @@ get typical keyboard shortcuts), you can install the readline wrapper `rlwrap`
 program (available as a package in most systems), and then use instead `rlwrap
 goal`.
 
-# Editor support
+# Links
 
 * [vim-goal](https://codeberg.org/anaseto/vim-goal) : vim files for Goal.
+* [APL Farm](https://matrix.to/#/#aplfarm:matrix.org) : chat about array
+  languages.
 
 # Examples
 

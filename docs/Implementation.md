@@ -33,12 +33,12 @@ reliably in programs.
 
 Even counting the recent generics addition, a downside of Go for implementing
 an interpreter might be the lack of macros, but code generation helps, and
-given Goal's somewhat minimalist design, it's not a blocker for me.
+given Goal's somewhat minimalist design, it's not an issue for me.
 
 Interestingly, while Go and Goal are quite the opposite in terms of conciseness
 due to the gap between scalar and array paradigms, they both encourage idioms
 over abstraction, and writing executable code over writing types: this might
-explain why this in only the third project for an array language in Go.
+explain why this in at least the third project for an array language in Go.
 
 # Context
 
