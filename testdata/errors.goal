@@ -823,17 +823,17 @@ sub["b" "a" "d" "c"]["a";"b"] / too many arguments
 {,2}#* / type
 {,0}#* / type
 {,2.0}#* / type
-{,2}_* / type
-{,0}_* / type
-{,2.0}_* / type
+{,2}^* / type
+{,0}^* / type
+{,2.0}^* / type
 {,"a"}#* / type
 {0 1 0}#"a""b"!1 2 / length mismatch
 {0 1 2}#"a""b"!1 2 / length mismatch
 {1.0 1 2}#"a""b"!1 2 / length mismatch
-{0 1 0}_"a""b"!1 2 / length mismatch
-{0 1 2}_"a""b"!1 2 / length mismatch
-{1.0 1 2}_"a""b"!1 2 / length mismatch
-{"a" "b"}_1 2 / type
+{0 1 0}^"a""b"!1 2 / length mismatch
+{0 1 2}^"a""b"!1 2 / length mismatch
+{1.0 1 2}^"a""b"!1 2 / length mismatch
+{"a" "b"}^1 2 / type
 .* / type
 .".*" / type
 eval * / type
@@ -855,7 +855,7 @@ f 1 / undefined global
 f[1;2] / undefined global
 {(a;b):x}@,3 / length
 {(a;b):x}42 / non-array
-{"a"+x}_1 2 3 / type
+{"a"+x}^1 2 3 / type
 4.5$"abc" / non-integer
 (*)$"abc" / type
 (?)[1;2;3;4] / too many arguments

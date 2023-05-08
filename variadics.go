@@ -337,7 +337,19 @@ func vfWithout(ctx *Context, args []V) V {
 	case 1:
 		return sortUp(ctx, args[0])
 	case 2:
-		return without(args[1], args[0])
+		x, y := args[1], args[0]
+		if x.IsFunction() {
+			ctx.push(y)
+			r := x.applyN(ctx, 1)
+			if r.IsPanic() {
+				ctx.drop()
+				return r
+			}
+			r = weedOut(r, y)
+			ctx.drop()
+			return r
+		}
+		return without(x, y)
 	default:
 		return panicRank("^")
 	}
@@ -374,17 +386,6 @@ func vfDrop(ctx *Context, args []V) V {
 		return floor(args[0])
 	case 2:
 		x, y := args[1], args[0]
-		if x.IsFunction() {
-			ctx.push(y)
-			r := x.applyN(ctx, 1)
-			if r.IsPanic() {
-				ctx.drop()
-				return r
-			}
-			r = weedOut(r, y)
-			ctx.drop()
-			return r
-		}
 		return drop(x, y)
 	default:
 		return panicRank("_")
