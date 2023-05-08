@@ -246,6 +246,7 @@ doxY:{[yt;e;t]
   rt:t2go t
   rs:?[yt~t;"r := yv.reuse()";"r := &A${t}{elts: make([]$rt, yv.Len()), rc: reuseRCp(yv.rc)}"]
   rs:?[op¿cmps;"$rs; r.flags |= flagBool";rs]
+  rs:?[(xt¿ntypes)&op¿"+""-""&""|";"asc := yv.flags.Has(flagAscending); $rs; if asc { r.flags |= flagAscending }";rs]
   "\n"_qq/
     case *A$yt:
         $rs
@@ -312,11 +313,13 @@ doXUy:{[yt;e;t]
 doXBy:{[yt;e;t]
   e:doExpr[e;yt;"x.At(i)";"yv"]
   rt:t2go t
-  rs:?[xt~t;"x.reuse()";"&A${t}{elts: make([]$rt, x.Len()), rc: reuseRCp(x.rc)}"]
+  rs:?[xt~t;"r := x.reuse()";"r := &A${t}{elts: make([]$rt, x.Len()), rc: reuseRCp(x.rc)}"]
+  rs:?[op¿cmps;"$rs; r.flags |= flagBool";rs]
+  rs:?[(yt¿ntypes)&op¿"+""-""&""|";"asc := x.flags.Has(flagAscending); $rs; if asc { r.flags |= flagAscending }";rs]
   / currently, yt~"S" in thoses cases
   "\n"_qq/
       case $yt:
-              r := $rs
+              $rs
               for i := range r.elts {
                       r.elts[i] = $rt($e)
               }

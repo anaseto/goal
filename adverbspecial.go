@@ -71,16 +71,16 @@ func scan2vAdd(x V) V {
 				n += xi
 				r.elts[i] = n
 			}
+			r.flags |= flagAscending
 			return NewV(r)
-		} else {
-			r := make([]int64, xv.Len())
-			var n int64
-			for i, xi := range xv.elts {
-				n += int64(xi)
-				r[i] = n
-			}
-			return NewAI(r)
 		}
+		r := make([]int64, xv.Len())
+		var n int64
+		for i, xi := range xv.elts {
+			n += int64(xi)
+			r[i] = n
+		}
+		return NewV(&AI{elts: r, flags: flagAscending})
 	case *AI:
 		r := xv.reuse()
 		var n int64
@@ -338,6 +338,7 @@ func scan2vMax(x V) V {
 		}
 		r := xv.reuse()
 		scan2vMaxSlice[byte](r.elts, xv.elts)
+		r.flags |= flagAscending
 		return NewV(r)
 	case *AI:
 		if xv.Len() == 0 {
@@ -345,6 +346,7 @@ func scan2vMax(x V) V {
 		}
 		r := xv.reuse()
 		scan2vMaxSlice[int64](r.elts, xv.elts)
+		r.flags |= flagAscending
 		return NewV(r)
 	case *AF:
 		if xv.Len() == 0 {
@@ -352,6 +354,7 @@ func scan2vMax(x V) V {
 		}
 		r := xv.reuse()
 		scan2vMaxSlice[float64](r.elts, xv.elts)
+		r.flags |= flagAscending
 		return NewV(r)
 	case *AS:
 		if xv.Len() == 0 {
@@ -359,6 +362,7 @@ func scan2vMax(x V) V {
 		}
 		r := xv.reuse()
 		scan2vMaxSlice[string](r.elts, xv.elts)
+		r.flags |= flagAscending
 		return NewV(r)
 	case *AV:
 		if xv.Len() == 0 {
@@ -377,7 +381,7 @@ func scan2vMax(x V) V {
 			}
 			r.elts[i+1] = next
 		}
-		// Will never be canonical, so normalizing is not needed.
+		// Will always be generic, so normalizing is not needed.
 		return NewV(r)
 	default:
 		return x
