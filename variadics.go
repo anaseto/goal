@@ -386,6 +386,17 @@ func vfDrop(ctx *Context, args []V) V {
 		return floor(args[0])
 	case 2:
 		x, y := args[1], args[0]
+		if x.IsFunction() {
+			ctx.push(y)
+			r := x.applyN(ctx, 1)
+			if r.IsPanic() {
+				ctx.drop()
+				return r
+			}
+			r = dropF(r, y)
+			ctx.drop()
+			return r
+		}
 		return drop(x, y)
 	default:
 		return panicRank("_")

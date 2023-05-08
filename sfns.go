@@ -208,43 +208,9 @@ func drop(x, y V) V {
 	case S:
 		return dropS(xv, y)
 	case *AB:
-		switch yv := y.value.(type) {
-		case S:
-			return cutABS(xv, yv)
-		case array:
-			return cutABarray(xv, yv)
-		case *Dict:
-			k := cutABarray(xv, yv.keys)
-			if k.IsPanic() {
-				return k
-			}
-			v := cutABarray(xv, yv.values)
-			if v.IsPanic() {
-				return v
-			}
-			return NewDict(k, v)
-		default:
-			return panicType("I_y", "y", y)
-		}
+		return cutAB(xv, y)
 	case *AI:
-		switch yv := y.value.(type) {
-		case S:
-			return cutAIS(xv, yv)
-		case array:
-			return cutAIarray(xv, yv)
-		case *Dict:
-			k := cutAIarray(xv, yv.keys)
-			if k.IsPanic() {
-				return k
-			}
-			v := cutAIarray(xv, yv.values)
-			if v.IsPanic() {
-				return v
-			}
-			return NewDict(k, v)
-		default:
-			return panicType("I_y", "y", y)
-		}
+		return cutAI(xv, y)
 	case *AF:
 		x = toAI(xv)
 		if x.IsPanic() {
@@ -300,6 +266,48 @@ func dropN(n int64, y V) V {
 			values: rv.value.(array)})
 	default:
 		return panicType("i_y", "y", y)
+	}
+}
+
+func cutAB(xv *AB, y V) V {
+	switch yv := y.value.(type) {
+	case S:
+		return cutABS(xv, yv)
+	case array:
+		return cutABarray(xv, yv)
+	case *Dict:
+		k := cutABarray(xv, yv.keys)
+		if k.IsPanic() {
+			return k
+		}
+		v := cutABarray(xv, yv.values)
+		if v.IsPanic() {
+			return v
+		}
+		return NewDict(k, v)
+	default:
+		return panicType("I_y", "y", y)
+	}
+}
+
+func cutAI(xv *AI, y V) V {
+	switch yv := y.value.(type) {
+	case S:
+		return cutAIS(xv, yv)
+	case array:
+		return cutAIarray(xv, yv)
+	case *Dict:
+		k := cutAIarray(xv, yv.keys)
+		if k.IsPanic() {
+			return k
+		}
+		v := cutAIarray(xv, yv.values)
+		if v.IsPanic() {
+			return v
+		}
+		return NewDict(k, v)
+	default:
+		return panicType("I_y", "y", y)
 	}
 }
 
@@ -407,6 +415,25 @@ func cutIntsS[I integer](x []I, y S) []string {
 		r[i] = string(y[from:to])
 	}
 	return r
+}
+
+func dropF(x, y V) V {
+	switch xv := x.value.(type) {
+	case *AB:
+		x = whereAB(xv)
+		return drop(x, y)
+	case *AI:
+		x = whereAI(xv)
+		return drop(x, y)
+	case *AF:
+		x = toAI(xv)
+		if x.IsPanic() {
+			return x
+		}
+		return dropF(x, y)
+	default:
+		return panicType("f_y", "f[y]", x)
+	}
 }
 
 // take returns i#y.

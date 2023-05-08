@@ -1,8 +1,9 @@
 # v? ?
 
 * Rename weed out to `f^y`, related to `X^y`, in the same way that `f#y` is
-  related to `X#y`. (breaking change) Leave `f_y` free for now, maybe to be
-  used for some variant of partition enclose, so that it's related to `I_y`.
+  related to `X#y`. (breaking change) Now `f_y` is “cut where”, same as `(&f
+  y)_y`, but `f` has to return an array of integers.
+* Now where `&` allows negative inputs, and simply treats them as zero.
 * Allow referencing main namespace from an imported file using `main.` as
   prefix (still thinking about alternative prefixes, like just `m.`, but this
   shouldn't come often so a longer form might be better).

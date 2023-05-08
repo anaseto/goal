@@ -47,10 +47,7 @@ a:3 "a";"c" 2=a / type
 !3.2 / non-integer
 !3.2 5.2 / contains non-integer
 !(*;+) / type
-&-3 / negative
 &2.5 / non-integer
-&-3.0 / negative
-&2 -3 / contains negative
 &2 3.5 / contains non-integer
 é / unexpected character
 a+1 / undefined global
@@ -812,8 +809,6 @@ sub["b" "a" "d" "c"]["a";"b"] / too many arguments
 (1 2;3 4)["a" "b"] / type
 ("a""b"!1 2)[1;2] / out of depth
 !* / type
-&-3.0 2 / negative
-&"a""b"!-3.0 2 / negative
 {-1}#1 2 / negative
 {1.5}#1 2 / non-integer
 {2 3 4}#1 2 / length mismatch
@@ -1056,3 +1051,5 @@ rt.time["%,2";3.5] / non-integer
 "a""b"_("c";"d" "e";"f" "g" "h") / length
 "a""b"_(*;"d" "e") / type
 "a""b"_* / type
+{1.5 0 1}_"a" "b" "c" / non-integer
+{*}_"a" "b" "c" / type

@@ -121,9 +121,7 @@ func odometerWithCols[I integer, J integer](x []I, cols int64) []J {
 func where(x V) V {
 	if x.IsI() {
 		switch {
-		case x.I() < 0:
-			return Panicf("&x : x negative (%d)", x.I())
-		case x.I() == 0:
+		case x.I() <= 0:
 			return newABb(nil)
 		default:
 			r := make([]byte, x.I())
@@ -138,33 +136,9 @@ func where(x V) V {
 	}
 	switch xv := x.value.(type) {
 	case *AB:
-		if xv.IsBoolean() {
-			if xv.Len() < 256 {
-				r := whereBools[byte](xv.elts)
-				return NewV(&AB{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
-			}
-			r := whereBools[int64](xv.elts)
-			return NewV(&AI{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
-		}
-		if xv.Len() < 256 {
-			r := whereBytes[byte](xv.elts)
-			return NewV(&AB{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
-		}
-		r := whereBytes[int64](xv.elts)
-		return NewV(&AI{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
+		return whereAB(xv)
 	case *AI:
-		if xv.Len() < 256 {
-			r, err := whereInts[byte](xv.elts)
-			if err != nil {
-				return panicErr(err)
-			}
-			return NewV(&AB{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
-		}
-		r, err := whereInts[int64](xv.elts)
-		if err != nil {
-			return panicErr(err)
-		}
-		return NewV(&AI{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
+		return whereAI(xv)
 	case *AF:
 		x := toAI(xv)
 		if x.IsPanic() {
@@ -193,6 +167,32 @@ func where(x V) V {
 	default:
 		return panicType("&x", "x", x)
 	}
+}
+
+func whereAB(xv *AB) V {
+	if xv.IsBoolean() {
+		if xv.Len() < 256 {
+			r := whereBools[byte](xv.elts)
+			return NewV(&AB{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
+		}
+		r := whereBools[int64](xv.elts)
+		return NewV(&AI{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
+	}
+	if xv.Len() < 256 {
+		r := whereBytes[byte](xv.elts)
+		return NewV(&AB{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
+	}
+	r := whereBytes[int64](xv.elts)
+	return NewV(&AI{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
+}
+
+func whereAI(xv *AI) V {
+	if xv.Len() < 256 {
+		r := whereInts[byte](xv.elts)
+		return NewV(&AB{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
+	}
+	r := whereInts[int64](xv.elts)
+	return NewV(&AI{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
 }
 
 func whereBools[I integer](x []byte) []I {
@@ -225,11 +225,11 @@ func whereBytes[I integer](x []byte) []I {
 	return r
 }
 
-func whereInts[I integer](x []int64) ([]I, error) {
+func whereInts[I integer](x []int64) []I {
 	var n int64
 	for _, xi := range x {
 		if xi < 0 {
-			return nil, fmt.Errorf("&x : x contains negative integer (%d)", xi)
+			continue
 		}
 		n += xi
 	}
@@ -241,7 +241,7 @@ func whereInts[I integer](x []int64) ([]I, error) {
 			n++
 		}
 	}
-	return r, nil
+	return r
 }
 
 // replicate returns {x}#y.
