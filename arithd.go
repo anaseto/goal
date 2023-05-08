@@ -1833,31 +1833,19 @@ func subtractFV(x float64, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		asc := yv.flags.Has(flagAscending)
 		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(yv.rc)}
-		if asc {
-			r.flags |= flagAscending
-		}
 		for i, yi := range yv.elts {
 			r.elts[i] = float64(x - float64(yi))
 		}
 		return NewV(r)
 	case *AF:
-		asc := yv.flags.Has(flagAscending)
 		r := yv.reuse()
-		if asc {
-			r.flags |= flagAscending
-		}
 		for i, yi := range yv.elts {
 			r.elts[i] = float64(x - yi)
 		}
 		return NewV(r)
 	case *AI:
-		asc := yv.flags.Has(flagAscending)
 		r := &AF{elts: make([]float64, yv.Len()), rc: reuseRCp(yv.rc)}
-		if asc {
-			r.flags |= flagAscending
-		}
 		for i, yi := range yv.elts {
 			r.elts[i] = float64(x - float64(yi))
 		}
@@ -1893,31 +1881,19 @@ func subtractIV(x int64, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		asc := yv.flags.Has(flagAscending)
 		r := &AI{elts: make([]int64, yv.Len()), rc: reuseRCp(yv.rc)}
-		if asc {
-			r.flags |= flagAscending
-		}
 		for i, yi := range yv.elts {
 			r.elts[i] = int64(x - int64(yi))
 		}
 		return NewV(r)
 	case *AF:
-		asc := yv.flags.Has(flagAscending)
 		r := yv.reuse()
-		if asc {
-			r.flags |= flagAscending
-		}
 		for i, yi := range yv.elts {
 			r.elts[i] = float64(float64(x) - yi)
 		}
 		return NewV(r)
 	case *AI:
-		asc := yv.flags.Has(flagAscending)
 		r := yv.reuse()
-		if asc {
-			r.flags |= flagAscending
-		}
 		for i, yi := range yv.elts {
 			r.elts[i] = int64(x - yi)
 		}

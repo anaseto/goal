@@ -246,7 +246,7 @@ doxY:{[yt;e;t]
   rt:t2go t
   rs:?[yt~t;"r := yv.reuse()";"r := &A${t}{elts: make([]$rt, yv.Len()), rc: reuseRCp(yv.rc)}"]
   rs:?[op¿cmps;"$rs; r.flags |= flagBool";rs]
-  rs:?[(xt¿ntypes)&op¿"+""-""&""|";"asc := yv.flags.Has(flagAscending); $rs; if asc { r.flags |= flagAscending }";rs]
+  rs:?[(xt¿ntypes)&op¿"+""&""|";"asc := yv.flags.Has(flagAscending); $rs; if asc { r.flags |= flagAscending }";rs]
   "\n"_qq/
     case *A$yt:
         $rs
