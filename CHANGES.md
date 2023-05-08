@@ -1,3 +1,11 @@
+# v? ?
+
+* Allow referencing main namespace from an imported file using `main.` as
+  prefix (still thinking about alternative prefixes, like just `m.`, but this
+  shouldn't come often so a longer form might be better).
+* Fix syntax regression when projecting `@` due to missing check for dyadic
+  case when optimizing away `@` and replacing it with a single opcode.
+
 # v0.16.0 2023-05-05
 
 * Make out-indexing valid and return the zero value of the array or dict, in
