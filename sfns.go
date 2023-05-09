@@ -326,8 +326,13 @@ func cutAIarray(x *AI, y array) V {
 	if xlen == 0 {
 		return NewAVWithRC(nil, reuseRCp(x.rc))
 	}
-	r := cutIntsArray(x.elts, y)
-	return NewAV(r)
+	_, generic := y.(*AV)
+	r := cutIntsArray(x.elts, y, generic)
+	if generic {
+		return NewAV(r)
+	}
+	var nrc int
+	return NewAVWithRC(r, &nrc)
 }
 
 func cutABarray(x *AB, y array) V {
@@ -345,11 +350,16 @@ func cutABarray(x *AB, y array) V {
 	if xlen == 0 {
 		return NewAV(nil)
 	}
-	r := cutIntsArray(x.elts, y)
-	return NewAV(r)
+	_, generic := y.(*AV)
+	r := cutIntsArray(x.elts, y, generic)
+	if generic {
+		return NewAV(r)
+	}
+	var nrc int
+	return NewAVWithRC(r, &nrc)
 }
 
-func cutIntsArray[I integer](x []I, y array) []V {
+func cutIntsArray[I integer](x []I, y array, generic bool) []V {
 	xlen := len(x)
 	ylen := int64(y.Len())
 	r := make([]V, xlen)
@@ -360,7 +370,11 @@ func cutIntsArray[I integer](x []I, y array) []V {
 		if i+1 < xlen {
 			to = int64(x[i+1])
 		}
-		r[i] = Canonical(NewV(y.slice(int(from), int(to))))
+		if generic {
+			r[i] = NewV(canonicalArray(y.slice(int(from), int(to))))
+		} else {
+			r[i] = NewV(y.slice(int(from), int(to)))
+		}
 	}
 	return r
 }

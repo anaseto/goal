@@ -70,7 +70,7 @@ func icountInts[I integer](x []int64) []I {
 }
 
 func icountBytes[I integer](x []byte) []I {
-	max := maxBytes(x)
+	max := int(maxBytes(x))
 	icounts := make([]I, max+1)
 	for _, xi := range x {
 		icounts[xi]++
@@ -95,6 +95,14 @@ func groupBy(x, y V) V {
 			return groupByBoolsV(xv.elts, y)
 		}
 		max := maxBytes(xv.elts)
+		if xv.flags.Has(flagAscending) {
+			switch yv := y.value.(type) {
+			case array:
+				return groupBySorted(xv.elts, yv, int64(max))
+			default:
+				return panicType("f=Y", "Y", y)
+			}
+		}
 		switch yv := y.value.(type) {
 		case *AB:
 			return groupByBytesBytes(xv.elts, yv.elts, max, yv.IsBoolean())
@@ -107,12 +115,20 @@ func groupBy(x, y V) V {
 		case *AV:
 			return groupByBytesVs(xv.elts, yv.elts, max, yv.rc)
 		default:
-			return panicType("f=Y", "Y", x)
+			return panicType("f=Y", "Y", y)
 		}
 	case *AI:
 		max := maxIntegers(xv.elts)
 		if max < 0 {
 			return NewAV(nil)
+		}
+		if xv.flags.Has(flagAscending) {
+			switch yv := y.value.(type) {
+			case array:
+				return groupBySorted(xv.elts, yv, int64(max))
+			default:
+				return panicType("f=Y", "Y", y)
+			}
 		}
 		switch yv := y.value.(type) {
 		case *AB:
@@ -126,7 +142,7 @@ func groupBy(x, y V) V {
 		case *AV:
 			return groupByInt64sVs(xv.elts, yv.elts, max, yv.rc)
 		default:
-			return panicType("f=Y", "Y", x)
+			return panicType("f=Y", "Y", y)
 		}
 	case *AF:
 		ix := toAI(xv)
@@ -226,7 +242,8 @@ func groupByBytesBytes(x []byte, y []byte, max byte, b bool) V {
 		count += n
 	}
 	groupByScatterBytes[byte](x, y, yg, offset)
-	return NewAVWithRC(r, &rc)
+	var nrc int
+	return NewAVWithRC(r, &nrc)
 }
 
 func groupByBytesInt64s(x []byte, y []int64, max byte) V {
@@ -239,7 +256,8 @@ func groupByBytesInt64s(x []byte, y []int64, max byte) V {
 		count += n
 	}
 	groupByScatterBytes[int64](x, y, yg, offset)
-	return NewAVWithRC(r, &rc)
+	var nrc int
+	return NewAVWithRC(r, &nrc)
 }
 
 func groupByBytesFloat64s(x []byte, y []float64, max byte) V {
@@ -252,7 +270,8 @@ func groupByBytesFloat64s(x []byte, y []float64, max byte) V {
 		count += n
 	}
 	groupByScatterBytes[float64](x, y, yg, offset)
-	return NewAVWithRC(r, &rc)
+	var nrc int
+	return NewAVWithRC(r, &nrc)
 }
 
 func groupByBytesStrings(x []byte, y []string, max byte) V {
@@ -265,7 +284,8 @@ func groupByBytesStrings(x []byte, y []string, max byte) V {
 		count += n
 	}
 	groupByScatterBytes[string](x, y, yg, offset)
-	return NewAVWithRC(r, &rc)
+	var nrc int
+	return NewAVWithRC(r, &nrc)
 }
 
 func groupByBytesVs(x []byte, y []V, max byte, rc *int) V {
@@ -285,8 +305,9 @@ func groupByBytesVs(x []byte, y []V, max byte, rc *int) V {
 }
 
 func groupByPrepareBytes[T any](x []byte, max byte) ([]V, []int, []T) {
-	r := make([]V, max+1)
-	offset := make([]int, max+1)
+	l := int(max) + 1
+	r := make([]V, l)
+	offset := make([]int, l)
 	count := 0
 	for _, xi := range x {
 		count++
@@ -318,7 +339,8 @@ func groupByInt64sBytes(x []int64, y []byte, max int64, b bool) V {
 		count += n
 	}
 	groupByScatter[byte](x, y, yg, offset)
-	return NewAVWithRC(r, &rc)
+	var nrc int
+	return NewAVWithRC(r, &nrc)
 }
 
 func groupByInt64sInt64s(x []int64, y []int64, max int64) V {
@@ -331,7 +353,8 @@ func groupByInt64sInt64s(x []int64, y []int64, max int64) V {
 		count += n
 	}
 	groupByScatter[int64](x, y, yg, offset)
-	return NewAVWithRC(r, &rc)
+	var nrc int
+	return NewAVWithRC(r, &nrc)
 }
 
 func groupByInt64sFloat64s(x []int64, y []float64, max int64) V {
@@ -344,7 +367,8 @@ func groupByInt64sFloat64s(x []int64, y []float64, max int64) V {
 		count += n
 	}
 	groupByScatter[float64](x, y, yg, offset)
-	return NewAVWithRC(r, &rc)
+	var nrc int
+	return NewAVWithRC(r, &nrc)
 }
 
 func groupByInt64sStrings(x []int64, y []string, max int64) V {
@@ -357,7 +381,8 @@ func groupByInt64sStrings(x []int64, y []string, max int64) V {
 		count += n
 	}
 	groupByScatter[string](x, y, yg, offset)
-	return NewAVWithRC(r, &rc)
+	var nrc int
+	return NewAVWithRC(r, &nrc)
 }
 
 func groupByInt64sVs(x []int64, y []V, max int64, rc *int) V {
@@ -400,4 +425,46 @@ func groupByScatter[T any](x []int64, y []T, yg []T, offset []int) {
 		offset[xi]++
 		yg[j] = y[i]
 	}
+}
+
+func groupBySorted[I integer](x []I, y array, max int64) V {
+	r := make([]V, max+1)
+	rc := y.RC()
+	*rc += 2
+	var from, i0 int
+	var n int64
+	_, generic := y.(*AV)
+	for i, xi := range x {
+		if xi >= 0 {
+			i0 = i
+			break
+		}
+	}
+	from = i0
+	for i, xi := range x[i0:] {
+		if int64(xi) == n {
+			continue
+		}
+		if generic {
+			r[n] = NewV(canonicalArray(y.slice(from, i+i0)))
+		} else {
+			r[n] = NewV(y.slice(from, i+i0))
+		}
+		from = i + i0
+		n++
+		for n < int64(xi) {
+			r[n] = NewAVWithRC(nil, rc)
+			n++
+		}
+	}
+	if generic {
+		r[n] = NewV(canonicalArray(y.slice(from, len(x))))
+	} else {
+		r[n] = NewV(y.slice(from, len(x)))
+	}
+	if generic {
+		return NewAV(r)
+	}
+	var nrc int
+	return NewAVWithRC(r, &nrc)
 }
