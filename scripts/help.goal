@@ -69,68 +69,68 @@ e               error           error "msg"
 "Verbs" `
 VERBS HELP
 :x  identity    :[42] -> 42 (recall that : is also syntax for return and assign)
-x:y right       2:3 -> 3            "a":"b" -> "b"
+x:y right       2:3 -> 3                       "a":"b" -> "b"
 +d  swap k/v    +"a""b"!0 1 -> 0 1!"a" "b"
-+x  flip        +(1 2;3 4) -> (1 3;2 4)                   +42 -> ,,42
-n+n add         2+3 -> 5            2+3 4 -> 5 6
-s+s concat      "a"+"b" -> "ab"     "a" "b"+"c" -> "ac" "bc"
--n  negate      - 2 3 -> -2 -3      -(1 2.5;3 4) -> (-1 -2.5;-3 -4)
++x  flip        +(1 2;3 4) -> (1 3;2 4)        +42 -> ,,42
+n+n add         2+3 -> 5                       2+3 4 -> 5 6
+s+s concat      "a"+"b" -> "ab"                "a" "b"+"c" -> "ac" "bc"
+-n  negate      - 2 3 -> -2 -3                 -(1 2.5;3 4) -> (-1 -2.5;-3 -4)
 -s  rtrim space -"a\tb \r\n" " c d \n" -> "a\tb" " c d"  (Unicode's White Space)
-n-n subtract    5-3 -> 2            5 4-3 -> 2 1
+n-n subtract    5-3 -> 2                       5 4-3 -> 2 1
 s-s trim suffix "file.txt"-".txt" -> "file"
-*x  first       *3 2 4 -> 3         *"ab" -> "ab"         *(+;*) -> +
-n*n multiply    2*3 -> 6            1 2 3*3 -> 3 6 9
+*x  first       *7 8 9 -> 7                    *"ab" -> "ab"         *(+;*) -> +
+n*n multiply    2*3 -> 6                       1 2 3*3 -> 3 6 9
 s*i repeat      "a"*3 2 1 0 -> "aaa" "aa" "a" ""
-%X  classify    %7 8 9 7 8 9 -> 0 1 2 0 1 2      %"a" "b" "a" -> 0 1 0
-x%y divide      3%2 -> 1.5          3 4%2 -> 1.5 2
-!i  enum        !5 -> 0 1 2 3 4
+%X  classify    %7 8 9 7 8 9 -> 0 1 2 0 1 2    %"a" "b" "a" -> 0 1 0
+n%n divide      3%2 -> 1.5                     3 4%2 -> 1.5 2
+!i  enum        !5 -> 0 1 2 3 4                !-5 -> -5 -4 -3 -2 -1
 !s  fields      !"a b\tc\nd  e" -> "a" "b" "c" "d" "e"   (Unicode's White Space)
 !I  odometer    !2 3 -> (0 0 0 1 1 1;0 1 2 0 1 2)
 !d  keys        !"a" "b"!1 2 -> "a" "b"
 i!n mod/div     3!9 8 7 -> 0 2 1          -3!9 8 7 -> 3 2 2
 i!s pad fields  3!"a" -> "a  "            -3!"1" "23" "456" -> "  1" " 23" "456"
 X!Y dict        d:"a" "b"!1 2;d "a" -> 1
-&s  byte-count  &"abc" -> 3     &"π" -> 2        &"αβγ" -> 6
-&I  where       &0 0 1 0 0 0 1 -> 2 6            &2 3 -> 0 0 1 1 1
+&s  byte-count  &"abc" -> 3                     &"π" -> 2            &"αβγ" -> 6
+&I  where       &0 0 1 0 0 0 1 -> 2 6           &2 3 -> 0 0 1 1 1
 &d  keys where  &"a""b""c""d"!0 1 1 0 -> "b" "c"
-x&y min/and     2&3 -> 2        4&3 -> 3         "b"&"a" -> "a"         0&1 -> 0
+x&y min/and     2&3 -> 2        4&3 -> 3        "b"&"a" -> "a"          0&1 -> 0
 |X  reverse     |!5 -> 4 3 2 1 0
-x|y max/or      2|3 -> 3        4|3 -> 4         "b"|"a" -> "b"         0|1 -> 1
+x|y max/or      2|3 -> 3        4|3 -> 4        "b"|"a" -> "b"          0|1 -> 1
 <d  sort up     <"a""b""c"!2 3 1 -> "c""a""b"!1 2 3
 <X  ascend      <3 5 4 -> 0 2 1          (index permutation for ascending order)
-x<y less        2<3 -> 1        "c" < "a" -> 0
+x<y less        2<3 -> 1        "c" < "a" -> 0                    7 8<6 9 -> 0 1
 >d  sort down   >"a""b""c"!2 3 1 -> "b""a""c"!3 2 1
 >X  descend     >3 5 4 -> 1 2 0         (index permutation for descending order)
-x>y greater     2>3 -> 0        "c" > "a" -> 1
+x>y greater     2>3 -> 0        "c" > "a" -> 1                    7 8>6 9 -> 1 0
 =s  lines       ="ab\ncd\r\nef gh" -> "ab" "cd" "ef gh"
 =I  index-count =1 0 0 2 2 3 -1 2 1 1 1 -> 2 4 3 1
 =d  group keys  ="a""b""c"!0 1 0 -> ("a" "c";,"b")         ="a""b"!0 -1 -> ,,"a"
 f=Y group by    (2!)=!10 -> (0 2 4 6 8;1 3 5 7 9)
-x=y equal       2 3 4=3 -> 0 1 0        "ab" = "ba" -> 0
-~x  not         ~0 1 2 -> 1 0 0         ~"a" "" "0" -> 0 1 0
-x~y match       3~3 -> 1        2 3~3 2 -> 0             ("a";%)~'("b";%) -> 0 1
-,x  enlist      ,1 -> ,1        #,2 3 -> 1               (list with one element)
+x=y equal       2 3 4=3 -> 0 1 0                         "ab" = "ba" -> 0
+~x  not         ~0 1 2 -> 1 0 0                          ~"a" "" "0" -> 0 1 0
+x~y match       3~3 -> 1           2 3~3 2 -> 0          ("a";%)~'("b";%) -> 0 1
+,x  enlist      ,1 -> ,1           #,2 3 -> 1            (list with one element)
 d,d merge       ("a""b"!1 2),"b""c"!3 4 -> "a""b""c"!1 3 4
-x,y join        1,2 -> 1 2              "ab" "c","d" -> "ab" "c" "d"
+x,y join        1,2 -> 1 2                     "ab" "c","d" -> "ab" "c" "d"
 ^d  sort keys   ^"c""a""b"!1 2 3 -> "a""b""c"!2 3 1
-^X  sort        ^3 5 0 -> 0 3 5         ^"ca" "ab" "bc" -> "ab" "bc" "ca"
+^X  sort        ^3 5 0 -> 0 3 5                ^"ca" "ab" "bc" -> "ab" "bc" "ca"
 i^s windows     2^"abcde" -> "abcd" "bcde"
-i^Y windows     2^!4 -> (0 1 2;1 2 3)   -2^!4 -> (0 1;1 2;2 3)
-s^s trim        " []"^"  [text]  " -> "text"      ""^" \nstuff\t" -> "stuff"
-f^y weed out    {0 1 1 0}^4 1 5 3 -> 4 3          {x>0}^2 -3 1 -> ,-3
+i^Y windows     2^!4 -> (0 1 2;1 2 3)                 -2^!4 -> (0 1;1 2;2 3)
+s^s trim        " []"^"  [text]  " -> "text"          ""^" \nstuff\t" -> "stuff"
+f^y weed out    {0 1 1 0}^4 1 5 3 -> 4 3              {x>0}^2 -3 1 -> ,-3
 X^d w/o keys    (,"b")^"a""b""c"!0 1 2 -> "a""c"!0 2
-X^Y w/o values  2 3^1 1 2 3 3 4 -> 1 1 4
+X^Y w/o values  2 3^1 1 2 3 3 4 -> 1 1 4                         (like in[;X]^Y)
 #x  length      #2 4 5 -> 3       #"ab" "cd" -> 2       #42 -> 1      #"ab" -> 1
-i#y take/repeat 2#6 7 8 -> 6 7    4#6 7 8 -> 6 7 8 6 (cyclic)       3#1 -> 1 1 1
-s#s count       "ab"#"cabdab" "cd" "deab" -> 2 0 1      ""#"αβγ" -> 4
-f#y replicate   {0 1 2 0}#4 1 5 3 -> 1 5 5        {x>0}#2 -3 1 -> 2 1
+i#y take/repeat 2#6 7 8 -> 6 7    5#6 7 8 -> 6 7 8 6 7              3#1 -> 1 1 1
+s#s count       "ab"#"cabdab" "cd" "deab" -> 2 0 1                 ""#"αβγ" -> 4
+f#y replicate   {0 1 2 0}#4 1 5 3 -> 1 5 5            {x>0}#2 -3 1 -> 2 1
 X#d with keys   "a""c""e"#"a""b""c""a"!2 3 4 5 -> "a""c""a"!2 4 5
-X#Y with values 2 3#1 1 2 3 3 4 -> 2 3 3
-_n  floor       _2.3 -> 2               _1.5 3.7 -> 1 3
-_s  to lower    _"ABC" -> "abc"         _"AB" "CD" -> "ab" "cd"
-i_s drop bytes  2_"abcde" -> "cde"      -2_"abcde" -> "abc"
-i_Y drop        2_3 4 5 6 -> 5 6        -2_3 4 5 6 -> 3 4
-s_s trim prefix "pref-"_"pref-name" -> "name"
+X#Y with values 2 3#1 1 2 3 3 4 -> 2 3 3                         (like in[;X]#Y)
+_n  floor       _2.3 -> 2                   _1.5 3.7 -> 1 3
+_s  to lower    _"ABC" -> "abc"             _"AB" "CD" "Π" -> "ab" "cd" "π"
+i_s drop bytes  2_"abcde" -> "cde"          -2_"abcde" -> "abc"
+i_Y drop        2_3 4 5 6 -> 5 6            -2_3 4 5 6 -> 3 4
+s_s trim prefix "pfx-"_"pfx-name" "pfx2-name" -> "name" "pfx2-name"
 f_Y cut where   {0=3!x}_!10 -> (0 1 2;3 4 5; 6 7 8;,9)        (same as (&f Y)_Y)
 I_s cut string  1 3_"abcdef" -> "bc" "def"                         (I ascending)
 I_Y cut         2 5_!10 -> (2 3 4;5 6 7 8 9)                       (I ascending)
@@ -139,11 +139,11 @@ i$i span        2$5 -> 4          3+!3$5 -> 3 4 5                (same as 1+y-x)
 i$s cut shape   3$"abcdefghijk" -> "abc" "defg" "hijk"
 i$Y cut shape   3$!6 -> (0 1;2 3;4 5)            -3$!6 -> (0 1 2;3 4 5)
 s$y strings     "s"$(1;"c";+) -> "1""c""+"
-s$s chars/bytes "c"$"aπ" -> 97 960             "b"$"aπ" -> 97 207 128
-s$i to string   "c"$97 960 -> "aπ"             "b"$97 207 128 -> "aπ"
-s$n cast        "i"$2.3 -> 2                   @"n"$42 -> "n"
-s$s parse       "i"$"42" "0b100" -> 42 4       "n"$"2.5" "1e+7" -> 2.5 1e+07
-s$y format      "%.2g"$1 4%3 -> "0.33" "1.3"   "%s=%03d"$"a" 42 -> "a=042"
+s$s chars/bytes "c"$"aπ" -> 97 960               "b"$"aπ" -> 97 207 128
+s$i to string   "c"$97 960 -> "aπ"               "b"$97 207 128 -> "aπ"
+s$n cast        "i"$2.3 -> 2                     @"n"$42 -> "n"
+s$s parse       "i"$"42" "0b100" -> 42 4         "n"$"2.5" "1e+7" -> 2.5 1e+07
+s$y format      "%.2g"$1 4%3 -> "0.33" "1.3"     "%s=%03d"$"a" 42 -> "a=042"
 X$y binsearch   2 3 5 7$8 2 7 5 5.5 3 0 -> 4 1 4 3 3 2 0           (x ascending)
 ?i  uniform     ?2 -> 0.6046602879796196 0.9405090880450124    (between 0 and 1)
 ?i  normal      ?-2 -> -1.233758177597947 -0.12634751070237293   (mean 0, dev 1)
@@ -154,28 +154,28 @@ i?i deal        -5?100 -> 19 26 0 73 94                        (always distinct)
 i?Y deal array  -3?"a""b""c" -> "a""c""b"    (0i?Y is (-#Y)?Y) (always distinct)
 s?r rindex      "abcde"?rx/b../ -> 1 3                           (offset;length)
 s?s index       "a = a + 1"?"=" "+" -> 2 6
-d?y find key    ("a" "b"!3 4)?4 -> "b"       ("a" "b"!3 4)?5 -> ""
-X?y find        9 8 7?8 -> 1                 9 8 7?6 -> 3
+d?y find key    ("a" "b"!3 4)?4 -> "b"                   ("a" "b"!3 4)?5 -> ""
+X?y find        9 8 7?8 -> 1                             9 8 7?6 -> 3
 @x  type        @2 -> "i"   @1.5 -> "n"   @"ab" -> "s"   @2 3 -> "I"   @+ -> "f"
-i@y take/pad    2@6 7 8 -> 6 7    4@6 7 8 -> 6 7 8 0    -4@6 7 8 -> 0 6 7 8
+i@y take/pad    2@6 7 8 -> 6 7    4@6 7 8 -> 6 7 8 0     -4@6 7 8 -> 0 6 7 8
 s@i substr      "abcdef"@2  -> "cdef"                                (s[offset])
-r@s match       rx/^[a-z]+$/"abc" -> 1       rx/\s/"abc" -> 0
+r@s match       rx/^[a-z]+$/"abc" -> 1                   rx/\s/"abc" -> 0
 r@s find group  rx/([a-z])(.)/"&a+c" -> "a+" "a" "+"     (whole match, group(s))
 f@y apply       (|)@1 2 -> 2 1                      (like |[1 2] -> 2 1 or |1 2)
 d@y at key      ("a" "b"!1 2)@"a" -> 1
-X@i at          7 8 9@2 -> 9         7 8 9[2 0] -> 9 7       7 8 9@-2 -> 8
+X@i at          7 8 9@2 -> 9            7 8 9[2 0] -> 9 7          7 8 9@-2 -> 8
 .s  reval       ."2+3" -> 5    (restricted eval with new context: see also eval)
 .e  get error   .error "msg" -> "msg"
-.d  values      ."a""b"!1 2 -> 1 2             ("a" "b"!1 2)[] -> 1 2 (special)
-.X  self-dict   ."a""b" -> "a""b"!"a""b"       .!3 -> 0 1 2!0 1 2
+.d  values      ."a""b"!1 2 -> 1 2              ("a" "b"!1 2)[] -> 1 2 (special)
+.X  self-dict   ."a""b" -> "a""b"!"a""b"        .!3 -> 0 1 2!0 1 2
 s.I substr      "abcdef"[2;3] -> "cde"                        (s[offset;length])
 r.y findN       rx/[a-z]/["abc";2] -> "a""b"    rx/[a-z]/["abc";-1] -> "a""b""c"
 r.y findN group rx/[a-z](.)/["abcdef";2] -> ("ab" "b";"cd" "d")
-f.y applyN      {x+y}.2 3 -> 5       {x+y}[2;3] -> 5
-X.y at deep     (6 7;8 9)[0;1] -> 7  (6 7;8 9)[;1] -> 7 9
-«X  shift       «8 9 -> 9 0    «"a" "b" -> "b" ""   (ASCII alternative: shift x)
+f.y applyN      {x+y}.2 3 -> 5                  {x+y}[2;3] -> 5
+X.y at deep     (6 7;8 9)[0;1] -> 7             (6 7;8 9)[;1] -> 7 9
+«X  shift       «8 9 -> 9 0     «"a" "b" -> "b" ""      (ASCII keyword: shift x)
 x«Y shift       "a" "b"«1 2 3 -> 3 "a" "b"
-»X  rshift      »8 9 -> 0 8    »"a" "b" -> "" "a"  (ASCII alternative: rshift x)
+»X  rshift      »8 9 -> 0 8     »"a" "b" -> "" "a"     (ASCII keyword: rshift x)
 x»Y rshift      "a" "b"»1 2 3 -> "a" "b" 1
 
 ::x         get global  a:3;::"a" -> 3
@@ -193,7 +193,7 @@ x::y        set global  "a"::3;a -> 3
 "NamedVerbs" rq&
 NAMED VERBS HELP
 abs n      abs value    abs -3 -1.5 2 -> 3 1.5 2
-ceil x     ceil/upper   ceil 1.5 -> 2       ceil "ab" -> "AB"
+ceil x     ceil/upper   ceil 1.5 -> 2       ceil "abπ" -> "ABΠ"
 csv s      csv read     csv "1,2,3" -> ,"1" "2" "3"
 csv A      csv write    csv ,"1" "2" "3" -> "1,2,3\n"
 error x    error        r:error "msg"; (@r;.r) -> "e" "msg"
