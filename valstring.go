@@ -1,6 +1,7 @@
 package goal
 
 import (
+	"fmt"
 	"math"
 	"strconv"
 	"unsafe"
@@ -46,10 +47,16 @@ func (v V) Append(ctx *Context, dst []byte) []byte {
 	case valFloat:
 		return appendFloat(ctx, dst, v.F())
 	case valVariadic:
-		// v.n < len(ctx.variadicsNames)
+		if v.n >= int64(len(ctx.variadicsNames)) {
+			// Does not happen with main context.
+			return append(dst, fmt.Sprintf("·v[%d]", v.n)...)
+		}
 		return append(dst, ctx.variadicsNames[v.n]...)
 	case valLambda:
-		// v.n < len(ctx.lambdas)
+		if v.n >= int64(len(ctx.lambdas)) {
+			// Does not happen with main context.
+			return append(dst, fmt.Sprintf("·l[%d]", v.n)...)
+		}
 		return append(dst, ctx.lambdas[v.n].Source...)
 	case valBoxed, valPanic:
 		return v.value.Append(ctx, dst)

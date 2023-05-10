@@ -959,8 +959,10 @@ func memberOfAV(x V, y *AV) V {
 }
 
 func memberOfArray(x, y array) V {
-	// NOTE: quadratic algorithm, worst case complexity could be
-	// improved by sorting or string hashing.
+	if x.Len() > bruteForceGeneric/2 && y.Len() > bruteForceGeneric/2 {
+		ctx := NewContext()
+		return memberOf(each2String(ctx, x), each2String(ctx, y))
+	}
 	r := make([]byte, x.Len())
 	for i := 0; i < x.Len(); i++ {
 		for j := 0; j < y.Len(); j++ {
@@ -1328,10 +1330,7 @@ func findAB(x *AB, y V) V {
 	case *AF:
 		return find(fromABtoAF(x), y)
 	case array:
-		if x.Len() < 256 {
-			return NewAB(findArrays[byte](x, yv))
-		}
-		return NewAI(findArrays[int64](x, yv))
+		return findArrays(x, yv)
 	default:
 		return NewI(int64(x.Len()))
 	}
@@ -1459,10 +1458,7 @@ func findAI(x *AI, y V) V {
 	case *AF:
 		return findAF(toAF(x).value.(*AF), y)
 	case array:
-		if x.Len() < 256 {
-			return NewAB(findArrays[byte](x, yv))
-		}
-		return NewAI(findArrays[int64](x, yv))
+		return findArrays(x, yv)
 	default:
 		return NewI(int64(x.Len()))
 	}
@@ -1626,10 +1622,7 @@ func findAF(x *AF, y V) V {
 		}
 		return NewAIWithRC(findSlices[float64, int64](x.elts, yv.elts, bruteForceNumeric), reuseRCp(yv.rc))
 	case array:
-		if x.Len() < 256 {
-			return NewAB(findArrays[byte](x, yv))
-		}
-		return NewAI(findArrays[int64](x, yv))
+		return findArrays(x, yv)
 	default:
 		return NewI(int64(x.Len()))
 	}
@@ -1670,10 +1663,7 @@ func findAS(x *AS, y V) V {
 		}
 		return NewAIWithRC(findSlices[string, int64](x.elts, yv.elts, bruteForceGeneric), reuseRCp(yv.rc))
 	case array:
-		if x.Len() < 256 {
-			return NewAB(findArrays[byte](x, yv))
-		}
-		return NewAI(findArrays[int64](x, yv))
+		return findArrays(x, yv)
 	default:
 		return NewI(int64(x.Len()))
 	}
@@ -1687,9 +1677,18 @@ func findSortedSsSs[I integer](xs, ys []string) []I {
 	return r
 }
 
-func findArrays[I integer](x, y array) []I {
-	// NOTE: quadratic algorithm, worst case complexity could be
-	// improved by sorting or string hashing.
+func findArrays(x, y array) V {
+	if x.Len() > bruteForceGeneric/2 && y.Len() > bruteForceGeneric/2 {
+		ctx := NewContext()
+		return find(each2String(ctx, x), each2String(ctx, y))
+	}
+	if x.Len() < 256 {
+		return NewAB(findArraysBrute[byte](x, y))
+	}
+	return NewAI(findArraysBrute[int64](x, y))
+}
+
+func findArraysBrute[I integer](x, y array) []I {
 	r := make([]I, y.Len())
 	for i := range r {
 		r[i] = I(x.Len())
@@ -1708,10 +1707,7 @@ func findArrays[I integer](x, y array) []I {
 func findAV(x *AV, y V) V {
 	switch yv := y.value.(type) {
 	case array:
-		if x.Len() < 256 {
-			return NewAB(findArrays[byte](x, yv))
-		}
-		return NewAI(findArrays[int64](x, yv))
+		return findArrays(x, yv)
 	default:
 		for i, xi := range x.elts {
 			if y.Matches(xi) {
