@@ -958,8 +958,10 @@ func memberOfAV(x V, y *AV) V {
 	}
 }
 
+const bruteForceGenericDyad = 24
+
 func memberOfArray(x, y array) V {
-	if x.Len() > bruteForceGeneric/2 && y.Len() > bruteForceGeneric/2 {
+	if x.Len() > bruteForceGenericDyad && y.Len() > bruteForceGenericDyad {
 		ctx := NewContext()
 		return memberOf(each2String(ctx, x), each2String(ctx, y))
 	}
@@ -1678,7 +1680,7 @@ func findSortedSsSs[I integer](xs, ys []string) []I {
 }
 
 func findArrays(x, y array) V {
-	if x.Len() > bruteForceGeneric/2 && y.Len() > bruteForceGeneric/2 {
+	if x.Len() > bruteForceGenericDyad && y.Len() > bruteForceGenericDyad {
 		ctx := NewContext()
 		return find(each2String(ctx, x), each2String(ctx, y))
 	}
