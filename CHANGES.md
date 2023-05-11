@@ -7,8 +7,12 @@
 * Allow referencing main namespace from an imported file using `main.` as
   prefix (still thinking about alternative prefixes, like just `m.`, but this
   shouldn't come often so a longer form might be better).
+* Optimize group by for sorted indices, and `X?Y` (find) and `X¿Y` (in) for
+  long generic arrays too (hashing).
 * Fix syntax regression when projecting `@` due to missing check for dyadic
   case when optimizing away `@` and replacing it with a single opcode.
++ Fix bug in `s?r` when there is no match: it returned
+  (start-offset;end-offset) instead of (offset;len) in such case.
 
 # v0.16.0 2023-05-05
 
