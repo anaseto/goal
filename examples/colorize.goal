@@ -1,0 +1,76 @@
+#!/usr/bin/env goal
+/ Simple html coloration script for Goal source code. It doesn't handle the
+/ whole syntax (no multi-line comments, and only / as quoting delimiter).
+(2<#ARGS)and:error"USAGE: colorize [file]"
+'src:read?[1<#ARGS;ARGS 1;STDIN]
+pos:0; tokens:(); i:0; start:1 / globals
+rxscan:{[t;r]
+  (off;len):src[pos]?r
+  ((~start)&t¿"number-neg" "stmt-adverb" "comment-line")and:0
+  ?[0<len;[tokens,::(t;src[pos+off;len]);pos+::off+len;start::t¿startToks;1];0]
+}
+scan:{i::0; opos:pos; {x&i<#rxs}{ok:rxscan. rxs@i;i+::1;~ok}/1; pos>opos}
+startToks:"open" "open-lambda" "spaces" "comment" "comment-line"
+rxs:(
+  ("string";rx/^"(?:\\.|[^"])*"/)
+  ("raw-string";rx/^`[^`]*`/)
+  ("rx";rx#^rx/(?:\\.|[^/])*/#)
+  ("rx";rx#^qq/(?:\\.|[^/])*/#)
+  ("rx";rx#^rq/(?:\\.|[^/])*/#)
+  ("number";rx/^\d[\da-z]*(?:\.\d[\da-z]*)?([Ee][\-+]?\d\+)?/)
+  ("number-neg";rx/^-\d[\da-z]*(?:\.\d[\da-z]*)?([Ee][\-+]?\d\+)?/)
+  ("xyz";rx/^[xyz]\b/)
+  ("monad";rx/^(?:abs|uc|error|eval|firsts|json|ocount|sign|chdir|close|flush|panic|shell|cos|exp|log|round|sin|sqrt)\b/)
+  ("dyad";rx/^(?:and|or|in|csv|nan|rotate|rshift|shift|sub|utf8|import|print|say|env|open|read|run|atan|time)\b/)
+  ("ident";rx/^[a-zA-Z]+(?:\.[a-zA-Z]+)?/)
+  ("dyad";rx/^[+\-*%!&|<>=~,^#_$?@\.¿«»]/)
+  ("comment-line";rx#^/.*#)
+  ("comment";rx#^[ \t]+/.*#)
+  ("stmt-adverb";rx#^[/\\']#)
+  ("adverb";rx#^[/\\']#)
+  ("stmt";rx/^:/)
+  ("sep";rx/^;/)
+  ("open";rx/^[(\[]/)
+  ("open-lambda";rx/^[{](?:\[[a-zA-Z]+(?:;[a-zA-Z]+)*\])?/)
+  ("close";rx/^[)\]]/)
+  ("close-lambda";rx/^[}]/)
+  ("spaces";rx#^\s+#)
+)
+(:)scan/1; (0~#tokens)and:error"empty source"; (tok;html):+-2$tokens
+span:{"<span class=\"$x\">$y</span>"}
+html:sub["&""&amp;""'""&#39;""<""&lt;"">""&gt;""\"""&#34;"]html
+html[w]:sub[rx/(?:\\.|[$][a-zA-Z]+|[$][{][a-zA-Z]+[}])/;span["escape";]]'html[w:&tok="string"]
+html[w]:sub[rx/\\./;span["escape";]]'html[w:&tok="rx"]
+html[w]:sub[rx/[\.+*?()|\[\]{}^$]/;span["rxsym";]]'html[w:&tok="rx"]
+dospan:{html[w]::span[x;]'html[w:&y]}
+dospan["string";tok="string"]
+dospan["string";tok="raw-string"]
+dospan["number";tok¿"number""number-neg"]
+dospan["xyz";tok="xyz"]
+dospan["rx";tok="rx"]
+dospan["adverb";tok="adverb"]
+dospan["dyad";tok="dyad"]
+dospan["monad";tok="monad"]
+dospan["sep";tok="sep"]
+dospan["stmt";tok="stmt"]
+dospan["stmt-adverb";tok="stmt-adverb"]
+dospan["lambda";tok¿"open-lambda""close-lambda"]
+dospan["comment";tok¿"comment""comment-line"]
+say "\n"^+/html
+/
+/* Example CSS with colors from https://github.com/jan-warchol/selenized/blob/master/the-values.md */
+span.adverb { color: #ad8900; }
+span.comment { color: #909995; }
+span.dyad { color: #489100; }
+span.escape { color: #dd0f9d; }
+span.lambda { color: #d2212d; }
+span.monad { color: #0072d4; }
+span.number { color: #009c8f; }
+span.rx { color: #009c8f; }
+span.rxsym { color: #d2212d; }
+span.sep { color: #d2212d; }
+span.stmt { color: #ad8900; }
+span.stmt-adverb { color: #d2212d; }
+span.string { color: #009c8f; }
+span.xyz { color: #d2212d; }
+\
