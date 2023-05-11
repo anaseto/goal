@@ -1,6 +1,7 @@
 package goal
 
 import (
+	"bytes"
 	"strings"
 )
 
@@ -660,10 +661,8 @@ func memberOf(x, y V) V {
 func memberOfAB(x V, y *AB) V {
 	if x.IsI() {
 		xv := x.I()
-		for _, yi := range y.elts {
-			if xv == int64(yi) {
-				return NewI(1)
-			}
+		if isBI(xv) {
+			return NewI(b2I(bytes.IndexByte(y.elts, byte(xv)) >= 0))
 		}
 		return NewI(0)
 	}
@@ -1296,10 +1295,13 @@ func findS(s S, y V) V {
 
 func findAB(x *AB, y V) V {
 	if y.IsI() {
-		for i, xi := range x.elts {
-			if int64(xi) == y.I() {
-				return NewI(int64(i))
+		yv := y.I()
+		if isBI(yv) {
+			n := bytes.IndexByte(x.elts, byte(yv))
+			if n == -1 {
+				n = x.Len()
 			}
+			return NewI(int64(n))
 		}
 		return NewI(int64(x.Len()))
 	}
