@@ -29,7 +29,7 @@ raw strings     `anything until first backquote`     `literal \, no escaping`
 arrays          1 2 -3 4      1 "ab" -2 "cd"      (1 2;"a";3 "b";(4 2;"c");*)
 regexps         rx/[a-z]/      (see https://pkg.go.dev/regexp/syntax for syntax)
 verbs           : + - * % ! && | < > = ~ , ^ # _ $ ? @ . ::   (right-associative)
-                abs ceil error ...
+                abs uc error ...
 adverbs         / \ ' (alone or after expr. with no space)    (left-associative)
 expressions     2*3+4 -> 14      1+|2 3 4 -> 5 4 3      +/'(1 2 3;4 5 6) -> 6 15
 separator       ; or newline except when ignored after {[( and before )]}
@@ -193,7 +193,6 @@ x::y        set global  "a"::3;a -> 3
 "NamedVerbs" rq&
 NAMED VERBS HELP
 abs n      abs value    abs -3 -1.5 2 -> 3 1.5 2
-ceil x     ceil/upper   ceil 1.5 -> 2       ceil "abπ" -> "ABΠ"
 csv s      csv read     csv "1,2,3" -> ,"1" "2" "3"
 csv A      csv write    csv ,"1" "2" "3" -> "1,2,3\n"
 error x    error        r:error "msg"; (@r;.r) -> "e" "msg"
@@ -205,6 +204,7 @@ ocount X   occur-count  ocount 3 4 5 3 4 4 7 -> 0 0 0 1 1 2 0
 panic s    panic        panic "msg"               (for fatal programming-errors)
 rx s       comp. regex  rx "[a-z]"      (like rx/[a-z]/ but compiled at runtime)
 sign n     sign         sign -3 -1 0 1.5 5 -> -1 -1 0 1 1
+uc x       upper/ceil   uc 1.5 -> 2                            uc "abπ" -> "ABΠ"
 
 s csv s    csv read     " " csv "1 2 3" -> ,"1" "2" "3"       (" " as separator)
 s csv A    csv write    " " csv ,"1" "2" "3" -> "1 2 3\n"     (" " as separator)

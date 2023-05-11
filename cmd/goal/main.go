@@ -63,7 +63,7 @@ func getHelp() map[string]string {
 		help[v] = getBuiltin(helpAdverbs, v, acols)
 	}
 	help["rx"] = getBuiltin(helpSyntax, "regexp", scols) + getBuiltin(helpNamedVerbs, "rx", nvcols)
-	for _, v := range []string{"abs", "bytes", "ceil", "error", "eval", "firsts", "json", "ocount", "panic", "sign", "csv", "in", "mod", "nan", "rotate", "sub"} {
+	for _, v := range []string{"abs", "bytes", "uc", "error", "eval", "firsts", "json", "ocount", "panic", "sign", "csv", "in", "mod", "nan", "rotate", "sub"} {
 		help[v] = getBuiltin(helpNamedVerbs, v, nvcols)
 	}
 	help["¿"] = getBuiltin(helpNamedVerbs, "firsts", nvcols) + getBuiltin(helpNamedVerbs, "in", nvcols)

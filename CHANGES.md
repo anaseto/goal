@@ -3,6 +3,11 @@
 * Rename weed out to `f^y`, related to `X^y`, in the same way that `f#y` is
   related to `X#y`. (breaking change) Now `f_y` is “cut where”, same as `(&f
   y)_y`, but `f` has to return an array of integers.
+* Rename `ceil` into `uc`, which can be read both as upper/ceil (for both of
+  its meanings on strings and numbers), or just upper case (like `uc` in Perl).
+  It felt unnatural to have a name representing only one of its meanings, but
+  it was natural to have a single built-in for both (like for `_`), hence a
+  name with double-reading. (breaking change)
 * Now where `&` allows negative inputs, and simply treats them as zero.
 * Allow referencing main namespace from an imported file using `main.` as
   prefix (still thinking about alternative prefixes, like just `m.`, but this

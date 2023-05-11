@@ -236,7 +236,7 @@ $[1;2;3] / too many arguments
 csv[1;2;3] / too many arguments
 abs[1;2] / too many arguments
 &[1;2;3] / too many arguments
-ceil[1;2] / too many arguments
+uc[1;2] / too many arguments
 error[1;2] / too many arguments
 eval[1;2;3;4] / too many arguments
 firsts[1;2] / too many arguments
@@ -329,8 +329,8 @@ sign"a" / type
 sign(1 2;"a") / type
 _* / type
 _(1 2;*) / type
-ceil * / type
-ceil(1 2;*) / type
+uc * / type
+uc(1 2;*) / type
 abs * / type
 abs(1 2;*) / type
 (1+0 1)+1 2 3 / length mismatch
@@ -867,7 +867,7 @@ atan[3;2;1] / too many arguments
 ::[1;2;3] / too many arguments
 rt.vars["v";"toomany"] / too many arguments
 rt.prec["toomany";"more"] / too many arguments
-sub[rx/[a-z]/;ceil]["a";"b";"c"] / too many arguments
+sub[rx/[a-z]/;uc]["a";"b";"c"] / too many arguments
 rx 42 / type
 rx "\4" / syntax
 rx["a";"b"] / too many arguments

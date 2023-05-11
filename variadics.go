@@ -121,7 +121,7 @@ func (ctx *Context) initVariadics() {
 
 	// monads
 	ctx.RegisterMonad("abs", vfAbs)
-	ctx.RegisterMonad("ceil", vfCeil)
+	ctx.RegisterMonad("uc", vfUpperCeil)
 	ctx.RegisterMonad("error", vfError)
 	ctx.RegisterMonad("eval", vfEval)
 	ctx.RegisterMonad("firsts", vfFirsts)
@@ -627,13 +627,13 @@ func vfAbs(ctx *Context, args []V) V {
 	}
 }
 
-// vfCeil implements the "ceil" variadic verb.
-func vfCeil(ctx *Context, args []V) V {
+// vfUpperCeil implements the "ceil" variadic verb.
+func vfUpperCeil(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return ceil(args[0])
+		return upperCeil(args[0])
 	default:
-		return panicRank("ceil")
+		return panicRank("uc")
 	}
 }
 

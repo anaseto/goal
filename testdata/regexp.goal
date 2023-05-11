@@ -11,7 +11,7 @@ sub[rx/[A-Z]/;_]"aBc" "ÉA" / "abc" "Éa"
 sub[rx/(.)(.)/;`$2$1`] "aB" / "Ba"
 2 sub[rx/(.)(.)/;`$2$1`]/ "aB" / "aB"
 'r:rx`[a-z]`;sub[r;"Z"]"aBbcC" "a" / "ZBZZC" "Z"
-'r:rx`[a-z]`;sub[r;ceil]"aBbcC" / "ABBCC"
+'r:rx`[a-z]`;sub[r;uc]"aBbcC" / "ABBCC"
 'r:rx`[a-z]`;sub[r;&]"aBbcC" / "1B11C"
 'r:rx`[A-Z]`;sub[r;_]"aBbcC" "a" / "abbcc" "a"
 'r:rx`[A-Z]`;sub[r;&]"aBbcC" "a" / "a1bc1" "a"
@@ -47,4 +47,4 @@ rx#\/#"/" / 1
 rx/\\/"\\" / 1
 rx/^[a-z]+$/"abc" / 1
 rx/([a-z])(.)/"&a+c" / "a+" "a" "+"
-$sub[rx/[a-z]/;ceil] / `sub[rx["[a-z]"];ceil]`
+$sub[rx/[a-z]/;uc] / `sub[rx["[a-z]"];uc]`

@@ -149,8 +149,8 @@ func floor(x V) V {
 	}
 }
 
-// ceil returns ceil x.
-func ceil(x V) V {
+// upperCeil returns upperCeil x.
+func upperCeil(x V) V {
 	if x.IsI() {
 		return x
 	}
@@ -177,11 +177,11 @@ func ceil(x V) V {
 		}
 		return NewV(r)
 	case *AV:
-		return monadAV(xv, ceil)
+		return monadAV(xv, upperCeil)
 	case *Dict:
-		return newDictValues(xv.keys, ceil(NewV(xv.values)))
+		return newDictValues(xv.keys, upperCeil(NewV(xv.values)))
 	default:
-		return panicType("ceil x", "x", x)
+		return panicType("uc x", "x", x)
 	}
 }
 
