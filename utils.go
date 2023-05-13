@@ -605,7 +605,7 @@ func normalizeRec(x *AV) (array, bool) {
 
 // normalize returns a canonical form of an AV array, assuming it's
 // elements themselves are canonical. It returns true if a shallow clone was
-// made.
+// made, in other words, if the returned array is not generic.
 func normalize(x *AV) (array, bool) {
 	t := eType(x)
 	switch t {

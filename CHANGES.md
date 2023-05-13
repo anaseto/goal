@@ -16,8 +16,10 @@
   long generic arrays too (hashing).
 * Fix syntax regression when projecting `@` due to missing check for dyadic
   case when optimizing away `@` and replacing it with a single opcode.
-+ Fix bug in `s?r` when there is no match: it returned
+* Fix bug in `s?r` when there is no match: it returned
   (start-offset;end-offset) instead of (offset;len) in such case.
+* Fix refcount bug in each and scan adverbs when function returned a mutated
+  global.
 
 # v0.16.0 2023-05-05
 

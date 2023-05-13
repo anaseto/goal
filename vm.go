@@ -309,6 +309,12 @@ func rcincrArgs(args []V) {
 	}
 }
 
+func rcdecrArgs(args []V) {
+	for _, v := range args {
+		v.DecrRC()
+	}
+}
+
 func (ctx *Context) clearAssignOnPanic(ops []opcode, ip int) {
 	// NOTE: it's not a perfect solution, because ideally we would want to
 	// preserve the old value, instead of clearing.

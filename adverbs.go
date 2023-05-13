@@ -341,26 +341,27 @@ func scanfx(ctx *Context, f, x V) V {
 			return x
 		}
 		r := make([]V, xv.Len())
-		r[0] = xv.at(0)
+		next := xv.at(0)
+		r[0] = next
+		next.IncrRC()
 		f.IncrRC()
 		ctx.pushNoRC(V{})
 		for i := 1; i < xv.Len(); i++ {
 			ctx.replaceTop(xv.at(i))
-			last := r[i-1]
-			ctx.pushNoRC(last)
-			last.incrRC2()
-			next := f.applyN(ctx, 2)
-			last.DecrRC()
+			ctx.push(next)
+			next = f.applyN(ctx, 2)
 			if next.IsPanic() {
 				f.DecrRC()
 				ctx.drop()
+				rcdecrArgs(r)
 				return next
 			}
 			r[i] = next
+			next.IncrRC()
 		}
 		f.DecrRC()
 		ctx.drop()
-		return Canonical(NewAV(r))
+		return normalizedArgs(r)
 	default:
 		return x
 	}
@@ -376,30 +377,28 @@ func converges(ctx *Context, f, x V) V {
 	}()
 	f.IncrRC()
 	first := x
-	first.IncrRC()
 	ctx.push(x)
 	for {
-		x.IncrRC()
 		r = append(r, x)
+		x.IncrRC()
 		y := f.applyN(ctx, 1)
 		if y.IsPanic() {
 			f.DecrRC()
-			first.DecrRC()
+			rcdecrArgs(r)
 			ctx.drop()
 			return y
 		}
 		if y.Matches(x) || y.Matches(first) {
 			f.DecrRC()
-			first.DecrRC()
 			ctx.drop()
-			return Canonical(NewAV(r))
+			return normalizedArgs(r)
 		}
 		ctx.replaceTop(y)
 		x = y
 		n++
 		if n > maxConvergeIters {
 			f.DecrRC()
-			first.DecrRC()
+			rcdecrArgs(r)
 			ctx.drop()
 			return panics(`f\x : too many iterations`)
 		}
@@ -445,21 +444,21 @@ func scanxfy(ctx *Context, x, f, y V) V {
 		r := make([]V, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
 			ctx.replaceTop(yv.at(i))
-			ctx.pushNoRC(x)
-			x.incrRC2()
+			ctx.push(x)
 			next := f.applyN(ctx, 2)
-			x.DecrRC()
 			if next.IsPanic() {
 				f.DecrRC()
 				ctx.drop()
+				rcdecrArgs(r)
 				return next
 			}
 			x = next
 			r[i] = x
+			x.IncrRC()
 		}
 		f.DecrRC()
 		ctx.drop()
-		return Canonical(NewAV(r))
+		return normalizedArgs(r)
 	default:
 		ctx.push(y)
 		ctx.push(x)
@@ -497,21 +496,21 @@ func scanN(ctx *Context, args []V) V {
 		for j := 1; j < len(args)-2; j++ {
 			ctx.push(args[j].at(i))
 		}
-		ctx.pushNoRC(x)
-		x.incrRC2()
+		ctx.push(x)
 		next := f.applyN(ctx, n)
-		x.DecrRC()
 		if next.IsPanic() {
 			f.DecrRC()
 			ctx.drop()
+			rcdecrArgs(r)
 			return next
 		}
 		x = next
 		r[i] = x
+		x.IncrRC()
 	}
 	f.DecrRC()
 	ctx.drop()
-	return Canonical(NewAV(r))
+	return normalizedArgs(r)
 }
 
 func splitNS(x V, sep S, y V) V {
@@ -552,30 +551,31 @@ func doWhiles(ctx *Context, args []V) V {
 		x.IncrRC()
 		ctx.push(y)
 		for {
-			y.IncrRC()
 			cond := x.applyN(ctx, 1)
-			y.DecrRC()
 			if cond.IsPanic() {
 				f.DecrRC()
 				x.DecrRC()
 				ctx.drop()
+				rcdecrArgs(r)
 				return cond
 			}
 			if !cond.IsTrue() {
 				f.DecrRC()
 				x.DecrRC()
 				ctx.drop()
-				return Canonical(NewAV(r))
+				return normalizedArgs(r)
 			}
 			y = f.applyN(ctx, 1)
 			if y.IsPanic() {
 				f.DecrRC()
 				x.DecrRC()
 				ctx.drop()
+				rcdecrArgs(r)
 				return y
 			}
-			ctx.replaceTop(y)
 			r = append(r, y)
+			y.IncrRC()
+			ctx.replaceTop(y)
 		}
 	}
 	return panicType("x f\\y", "x", x)
@@ -584,24 +584,24 @@ func doWhiles(ctx *Context, args []V) V {
 func dosTimes(ctx *Context, n int64, f, y V) V {
 	r := make([]V, n+1)
 	r[0] = y
+	y.IncrRC()
 	f.IncrRC()
 	ctx.push(y)
 	for i := int64(1); i <= n; i++ {
-		y.IncrRC()
-		next := f.applyN(ctx, 1)
-		y.DecrRC()
-		if next.IsPanic() {
+		y = f.applyN(ctx, 1)
+		if y.IsPanic() {
 			f.DecrRC()
 			ctx.drop()
-			return next
+			rcdecrArgs(r)
+			return y
 		}
-		y = next
-		ctx.replaceTop(y)
 		r[i] = y
+		y.IncrRC()
+		ctx.replaceTop(y)
 	}
 	f.DecrRC()
 	ctx.drop()
-	return Canonical(NewAV(r))
+	return normalizedArgs(r)
 }
 
 func each2(ctx *Context, f, x V) V {
@@ -640,13 +640,15 @@ func eachfx(ctx *Context, f V, x array) V {
 		if next.IsPanic() {
 			f.DecrRC()
 			ctx.drop()
+			rcdecrArgs(r)
 			return next
 		}
 		r[i] = next
+		next.IncrRC()
 	}
 	f.DecrRC()
 	ctx.drop()
-	return Canonical(NewAV(r))
+	return normalizedArgs(r)
 }
 
 func eachN(ctx *Context, args []V) V {
@@ -678,13 +680,15 @@ func eachN(ctx *Context, args []V) V {
 		if next.IsPanic() {
 			f.DecrRC()
 			ctx.drop()
+			rcdecrArgs(r)
 			return next
 		}
 		r[i] = next
+		next.IncrRC()
 	}
 	f.DecrRC()
 	ctx.drop()
-	return Canonical(NewAV(r))
+	return normalizedArgs(r)
 }
 
 func (x V) at(i int) V {
@@ -696,4 +700,12 @@ func (x V) at(i int) V {
 	default:
 		return x
 	}
+}
+
+func normalizedArgs(r []V) V {
+	ra, ok := normalize(&AV{elts: r})
+	if !ok {
+		rcdecrArgs(r)
+	}
+	return NewV(ra)
 }
