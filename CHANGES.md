@@ -12,6 +12,8 @@
 * Allow referencing main namespace from an imported file using `main.` as
   prefix (still thinking about alternative prefixes, like just `m.`, but this
   shouldn't come often so a longer form might be better).
+* Implement dyadic version for shell too, and make it inherit STDIN too. It
+  works now exactly like run, but through /bin/sh.
 * Optimize group by for sorted indices, and `X?Y` (find) and `X¿Y` (in) for
   long generic arrays too (hashing).
 * Fix syntax regression when projecting `@` due to missing check for dyadic

@@ -259,7 +259,7 @@ run s       run command s or S (with arguments)   run "pwd"        run "ls" "-l"
             inherits stdin and stderr, returns its standard output or an error
             dict with keys "code" "msg" "out"
 say s       same as print, but appends a newline                   say !5
-shell s     same as s run "/bin/sh"                                shell "ls -l"
+shell s     same as run, but through /bin/sh                       shell "ls -l"
 
 x env s     set environment variable x to s, or return an error
 x env 0     unset environment variable x, or clear environment if x~""

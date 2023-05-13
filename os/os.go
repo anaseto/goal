@@ -294,26 +294,43 @@ func fsayV(ctx *goal.Context, w io.Writer, x goal.V) error {
 	}
 }
 
-// VFShell implements the shell monad.
-//
-// shell s : sends command s to the shell as-is. It returns the standard output
-// of the command, or an error. Standard error is inherited from the parent.
+// VFShell implements the shell dyad. It works like the run dyad, but runs a
+// single string command through /bin/sh instead.
 func VFShell(ctx *goal.Context, args []goal.V) goal.V {
-	if len(args) > 1 {
+	if len(args) > 2 {
 		return goal.Panicf("shell : too many arguments (%d)", len(args))
 	}
-	var source string
-	switch arg := args[len(args)-1].Value().(type) {
+	var shellcmd string
+	y := args[0]
+	switch yv := y.Value().(type) {
 	case goal.S:
-		source = string(arg)
+		shellcmd = string(yv)
 	default:
-		return panicType("shell s", "s", args[len(args)-1])
+		if len(args) == 2 {
+			return panicType("x shell s", "s", y)
+		}
+		return panicType("shell s", "s", y)
 	}
-	cmd := exec.Command("/bin/sh")
-	cmd.Stdin = strings.NewReader(source)
-	cmd.Stderr = os.Stderr
+	cmd := exec.Command("/bin/sh", "-c", shellcmd)
 	var sb strings.Builder
 	cmd.Stdout = &sb
+	cmd.Stderr = os.Stderr
+	switch len(args) {
+	case 1:
+		cmd.Stdin = os.Stdin
+		err := cmd.Run()
+		if err != nil {
+			return cmdError(err, cmd, sb.String())
+		}
+		return goal.NewS(sb.String())
+	case 2:
+		x := args[1]
+		s, ok := x.Value().(goal.S)
+		if !ok {
+			return panicType("x run s", "x", x)
+		}
+		cmd.Stdin = strings.NewReader(string(s))
+	}
 	err := cmd.Run()
 	if err != nil {
 		return cmdError(err, cmd, sb.String())
@@ -337,6 +354,9 @@ func cmdError(err error, cmd *exec.Cmd, out string) goal.V {
 // parent. In the second form, only standard error is inherited.
 // Both commands return their own standard output, or an error.
 func VFRun(ctx *goal.Context, args []goal.V) goal.V {
+	if len(args) > 2 {
+		return goal.Panicf("run : too many arguments (%d)", len(args))
+	}
 	var cmds []string
 	y := args[0]
 	switch yv := y.Value().(type) {
@@ -353,8 +373,7 @@ func VFRun(ctx *goal.Context, args []goal.V) goal.V {
 	if len(cmds) == 0 {
 		return goal.NewPanic("run : empty command")
 	}
-	switch len(args) {
-	case 1:
+	if len(args) == 1 {
 		cmd := exec.Command(cmds[0], cmds[1:]...)
 		cmd.Stdin = os.Stdin
 		var sb strings.Builder
@@ -365,25 +384,22 @@ func VFRun(ctx *goal.Context, args []goal.V) goal.V {
 			return cmdError(err, cmd, sb.String())
 		}
 		return goal.NewS(sb.String())
-	case 2:
-		x := args[1]
-		s, ok := x.Value().(goal.S)
-		if !ok {
-			return panicType("x run s", "x", x)
-		}
-		cmd := exec.Command(cmds[0], cmds[1:]...)
-		cmd.Stdin = strings.NewReader(string(s))
-		var sb strings.Builder
-		cmd.Stdout = &sb
-		cmd.Stderr = os.Stderr
-		err := cmd.Run()
-		if err != nil {
-			return cmdError(err, cmd, sb.String())
-		}
-		return goal.NewS(sb.String())
-	default:
-		return goal.Panicf("run : too many arguments (%d)", len(args))
 	}
+	x := args[1]
+	s, ok := x.Value().(goal.S)
+	if !ok {
+		return panicType("x run s", "x", x)
+	}
+	cmd := exec.Command(cmds[0], cmds[1:]...)
+	cmd.Stdin = strings.NewReader(string(s))
+	var sb strings.Builder
+	cmd.Stdout = &sb
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		return cmdError(err, cmd, sb.String())
+	}
+	return goal.NewS(sb.String())
 }
 
 // VFChdir implements the chdir monad.

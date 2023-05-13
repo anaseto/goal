@@ -20,7 +20,6 @@ func registerVariadics(ctx *goal.Context) {
 	ctx.RegisterMonad("chdir", gos.VFChdir)
 	ctx.RegisterMonad("close", gos.VFClose)
 	ctx.RegisterMonad("flush", gos.VFFlush)
-	ctx.RegisterMonad("shell", gos.VFShell)
 	ctx.RegisterDyad("env", gos.VFEnv)
 	ctx.RegisterDyad("import", gos.VFImport)
 	ctx.RegisterDyad("open", gos.VFOpen)
@@ -28,6 +27,7 @@ func registerVariadics(ctx *goal.Context) {
 	ctx.RegisterDyad("read", gos.VFRead)
 	ctx.RegisterDyad("run", gos.VFRun)
 	ctx.RegisterDyad("say", gos.VFSay)
+	ctx.RegisterDyad("shell", gos.VFShell)
 
 	ctx.AssignGlobal("STDOUT", gos.NewStdHandle(os.Stdout))
 	ctx.AssignGlobal("STDERR", gos.NewStdHandle(os.Stderr))
