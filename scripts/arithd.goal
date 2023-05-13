@@ -171,7 +171,7 @@ genOp:{[opname;opsym] / globals o,op,xt,h
   o::opname; op::opsym; ts:olts[::o]
   h say "\n"_qq|
     // $o returns x${op}y.
-    func $o(ctx *Context, x, y V) V {|
+    func $o(x, y V) V {|
   h say'{"if x.Is$x() { return $o${x}V(x.$x(), y) }"}'utypes#ts
   h say `switch xv := x.value.(type) {`
   h say'{"  case $x: return $o${x}V(xv, y)"}'^(ntypes^ts)
@@ -181,25 +181,25 @@ genOp:{[opname;opsym] / globals o,op,xt,h
     case *AV:
         switch yv := y.value.(type) {
         case *Dict:
-              return newDictValues(yv.keys, $o(ctx, x, NewV(yv.values)))
+              return newDictValues(yv.keys, $o(x, NewV(yv.values)))
         case array:
               if yv.Len() != xv.Len() {
                       return panicLength("x${op}y", xv.Len(), yv.Len())
               }/
-  h say "return dyadAVarray(ctx, xv, yv, $o)"
+  h say "return dyadAVarray(xv, yv, $o)"
   h say `}`
-  h say "return dyadAVV(ctx, xv, y, $o)"
+  h say "return dyadAVV(xv, y, $o)"
   h say "\n"_qq/
     case *Dict:
         yv, ok := y.value.(*Dict)
         if ok {
-            r := dictArith(ctx, xv, yv, $o)
+            r := dictArith(xv, yv, $o)
             if r.IsPanic() {
                     return ppanic("d${op}d", r)
             }
             return r
         }
-        return newDictValues(xv.keys, $o(ctx, NewV(xv.values), y))
+        return newDictValues(xv.keys, $o(NewV(xv.values), y))
     default:
           return panicType("x${op}y", "x", x)
     }
