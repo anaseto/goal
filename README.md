@@ -47,10 +47,11 @@ It's main distinctive features are as follows:
   less compact than how it could be done in C, but Goal does have unboxed
   integers and floats.
 
-If this list is not enough to satisfy your curiosity, there's also a
-[Why.md](docs/Why.md) text for you. You can also read the [Credits.md](Credits.md)
-to know about main inspiration sources for the language. Last, but not least,
-there are some [implementation notes](docs/Implementation.md) too.
+If this list is not enough to satisfy your curiosity, have a look at the [why
+section](https://anaseto.codeberg.page/goal/chap-FAQ.html#why) of the FAQ.  You
+can also read the [Credits.md](Credits.md) to know about main inspiration
+sources for the language. Last, but not least, there are some [implementation
+notes](docs/Implementation.md) too.
 
 # Install
 
