@@ -16,13 +16,15 @@ rxs:(
   ("raw-string";rx/^`[^`]*`/)
   ("rx";rx#^rx/(?:\\.|[^/])*/#)
   ("string";rx#^qq/(?:\\.|[^/])*/#)
+  ("string";rx!^qq#(?:\\.|[^#])*#!)
   ("raw-string";rx#^rq/(?:\\.|[^/])*/#)
-  ("number";rx/^\d[\da-z]*(?:\.\d[\da-z]*)?([Ee][\-+]?\d\+)?/)
-  ("number-neg";rx/^-\d[\da-z]*(?:\.\d[\da-z]*)?([Ee][\-+]?\d\+)?/)
+  ("raw-string";rx!^rq#(?:\\.|[^#])*#!)
+  ("number";rx/^\d[\da-z]*(?:\.\d[[:alnum:]]*)?([Ee][\-+]?\d\+)?/)
+  ("number-neg";rx/^-\d[[:alnum:]]*(?:\.\d[[:alnum:]]*)?([Ee][\-+]?\d\+)?/)
   ("xyz";rx/^[xyz]\b/)
   ("monad";rx/^(?:abs|uc|error|eval|firsts|json|ocount|sign|chdir|close|flush|panic|shell|cos|exp|log|round|sin|sqrt|rx)\b/)
   ("dyad";rx/^(?:and|or|in|csv|nan|rotate|rshift|shift|sub|utf8|import|print|say|env|open|read|run|atan|time)\b/)
-  ("ident";rx/^[a-zA-Z]+(?:\.[a-zA-Z]+)?/)
+  ("ident";rx/^[[:alpha:]][[:alnum:]]*(?:\.[[:alpha:]][[:alnum:]]*)?/)
   ("dyad";rx/^[+\-*%!&|<>=~,^#_$?@\.¿«»]/)
   ("comment-line";rx#^/.*#)
   ("comment";rx#^[ \t]+/.*#)
@@ -40,8 +42,8 @@ rxs:(
 (:)scan/1; (0~#tokens)and:error"empty source"; (tok;html):+-2$tokens
 span:{"<span class=\"$x\">$y</span>"}
 html:sub["&""&amp;""'""&#39;""<""&lt;"">""&gt;""\"""&#34;"]html
-html[w]:sub[rx/(?:\\.|\$[a-zA-Z]+|\$[{][a-zA-Z]+[}])/;span["escape";]]'html[w:&tok="string"]
-html[w]:sub[rx/\\./;span["escape";]]'html[w:&tok="rx"]
+html[w]:sub[rx/(?:\\[0-7]{3}|\\[abfnrtv\\]|\\&#34;|\$[a-zA-Z]+|\$[{][a-zA-Z]+[}]|\\x\x{2}|\\u\x{4}|\\U\x{8})/;span["escape";]]'html[w:&tok="string"]
+html[w]:sub[rx/\\[AbBzQE]/;span["escape";]]'html[w:&tok="rx"]
 html[w]:sub[rx/[\.+*?()|\[\]{}^$]/;span["rxsym";]]'html[w:&tok="rx"]
 dospan:{html[w]::span[x;]'html[w:&y]}
 dospan["string";tok="string"]
