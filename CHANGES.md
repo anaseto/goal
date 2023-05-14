@@ -16,6 +16,7 @@
   works now exactly like run, but through /bin/sh.
 * Optimize group by for sorted indices, and `X?Y` (find) and `X¿Y` (in) for
   long generic arrays too (hashing).
+* Make f'[d;y;…] and f\\[x;d;z;…] return dictionary too in n-arg case.
 * Fix syntax regression when projecting `@` due to missing check for dyadic
   case when optimizing away `@` and replacing it with a single opcode.
 * Fix bug in `s?r` when there is no match: it returned

@@ -510,6 +510,9 @@ func scanN(ctx *Context, args []V) V {
 	}
 	f.DecrRC()
 	ctx.drop()
+	if d, ok := args[len(args)-3].value.(*Dict); ok {
+		return newDictValues(d.keys, normalizedArgs(r))
+	}
 	return normalizedArgs(r)
 }
 
@@ -688,6 +691,9 @@ func eachN(ctx *Context, args []V) V {
 	}
 	f.DecrRC()
 	ctx.drop()
+	if d, ok := args[len(args)-2].value.(*Dict); ok {
+		return newDictValues(d.keys, normalizedArgs(r))
+	}
 	return normalizedArgs(r)
 }
 
