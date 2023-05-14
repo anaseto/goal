@@ -340,6 +340,3 @@ package main
 "../cmd/goal/help.go" say package+"\n"/{{qy:$"\n"_y;"const help$x = $qy\n"}. x}'help
 helps:""/help[;1]
 "../docs/help.txt"print "\n"_helps
-helps:sub[`$`;`$$`]helps
-'readme:read"../README.md"
-"../README.md"print sub[rx/(?s)```.TOPICS.*```/;"```"+helps+"```"] readme
