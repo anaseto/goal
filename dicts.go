@@ -100,7 +100,9 @@ func dictAmendKVI(xd *Dict, yk array) (array, array, V) {
 	max := maxIndices(ky)
 	if max == int64(nkeys) {
 		b := equalIV(max, ky)
+		flags := keys.getFlags() & flagUnique
 		keys = joinTo(NewV(keys), uniq(replicate(b, ykv))).value.(array)
+		keys.setFlags(flags)
 		initRC(keys)
 		values = padArrayMut(keys.Len()-nkeys, values)
 		ky = findArray(keys, ykv)
