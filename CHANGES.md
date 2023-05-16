@@ -1,3 +1,8 @@
+# v? ?
+
+* Improve `d op d` semantics for uncommon or duplicate keys, so that it's in
+  line with amend dict.
+
 # v0.17.1 2023-05-16
 
 * Fix CRLF handling in Goal scripts.

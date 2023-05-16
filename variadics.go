@@ -423,7 +423,7 @@ func vfFind(ctx *Context, args []V) V {
 		if x.IsI() || x.IsF() {
 			return uniform(ctx, x)
 		}
-		return uniq(ctx, x)
+		return uniq(x)
 	case 2:
 		x, y := args[1], args[0]
 		if x.IsI() || x.IsF() {
@@ -669,7 +669,7 @@ func vfEval(ctx *Context, args []V) V {
 func vfFirsts(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return markFirsts(ctx, args[0])
+		return markFirsts(args[0])
 	default:
 		return panicRank("firsts")
 	}
@@ -691,7 +691,7 @@ func vfInKeyword(ctx *Context, args []V) V {
 func vfIn(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return markFirsts(ctx, args[0])
+		return markFirsts(args[0])
 	case 2:
 		return memberOf(args[1], args[0])
 	default:

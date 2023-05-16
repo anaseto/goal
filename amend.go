@@ -55,40 +55,28 @@ func (x V) nonGenericIndices() bool {
 }
 
 func amend3Dict(ctx *Context, d *Dict, y, f V) V {
-	keys, values := d.keys.shallowClone(), d.values.shallowClone()
-	y.IncrRC()
-	ky := findArray(keys, y)
-	switch y.value.(type) {
+	switch yv := y.value.(type) {
 	case array:
-		nkeys := keys.Len()
-		max := maxIndices(ky)
-		if max == int64(nkeys) {
-			keys = uniq(ctx, joinTo(NewV(keys), y)).value.(array)
-		}
-		if keys.Len() > nkeys {
-			values = padArrayMut(keys.Len()-nkeys, values)
-			ky = findArray(keys, y)
-		}
-		y.DecrRC()
+		keys, values, ky := dictAmendKVI(d, yv)
 		r, err := ctx.amend3array(values, ky, f)
 		if err != nil {
 			return Panicf("@[d;y;f] : %v", err)
 		}
+		initRC(r)
 		return NewV(&Dict{keys: keys, values: canonicalArray(r)})
 	default:
-		nkeys := keys.Len()
-		if ky.I() == int64(nkeys) {
-			keys = uniq(ctx, joinTo(NewV(keys), y)).value.(array)
+		keys, values := d.keys, d.values.shallowClone()
+		ky := findArray(keys, y)
+		if ky.I() == int64(keys.Len()) {
+			keys = joinTo(NewV(keys), y).value.(array)
+			initRC(keys)
+			values = padArrayMut(1, values)
 		}
-		if keys.Len() > nkeys {
-			values = padArrayMut(keys.Len()-nkeys, values)
-			ky = findArray(keys, y)
-		}
-		y.DecrRC()
 		r, err := ctx.amend3arrayI(values, ky.I(), f)
 		if err != nil {
 			return Panicf("@[d;y;f] : %v", err)
 		}
+		initRC(r)
 		return NewV(&Dict{keys: keys, values: canonicalArray(r)})
 	}
 }
@@ -221,37 +209,23 @@ func (ctx *Context) amend4array(x array, y, f, z V) (array, error) {
 }
 
 func amend4Dict(ctx *Context, d *Dict, y, f, z V) V {
-	keys, values := d.keys.shallowClone(), d.values.shallowClone()
-	y.IncrRC()
-	ky := findArray(keys, y)
-	switch y.value.(type) {
+	switch yv := y.value.(type) {
 	case array:
-		nkeys := keys.Len()
-		max := maxIndices(ky)
-		if max == int64(nkeys) {
-			keys = uniq(ctx, joinTo(NewV(keys), y)).value.(array)
-		}
-		if keys.Len() > nkeys {
-			values = padArrayMut(keys.Len()-nkeys, values)
-			ky = findArray(keys, y)
-		}
-		y.DecrRC()
+		keys, values, ky := dictAmendKVI(d, yv)
 		r, err := ctx.amend4array(values, ky, f, z)
 		if err != nil {
 			return Panicf("@[d;y;f;z] : %v", err)
 		}
+		initRC(r)
 		return NewV(&Dict{keys: keys, values: canonicalArray(r)})
 	default:
-		nkeys := keys.Len()
-		if ky.I() == int64(nkeys) {
-			keys = uniq(ctx, joinTo(NewV(keys), y)).value.(array)
-			y.DecrRC()
+		keys, values := d.keys, d.values.shallowClone()
+		ky := findArray(keys, y)
+		if ky.I() == int64(keys.Len()) {
+			keys = joinTo(NewV(keys), y).value.(array)
+			initRC(keys)
+			values = padArrayMut(1, values)
 		}
-		if keys.Len() > nkeys {
-			values = padArrayMut(keys.Len()-nkeys, values)
-			ky = findArray(keys, y)
-		}
-		y.DecrRC()
 		if f.kind == valVariadic && variadic(f.n) == vRight {
 			r, err := amend4Right(values, ky, z)
 			if err != nil {
@@ -264,13 +238,14 @@ func amend4Dict(ctx *Context, d *Dict, y, f, z V) V {
 		if err != nil {
 			return Panicf("@[d;y;f;z] : %v", err)
 		}
+		initRC(r)
 		return NewV(&Dict{keys: keys, values: canonicalArray(r)})
 	}
 }
 
 func (ctx *Context) amend4arrayI(x array, y int64, f, z V) (array, error) {
 	if y < 0 || y >= int64(x.Len()) {
-		return x, fmt.Errorf("x out of bounds (%d)", y)
+		return x, fmt.Errorf("y out of bounds (%d)", y)
 	}
 	xy := x.at(int(y))
 	repl := ctx.Apply2(f, xy, z)

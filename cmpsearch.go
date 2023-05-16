@@ -266,44 +266,55 @@ func classifySortedSlice[T comparable, I integer](xs []T) []I {
 }
 
 // uniq returns ?x.
-func uniq(ctx *Context, x V) V {
+func uniq(x V) V {
 	switch xv := x.value.(type) {
 	case *Dict:
-		xv.values.IncrRC()
-		mf := markFirsts(ctx, NewV(xv.values))
-		xv.values.DecrRC()
-		nk := replicate(mf, NewV(xv.keys))
-		nk.InitRC()
-		nv := replicate(mf, NewV(xv.values))
-		nv.InitRC()
-		return NewV(&Dict{keys: nk.value.(array), values: nv.value.(array)})
+		return NewV(uniqDict(xv))
 	case array:
-		if xv.Len() == 0 || xv.getFlags().Has(flagUnique) {
-			return x
-		}
+		return NewV(uniqArray(xv))
 	default:
 		return panicType("?x", "x", x)
 	}
-	switch xv := x.value.(type) {
+}
+
+func uniqDict(x *Dict) *Dict {
+	if x.values.getFlags().Has(flagUnique) {
+		return x
+	}
+	x.values.IncrRC()
+	mf := markFirsts(NewV(x.values))
+	x.values.DecrRC()
+	nk := replicate(mf, NewV(x.keys))
+	nk.InitRC()
+	nv := replicate(mf, NewV(x.values))
+	nv.InitRC()
+	return &Dict{keys: nk.value.(array), values: nv.value.(array)}
+}
+
+func uniqArray(x array) array {
+	if x.Len() == 0 || x.getFlags().Has(flagUnique) {
+		return x
+	}
+	switch xv := x.(type) {
 	case *AB:
 		if xv.IsBoolean() {
 			b := xv.At(0)
 			for i := 1; i < xv.Len(); i++ {
 				if xv.At(i) != b {
-					return NewV(&AB{elts: []byte{b, xv.At(i)}, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
+					return &AB{elts: []byte{b, xv.At(i)}, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique}
 				}
 			}
-			return NewV(&AB{elts: []byte{b}, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
+			return &AB{elts: []byte{b}, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique}
 		}
 		if xv.flags.Has(flagAscending) {
 			r := uniqSortedSlice[byte](xv.elts)
-			return NewV(&AB{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
+			return &AB{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique}
 		}
 		if xv.Len() < bruteForceBytes {
 			r := uniqBrute(xv.elts)
-			return NewV(&AB{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
+			return &AB{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique}
 		}
-		return NewV(&AB{elts: uniqBytes(xv.elts), rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
+		return &AB{elts: uniqBytes(xv.elts), rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique}
 	case *AF:
 		var r []float64
 		if xv.flags.Has(flagAscending) {
@@ -311,21 +322,21 @@ func uniq(ctx *Context, x V) V {
 		} else {
 			r = uniqSlice[float64](xv.elts, bruteForceNumeric)
 		}
-		return NewV(&AF{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
+		return &AF{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique}
 	case *AI:
 		var r []int64
 		min, span, ok := smallRange(xv)
 		if ok {
 			// fast path avoiding hash table
 			r = uniqInts(xv.elts, min, span)
-			return NewV(&AI{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
+			return &AI{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique}
 		}
 		if xv.flags.Has(flagAscending) {
 			r = uniqSortedSlice[int64](xv.elts)
 		} else {
 			r = uniqSlice[int64](xv.elts, bruteForceNumeric)
 		}
-		return NewV(&AI{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
+		return &AI{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique}
 	case *AS:
 		var r []string
 		if xv.flags.Has(flagAscending) {
@@ -333,37 +344,14 @@ func uniq(ctx *Context, x V) V {
 		} else {
 			r = uniqSlice[string](xv.elts, bruteForceGeneric)
 		}
-		return NewV(&AS{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique})
+		return &AS{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagUnique}
 	case *AV:
-		r := []V{}
-		if xv.Len() > bruteForceGeneric {
-			ss := make([]string, xv.Len())
-			for i, xi := range xv.elts {
-				ss[i] = xi.Sprint(ctx)
-			}
-			m := map[string]struct{}{}
-			for i, s := range ss {
-				_, ok := m[s]
-				if !ok {
-					r = append(r, xv.At(i))
-					m[s] = struct{}{}
-					continue
-				}
-			}
-			return NewV(canonicalAV(&AV{elts: r, rc: xv.rc, flags: xv.flags | flagUnique}))
-		}
-	loop:
-		for i, xi := range xv.elts {
-			for _, xj := range xv.elts[:i] {
-				if xi.Matches(xj) {
-					continue loop
-				}
-			}
-			r = append(r, xi)
-		}
-		return NewV(canonicalAV(&AV{elts: r, rc: xv.rc, flags: xv.flags | flagUnique}))
+		xv.IncrRC()
+		mf := markFirsts(NewV(xv))
+		xv.DecrRC()
+		return replicate(mf, NewV(xv)).value.(array)
 	default:
-		panic("uniq")
+		panic("uniqArray")
 	}
 }
 
@@ -461,10 +449,10 @@ func uniqSortedSlice[T comparable](xs []T) []T {
 }
 
 // Mark Firsts returns firsts x.
-func markFirsts(ctx *Context, x V) V {
+func markFirsts(x V) V {
 	switch xv := x.value.(type) {
 	case *Dict:
-		return newDictValues(xv.keys, markFirsts(ctx, NewV(xv.values)))
+		return newDictValues(xv.keys, markFirsts(NewV(xv.values)))
 	case array:
 		if xv.Len() == 0 {
 			return x
@@ -536,6 +524,7 @@ func markFirsts(ctx *Context, x V) V {
 	case *AV:
 		if xv.Len() > bruteForceGeneric {
 			ss := make([]string, xv.Len())
+			ctx := NewContext()
 			for i, xi := range xv.elts {
 				ss[i] = xi.Sprint(ctx)
 			}
@@ -1171,17 +1160,21 @@ func without(x, y V) V {
 			}
 			return panicType("X^Y", "Y", y)
 		}
-		r := memberOf(y, x)
-		switch bres := r.value.(type) {
-		case *AB:
-			for i, b := range bres.elts {
-				bres.elts[i] = 1 - b
-			}
-		}
-		return replicate(r, y)
+		return withoutVArray(x, y)
 	default:
 		return panicType("x^y", "x", x)
 	}
+}
+
+func withoutVArray(x, y V) V {
+	r := memberOf(y, x)
+	switch bres := r.value.(type) {
+	case *AB:
+		for i, b := range bres.elts {
+			bres.elts[i] = 1 - b
+		}
+	}
+	return replicate(r, y)
 }
 
 func withoutDict(x V, y *Dict) V {

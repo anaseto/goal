@@ -91,33 +91,32 @@ func dict(x, y V) V {
 	return NewV(&Dict{keys: xv, values: yv})
 }
 
-func dictArith(xd, yd *Dict, f func(V, V) V) V {
-	xd = xd.clone()
-	xk, xv := xd.keys, xd.values
-	yk, yv := yd.keys, yd.values
-	ky := findArray(xk, NewV(yk))
-	nkeys := xk.Len()
-	max := maxIndices(ky) // *AB or *AI -> I
+func dictAmendKVI(xd *Dict, yk array) (array, array, V) {
+	keys, values := xd.keys, xd.values.shallowClone()
+	ykv := NewV(yk)
+	yk.IncrRC()
+	ky := findArray(keys, ykv)
+	nkeys := keys.Len()
+	max := maxIndices(ky)
 	if max == int64(nkeys) {
-		bnk := memberOf(NewV(yk), NewV(xk))
-		bnk.InitRC()
-		bnk.incrRC2()
-		notbnk := not(bnk)
-		bnk.decrRC2()
-		nk := replicate(notbnk, NewV(yk))
-		nv := replicate(notbnk, NewV(yv))
-		yv = replicate(bnk, NewV(yv)).value.(array)
-		xk = joinTo(NewV(xk), nk).value.(array)
-		initRC(xk)
-		xv = joinTo(NewV(xv), nv).value.(array)
-		ky = without(NewAI([]int64{int64(nkeys)}), ky)
+		b := equalIV(max, ky)
+		keys = joinTo(NewV(keys), uniq(replicate(b, ykv))).value.(array)
+		initRC(keys)
+		values = padArrayMut(keys.Len()-nkeys, values)
+		ky = findArray(keys, ykv)
 	}
-	r, err := dictArithAmend(xv, ky.value.(array), f, yv)
+	yk.DecrRC()
+	return keys, values, ky
+}
+
+func dictArith(xd, yd *Dict, f func(V, V) V) V {
+	keys, values, ky := dictAmendKVI(xd, yd.keys)
+	r, err := dictArithAmend(values, ky.value.(array), f, yd.values)
 	if err != nil {
 		return Panicf("%v", err)
 	}
 	initRC(r)
-	return NewV(&Dict{keys: xk, values: canonicalArray(r)})
+	return NewV(&Dict{keys: keys, values: canonicalArray(r)})
 }
 
 func dictArithAmendI(x array, y int64, f func(V, V) V, z V) (array, error) {

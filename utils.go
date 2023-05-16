@@ -698,7 +698,7 @@ func CanonicalRec(x V) V {
 }
 
 // canonicalAV returns the canonical form of a given generic array.
-func canonicalAV(x *AV) Value {
+func canonicalAV(x *AV) array {
 	r, _ := normalize(x)
 	return r
 }
