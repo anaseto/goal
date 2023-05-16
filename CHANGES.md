@@ -1,3 +1,7 @@
+# v0.17.1 2023-05-16
+
+* Fix CRLF handling in Goal scripts.
+
 # v0.17.0 2023-05-14
 
 * Rename weed out to `f^y`, related to `X^y`, in the same way that `f#y` is
