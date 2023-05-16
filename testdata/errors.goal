@@ -1056,3 +1056,14 @@ rt.time["%,2";3.5] / non-integer
 {^,0}=* / type
 {^,5}=* / type
 {^-1+1+,0}=* / type
+(or[];3) / empty
+[or[];3] / empty
+or[or[];3] / empty
+and[or[];3] / empty
+?[or[];3;4] / empty
+?[1;or[];4] / empty
+@[or[];3] / empty
+a:@[or[];3] / empty
+(a;b):@[or[];3] / empty
+a:1;a+:@[or[];3] / empty
+rx/[a\O/ / error parsing regexp
