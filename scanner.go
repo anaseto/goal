@@ -262,7 +262,7 @@ func scanAny(s *Scanner) stateFn {
 			s.start = true
 		}
 		return scanAny
-	case ' ', '\t':
+	case ' ', '\t', '\r':
 		return scanSpace
 	case '/':
 		if s.start {
@@ -356,7 +356,7 @@ func scanSpace(s *Scanner) stateFn {
 		switch s.r {
 		case '/':
 			return scanComment
-		case ' ', '\t':
+		case ' ', '\t', '\r':
 		case '-':
 			s.tpos = s.epos
 			return scanMinus
