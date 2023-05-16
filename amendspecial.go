@@ -230,10 +230,9 @@ func amend4RightIs[I integer](x array, y []I, z V) (array, error) {
 			len(y), za.Len())
 	}
 	if sameType(x, za) {
-		amend4RightIntegersSlice(x, y, za)
-		return x, nil
+		return amend4RightIntegersSlice(x, y, za), nil
 	}
-	return amend4RightIntegersArrays(x, y, za)
+	return amend4RightIntegersArrays(x, y, za), nil
 }
 
 func amend4RightIsV[I integer](x array, y []I, z V) (array, error) {
@@ -294,7 +293,7 @@ func amendSlice[I integer, T any](x []T, y []I, z T) {
 	}
 }
 
-func amend4RightIntegersSlice[I integer](x array, y []I, za array) {
+func amend4RightIntegersSlice[I integer](x array, y []I, za array) array {
 	switch xv := x.(type) {
 	case *AB:
 		zv := za.(*AB)
@@ -313,6 +312,7 @@ func amend4RightIntegersSlice[I integer](x array, y []I, za array) {
 		*zv.rc += 2
 		amend4RightSlices(xv.elts, y, zv.elts)
 	}
+	return x
 }
 
 func amend4RightSlices[I integer, T any](x []T, y []I, z []T) {
@@ -321,7 +321,7 @@ func amend4RightSlices[I integer, T any](x []T, y []I, z []T) {
 	}
 }
 
-func amend4RightIntegersArrays[I integer](x array, y []I, z array) (array, error) {
+func amend4RightIntegersArrays[I integer](x array, y []I, z array) array {
 	for i := range y {
 		if !x.canSet(z.at(i)) {
 			r := make([]V, x.Len())
@@ -335,7 +335,7 @@ func amend4RightIntegersArrays[I integer](x array, y []I, z array) (array, error
 	for i, yi := range y {
 		x.set(int(yi), z.at(i))
 	}
-	return x, nil
+	return x
 }
 
 func amend4RightAV(x array, yv *AV, z V) (array, error) {

@@ -111,6 +111,26 @@ func dictAmendKVI(xd *Dict, yk array) (array, array, V) {
 	return keys, values, ky
 }
 
+func dictMerge(xd, yd *Dict) V {
+	keys, values, ky := dictAmendKVI(xd, yd.keys)
+	var r array
+	switch kyv := ky.value.(type) {
+	case *AB:
+		r = mergeAtIntegers(values, kyv.elts, yd.values)
+	case *AI:
+		r = mergeAtIntegers(values, kyv.elts, yd.values)
+	}
+	initRC(r)
+	return NewV(&Dict{keys: keys, values: canonicalArray(r)})
+}
+
+func mergeAtIntegers[I integer](x array, y []I, z array) array {
+	if sameType(x, z) {
+		return amend4RightIntegersSlice(x, y, z)
+	}
+	return amend4RightIntegersArrays(x, y, z)
+}
+
 func dictArith(xd, yd *Dict, f func(V, V) V) V {
 	keys, values, ky := dictAmendKVI(xd, yd.keys)
 	r, err := dictArithAmend(values, ky.value.(array), f, yd.values)

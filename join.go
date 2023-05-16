@@ -24,7 +24,7 @@ func joinTo(x, y V) V {
 	case *Dict:
 		switch yv := y.value.(type) {
 		case *Dict:
-			return dictArith(xv, yv, func(x, y V) V { return y })
+			return dictMerge(xv, yv)
 		case array:
 			return joinAtomToArray(x, yv, true)
 		default:
