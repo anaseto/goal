@@ -17,8 +17,8 @@ rxs:(
   ("rx";rx#^rx/(?:\\.|[^/])*/#)
   ("string";rx#^qq/(?:\\.|[^/])*/#)
   ("string";rx!^qq#(?:\\.|[^#])*#!)
-  ("raw-string";rx#^rq/(?:\\.|[^/])*/#)
-  ("raw-string";rx!^rq#(?:\\.|[^#])*#!)
+  ("raw-string";rx#^rq/(?://|[^/])*/#)
+  ("raw-string";rx!^rq#(?:##|[^#])*#!)
   ("number";rx/^\d[\da-z]*(?:\.\d[[:alnum:]]*)?([Ee][\-+]?\d\+)?/)
   ("number-neg";rx/^-\d[[:alnum:]]*(?:\.\d[[:alnum:]]*)?([Ee][\-+]?\d\+)?/)
   ("xyz";rx/^[xyz]\b/)
@@ -43,7 +43,7 @@ rxs:(
 span:{"<span class=\"$x\">$y</span>"}
 html:sub["&""&amp;""'""&#39;""<""&lt;"">""&gt;""\"""&#34;"]html
 html[w]:sub[rx/(?:\\[0-7]{3}|\\[abfnrtv\\]|\\&#34;|\$[a-zA-Z]+|\$[{][a-zA-Z]+[}]|\\x\x{2}|\\u\x{4}|\\U\x{8})/;span["escape";]]'html[w:&tok="string"]
-html[w]:sub[rx/\\[AbBzQE]/;span["escape";]]'html[w:&tok="rx"]
+html[w]:sub[rx/\\./;span["escape";]]'html[w:&tok="rx"]
 html[w]:sub[rx/[\.+*?()|\[\]{}^$]/;span["rxsym";]]'html[w:&tok="rx"]
 dospan:{html[w]::span[x;]'html[w:&y]}
 dospan["string";tok="string"]
