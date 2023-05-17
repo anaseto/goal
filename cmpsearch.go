@@ -834,13 +834,6 @@ func memberOfAI(x V, y *AI) V {
 		return newABbWithRC(r, reuseRCp(xv.rc))
 	case *AI:
 		ylen := int64(y.Len())
-		if y.flags.Has(flagAscending) && ylen > numericSortedLen {
-			r := make([]byte, xv.Len())
-			for i, xi := range xv.elts {
-				r[i] = b2B(memberISortedAI(xi, y))
-			}
-			return newABbWithRC(r, reuseRCp(xv.rc))
-		}
 		xlen := int64(xv.Len())
 		if ylen > smallRangeLen && xlen > smallRangeLen || xlen > bruteForceNumeric {
 			// NOTE: heuristics here might need some adjustments:
@@ -855,6 +848,13 @@ func memberOfAI(x V, y *AI) V {
 				r := memberOfII(xv.elts, y.elts, min, max)
 				return newABbWithRC(r, reuseRCp(xv.rc))
 			}
+		}
+		if y.flags.Has(flagAscending) && ylen > numericSortedLen {
+			r := make([]byte, xv.Len())
+			for i, xi := range xv.elts {
+				r[i] = b2B(memberISortedAI(xi, y))
+			}
+			return newABbWithRC(r, reuseRCp(xv.rc))
 		}
 		return newABbWithRC(memberOfSlice[int64](xv.elts, y.elts, bruteForceNumeric), reuseRCp(xv.rc))
 	case *AF:
@@ -1421,14 +1421,6 @@ func findAI(x *AI, y V) V {
 		return NewAIWithRC(r, reuseRCp(yv.rc))
 	case *AI:
 		xlen := int64(x.Len())
-		if x.flags.Has(flagAscending) && xlen > numericSortedLen {
-			if xlen < 256 {
-				r := findSortedIsIs[byte](x.elts, yv.elts)
-				return NewABWithRC(r, reuseRCp(yv.rc))
-			}
-			r := findSortedIsIs[int64](x.elts, yv.elts)
-			return NewAIWithRC(r, reuseRCp(yv.rc))
-		}
 		ylen := int64(yv.Len())
 		if xlen > smallRangeLen && ylen > smallRangeLen || ylen > bruteForceNumeric {
 			// NOTE: heuristics here might need some adjustments:
@@ -1447,6 +1439,14 @@ func findAI(x *AI, y V) V {
 				r := findIsIs[int64](x.elts, yv.elts, min, max)
 				return NewAIWithRC(r, reuseRCp(yv.rc))
 			}
+		}
+		if x.flags.Has(flagAscending) && xlen > numericSortedLen {
+			if xlen < 256 {
+				r := findSortedIsIs[byte](x.elts, yv.elts)
+				return NewABWithRC(r, reuseRCp(yv.rc))
+			}
+			r := findSortedIsIs[int64](x.elts, yv.elts)
+			return NewAIWithRC(r, reuseRCp(yv.rc))
 		}
 		if xlen < 256 {
 			return NewABWithRC(findSlices[int64, byte](x.elts, yv.elts, bruteForceNumeric), reuseRCp(yv.rc))
