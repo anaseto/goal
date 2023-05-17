@@ -835,13 +835,19 @@ func memberOfAI(x V, y *AI) V {
 	case *AI:
 		ylen := int64(y.Len())
 		xlen := int64(xv.Len())
-		if ylen > smallRangeLen && xlen > smallRangeLen || xlen > bruteForceNumeric {
+		asc := y.flags.Has(flagAscending)
+		if ylen > smallRangeLen && xlen > smallRangeLen || xlen > bruteForceNumeric && ylen > 0 {
 			// NOTE: heuristics here might need some adjustments:
 			// we used one based on self-search functions, but
 			// member of is more complicated, because there are two
 			// variables (#x influences allocation, while #y
 			// influences number of searches).
-			min, max := minMax(y)
+			var min, max int64
+			if asc {
+				min, max = y.elts[0], y.elts[ylen-1]
+			} else {
+				min, max = minMax(y)
+			}
 			span := max - min + 1
 			if span < ylen+xlen+smallRangeSpan {
 				// fast path avoiding hash table
@@ -849,7 +855,7 @@ func memberOfAI(x V, y *AI) V {
 				return newABbWithRC(r, reuseRCp(xv.rc))
 			}
 		}
-		if y.flags.Has(flagAscending) && ylen > numericSortedLen {
+		if asc && ylen > numericSortedLen {
 			r := make([]byte, xv.Len())
 			for i, xi := range xv.elts {
 				r[i] = b2B(memberISortedAI(xi, y))
@@ -1422,13 +1428,19 @@ func findAI(x *AI, y V) V {
 	case *AI:
 		xlen := int64(x.Len())
 		ylen := int64(yv.Len())
-		if xlen > smallRangeLen && ylen > smallRangeLen || ylen > bruteForceNumeric {
+		asc := x.flags.Has(flagAscending)
+		if xlen > smallRangeLen && ylen > smallRangeLen || ylen > bruteForceNumeric && xlen > 0 {
 			// NOTE: heuristics here might need some adjustments:
 			// we used one based on self-search functions, but find
 			// is more complicated, because there are two variables
 			// (#x influences allocation, while #y influences
 			// number of searches).
-			min, max := minMax(x)
+			var min, max int64
+			if asc {
+				min, max = x.elts[0], x.elts[xlen-1]
+			} else {
+				min, max = minMax(x)
+			}
 			span := max - min + 1
 			if span < xlen+ylen+smallRangeSpan {
 				// fast path avoiding hash table
@@ -1440,7 +1452,7 @@ func findAI(x *AI, y V) V {
 				return NewAIWithRC(r, reuseRCp(yv.rc))
 			}
 		}
-		if x.flags.Has(flagAscending) && xlen > numericSortedLen {
+		if asc && xlen > numericSortedLen {
 			if xlen < 256 {
 				r := findSortedIsIs[byte](x.elts, yv.elts)
 				return NewABWithRC(r, reuseRCp(yv.rc))
