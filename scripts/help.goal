@@ -98,10 +98,10 @@ x&y min/and     2&3 → 2          4&3 → 3         "b"&"a" → "a"           0
 x|y max/or      2|3 → 3          4|3 → 4         "b"|"a" → "b"           0|1 → 1
 <d  sort up     <"a""b""c"!2 3 1 → "c""a""b"!1 2 3
 <X  ascend      <3 5 4 → 0 2 1           (index permutation for ascending order)
-x<y less        2<3 → 1          "c" < "a" → 0                     7 8<6 9 → 0 1
+x<y less        2<3 → 1          "c"<"a" → 0                       7 8<6 9 → 0 1
 >d  sort down   >"a""b""c"!2 3 1 → "b""a""c"!3 2 1
 >X  descend     >3 5 4 → 1 2 0         (index permutation for descending order)
-x>y greater     2>3 → 0          "c" > "a" → 1                     7 8>6 9 → 1 0
+x>y greater     2>3 → 0          "c">"a" → 1                       7 8>6 9 → 1 0
 =s  lines       ="ab\ncd\r\nef gh" → "ab" "cd" "ef gh"
 =I  index-count =1 0 0 2 2 3 -1 2 1 1 1 → 2 4 3 1
 =d  group keys  ="a""b""c"!0 1 0 → ("a" "c";,"b")           ="a""b"!0 -1 → ,,"a"
@@ -120,10 +120,10 @@ s^s trim        " []"^"  [text]  " → "text"            ""^" \nstuff\t" → "st
 f^y weed out    {0 1 1 0}^4 1 5 3 → 4 3                {x>0}^2 -3 1 → ,-3
 X^d w/o keys    (,"b")^"a""b""c"!0 1 2 → "a""c"!0 2
 X^Y w/o values  2 3^1 1 2 3 3 4 → 1 1 4                          (like in[;X]^Y)
-#x  length      #2 4 5 → 3        #"ab" "cd" → 2        #42 → 1        #"ab" → 1
-i#y take/repeat 2#6 7 8 → 6 7    5#6 7 8 → 6 7 8 6 7              3#1 → 1 1 1
-s#s count       "ab"#"cabdab" "cd" "deab" → 2 0 1                 ""#"αβγ" → 4
-f#y replicate   {0 1 2 0}#4 1 5 3 → 1 5 5            {x>0}#2 -3 1 → 2 1
+#x  length      #2 4 5 → 3        #"ab" "cd" → 2       #42 → 1      #"ab" → 1
+i#y take/repeat 2#6 7 8 → 6 7     5#6 7 8 → 6 7 8 6 7               3#1 → 1 1 1
+s#s count       "ab"#"cabdab" "cd" "deab" → 2 0 1                   ""#"αβγ" → 4
+f#y replicate   {0 1 2 0}#4 1 5 3 → 1 5 5              {x>0}#2 -3 1 → 2 1
 X#d with keys   "a""c""e"#"a""b""c""a"!2 3 4 5 → "a""c""a"!2 4 5
 X#Y with values 2 3#1 1 2 3 3 4 → 2 3 3                          (like in[;X]#Y)
 _n  floor       _2.3 → 2                    _1.5 3.7 → 1 3
