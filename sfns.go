@@ -1328,7 +1328,7 @@ func windows(i int64, y V) V {
 		if i > 0 && i < int64(len(yv))+1 {
 			return windowsString(int64(len(yv))-i+1, string(yv))
 		}
-		return Panicf("i^y : out of range i !%d (%d)", len(yv)+1, i)
+		return Panicf("i^y : out of range i (%d)", i)
 	case array:
 		if i < 0 && -i < int64(yv.Len())+1 {
 			return windowsArray(-i, yv)
@@ -1336,7 +1336,7 @@ func windows(i int64, y V) V {
 		if i > 0 && i < int64(yv.Len())+1 {
 			return windowsArray(int64(yv.Len())-i+1, yv)
 		}
-		return Panicf("i^y : out of range i !%d (%d)", yv.Len()+1, i)
+		return Panicf("i^y : out of range i (%d)", i)
 	default:
 		return panicType("i^y", "y", y)
 	}
