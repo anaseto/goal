@@ -1,6 +1,7 @@
 package goal
 
 import (
+	"math"
 	"strings"
 	"time"
 )
@@ -897,6 +898,26 @@ func vfRTVars(ctx *Context, args []V) V {
 				v = append(v, x)
 				k = append(k, ctx.gNames[i])
 			}
+		}
+		return NewDict(NewAS(k), Canonical(NewAV(v)))
+	case "rc":
+		v := []V{}
+		k := []string{}
+		for i, x := range ctx.globals {
+			rcv := refcounts(x)
+			if rcv.IsI() && (rcv.I() == -1 || rcv.I() == math.MinInt64) {
+				continue
+			}
+			v = append(v, rcv)
+			k = append(k, ctx.gNames[i])
+		}
+		return NewDict(NewAS(k), Canonical(NewAV(v)))
+	case "stack":
+		k := make([]string, len(ctx.stack))
+		v := make([]V, len(k))
+		for i, x := range ctx.stack {
+			k[i] = x.Sprint(ctx)
+			v[i] = refcounts(x)
 		}
 		return NewDict(NewAS(k), Canonical(NewAV(v)))
 	default:

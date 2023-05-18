@@ -1,5 +1,7 @@
 package goal
 
+import "math"
+
 // RefCounter is implemented by values that use a reference count. In goal the
 // refcount is not used for memory management, but only for optimization of
 // memory allocations.  Refcount is increased by each assignement, and each
@@ -403,4 +405,28 @@ func (r *replacer) InitWithRC(rc *int) {
 
 func (r *rxReplacer) InitWithRC(rc *int) {
 	r.repl.InitWithRC(rc)
+}
+
+func refcounts(x V) V {
+	if x.kind != valBoxed {
+		return NewI(-1)
+	}
+	switch xv := x.value.(type) {
+	case S:
+		return NewI(-1)
+	case *errV:
+		return refcounts(xv.V)
+	case *AV:
+		r := make([]V, xv.Len())
+		for i, xi := range xv.elts {
+			r[i] = refcounts(xi)
+		}
+		return Canonical(NewAV(r))
+	case array:
+		return NewI(int64(*xv.RC()))
+	case *Dict:
+		return Canonical(NewAV([]V{refcounts(NewV(xv.keys)), refcounts(NewV(xv.values))}))
+	default:
+		return NewI(math.MinInt64)
+	}
 }

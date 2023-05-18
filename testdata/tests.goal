@@ -362,3 +362,5 @@ rt.time["%,2";0] / 0
 3+!3$5 / 3 4 5
 main.a:5;a / 5
 "\r"~"" / 1
+!rt.vars "stack"  / ,"\"stack\""
+b:1 2;a:b;rt.vars "rc"  / ("b""a")!2 2
