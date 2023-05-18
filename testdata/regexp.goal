@@ -48,3 +48,7 @@ rx/\\/"\\" / 1
 rx/^[a-z]+$/"abc" / 1
 rx/([a-z])(.)/"&a+c" / "a+" "a" "+"
 $sub[rx/[a-z]/;uc] / `sub[rx["[a-z]"];uc]`
+rx/\w+/[;-1] "a bc de" / "a" "bc" "de"
+rx/\w+/["a bc de";] -1 / "a" "bc" "de"
+rx/\w+/[] "a bc de" / 1
+rx/\w+/[;]["a bc de";-1] / "a" "bc" "de"

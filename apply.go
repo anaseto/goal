@@ -305,11 +305,30 @@ func (s S) applyN(ctx *Context, n int) V {
 func (re *rx) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
-		r := applyRx(re, ctx.top())
+		x := ctx.top()
+		if x.kind == valNil {
+			return NewV(&projectionMonad{Fun: NewV(re)})
+		}
+		r := applyRx(re, x)
 		r.InitRC()
 		return r
 	case 2:
 		args := ctx.peekN(2)
+		if args[0].kind == valNil {
+			if args[1].kind != valNil {
+				arg := args[1]
+				ctx.drop()
+				return NewV(&projectionFirst{Fun: NewV(re), Arg: arg})
+			}
+			args := cloneArgs(args)
+			ctx.drop()
+			return NewV(&projection{Fun: NewV(re), Args: args})
+		}
+		if args[1].kind == valNil {
+			args := cloneArgs(args)
+			ctx.drop()
+			return NewV(&projection{Fun: NewV(re), Args: args})
+		}
 		r := applyRx2(re, args[1], args[0])
 		r.InitRC()
 		ctx.drop()
