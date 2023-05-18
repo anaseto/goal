@@ -370,11 +370,6 @@ func scanfx(ctx *Context, f, x V) V {
 func converges(ctx *Context, f, x V) V {
 	n := 0
 	r := []V{}
-	defer func() {
-		for _, ri := range r {
-			ri.DecrRC()
-		}
-	}()
 	f.IncrRC()
 	first := x
 	ctx.push(x)
