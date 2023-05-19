@@ -1067,3 +1067,4 @@ a:@[or[];3] / empty
 (a;b):@[or[];3] / empty
 a:1;a+:@[or[];3] / empty
 rx/[a\O/ / error parsing regexp
+"a"+/(1 2;3 4) / type

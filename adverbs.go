@@ -145,6 +145,16 @@ func fold3(ctx *Context, args []V) V {
 }
 
 func foldxfy(ctx *Context, x, f, y V) V {
+	if f.kind == valVariadic {
+		switch f.variadic() {
+		case vAdd:
+			return fold3vAdd(x, y)
+		case vSubtract:
+			return fold3vSubtract(x, y)
+		case vMultiply:
+			return fold3vMultiply(x, y)
+		}
+	}
 	switch yv := y.value.(type) {
 	case *Dict:
 		return foldxfy(ctx, x, f, NewV(yv.values))
