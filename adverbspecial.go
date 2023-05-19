@@ -575,7 +575,7 @@ func fold2vJoin(x V) V {
 	case *Dict:
 		return fold2vJoin(NewV(xv.values))
 	case *AV:
-		if xv.Len() == 0 {
+		if isFlat(xv.elts) {
 			return x
 		}
 		r := xv.elts[0]
@@ -599,6 +599,24 @@ func fold3vJoin(x, y V) V {
 		return x
 	default:
 		return joinTo(x, y)
+	}
+}
+
+func convergeJoin(x V) V {
+	switch xv := x.value.(type) {
+	case *Dict:
+		return convergeJoin(NewV(xv.values))
+	case *AV:
+		if isFlat(xv.elts) {
+			return x
+		}
+		r := xv.elts[0]
+		for _, xi := range xv.elts[1:] {
+			r = joinTo(r, xi) // does not panic
+		}
+		return convergeJoin(r)
+	default:
+		return x
 	}
 }
 

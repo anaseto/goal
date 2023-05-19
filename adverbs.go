@@ -96,6 +96,12 @@ func joinS(sep S, x V) V {
 const maxConvergeIters = 1_000_000
 
 func converge(ctx *Context, f, x V) V {
+	if dv, ok := f.value.(*derivedVerb); ok && dv.Fun == vFold && dv.Arg.kind == valVariadic {
+		switch dv.Arg.variadic() {
+		case vJoin:
+			return convergeJoin(x)
+		}
+	}
 	n := 0
 	f.IncrRC()
 	first := x
