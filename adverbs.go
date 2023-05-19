@@ -449,6 +449,12 @@ func scan3(ctx *Context, args []V) V {
 }
 
 func scanxfy(ctx *Context, x, f, y V) V {
+	if f.kind == valVariadic {
+		switch f.variadic() {
+		case vAdd:
+			return scan3vAdd(x, y)
+		}
+	}
 	switch yv := y.value.(type) {
 	case *Dict:
 		return newDictValues(yv.keys, scanxfy(ctx, x, f, NewV(yv.values)))
@@ -462,14 +468,13 @@ func scanxfy(ctx *Context, x, f, y V) V {
 		for i := 0; i < yv.Len(); i++ {
 			ctx.replaceTop(yv.at(i))
 			ctx.push(x)
-			next := f.applyN(ctx, 2)
-			if next.IsPanic() {
+			x = f.applyN(ctx, 2)
+			if x.IsPanic() {
 				f.DecrRC()
 				ctx.drop()
 				rcdecrArgs(r)
-				return next
+				return x
 			}
-			x = next
 			r[i] = x
 			x.IncrRC()
 		}

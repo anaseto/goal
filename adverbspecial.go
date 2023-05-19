@@ -620,7 +620,7 @@ func convergeJoin(x V) V {
 	}
 }
 
-func scanGeneric(x *AV, f func(V, V) V) V {
+func scan2Generic(x *AV, f func(V, V) V) V {
 	if x.Len() == 0 {
 		return NewV(x)
 	}
@@ -637,8 +637,30 @@ func scanGeneric(x *AV, f func(V, V) V) V {
 		}
 		r.elts[i+1] = next
 	}
-	// Will never be canonical, so normalizing is not needed.
+	// Will never be canonical (for currently used fs), so normalizing is
+	// not needed.
 	return NewV(r)
+}
+
+func scan3Generic(x V, y array, f func(V, V) V) V {
+	if y.Len() == 0 {
+		return NewV(y)
+	}
+	r := make([]V, y.Len())
+	for i := 0; i < y.Len(); i++ {
+		last := x
+		last.incrRC2()
+		x = f(last, y.at(i))
+		x.InitRC()
+		last.decrRC2()
+		if x.IsPanic() {
+			return x
+		}
+		r[i] = x
+	}
+	// Will never be canonical (for currently used fs), so normalizing is
+	// not needed.
+	return NewAV(r)
 }
 
 func scan2vAdd(x V) V {
@@ -648,63 +670,111 @@ func scan2vAdd(x V) V {
 	case *AB:
 		if xv.IsBoolean() && xv.Len() < 256 {
 			r := xv.reuse()
-			var n byte
-			for i, xi := range xv.elts {
-				n += xi
-				r.elts[i] = n
-			}
+			scanSumNumbers(0, xv.elts, r.elts)
 			r.flags |= flagAscending
 			return NewV(r)
 		}
 		r := make([]int64, xv.Len())
-		var n int64
-		for i, xi := range xv.elts {
-			n += int64(xi)
-			r[i] = n
-		}
+		scanSumNumbers(0, xv.elts, r)
 		return NewV(&AI{elts: r, flags: flagAscending})
 	case *AI:
 		r := xv.reuse()
-		var n int64
-		for i, xi := range xv.elts {
-			n += xi
-			r.elts[i] = n
-		}
+		scanSumNumbers(0, xv.elts, r.elts)
 		return NewV(r)
 	case *AF:
 		r := xv.reuse()
-		n := 0.0
-		for i, xi := range xv.elts {
-			n += xi
-			r.elts[i] = n
-		}
+		scanSumNumbers(0.0, xv.elts, r.elts)
 		return NewV(r)
 	case *AS:
 		if xv.Len() == 0 {
 			return NewAS(nil)
 		}
-		n := 0
-		for _, s := range xv.elts {
-			n += len(s)
-		}
-		var sb strings.Builder
-		sb.Grow(n)
-		for _, s := range xv.elts {
-			sb.WriteString(s)
-		}
-		rs := sb.String()
-		r := xv.reuse()
-		n = 0
-		for i, s := range xv.elts {
-			n += len(s)
-			r.elts[i] = rs[:n]
-		}
-		return NewV(r)
+		return scanConcatStrings("", xv)
 	case *AV:
-		return scanGeneric(xv, add)
+		return scan2Generic(xv, add)
 	default:
 		return x
 	}
+}
+
+func scan3vAdd(x, y V) V {
+	switch yv := y.value.(type) {
+	case *Dict:
+		return newDictValues(yv.keys, scan3vAdd(x, NewV(yv.values)))
+	case *AB:
+		if x.IsI() {
+			r := make([]int64, yv.Len())
+			scanSumNumbers(x.I(), yv.elts, r)
+			return NewV(&AI{elts: r, flags: flagAscending})
+		}
+		if x.IsF() {
+			r := make([]float64, yv.Len())
+			scanSumNumbers(x.F(), yv.elts, r)
+			return NewV(&AF{elts: r, flags: flagAscending})
+		}
+		return scan3Generic(x, yv, add)
+	case *AI:
+		if x.IsI() {
+			r := yv.reuse()
+			scanSumNumbers(x.I(), yv.elts, r.elts)
+			return NewV(r)
+		}
+		if x.IsF() {
+			r := make([]float64, yv.Len())
+			scanSumNumbers(x.F(), yv.elts, r)
+			return NewAF(r)
+		}
+		return scan3Generic(x, yv, add)
+	case *AF:
+		if x.IsI() {
+			r := yv.reuse()
+			scanSumNumbers(float64(x.I()), yv.elts, r.elts)
+			return NewV(r)
+		}
+		if x.IsF() {
+			r := make([]float64, yv.Len())
+			scanSumNumbers(x.F(), yv.elts, r)
+			return NewAF(r)
+		}
+		return scan3Generic(x, yv, add)
+	case *AS:
+		if s, ok := x.value.(S); ok {
+			return scanConcatStrings(string(s), yv)
+		}
+		return scan3Generic(x, yv, add)
+	case *AV:
+		return scan3Generic(x, yv, add)
+	default:
+		return add(x, y)
+	}
+}
+
+func scanSumNumbers[S number, T number](x S, y []T, r []S) {
+	for i, yi := range y {
+		x += S(yi)
+		r[i] = x
+	}
+}
+
+func scanConcatStrings(x string, y *AS) V {
+	n := len(x)
+	for _, s := range y.elts {
+		n += len(s)
+	}
+	var sb strings.Builder
+	sb.Grow(n)
+	sb.WriteString(x)
+	for _, s := range y.elts {
+		sb.WriteString(s)
+	}
+	rs := sb.String()
+	r := y.reuse()
+	n = len(x)
+	for i, s := range y.elts {
+		n += len(s)
+		r.elts[i] = rs[:n]
+	}
+	return NewV(r)
 }
 
 func scan2vMax(x V) V {
@@ -744,7 +814,7 @@ func scan2vMax(x V) V {
 		r.flags |= flagAscending
 		return NewV(r)
 	case *AV:
-		return scanGeneric(xv, maximum)
+		return scan2Generic(xv, maximum)
 	default:
 		return x
 	}
@@ -794,7 +864,7 @@ func scan2vMin(x V) V {
 		scan2vMinSlice[string](r.elts, xv.elts)
 		return NewV(r)
 	case *AV:
-		return scanGeneric(xv, minimum)
+		return scan2Generic(xv, minimum)
 	default:
 		return x
 	}
