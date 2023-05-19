@@ -153,6 +153,12 @@ func foldxfy(ctx *Context, x, f, y V) V {
 			return fold3vSubtract(x, y)
 		case vMultiply:
 			return fold3vMultiply(x, y)
+		case vMax:
+			return fold3vMax(x, y)
+		case vMin:
+			return fold3vMin(x, y)
+		case vJoin:
+			return fold3vJoin(x, y)
 		}
 	}
 	switch yv := y.value.(type) {

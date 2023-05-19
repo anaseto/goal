@@ -390,6 +390,46 @@ func fold2vMax(x V) V {
 	}
 }
 
+func fold3vMax(x, y V) V {
+	switch yv := y.value.(type) {
+	case *Dict:
+		return fold3vMax(x, NewV(yv.values))
+	case *AB:
+		if x.IsI() {
+			return NewI(maxNumbers(x.I(), yv.elts))
+		}
+		if x.IsF() {
+			return NewF(maxNumbers(x.F(), yv.elts))
+		}
+		return fold3Generic(x, yv, maximum)
+	case *AI:
+		if x.IsI() {
+			return NewI(maxNumbers(x.I(), yv.elts))
+		}
+		if x.IsF() {
+			return NewF(maxNumbers(x.F(), yv.elts))
+		}
+		return fold3Generic(x, yv, maximum)
+	case *AF:
+		if x.IsI() {
+			return NewF(maxNumbers(float64(x.I()), yv.elts))
+		}
+		if x.IsF() {
+			return NewF(maxNumbers(x.F(), yv.elts))
+		}
+		return fold3Generic(x, yv, maximum)
+	case *AS:
+		if s, ok := x.value.(S); ok {
+			return NewS(maxStrings(string(s), yv.elts))
+		}
+		return fold3Generic(x, yv, maximum)
+	case *AV:
+		return fold3Generic(x, yv, maximum)
+	default:
+		return maximum(x, y)
+	}
+}
+
 func maxBools(x []byte) int64 {
 	var max byte
 	for _, xi := range x {
@@ -454,6 +494,46 @@ func fold2vMin(x V) V {
 	}
 }
 
+func fold3vMin(x, y V) V {
+	switch yv := y.value.(type) {
+	case *Dict:
+		return fold3vMin(x, NewV(yv.values))
+	case *AB:
+		if x.IsI() {
+			return NewI(minNumbers(x.I(), yv.elts))
+		}
+		if x.IsF() {
+			return NewF(minNumbers(x.F(), yv.elts))
+		}
+		return fold3Generic(x, yv, minimum)
+	case *AI:
+		if x.IsI() {
+			return NewI(minNumbers(x.I(), yv.elts))
+		}
+		if x.IsF() {
+			return NewF(minNumbers(x.F(), yv.elts))
+		}
+		return fold3Generic(x, yv, minimum)
+	case *AF:
+		if x.IsI() {
+			return NewF(minNumbers(float64(x.I()), yv.elts))
+		}
+		if x.IsF() {
+			return NewF(minNumbers(x.F(), yv.elts))
+		}
+		return fold3Generic(x, yv, minimum)
+	case *AS:
+		if s, ok := x.value.(S); ok {
+			return NewS(minStrings(string(s), yv.elts))
+		}
+		return fold3Generic(x, yv, minimum)
+	case *AV:
+		return fold3Generic(x, yv, minimum)
+	default:
+		return minimum(x, y)
+	}
+}
+
 func minBools(x []byte) int64 {
 	var min byte = 1
 	for _, xi := range x {
@@ -505,6 +585,20 @@ func fold2vJoin(x V) V {
 		return r
 	default:
 		return x
+	}
+}
+
+func fold3vJoin(x, y V) V {
+	switch yv := y.value.(type) {
+	case *Dict:
+		return fold3vJoin(x, NewV(yv.values))
+	case *AV:
+		for _, yi := range yv.elts {
+			x = joinTo(x, yi) // does not panic
+		}
+		return x
+	default:
+		return joinTo(x, y)
 	}
 }
 
