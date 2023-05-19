@@ -524,9 +524,7 @@ func vfQq(ctx *Context, args []V) V {
 		}
 	}
 	var sb strings.Builder
-	if n > 0 {
-		sb.Grow(n)
-	}
+	sb.Grow(n)
 	for _, arg := range args {
 		switch argv := arg.value.(type) {
 		case S:

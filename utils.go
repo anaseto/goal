@@ -943,3 +943,11 @@ func dyadAVarray(x *AV, y array, f func(V, V) V) V {
 	}
 	return NewV(r)
 }
+
+func sumIntegers[T integer](x []T) int64 {
+	var n int64
+	for _, xi := range x {
+		n += int64(xi)
+	}
+	return n
+}

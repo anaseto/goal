@@ -6,6 +6,41 @@ import (
 	"strings"
 )
 
+func foldGeneric(x *AV, f func(V, V) V) V {
+	if x.Len() == 0 {
+		return NewV(x)
+	}
+	r := x.At(0)
+	for _, xi := range x.elts[1:] {
+		r = f(r, xi)
+		if r.IsPanic() {
+			return r
+		}
+	}
+	return r
+}
+
+func scanGeneric(x *AV, f func(V, V) V) V {
+	if x.Len() == 0 {
+		return NewV(x)
+	}
+	r := x.reuse()
+	r.elts[0] = x.elts[0]
+	for i, xi := range x.elts[1:] {
+		last := r.elts[i]
+		last.incrRC2()
+		next := f(last, xi)
+		next.InitRC()
+		last.decrRC2()
+		if next.IsPanic() {
+			return next
+		}
+		r.elts[i+1] = next
+	}
+	// Will never be canonical, so normalizing is not needed.
+	return NewV(r)
+}
+
 func fold2vAdd(x V) V {
 	switch xv := x.value.(type) {
 	case *Dict:
@@ -15,48 +50,38 @@ func fold2vAdd(x V) V {
 	case *AI:
 		return NewI(sumIntegers(xv.elts))
 	case *AF:
-		n := 0.0
-		for _, xi := range xv.elts {
-			n += xi
-		}
-		return NewF(n)
+		return NewF(sumNumbers(0.0, xv.elts))
 	case *AS:
-		if xv.Len() == 0 {
-			return NewS("")
-		}
-		n := 0
-		for _, s := range xv.elts {
-			n += len(s)
-		}
-		var sb strings.Builder
-		sb.Grow(n)
-		for _, s := range xv.elts {
-			sb.WriteString(s)
-		}
-		return NewS(sb.String())
+		return NewS(concatStrings("", xv.elts))
 	case *AV:
-		if xv.Len() == 0 {
-			return x
-		}
-		r := xv.At(0)
-		for _, xi := range xv.elts[1:] {
-			r = add(r, xi)
-			if r.IsPanic() {
-				return r
-			}
-		}
-		return r
+		return foldGeneric(xv, add)
 	default:
 		return x
 	}
 }
 
-func sumIntegers[T integer](x []T) int64 {
-	var n int64
-	for _, xi := range x {
-		n += int64(xi)
+func sumNumbers[S number, T number](x S, y []T) S {
+	for _, yi := range y {
+		x += S(yi)
 	}
-	return n
+	return x
+}
+
+func concatStrings(x string, y []string) string {
+	if len(y) == 0 {
+		return x
+	}
+	n := len(x)
+	for _, s := range y {
+		n += len(s)
+	}
+	var sb strings.Builder
+	sb.Grow(n)
+	sb.WriteString(x)
+	for _, s := range y {
+		sb.WriteString(s)
+	}
+	return sb.String()
 }
 
 func scan2vAdd(x V) V {
@@ -119,24 +144,7 @@ func scan2vAdd(x V) V {
 		}
 		return NewV(r)
 	case *AV:
-		if xv.Len() == 0 {
-			return x
-		}
-		r := xv.reuse()
-		r.elts[0] = xv.elts[0]
-		for i, xi := range xv.elts[1:] {
-			last := r.elts[i]
-			last.incrRC2()
-			next := add(last, xi)
-			next.InitRC()
-			last.decrRC2()
-			if next.IsPanic() {
-				return next
-			}
-			r.elts[i+1] = next
-		}
-		// Will never be canonical, so normalizing is not needed.
-		return NewV(r)
+		return scanGeneric(xv, add)
 	default:
 		return x
 	}
@@ -150,53 +158,41 @@ func fold2vSubtract(x V) V {
 		if xv.Len() == 0 {
 			return NewI(0)
 		}
-		n := int64(xv.elts[0])
-		for _, xi := range xv.elts[1:] {
-			n -= int64(xi)
-		}
-		return NewI(n)
+		return NewI(subtractNumbers(int64(xv.elts[0]), xv.elts[1:]))
 	case *AI:
 		if xv.Len() == 0 {
 			return NewI(0)
 		}
-		var n int64 = xv.elts[0]
-		for _, xi := range xv.elts[1:] {
-			n -= xi
-		}
-		return NewI(n)
+		return NewI(subtractNumbers(xv.elts[0], xv.elts[1:]))
 	case *AF:
 		if xv.Len() == 0 {
-			return NewI(0)
+			return NewF(0)
 		}
-		var n float64 = xv.elts[0]
-		for _, xi := range xv.elts[1:] {
-			n -= xi
-		}
-		return NewF(n)
+		return NewF(subtractNumbers(xv.elts[0], xv.elts[1:]))
 	case *AS:
 		if xv.Len() == 0 {
 			return NewS("")
 		}
-		var r string = xv.elts[0]
-		for _, xi := range xv.elts[1:] {
-			r = strings.TrimSuffix(r, xi)
-		}
-		return NewS(r)
+		return NewS(trimSuffixs(xv.elts[0], xv.elts[1:]))
 	case *AV:
-		if xv.Len() == 0 {
-			return x
-		}
-		r := xv.At(0)
-		for _, xi := range xv.elts[1:] {
-			r = subtract(r, xi)
-			if r.IsPanic() {
-				return r
-			}
-		}
-		return r
+		return foldGeneric(xv, subtract)
 	default:
 		return x
 	}
+}
+
+func subtractNumbers[S number, T number](x S, y []T) S {
+	for _, yi := range y {
+		x -= S(yi)
+	}
+	return x
+}
+
+func trimSuffixs(x string, y []string) string {
+	for _, yi := range y {
+		x = strings.TrimSuffix(x, yi)
+	}
+	return x
 }
 
 func fold2vMultiply(x V) V {
@@ -216,17 +212,7 @@ func fold2vMultiply(x V) V {
 	case *AS:
 		return panics("*/x : bad type in x (S)")
 	case *AV:
-		if xv.Len() == 0 {
-			return x
-		}
-		r := xv.At(0)
-		for _, xi := range xv.elts[1:] {
-			r = multiply(r, xi)
-			if r.IsPanic() {
-				return r
-			}
-		}
-		return r
+		return foldGeneric(xv, multiply)
 	default:
 		return x
 	}
@@ -255,33 +241,11 @@ func fold2vMax(x V) V {
 	case *AI:
 		return NewI(maxIntegers(xv.elts))
 	case *AF:
-		if xv.Len() == 0 {
-			return NewF(math.Inf(-1))
-		}
-		return NewF(maxFloat64s(xv.elts))
+		return NewF(maxNumbers(math.Inf(-1), xv.elts))
 	case *AS:
-		if xv.Len() == 0 {
-			return NewS("")
-		}
-		max := xv.elts[0]
-		for _, s := range xv.elts[1:] {
-			if s > max {
-				max = s
-			}
-		}
-		return NewS(max)
+		return NewS(maxStrings("", xv.elts))
 	case *AV:
-		if xv.Len() == 0 {
-			return x
-		}
-		r := xv.At(0)
-		for _, xi := range xv.elts[1:] {
-			r = maximum(r, xi)
-			if r.IsPanic() {
-				return r
-			}
-		}
-		return r
+		return foldGeneric(xv, maximum)
 	default:
 		return x
 	}
@@ -295,23 +259,29 @@ func maxBools(x []byte) int64 {
 	return int64(max)
 }
 
+func maxNumbers[S number, T number](x S, y []T) S {
+	for _, yi := range y {
+		if S(yi) > x {
+			x = S(yi)
+		}
+	}
+	return x
+}
+
+func maxStrings(x string, y []string) string {
+	for _, yi := range y {
+		if yi > x {
+			x = yi
+		}
+	}
+	return x
+}
+
 func maxIntegers[I integer](x []I) int64 {
 	var max int64 = math.MinInt64
 	for _, xi := range x {
 		if int64(xi) > max {
 			max = int64(xi)
-		}
-	}
-	return max
-}
-
-func maxFloat64s(x []float64) float64 {
-	max := math.Inf(-1)
-	for _, xi := range x {
-		// NOTE: not equivalent to math.Max(xi, max) if there are NaNs,
-		// but faster, so keep it this way.
-		if xi > max {
-			max = xi
 		}
 	}
 	return max
@@ -365,24 +335,7 @@ func scan2vMax(x V) V {
 		r.flags |= flagAscending
 		return NewV(r)
 	case *AV:
-		if xv.Len() == 0 {
-			return x
-		}
-		r := xv.reuse()
-		r.elts[0] = xv.elts[0]
-		for i, xi := range xv.elts[1:] {
-			last := r.elts[i]
-			last.incrRC2()
-			next := maximum(last, xi)
-			next.InitRC()
-			last.decrRC2()
-			if next.IsPanic() {
-				return next
-			}
-			r.elts[i+1] = next
-		}
-		// Will always be generic, so normalizing is not needed.
-		return NewV(r)
+		return scanGeneric(xv, maximum)
 	default:
 		return x
 	}
@@ -403,33 +356,14 @@ func fold2vMin(x V) V {
 	case *AI:
 		return NewI(minIntegers(xv.elts))
 	case *AF:
-		if x.Len() == 0 {
-			return NewF(math.Inf(1))
-		}
-		return NewF(minFloat64s(xv.elts))
+		return NewF(minNumbers(math.Inf(1), xv.elts))
 	case *AS:
 		if xv.Len() == 0 {
 			return NewS("")
 		}
-		min := xv.elts[0]
-		for _, s := range xv.elts[1:] {
-			if s < min {
-				min = s
-			}
-		}
-		return NewS(min)
+		return NewS(minStrings(xv.elts[0], xv.elts[1:]))
 	case *AV:
-		if xv.Len() == 0 {
-			return x
-		}
-		r := xv.At(0)
-		for _, xi := range xv.elts[1:] {
-			r = minimum(r, xi)
-			if r.IsPanic() {
-				return r
-			}
-		}
-		return r
+		return foldGeneric(xv, minimum)
 	default:
 		return x
 	}
@@ -453,16 +387,22 @@ func minIntegers[T integer](x []T) int64 {
 	return min
 }
 
-func minFloat64s(x []float64) float64 {
-	min := math.Inf(1)
-	for _, xi := range x {
-		// NOTE: not equivalent to math.Min(xi, min) if there are NaNs,
-		// but faster, so keep it this way.
-		if xi < min {
-			min = xi
+func minStrings(x string, y []string) string {
+	for _, yi := range y {
+		if yi < x {
+			x = yi
 		}
 	}
-	return min
+	return x
+}
+
+func minNumbers[S number, T number](x S, y []T) S {
+	for _, yi := range y {
+		if S(yi) < x {
+			x = S(yi)
+		}
+	}
+	return x
 }
 
 func scan2vMinSlice[T ordered](dst, xs []T) {
@@ -509,24 +449,7 @@ func scan2vMin(x V) V {
 		scan2vMinSlice[string](r.elts, xv.elts)
 		return NewV(r)
 	case *AV:
-		if xv.Len() == 0 {
-			return x
-		}
-		r := xv.reuse()
-		r.elts[0] = xv.elts[0]
-		for i, xi := range xv.elts[1:] {
-			last := r.elts[i]
-			last.incrRC2()
-			next := minimum(last, xi)
-			next.InitRC()
-			last.decrRC2()
-			if next.IsPanic() {
-				return next
-			}
-			r.elts[i+1] = next
-		}
-		// Will never be canonical, so normalizing is not needed.
-		return NewV(r)
+		return scanGeneric(xv, minimum)
 	default:
 		return x
 	}

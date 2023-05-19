@@ -388,6 +388,10 @@ type integer interface {
 	signed | unsigned
 }
 
+type number interface {
+	~float64 | integer
+}
+
 type ordered interface {
 	~float64 | ~string | integer
 }
