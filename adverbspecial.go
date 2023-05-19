@@ -193,9 +193,9 @@ func fold3vAdd(x, y V) V {
 	}
 }
 
-func sumNumbers[S number, T number](x S, y []T) S {
+func sumNumbers[T number, U number](x U, y []T) U {
 	for _, yi := range y {
-		x += S(yi)
+		x += U(yi)
 	}
 	return x
 }
@@ -288,9 +288,9 @@ func fold3vSubtract(x, y V) V {
 	}
 }
 
-func subtractNumbers[S number, T number](x S, y []T) S {
+func subtractNumbers[T number, U number](x U, y []T) U {
 	for _, yi := range y {
-		x -= S(yi)
+		x -= U(yi)
 	}
 	return x
 }
@@ -358,9 +358,9 @@ func fold3vMultiply(x, y V) V {
 	}
 }
 
-func multiplyNumbers[T number, S number](x S, y []T) S {
+func multiplyNumbers[T number, U number](x U, y []T) U {
 	for _, yi := range y {
-		x *= S(yi)
+		x *= U(yi)
 	}
 	return x
 }
@@ -438,10 +438,10 @@ func maxBools(x []byte) int64 {
 	return int64(max)
 }
 
-func maxNumbers[S number, T number](x S, y []T) S {
+func maxNumbers[T number, U number](x U, y []T) U {
 	for _, yi := range y {
-		if S(yi) > x {
-			x = S(yi)
+		if U(yi) > x {
+			x = U(yi)
 		}
 	}
 	return x
@@ -561,10 +561,10 @@ func minStrings(x string, y []string) string {
 	return x
 }
 
-func minNumbers[S number, T number](x S, y []T) S {
+func minNumbers[T number, U number](x U, y []T) U {
 	for _, yi := range y {
-		if S(yi) < x {
-			x = S(yi)
+		if U(yi) < x {
+			x = U(yi)
 		}
 	}
 	return x
@@ -749,9 +749,9 @@ func scan3vAdd(x, y V) V {
 	}
 }
 
-func scanSumNumbers[S number, T number](x S, y []T, r []S) {
+func scanSumNumbers[T number, U number](x U, y []T, r []U) {
 	for i, yi := range y {
-		x += S(yi)
+		x += U(yi)
 		r[i] = x
 	}
 }
