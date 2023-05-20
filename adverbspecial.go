@@ -782,36 +782,25 @@ func scan2vMax(x V) V {
 	case *Dict:
 		return newDictValues(xv.keys, scan2vMax(NewV(xv.values)))
 	case *AB:
-		if xv.Len() == 0 {
-			return x
-		}
+		fl := xv.flags & flagBool
 		r := xv.reuse()
-		scan2vMaxSlice[byte](r.elts, xv.elts)
-		r.flags |= flagAscending
+		scanMaxNumbers(r.elts, 0, xv.elts)
+		r.flags = fl | flagAscending
 		return NewV(r)
 	case *AI:
-		if xv.Len() == 0 {
-			return x
-		}
 		r := xv.reuse()
-		scan2vMaxSlice[int64](r.elts, xv.elts)
-		r.flags |= flagAscending
+		scanMaxNumbers(r.elts, 0, xv.elts)
+		r.flags = flagAscending
 		return NewV(r)
 	case *AF:
-		if xv.Len() == 0 {
-			return x
-		}
 		r := xv.reuse()
-		scan2vMaxSlice[float64](r.elts, xv.elts)
-		r.flags |= flagAscending
+		scanMaxNumbers(r.elts, 0.0, xv.elts)
+		r.flags = flagAscending
 		return NewV(r)
 	case *AS:
-		if xv.Len() == 0 {
-			return x
-		}
 		r := xv.reuse()
-		scan2vMaxSlice[string](r.elts, xv.elts)
-		r.flags |= flagAscending
+		scanMaxStrings(r.elts, "", xv.elts)
+		r.flags = flagAscending
 		return NewV(r)
 	case *AV:
 		return scan2Generic(xv, maximum)
@@ -820,14 +809,88 @@ func scan2vMax(x V) V {
 	}
 }
 
-func scan2vMaxSlice[T ordered](dst, xs []T) {
-	max := xs[0]
-	dst[0] = max
-	for i, xi := range xs[1:] {
-		if xi > max {
-			max = xi
+func scan3vMax(x, y V) V {
+	switch yv := y.value.(type) {
+	case *Dict:
+		return newDictValues(yv.keys, scan3vMax(x, NewV(yv.values)))
+	case *AB:
+		if x.IsI() {
+			if x.I() >= 0 && x.I() < 256 {
+				var fl flags
+				if x.I() <= 1 {
+					fl = yv.flags & flagBool
+				}
+				r := yv.reuse()
+				scanMaxNumbers(r.elts, byte(x.I()), yv.elts)
+				r.flags = fl | flagAscending
+				return NewV(r)
+			}
+			r := make([]int64, yv.Len())
+			scanMaxNumbers(r, x.I(), yv.elts)
+			return NewV(&AI{elts: r, flags: flagAscending})
 		}
-		dst[i+1] = max
+		if x.IsF() {
+			r := make([]float64, yv.Len())
+			scanMaxNumbers(r, x.F(), yv.elts)
+			return NewV(&AF{elts: r, flags: flagAscending})
+		}
+		return scan3Generic(x, yv, maximum)
+	case *AI:
+		if x.IsI() {
+			r := yv.reuse()
+			scanMaxNumbers(r.elts, x.I(), yv.elts)
+			r.flags = flagAscending
+			return NewV(r)
+		}
+		if x.IsF() {
+			r := make([]float64, yv.Len())
+			scanMaxNumbers(r, x.F(), yv.elts)
+			return NewV(&AF{elts: r, flags: flagAscending})
+		}
+		return scan3Generic(x, yv, maximum)
+	case *AF:
+		if x.IsI() {
+			r := yv.reuse()
+			scanMaxNumbers(r.elts, float64(x.I()), yv.elts)
+			r.flags = flagAscending
+			return NewV(r)
+		}
+		if x.IsF() {
+			r := make([]float64, yv.Len())
+			scanMaxNumbers(r, x.F(), yv.elts)
+			return NewV(&AF{elts: r, flags: flagAscending})
+		}
+		return scan3Generic(x, yv, maximum)
+	case *AS:
+		if s, ok := x.value.(S); ok {
+			r := yv.reuse()
+			scanMaxStrings(r.elts, string(s), yv.elts)
+			r.flags = flagAscending
+			return NewV(r)
+		}
+		return scan3Generic(x, yv, maximum)
+	case *AV:
+		return scan3Generic(x, yv, maximum)
+	default:
+		return maximum(x, y)
+	}
+}
+
+func scanMaxNumbers[T number, U number](dst []U, x U, y []T) {
+	for i, yi := range y {
+		if U(yi) > x {
+			x = U(yi)
+		}
+		dst[i] = x
+	}
+}
+
+func scanMaxStrings(dst []string, x string, y []string) {
+	for i, yi := range y {
+		if yi > x {
+			x = yi
+		}
+		dst[i] = x
 	}
 }
 
