@@ -953,13 +953,15 @@ func sumIntegers[T integer](x []T) int64 {
 }
 
 func isFlat(x []V) bool {
-	for _, xi := range x {
+	for i, xi := range x {
 		if xi.kind != valBoxed {
 			continue
 		}
 		switch xi.value.(type) {
 		case *Dict:
-			return false
+			if i == 0 {
+				return false
+			}
 		case array:
 			return false
 		}
