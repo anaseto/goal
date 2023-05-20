@@ -455,6 +455,8 @@ func scanxfy(ctx *Context, x, f, y V) V {
 			return scan3vAdd(x, y)
 		case vMax:
 			return scan3vMax(x, y)
+		case vMin:
+			return scan3vMin(x, y)
 		}
 	}
 	switch yv := y.value.(type) {

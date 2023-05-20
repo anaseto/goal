@@ -899,32 +899,24 @@ func scan2vMin(x V) V {
 	case *Dict:
 		return newDictValues(xv.keys, scan2vMin(NewV(xv.values)))
 	case *AB:
-		if xv.Len() == 0 {
-			return x
-		}
 		r := xv.reuse()
-		scan2vMinSlice[byte](r.elts, xv.elts)
+		scanMinNumbers(r.elts, math.MaxUint8, xv.elts)
 		return NewV(r)
 	case *AI:
-		if xv.Len() == 0 {
-			return x
-		}
 		r := xv.reuse()
-		scan2vMinSlice[int64](r.elts, xv.elts)
+		scanMinNumbers(r.elts, math.MaxInt64, xv.elts)
 		return NewV(r)
 	case *AF:
-		if xv.Len() == 0 {
-			return x
-		}
 		r := xv.reuse()
-		scan2vMinSlice[float64](r.elts, xv.elts)
+		scanMinNumbers(r.elts, math.MaxFloat64, xv.elts)
 		return NewV(r)
 	case *AS:
 		if xv.Len() == 0 {
 			return x
 		}
 		r := xv.reuse()
-		scan2vMinSlice[string](r.elts, xv.elts)
+		r.elts[0] = xv.elts[0]
+		scanMinStrings(r.elts[1:], xv.elts[0], xv.elts[1:])
 		return NewV(r)
 	case *AV:
 		return scan2Generic(xv, minimum)
@@ -933,13 +925,84 @@ func scan2vMin(x V) V {
 	}
 }
 
-func scan2vMinSlice[T ordered](dst, xs []T) {
-	min := xs[0]
-	dst[0] = min
-	for i, xi := range xs[1:] {
-		if xi < min {
-			min = xi
+func scan3vMin(x, y V) V {
+	switch yv := y.value.(type) {
+	case *Dict:
+		return newDictValues(yv.keys, scan3vMin(x, NewV(yv.values)))
+	case *AB:
+		if x.IsI() {
+			if x.I() >= 0 && x.I() < 256 {
+				var fl flags
+				if x.I() <= 1 {
+					fl = flagBool
+				}
+				r := yv.reuse()
+				scanMinNumbers(r.elts, byte(x.I()), yv.elts)
+				r.flags = fl
+				return NewV(r)
+			}
+			r := make([]int64, yv.Len())
+			scanMinNumbers(r, x.I(), yv.elts)
+			return NewAI(r)
 		}
-		dst[i+1] = min
+		if x.IsF() {
+			r := make([]float64, yv.Len())
+			scanMinNumbers(r, x.F(), yv.elts)
+			return NewAF(r)
+		}
+		return scan3Generic(x, yv, minimum)
+	case *AI:
+		if x.IsI() {
+			r := yv.reuse()
+			scanMinNumbers(r.elts, x.I(), yv.elts)
+			return NewV(r)
+		}
+		if x.IsF() {
+			r := make([]float64, yv.Len())
+			scanMinNumbers(r, x.F(), yv.elts)
+			return NewAF(r)
+		}
+		return scan3Generic(x, yv, minimum)
+	case *AF:
+		if x.IsI() {
+			r := yv.reuse()
+			scanMinNumbers(r.elts, float64(x.I()), yv.elts)
+			return NewV(r)
+		}
+		if x.IsF() {
+			r := make([]float64, yv.Len())
+			scanMinNumbers(r, x.F(), yv.elts)
+			return NewAF(r)
+		}
+		return scan3Generic(x, yv, minimum)
+	case *AS:
+		if s, ok := x.value.(S); ok {
+			r := yv.reuse()
+			scanMinStrings(r.elts, string(s), yv.elts)
+			return NewV(r)
+		}
+		return scan3Generic(x, yv, minimum)
+	case *AV:
+		return scan3Generic(x, yv, minimum)
+	default:
+		return minimum(x, y)
+	}
+}
+
+func scanMinNumbers[T number, U number](dst []U, x U, y []T) {
+	for i, yi := range y {
+		if U(yi) < x {
+			x = U(yi)
+		}
+		dst[i] = x
+	}
+}
+
+func scanMinStrings(dst []string, x string, y []string) {
+	for i, yi := range y {
+		if yi < x {
+			x = yi
+		}
+		dst[i] = x
 	}
 }
