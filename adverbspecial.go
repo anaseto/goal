@@ -240,7 +240,7 @@ func fold2vSubtract(x V) V {
 		if xv.Len() == 0 {
 			return NewS("")
 		}
-		return NewS(trimSuffixs(xv.elts[0], xv.elts[1:]))
+		return NewS(trimSuffixes(xv.elts[0], xv.elts[1:]))
 	case *AV:
 		return fold2Generic(xv, subtract)
 	default:
@@ -278,7 +278,7 @@ func fold3vSubtract(x, y V) V {
 		return fold3Generic(x, yv, subtract)
 	case *AS:
 		if s, ok := x.value.(S); ok {
-			return NewS(trimSuffixs(string(s), yv.elts))
+			return NewS(trimSuffixes(string(s), yv.elts))
 		}
 		return fold3Generic(x, yv, subtract)
 	case *AV:
@@ -295,7 +295,7 @@ func subtractNumbers[T number, U number](x U, y []T) U {
 	return x
 }
 
-func trimSuffixs(x string, y []string) string {
+func trimSuffixes(x string, y []string) string {
 	for _, yi := range y {
 		x = strings.TrimSuffix(x, yi)
 	}
@@ -670,20 +670,20 @@ func scan2vAdd(x V) V {
 	case *AB:
 		if xv.IsBoolean() && xv.Len() < 256 {
 			r := xv.reuse()
-			scanSumNumbers(0, xv.elts, r.elts)
+			scanSumNumbers(r.elts, 0, xv.elts)
 			r.flags |= flagAscending
 			return NewV(r)
 		}
 		r := make([]int64, xv.Len())
-		scanSumNumbers(0, xv.elts, r)
+		scanSumNumbers(r, 0, xv.elts)
 		return NewV(&AI{elts: r, flags: flagAscending})
 	case *AI:
 		r := xv.reuse()
-		scanSumNumbers(0, xv.elts, r.elts)
+		scanSumNumbers(r.elts, 0, xv.elts)
 		return NewV(r)
 	case *AF:
 		r := xv.reuse()
-		scanSumNumbers(0.0, xv.elts, r.elts)
+		scanSumNumbers(r.elts, 0.0, xv.elts)
 		return NewV(r)
 	case *AS:
 		if xv.Len() == 0 {
@@ -704,36 +704,36 @@ func scan3vAdd(x, y V) V {
 	case *AB:
 		if x.IsI() {
 			r := make([]int64, yv.Len())
-			scanSumNumbers(x.I(), yv.elts, r)
+			scanSumNumbers(r, x.I(), yv.elts)
 			return NewV(&AI{elts: r, flags: flagAscending})
 		}
 		if x.IsF() {
 			r := make([]float64, yv.Len())
-			scanSumNumbers(x.F(), yv.elts, r)
+			scanSumNumbers(r, x.F(), yv.elts)
 			return NewV(&AF{elts: r, flags: flagAscending})
 		}
 		return scan3Generic(x, yv, add)
 	case *AI:
 		if x.IsI() {
 			r := yv.reuse()
-			scanSumNumbers(x.I(), yv.elts, r.elts)
+			scanSumNumbers(r.elts, x.I(), yv.elts)
 			return NewV(r)
 		}
 		if x.IsF() {
 			r := make([]float64, yv.Len())
-			scanSumNumbers(x.F(), yv.elts, r)
+			scanSumNumbers(r, x.F(), yv.elts)
 			return NewAF(r)
 		}
 		return scan3Generic(x, yv, add)
 	case *AF:
 		if x.IsI() {
 			r := yv.reuse()
-			scanSumNumbers(float64(x.I()), yv.elts, r.elts)
+			scanSumNumbers(r.elts, float64(x.I()), yv.elts)
 			return NewV(r)
 		}
 		if x.IsF() {
 			r := make([]float64, yv.Len())
-			scanSumNumbers(x.F(), yv.elts, r)
+			scanSumNumbers(r, x.F(), yv.elts)
 			return NewAF(r)
 		}
 		return scan3Generic(x, yv, add)
@@ -749,7 +749,7 @@ func scan3vAdd(x, y V) V {
 	}
 }
 
-func scanSumNumbers[T number, U number](x U, y []T, r []U) {
+func scanSumNumbers[T number, U number](r []U, x U, y []T) {
 	for i, yi := range y {
 		x += U(yi)
 		r[i] = x
@@ -775,6 +775,117 @@ func scanConcatStrings(x string, y *AS) V {
 		r.elts[i] = rs[:n]
 	}
 	return NewV(r)
+}
+
+func scan2vSubtract(x V) V {
+	switch xv := x.value.(type) {
+	case *Dict:
+		return newDictValues(xv.keys, scan2vSubtract(NewV(xv.values)))
+	case *AB:
+		if xv.Len() == 0 {
+			return x
+		}
+		r := make([]int64, xv.Len())
+		r[0] = int64(xv.elts[0])
+		scanSubtractNumbers(r[1:], int64(xv.elts[0]), xv.elts[1:])
+		return NewAI(r)
+	case *AI:
+		if xv.Len() == 0 {
+			return x
+		}
+		r := xv.reuse()
+		r.elts[0] = xv.elts[0]
+		scanSubtractNumbers(r.elts[1:], xv.elts[0], xv.elts[1:])
+		return NewV(r)
+	case *AF:
+		if xv.Len() == 0 {
+			return x
+		}
+		r := xv.reuse()
+		r.elts[0] = xv.elts[0]
+		scanSubtractNumbers(r.elts[1:], xv.elts[0], xv.elts[1:])
+		return NewV(r)
+	case *AS:
+		if xv.Len() == 0 {
+			return x
+		}
+		r := xv.reuse()
+		r.elts[0] = xv.elts[0]
+		scanTrimSuffixes(r.elts[1:], xv.elts[0], xv.elts[1:])
+		return NewV(r)
+	case *AV:
+		return scan2Generic(xv, subtract)
+	default:
+		return x
+	}
+}
+
+func scan3vSubtract(x, y V) V {
+	switch yv := y.value.(type) {
+	case *Dict:
+		return newDictValues(yv.keys, scan3vSubtract(x, NewV(yv.values)))
+	case *AB:
+		if x.IsI() {
+			r := make([]int64, yv.Len())
+			scanSubtractNumbers(r, x.I(), yv.elts)
+			return NewV(&AI{elts: r, flags: flagAscending})
+		}
+		if x.IsF() {
+			r := make([]float64, yv.Len())
+			scanSubtractNumbers(r, x.F(), yv.elts)
+			return NewV(&AF{elts: r, flags: flagAscending})
+		}
+		return scan3Generic(x, yv, subtract)
+	case *AI:
+		if x.IsI() {
+			r := yv.reuse()
+			scanSubtractNumbers(r.elts, x.I(), yv.elts)
+			return NewV(r)
+		}
+		if x.IsF() {
+			r := make([]float64, yv.Len())
+			scanSubtractNumbers(r, x.F(), yv.elts)
+			return NewAF(r)
+		}
+		return scan3Generic(x, yv, subtract)
+	case *AF:
+		if x.IsI() {
+			r := yv.reuse()
+			scanSubtractNumbers(r.elts, float64(x.I()), yv.elts)
+			return NewV(r)
+		}
+		if x.IsF() {
+			r := make([]float64, yv.Len())
+			scanSubtractNumbers(r, x.F(), yv.elts)
+			return NewAF(r)
+		}
+		return scan3Generic(x, yv, subtract)
+	case *AS:
+		if s, ok := x.value.(S); ok {
+			r := yv.reuse()
+			scanTrimSuffixes(r.elts, string(s), yv.elts)
+			return NewV(r)
+		}
+		return scan3Generic(x, yv, subtract)
+	case *AV:
+		return scan3Generic(x, yv, subtract)
+	default:
+		return subtract(x, y)
+	}
+}
+
+func scanSubtractNumbers[T number, U number](r []U, x U, y []T) {
+	for i, yi := range y {
+		x -= U(yi)
+		r[i] = x
+	}
+}
+
+func scanTrimSuffixes(r []string, x string, y []string) {
+	for i, yi := range y {
+		x = strings.TrimSuffix(x, yi)
+		r[i] = x
+	}
 }
 
 func scan2vMax(x V) V {

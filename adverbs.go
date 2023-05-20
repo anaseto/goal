@@ -349,6 +349,8 @@ func scanfx(ctx *Context, f, x V) V {
 		switch f.variadic() {
 		case vAdd:
 			return scan2vAdd(x)
+		case vSubtract:
+			return scan2vSubtract(x)
 		case vMax:
 			return scan2vMax(x)
 		case vMin:
@@ -453,6 +455,8 @@ func scanxfy(ctx *Context, x, f, y V) V {
 		switch f.variadic() {
 		case vAdd:
 			return scan3vAdd(x, y)
+		case vSubtract:
+			return scan3vSubtract(x, y)
 		case vMax:
 			return scan3vMax(x, y)
 		case vMin:
