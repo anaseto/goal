@@ -6,7 +6,7 @@
 * Fix regression refcount bug in converges `f\x`.
 * Fix refcount bug for out of bounds dict indexing.
 * Optimize seeded `x op/y` and `x op\y` for various common op (only non-seeded
-  variants had special code before).
+  variants had special code before), as well as `~'` and `,//`.
 * Optimize small-range computation for sorted inputs in search functions.
 * Added some debug and dev purpose tools for refcounting issues and stack
   handling.

@@ -701,6 +701,9 @@ func eachN(ctx *Context, args []V) V {
 		return ctx.ApplyN(f, args[:len(args)-1])
 	}
 	y := args[0]
+	if n == 2 && f.kind == valVariadic && f.variadic() == vMatch {
+		return each3Match(args[1], y)
+	}
 	r := make([]V, mlen)
 	f.IncrRC()
 	ctx.pushNoRC(V{})

@@ -1117,3 +1117,39 @@ func scanMinStrings(dst []string, x string, y []string) {
 		dst[i] = x
 	}
 }
+
+func each3Match(x, y V) V {
+	switch xv := x.value.(type) {
+	case *Dict:
+		return newDictValues(xv.keys, each3Match(NewV(xv.values), y))
+	default:
+		xa, ok := x.value.(array)
+		if !ok {
+			break
+		}
+		ya, ok := y.value.(array)
+		if !ok {
+			yd, ok := y.value.(*Dict)
+			if !ok {
+				break
+			}
+			ya = yd.values
+		}
+		xlen := xa.Len()
+		r := make([]byte, xlen)
+		for i := 0; i < xlen; i++ {
+			xi := xa.at(i)
+			yi := ya.at(i)
+			r[i] = b2B(xi.Matches(yi))
+		}
+		return newABb(r)
+	}
+	l := maxInt(x.Len(), y.Len())
+	r := make([]byte, l)
+	for i := 0; i < l; i++ {
+		xi := x.at(i)
+		yi := y.at(i)
+		r[i] = b2B(xi.Matches(yi))
+	}
+	return newABb(r)
+}
