@@ -406,7 +406,9 @@ func (d *Dict) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
 		y := ctx.top()
-		return applyDict(d, y)
+		r := applyDict(d, y)
+		r.InitRC()
+		return r
 	default:
 		args := ctx.peekN(n)
 		r := ctx.applyDictArgs(d, args[len(args)-1], args[:len(args)-1])

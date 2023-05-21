@@ -4,6 +4,7 @@
   line with amend dict.
 * Support regexp projections (like for any function).
 * Fix regression refcount bug in converges `f\x`.
+* Fix refcount bug for out of bounds dict indexing.
 * Added some debug and dev purpose tools about refcounting and stack handling.
 
 # v0.17.1 2023-05-16
