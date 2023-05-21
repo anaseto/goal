@@ -1,4 +1,4 @@
-# v? ?
+# v0.18.0 2023-05-21
 
 * Improve `d op d` semantics for uncommon or duplicate keys, so that it's in
   line with amend dict.
