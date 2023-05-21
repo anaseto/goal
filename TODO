@@ -12,10 +12,9 @@ Tests:
 
 Documentation:
 - maybe write some introductory guide (in addition to the current help and FAQ)
-- write a summary of differences with ngn/k and maybe other K versions.
 
 Optimizations:
-- maybe special code for more uncommon op/ and op\ and op', as well as amend
+- maybe special code for common arithmetic amends (like @[;;+;])
 - maybe improve liveness analysis for code with branches
-- maybe some remaining special cases in self-search functions (all common uses
+- maybe some remaining special cases in self-search functions (all common cases
   already done)
