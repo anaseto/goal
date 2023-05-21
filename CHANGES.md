@@ -5,7 +5,11 @@
 * Support regexp projections (like for any function).
 * Fix regression refcount bug in converges `f\x`.
 * Fix refcount bug for out of bounds dict indexing.
-* Added some debug and dev purpose tools about refcounting and stack handling.
+* Optimize seeded `x op/y` and `x op\y` for various common op (only non-seeded
+  variants had special code before).
+* Optimize small-range computation for sorted inputs in search functions.
+* Added some debug and dev purpose tools for refcounting issues and stack
+  handling.
 
 # v0.17.1 2023-05-16
 
