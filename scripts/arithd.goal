@@ -22,7 +22,7 @@ equal:keys!+(
   "F" "F" "b2B(x == y)" "B"
   "S" "S" "b2B(x == y)" "B"
 )
-lesser:keys!+(
+less:keys!+(
   "B" "B" "b2B(x < y)" "B"
   "B" "I" "b2B(int64(x) < y)" "B"
   "B" "F" "b2B(float64(x) < y)" "B"
@@ -34,7 +34,7 @@ lesser:keys!+(
   "F" "F" "b2B(x < y)" "B"
   "S" "S" "b2B(x < y)" "B"
 )
-greater:keys!+(
+more:keys!+(
   "B" "B" "b2B(x > y)" "B"
   "B" "I" "b2B(int64(x) > y)" "B"
   "B" "F" "b2B(float64(x) > y)" "B"
@@ -136,8 +136,8 @@ arctan2:keys!+(
 
 ops:(
   "equal" "="
-  "lesser" "<"
-  "greater" ">"
+  "less" "<"
+  "more" ">"
   "add" "+"
   "subtract" "-"
   "multiply" "*"

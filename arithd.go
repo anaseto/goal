@@ -453,22 +453,22 @@ func equalASV(x *AS, y V) V {
 // less returns x<y.
 func less(x, y V) V {
 	if x.IsI() {
-		return lesserIV(x.I(), y)
+		return lessIV(x.I(), y)
 	}
 	if x.IsF() {
-		return lesserFV(x.F(), y)
+		return lessFV(x.F(), y)
 	}
 	switch xv := x.value.(type) {
 	case S:
-		return lesserSV(xv, y)
+		return lessSV(xv, y)
 	case *AB:
-		return lesserABV(xv, y)
+		return lessABV(xv, y)
 	case *AF:
-		return lesserAFV(xv, y)
+		return lessAFV(xv, y)
 	case *AI:
-		return lesserAIV(xv, y)
+		return lessAIV(xv, y)
 	case *AS:
-		return lesserASV(xv, y)
+		return lessASV(xv, y)
 	case *AV:
 		switch yv := y.value.(type) {
 		case *Dict:
@@ -495,7 +495,7 @@ func less(x, y V) V {
 	}
 }
 
-func lesserFV(x float64, y V) V {
+func lessFV(x float64, y V) V {
 	if y.IsI() {
 		return NewI(int64(b2B(x < float64(y.I()))))
 	}
@@ -525,7 +525,7 @@ func lesserFV(x float64, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		v := lesserFV(x, NewV(yv.values))
+		v := lessFV(x, NewV(yv.values))
 		if v.IsPanic() {
 			return v
 		}
@@ -534,7 +534,7 @@ func lesserFV(x float64, y V) V {
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.elts {
-			ri := lesserFV(x, yi)
+			ri := lessFV(x, yi)
 			if ri.IsPanic() {
 				return ri
 			}
@@ -546,7 +546,7 @@ func lesserFV(x float64, y V) V {
 	}
 }
 
-func lesserIV(x int64, y V) V {
+func lessIV(x int64, y V) V {
 	if y.IsI() {
 		return NewI(int64(b2B(x < y.I())))
 	}
@@ -576,7 +576,7 @@ func lesserIV(x int64, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		v := lesserIV(x, NewV(yv.values))
+		v := lessIV(x, NewV(yv.values))
 		if v.IsPanic() {
 			return v
 		}
@@ -585,7 +585,7 @@ func lesserIV(x int64, y V) V {
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.elts {
-			ri := lesserIV(x, yi)
+			ri := lessIV(x, yi)
 			if ri.IsPanic() {
 				return ri
 			}
@@ -597,7 +597,7 @@ func lesserIV(x int64, y V) V {
 	}
 }
 
-func lesserSV(x S, y V) V {
+func lessSV(x S, y V) V {
 	switch yv := y.value.(type) {
 	case S:
 		return NewI(int64(int64(b2B(S(x) < S(yv)))))
@@ -609,7 +609,7 @@ func lesserSV(x S, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		v := lesserSV(x, NewV(yv.values))
+		v := lessSV(x, NewV(yv.values))
 		if v.IsPanic() {
 			return v
 		}
@@ -618,7 +618,7 @@ func lesserSV(x S, y V) V {
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.elts {
-			ri := lesserSV(x, yi)
+			ri := lessSV(x, yi)
 			if ri.IsPanic() {
 				return ri
 			}
@@ -630,7 +630,7 @@ func lesserSV(x S, y V) V {
 	}
 }
 
-func lesserABV(x *AB, y V) V {
+func lessABV(x *AB, y V) V {
 	if y.IsI() {
 		r := x.reuse()
 		r.flags |= flagBool
@@ -679,7 +679,7 @@ func lesserABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		v := lesserABV(x, NewV(yv.values))
+		v := lessABV(x, NewV(yv.values))
 		if v.IsPanic() {
 			return v
 		}
@@ -691,7 +691,7 @@ func lesserABV(x *AB, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.elts {
-			ri := lesserIV(int64(x.At(i)), yv.At(i))
+			ri := lessIV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
 				return ri
 			}
@@ -703,7 +703,7 @@ func lesserABV(x *AB, y V) V {
 	}
 }
 
-func lesserAFV(x *AF, y V) V {
+func lessAFV(x *AF, y V) V {
 	if y.IsI() {
 		r := &AB{elts: make([]byte, x.Len()), rc: reuseRCp(x.rc)}
 		r.flags |= flagBool
@@ -752,7 +752,7 @@ func lesserAFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		v := lesserAFV(x, NewV(yv.values))
+		v := lessAFV(x, NewV(yv.values))
 		if v.IsPanic() {
 			return v
 		}
@@ -764,7 +764,7 @@ func lesserAFV(x *AF, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.elts {
-			ri := lesserFV(float64(x.At(i)), yv.At(i))
+			ri := lessFV(float64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
 				return ri
 			}
@@ -776,7 +776,7 @@ func lesserAFV(x *AF, y V) V {
 	}
 }
 
-func lesserAIV(x *AI, y V) V {
+func lessAIV(x *AI, y V) V {
 	if y.IsI() {
 		r := &AB{elts: make([]byte, x.Len()), rc: reuseRCp(x.rc)}
 		r.flags |= flagBool
@@ -825,7 +825,7 @@ func lesserAIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		v := lesserAIV(x, NewV(yv.values))
+		v := lessAIV(x, NewV(yv.values))
 		if v.IsPanic() {
 			return v
 		}
@@ -837,7 +837,7 @@ func lesserAIV(x *AI, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.elts {
-			ri := lesserIV(int64(x.At(i)), yv.At(i))
+			ri := lessIV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
 				return ri
 			}
@@ -849,7 +849,7 @@ func lesserAIV(x *AI, y V) V {
 	}
 }
 
-func lesserASV(x *AS, y V) V {
+func lessASV(x *AS, y V) V {
 	switch yv := y.value.(type) {
 	case S:
 		r := &AB{elts: make([]byte, x.Len()), rc: reuseRCp(x.rc)}
@@ -869,7 +869,7 @@ func lesserASV(x *AS, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		v := lesserASV(x, NewV(yv.values))
+		v := lessASV(x, NewV(yv.values))
 		if v.IsPanic() {
 			return v
 		}
@@ -881,7 +881,7 @@ func lesserASV(x *AS, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.elts {
-			ri := lesserSV(S(x.At(i)), yv.At(i))
+			ri := lessSV(S(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
 				return ri
 			}
@@ -893,52 +893,52 @@ func lesserASV(x *AS, y V) V {
 	}
 }
 
-// greater returns x>y.
-func greater(x, y V) V {
+// more returns x>y.
+func more(x, y V) V {
 	if x.IsI() {
-		return greaterIV(x.I(), y)
+		return moreIV(x.I(), y)
 	}
 	if x.IsF() {
-		return greaterFV(x.F(), y)
+		return moreFV(x.F(), y)
 	}
 	switch xv := x.value.(type) {
 	case S:
-		return greaterSV(xv, y)
+		return moreSV(xv, y)
 	case *AB:
-		return greaterABV(xv, y)
+		return moreABV(xv, y)
 	case *AF:
-		return greaterAFV(xv, y)
+		return moreAFV(xv, y)
 	case *AI:
-		return greaterAIV(xv, y)
+		return moreAIV(xv, y)
 	case *AS:
-		return greaterASV(xv, y)
+		return moreASV(xv, y)
 	case *AV:
 		switch yv := y.value.(type) {
 		case *Dict:
-			return newDictValues(yv.keys, greater(x, NewV(yv.values)))
+			return newDictValues(yv.keys, more(x, NewV(yv.values)))
 		case array:
 			if yv.Len() != xv.Len() {
 				return panicLength("x>y", xv.Len(), yv.Len())
 			}
-			return dyadAVarray(xv, yv, greater)
+			return dyadAVarray(xv, yv, more)
 		}
-		return dyadAVV(xv, y, greater)
+		return dyadAVV(xv, y, more)
 	case *Dict:
 		yv, ok := y.value.(*Dict)
 		if ok {
-			r := dictArith(xv, yv, greater)
+			r := dictArith(xv, yv, more)
 			if r.IsPanic() {
 				return ppanic("d>d", r)
 			}
 			return r
 		}
-		return newDictValues(xv.keys, greater(NewV(xv.values), y))
+		return newDictValues(xv.keys, more(NewV(xv.values), y))
 	default:
 		return panicType("x>y", "x", x)
 	}
 }
 
-func greaterFV(x float64, y V) V {
+func moreFV(x float64, y V) V {
 	if y.IsI() {
 		return NewI(int64(b2B(x > float64(y.I()))))
 	}
@@ -968,7 +968,7 @@ func greaterFV(x float64, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		v := greaterFV(x, NewV(yv.values))
+		v := moreFV(x, NewV(yv.values))
 		if v.IsPanic() {
 			return v
 		}
@@ -977,7 +977,7 @@ func greaterFV(x float64, y V) V {
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.elts {
-			ri := greaterFV(x, yi)
+			ri := moreFV(x, yi)
 			if ri.IsPanic() {
 				return ri
 			}
@@ -989,7 +989,7 @@ func greaterFV(x float64, y V) V {
 	}
 }
 
-func greaterIV(x int64, y V) V {
+func moreIV(x int64, y V) V {
 	if y.IsI() {
 		return NewI(int64(b2B(x > y.I())))
 	}
@@ -1019,7 +1019,7 @@ func greaterIV(x int64, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		v := greaterIV(x, NewV(yv.values))
+		v := moreIV(x, NewV(yv.values))
 		if v.IsPanic() {
 			return v
 		}
@@ -1028,7 +1028,7 @@ func greaterIV(x int64, y V) V {
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.elts {
-			ri := greaterIV(x, yi)
+			ri := moreIV(x, yi)
 			if ri.IsPanic() {
 				return ri
 			}
@@ -1040,7 +1040,7 @@ func greaterIV(x int64, y V) V {
 	}
 }
 
-func greaterSV(x S, y V) V {
+func moreSV(x S, y V) V {
 	switch yv := y.value.(type) {
 	case S:
 		return NewI(int64(int64(b2B(S(x) > S(yv)))))
@@ -1052,7 +1052,7 @@ func greaterSV(x S, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		v := greaterSV(x, NewV(yv.values))
+		v := moreSV(x, NewV(yv.values))
 		if v.IsPanic() {
 			return v
 		}
@@ -1061,7 +1061,7 @@ func greaterSV(x S, y V) V {
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.elts {
-			ri := greaterSV(x, yi)
+			ri := moreSV(x, yi)
 			if ri.IsPanic() {
 				return ri
 			}
@@ -1073,7 +1073,7 @@ func greaterSV(x S, y V) V {
 	}
 }
 
-func greaterABV(x *AB, y V) V {
+func moreABV(x *AB, y V) V {
 	if y.IsI() {
 		r := x.reuse()
 		r.flags |= flagBool
@@ -1122,7 +1122,7 @@ func greaterABV(x *AB, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		v := greaterABV(x, NewV(yv.values))
+		v := moreABV(x, NewV(yv.values))
 		if v.IsPanic() {
 			return v
 		}
@@ -1134,7 +1134,7 @@ func greaterABV(x *AB, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.elts {
-			ri := greaterIV(int64(x.At(i)), yv.At(i))
+			ri := moreIV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
 				return ri
 			}
@@ -1146,7 +1146,7 @@ func greaterABV(x *AB, y V) V {
 	}
 }
 
-func greaterAFV(x *AF, y V) V {
+func moreAFV(x *AF, y V) V {
 	if y.IsI() {
 		r := &AB{elts: make([]byte, x.Len()), rc: reuseRCp(x.rc)}
 		r.flags |= flagBool
@@ -1195,7 +1195,7 @@ func greaterAFV(x *AF, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		v := greaterAFV(x, NewV(yv.values))
+		v := moreAFV(x, NewV(yv.values))
 		if v.IsPanic() {
 			return v
 		}
@@ -1207,7 +1207,7 @@ func greaterAFV(x *AF, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.elts {
-			ri := greaterFV(float64(x.At(i)), yv.At(i))
+			ri := moreFV(float64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
 				return ri
 			}
@@ -1219,7 +1219,7 @@ func greaterAFV(x *AF, y V) V {
 	}
 }
 
-func greaterAIV(x *AI, y V) V {
+func moreAIV(x *AI, y V) V {
 	if y.IsI() {
 		r := &AB{elts: make([]byte, x.Len()), rc: reuseRCp(x.rc)}
 		r.flags |= flagBool
@@ -1268,7 +1268,7 @@ func greaterAIV(x *AI, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		v := greaterAIV(x, NewV(yv.values))
+		v := moreAIV(x, NewV(yv.values))
 		if v.IsPanic() {
 			return v
 		}
@@ -1280,7 +1280,7 @@ func greaterAIV(x *AI, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.elts {
-			ri := greaterIV(int64(x.At(i)), yv.At(i))
+			ri := moreIV(int64(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
 				return ri
 			}
@@ -1292,7 +1292,7 @@ func greaterAIV(x *AI, y V) V {
 	}
 }
 
-func greaterASV(x *AS, y V) V {
+func moreASV(x *AS, y V) V {
 	switch yv := y.value.(type) {
 	case S:
 		r := &AB{elts: make([]byte, x.Len()), rc: reuseRCp(x.rc)}
@@ -1312,7 +1312,7 @@ func greaterASV(x *AS, y V) V {
 		}
 		return NewV(r)
 	case *Dict:
-		v := greaterASV(x, NewV(yv.values))
+		v := moreASV(x, NewV(yv.values))
 		if v.IsPanic() {
 			return v
 		}
@@ -1324,7 +1324,7 @@ func greaterASV(x *AS, y V) V {
 		}
 		r := yv.reuse()
 		for i := range r.elts {
-			ri := greaterSV(S(x.At(i)), yv.At(i))
+			ri := moreSV(S(x.At(i)), yv.At(i))
 			if ri.IsPanic() {
 				return ri
 			}

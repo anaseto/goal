@@ -278,7 +278,7 @@ func vfMore(ctx *Context, args []V) V {
 	case 1:
 		return descend(ctx, args[0])
 	case 2:
-		return greater(args[1], args[0])
+		return more(args[1], args[0])
 	default:
 		return panicRank(">")
 	}
