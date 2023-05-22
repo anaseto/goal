@@ -450,8 +450,8 @@ func equalASV(x *AS, y V) V {
 	}
 }
 
-// lesser returns x<y.
-func lesser(x, y V) V {
+// less returns x<y.
+func less(x, y V) V {
 	if x.IsI() {
 		return lesserIV(x.I(), y)
 	}
@@ -472,24 +472,24 @@ func lesser(x, y V) V {
 	case *AV:
 		switch yv := y.value.(type) {
 		case *Dict:
-			return newDictValues(yv.keys, lesser(x, NewV(yv.values)))
+			return newDictValues(yv.keys, less(x, NewV(yv.values)))
 		case array:
 			if yv.Len() != xv.Len() {
 				return panicLength("x<y", xv.Len(), yv.Len())
 			}
-			return dyadAVarray(xv, yv, lesser)
+			return dyadAVarray(xv, yv, less)
 		}
-		return dyadAVV(xv, y, lesser)
+		return dyadAVV(xv, y, less)
 	case *Dict:
 		yv, ok := y.value.(*Dict)
 		if ok {
-			r := dictArith(xv, yv, lesser)
+			r := dictArith(xv, yv, less)
 			if r.IsPanic() {
 				return ppanic("d<d", r)
 			}
 			return r
 		}
-		return newDictValues(xv.keys, lesser(NewV(xv.values), y))
+		return newDictValues(xv.keys, less(NewV(xv.values), y))
 	default:
 		return panicType("x<y", "x", x)
 	}

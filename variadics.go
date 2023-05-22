@@ -157,7 +157,7 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterDyad("utf8", vfUTF8)
 
 	// runtime functions
-	ctx.RegisterMonad("rt.ofs", vfOFS)
+	ctx.RegisterMonad("rt.ofs", vfRTOFS)
 	ctx.RegisterMonad("rt.prec", vfRTPrec)
 	ctx.RegisterMonad("rt.seed", vfRTSeed)
 	ctx.RegisterMonad("rt.time", vfRTTime)
@@ -228,7 +228,7 @@ func vfDivide(ctx *Context, args []V) V {
 func vfDict(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return enumFieldsKeys(args[0])
+		return enum(args[0])
 	case 2:
 		return dict(args[1], args[0])
 	default:
@@ -266,7 +266,7 @@ func vfLess(ctx *Context, args []V) V {
 	case 1:
 		return ascend(ctx, args[0])
 	case 2:
-		return lesser(args[1], args[0])
+		return less(args[1], args[0])
 	default:
 		return panicRank("<")
 	}
@@ -288,7 +288,7 @@ func vfMore(ctx *Context, args []V) V {
 func vfEqual(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		return icountLinesGroup(args[0])
+		return icountGroup(args[0])
 	case 2:
 		x, y := args[1], args[0]
 		if x.IsFunction() {
@@ -394,7 +394,7 @@ func vfDrop(ctx *Context, args []V) V {
 				ctx.drop()
 				return r
 			}
-			r = dropF(r, y)
+			r = cutWhere(r, y)
 			ctx.drop()
 			return r
 		}
@@ -424,7 +424,7 @@ func vfFind(ctx *Context, args []V) V {
 		if x.IsI() || x.IsF() {
 			return uniform(ctx, x)
 		}
-		return uniq(x)
+		return distinct(x)
 	case 2:
 		x, y := args[1], args[0]
 		if x.IsI() || x.IsF() {
@@ -819,8 +819,8 @@ func vfSub(ctx *Context, args []V) V {
 	}
 }
 
-// vfOFS implements the rt.ofs variadic verb.
-func vfOFS(ctx *Context, args []V) V {
+// vfRTOFS implements the rt.ofs variadic verb.
+func vfRTOFS(ctx *Context, args []V) V {
 	if len(args) > 1 {
 		return panicRank(`rt.ofs`)
 	}

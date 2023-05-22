@@ -431,7 +431,7 @@ func cutIntsS[I integer](x []I, y S) []string {
 	return r
 }
 
-func dropF(x, y V) V {
+func cutWhere(x, y V) V {
 	switch xv := x.value.(type) {
 	case *AB:
 		x = whereAB(xv)
@@ -444,7 +444,7 @@ func dropF(x, y V) V {
 		if x.IsPanic() {
 			return x
 		}
-		return dropF(x, y)
+		return cutWhere(x, y)
 	default:
 		return panicType("f_y", "f[y]", x)
 	}

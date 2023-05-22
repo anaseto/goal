@@ -145,7 +145,7 @@ func (ctx *Context) amend3arrayGeneric(x array, y, f V) (array, error) {
 		return ctx.amend3arrayI(x, y.I(), f)
 	}
 	if isStar(y) {
-		return ctx.amend3array(x, rangeI(int64(x.Len())), f)
+		return ctx.amend3array(x, enumI(int64(x.Len())), f)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -260,7 +260,7 @@ func (ctx *Context) amend4arrayGeneric(x array, y, f, z V) (array, error) {
 		return ctx.amend4arrayI(x, y.I(), f, z)
 	}
 	if isStar(y) {
-		return ctx.amend4array(x, rangeI(int64(x.Len())), f, z)
+		return ctx.amend4array(x, enumI(int64(x.Len())), f, z)
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -347,7 +347,7 @@ func (ctx *Context) deepAmend3array(x array, y, f V) (array, error) {
 	}
 	yv := y.value.(array)
 	if yv.Len() == 0 {
-		return ctx.amend3array(x, rangeI(int64(x.Len())), f)
+		return ctx.amend3array(x, enumI(int64(x.Len())), f)
 	}
 	return ctx.deepAmend3rec(x, yv.at(0), yv.slice(1, yv.Len()), f)
 }
@@ -417,7 +417,7 @@ func (ctx *Context) deepAmend4array(x array, y, f, z V) (array, error) {
 	}
 	yv := y.value.(array)
 	if yv.Len() == 0 {
-		return ctx.amend4array(x, rangeI(int64(x.Len())), f, z)
+		return ctx.amend4array(x, enumI(int64(x.Len())), f, z)
 	}
 	return ctx.deepAmend4rec(x, yv.at(0), yv.slice(1, yv.Len()), f, z)
 }

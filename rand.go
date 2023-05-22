@@ -140,10 +140,10 @@ func deal(ctx *Context, n int64, y V) V {
 		}
 		if yv <= 256 { // <= because up to yv (excluded)
 			r := dealI[byte](ctx, n, yv)
-			return NewV(&AB{elts: r, flags: flagUnique})
+			return NewV(&AB{elts: r, flags: flagDistinct})
 		}
 		r := dealI[int64](ctx, n, yv)
-		return NewV(&AI{elts: r, flags: flagUnique})
+		return NewV(&AI{elts: r, flags: flagDistinct})
 	}
 	if y.IsF() {
 		if !isI(y.F()) {
@@ -167,20 +167,20 @@ func deal(ctx *Context, n int64, y V) V {
 	}
 	switch yv := y.value.(type) {
 	case *AB:
-		fl := flagUnique
+		fl := flagDistinct
 		if yv.IsBoolean() {
 			fl |= flagBool
 		}
 		return NewV(&AB{elts: dealSlice[byte](ctx, n, yv.elts), flags: fl})
 	case *AI:
-		return NewV(&AI{elts: dealSlice[int64](ctx, n, yv.elts), flags: flagUnique})
+		return NewV(&AI{elts: dealSlice[int64](ctx, n, yv.elts), flags: flagDistinct})
 	case *AF:
-		return NewV(&AF{elts: dealSlice[float64](ctx, n, yv.elts), flags: flagUnique})
+		return NewV(&AF{elts: dealSlice[float64](ctx, n, yv.elts), flags: flagDistinct})
 	case *AS:
-		return NewV(&AS{elts: dealSlice[string](ctx, n, yv.elts), flags: flagUnique})
+		return NewV(&AS{elts: dealSlice[string](ctx, n, yv.elts), flags: flagDistinct})
 	case *AV:
 		*yv.rc += 2
-		return NewV(&AV{elts: dealSlice[V](ctx, n, yv.elts), flags: flagUnique, rc: yv.rc})
+		return NewV(&AV{elts: dealSlice[V](ctx, n, yv.elts), flags: flagDistinct, rc: yv.rc})
 	default:
 		panic("deal")
 	}

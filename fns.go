@@ -6,16 +6,16 @@ import (
 	"strings"
 )
 
-// enumFieldsKeys returns !x.
-func enumFieldsKeys(x V) V {
+// enum returns !x.
+func enum(x V) V {
 	if x.IsI() {
-		return rangeI(x.I())
+		return enumI(x.I())
 	}
 	if x.IsF() {
 		if !isI(x.F()) {
 			return Panicf("!i : non-integer i (%g)", x.F())
 		}
-		return rangeI(int64(x.F()))
+		return enumI(int64(x.F()))
 	}
 	switch xv := x.value.(type) {
 	case S:
@@ -27,7 +27,7 @@ func enumFieldsKeys(x V) V {
 		if x.IsPanic() {
 			return ppanic("!I : ", x)
 		}
-		return enumFieldsKeys(x)
+		return enum(x)
 	case *AI:
 		return odometer(xv.elts)
 	case *AS:
@@ -37,7 +37,7 @@ func enumFieldsKeys(x V) V {
 		}
 		return NewAV(r)
 	case *AV:
-		return monadAV(xv, enumFieldsKeys)
+		return monadAV(xv, enum)
 	case *Dict:
 		return xv.Keys()
 	default:
@@ -45,20 +45,20 @@ func enumFieldsKeys(x V) V {
 	}
 }
 
-func rangeI(n int64) V {
+func enumI(n int64) V {
 	if n < 0 {
 		r := make([]int64, -n)
 		for i := range r {
 			r[i] = n + int64(i)
 		}
-		return NewV(&AI{elts: r, flags: flagAscending | flagUnique})
+		return NewV(&AI{elts: r, flags: flagAscending | flagDistinct})
 	}
 	if n < 256 {
 		r := permRange[byte](int(n))
-		return NewV(&AB{elts: r, flags: flagAscending | flagUnique})
+		return NewV(&AB{elts: r, flags: flagAscending | flagDistinct})
 	}
 	r := permRange[int64](int(n))
-	return NewV(&AI{elts: r, flags: flagAscending | flagUnique})
+	return NewV(&AI{elts: r, flags: flagAscending | flagDistinct})
 }
 
 func odometer[I integer](x []I) V {

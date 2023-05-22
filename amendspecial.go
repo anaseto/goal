@@ -182,7 +182,7 @@ func amend4Right(x array, y, z V) (array, error) {
 		return amend4RightI(x, y.I(), z)
 	}
 	if isStar(y) {
-		return amend4Right(x, rangeI(int64(x.Len())), z)
+		return amend4Right(x, enumI(int64(x.Len())), z)
 	}
 	switch yv := y.value.(type) {
 	case *AB:

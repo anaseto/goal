@@ -31,7 +31,7 @@ type flags uint32
 const (
 	flagNone      flags = 0b000
 	flagAscending flags = 0b001
-	flagUnique    flags = 0b010
+	flagDistinct  flags = 0b010
 	flagBool      flags = 0b100
 )
 

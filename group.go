@@ -1,7 +1,7 @@
 package goal
 
-// icountLinesGroup returns =x.
-func icountLinesGroup(x V) V {
+// icountGroup returns =x.
+func icountGroup(x V) V {
 	switch xv := x.value.(type) {
 	case S:
 		return NewAS(lineSplit(string(xv)))
@@ -39,7 +39,7 @@ func icountLinesGroup(x V) V {
 		if x.IsPanic() {
 			return ppanic("=x : ", x)
 		}
-		return icountLinesGroup(x)
+		return icountGroup(x)
 	case *AS:
 		r := make([]V, xv.Len())
 		for i, xi := range xv.elts {
@@ -49,7 +49,7 @@ func icountLinesGroup(x V) V {
 	case *Dict:
 		return groupBy(NewV(xv.values), NewV(xv.keys))
 	case *AV:
-		return monadAV(xv, icountLinesGroup)
+		return monadAV(xv, icountGroup)
 	default:
 		return panicType("=x", "x", x)
 	}

@@ -379,7 +379,7 @@ func BenchmarkWhere(b *testing.B) {
 	}
 }
 
-func BenchmarkUniq10(b *testing.B) {
+func BenchmarkDistinct10(b *testing.B) {
 	ctx := NewContext()
 	ctx.Eval("a:10?10000")
 	for n := 0; n < b.N; n++ {
@@ -387,7 +387,7 @@ func BenchmarkUniq10(b *testing.B) {
 	}
 }
 
-func BenchmarkUniq50(b *testing.B) {
+func BenchmarkDistinct50(b *testing.B) {
 	ctx := NewContext()
 	ctx.Eval("a:50?10000")
 	for n := 0; n < b.N; n++ {
@@ -395,7 +395,7 @@ func BenchmarkUniq50(b *testing.B) {
 	}
 }
 
-func BenchmarkUniq100(b *testing.B) {
+func BenchmarkDistinct100(b *testing.B) {
 	ctx := NewContext()
 	ctx.Eval("a:100?10000")
 	for n := 0; n < b.N; n++ {
@@ -403,7 +403,7 @@ func BenchmarkUniq100(b *testing.B) {
 	}
 }
 
-func BenchmarkUniq256(b *testing.B) {
+func BenchmarkDistinct256(b *testing.B) {
 	ctx := NewContext()
 	ctx.Eval("a:256?10000")
 	for n := 0; n < b.N; n++ {
@@ -411,7 +411,7 @@ func BenchmarkUniq256(b *testing.B) {
 	}
 }
 
-func BenchmarkUniq1000(b *testing.B) {
+func BenchmarkDistinct1000(b *testing.B) {
 	ctx := NewContext()
 	ctx.Eval("a:1000?10000")
 	for n := 0; n < b.N; n++ {
