@@ -131,7 +131,7 @@ _s  to lower    _"ABC" → "abc"              _"AB" "CD" "Π" → "ab" "cd" "π"
 i_s drop bytes  2_"abcde" → "cde"           -2_"abcde" → "abc"
 i_Y drop        2_3 4 5 6 → 5 6             -2_3 4 5 6 → 3 4
 s_s trim prefix "pfx-"_"pfx-name" "pfx2-name" → "name" "pfx2-name"
-f_Y cut where   {0=3!x}_!10 → (0 1 2;3 4 5; 6 7 8;,9)         (same as (&f Y)_Y)
+f_Y cut where   {0=3!x}_!10 → (0 1 2;3 4 5;6 7 8;,9)          (same as (&f Y)_Y)
 I_s cut string  1 3_"abcdef" → "bc" "def"                          (I ascending)
 I_Y cut         2 5_!10 → (2 3 4;5 6 7 8 9)                        (I ascending)
 $x  string      $2 3 → "2 3"      $"text" → "\"text\""
