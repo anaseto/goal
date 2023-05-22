@@ -42,7 +42,7 @@ rxs:(
 (:)scan/1; (0~#tokens)and:error"empty source"; (tok;html):+-2$tokens
 span:{"<span class=\"$x\">$y</span>"}
 html:sub["&""&amp;""'""&#39;""<""&lt;"">""&gt;""\"""&#34;"]html
-html[w]:sub[rx/(?:\\[0-7]{3}|\\[abfnrtv\\]|\\&#34;|\$[a-zA-Z]+|\$[{][a-zA-Z]+[}]|\\x\x{2}|\\u\x{4}|\\U\x{8})/;span["escape";]]'html[w:&tok="string"]
+html[w]:sub[rx/(?:\\[0-7]{3}|\\[abfnrtv\\]|\\&#34;|\$[[:alnum:]]+|\$\{[[:alnum:]]+\}|\\x[[:xdigit:]]{2}|\\u[[:xdigit:]]{4}|\\U[[:xdigit:]]{8})/;span["escape";]]'html[w:&tok="string"]
 html[w]:sub[rx/\\./;span["escape";]]'html[w:&tok="rx"]
 html[w]:sub[rx/[\.+*?()|\[\]{}^$]/;span["rxsym";]]'html[w:&tok="rx"]
 dospan:{html[w]::span[x;]'html[w:&y]}
