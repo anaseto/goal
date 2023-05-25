@@ -152,7 +152,10 @@ sqrt[1;2] / too many arguments
 @[1 2;3 5;+;5] / out of bounds
 @[-1 2;-3 5;+;5] / out of bounds
 @[1 2;-3 5;+;5] / out of bounds
+@[1 2;-3 5;{x+y};5] / out of bounds
+@[1 2;(,-3;,5);{x+y};5] / out of bounds
 @[1 -2;3 5;+;5] / out of bounds
+@[1 -2;3 5;{x+y};5] / out of bounds
 @[1 2;3 5;:;5] / out of bounds
 @[1 -2;3 5;:;5] / out of bounds
 @[1 -2;-3 5;:;5] / out of bounds
@@ -307,6 +310,9 @@ sqrt'"a" "b" / type
 |\(1 2;"a" "b") / type
 @[1 2 3;"a" "b";+;0] / type
 @[1 2 3;0 2;+;0 1 3] / length mismatch
+@["a" 2 3;0 2 1;+;0 1 3] / type
+@["a" 2 3;0 2 1;{x+y};0 1 3] / type
+@[1 2 3;0 2;{x+y};0 1 3] / length mismatch
 @[*;0 2;+;0 1 3] / type
 @["a""b""c"!1 2 3;"a" "c";+;0 1 3] / length mismatch
 @["a""b""c"!1 2 3;"a" "c";:;0 1 3] / length mismatch
@@ -315,10 +321,19 @@ sqrt'"a" "b" / type
 @["a""b""c"!"d""e""f";"a";sqrt] / type
 @[1 2 3;0 5;+;0 1] / out of bounds
 @[1 2 3;0 -5;+;0 1] / out of bounds
+@[1 2 3;0 5;{x+y};0 1] / out of bounds
+@[1 2 3;0 -5;{x+y};0 1] / out of bounds
 @[1 2 3;0 5;1+] / out of bounds
 @[1 2 -3;0 5;1+] / out of bounds
 @[1 2 3;5;1+] / out of bounds
 @[1 2 3;0 "a";1+] / type
+@["a" 2 3;(0;1 0);1+] / type
+@["a" 2 3;(0;1 0);+;1] / type
+@[1 2 3;(0;1 0);+;1 2 3] / length mismatch
+@[1 2 3;(0;1 0);{x+y};1 2 3] / length mismatch
+@["a" 2 3;(0;1 0);{x+y};1] / type
+@["a" 2 3;(0;1 0);{x+y};1 2] / type
+@["a" 2 3;(0;1 0);{x+y};(1;2 3)] / type
 "a"!3 4 / type
 "a""a"!3 / type
 "a""b"!1 2 3 / length mismatch
@@ -929,8 +944,12 @@ a:(#;^);a[(0 1;1 0);3 2 1] / out of depth
 @[1 2;2;+;3] / out of bounds
 @[1 2;*;+;"a"] / type
 @[-1 2;*;+;"a"] / type
-@[1 2;(1 2;3 4 5);+;(1 2;3 4;5 6)] / length mismatch
-@[1 -2;(-1 2;3 4 5);+;(1 2;3 4;5 6)] / length mismatch
+@[1 2;(1 2;3 4 5);+;(1 2;3 4;5 6)] / out of bounds
+@["a" 2;(1 1;0 1 0);+;(1 2;3 5 6)] / type
+@["a" 2;(1 1;0 1 0);{x+y};(1 2;3 5 6)] / type
+@[1 -2;(1 0;1 1 0);+;(1 2;3 4;5 6)] / length mismatch
+@[1 -2;(-1 2;3 4 5);+;(1 2;3 4;5 6)] / out of bounds
+@[1 -2;(1 0;1 1 0);{x+y};(1 2;3 4;5 6)] / length mismatch
 @[1 2;(1 2;3 4 5);:;(1 2;3 4;5 6)] / length mismatch
 .[1 2;"a" "b";+] / type
 .[1 2;5;+] / out of bounds
@@ -1069,3 +1088,11 @@ a:1;a+:@[or[];3] / empty
 rx/[a\O/ / error parsing regexp
 "a"+/(1 2;3 4) / type
 "a"+\(1 2;3 4) / type
+@[7 8 9;5;+;-2] / out of bounds
+.[(1+5 6;8 9);(0 1 0;1 0 1);+;10 12] / length mismatch
+.[(1+5 6;8 9);(0 9 0;1);{x+y};10] / out of bounds
+.[(1+5 6;8 9);(0 1 0;1;1;1);{x+y};10] / out of depth
+.[(1+5 6;8 9);(0 9 0;1);{10+x}] / out of bounds
+.[(1+5 6;8 9);(0 1 0;1;1;1);10+] / out of depth
+@[1 2 3;(0 5;0);~] / out of bounds
+@[1 2 3;5;:;4] / out of bounds

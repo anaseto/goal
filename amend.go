@@ -27,7 +27,7 @@ func (ctx *Context) amend3(x, y, f V) V {
 }
 
 func (ctx *Context) amend3array(x array, y, f V) (array, error) {
-	if f.kind == valVariadic && x.numeric() && y.nonGenericIndices() {
+	if f.kind == valVariadic && x.numeric() {
 		switch f.variadic() {
 		case vMatch:
 			return amend3NotV(x, y)
@@ -36,22 +36,6 @@ func (ctx *Context) amend3array(x array, y, f V) (array, error) {
 		}
 	}
 	return ctx.amend3arrayGeneric(x, y, f)
-}
-
-// nonGenericIndices returns true if indices represented by x are either an
-// atom or a flat array.
-func (x V) nonGenericIndices() bool {
-	if x.IsI() {
-		return true
-	}
-	switch x.value.(type) {
-	case *AB:
-		return true
-	case *AI:
-		return true
-	default:
-		return false
-	}
 }
 
 func amend3Dict(ctx *Context, d *Dict, y, f V) V {
@@ -135,7 +119,7 @@ func (ctx *Context) amend3arrayI(x array, y int64, f V) (array, error) {
 	xy := x.at(int(y))
 	repl := ctx.Apply(f, xy)
 	if repl.IsPanic() {
-		return x, fmt.Errorf("f call: %v", repl.value.(panicV))
+		return x, fmt.Errorf("f call %v", repl.value.(panicV))
 	}
 	return amendArrayAt(x, int(y), repl), nil
 }
@@ -203,6 +187,18 @@ func (ctx *Context) amend4array(x array, y, f, z V) (array, error) {
 		switch f.variadic() {
 		case vRight:
 			return amend4Right(x, y, z)
+		case vAdd:
+			return amend4Arith(x, y, add, z)
+		case vSubtract:
+			return amend4Arith(x, y, subtract, z)
+		case vMultiply:
+			return amend4Arith(x, y, multiply, z)
+		case vDivide:
+			return amend4Arith(x, y, divide, z)
+		case vMax:
+			return amend4Arith(x, y, maximum, z)
+		case vMin:
+			return amend4Arith(x, y, minimum, z)
 		}
 	}
 	return ctx.amend4arrayGeneric(x, y, f, z)
@@ -250,7 +246,7 @@ func (ctx *Context) amend4arrayI(x array, y int64, f, z V) (array, error) {
 	xy := x.at(int(y))
 	repl := ctx.Apply2(f, xy, z)
 	if repl.IsPanic() {
-		return x, fmt.Errorf("f call: %v", repl.value.(panicV))
+		return x, fmt.Errorf("f call %v", repl.value.(panicV))
 	}
 	return amendArrayAt(x, int(y), repl), nil
 }

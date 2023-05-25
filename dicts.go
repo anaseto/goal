@@ -133,46 +133,19 @@ func mergeAtIntegers[I integer](x array, y []I, z array) array {
 
 func dictArith(xd, yd *Dict, f func(V, V) V) V {
 	keys, values, ky := dictAmendKVI(xd, yd.keys)
-	r, err := dictArithAmend(values, ky.value.(array), f, yd.values)
+	var err error
+	var r array
+	switch kyv := ky.value.(type) {
+	case *AB:
+		r, err = arithAmendIntegersArray(values, kyv.elts, f, yd.values)
+	case *AI:
+		r, err = arithAmendIntegersArray(values, kyv.elts, f, yd.values)
+	}
 	if err != nil {
 		return Panicf("%v", err)
 	}
 	initRC(r)
 	return NewV(&Dict{keys: keys, values: canonicalArray(r)})
-}
-
-func dictArithAmendI(x array, y int64, f func(V, V) V, z V) (array, error) {
-	xy := x.at(int(y))
-	repl := f(xy, z)
-	if repl.IsPanic() {
-		return x, newExecError(repl)
-	}
-	return amendArrayAt(x, int(y), repl), nil
-}
-
-func dictArithAmend(x array, y array, f func(V, V) V, z array) (array, error) {
-	switch yv := y.(type) {
-	case *AB:
-		var err error
-		for i, yi := range yv.elts {
-			x, err = dictArithAmendI(x, int64(yi), f, z.at(i))
-			if err != nil {
-				return x, err
-			}
-		}
-		return x, nil
-	case *AI:
-		var err error
-		for i, yi := range yv.elts {
-			x, err = dictArithAmendI(x, yi, f, z.at(i))
-			if err != nil {
-				return x, err
-			}
-		}
-		return x, nil
-	default:
-		panic("dictArithAmend")
-	}
 }
 
 // withKeys implements X#d.

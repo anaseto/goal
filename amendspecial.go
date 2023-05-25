@@ -57,6 +57,17 @@ func inBoundsI(y int64, l int) (int64, bool) {
 	return 0, true
 }
 
+func arithmAmend3AV(x array, y *AV, f func(array, V) (array, error)) (array, error) {
+	var err error
+	for _, yi := range y.elts {
+		x, err = f(x, yi)
+		if err != nil {
+			return x, err
+		}
+	}
+	return x, err
+}
+
 func amend3NotV(x array, y V) (array, error) {
 	yi, ok := inBoundsV(y, x.Len())
 	if !ok {
@@ -65,11 +76,16 @@ func amend3NotV(x array, y V) (array, error) {
 	if y.IsI() {
 		return amend3NotI(x, y.I()), nil
 	}
+	if isStar(y) {
+		return amend3NotV(x, enumI(int64(x.Len())))
+	}
 	switch yv := y.value.(type) {
 	case *AB:
 		return amend3NotIntegers(x, yv.elts), nil
 	case *AI:
 		return amend3NotIntegers(x, yv.elts), nil
+	case *AV:
+		return arithmAmend3AV(x, yv, amend3NotV)
 	default:
 		panic("amend3NotV")
 	}
@@ -121,11 +137,16 @@ func amend3NegateV(x array, y V) (array, error) {
 	if y.IsI() {
 		return amend3NegateI(x, y.I()), nil
 	}
+	if isStar(y) {
+		return amend3NegateV(x, enumI(int64(x.Len())))
+	}
 	switch yv := y.value.(type) {
 	case *AB:
 		return amend3NegateIntegers(x, yv.elts), nil
 	case *AI:
 		return amend3NegateIntegers(x, yv.elts), nil
+	case *AV:
+		return arithmAmend3AV(x, yv, amend3NegateV)
 	default:
 		panic("amend3NegateV")
 	}
@@ -237,6 +258,7 @@ func amend4RightIs[I integer](x array, y []I, z V) (array, error) {
 
 func amend4RightIsV[I integer](x array, y []I, z V) (array, error) {
 	if x.canSet(z) {
+		// NOTE: we could optimize some float and integer mix cases.
 		amend4RightIntegersAtom(x, y, z)
 		return x, nil
 	}
@@ -255,29 +277,11 @@ func amend4RightIsV[I integer](x array, y []I, z V) (array, error) {
 func amend4RightIntegersAtom[I integer](x array, y []I, z V) {
 	switch xv := x.(type) {
 	case *AB:
-		var zi byte
-		if z.IsI() {
-			zi = byte(z.I())
-		} else {
-			zi = byte(z.F())
-		}
-		amendSlice(xv.elts, y, zi)
+		amendSlice(xv.elts, y, byte(z.I()))
 	case *AI:
-		var zi int64
-		if z.IsI() {
-			zi = z.I()
-		} else {
-			zi = int64(z.F())
-		}
-		amendSlice(xv.elts, y, zi)
+		amendSlice(xv.elts, y, z.I())
 	case *AF:
-		var zf float64
-		if z.IsI() {
-			zf = float64(z.I())
-		} else {
-			zf = z.F()
-		}
-		amendSlice(xv.elts, y, zf)
+		amendSlice(xv.elts, y, z.F())
 	case *AS:
 		zs := string(z.value.(S))
 		amendSlice(xv.elts, y, zs)
@@ -353,10 +357,101 @@ func amend4RightAV(x array, yv *AV, z V) (array, error) {
 	if za.Len() != yv.Len() {
 		return x, fmt.Errorf("length mismatch between y and z (%d vs %d)",
 			yv.Len(), za.Len())
-
 	}
 	for i, yi := range yv.elts {
 		x, err = amend4Right(x, yi, za.at(i))
+		if err != nil {
+			return x, err
+		}
+	}
+	return x, nil
+}
+
+func amend4Arith(x array, y V, f func(V, V) V, z V) (array, error) {
+	yi, ok := inBoundsV(y, x.Len())
+	if !ok {
+		return x, fmt.Errorf("out of bounds index (%d)", yi)
+	}
+	if y.IsI() {
+		return arithAmendI(x, int(y.I()), f, z)
+	}
+	if isStar(y) {
+		return amend4Arith(x, enumI(int64(x.Len())), f, z)
+	}
+	switch yv := y.value.(type) {
+	case *AB:
+		return arithAmendIntegersV(x, yv.elts, f, z)
+	case *AI:
+		return arithAmendIntegersV(x, yv.elts, f, z)
+	case *AV:
+		return arithAmend4AV(x, yv.elts, f, z)
+	default:
+		panic("amend4Arith")
+	}
+}
+
+func arithAmendI(x array, y int, f func(V, V) V, z V) (array, error) {
+	xy := x.at(y)
+	repl := f(xy, z)
+	if repl.IsPanic() {
+		return x, newExecError(repl)
+	}
+	return amendArrayAt(x, y, repl), nil
+}
+
+func arithAmendIntegersV[I integer](x array, y []I, f func(V, V) V, z V) (array, error) {
+	za, ok := z.value.(array)
+	if !ok {
+		return arithAmendIntegersAtom(x, y, f, z)
+	}
+	if za.Len() != len(y) {
+		return x, fmt.Errorf("length mismatch between y and z (%d vs %d)",
+			len(y), za.Len())
+	}
+	return arithAmendIntegersArray(x, y, f, za)
+}
+
+func arithAmendIntegersArray[I integer](x array, y []I, f func(V, V) V, z array) (array, error) {
+	var err error
+	for i, yi := range y {
+		x, err = arithAmendI(x, int(yi), f, z.at(i))
+		if err != nil {
+			return x, err
+		}
+	}
+	return x, nil
+}
+
+func arithAmendIntegersAtom[I integer](x array, y []I, f func(V, V) V, z V) (array, error) {
+	var err error
+	z.immutable()
+	for _, yi := range y {
+		x, err = arithAmendI(x, int(yi), f, z)
+		if err != nil {
+			return x, err
+		}
+	}
+	return x, nil
+}
+
+func arithAmend4AV(x array, y []V, f func(V, V) V, z V) (array, error) {
+	var err error
+	za, ok := z.value.(array)
+	if !ok {
+		for _, yi := range y {
+			x, err = amend4Arith(x, yi, f, z)
+			if err != nil {
+				return x, err
+			}
+		}
+		return x, nil
+	}
+	if za.Len() != len(y) {
+		return x, fmt.Errorf("length mismatch between y and z (%d vs %d)",
+			len(y), za.Len())
+	}
+	for i, yi := range y {
+		x, err = amend4Arith(x, yi, f, za.at(i))
 		if err != nil {
 			return x, err
 		}
