@@ -5,30 +5,19 @@ import (
 )
 
 // inBoundsV returns true if it contains only indexes within [0,l), and false
-// otherwise, along with the out index. NOTE: we do not handle negative indices
-// in amend for now.
+// otherwise, along with the out index. NOTE: We do not handle negative indices
+// in amend for now. Also, it doesn't do recursion in generic arrays.
 func inBoundsV(y V, l int) (int64, bool) {
 	if y.IsI() {
 		return inBoundsI(y.I(), l)
-	}
-	if isStar(y) {
-		return 0, true
 	}
 	switch yv := y.value.(type) {
 	case *AB:
 		return inBoundsBytes(yv.elts, l)
 	case *AI:
 		return inBoundsInts(yv.elts, l)
-	case *AV:
-		for _, yi := range yv.elts {
-			i, ok := inBoundsV(yi, l)
-			if !ok {
-				return i, false
-			}
-		}
-		return 0, true
 	default:
-		panic("inBoundsV")
+		return 0, true
 	}
 }
 
