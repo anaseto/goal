@@ -413,13 +413,15 @@ func arithAmendIntegersArray[I integer](x array, y []I, f func(V, V) V, z array)
 
 func arithAmendIntegersAtom[I integer](x array, y []I, f func(V, V) V, z V) (array, error) {
 	var err error
-	z.immutable()
+	z.incrRC2()
 	for _, yi := range y {
 		x, err = arithAmendI(x, int(yi), f, z)
 		if err != nil {
+			z.decrRC2()
 			return x, err
 		}
 	}
+	z.decrRC2()
 	return x, nil
 }
 
