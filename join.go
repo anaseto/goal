@@ -47,7 +47,7 @@ func joinToI(x int64, y V) V {
 	if y.IsF() {
 		return NewAF([]float64{float64(x), float64(y.F())})
 	}
-	left := true
+	const left = true
 	switch yv := y.value.(type) {
 	case S:
 		return NewAV([]V{NewI(x), y})
@@ -73,7 +73,7 @@ func joinToF(x float64, y V) V {
 	if y.IsF() {
 		return NewAF([]float64{float64(x), float64(y.F())})
 	}
-	left := true
+	const left = true
 	switch yv := y.value.(type) {
 	case S:
 		return NewAV([]V{NewF(x), y})
@@ -99,7 +99,7 @@ func joinToS(x S, y V) V {
 	if y.IsF() {
 		return NewAV([]V{NewV(x), y})
 	}
-	left := true
+	const left = true
 	switch yv := y.value.(type) {
 	case S:
 		return NewAS([]string{string(x), string(yv)})
@@ -127,49 +127,19 @@ func joinToAB(x *AB, y V, left bool) V {
 				fl = flagBool
 			}
 			if left {
-				r := make([]byte, x.Len()+1)
-				r[0] = byte(y.I())
-				copy(r[1:], x.elts)
-				return NewV(&AB{elts: r, rc: reuseRCp(x.rc), flags: fl})
+				return NewV(&AB{elts: joinToAnyLeft(x.elts, byte(y.I())), rc: reuseRCp(x.rc), flags: fl})
 			}
 			if reusableRCp(x.RC()) {
 				x.elts = append(x.elts, byte(y.I()))
 				x.flags = fl
 				return NewV(x)
 			}
-			r := make([]byte, x.Len()+1)
-			r[len(r)-1] = byte(y.I())
-			copy(r[:len(r)-1], x.elts)
-			return NewV(&AB{elts: r, flags: fl})
+			return NewV(&AB{elts: joinToAny(x.elts, byte(y.I())), flags: fl})
 		}
-		r := make([]int64, x.Len()+1)
-		if left {
-			r[0] = y.I()
-			for i := 1; i < len(r); i++ {
-				r[i] = int64(x.At(i - 1))
-			}
-		} else {
-			r[len(r)-1] = y.I()
-			for i := 0; i < len(r)-1; i++ {
-				r[i] = int64(x.At(i))
-			}
-		}
-		return NewAIWithRC(r, reuseRCp(x.rc))
+		return NewAIWithRC(joinToIntegersN(x.elts, y.I(), left), reuseRCp(x.rc))
 	}
 	if y.IsF() {
-		r := make([]float64, x.Len()+1)
-		if left {
-			r[0] = y.F()
-			for i := 1; i < len(r); i++ {
-				r[i] = float64(x.At(i - 1))
-			}
-		} else {
-			r[len(r)-1] = y.F()
-			for i := 0; i < len(r)-1; i++ {
-				r[i] = float64(x.At(i))
-			}
-		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewAFWithRC(joinToIntegersN(x.elts, y.F(), left), reuseRCp(x.rc))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -189,39 +159,51 @@ func joinToAB(x *AB, y V, left bool) V {
 	}
 }
 
+func joinToIntegersN[I integer, N number](x []I, y N, left bool) []N {
+	r := make([]N, len(x)+1)
+	if left {
+		r[0] = y
+		for i := 1; i < len(r); i++ {
+			r[i] = N(x[i-1])
+		}
+	} else {
+		r[len(r)-1] = y
+		for i := 0; i < len(r)-1; i++ {
+			r[i] = N(x[i])
+		}
+	}
+	return r
+}
+
+func joinToAny[T any](x []T, y T) []T {
+	r := make([]T, len(x)+1)
+	r[len(r)-1] = y
+	copy(r[:len(r)-1], x)
+	return r
+}
+
+func joinToAnyLeft[T any](x []T, y T) []T {
+	r := make([]T, len(x)+1)
+	r[0] = y
+	copy(r[1:], x)
+	return r
+}
+
 func joinToAI(x *AI, y V, left bool) V {
 	if y.IsI() {
 		if left {
-			r := make([]int64, x.Len()+1)
-			r[0] = y.I()
-			copy(r[1:], x.elts)
-			return NewAIWithRC(r, reuseRCp(x.rc))
+			return NewAIWithRC(joinToAnyLeft(x.elts, y.I()), reuseRCp(x.rc))
 		}
 		if reusableRCp(x.RC()) {
 			x.elts = append(x.elts, y.I())
 			x.flags = flagNone
 			return NewV(x)
 		}
-		r := make([]int64, x.Len()+1)
-		r[len(r)-1] = y.I()
-		copy(r[:len(r)-1], x.elts)
-		return NewAI(r)
+		return NewAI(joinToAny(x.elts, y.I()))
 
 	}
 	if y.IsF() {
-		r := make([]float64, x.Len()+1)
-		if left {
-			r[0] = y.F()
-			for i := 1; i < len(r); i++ {
-				r[i] = float64(x.At(i - 1))
-			}
-		} else {
-			r[len(r)-1] = y.F()
-			for i := 0; i < len(r)-1; i++ {
-				r[i] = float64(x.At(i))
-			}
-		}
-		return NewAFWithRC(r, reuseRCp(x.rc))
+		return NewAFWithRC(joinToIntegersN(x.elts, y.F(), left), reuseRCp(x.rc))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -244,37 +226,25 @@ func joinToAI(x *AI, y V, left bool) V {
 func joinToAF(x *AF, y V, left bool) V {
 	if y.IsI() {
 		if left {
-			r := make([]float64, x.Len()+1)
-			r[0] = float64(y.I())
-			copy(r[1:], x.elts)
-			return NewAFWithRC(r, reuseRCp(x.rc))
+			return NewAFWithRC(joinToAnyLeft(x.elts, float64(y.I())), reuseRCp(x.rc))
 		}
 		if reusableRCp(x.RC()) {
 			x.elts = append(x.elts, float64(y.I()))
 			x.flags = flagNone
 			return NewV(x)
 		}
-		r := make([]float64, x.Len()+1)
-		r[len(r)-1] = float64(y.I())
-		copy(r[:len(r)-1], x.elts)
-		return NewAF(r)
+		return NewAF(joinToAny(x.elts, float64(y.I())))
 	}
 	if y.IsF() {
 		if left {
-			r := make([]float64, x.Len()+1)
-			r[0] = y.F()
-			copy(r[1:], x.elts)
-			return NewAFWithRC(r, reuseRCp(x.rc))
+			return NewAFWithRC(joinToAnyLeft(x.elts, y.F()), reuseRCp(x.rc))
 		}
 		if reusableRCp(x.RC()) {
 			x.elts = append(x.elts, y.F())
 			x.flags = flagNone
 			return NewV(x)
 		}
-		r := make([]float64, x.Len()+1)
-		r[len(r)-1] = y.F()
-		copy(r[:len(r)-1], x.elts)
-		return NewAF(r)
+		return NewAF(joinToAny(x.elts, y.F()))
 	}
 	switch yv := y.value.(type) {
 	case *AB:
@@ -305,10 +275,14 @@ func joinABAB(x *AB, y *AB) V {
 		x.flags = fl
 		return NewV(x)
 	}
-	r := make([]byte, y.Len()+x.Len())
-	copy(r[:x.Len()], x.elts)
-	copy(r[x.Len():], y.elts)
-	return NewV(&AB{elts: r, flags: fl})
+	return NewV(&AB{elts: joinAnyAny(x.elts, y.elts), flags: fl})
+}
+
+func joinAnyAny[T any](x, y []T) []T {
+	r := make([]T, len(x)+len(y))
+	copy(r[:len(x)], x)
+	copy(r[len(x):], y)
+	return r
 }
 
 func joinAIAI(x *AI, y *AI) V {
@@ -317,10 +291,7 @@ func joinAIAI(x *AI, y *AI) V {
 		x.flags = flagNone
 		return NewV(x)
 	}
-	r := make([]int64, y.Len()+x.Len())
-	copy(r[:x.Len()], x.elts)
-	copy(r[x.Len():], y.elts)
-	return NewAI(r)
+	return NewAI(joinAnyAny(x.elts, y.elts))
 }
 
 func joinAFAF(x *AF, y *AF) V {
@@ -329,10 +300,7 @@ func joinAFAF(x *AF, y *AF) V {
 		x.flags = flagNone
 		return NewV(x)
 	}
-	r := make([]float64, y.Len()+x.Len())
-	copy(r[:x.Len()], x.elts)
-	copy(r[x.Len():], y.elts)
-	return NewAF(r)
+	return NewAF(joinAnyAny(x.elts, y.elts))
 }
 
 func joinABAI(x *AB, y *AI) V {
@@ -414,20 +382,14 @@ func joinToAS(x *AS, y V, left bool) V {
 	switch yv := y.value.(type) {
 	case S:
 		if left {
-			r := make([]string, x.Len()+1)
-			r[0] = string(yv)
-			copy(r[1:], x.elts)
-			return NewASWithRC(r, reuseRCp(x.rc))
+			return NewASWithRC(joinToAnyLeft(x.elts, string(yv)), reuseRCp(x.rc))
 		}
 		if reusableRCp(x.RC()) {
 			x.elts = append(x.elts, string(yv))
 			x.flags = flagNone
 			return NewV(x)
 		}
-		r := make([]string, x.Len()+1)
-		r[len(r)-1] = string(yv)
-		copy(r[:len(r)-1], x.elts)
-		return NewAS(r)
+		return NewAS(joinToAny(x.elts, string(yv)))
 	case *AS:
 		// left == false
 		if reusableRCp(x.RC()) {
@@ -435,10 +397,7 @@ func joinToAS(x *AS, y V, left bool) V {
 			x.flags = flagNone
 			return NewV(x)
 		}
-		r := make([]string, x.Len()+yv.Len())
-		copy(r[:x.Len()], x.elts)
-		copy(r[x.Len():], yv.elts)
-		return NewAS(r)
+		return NewAS(joinAnyAny(x.elts, yv.elts))
 	case array:
 		// left == false
 		return joinArrays(x, yv)
@@ -466,10 +425,7 @@ func joinToAV(x *AV, y V, left bool) V {
 			return toArray(y)
 		}
 		if left {
-			r := make([]V, x.Len()+1)
-			r[0] = y
-			copy(r[1:], x.elts)
-			return NewV(&AV{elts: r})
+			return NewV(&AV{elts: joinToAnyLeft(x.elts, y)})
 		}
 		if reusableRCp(x.RC()) {
 			x.elts = append(x.elts, y)
@@ -477,10 +433,7 @@ func joinToAV(x *AV, y V, left bool) V {
 			x.flags = flagNone
 			return NewV(x)
 		}
-		r := make([]V, x.Len()+1)
-		r[len(r)-1] = y
-		copy(r[:len(r)-1], x.elts)
-		return NewV(&AV{elts: r})
+		return NewV(&AV{elts: joinToAny(x.elts, y)})
 	}
 }
 
