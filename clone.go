@@ -112,20 +112,6 @@ func (d *Dict) CloneWithRC(rc *int) Value {
 	return &Dict{keys: d.keys.CloneWithRC(rc).(array), values: d.values.CloneWithRC(rc).(array)}
 }
 
-func (d *Dict) clone() *Dict {
-	krc := d.keys.RC()
-	if !reusableRCp(krc) || krc == nil {
-		var n int
-		krc = &n
-	}
-	vrc := d.values.RC()
-	if !reusableRCp(vrc) || vrc == nil {
-		var n int
-		vrc = &n
-	}
-	return &Dict{keys: d.keys.CloneWithRC(krc).(array), values: d.values.CloneWithRC(vrc).(array)}
-}
-
 func (p *projection) CloneWithRC(rc *int) Value {
 	np := &projection{Fun: p.Fun.CloneWithRC(rc), Args: make([]V, len(p.Args))}
 	for i, arg := range p.Args {
