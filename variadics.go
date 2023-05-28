@@ -326,7 +326,7 @@ func vfJoin(ctx *Context, args []V) V {
 	case 1:
 		return enlist(args[0])
 	case 2:
-		return joinTo(args[1], args[0])
+		return join(args[1], args[0])
 	default:
 		return panicRank(",")
 	}

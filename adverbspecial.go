@@ -580,7 +580,7 @@ func fold2vJoin(x V) V {
 		}
 		r := xv.elts[0]
 		for _, xi := range xv.elts[1:] {
-			r = joinTo(r, xi) // does not panic
+			r = join(r, xi) // does not panic
 		}
 		return r
 	default:
@@ -594,11 +594,11 @@ func fold3vJoin(x, y V) V {
 		return fold3vJoin(x, NewV(yv.values))
 	case *AV:
 		for _, yi := range yv.elts {
-			x = joinTo(x, yi) // does not panic
+			x = join(x, yi) // does not panic
 		}
 		return x
 	default:
-		return joinTo(x, y)
+		return join(x, y)
 	}
 }
 
@@ -612,7 +612,7 @@ func convergeJoin(x V) V {
 		}
 		r := xv.elts[0]
 		for _, xi := range xv.elts[1:] {
-			r = joinTo(r, xi) // does not panic
+			r = join(r, xi) // does not panic
 		}
 		return convergeJoin(r)
 	default:

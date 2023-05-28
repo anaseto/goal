@@ -101,7 +101,7 @@ func dictAmendKVI(xd *Dict, yk array) (array, array, V) {
 	if max == int64(nkeys) {
 		b := equalIV(max, ky)
 		flags := keys.getFlags() & flagDistinct
-		keys = joinTo(NewV(keys), distinct(replicate(b, ykv))).value.(array)
+		keys = join(NewV(keys), distinct(replicate(b, ykv))).value.(array)
 		keys.setFlags(flags)
 		initRC(keys)
 		values = padArrayMut(keys.Len()-nkeys, values)

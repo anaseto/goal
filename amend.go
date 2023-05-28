@@ -52,7 +52,7 @@ func amend3Dict(ctx *Context, d *Dict, y, f V) V {
 		keys, values := d.keys, d.values.shallowClone()
 		ky := findArray(keys, y)
 		if ky.I() == int64(keys.Len()) {
-			keys = joinTo(NewV(keys), y).value.(array)
+			keys = join(NewV(keys), y).value.(array)
 			initRC(keys)
 			values = padArrayMut(1, values)
 		}
@@ -218,7 +218,7 @@ func amend4Dict(ctx *Context, d *Dict, y, f, z V) V {
 		keys, values := d.keys, d.values.shallowClone()
 		ky := findArray(keys, y)
 		if ky.I() == int64(keys.Len()) {
-			keys = joinTo(NewV(keys), y).value.(array)
+			keys = join(NewV(keys), y).value.(array)
 			initRC(keys)
 			values = padArrayMut(1, values)
 		}

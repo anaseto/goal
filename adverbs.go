@@ -16,7 +16,7 @@ func fold2(ctx *Context, args []V) V {
 		}
 		switch fv := f.value.(type) {
 		case S:
-			return joinS(fv, args[0])
+			return joinStrings(fv, args[0])
 		case *AB, *AI, *AF:
 			return decode(f, args[0])
 		default:
@@ -79,7 +79,7 @@ func foldfx(ctx *Context, f, x V) V {
 	}
 }
 
-func joinS(sep S, x V) V {
+func joinStrings(sep S, x V) V {
 	switch xv := x.value.(type) {
 	case S:
 		return x
