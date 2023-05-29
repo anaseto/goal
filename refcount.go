@@ -367,7 +367,7 @@ func refcounts(x V) V {
 	case *AV:
 		return NewI(int64(xv.rc))
 	case *Dict:
-		return Canonical(NewAV([]V{refcounts(NewV(xv.keys)), refcounts(NewV(xv.values))}))
+		return canonicalAV(newAV([]V{refcounts(NewV(xv.keys)), refcounts(NewV(xv.values))}))
 	default:
 		return NewI(math.MinInt64)
 	}

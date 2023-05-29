@@ -254,7 +254,7 @@ func applyS2Is[I integer](s S, x []I, y V) V {
 			ri.MarkImmutable()
 			r[i] = ri
 		}
-		return newAV(r)
+		return newAVu(r)
 	default:
 		return panicType("s[i;y]", "y", y)
 	}
@@ -482,7 +482,7 @@ func castb(y V) V {
 		for i, s := range yv.elts {
 			r[i] = NewV(&AB{elts: []byte(s), flags: flagImmutable})
 		}
-		return newAV(r)
+		return newAVu(r)
 	case *AB:
 		return NewS(string(yv.elts))
 	case *AI:
@@ -540,7 +540,7 @@ func castc(y V) V {
 			ri.MarkImmutable()
 			r[i] = ri
 		}
-		return newAV(r)
+		return newAVu(r)
 	case *AV:
 		return canonicalFast(monadAV(yv, castc))
 	default:
@@ -729,7 +729,7 @@ func dropAS(x *AS, y V) V {
 			ri.MarkImmutable()
 			r[i] = ri
 		}
-		return newAV(r)
+		return newAVu(r)
 	case *Dict:
 		if x.Len() != yv.Len() {
 			return panicLength("S_S", x.Len(), yv.Len())
@@ -937,7 +937,7 @@ func splitN(n int, sep S, y V) V {
 		for i := range r {
 			r[i] = NewV(&AS{elts: strings.SplitN(yv.At(i), string(sep), n), flags: flagImmutable})
 		}
-		return newAV(r)
+		return newAVu(r)
 	case *AV:
 		return monadAV(yv, func(y V) V { return splitN(n, sep, y) })
 	case *Dict:

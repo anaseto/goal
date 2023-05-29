@@ -656,7 +656,7 @@ func scan3Generic(x V, y array, f func(V, V) V) V {
 	}
 	// Will never be canonical (for currently used fs), so normalizing is
 	// not needed.
-	return newAV(r)
+	return newAVu(r)
 }
 
 func scan2vAdd(x V) V {

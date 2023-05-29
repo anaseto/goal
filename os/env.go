@@ -18,9 +18,6 @@ func environ() goal.V {
 	}
 	keys := goal.NewAS(ss[:len(env)])
 	values := goal.NewAS(ss[len(env):])
-	var n int = 2
-	keys.InitWithRC(&n)
-	values.InitWithRC(&n)
 	return goal.NewDict(keys, values)
 }
 

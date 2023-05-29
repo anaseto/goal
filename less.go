@@ -261,7 +261,7 @@ func (xv *projection) LessT(y Value) bool {
 	switch yv := y.(type) {
 	case *projection:
 		return xv.Fun.LessT(yv.Fun) ||
-			xv.Fun.Matches(yv.Fun) && NewAV(xv.Args).LessT(NewAV(yv.Args))
+			xv.Fun.Matches(yv.Fun) && newAVu(xv.Args).LessT(newAVu(yv.Args))
 	case function:
 		return xv.stype() < yv.stype()
 	default:

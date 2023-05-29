@@ -122,20 +122,45 @@ func (x *AS) Slice() []string {
 	return x.elts
 }
 
-// AV represents a generic array.
+// AV represents a generic array. The elements of a generic array are marked as
+// immutable, and they should not be representable together in a specialized
+// array. In other words, it should be the canonical form of the array.
 type AV A[V]
 
-// NewAV returns a new generic array.
+// NewAV returns a new array from a slice of generic values. The result value
+// will be an array in canonical form.
 func NewAV(x []V) V {
-	for _, xi := range x {
-		xi.MarkImmutable()
+	xav := &AV{elts: x}
+	xv, cloned := normalize(xav)
+	if cloned {
+		r := NewV(xv)
+		return r
 	}
+	for _, x := range xav.elts {
+		x.MarkImmutable()
+	}
+	return NewV(xav)
+}
+
+// newAVu returns a new generic array. It does not mark its elements as
+// immutable, assuming they already were marked as such.
+func newAVu(x []V) V {
 	return NewV(&AV{elts: x})
 }
 
-// newAV returns a new generic array. It does not mark it's elements as
-// immutable, assuming they already were marked as such.
-func newAV(x []V) V {
+// newAV returns a new generic array.
+func newAV(x []V) *AV {
+	for _, xi := range x {
+		xi.MarkImmutable()
+	}
+	return &AV{elts: x}
+}
+
+// newAV returns a new generic array.
+func newAVv(x []V) V {
+	for _, xi := range x {
+		xi.MarkImmutable()
+	}
 	return NewV(&AV{elts: x})
 }
 

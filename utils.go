@@ -215,16 +215,7 @@ func toIndicesRec(x V) V {
 	case *AF:
 		return toAI(xv)
 	case *AV:
-		r := make([]V, xv.Len())
-		for i, xi := range xv.elts {
-			ri := toIndicesRec(xi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r[i] = ri
-		}
-		return NewAV(r)
+		return monadAV(xv, func(xi V) V { return toIndicesRec(xi) })
 	case *AS:
 		return Panicf("bad type \"%s\" as index", x.Type())
 	default:
@@ -718,7 +709,7 @@ func canonicalArray(x array) array {
 func canonicalVs(r []V) V {
 	ra, ok := normalize(&AV{elts: r})
 	if !ok {
-		newAV(r)
+		newAVu(r)
 	}
 	return NewV(ra)
 }
@@ -760,9 +751,13 @@ func canonicalFast(x V) V {
 	}
 }
 
+func protoAV() V {
+	return NewV(&AV{flags: flagImmutable})
+}
+
 func proto(x []V) V {
 	if len(x) == 0 {
-		return NewV(&AV{flags: flagImmutable})
+		return protoAV()
 	}
 	return protoV(x[0])
 }
@@ -786,7 +781,7 @@ func protoV(x V) V {
 	case *AS:
 		return NewV(&AS{flags: flagImmutable})
 	case *AV:
-		return NewV(&AV{flags: flagImmutable})
+		return protoAV()
 	case *Dict:
 		return NewDict(protoArray(xv.keys), protoArray(xv.values))
 	default:
@@ -808,7 +803,7 @@ func protoArray(x array) V {
 	case *AS:
 		return NewV(&AS{flags: flagImmutable})
 	case *AV:
-		return NewV(&AV{flags: flagImmutable})
+		return protoAV()
 	default:
 		panic("protoArray")
 	}
@@ -850,7 +845,7 @@ func protoArrayForV(x V) V {
 	case *AS:
 		return NewV(&AS{flags: flagImmutable})
 	default:
-		return NewV(&AV{flags: flagImmutable})
+		return protoAV()
 	}
 }
 

@@ -111,9 +111,10 @@ func doTime(cmd string, y V, layout, loc string) V {
 			if ri.IsPanic() {
 				return ri
 			}
+			ri.MarkImmutable()
 			r[i] = ri
 		}
-		return canonicalFast(NewAV(r))
+		return canonicalVs(r)
 	case *AV:
 		r := make([]V, yv.Len())
 		for i, yi := range yv.elts {
@@ -121,9 +122,10 @@ func doTime(cmd string, y V, layout, loc string) V {
 			if ri.IsPanic() {
 				return ri
 			}
+			ri.MarkImmutable()
 			r[i] = ri
 		}
-		return canonicalFast(NewAV(r))
+		return canonicalVs(r)
 	default:
 		return panicType("time[cmd;t;...]", "t", y)
 	}
@@ -136,9 +138,10 @@ func doTimeInts[I integer](cmd string, y []I, layout, loc string) V {
 		if ri.IsPanic() {
 			return ri
 		}
+		ri.MarkImmutable()
 		r[i] = ri
 	}
-	return canonicalFast(NewAV(r))
+	return canonicalVs(r)
 }
 
 func doTimeI(cmd string, yv int64, layout string) V {
@@ -212,7 +215,7 @@ func ftime(cmd string, t time.Time) V {
 		return NewI(int64(t.YearDay()))
 	case "zone":
 		zone, seconds := t.Zone()
-		return NewAV([]V{NewS(zone), NewI(int64(seconds))})
+		return newAVu([]V{NewS(zone), NewI(int64(seconds))})
 	default:
 		cmd = getFormat(cmd)
 		if strings.ContainsAny(cmd, " 0123456789-") {

@@ -46,9 +46,9 @@ func encodeIInts(f int64, x []int64) V {
 	encodeIIs(f, a, len(x), n)
 	r := make([]V, n)
 	for i := range r {
-		r[i] = NewAI(a[i*len(x) : (i+1)*len(x)])
+		r[i] = NewV(&AI{elts: a[i*len(x) : (i+1)*len(x)], flags: flagImmutable})
 	}
-	return NewAV(r)
+	return newAVu(r)
 }
 
 func encodeIBytes(f int64, x []byte) V {
@@ -63,9 +63,9 @@ func encodeIBytes(f int64, x []byte) V {
 		fl |= flagBool
 	}
 	for i := range r {
-		r[i] = NewV(&AB{elts: a[i*len(x) : (i+1)*len(x)], flags: fl})
+		r[i] = NewV(&AB{elts: a[i*len(x) : (i+1)*len(x)], flags: fl | flagImmutable})
 	}
-	return NewAV(r)
+	return newAVu(r)
 }
 
 func encodeIIs[I integer](f int64, a []I, cols, n int) {
@@ -113,9 +113,9 @@ func encodeIsBytes[I integer](f []I, x []byte) V {
 		fl |= flagBool
 	}
 	for i := range r {
-		r[i] = NewV(&AB{elts: a[i*len(x) : (i+1)*len(x)], flags: fl})
+		r[i] = NewV(&AB{elts: a[i*len(x) : (i+1)*len(x)], flags: fl | flagImmutable})
 	}
-	return NewAV(r)
+	return newAVu(r)
 }
 
 func encodeIsInts[I integer](f []I, x []int64) V {
@@ -129,9 +129,9 @@ func encodeIsInts[I integer](f []I, x []int64) V {
 	encodeIsIs(f, a, len(x))
 	r := make([]V, n)
 	for i := range r {
-		r[i] = NewAI(a[i*len(x) : (i+1)*len(x)])
+		r[i] = NewV(&AI{elts: a[i*len(x) : (i+1)*len(x)], flags: flagImmutable})
 	}
-	return NewAV(r)
+	return newAVu(r)
 }
 
 func encodeIsIs[I integer, J integer](f []I, a []J, cols int) {
@@ -173,14 +173,7 @@ func encode(f V, x V) V {
 			}
 			return encode(f, aix)
 		case *AV:
-			r := make([]V, xv.Len())
-			for i, xi := range xv.elts {
-				r[i] = encode(f, xi)
-				if r[i].IsPanic() {
-					return r[i]
-				}
-			}
-			return canonicalFast(NewAV(r))
+			return Canonical(monadAV(xv, func(xi V) V { return encode(f, xi) }))
 		default:
 			return panicType("i\\x", "x", x)
 		}
@@ -221,14 +214,7 @@ func encode(f V, x V) V {
 			}
 			return encode(f, aix)
 		case *AV:
-			r := make([]V, xv.Len())
-			for i, xi := range xv.elts {
-				r[i] = encode(f, xi)
-				if r[i].IsPanic() {
-					return r[i]
-				}
-			}
-			return canonicalFast(NewAV(r))
+			return Canonical(monadAV(xv, func(xi V) V { return encode(f, xi) }))
 		default:
 			return panicType("I\\x", "x", x)
 		}
@@ -270,14 +256,7 @@ func decode(f V, x V) V {
 			}
 			return decode(f, aix)
 		case *AV:
-			r := make([]V, xv.Len())
-			for i, xi := range xv.elts {
-				r[i] = decode(f, xi)
-				if r[i].IsPanic() {
-					return r[i]
-				}
-			}
-			return canonicalFast(NewAV(r))
+			return Canonical(monadAV(xv, func(xi V) V { return decode(f, xi) }))
 		default:
 			return panicType("i/x", "x", x)
 		}
@@ -325,14 +304,7 @@ func decode(f V, x V) V {
 			}
 			return decode(f, aix)
 		case *AV:
-			r := make([]V, xv.Len())
-			for i, xi := range xv.elts {
-				r[i] = decode(f, xi)
-				if r[i].IsPanic() {
-					return r[i]
-				}
-			}
-			return canonicalFast(NewAV(r))
+			return Canonical(monadAV(xv, func(xi V) V { return decode(f, xi) }))
 		default:
 			return panicType("I/x", "x", x)
 		}

@@ -76,7 +76,7 @@ func roll(ctx *Context, n int64, y V) V {
 	case *AS:
 		return NewAS(rollSlice[string](ctx, n, yv.elts))
 	case *AV:
-		return newAV(rollSlice[V](ctx, n, yv.elts))
+		return newAVu(rollSlice[V](ctx, n, yv.elts))
 	default:
 		return panicType("i?y", "y", y)
 	}

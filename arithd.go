@@ -88,16 +88,7 @@ func equalFV(x float64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := equalFV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return equalFV(x, yi) })
 	default:
 		return panicType("x=y", "y", y)
 	}
@@ -139,16 +130,7 @@ func equalIV(x int64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := equalIV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return equalIV(x, yi) })
 	default:
 		return panicType("x=y", "y", y)
 	}
@@ -172,16 +154,7 @@ func equalSV(x S, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := equalSV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return equalSV(x, yi) })
 	default:
 		return panicType("x=y", "y", y)
 	}
@@ -531,16 +504,7 @@ func lessFV(x float64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := lessFV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return lessFV(x, yi) })
 	default:
 		return panicType("x<y", "y", y)
 	}
@@ -582,16 +546,7 @@ func lessIV(x int64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := lessIV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return lessIV(x, yi) })
 	default:
 		return panicType("x<y", "y", y)
 	}
@@ -615,16 +570,7 @@ func lessSV(x S, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := lessSV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return lessSV(x, yi) })
 	default:
 		return panicType("x<y", "y", y)
 	}
@@ -974,16 +920,7 @@ func moreFV(x float64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := moreFV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return moreFV(x, yi) })
 	default:
 		return panicType("x>y", "y", y)
 	}
@@ -1025,16 +962,7 @@ func moreIV(x int64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := moreIV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return moreIV(x, yi) })
 	default:
 		return panicType("x>y", "y", y)
 	}
@@ -1058,16 +986,7 @@ func moreSV(x S, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := moreSV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return moreSV(x, yi) })
 	default:
 		return panicType("x>y", "y", y)
 	}
@@ -1426,16 +1345,7 @@ func addFV(x float64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := addFV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return addFV(x, yi) })
 	default:
 		return panicType("x+y", "y", y)
 	}
@@ -1486,16 +1396,7 @@ func addIV(x int64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := addIV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return addIV(x, yi) })
 	default:
 		return panicType("x+y", "y", y)
 	}
@@ -1518,16 +1419,7 @@ func addSV(x S, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := addSV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return addSV(x, yi) })
 	default:
 		return panicType("x+y", "y", y)
 	}
@@ -1857,16 +1749,7 @@ func subtractFV(x float64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := subtractFV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return subtractFV(x, yi) })
 	default:
 		return panicType("x-y", "y", y)
 	}
@@ -1905,16 +1788,7 @@ func subtractIV(x int64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := subtractIV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return subtractIV(x, yi) })
 	default:
 		return panicType("x-y", "y", y)
 	}
@@ -1937,16 +1811,7 @@ func subtractSV(x S, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := subtractSV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return subtractSV(x, yi) })
 	default:
 		return panicType("x-y", "y", y)
 	}
@@ -2284,16 +2149,7 @@ func multiplyFV(x float64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := multiplyFV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return multiplyFV(x, yi) })
 	default:
 		return panicType("x*y", "y", y)
 	}
@@ -2340,16 +2196,7 @@ func multiplyIV(x int64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := multiplyIV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return multiplyIV(x, yi) })
 	default:
 		return panicType("x*y", "y", y)
 	}
@@ -2388,16 +2235,7 @@ func multiplySV(x S, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := multiplySV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return multiplySV(x, yi) })
 	default:
 		return panicType("x*y", "y", y)
 	}
@@ -2794,16 +2632,7 @@ func divideFV(x float64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := divideFV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return divideFV(x, yi) })
 	default:
 		return panicType("x%y", "y", y)
 	}
@@ -2842,16 +2671,7 @@ func divideIV(x int64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := divideIV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return divideIV(x, yi) })
 	default:
 		return panicType("x%y", "y", y)
 	}
@@ -3151,16 +2971,7 @@ func minimumFV(x float64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := minimumFV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return minimumFV(x, yi) })
 	default:
 		return panicType("x&y", "y", y)
 	}
@@ -3211,16 +3022,7 @@ func minimumIV(x int64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := minimumIV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return minimumIV(x, yi) })
 	default:
 		return panicType("x&y", "y", y)
 	}
@@ -3243,16 +3045,7 @@ func minimumSV(x S, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := minimumSV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return minimumSV(x, yi) })
 	default:
 		return panicType("x&y", "y", y)
 	}
@@ -3602,16 +3395,7 @@ func maximumFV(x float64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := maximumFV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return maximumFV(x, yi) })
 	default:
 		return panicType("x|y", "y", y)
 	}
@@ -3662,16 +3446,7 @@ func maximumIV(x int64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := maximumIV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return maximumIV(x, yi) })
 	default:
 		return panicType("x|y", "y", y)
 	}
@@ -3694,16 +3469,7 @@ func maximumSV(x S, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := maximumSV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return maximumSV(x, yi) })
 	default:
 		return panicType("x|y", "y", y)
 	}
@@ -4037,16 +3803,7 @@ func arctan2FV(x float64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := arctan2FV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return arctan2FV(x, yi) })
 	default:
 		return panicType("x atan y", "y", y)
 	}
@@ -4085,16 +3842,7 @@ func arctan2IV(x int64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := arctan2IV(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return arctan2IV(x, yi) })
 	default:
 		return panicType("x atan y", "y", y)
 	}

@@ -53,11 +53,11 @@ func fCSV(ctx *Context, comma rune, x V) V {
 			record, err := csvr.Read()
 			if err != nil {
 				if err == io.EOF {
-					return NewAV(r)
+					return newAVu(r)
 				}
 				return Errorf("%v", err)
 			}
-			r = append(r, NewAS(record))
+			r = append(r, NewV(&AS{elts: record, flags: flagImmutable}))
 		}
 	case *AS:
 		sb := strings.Builder{}

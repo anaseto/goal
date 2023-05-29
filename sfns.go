@@ -95,7 +95,7 @@ func rotateIs[I integer](x []I, y V) V {
 		ri.MarkImmutable()
 		r[i] = ri
 	}
-	return newAV(r)
+	return newAVu(r)
 }
 
 func rotateI(i int64, y V) V {
@@ -158,7 +158,7 @@ func first(x V) V {
 			case *AS:
 				return NewS("")
 			case *AV:
-				return NewAV(nil)
+				return protoAV()
 			default:
 				return NewI(0)
 			}
@@ -300,10 +300,10 @@ func cutAIarray(x *AI, y array) V {
 	}
 	xlen := x.Len()
 	if xlen == 0 {
-		return NewAV(nil)
+		return protoAV()
 	}
 	r := cutIntsArray(x.elts, y)
-	return newAV(r)
+	return newAVu(r)
 }
 
 func cutABarray(x *AB, y array) V {
@@ -319,10 +319,10 @@ func cutABarray(x *AB, y array) V {
 	}
 	xlen := x.Len()
 	if xlen == 0 {
-		return NewAV(nil)
+		return protoAV()
 	}
 	r := cutIntsArray(x.elts, y)
-	return newAV(r)
+	return newAVu(r)
 }
 
 func cutIntsArray[I integer](x []I, y array) []V {
@@ -499,7 +499,7 @@ func takeNAtom(n int64, y V) V {
 		return NewAS(r)
 	default:
 		y.immutable()
-		return newAV(constArray(n, y))
+		return newAVu(constArray(n, y))
 	}
 }
 
@@ -525,10 +525,11 @@ func takeN(n int64, y array) V {
 			return NewAF(r)
 		case *AV:
 			r := make([]V, n)
+			p := protoAV()
 			for i := range r {
-				r[i] = NewAV(nil)
+				r[i] = p
 			}
-			return NewAV(r)
+			return newAVu(r)
 		default:
 			r := make([]byte, n)
 			return newABb(r)
@@ -561,7 +562,7 @@ func takeCyclic(n int64, y array) V {
 	case *AS:
 		return NewAS(takeCyclicSlice[string](n, yv.elts))
 	case *AV:
-		return newAV(takeCyclicSlice[V](n, yv.elts))
+		return newAVu(takeCyclicSlice[V](n, yv.elts))
 	default:
 		panic("takeCyclic: y not an array")
 	}
@@ -597,7 +598,7 @@ func padArrayN(n int64, x array) V {
 	case *AS:
 		return NewAS(padNSlice[string](n, xv.elts))
 	case *AV:
-		return NewAV(padNSliceVs(n, xv.elts))
+		return newAVu(padNSliceVs(n, xv.elts))
 	default:
 		panic("padArrayN")
 	}
@@ -624,7 +625,6 @@ func padNSliceVs(n int64, ys []V) []V {
 	}
 	r := make([]V, l)
 	pad := proto(ys)
-	pad.immutable()
 	if n >= 0 {
 		copy(r[:len(ys)], ys)
 		for i := len(ys); i < len(r); i++ {
@@ -888,7 +888,7 @@ func shiftArrayBeforeArray(xv, yv array) V {
 		xi := xv.at(i)
 		r[i] = xi
 	}
-	return newAV(r)
+	return newAVu(r)
 }
 
 func shiftVBeforeArray(x V, yv array) V {
@@ -898,7 +898,8 @@ func shiftVBeforeArray(x V, yv array) V {
 		r[i] = yv.at(i - 1)
 	}
 	r[0] = x
-	return NewAV(r)
+	x.MarkImmutable()
+	return newAVu(r)
 }
 
 func shiftAVBeforeArray(xv *AV, yv array) V {
@@ -909,7 +910,7 @@ func shiftAVBeforeArray(xv *AV, yv array) V {
 		r[i] = yv.at(i - max)
 	}
 	copy(r[:max], xv.elts)
-	return NewAV(r)
+	return newAVu(r)
 }
 
 // nudge returns rshift x.
@@ -1201,7 +1202,7 @@ func shiftArrayAfterArray(xv, yv array) V {
 		xi := xv.at(i)
 		r[ylen-max+i] = xi
 	}
-	return newAV(r)
+	return newAVu(r)
 }
 
 func shiftVAfterArray(x V, yv array) V {
@@ -1211,7 +1212,8 @@ func shiftVAfterArray(x V, yv array) V {
 		r[i-1] = yv.at(i)
 	}
 	r[ylen-1] = x
-	return NewAV(r)
+	x.MarkImmutable()
+	return newAVu(r)
 }
 
 func shiftAVAfterArray(xv *AV, yv array) V {
@@ -1222,7 +1224,7 @@ func shiftAVAfterArray(xv *AV, yv array) V {
 		r[i-max] = yv.at(i)
 	}
 	copy(r[ylen-max:], xv.elts)
-	return NewAV(r)
+	return newAVu(r)
 }
 
 // NudgeBack returns shift x.
@@ -1303,7 +1305,7 @@ func windowsArray(i int64, y array) V {
 	for j := range r {
 		r[j] = NewV(y.slice(j, j+int(i)))
 	}
-	return newAV(r)
+	return newAVu(r)
 }
 
 func shape(ctx *Context, x, y V) V {
@@ -1399,7 +1401,8 @@ func cutLinesString(n int, s string) V {
 func cutColsArray(i int64, y array) V {
 	ylen := y.Len()
 	if i >= int64(ylen) {
-		return NewAV([]V{NewV(y)})
+		y.MarkImmutable()
+		return newAVu([]V{NewV(y)})
 	}
 	n := ylen / int(i)
 	if ylen%int(i) != 0 {
@@ -1411,13 +1414,14 @@ func cutColsArray(i int64, y array) V {
 		to := minInt(from+int(i), ylen)
 		r[j] = NewV(y.slice(from, to))
 	}
-	return newAV(r)
+	return newAVu(r)
 }
 
 func cutLinesArray(n int, y array) V {
 	ylen := y.Len()
 	if n == 1 {
-		return NewAV([]V{NewV(y)})
+		y.MarkImmutable()
+		return newAVu([]V{NewV(y)})
 	}
 	r := make([]V, n)
 	from := 0
@@ -1426,5 +1430,5 @@ func cutLinesArray(n int, y array) V {
 		r[j] = NewV(y.slice(from, to))
 		from = to
 	}
-	return newAV(r)
+	return newAVu(r)
 }

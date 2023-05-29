@@ -33,9 +33,9 @@ func enum(x V) V {
 	case *AS:
 		r := make([]V, xv.Len())
 		for i, xi := range xv.elts {
-			r[i] = NewAS(strings.Fields(xi))
+			r[i] = NewV(&AS{elts: strings.Fields(xi), flags: flagImmutable})
 		}
-		return NewAV(r)
+		return newAVu(r)
 	case *AV:
 		return monadAV(xv, enum)
 	case *Dict:
@@ -66,7 +66,7 @@ func odometer[I integer](x []I) V {
 	bsize := true
 	for _, n := range x {
 		if n <= 0 {
-			return NewAV(nil)
+			return protoAV()
 		}
 		if int64(n) > math.MaxInt64/cols {
 			return panics("!I : too big: overflow")
@@ -83,7 +83,7 @@ func odometer[I integer](x []I) V {
 			ai := a[i*int(cols) : (i+1)*int(cols)]
 			r[i] = NewV(&AB{elts: ai, flags: flagImmutable})
 		}
-		return newAV(r)
+		return newAVu(r)
 	}
 	a := odometerWithCols[I, int64](x, cols)
 	r := make([]V, len(x))
@@ -91,7 +91,7 @@ func odometer[I integer](x []I) V {
 		ai := a[i*int(cols) : (i+1)*int(cols)]
 		r[i] = NewV(&AI{elts: ai, flags: flagImmutable})
 	}
-	return newAV(r)
+	return newAVu(r)
 }
 
 func odometerWithCols[I integer, J integer](x []I, cols int64) []J {
@@ -325,17 +325,18 @@ func replicateI(n int64, y V) V {
 		return NewAS(r)
 	case *AV:
 		r := replicateISlice(n, yv.elts)
-		return NewAV(r)
+		return newAVu(r)
 	case *Dict:
 		keys := replicateI(n, NewV(yv.keys))
 		values := replicateI(n, NewV(yv.values))
 		return NewDict(keys, values)
 	default:
 		r := make([]V, n)
+		y.MarkImmutable()
 		for i := range r {
 			r[i] = y
 		}
-		return NewAV(r)
+		return newAVu(r)
 	}
 }
 

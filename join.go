@@ -28,14 +28,14 @@ func join(x, y V) V {
 		case array:
 			return joinAtomToArray(x, yv, true)
 		default:
-			return NewAV([]V{x, y})
+			return newAVv([]V{x, y})
 		}
 	default:
 		switch yv := y.bv.(type) {
 		case array:
 			return joinAtomToArray(x, yv, true)
 		default:
-			return NewAV([]V{x, y})
+			return newAVv([]V{x, y})
 		}
 	}
 }
@@ -50,7 +50,7 @@ func joinI(x int64, y V) V {
 	const left = true
 	switch yv := y.bv.(type) {
 	case S:
-		return NewAV([]V{NewI(x), y})
+		return newAVv([]V{NewI(x), y})
 	case *AB:
 		return joinAB(yv, NewI(x), left)
 	case *AF:
@@ -62,7 +62,7 @@ func joinI(x int64, y V) V {
 	case *AV:
 		return joinAV(yv, NewI(x), left)
 	default:
-		return NewAV([]V{NewI(x), y})
+		return newAVv([]V{NewI(x), y})
 	}
 }
 
@@ -76,7 +76,7 @@ func joinF(x float64, y V) V {
 	const left = true
 	switch yv := y.bv.(type) {
 	case S:
-		return NewAV([]V{NewF(x), y})
+		return newAVv([]V{NewF(x), y})
 	case *AB:
 		return joinAB(yv, NewF(x), left)
 	case *AF:
@@ -88,16 +88,16 @@ func joinF(x float64, y V) V {
 	case *AV:
 		return joinAV(yv, NewF(x), left)
 	default:
-		return NewAV([]V{NewF(x), y})
+		return newAVv([]V{NewF(x), y})
 	}
 }
 
 func joinS(x S, y V) V {
 	if y.IsI() {
-		return NewAV([]V{NewV(x), y})
+		return newAVv([]V{NewV(x), y})
 	}
 	if y.IsF() {
-		return NewAV([]V{NewV(x), y})
+		return newAVv([]V{NewV(x), y})
 	}
 	const left = true
 	switch yv := y.bv.(type) {
@@ -114,7 +114,7 @@ func joinS(x S, y V) V {
 	case *AV:
 		return joinAV(yv, NewV(x), left)
 	default:
-		return NewAV([]V{NewV(x), y})
+		return newAVv([]V{NewV(x), y})
 	}
 }
 
@@ -482,6 +482,6 @@ func enlist(x V) V {
 		return NewAS([]string{string(xv)})
 	default:
 		x.MarkImmutable()
-		return newAV([]V{x})
+		return newAVu([]V{x})
 	}
 }

@@ -140,19 +140,13 @@ func applyRxFindSubmatch(x *rx, y V) V {
 	case *AS:
 		r := make([]V, yv.Len())
 		for i, yi := range yv.elts {
-			r[i] = applyRxFindSubmatch(x, NewS(yi))
+			ri := applyRxFindSubmatch(x, NewS(yi))
+			ri.MarkImmutable()
+			r[i] = ri
 		}
-		return NewAV(r)
+		return newAVu(r)
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := applyRxFindSubmatch(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return applyRxFindSubmatch(x, yi) })
 	default:
 		return panicType("r[y]", "y", y)
 	}
@@ -182,25 +176,19 @@ func applyRxFindAllSubmatch(x *rx, y V, n int64) V {
 		matches := x.Regexp.FindAllStringSubmatch(string(yv), int(n))
 		r := make([]V, len(matches))
 		for i, sm := range matches {
-			r[i] = NewAS(sm)
+			r[i] = NewV(&AS{elts: sm, flags: flagImmutable})
 		}
-		return NewAV(r)
+		return newAVu(r)
 	case *AS:
 		r := make([]V, yv.Len())
 		for i, yi := range yv.elts {
-			r[i] = applyRxFindAllSubmatch(x, NewS(yi), n)
+			ri := applyRxFindAllSubmatch(x, NewS(yi), n)
+			ri.MarkImmutable()
+			r[i] = ri
 		}
-		return NewAV(r)
+		return newAVu(r)
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := applyRxFindAllSubmatch(x, yi, n)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return applyRxFindAllSubmatch(x, yi, n) })
 	default:
 		return panicType("r[y]", "y", y)
 	}
@@ -214,19 +202,13 @@ func applyRxFindAll(x *rx, y V, n int64) V {
 	case *AS:
 		r := make([]V, yv.Len())
 		for i, yi := range yv.elts {
-			r[i] = applyRxFindAll(x, NewS(yi), n)
+			ri := applyRxFindAll(x, NewS(yi), n)
+			ri.MarkImmutable()
+			r[i] = ri
 		}
-		return NewAV(r)
+		return newAVu(r)
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := applyRxFindAll(x, yi, n)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return applyRxFindAll(x, yi, n) })
 	default:
 		return panicType("r[y]", "y", y)
 	}
@@ -240,19 +222,13 @@ func splitRx(f *rx, x V) V {
 	case *AS:
 		r := make([]V, xv.Len())
 		for i, xi := range xv.elts {
-			r[i] = NewAS(f.Regexp.Split(string(xi), -1))
+			ri := NewAS(f.Regexp.Split(string(xi), -1))
+			ri.MarkImmutable()
+			r[i] = ri
 		}
-		return NewAV(r)
+		return newAVu(r)
 	case *AV:
-		r := xv.reuse()
-		for i, xi := range xv.elts {
-			ri := splitRx(f, xi)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(xv, func(xi V) V { return splitRx(f, xi) })
 	default:
 		return panicType("r\\x", "x", x)
 	}

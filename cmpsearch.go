@@ -1285,7 +1285,7 @@ func findS(s S, y V) V {
 			ri.MarkImmutable()
 			r[i] = ri
 		}
-		return newAV(r)
+		return newAVu(r)
 	default:
 		return panicType("s?y", "y", y)
 	}
