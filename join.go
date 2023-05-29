@@ -127,9 +127,9 @@ func joinAB(x *AB, y V, left bool) V {
 				fl = flagBool
 			}
 			if left {
-				return NewV(&AB{elts: joinSliceLeft(x.elts, byte(y.I())), rc: reuseRCp(x.rc), flags: fl})
+				return NewV(&AB{elts: joinSliceLeft(x.elts, byte(y.I())), flags: fl})
 			}
-			if reusableRCp(x.RC()) {
+			if x.reusable() {
 				x.elts = append(x.elts, byte(y.I()))
 				x.flags = fl
 				return NewV(x)
@@ -194,7 +194,7 @@ func joinAI(x *AI, y V, left bool) V {
 		if left {
 			return NewAI(joinSliceLeft(x.elts, y.I()))
 		}
-		if reusableRCp(x.RC()) {
+		if x.reusable() {
 			x.elts = append(x.elts, y.I())
 			x.flags = flagNone
 			return NewV(x)
@@ -228,7 +228,7 @@ func joinAF(x *AF, y V, left bool) V {
 		if left {
 			return NewAF(joinSliceLeft(x.elts, float64(y.I())))
 		}
-		if reusableRCp(x.RC()) {
+		if x.reusable() {
 			x.elts = append(x.elts, float64(y.I()))
 			x.flags = flagNone
 			return NewV(x)
@@ -239,7 +239,7 @@ func joinAF(x *AF, y V, left bool) V {
 		if left {
 			return NewAF(joinSliceLeft(x.elts, y.F()))
 		}
-		if reusableRCp(x.RC()) {
+		if x.reusable() {
 			x.elts = append(x.elts, y.F())
 			x.flags = flagNone
 			return NewV(x)
@@ -270,7 +270,7 @@ func joinABAB(x *AB, y *AB) V {
 	if b {
 		fl = flagBool
 	}
-	if reusableRCp(x.RC()) {
+	if x.reusable() {
 		x.elts = append(x.elts, y.elts...)
 		x.flags = fl
 		return NewV(x)
@@ -286,7 +286,7 @@ func joinSlices[T any](x, y []T) []T {
 }
 
 func joinAIAI(x *AI, y *AI) V {
-	if reusableRCp(x.RC()) {
+	if x.reusable() {
 		x.elts = append(x.elts, y.elts...)
 		x.flags = flagNone
 		return NewV(x)
@@ -295,7 +295,7 @@ func joinAIAI(x *AI, y *AI) V {
 }
 
 func joinAFAF(x *AF, y *AF) V {
-	if reusableRCp(x.RC()) {
+	if x.reusable() {
 		x.elts = append(x.elts, y.elts...)
 		x.flags = flagNone
 		return NewV(x)
@@ -317,7 +317,7 @@ func joinSliceToNums[N number, M number](x []N, y []M) []M {
 }
 
 func joinAIAB(x *AI, y *AB) V {
-	if reusableRCp(x.RC()) {
+	if x.reusable() {
 		for _, yi := range y.elts {
 			x.elts = append(x.elts, int64(yi))
 		}
@@ -341,7 +341,7 @@ func joinABAF(x *AB, y *AF) V {
 }
 
 func joinAFAB(x *AF, y *AB) V {
-	if reusableRCp(x.RC()) {
+	if x.reusable() {
 		for _, yi := range y.elts {
 			x.elts = append(x.elts, float64(yi))
 		}
@@ -356,7 +356,7 @@ func joinAIAF(x *AI, y *AF) V {
 }
 
 func joinAFAI(x *AF, y *AI) V {
-	if reusableRCp(x.RC()) {
+	if x.reusable() {
 		for _, yi := range y.elts {
 			x.elts = append(x.elts, float64(yi))
 		}
@@ -372,7 +372,7 @@ func joinAS(x *AS, y V, left bool) V {
 		if left {
 			return NewAS(joinSliceLeft(x.elts, string(yv)))
 		}
-		if reusableRCp(x.RC()) {
+		if x.reusable() {
 			x.elts = append(x.elts, string(yv))
 			x.flags = flagNone
 			return NewV(x)
@@ -380,7 +380,7 @@ func joinAS(x *AS, y V, left bool) V {
 		return NewAS(joinSlice(x.elts, string(yv)))
 	case *AS:
 		// left == false
-		if reusableRCp(x.RC()) {
+		if x.reusable() {
 			x.elts = append(x.elts, yv.elts...)
 			x.flags = flagNone
 			return NewV(x)
@@ -398,10 +398,9 @@ func joinAV(x *AV, y V, left bool) V {
 	switch yv := y.bv.(type) {
 	case *AV:
 		// left == false
-		if reusableRCp(x.RC()) {
+		if x.reusable() {
 			x.elts = append(x.elts, yv.elts...)
 			x.flags = flagNone
-			x.rc = nil
 			return NewV(x)
 		}
 		return joinArrays(x, yv)
@@ -415,9 +414,9 @@ func joinAV(x *AV, y V, left bool) V {
 		if left {
 			return NewV(&AV{elts: joinSliceLeft(x.elts, y)})
 		}
-		if reusableRCp(x.RC()) {
+		if x.reusable() {
 			x.elts = append(x.elts, y)
-			y.InitWithRC(x.RC())
+			y.MarkImmutable()
 			x.flags = flagNone
 			return NewV(x)
 		}
@@ -481,9 +480,8 @@ func enlist(x V) V {
 	switch xv := x.bv.(type) {
 	case S:
 		return NewAS([]string{string(xv)})
-	case RefCountHolder:
-		return NewAV([]V{x})
 	default:
-		return NewAV([]V{x})
+		x.MarkImmutable()
+		return newAV([]V{x})
 	}
 }

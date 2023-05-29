@@ -72,7 +72,7 @@ func radixSortAI(ctx *Context, x *AI, min, max int64) *AI {
 func radixSortAIWithSize[T signed](x *AI, buf []T, size uint, min T) *AI {
 	from := radixSortIntsWithSize[T](x.elts, buf, size, min)
 	var dst []int64
-	reuse := reusableRCp(x.rc)
+	reuse := x.reusable()
 	if reuse {
 		dst = x.elts
 	} else {
@@ -198,7 +198,7 @@ func radixGradeSmallRange(ctx *Context, x *AI, min, max int64) V {
 		return NewAB(p)
 	}
 	var p []int64
-	if reusableRCp(x.rc) {
+	if x.reusable() {
 		p = x.elts
 	} else {
 		p = make([]int64, xlen)
@@ -261,7 +261,7 @@ func radixGradeAIInts[T signed](x *AI, buf []T, size uint, min T) []int64 {
 		from[i] = T(xi)
 	}
 	var fromp, top []int64
-	if reusableRCp(x.rc) {
+	if x.reusable() {
 		fromp = x.elts
 		top = make([]int64, xlen)
 	} else {

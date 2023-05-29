@@ -43,9 +43,9 @@ func icountGroup(x V) V {
 	case *AS:
 		r := make([]V, xv.Len())
 		for i, xi := range xv.elts {
-			r[i] = NewAS(lineSplit(xi))
+			r[i] = NewV(&AS{elts: lineSplit(xi), flags: flagImmutable})
 		}
-		return NewAV(r)
+		return newAV(r)
 	case *Dict:
 		return groupBy(NewV(xv.values), NewV(xv.keys))
 	case *AV:
@@ -161,44 +161,49 @@ func groupByBoolsV(x []byte, y V) V {
 	switch yv := y.bv.(type) {
 	case *AB:
 		if n == 0 {
+			y.MarkImmutable()
 			r[0] = y
-			return NewAV(r)
+			return newAV(r)
 		}
 		rf, rt := groupByBools[byte](x, yv.elts, n)
-		r[0] = NewAB(rf)
-		r[1] = NewAB(rt)
-		return NewAV(r)
+		r[0] = NewV(&AB{elts: rf, flags: flagImmutable})
+		r[1] = NewV(&AB{elts: rt, flags: flagImmutable})
+		return newAV(r)
 	case *AI:
 		if n == 0 {
+			y.MarkImmutable()
 			r[0] = y
-			return NewAV(r)
+			return newAV(r)
 		}
 		rf, rt := groupByBools[int64](x, yv.elts, n)
-		r[0] = NewAI(rf)
-		r[1] = NewAI(rt)
-		return NewAV(r)
+		r[0] = NewV(&AI{elts: rf, flags: flagImmutable})
+		r[1] = NewV(&AI{elts: rt, flags: flagImmutable})
+		return newAV(r)
 	case *AF:
 		if n == 0 {
+			y.MarkImmutable()
 			r[0] = y
-			return NewAV(r)
+			return newAV(r)
 		}
 		rf, rt := groupByBools[float64](x, yv.elts, n)
-		r[0] = NewAF(rf)
-		r[1] = NewAF(rt)
-		return NewAV(r)
+		r[0] = NewV(&AF{elts: rf, flags: flagImmutable})
+		r[1] = NewV(&AF{elts: rt, flags: flagImmutable})
+		return newAV(r)
 	case *AS:
 		if n == 0 {
+			y.MarkImmutable()
 			r[0] = y
-			return NewAV(r)
+			return newAV(r)
 		}
 		rf, rt := groupByBools[string](x, yv.elts, n)
-		r[0] = NewAS(rf)
-		r[1] = NewAS(rt)
-		return NewAV(r)
+		r[0] = NewV(&AS{elts: rf, flags: flagImmutable})
+		r[1] = NewV(&AS{elts: rt, flags: flagImmutable})
+		return newAV(r)
 	case *AV:
 		if n == 0 {
+			y.MarkImmutable()
 			r[0] = y
-			return NewAV(r)
+			return newAV(r)
 		}
 		rf, rt := groupByBools[V](x, yv.elts, n)
 		r[0] = canonicalVs(rf)
@@ -260,7 +265,7 @@ func groupByBytesFloat64s(x []byte, y []float64, max byte) V {
 		count += n
 	}
 	groupByScatterBytes[float64](x, y, yg, offset)
-	return NewAV(r)
+	return newAV(r)
 }
 
 func groupByBytesStrings(x []byte, y []string, max byte) V {
@@ -272,7 +277,7 @@ func groupByBytesStrings(x []byte, y []string, max byte) V {
 		count += n
 	}
 	groupByScatterBytes[string](x, y, yg, offset)
-	return NewAV(r)
+	return newAV(r)
 }
 
 func groupByBytesVs(x []byte, y []V, max byte) V {
@@ -287,7 +292,7 @@ func groupByBytesVs(x []byte, y []V, max byte) V {
 	for i, ri := range r {
 		r[i] = Canonical(ri)
 	}
-	return NewAV(r)
+	return newAV(r)
 }
 
 func groupByPrepareBytes[T any](x []byte, max byte) ([]V, []int, []T) {
@@ -415,6 +420,7 @@ func groupBySorted[I integer](x []I, y array, max int64) V {
 		}
 	}
 	from = i0
+	var p V
 	for i, xi := range x[i0:] {
 		if int64(xi) == n {
 			continue
@@ -423,7 +429,10 @@ func groupBySorted[I integer](x []I, y array, max int64) V {
 		from = i + i0
 		n++
 		for n < int64(xi) {
-			r[n] = NewAV(nil)
+			if p.kind == valNil {
+				p = NewV(&AV{flags: flagImmutable})
+			}
+			r[n] = p
 			n++
 		}
 	}

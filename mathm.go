@@ -37,12 +37,12 @@ func mathm(x V, f func(float64) float64) V {
 			if ri.IsPanic() {
 				return ri
 			}
+			ri.MarkImmutable()
 			r.elts[i] = ri
 		}
 		return NewV(r)
 	case *Dict:
 		r := mathm(NewV(xv.values), f)
-		r.InitRC()
 		return NewV(&Dict{keys: xv.keys, values: r.bv.(array)})
 	default:
 		return Panicf("bad type \"%s\" in x", x.Type())

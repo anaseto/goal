@@ -76,8 +76,7 @@ func roll(ctx *Context, n int64, y V) V {
 	case *AS:
 		return NewAS(rollSlice[string](ctx, n, yv.elts))
 	case *AV:
-		*yv.rc += 2
-		return NewAV(rollSlice[V](ctx, n, yv.elts))
+		return newAV(rollSlice[V](ctx, n, yv.elts))
 	default:
 		return panicType("i?y", "y", y)
 	}
@@ -167,20 +166,15 @@ func deal(ctx *Context, n int64, y V) V {
 	}
 	switch yv := y.bv.(type) {
 	case *AB:
-		fl := flagDistinct
-		if yv.IsBoolean() {
-			fl |= flagBool
-		}
-		return NewV(&AB{elts: dealSlice[byte](ctx, n, yv.elts), flags: fl})
+		return NewV(&AB{elts: dealSlice[byte](ctx, n, yv.elts), flags: (flagDistinct | flagBool) & yv.flags})
 	case *AI:
-		return NewV(&AI{elts: dealSlice[int64](ctx, n, yv.elts), flags: flagDistinct})
+		return NewV(&AI{elts: dealSlice[int64](ctx, n, yv.elts), flags: flagDistinct & yv.flags})
 	case *AF:
-		return NewV(&AF{elts: dealSlice[float64](ctx, n, yv.elts), flags: flagDistinct})
+		return NewV(&AF{elts: dealSlice[float64](ctx, n, yv.elts), flags: flagDistinct & yv.flags})
 	case *AS:
-		return NewV(&AS{elts: dealSlice[string](ctx, n, yv.elts), flags: flagDistinct})
+		return NewV(&AS{elts: dealSlice[string](ctx, n, yv.elts), flags: flagDistinct & yv.flags})
 	case *AV:
-		*yv.rc += 2
-		return NewV(&AV{elts: dealSlice[V](ctx, n, yv.elts), flags: flagDistinct, rc: yv.rc})
+		return NewV(&AV{elts: dealSlice[V](ctx, n, yv.elts), flags: flagDistinct & yv.flags, rc: yv.rc})
 	default:
 		panic("deal")
 	}

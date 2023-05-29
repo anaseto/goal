@@ -78,7 +78,7 @@ func fillNaNf(fill float64, y V) V {
 		return y
 	case *AF:
 		var r []float64
-		if reusableRCp(yv.RC()) {
+		if yv.reusable() {
 			r = yv.elts
 		} else {
 			r = make([]float64, yv.Len())
