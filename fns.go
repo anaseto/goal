@@ -726,9 +726,10 @@ func eval(ctx *Context, x V) V {
 			if ri.IsPanic() {
 				return ri
 			}
+			ri.MarkImmutable()
 			r[i] = ri
 		}
-		return Canonical(NewAV(r))
+		return canonicalVs(r)
 	case *AV:
 		r := make([]V, xv.Len())
 		for i, xi := range xv.elts {
@@ -736,9 +737,10 @@ func eval(ctx *Context, x V) V {
 			if ri.IsPanic() {
 				return ri
 			}
+			ri.MarkImmutable()
 			r[i] = ri
 		}
-		return Canonical(NewAV(r))
+		return canonicalVs(r)
 	default:
 		return panicType("eval x", "x", x)
 	}

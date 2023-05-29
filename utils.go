@@ -235,26 +235,23 @@ func toIndicesRec(x V) V {
 // toArray converts atoms into 1-length arrays. It returns arrays as-is.
 func toArray(x V) V {
 	if x.IsI() {
-		var n int
 		if isBI(x.I()) {
-			r := &AB{elts: []byte{byte(x.I())}, rc: &n}
+			r := &AB{elts: []byte{byte(x.I())}}
 			if isbI(x.I()) {
 				r.flags |= flagBool
 			}
 			return NewV(r)
 		}
-		r := &AI{elts: []int64{x.I()}, rc: &n}
+		r := &AI{elts: []int64{x.I()}}
 		return NewV(r)
 	}
 	if x.IsF() {
-		var n int
-		r := &AF{elts: []float64{float64(x.F())}, rc: &n}
+		r := &AF{elts: []float64{float64(x.F())}}
 		return NewV(r)
 	}
 	switch xv := x.bv.(type) {
 	case S:
-		var n int
-		r := &AS{elts: []string{string(xv)}, rc: &n}
+		r := &AS{elts: []string{string(xv)}}
 		return NewV(r)
 	case array:
 		return x
@@ -568,13 +565,13 @@ func normalizeRec(x *AV) (array, bool) {
 		if t == tb {
 			fl = flagBool
 		}
-		return &AB{elts: r, rc: x.rc, flags: fl}, true
+		return &AB{elts: r, flags: fl}, true
 	case tI:
 		r := make([]int64, x.Len())
 		for i, xi := range x.elts {
 			r[i] = xi.I()
 		}
-		return &AI{elts: r, rc: x.rc}, true
+		return &AI{elts: r}, true
 	case tF:
 		r := make([]float64, x.Len())
 		for i, xi := range x.elts {
@@ -584,13 +581,13 @@ func normalizeRec(x *AV) (array, bool) {
 				r[i] = float64(xi.F())
 			}
 		}
-		return &AF{elts: r, rc: x.rc}, true
+		return &AF{elts: r}, true
 	case tS:
 		r := make([]string, x.Len())
 		for i, xi := range x.elts {
 			r[i] = string(xi.bv.(S))
 		}
-		return &AS{elts: r, rc: x.rc}, true
+		return &AS{elts: r}, true
 	case tV, tAV:
 		for i, xi := range x.elts {
 			x.elts[i] = CanonicalRec(xi)
@@ -655,7 +652,7 @@ func normalizeFast(x *AV) (array, bool) {
 		for i, xi := range x.elts {
 			r[i] = xi.I()
 		}
-		return &AI{elts: r, rc: reuseRCp(x.rc), flags: x.flags}, true
+		return &AI{elts: r, flags: x.flags}, true
 	case tF:
 		r := make([]float64, x.Len())
 		for i, xi := range x.elts {
@@ -665,13 +662,13 @@ func normalizeFast(x *AV) (array, bool) {
 				r[i] = float64(xi.F())
 			}
 		}
-		return &AF{elts: r, rc: reuseRCp(x.rc), flags: x.flags}, true
+		return &AF{elts: r, flags: x.flags}, true
 	case tS:
 		r := make([]string, x.Len())
 		for i, xi := range x.elts {
 			r[i] = string(xi.bv.(S))
 		}
-		return &AS{elts: r, rc: reuseRCp(x.rc), flags: x.flags}, true
+		return &AS{elts: r, flags: x.flags}, true
 	default:
 		return x, false
 	}

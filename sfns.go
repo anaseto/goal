@@ -49,9 +49,7 @@ func reverse(x V) V {
 		return x
 	case *Dict:
 		k := reverse(NewV(xv.keys))
-		k.InitRC()
 		v := reverse(NewV(xv.values))
-		v.InitRC()
 		return NewV(&Dict{keys: k.bv.(array), values: v.bv.(array)})
 	default:
 		return panicType("|x", "x", x)
@@ -71,51 +69,33 @@ func rotate(x, y V) V {
 	}
 	switch xv := x.bv.(type) {
 	case *AB:
-		r := make([]V, xv.Len())
-		for i, xi := range xv.elts {
-			ri := rotateI(int64(xi), y)
-			if ri.IsPanic() {
-				return ri
-			}
-			r[i] = ri
-		}
-		return NewAV(r)
+		return rotateIs(xv.elts, y)
 	case *AI:
-		r := make([]V, xv.Len())
-		for i, xi := range xv.elts {
-			ri := rotateI(xi, y)
-			if ri.IsPanic() {
-				return ri
-			}
-			r[i] = ri
-		}
-		return NewAV(r)
+		return rotateIs(xv.elts, y)
 	case *AF:
-		r := make([]V, xv.Len())
-		for i, xi := range xv.elts {
-			if !isI(xi) {
-				return Panicf("x rotate y : non-integer x (%g)", x.F())
-			}
-			ri := rotateI(int64(xi), y)
-			if ri.IsPanic() {
-				return ri
-			}
-			r[i] = ri
+		x = toAI(xv)
+		if x.IsPanic() {
+			return ppanic("x rotate y : ", x)
 		}
-		return NewAV(r)
+		return rotate(x, y)
 	case *AV:
-		r := make([]V, xv.Len())
-		for i, xi := range xv.elts {
-			ri := rotate(xi, y)
-			if ri.IsPanic() {
-				return ri
-			}
-			r[i] = ri
-		}
-		return NewAV(r)
+		return dyadAVV(xv, y, rotate)
 	default:
 		return panicType("x rotate y", "x", x)
 	}
+}
+
+func rotateIs[I integer](x []I, y V) V {
+	r := make([]V, len(x))
+	for i, xi := range x {
+		ri := rotateI(int64(xi), y)
+		if ri.IsPanic() {
+			return ri
+		}
+		ri.MarkImmutable()
+		r[i] = ri
+	}
+	return newAV(r)
 }
 
 func rotateI(i int64, y V) V {
@@ -130,30 +110,28 @@ func rotateI(i int64, y V) V {
 	switch yv := y.bv.(type) {
 	case *AB:
 		fl := yv.flags &^ flagAscending
-		return NewV(&AB{elts: rotateSlice[byte](i, yv.elts), rc: reuseRCp(yv.rc), flags: fl})
+		return NewV(&AB{elts: rotateSlice[byte](i, yv.elts), flags: fl})
 	case *AF:
 		fl := yv.flags &^ flagAscending
-		return NewV(&AF{elts: rotateSlice[float64](i, yv.elts), rc: reuseRCp(yv.rc), flags: fl})
+		return NewV(&AF{elts: rotateSlice[float64](i, yv.elts), flags: fl})
 	case *AI:
 		fl := yv.flags &^ flagAscending
-		return NewV(&AI{elts: rotateSlice[int64](i, yv.elts), rc: reuseRCp(yv.rc), flags: fl})
+		return NewV(&AI{elts: rotateSlice[int64](i, yv.elts), flags: fl})
 	case *AS:
 		fl := yv.flags &^ flagAscending
-		return NewV(&AS{elts: rotateSlice[string](i, yv.elts), rc: reuseRCp(yv.rc), flags: fl})
+		return NewV(&AS{elts: rotateSlice[string](i, yv.elts), flags: fl})
 	case *AV:
 		fl := yv.flags &^ flagAscending
-		return NewV(&AV{elts: rotateSlice[V](i, yv.elts), rc: yv.rc, flags: fl})
+		return NewV(&AV{elts: rotateSlice[V](i, yv.elts), flags: fl})
 	case *Dict:
 		k := rotateI(i, NewV(yv.keys))
 		if k.IsPanic() {
 			return k
 		}
-		k.InitRC()
 		v := rotateI(i, NewV(yv.values))
 		if v.IsPanic() {
 			return v
 		}
-		v.InitRC()
 		return NewV(&Dict{keys: k.bv.(array), values: v.bv.(array)})
 	default:
 		return panicType("x rotate y", "y", y)
@@ -258,9 +236,7 @@ func dropN(n int64, y V) V {
 		}
 	case *Dict:
 		rk := dropN(n, NewV(yv.keys))
-		rk.InitRC()
 		rv := dropN(n, NewV(yv.values))
-		rv.InitRC()
 		return NewV(&Dict{
 			keys:   rk.bv.(array),
 			values: rv.bv.(array)})
@@ -457,9 +433,7 @@ func take(x, y V) V {
 	switch yv := y.bv.(type) {
 	case *Dict:
 		rk := takeN(n, yv.keys)
-		rk.InitRC()
 		rv := takeN(n, yv.values)
-		rv.InitRC()
 		return NewV(&Dict{
 			keys:   rk.bv.(array),
 			values: rv.bv.(array)})
@@ -525,10 +499,7 @@ func takeNAtom(n int64, y V) V {
 		return NewAS(r)
 	default:
 		y.immutable()
-		r := constArray(n, y)
-		var n int
-		rv := &AV{elts: r, rc: &n}
-		return NewV(rv)
+		return newAV(constArray(n, y))
 	}
 }
 
@@ -582,7 +553,7 @@ func takeCyclic(n int64, y array) V {
 	case *AB:
 		fl := yv.flags & flagBool
 		r := takeCyclicSlice[byte](n, yv.elts)
-		return NewV(&AB{elts: r, rc: reuseRCp(yv.rc), flags: fl})
+		return NewV(&AB{elts: r, flags: fl})
 	case *AI:
 		return NewAI(takeCyclicSlice[int64](n, yv.elts))
 	case *AF:
@@ -590,8 +561,7 @@ func takeCyclic(n int64, y array) V {
 	case *AS:
 		return NewAS(takeCyclicSlice[string](n, yv.elts))
 	case *AV:
-		*yv.rc += 2
-		return NewAV(takeCyclicSlice[V](n, yv.elts))
+		return newAV(takeCyclicSlice[V](n, yv.elts))
 	default:
 		panic("takeCyclic: y not an array")
 	}
@@ -898,7 +868,7 @@ func shiftBeforeAV(x V, yv *AV) V {
 		for i := 0; i < max; i++ {
 			r.elts[i] = xv.at(i)
 		}
-		return Canonical(NewV(r))
+		return canonicalAV(r)
 	default:
 		r := yv.reuse()
 		copy(r.elts[max:], ys[:len(ys)-max])
@@ -911,16 +881,14 @@ func shiftArrayBeforeArray(xv, yv array) V {
 	ylen := yv.Len()
 	max := minInt(xv.Len(), ylen)
 	r := make([]V, ylen)
-	rc := yv.RC()
 	for i := max; i < ylen; i++ {
 		r[i] = yv.at(i - max)
 	}
 	for i := 0; i < max; i++ {
 		xi := xv.at(i)
-		xi.InitWithRC(rc)
 		r[i] = xi
 	}
-	return NewAV(r)
+	return newAV(r)
 }
 
 func shiftVBeforeArray(x V, yv array) V {
@@ -977,8 +945,7 @@ func nudge(x V) V {
 		r0 := proto(xv.elts)
 		copy(r.elts[1:], xv.elts[:xv.Len()-1])
 		r.elts[0] = r0
-		r0.InitWithRC(r.rc)
-		return Canonical(NewV(r))
+		return canonicalAV(r)
 	case *Dict:
 		return newDictValues(xv.keys, nudge(NewV(xv.values)))
 	default:
@@ -1227,16 +1194,14 @@ func shiftArrayAfterArray(xv, yv array) V {
 	ylen := yv.Len()
 	max := minInt(xv.Len(), ylen)
 	r := make([]V, ylen)
-	rc := yv.RC()
 	for i := max; i < ylen; i++ {
 		r[i-max] = yv.at(i)
 	}
 	for i := 0; i < max; i++ {
 		xi := xv.at(i)
-		xi.InitWithRC(rc)
 		r[ylen-max+i] = xi
 	}
-	return NewAV(r)
+	return newAV(r)
 }
 
 func shiftVAfterArray(x V, yv array) V {
@@ -1293,8 +1258,7 @@ func nudgeBack(x V) V {
 		rlast := proto(xv.elts)
 		copy(r.elts[0:xv.Len()-1], xv.elts[1:])
 		r.elts[xv.Len()-1] = rlast
-		rlast.InitWithRC(r.rc)
-		return Canonical(NewV(r))
+		return canonicalAV(r)
 	case *Dict:
 		return newDictValues(xv.keys, nudgeBack(NewV(xv.values)))
 	default:
@@ -1339,7 +1303,6 @@ func windowsArray(i int64, y array) V {
 	for j := range r {
 		r[j] = NewV(y.slice(j, j+int(i)))
 	}
-	var n int
 	return newAV(r)
 }
 

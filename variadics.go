@@ -503,6 +503,9 @@ func vfList(ctx *Context, args []V) V {
 		return r
 	}
 	xav.elts = cloneArgs(args)
+	for _, x := range xav.elts {
+		x.MarkImmutable()
+	}
 	return NewV(xav)
 }
 
@@ -877,27 +880,29 @@ func vfRTVars(ctx *Context, args []V) V {
 		v := cloneArgs(ctx.globals)
 		k := make([]string, len(ctx.gNames))
 		copy(k, ctx.gNames)
-		return NewDict(NewAS(k), Canonical(NewAV(v)))
+		return NewDict(NewAS(k), canonicalVs(v))
 	case "f":
 		v := []V{}
 		k := []string{}
 		for i, x := range ctx.globals {
 			if x.IsFunction() {
 				v = append(v, x)
+				x.MarkImmutable()
 				k = append(k, ctx.gNames[i])
 			}
 		}
-		return NewDict(NewAS(k), Canonical(NewAV(v)))
+		return NewDict(NewAS(k), canonicalVs(v))
 	case "v":
 		v := []V{}
 		k := []string{}
 		for i, x := range ctx.globals {
 			if !x.IsFunction() {
 				v = append(v, x)
+				x.MarkImmutable()
 				k = append(k, ctx.gNames[i])
 			}
 		}
-		return NewDict(NewAS(k), Canonical(NewAV(v)))
+		return NewDict(NewAS(k), canonicalVs(v))
 	case "rc":
 		v := []V{}
 		k := []string{}
@@ -907,17 +912,20 @@ func vfRTVars(ctx *Context, args []V) V {
 				continue
 			}
 			v = append(v, rcv)
+			rcv.MarkImmutable()
 			k = append(k, ctx.gNames[i])
 		}
-		return NewDict(NewAS(k), Canonical(NewAV(v)))
+		return NewDict(NewAS(k), canonicalVs(v))
 	case "stack":
 		k := make([]string, len(ctx.stack))
 		v := make([]V, len(k))
 		for i, x := range ctx.stack {
 			k[i] = x.Sprint(ctx)
-			v[i] = refcounts(x)
+			vi := refcounts(x)
+			vi.MarkImmutable()
+			v[i] = vi
 		}
-		return NewDict(NewAS(k), Canonical(NewAV(v)))
+		return NewDict(NewAS(k), canonicalVs(v))
 	default:
 		return Panicf("rt.vars s : invalid value (%s)", cmd)
 	}

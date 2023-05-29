@@ -282,15 +282,11 @@ func sortBy(ctx *Context, keys, values array) *Dict {
 	switch av := a.bv.(type) {
 	case *AB:
 		nk := keys.atBytes(av.elts)
-		initRC(nk)
 		nv := values.atBytes(av.elts)
-		initRC(nv)
 		return &Dict{keys: nk, values: nv}
 	case *AI:
 		nk := keys.atInts(av.elts)
-		initRC(nk)
 		nv := values.atInts(av.elts)
-		initRC(nv)
 		return &Dict{keys: nk, values: nv}
 	default:
 		panic("sortBy")

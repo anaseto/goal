@@ -50,14 +50,7 @@ func toValidUTF8(repl string, x V) V {
 		}
 		return NewAS(r)
 	case *AV:
-		r := make([]V, xv.Len())
-		for i, xi := range xv.elts {
-			r[i] = toValidUTF8(repl, xi)
-			if r[i].IsPanic() {
-				return r[i]
-			}
-		}
-		return Canonical(NewAV(r))
+		return monadAV(xv, func(x V) V { return toValidUTF8(repl, x) })
 	default:
 		return panicType("x utf8 s", "s", x)
 	}

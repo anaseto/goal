@@ -12,19 +12,13 @@ func fJSON(x V) V {
 	case *AS:
 		r := make([]V, xv.Len())
 		for i, xi := range xv.elts {
-			r[i] = jsonStringToGoal(xi)
-		}
-		return Canonical(NewAV(r))
-	case *AV:
-		r := make([]V, xv.Len())
-		for i, xi := range xv.elts {
-			ri := fJSON(xi)
-			if ri.IsPanic() {
-				return ri
-			}
+			ri := jsonStringToGoal(xi)
+			ri.MarkImmutable()
 			r[i] = ri
 		}
-		return NewAV(r)
+		return canonicalVs(r)
+	case *AV:
+		return monadAV(xv, fJSON)
 	default:
 		return panicType("json x", "x", x)
 	}
@@ -52,17 +46,21 @@ func jsonToGoal(v any) V {
 	case []any:
 		r := make([]V, len(vv))
 		for i, vi := range vv {
-			r[i] = jsonToGoal(vi)
+			ri := jsonToGoal(vi)
+			ri.MarkImmutable()
+			r[i] = ri
 		}
-		return Canonical(NewAV(r))
+		return canonicalVs(r)
 	case map[string]any:
 		keys := make([]string, 0, len(vv))
 		values := make([]V, 0, len(vv))
 		for k, vk := range vv {
-			values = append(values, jsonToGoal(vk))
+			v := jsonToGoal(vk)
+			v.MarkImmutable()
+			values = append(values, v)
 			keys = append(keys, k)
 		}
-		return NewDict(NewAS(keys), Canonical(NewAV(values)))
+		return NewDict(NewAS(keys), canonicalVs(values))
 	default:
 		return NewError(NewS("null"))
 	}

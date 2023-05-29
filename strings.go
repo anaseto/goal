@@ -111,15 +111,7 @@ func applyS(s S, x V) V {
 		}
 		return applyS(s, x)
 	case *AV:
-		r := make([]V, xv.Len())
-		for i, xi := range xv.elts {
-			ri := applyS(s, xi)
-			if ri.IsPanic() {
-				return ri
-			}
-			r[i] = ri
-		}
-		return canonicalFast(NewAV(r))
+		return canonicalFast(monadAV(xv, func(x V) V { return applyS(s, x) }))
 	default:
 		return panicType("s@i", "i", x)
 	}
@@ -169,14 +161,7 @@ func applyS2(s S, x V, y V) V {
 		}
 		return applyS2(s, x, y)
 	case *AV:
-		r := make([]V, xv.Len())
-		for i, xi := range xv.elts {
-			r[i] = applyS2(s, xi, y)
-			if r[i].IsPanic() {
-				return r[i]
-			}
-		}
-		return canonicalFast(NewAV(r))
+		return canonicalFast(monadAV(xv, func(x V) V { return applyS2(s, x, y) }))
 	default:
 		return panicType("s[x;y]", "x", x)
 	}
@@ -208,15 +193,7 @@ func applyS2I(s S, x int64, y V) V {
 		}
 		return applyS2I(s, x, y)
 	case *AV:
-		r := make([]V, yv.Len())
-		for j, yj := range yv.elts {
-			rj := applyS2I(s, int64(x), yj)
-			if rj.IsPanic() {
-				return rj
-			}
-			r[j] = rj
-		}
-		return NewAV(r)
+		return monadAV(yv, func(y V) V { return applyS2I(s, int64(x), y) })
 	default:
 		return panicType("s[i;y]", "y", y)
 	}
@@ -274,9 +251,10 @@ func applyS2Is[I integer](s S, x []I, y V) V {
 			if ri.IsPanic() {
 				return ri
 			}
+			ri.MarkImmutable()
 			r[i] = ri
 		}
-		return NewAV(r)
+		return newAV(r)
 	default:
 		return panicType("s[i;y]", "y", y)
 	}
@@ -472,7 +450,9 @@ func casts(ctx *Context, y V) V {
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.elts {
-			r.elts[i] = casts(ctx, yi)
+			ri := casts(ctx, yi)
+			ri.MarkImmutable()
+			r.elts[i] = ri
 		}
 		return canonicalAV(r)
 	case array:
@@ -500,9 +480,9 @@ func castb(y V) V {
 	case *AS:
 		r := make([]V, yv.Len())
 		for i, s := range yv.elts {
-			r[i] = NewAB([]byte(s))
+			r[i] = NewV(&AB{elts: []byte(s), flags: flagImmutable})
 		}
-		return NewAV(r)
+		return newAV(r)
 	case *AB:
 		return NewS(string(yv.elts))
 	case *AI:
@@ -556,9 +536,11 @@ func castc(y V) V {
 	case *AS:
 		r := make([]V, yv.Len())
 		for i, s := range yv.elts {
-			r[i] = castcString(s)
+			ri := castcString(s)
+			ri.MarkImmutable()
+			r[i] = ri
 		}
-		return NewAV(r)
+		return newAV(r)
 	case *AV:
 		return canonicalFast(monadAV(yv, castc))
 	default:
@@ -625,9 +607,11 @@ func castFormat1(ctx *Context, s string, y V) V {
 	case *AV:
 		r := make([]V, yv.Len())
 		for i, yi := range yv.elts {
-			r[i] = castFormat1(ctx, s, yi)
+			ri := castFormat1(ctx, s, yi)
+			ri.MarkImmutable()
+			r[i] = ri
 		}
-		return Canonical(NewAV(r))
+		return canonicalVs(r)
 	case *Dict:
 		return newDictValues(yv.keys, castFormat1(ctx, s, NewV(yv.values)))
 	default:
@@ -707,14 +691,7 @@ func dropS(s S, y V) V {
 		}
 		return NewAS(r)
 	case *AV:
-		r := make([]V, yv.Len())
-		for i, yi := range yv.elts {
-			r[i] = dropS(s, yi)
-			if r[i].IsPanic() {
-				return r[i]
-			}
-		}
-		return NewAV(r)
+		return monadAV(yv, func(y V) V { return dropS(s, y) })
 	case *Dict:
 		return newDictValues(yv.keys, dropS(s, NewV(yv.values)))
 	default:
@@ -745,12 +722,14 @@ func dropAS(x *AS, y V) V {
 		}
 		r := make([]V, yv.Len())
 		for i, yi := range yv.elts {
-			r[i] = dropS(S(x.At(i)), yi)
-			if r[i].IsPanic() {
-				return r[i]
+			ri := dropS(S(x.At(i)), yi)
+			if ri.IsPanic() {
+				return ri
 			}
+			ri.MarkImmutable()
+			r[i] = ri
 		}
-		return NewAV(r)
+		return newAV(r)
 	case *Dict:
 		if x.Len() != yv.Len() {
 			return panicLength("S_S", x.Len(), yv.Len())
@@ -773,14 +752,7 @@ func trim(s S, y V) V {
 		}
 		return NewAS(r)
 	case *AV:
-		r := make([]V, yv.Len())
-		for i, yi := range yv.elts {
-			r[i] = trim(s, yi)
-			if r[i].IsPanic() {
-				return r[i]
-			}
-		}
-		return NewAV(r)
+		return monadAV(yv, func(y V) V { return trim(s, y) })
 	case *Dict:
 		return newDictValues(yv.keys, trim(s, NewV(yv.values)))
 	default:
@@ -843,7 +815,7 @@ func sub2(x, y V) V {
 			oldnew[2*i] = xi
 			oldnew[2*i+1] = yv.elts[i]
 		}
-		return NewV(&replacer{r: strings.NewReplacer(oldnew...), oldnew: &AS{elts: oldnew, rc: reuseRCp(yv.rc)}})
+		return NewV(&replacer{r: strings.NewReplacer(oldnew...), oldnew: &AS{elts: oldnew}})
 	case *rx:
 		switch y.bv.(type) {
 		case S:
@@ -900,6 +872,7 @@ func (ctx *Context) replace(f stringReplacer, x V) V {
 			if ri.IsPanic() {
 				return ri
 			}
+			ri.MarkImmutable()
 			r.elts[i] = ri
 		}
 		return NewV(r)
@@ -921,15 +894,7 @@ func containedInS(x V, s string) V {
 		}
 		return newABb(r)
 	case *AV:
-		r := xv.reuse()
-		for i, xi := range xv.elts {
-			ri := containedInS(xi, s)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(xv, func(x V) V { return containedInS(x, s) })
 	case *Dict:
 		return newDictValues(xv.keys, containedInS(NewV(xv.values), s))
 	default:
@@ -955,15 +920,7 @@ func scount(s S, y V) V {
 		}
 		return NewAI(r)
 	case *AV:
-		r := make([]V, yv.Len())
-		for i, yi := range yv.elts {
-			ri := scount(s, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			r[i] = ri
-		}
-		return NewAV(r)
+		return monadAV(yv, func(y V) V { return scount(s, y) })
 	case *Dict:
 		return newDictValues(yv.keys, scount(s, NewV(yv.values)))
 	default:
@@ -978,19 +935,11 @@ func splitN(n int, sep S, y V) V {
 	case *AS:
 		r := make([]V, yv.Len())
 		for i := range r {
-			r[i] = NewAS(strings.SplitN(yv.At(i), string(sep), n))
+			r[i] = NewV(&AS{elts: strings.SplitN(yv.At(i), string(sep), n), flags: flagImmutable})
 		}
-		return NewAV(r)
+		return newAV(r)
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := splitN(n, sep, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(y V) V { return splitN(n, sep, y) })
 	case *Dict:
 		return newDictValues(yv.keys, splitN(n, sep, NewV(yv.values)))
 	default:
