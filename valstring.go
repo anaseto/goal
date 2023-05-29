@@ -47,19 +47,19 @@ func (v V) Append(ctx *Context, dst []byte) []byte {
 	case valFloat:
 		return appendFloat(ctx, dst, v.F())
 	case valVariadic:
-		if v.n >= int64(len(ctx.variadicsNames)) {
+		if v.uv >= int64(len(ctx.variadicsNames)) {
 			// Does not happen with main context.
-			return append(dst, fmt.Sprintf("·v[%d]", v.n)...)
+			return append(dst, fmt.Sprintf("·v[%d]", v.uv)...)
 		}
-		return append(dst, ctx.variadicsNames[v.n]...)
+		return append(dst, ctx.variadicsNames[v.uv]...)
 	case valLambda:
-		if v.n >= int64(len(ctx.lambdas)) {
+		if v.uv >= int64(len(ctx.lambdas)) {
 			// Does not happen with main context.
-			return append(dst, fmt.Sprintf("·l[%d]", v.n)...)
+			return append(dst, fmt.Sprintf("·l[%d]", v.uv)...)
 		}
-		return append(dst, ctx.lambdas[v.n].Source...)
+		return append(dst, ctx.lambdas[v.uv].Source...)
 	case valBoxed, valPanic:
-		return v.value.Append(ctx, dst)
+		return v.bv.Append(ctx, dst)
 	default:
 		// Could happen for nil values, but they are not normally
 		// created from goal programs.
@@ -170,7 +170,7 @@ func needsParens(x []V) bool {
 		if xi.IsI() || xi.IsF() {
 			continue
 		}
-		if _, ok := xi.value.(S); ok {
+		if _, ok := xi.bv.(S); ok {
 			continue
 		}
 		return true

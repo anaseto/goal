@@ -57,14 +57,14 @@ func (r *rxReplacer) rank(ctx *Context) int {
 }
 
 func (r *rxReplacer) replace(ctx *Context, s string) string {
-	switch zv := r.repl.value.(type) {
+	switch zv := r.repl.bv.(type) {
 	case S:
 		return r.r.Regexp.ReplaceAllString(string(s), string(zv))
 	default:
 		// zv is a function
 		f := func(s string) string {
 			r := ctx.Apply(r.repl, NewS(s))
-			switch rv := r.value.(type) {
+			switch rv := r.bv.(type) {
 			case S:
 				return string(rv)
 			default:
@@ -89,7 +89,7 @@ func vfRx(ctx *Context, args []V) V {
 }
 
 func compileRegex(x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		r, err := regexp.Compile(string(xv))
 		if err != nil {
@@ -109,7 +109,7 @@ func applyRx(x *rx, y V) V {
 }
 
 func applyRxMatch(x *rx, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		return NewI(b2I(x.Regexp.MatchString(string(yv))))
 	case *AS:
@@ -134,7 +134,7 @@ func applyRxMatch(x *rx, y V) V {
 }
 
 func applyRxFindSubmatch(x *rx, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		return NewAS(x.Regexp.FindStringSubmatch(string(yv)))
 	case *AS:
@@ -177,7 +177,7 @@ func applyRx2(x *rx, y, z V) V {
 }
 
 func applyRxFindAllSubmatch(x *rx, y V, n int64) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		matches := x.Regexp.FindAllStringSubmatch(string(yv), int(n))
 		r := make([]V, len(matches))
@@ -207,7 +207,7 @@ func applyRxFindAllSubmatch(x *rx, y V, n int64) V {
 }
 
 func applyRxFindAll(x *rx, y V, n int64) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		matches := x.Regexp.FindAllString(string(yv), int(n))
 		return NewAS(matches)
@@ -233,7 +233,7 @@ func applyRxFindAll(x *rx, y V, n int64) V {
 }
 
 func splitRx(f *rx, x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		r := f.Regexp.Split(string(xv), -1)
 		return NewAS(r)

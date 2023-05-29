@@ -8,9 +8,9 @@ import (
 
 // V contains a boxed or unboxed value.
 type V struct {
-	kind  valueKind // valInt, valFloat, valBoxed, ...
-	n     int64     // unboxed integer or float value
-	value Value     // boxed value
+	kind valueKind // valInt, valFloat, valBoxed, ...
+	uv   int64     // unboxed integer or float value
+	bv   Value     // boxed value
 }
 
 // valueKind represents the kinds of values.
@@ -51,7 +51,7 @@ type Value interface {
 
 // newVariadic returns a new variadic value.
 func newVariadic(v variadic) V {
-	return V{kind: valVariadic, n: int64(v)}
+	return V{kind: valVariadic, uv: int64(v)}
 }
 
 // lambda represents an user defined function by ID.
@@ -59,60 +59,60 @@ type lambda int32
 
 // newLambda returns a new lambda value.
 func newLambda(v lambda) V {
-	return V{kind: valLambda, n: int64(v)}
+	return V{kind: valLambda, uv: int64(v)}
 }
 
 // NewError returns a new recoverable error value.
 func NewError(x V) V {
-	return V{kind: valBoxed, value: &errV{V: x}}
+	return V{kind: valBoxed, bv: &errV{V: x}}
 }
 
-// NewI returns a new int64 value.
+// NewI returns a new unboxed int64 value.
 func NewI(i int64) V {
-	return V{kind: valInt, n: i}
+	return V{kind: valInt, uv: i}
 }
 
-// NewF returns a new float64 value.
+// NewF returns a new unboxed float64 value.
 func NewF(f float64) V {
 	i := *(*int64)(unsafe.Pointer(&f))
-	return V{kind: valFloat, n: i}
+	return V{kind: valFloat, uv: i}
 }
 
 // NewS returns a new string value.
 func NewS(s string) V {
-	return V{kind: valBoxed, value: S(s)}
+	return V{kind: valBoxed, bv: S(s)}
 }
 
 // NewV returns a new boxed value.
 func NewV(xv Value) V {
-	return V{kind: valBoxed, value: xv}
+	return V{kind: valBoxed, bv: xv}
 }
 
 // variadic retrieves the variadic value from N field. It assumes kind is
 // IntVariadic.
 func (x V) variadic() variadic {
-	return variadic(x.n)
+	return variadic(x.uv)
 }
 
 // Variadic retrieves the lambda value from N field. It assumes kind is
 // IntLambda.
 func (x V) lambda() lambda {
-	return lambda(x.n)
+	return lambda(x.uv)
 }
 
 // Error retrieves the error value. It assumes x.IsError().
 func (x V) Error() V {
-	return x.value.(*errV).V
+	return x.bv.(*errV).V
 }
 
 // I retrieves the unboxed integer value from N field. It assumes x.IsI().
 func (x V) I() int64 {
-	return x.n
+	return x.uv
 }
 
 // F retrieves the unboxed float64 value. It assumes x.IsF().
 func (x V) F() float64 {
-	i := x.n
+	i := x.uv
 	f := *(*float64)(unsafe.Pointer(&i))
 	return f
 }
@@ -120,7 +120,7 @@ func (x V) F() float64 {
 // Value retrieves the boxed value, or nil if the value is not boxed. You can
 // check whether the value is boxed with IsValue(v).
 func (x V) Value() Value {
-	return x.value
+	return x.bv
 }
 
 // Type returns the name of the value's type.
@@ -137,7 +137,7 @@ func (x V) Type() string {
 	case valLambda:
 		return "f"
 	case valBoxed:
-		return x.value.Type()
+		return x.bv.Type()
 	default:
 		return ""
 	}
@@ -161,7 +161,7 @@ func (x V) IsPanic() bool {
 // Panic returns the panic string. It assumes x.IsPanic().
 func (x V) Panic() string {
 	if x.IsPanic() {
-		return string(x.value.(panicV))
+		return string(x.bv.(panicV))
 	}
 	return ""
 }
@@ -171,7 +171,7 @@ func (x V) IsError() bool {
 	if x.kind != valBoxed {
 		return false
 	}
-	_, ok := x.value.(*errV)
+	_, ok := x.bv.(*errV)
 	return ok
 }
 
@@ -187,7 +187,7 @@ func (x V) IsFunction() bool {
 	case valVariadic, valLambda:
 		return true
 	case valBoxed:
-		_, ok := x.value.(function)
+		_, ok := x.bv.(function)
 		return ok
 	default:
 		return false
@@ -202,7 +202,7 @@ func (x V) IsCallable() bool {
 	case valVariadic, valLambda:
 		return true
 	case valBoxed:
-		_, ok := x.value.(callable)
+		_, ok := x.bv.(callable)
 		return ok
 	default:
 		return false
@@ -224,9 +224,9 @@ func (x V) Rank(ctx *Context) int {
 	case valVariadic:
 		return 2
 	case valLambda:
-		return ctx.lambdas[x.n].Rank
+		return ctx.lambdas[x.uv].Rank
 	case valBoxed:
-		if xf, ok := x.value.(function); ok {
+		if xf, ok := x.bv.(function); ok {
 			return xf.rank(ctx)
 		}
 		return 0

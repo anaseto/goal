@@ -2,7 +2,7 @@ package goal
 
 // icountGroup returns =x.
 func icountGroup(x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return NewAS(lineSplit(string(xv)))
 	case *AB:
@@ -89,21 +89,21 @@ func groupBy(x, y V) V {
 	if xlen == 0 {
 		return NewAV(nil)
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		if xv.IsBoolean() {
 			return groupByBoolsV(xv.elts, y)
 		}
 		max := maxBytes(xv.elts)
 		if xv.flags.Has(flagAscending) {
-			switch yv := y.value.(type) {
+			switch yv := y.bv.(type) {
 			case array:
 				return groupBySorted(xv.elts, yv, int64(max))
 			default:
 				return panicType("f=Y", "Y", y)
 			}
 		}
-		switch yv := y.value.(type) {
+		switch yv := y.bv.(type) {
 		case *AB:
 			return groupByBytesBytes(xv.elts, yv.elts, max, yv.IsBoolean())
 		case *AI:
@@ -123,14 +123,14 @@ func groupBy(x, y V) V {
 			return NewAV(nil)
 		}
 		if xv.flags.Has(flagAscending) {
-			switch yv := y.value.(type) {
+			switch yv := y.bv.(type) {
 			case array:
 				return groupBySorted(xv.elts, yv, int64(max))
 			default:
 				return panicType("f=Y", "Y", y)
 			}
 		}
-		switch yv := y.value.(type) {
+		switch yv := y.bv.(type) {
 		case *AB:
 			return groupByInt64sBytes(xv.elts, yv.elts, max, yv.IsBoolean())
 		case *AI:
@@ -158,7 +158,7 @@ func groupBy(x, y V) V {
 func groupByBoolsV(x []byte, y V) V {
 	n := int(sumIntegers(x))
 	r := make([]V, int(b2I(n > 0)+1))
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		if n == 0 {
 			r[0] = y

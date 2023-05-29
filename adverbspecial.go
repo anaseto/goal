@@ -135,7 +135,7 @@ func fold3Generic(x V, y array, f func(V, V) V) V {
 }
 
 func fold2vAdd(x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *Dict:
 		return fold2vAdd(NewV(xv.values))
 	case *AB:
@@ -154,7 +154,7 @@ func fold2vAdd(x V) V {
 }
 
 func fold3vAdd(x, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *Dict:
 		return fold3vAdd(x, NewV(yv.values))
 	case *AB:
@@ -182,7 +182,7 @@ func fold3vAdd(x, y V) V {
 		}
 		return fold3Generic(x, yv, add)
 	case *AS:
-		if s, ok := x.value.(S); ok {
+		if s, ok := x.bv.(S); ok {
 			return NewS(concatStrings(string(s), yv.elts))
 		}
 		return fold3Generic(x, yv, add)
@@ -218,7 +218,7 @@ func concatStrings(x string, y []string) string {
 }
 
 func fold2vSubtract(x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *Dict:
 		return fold2vSubtract(NewV(xv.values))
 	case *AB:
@@ -249,7 +249,7 @@ func fold2vSubtract(x V) V {
 }
 
 func fold3vSubtract(x, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *Dict:
 		return fold3vSubtract(x, NewV(yv.values))
 	case *AB:
@@ -277,7 +277,7 @@ func fold3vSubtract(x, y V) V {
 		}
 		return fold3Generic(x, yv, subtract)
 	case *AS:
-		if s, ok := x.value.(S); ok {
+		if s, ok := x.bv.(S); ok {
 			return NewS(trimSuffixes(string(s), yv.elts))
 		}
 		return fold3Generic(x, yv, subtract)
@@ -303,7 +303,7 @@ func trimSuffixes(x string, y []string) string {
 }
 
 func fold2vMultiply(x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *Dict:
 		return fold2vMultiply(NewV(xv.values))
 	case *AB:
@@ -322,7 +322,7 @@ func fold2vMultiply(x V) V {
 }
 
 func fold3vMultiply(x, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *Dict:
 		return fold3vMultiply(x, NewV(yv.values))
 	case *AB:
@@ -366,7 +366,7 @@ func multiplyNumbers[T number, U number](x U, y []T) U {
 }
 
 func fold2vMax(x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *Dict:
 		return fold2vMax(NewV(xv.values))
 	case *AB:
@@ -391,7 +391,7 @@ func fold2vMax(x V) V {
 }
 
 func fold3vMax(x, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *Dict:
 		return fold3vMax(x, NewV(yv.values))
 	case *AB:
@@ -419,7 +419,7 @@ func fold3vMax(x, y V) V {
 		}
 		return fold3Generic(x, yv, maximum)
 	case *AS:
-		if s, ok := x.value.(S); ok {
+		if s, ok := x.bv.(S); ok {
 			return NewS(maxStrings(string(s), yv.elts))
 		}
 		return fold3Generic(x, yv, maximum)
@@ -467,7 +467,7 @@ func maxIntegers[I integer](x []I) int64 {
 }
 
 func fold2vMin(x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *Dict:
 		return fold2vMin(NewV(xv.values))
 	case *AB:
@@ -495,7 +495,7 @@ func fold2vMin(x V) V {
 }
 
 func fold3vMin(x, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *Dict:
 		return fold3vMin(x, NewV(yv.values))
 	case *AB:
@@ -523,7 +523,7 @@ func fold3vMin(x, y V) V {
 		}
 		return fold3Generic(x, yv, minimum)
 	case *AS:
-		if s, ok := x.value.(S); ok {
+		if s, ok := x.bv.(S); ok {
 			return NewS(minStrings(string(s), yv.elts))
 		}
 		return fold3Generic(x, yv, minimum)
@@ -571,7 +571,7 @@ func minNumbers[T number, U number](x U, y []T) U {
 }
 
 func fold2vJoin(x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *Dict:
 		return fold2vJoin(NewV(xv.values))
 	case *AV:
@@ -589,7 +589,7 @@ func fold2vJoin(x V) V {
 }
 
 func fold3vJoin(x, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *Dict:
 		return fold3vJoin(x, NewV(yv.values))
 	case *AV:
@@ -603,7 +603,7 @@ func fold3vJoin(x, y V) V {
 }
 
 func convergeJoin(x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *Dict:
 		return convergeJoin(NewV(xv.values))
 	case *AV:
@@ -664,7 +664,7 @@ func scan3Generic(x V, y array, f func(V, V) V) V {
 }
 
 func scan2vAdd(x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *Dict:
 		return newDictValues(xv.keys, scan2vAdd(NewV(xv.values)))
 	case *AB:
@@ -698,7 +698,7 @@ func scan2vAdd(x V) V {
 }
 
 func scan3vAdd(x, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *Dict:
 		return newDictValues(yv.keys, scan3vAdd(x, NewV(yv.values)))
 	case *AB:
@@ -738,7 +738,7 @@ func scan3vAdd(x, y V) V {
 		}
 		return scan3Generic(x, yv, add)
 	case *AS:
-		if s, ok := x.value.(S); ok {
+		if s, ok := x.bv.(S); ok {
 			return scanConcatStrings(string(s), yv)
 		}
 		return scan3Generic(x, yv, add)
@@ -778,7 +778,7 @@ func scanConcatStrings(x string, y *AS) V {
 }
 
 func scan2vSubtract(x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *Dict:
 		return newDictValues(xv.keys, scan2vSubtract(NewV(xv.values)))
 	case *AB:
@@ -821,7 +821,7 @@ func scan2vSubtract(x V) V {
 }
 
 func scan3vSubtract(x, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *Dict:
 		return newDictValues(yv.keys, scan3vSubtract(x, NewV(yv.values)))
 	case *AB:
@@ -861,7 +861,7 @@ func scan3vSubtract(x, y V) V {
 		}
 		return scan3Generic(x, yv, subtract)
 	case *AS:
-		if s, ok := x.value.(S); ok {
+		if s, ok := x.bv.(S); ok {
 			r := yv.reuse()
 			scanTrimSuffixes(r.elts, string(s), yv.elts)
 			return NewV(r)
@@ -889,7 +889,7 @@ func scanTrimSuffixes(r []string, x string, y []string) {
 }
 
 func scan2vMax(x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *Dict:
 		return newDictValues(xv.keys, scan2vMax(NewV(xv.values)))
 	case *AB:
@@ -921,7 +921,7 @@ func scan2vMax(x V) V {
 }
 
 func scan3vMax(x, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *Dict:
 		return newDictValues(yv.keys, scan3vMax(x, NewV(yv.values)))
 	case *AB:
@@ -973,7 +973,7 @@ func scan3vMax(x, y V) V {
 		}
 		return scan3Generic(x, yv, maximum)
 	case *AS:
-		if s, ok := x.value.(S); ok {
+		if s, ok := x.bv.(S); ok {
 			r := yv.reuse()
 			scanMaxStrings(r.elts, string(s), yv.elts)
 			r.flags = flagAscending
@@ -1006,7 +1006,7 @@ func scanMaxStrings(dst []string, x string, y []string) {
 }
 
 func scan2vMin(x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *Dict:
 		return newDictValues(xv.keys, scan2vMin(NewV(xv.values)))
 	case *AB:
@@ -1037,7 +1037,7 @@ func scan2vMin(x V) V {
 }
 
 func scan3vMin(x, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *Dict:
 		return newDictValues(yv.keys, scan3vMin(x, NewV(yv.values)))
 	case *AB:
@@ -1087,7 +1087,7 @@ func scan3vMin(x, y V) V {
 		}
 		return scan3Generic(x, yv, minimum)
 	case *AS:
-		if s, ok := x.value.(S); ok {
+		if s, ok := x.bv.(S); ok {
 			r := yv.reuse()
 			scanMinStrings(r.elts, string(s), yv.elts)
 			return NewV(r)
@@ -1119,17 +1119,17 @@ func scanMinStrings(dst []string, x string, y []string) {
 }
 
 func each3Match(x, y V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *Dict:
 		return newDictValues(xv.keys, each3Match(NewV(xv.values), y))
 	default:
-		xa, ok := x.value.(array)
+		xa, ok := x.bv.(array)
 		if !ok {
 			break
 		}
-		ya, ok := y.value.(array)
+		ya, ok := y.bv.(array)
 		if !ok {
-			yd, ok := y.value.(*Dict)
+			yd, ok := y.bv.(*Dict)
 			if !ok {
 				break
 			}

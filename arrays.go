@@ -39,14 +39,22 @@ func (f flags) Has(ff flags) bool {
 	return f&ff != 0
 }
 
+// A is a generic type used to represent arrays. Only specific instantiations
+// implement the Value interface.
+type A[T any] struct {
+	flags flags
+	rc    *int
+	elts  []T
+}
+
+func newA[T any](x []T) A[T] {
+	return A[T]{elts: x}
+}
+
 // AB represents an array of bytes. From Goal's perspective, it's the same as
 // AI. It's used as an optimization to save space for small-integers, in
 // particular for arrays of booleans (0s and 1s).
-type AB struct {
-	flags flags
-	rc    *int
-	elts  []byte
-}
+type AB A[byte]
 
 // NewAB returns a new byte array. It does not initialize the reference
 // counter.
@@ -84,11 +92,7 @@ func newABbWithRC(x []byte, rc *int) V {
 }
 
 // AI represents an array of integers.
-type AI struct {
-	flags flags
-	rc    *int
-	elts  []int64
-}
+type AI A[int64]
 
 // NewAI returns a new int array. It does not initialize the reference
 // counter.
@@ -109,11 +113,7 @@ func NewAIWithRC(x []int64, rc *int) V {
 }
 
 // AF represents an array of reals.
-type AF struct {
-	flags flags
-	rc    *int
-	elts  []float64
-}
+type AF A[float64]
 
 // NewAF returns a new array of reals. It does not initialize the reference
 // counter.
@@ -134,11 +134,7 @@ func NewAFWithRC(x []float64, rc *int) V {
 }
 
 // AS represents an array of strings.
-type AS struct {
-	flags flags
-	rc    *int
-	elts  []string // string array
-}
+type AS A[string]
 
 // NewAS returns a new array of strings. It does not initialize the reference
 // counter.
@@ -159,11 +155,7 @@ func NewASWithRC(x []string, rc *int) V {
 }
 
 // AV represents a generic array.
-type AV struct {
-	flags flags
-	rc    *int
-	elts  []V
-}
+type AV A[V]
 
 // NewAV returns a new generic array. It does not initialize the reference
 // counter.
@@ -254,12 +246,12 @@ func (x *AV) setFlags(f flags) { x.flags = f }
 
 // set changes x at i with y (in place), assuming the value is compatible.
 func (x *AB) set(i int, y V) {
-	x.elts[i] = byte(y.n)
+	x.elts[i] = byte(y.uv)
 }
 
 // set changes x at i with y (in place), assuming the value is compatible.
 func (x *AI) set(i int, y V) {
-	x.elts[i] = y.n
+	x.elts[i] = y.uv
 }
 
 // set changes x at i with y (in place), assuming the value is compatible.
@@ -269,7 +261,7 @@ func (x *AF) set(i int, y V) {
 
 // set changes x at i with y (in place), assuming the value is compatible.
 func (x *AS) set(i int, y V) {
-	x.elts[i] = string(y.value.(S))
+	x.elts[i] = string(y.bv.(S))
 }
 
 // set changes x at i with y (in place).
@@ -777,7 +769,7 @@ func initArrayFlags(x array) {
 }
 
 func arrayAtV(x array, y V) array {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		return x.atBytes(yv.elts)
 	case *AI:
@@ -788,7 +780,7 @@ func arrayAtV(x array, y V) array {
 }
 
 func vArrayAtV(x array, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		return x.vAtBytes(yv)
 	case *AI:
@@ -804,8 +796,8 @@ func (x *AF) numeric() bool { return true }
 func (x *AS) numeric() bool { return false }
 func (x *AV) numeric() bool { return false }
 
-func (x *AB) canSet(y V) bool { return y.IsI() && y.n >= 0 && y.n < 256 }
+func (x *AB) canSet(y V) bool { return y.IsI() && y.uv >= 0 && y.uv < 256 }
 func (x *AI) canSet(y V) bool { return y.IsI() }
 func (x *AF) canSet(y V) bool { return y.IsF() }
-func (x *AS) canSet(y V) bool { _, ok := y.value.(S); return ok }
+func (x *AS) canSet(y V) bool { _, ok := y.bv.(S); return ok }
 func (x *AV) canSet(y V) bool { return true }

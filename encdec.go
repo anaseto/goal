@@ -161,7 +161,7 @@ func encode(f V, x V) V {
 			}
 			return encode(f, NewI(int64(x.F())))
 		}
-		switch xv := x.value.(type) {
+		switch xv := x.bv.(type) {
 		case *AI:
 			return encodeIInts(f.I(), xv.elts)
 		case *AB:
@@ -191,7 +191,7 @@ func encode(f V, x V) V {
 		}
 		return encode(NewI(int64(f.F())), x)
 	}
-	switch fv := f.value.(type) {
+	switch fv := f.bv.(type) {
 	case *AB:
 		return encode(fromABtoAI(fv), x)
 	case *AI:
@@ -209,7 +209,7 @@ func encode(f V, x V) V {
 			}
 			return encode(f, NewI(int64(x.F())))
 		}
-		switch xv := x.value.(type) {
+		switch xv := x.bv.(type) {
 		case *AI:
 			return encodeIsInts(fv.elts, xv.elts)
 		case *AB:
@@ -258,7 +258,7 @@ func decode(f V, x V) V {
 			}
 			return NewI(int64(x.F()))
 		}
-		switch xv := x.value.(type) {
+		switch xv := x.bv.(type) {
 		case *AI:
 			return NewI(decodeIIs(f.I(), xv.elts))
 		case *AB:
@@ -289,7 +289,7 @@ func decode(f V, x V) V {
 		}
 		return decode(NewI(int64(f.F())), x)
 	}
-	switch fv := f.value.(type) {
+	switch fv := f.bv.(type) {
 	case *AB:
 		return decode(fromABtoAI(fv), x)
 	case *AI:
@@ -307,7 +307,7 @@ func decode(f V, x V) V {
 			}
 			return decode(f, NewI(int64(x.F())))
 		}
-		switch xv := x.value.(type) {
+		switch xv := x.bv.(type) {
 		case *AI:
 			if fv.Len() != xv.Len() {
 				return panicLength("I/x", fv.Len(), xv.Len())

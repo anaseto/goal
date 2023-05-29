@@ -72,7 +72,7 @@ func (x V) applyN(ctx *Context, n int) V {
 			return x.variadic().applyN(ctx, n)
 		}
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case callable:
 		return xv.applyN(ctx, n)
 	default:
@@ -165,7 +165,7 @@ func (id lambda) applyN(ctx *Context, n int) V {
 	for _, i := range lc.UnusedArgs {
 		if v := &args[i]; v.kind == valBoxed {
 			v.rcdecrRefCounter()
-			v.value = nil
+			v.bv = nil
 			if i == 0 {
 				unusedFirst = true
 			}
@@ -192,7 +192,7 @@ func (id lambda) applyN(ctx *Context, n int) V {
 				v.IncrRC()
 				continue
 			}
-			v.value = nil
+			v.bv = nil
 		}
 	}
 	var r V
@@ -451,7 +451,7 @@ func (ctx *Context) applyDictArgs(x *Dict, arg V, args []V) V {
 		}
 		return NewV(canonicalAV(&AV{elts: r}))
 	}
-	switch argv := arg.value.(type) {
+	switch argv := arg.bv.(type) {
 	case array:
 		r := make([]V, argv.Len())
 		for i := 0; i < argv.Len(); i++ {
@@ -465,7 +465,7 @@ func (ctx *Context) applyDictArgs(x *Dict, arg V, args []V) V {
 	default:
 		r := applyDict(x, arg)
 		// applyDict never panics
-		switch rv := r.value.(type) {
+		switch rv := r.bv.(type) {
 		case array:
 			return ctx.applyArrayArgs(rv, args[len(args)-1], args[:len(args)-1])
 		case *Dict:
@@ -498,7 +498,7 @@ func applyArray(x array, y V) V {
 	if y.kind == valNil || isStar(y) {
 		return NewV(x)
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		return x.vAtBytes(yv)
 	case *AF:
@@ -541,7 +541,7 @@ func (ctx *Context) applyArrayArgs(x array, arg V, args []V) V {
 		}
 		return NewV(canonicalAV(&AV{elts: r}))
 	}
-	switch argv := arg.value.(type) {
+	switch argv := arg.bv.(type) {
 	case array:
 		r := make([]V, argv.Len())
 		for i := 0; i < argv.Len(); i++ {
@@ -557,7 +557,7 @@ func (ctx *Context) applyArrayArgs(x array, arg V, args []V) V {
 		if r.IsPanic() {
 			return r
 		}
-		switch rv := r.value.(type) {
+		switch rv := r.bv.(type) {
 		case array:
 			return ctx.applyArrayArgs(rv, args[len(args)-1], args[:len(args)-1])
 		case *Dict:
@@ -602,21 +602,21 @@ func applyI(n int, i int64, y V) V {
 	if n > 1 {
 		return panicRank("i.y")
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *Dict:
 		rk := takePadN(i, yv.keys)
 		rk.InitRC()
 		rv := takePadN(i, yv.values)
 		rv.InitRC()
 		return NewV(&Dict{
-			keys:   rk.value.(array),
-			values: rv.value.(array)})
+			keys:   rk.bv.(array),
+			values: rv.bv.(array)})
 	case array:
 		r := takePadN(i, yv)
 		r.InitRC()
 		return r
 	default:
-		r := takePadN(i, toArray(y).value.(array))
+		r := takePadN(i, toArray(y).bv.(array))
 		r.InitRC()
 		return r
 	}

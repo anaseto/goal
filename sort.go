@@ -67,9 +67,9 @@ func (x *Dict) Swap(i, j int) {
 
 // sortUp returns ^x.
 func sortUp(ctx *Context, x V) V {
-	xa, ok := x.value.(array)
+	xa, ok := x.bv.(array)
 	if !ok {
-		switch xv := x.value.(type) {
+		switch xv := x.bv.(type) {
 		case *Dict:
 			return NewV(sortUpDictKeys(ctx, xv))
 		default:
@@ -207,7 +207,7 @@ func permRange[I integer](n int) []I {
 
 // ascend returns <x.
 func ascend(ctx *Context, x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case array:
 		return ascendArray(ctx, xv)
 	case *Dict:
@@ -279,7 +279,7 @@ func ascendAI(ctx *Context, xv *AI) V {
 
 func sortBy(ctx *Context, keys, values array) *Dict {
 	a := ascendArray(ctx, values)
-	switch av := a.value.(type) {
+	switch av := a.bv.(type) {
 	case *AB:
 		nk := keys.atBytes(av.elts)
 		initRC(nk)
@@ -333,9 +333,9 @@ func sortUpDict(ctx *Context, d *Dict) *Dict {
 
 // descend returns >x.
 func descend(ctx *Context, x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case array:
-		r := ascendArray(ctx, xv).value.(array)
+		r := ascendArray(ctx, xv).bv.(array)
 		reverseMut(r)
 		return NewV(r)
 	case *Dict:
@@ -350,7 +350,7 @@ func descend(ctx *Context, x V) V {
 
 // search implements x$y.
 func search(x V, y V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		if !xv.flags.Has(flagAscending) && !sort.IsSorted(xv) {
 			return panics("X$y : non-ascending X")
@@ -446,7 +446,7 @@ func searchAB(x *AB, y V) V {
 	if y.IsF() {
 		return NewI(searchABF(x, y.F()))
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case array:
 		if x.Len() < 256 {
 			return NewAB(searchABArray[byte](x, yv))
@@ -494,7 +494,7 @@ func searchAI(x *AI, y V) V {
 	if y.IsF() {
 		return NewI(searchAIF(x, y.F()))
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case array:
 		if x.Len() < 256 {
 			return NewAB(searchAIArray[byte](x, yv))
@@ -542,7 +542,7 @@ func searchAF(x *AF, y V) V {
 	if y.IsF() {
 		return NewI(searchAFF(x, y.F()))
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case array:
 		if x.Len() < 256 {
 			return NewAB(searchAFArray[byte](x, yv))
@@ -584,7 +584,7 @@ func searchAFArray[I integer](x *AF, y array) []I {
 }
 
 func searchAS(x *AS, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		return NewI(searchASS(x, yv))
 	case array:
@@ -616,7 +616,7 @@ func searchASArray[I integer](x *AS, y array) []I {
 }
 
 func searchAV(x *AV, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case array:
 		if x.Len() < 256 {
 			return NewAB(searchAVArray[byte](x, yv))

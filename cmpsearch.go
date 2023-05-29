@@ -11,13 +11,13 @@ func (x V) Matches(y V) bool {
 	case valNil:
 		return y.kind == valNil
 	case valInt:
-		return y.kind == valInt && x.n == y.n ||
-			y.kind == valFloat && float64(x.n) == y.F()
+		return y.kind == valInt && x.uv == y.uv ||
+			y.kind == valFloat && float64(x.uv) == y.F()
 	case valFloat:
-		return y.kind == valInt && x.F() == float64(y.n) ||
+		return y.kind == valInt && x.F() == float64(y.uv) ||
 			y.kind == valFloat && x.F() == y.F()
 	case valVariadic:
-		return y.kind == valVariadic && x.n == y.n
+		return y.kind == valVariadic && x.uv == y.uv
 	case valLambda:
 		// XXX: match lambdas: match the string representations?
 		// Currently, self-search operations may use a more tolerant
@@ -25,11 +25,11 @@ func (x V) Matches(y V) bool {
 		// context information in Match would be a bit inconvenient.
 		// Comparing lambdas is not a common thing, so it does not
 		// matter much in practice.
-		return y.kind == valLambda && x.n == y.n
+		return y.kind == valLambda && x.uv == y.uv
 	case valPanic:
-		return y.kind == valPanic && x.value.Matches(y.value)
+		return y.kind == valPanic && x.bv.Matches(y.bv)
 	default:
-		return y.kind == valBoxed && x.value.Matches(y.value)
+		return y.kind == valBoxed && x.bv.Matches(y.bv)
 	}
 }
 
@@ -58,7 +58,7 @@ func smallRange(xv *AI) (min, span int64, ok bool) {
 
 // classify returns %x.
 func classify(ctx *Context, x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *Dict:
 		return newDictValues(xv.keys, classify(ctx, NewV(xv.values)))
 	case array:
@@ -71,7 +71,7 @@ func classify(ctx *Context, x V) V {
 	default:
 		return panicType("%X", "X", x)
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		if xv.IsBoolean() {
 			if xv.At(0) == 0 {
@@ -267,7 +267,7 @@ func classifySortedSlice[T comparable, I integer](xs []T) []I {
 
 // distinct returns ?x.
 func distinct(x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *Dict:
 		return NewV(distinctDict(xv))
 	case array:
@@ -288,7 +288,7 @@ func distinctDict(x *Dict) *Dict {
 	nk.InitRC()
 	nv := replicate(mf, NewV(x.values))
 	nv.InitRC()
-	return &Dict{keys: nk.value.(array), values: nv.value.(array)}
+	return &Dict{keys: nk.bv.(array), values: nv.bv.(array)}
 }
 
 func distinctArray(x array) array {
@@ -349,7 +349,7 @@ func distinctArray(x array) array {
 		xv.IncrRC()
 		mf := markFirsts(NewV(xv))
 		xv.DecrRC()
-		return replicate(mf, NewV(xv)).value.(array)
+		return replicate(mf, NewV(xv)).bv.(array)
 	default:
 		panic("distinctArray")
 	}
@@ -450,7 +450,7 @@ func distinctSortedSlice[T comparable](xs []T) []T {
 
 // Mark Firsts returns firsts x.
 func markFirsts(x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *Dict:
 		return newDictValues(xv.keys, markFirsts(NewV(xv.values)))
 	case array:
@@ -467,7 +467,7 @@ func markFirsts(x V) V {
 	default:
 		return panicType("firsts X", "X", x)
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		if xv.IsBoolean() {
 			r := make([]byte, xv.Len())
@@ -624,10 +624,10 @@ func markFirstsSortedSlice[T comparable](xs []T) []byte {
 func memberOf(x, y V) V {
 	// XXX: maybe we should make a switch first on x, instead of y, to
 	// handle simple unboxed cases firsts. Same comment for find.
-	if xv, ok := x.value.(*Dict); ok {
+	if xv, ok := x.bv.(*Dict); ok {
 		return newDictValues(xv.keys, memberOf(NewV(xv.values), y))
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		return containedInS(x, string(yv))
 	case *AB:
@@ -661,7 +661,7 @@ func memberOfAB(x V, y *AB) V {
 		}
 		return memberOfAB(NewI(int64(x.F())), y)
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		r := memberOfBB(xv.elts, y.elts)
 		return newABb(r)
@@ -759,7 +759,7 @@ func memberOfAF(x V, y *AF) V {
 		}
 		return NewI(0)
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		return memberOfAF(fromABtoAF(xv), y)
 	case *AI:
@@ -818,7 +818,7 @@ func memberOfAI(x V, y *AI) V {
 		}
 		return NewI(0)
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		if xv.IsBoolean() {
 			m := findAIboolsIdx[int64](y.elts)
@@ -911,7 +911,7 @@ func memberSOfAS(x string, y *AS) bool {
 }
 
 func memberOfAS(x V, y *AS) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		if y.flags.Has(flagAscending) && y.Len() > bruteForceGeneric/4 {
 			return NewI(b2I(memberSOfAS(string(xv), y)))
@@ -939,7 +939,7 @@ func memberOfAS(x V, y *AS) V {
 }
 
 func memberOfAV(x V, y *AV) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case array:
 		return memberOfArray(xv, y)
 	default:
@@ -973,7 +973,7 @@ func memberOfArray(x, y array) V {
 
 // OccurrenceCount returns ocount x.
 func occurrenceCount(ctx *Context, x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *Dict:
 		return newDictValues(xv.keys, occurrenceCount(ctx, NewV(xv.values)))
 	case array:
@@ -988,7 +988,7 @@ func occurrenceCount(ctx *Context, x V) V {
 		return panicType("ocount X", "X", x)
 	}
 	// TODO: occurrence count could often return []bytes instead of []int64
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		if xv.IsBoolean() {
 			r := make([]int64, xv.Len())
@@ -1151,16 +1151,16 @@ func without(x, y V) V {
 		}
 		return windows(int64(x.F()), y)
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		if xv == "" {
 			return trimSpaces(y)
 		}
 		return trim(xv, y)
 	case array:
-		_, ok := y.value.(array)
+		_, ok := y.bv.(array)
 		if !ok {
-			d, ok := y.value.(*Dict)
+			d, ok := y.bv.(*Dict)
 			if ok {
 				return withoutDict(x, d)
 			}
@@ -1174,7 +1174,7 @@ func without(x, y V) V {
 
 func withoutVArray(x, y V) V {
 	r := memberOf(y, x)
-	switch bres := r.value.(type) {
+	switch bres := r.bv.(type) {
 	case *AB:
 		for i, b := range bres.elts {
 			bres.elts[i] = 1 - b
@@ -1185,7 +1185,7 @@ func withoutVArray(x, y V) V {
 
 func withoutDict(x V, y *Dict) V {
 	r := memberOf(NewV(y.keys), x)
-	switch bres := r.value.(type) {
+	switch bres := r.bv.(type) {
 	case *AB:
 		for i, b := range bres.elts {
 			bres.elts[i] = 1 - b
@@ -1196,7 +1196,7 @@ func withoutDict(x V, y *Dict) V {
 
 // intersection implements keep x#y.
 func intersection(x array, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case array:
 		return replicate(memberOf(y, NewV(x)), y)
 	case *Dict:
@@ -1208,10 +1208,10 @@ func intersection(x array, y V) V {
 
 // find returns x?y.
 func find(x, y V) V {
-	if yv, ok := y.value.(*Dict); ok {
+	if yv, ok := y.bv.(*Dict); ok {
 		return newDictValues(yv.keys, find(x, NewV(yv.values)))
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return findS(xv, y)
 	case *AB:
@@ -1262,7 +1262,7 @@ func findArray(x array, y V) V {
 }
 
 func findS(s S, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		return NewI(int64(strings.Index(string(s), string(yv))))
 	case *rx:
@@ -1310,7 +1310,7 @@ func findAB(x *AB, y V) V {
 		}
 		return findAB(x, NewI(int64(y.F())))
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		if x.Len() < bruteForceBytes {
 			r := make([]byte, y.Len())
@@ -1409,7 +1409,7 @@ func findAI(x *AI, y V) V {
 		}
 		return findAI(x, NewI(int64(y.F())))
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		if yv.IsBoolean() {
 			if x.Len() < 256 {
@@ -1465,7 +1465,7 @@ func findAI(x *AI, y V) V {
 		}
 		return NewAIWithRC(findSlices[int64, int64](x.elts, yv.elts, bruteForceNumeric), reuseRCp(yv.rc))
 	case *AF:
-		return findAF(toAF(x).value.(*AF), y)
+		return findAF(toAF(x).bv.(*AF), y)
 	case array:
 		return findArrays(x, yv)
 	default:
@@ -1620,7 +1620,7 @@ func findAF(x *AF, y V) V {
 		}
 		return NewI(int64(x.Len()))
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		return findAF(x, fromABtoAF(yv))
 	case *AI:
@@ -1647,7 +1647,7 @@ func findSs(x []string, y string) int64 {
 }
 
 func findAS(x *AS, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		if x.flags.Has(flagAscending) && x.Len() > bruteForceGeneric/4 {
 			return NewI(findSs(x.elts, string(yv)))
@@ -1714,7 +1714,7 @@ func findArraysBrute[I integer](x, y array) []I {
 }
 
 func findAV(x *AV, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case array:
 		return findArrays(x, yv)
 	default:

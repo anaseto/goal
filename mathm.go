@@ -11,7 +11,7 @@ func mathm(x V, f func(float64) float64) V {
 	if x.IsF() {
 		return NewF(f(x.F()))
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		r := make([]float64, xv.Len())
 		for i, xi := range xv.elts {
@@ -43,7 +43,7 @@ func mathm(x V, f func(float64) float64) V {
 	case *Dict:
 		r := mathm(NewV(xv.values), f)
 		r.InitRC()
-		return NewV(&Dict{keys: xv.keys, values: r.value.(array)})
+		return NewV(&Dict{keys: xv.keys, values: r.bv.(array)})
 	default:
 		return Panicf("bad type \"%s\" in x", x.Type())
 	}

@@ -14,7 +14,7 @@ func negate(x V) V {
 	if x.IsF() {
 		return NewF(-x.F())
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return NewS(strings.TrimRightFunc(string(xv), unicode.IsSpace))
 	case *AB:
@@ -80,7 +80,7 @@ func sign(x V) V {
 	if x.IsF() {
 		return NewI(int64(signF(x.F())))
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		if xv.IsBoolean() {
 			return x
@@ -121,7 +121,7 @@ func floor(x V) V {
 	if x.IsF() {
 		return NewF(math.Floor(float64(x.F())))
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return NewS(strings.ToLower(string(xv)))
 	case *AB:
@@ -157,7 +157,7 @@ func upperCeil(x V) V {
 	if x.IsF() {
 		return NewF(math.Ceil(float64(x.F())))
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return NewS(strings.ToUpper(string(xv)))
 	case *AB:
@@ -193,7 +193,7 @@ func not(x V) V {
 	if x.IsF() {
 		return NewI(b2I(x.F() == 0))
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return NewI(b2I(xv == ""))
 	case *AB:
@@ -243,7 +243,7 @@ func abs(x V) V {
 	if x.IsF() {
 		return NewF(math.Abs(float64(x.F())))
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		return x
 	case *AI:
@@ -291,7 +291,7 @@ func modpad(x int64, y V) V {
 	if y.IsF() {
 		return NewF(modF(float64(x), y.F()))
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		return NewS(padStringRight(int(x), string(yv)))
 	case *AB:
@@ -376,7 +376,7 @@ func divpad(x int64, y V) V {
 	if y.IsF() {
 		return NewF(divF(float64(x), y.F()))
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		return NewS(padStringLeft(int(x), string(yv)))
 	case *AB:

@@ -8,7 +8,7 @@ import (
 )
 
 func fCSV2(ctx *Context, x, y V) V {
-	s, ok := x.value.(S)
+	s, ok := x.bv.(S)
 	if !ok {
 		return panicType("x csv y", "x", x)
 	}
@@ -21,7 +21,7 @@ func fCSV2(ctx *Context, x, y V) V {
 	}
 	r := fCSV(ctx, c, y)
 	if r.IsPanic() {
-		s := string(r.value.(panicV))
+		s := string(r.bv.(panicV))
 		return NewPanic("x csv y" + strings.TrimPrefix(s, "csv x"))
 	}
 	return r
@@ -30,7 +30,7 @@ func fCSV2(ctx *Context, x, y V) V {
 func csvStringVs(x []V, ctx *Context) []string {
 	r := make([]string, len(x))
 	for i, xi := range x {
-		switch xiv := xi.value.(type) {
+		switch xiv := xi.bv.(type) {
 		case S:
 			r[i] = string(xiv)
 		default:
@@ -41,7 +41,7 @@ func csvStringVs(x []V, ctx *Context) []string {
 }
 
 func fCSV(ctx *Context, comma rune, x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		sr := strings.NewReader(string(xv))
 		csvr := csv.NewReader(sr)
@@ -71,7 +71,7 @@ func fCSV(ctx *Context, comma rune, x V) V {
 		csvw := csv.NewWriter(&sb)
 		csvw.Comma = comma
 		for _, xi := range xv.elts {
-			switch xiv := xi.value.(type) {
+			switch xiv := xi.bv.(type) {
 			case *AS:
 				csvw.Write(xiv.elts)
 			case *AB:

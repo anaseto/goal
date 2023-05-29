@@ -24,19 +24,19 @@ func (x V) LessT(y V) bool {
 		}
 	case valVariadic:
 		if y.kind == valVariadic {
-			return x.n < y.n
+			return x.uv < y.uv
 		}
 	case valLambda:
 		if y.kind == valLambda {
-			return x.n < y.n
+			return x.uv < y.uv
 		}
 	case valBoxed:
 		if y.kind == valBoxed {
-			return x.value.LessT(y.value)
+			return x.bv.LessT(y.bv)
 		}
 	case valPanic:
 		if y.kind == valPanic {
-			return x.value.LessT(y.value)
+			return x.bv.LessT(y.bv)
 		}
 	}
 	return x.kind < y.kind

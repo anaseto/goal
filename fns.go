@@ -17,7 +17,7 @@ func enum(x V) V {
 		}
 		return enumI(int64(x.F()))
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return NewAS(strings.Fields(string(xv)))
 	case *AB:
@@ -134,7 +134,7 @@ func where(x V) V {
 		}
 		return where(NewI(int64(x.F())))
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		return whereAB(xv)
 	case *AI:
@@ -260,7 +260,7 @@ func replicate(x, y V) V {
 		}
 		return replicate(NewI(int64(x.F())), y)
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		if xv.Len() != y.Len() {
 			return Panicf("f#y : length mismatch: %d (f[y]) vs %d (y)", xv.Len(), y.Len())
@@ -284,20 +284,20 @@ func replicate(x, y V) V {
 
 func replicateI(n int64, y V) V {
 	if y.IsI() {
-		if isBI(y.n) {
+		if isBI(y.uv) {
 			r := make([]byte, n)
 			for i := range r {
-				r[i] = byte(y.n)
+				r[i] = byte(y.uv)
 			}
 			var fl flags
-			if isbI(y.n) {
+			if isbI(y.uv) {
 				fl |= flagBool
 			}
 			return NewV(&AB{elts: r, flags: fl})
 		}
 		r := make([]int64, n)
 		for i := range r {
-			r[i] = y.n
+			r[i] = y.uv
 		}
 		return NewAI(r)
 	}
@@ -308,7 +308,7 @@ func replicateI(n int64, y V) V {
 		}
 		return NewAF(r)
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		r := make([]string, n)
 		for i := range r {
@@ -356,7 +356,7 @@ func replicateISlice[T any](n int64, ys []T) []T {
 }
 
 func replicateAB(x *AB, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		if x.IsBoolean() {
 			r := replicateBools(x.elts, yv.elts)
@@ -448,7 +448,7 @@ func replicateBytes[T any](x []byte, y []T) []T {
 }
 
 func replicateAI(x *AI, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		r, err := replicateInts(x.elts, yv.elts)
 		if err != nil {
@@ -532,7 +532,7 @@ func weedOut(x, y V) V {
 		}
 		return weedOut(NewI(int64(x.F())), y)
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		if xv.Len() != y.Len() {
 			return Panicf("f_y : length mismatch: %d (f[y]) vs %d (y)", xv.Len(), y.Len())
@@ -555,7 +555,7 @@ func weedOut(x, y V) V {
 }
 
 func weedOutAB(x *AB, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		r := weedOutIntegers(x.elts, yv.elts)
 		return NewV(&AB{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
@@ -603,7 +603,7 @@ func weedOutIntegers[I integer, T any](x []I, y []T) []T {
 }
 
 func weedOutAI(x *AI, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		r := weedOutIntegers(x.elts, yv.elts)
 		return NewV(&AB{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
@@ -636,7 +636,7 @@ func weedOutAI(x *AI, y V) V {
 
 // get implements .x.
 func get(ctx *Context, x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return reval(ctx, xv)
 	case *errV:
@@ -667,7 +667,7 @@ func recompileLambdas(ctx, nctx *Context, x V) V {
 	if x.kind != valBoxed {
 		return x
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return x
 	case *AB:
@@ -689,12 +689,12 @@ func recompileLambdas(ctx, nctx *Context, x V) V {
 		if ks.IsPanic() {
 			return ks
 		}
-		xv.keys = ks.value.(array)
+		xv.keys = ks.bv.(array)
 		vs := recompileLambdas(ctx, nctx, xv.Values())
 		if vs.IsPanic() {
 			return vs
 		}
-		xv.values = vs.value.(array)
+		xv.values = vs.bv.(array)
 		return x
 	case *errV:
 		xv.V = recompileLambdas(ctx, nctx, xv.V)
@@ -755,7 +755,7 @@ func recompileLambdas(ctx, nctx *Context, x V) V {
 
 // eval implements eval x.
 func eval(ctx *Context, x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return evalString(ctx, string(xv))
 	case *AS:
@@ -801,15 +801,15 @@ func evalString(ctx *Context, s string) V {
 
 // evalPackage implements eval[s;loc;pfx].
 func evalPackage(ctx *Context, x V, y V, z V) V {
-	s, ok := x.value.(S)
+	s, ok := x.bv.(S)
 	if !ok {
 		return panicType("eval[s;loc;pfx]", "s", x)
 	}
-	loc, ok := y.value.(S)
+	loc, ok := y.bv.(S)
 	if !ok {
 		return panicType("eval[s;loc;pfx]", "loc", y)
 	}
-	pfx, ok := z.value.(S)
+	pfx, ok := z.bv.(S)
 	if !ok {
 		return panicType("eval[s;loc;pfx]", "pfx", z)
 	}
@@ -837,7 +837,7 @@ func evalPackage(ctx *Context, x V, y V, z V) V {
 
 // try implements .[f1;x;f2].
 func try(ctx *Context, f1, x, f2 V) V {
-	av := toArray(x).value.(array)
+	av := toArray(x).bv.(array)
 	if av.Len() == 0 {
 		return panics(".[f1;x;f2] : empty x")
 	}
@@ -846,7 +846,7 @@ func try(ctx *Context, f1, x, f2 V) V {
 	}
 	r := f1.applyN(ctx, av.Len())
 	if r.IsPanic() {
-		r = NewS(string(r.value.(panicV)))
+		r = NewS(string(r.bv.(panicV)))
 		ctx.replaceTop(r)
 		r = f2.applyN(ctx, 1)
 		if r.IsPanic() {
@@ -862,7 +862,7 @@ func try(ctx *Context, f1, x, f2 V) V {
 func tryAt(ctx *Context, f1, x, f2 V) V {
 	r := ctx.Apply(f1, x)
 	if r.IsPanic() {
-		r = NewS(string(r.value.(panicV)))
+		r = NewS(string(r.bv.(panicV)))
 		ctx.replaceTop(r)
 		r = f2.applyN(ctx, 1)
 		if r.IsPanic() {

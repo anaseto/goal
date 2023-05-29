@@ -391,8 +391,8 @@ func (c *compiler) doToken(tok *astToken, n int) error {
 		if err != nil {
 			return c.errorf("number: %v", err)
 		}
-		if x.kind == valInt && x.n <= math.MaxInt32 && x.n >= math.MinInt32 {
-			c.push2(opInt, opcode(int32(x.n)))
+		if x.kind == valInt && x.uv <= math.MaxInt32 && x.uv >= math.MinInt32 {
+			c.push2(opInt, opcode(int32(x.uv)))
 		} else {
 			id := c.ctx.storeConst(x)
 			c.push2(opConst, opcode(id))

@@ -14,7 +14,7 @@ func fold2(ctx *Context, args []V) V {
 		if f.IsF() {
 			return decode(f, args[0])
 		}
-		switch fv := f.value.(type) {
+		switch fv := f.bv.(type) {
 		case S:
 			return joinStrings(fv, args[0])
 		case *AB, *AI, *AF:
@@ -47,7 +47,7 @@ func foldfx(ctx *Context, f, x V) V {
 			return fold2vJoin(x)
 		}
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *Dict:
 		return foldfx(ctx, f, NewV(xv.values))
 	case array:
@@ -80,7 +80,7 @@ func foldfx(ctx *Context, f, x V) V {
 }
 
 func joinStrings(sep S, x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return x
 	case *AS:
@@ -96,7 +96,7 @@ func joinStrings(sep S, x V) V {
 const maxConvergeIters = 1_000_000
 
 func converge(ctx *Context, f, x V) V {
-	if dv, ok := f.value.(*derivedVerb); ok && dv.Fun == vFold && dv.Arg.kind == valVariadic {
+	if dv, ok := f.bv.(*derivedVerb); ok && dv.Fun == vFold && dv.Arg.kind == valVariadic {
 		switch dv.Arg.variadic() {
 		case vJoin:
 			return convergeJoin(x)
@@ -167,7 +167,7 @@ func foldxfy(ctx *Context, x, f, y V) V {
 			return fold3vJoin(x, y)
 		}
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *Dict:
 		return foldxfy(ctx, x, f, NewV(yv.values))
 	case array:
@@ -202,7 +202,7 @@ func foldxfy(ctx *Context, x, f, y V) V {
 func getIterLen(args []V) (int, error) {
 	mlen := -1
 	for _, x := range args {
-		switch xv := x.value.(type) {
+		switch xv := x.bv.(type) {
 		case countable:
 			switch {
 			case mlen < 0:
@@ -327,7 +327,7 @@ func scan2(ctx *Context, f, x V) V {
 		if f.IsF() {
 			return encode(f, x)
 		}
-		switch fv := f.value.(type) {
+		switch fv := f.bv.(type) {
 		case S:
 			return splitS(fv, x)
 		case *rx:
@@ -357,7 +357,7 @@ func scanfx(ctx *Context, f, x V) V {
 			return scan2vMin(x)
 		}
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *Dict:
 		return newDictValues(xv.keys, scanfx(ctx, f, NewV(xv.values)))
 	case array:
@@ -435,7 +435,7 @@ func splitS(sep S, x V) V {
 func scan3(ctx *Context, args []V) V {
 	f := args[2]
 	if !f.IsFunction() {
-		switch fv := f.value.(type) {
+		switch fv := f.bv.(type) {
 		case S:
 			return splitNS(args[1], fv, args[0])
 		default:
@@ -463,7 +463,7 @@ func scanxfy(ctx *Context, x, f, y V) V {
 			return scan3vMin(x, y)
 		}
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *Dict:
 		return newDictValues(yv.keys, scanxfy(ctx, x, f, NewV(yv.values)))
 	case array:
@@ -540,7 +540,7 @@ func scanN(ctx *Context, args []V) V {
 	}
 	f.DecrRC()
 	ctx.drop()
-	if d, ok := args[len(args)-3].value.(*Dict); ok {
+	if d, ok := args[len(args)-3].bv.(*Dict); ok {
 		return newDictValues(d.keys, normalizedArgs(r))
 	}
 	return normalizedArgs(r)
@@ -641,7 +641,7 @@ func each2(ctx *Context, f, x V) V {
 	if !f.IsFunction() {
 		return panicType(`f'x`, "f", f)
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *Dict:
 		return newDictValues(xv.keys, eachfx(ctx, f, xv.values))
 	case array:
@@ -724,14 +724,14 @@ func eachN(ctx *Context, args []V) V {
 	}
 	f.DecrRC()
 	ctx.drop()
-	if d, ok := args[len(args)-2].value.(*Dict); ok {
+	if d, ok := args[len(args)-2].bv.(*Dict); ok {
 		return newDictValues(d.keys, normalizedArgs(r))
 	}
 	return normalizedArgs(r)
 }
 
 func (x V) at(i int) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *Dict:
 		return xv.values.at(i)
 	case array:

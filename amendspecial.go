@@ -11,7 +11,7 @@ func inBoundsV(y V, l int) (int64, bool) {
 	if y.IsI() {
 		return inBoundsI(y.I(), l)
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		return inBoundsBytes(yv.elts, l)
 	case *AI:
@@ -68,7 +68,7 @@ func amend3NotV(x array, y V) (array, error) {
 	if isStar(y) {
 		return amend3NotV(x, enumI(int64(x.Len())))
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		return amend3NotIntegers(x, yv.elts), nil
 	case *AI:
@@ -129,7 +129,7 @@ func amend3NegateV(x array, y V) (array, error) {
 	if isStar(y) {
 		return amend3NegateV(x, enumI(int64(x.Len())))
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		return amend3NegateIntegers(x, yv.elts), nil
 	case *AI:
@@ -194,7 +194,7 @@ func amend4Right(x array, y, z V) (array, error) {
 	if isStar(y) {
 		return amend4Right(x, enumI(int64(x.Len())), z)
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		return amend4RightIs(x, yv.elts, z)
 	case *AI:
@@ -231,7 +231,7 @@ func amend4RightIs[I integer](x array, y []I, z V) (array, error) {
 			return x, fmt.Errorf("out of bounds index (%d)", yi)
 		}
 	}
-	za, ok := z.value.(array)
+	za, ok := z.bv.(array)
 	if !ok {
 		return amend4RightIsV(x, y, z)
 	}
@@ -272,7 +272,7 @@ func amend4RightIntegersAtom[I integer](x array, y []I, z V) {
 	case *AF:
 		amendSlice(xv.elts, y, z.F())
 	case *AS:
-		zs := string(z.value.(S))
+		zs := string(z.bv.(S))
 		amendSlice(xv.elts, y, zs)
 	case *AV:
 		z.immutable()
@@ -333,7 +333,7 @@ func amend4RightIntegersArrays[I integer](x array, y []I, z array) array {
 
 func amend4RightAV(x array, yv *AV, z V) (array, error) {
 	var err error
-	za, ok := z.value.(array)
+	za, ok := z.bv.(array)
 	if !ok {
 		for _, yi := range yv.elts {
 			x, err = amend4Right(x, yi, z)
@@ -367,7 +367,7 @@ func amend4Arith(x array, y V, f func(V, V) V, z V) (array, error) {
 	if isStar(y) {
 		return amend4Arith(x, enumI(int64(x.Len())), f, z)
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		return arithAmendIntegersV(x, yv.elts, f, z)
 	case *AI:
@@ -389,7 +389,7 @@ func arithAmendI(x array, y int, f func(V, V) V, z V) (array, error) {
 }
 
 func arithAmendIntegersV[I integer](x array, y []I, f func(V, V) V, z V) (array, error) {
-	za, ok := z.value.(array)
+	za, ok := z.bv.(array)
 	if !ok {
 		return arithAmendIntegersAtom(x, y, f, z)
 	}
@@ -427,7 +427,7 @@ func arithAmendIntegersAtom[I integer](x array, y []I, f func(V, V) V, z V) (arr
 
 func arithAmend4AV(x array, y []V, f func(V, V) V, z V) (array, error) {
 	var err error
-	za, ok := z.value.(array)
+	za, ok := z.bv.(array)
 	if !ok {
 		for _, yi := range y {
 			x, err = amend4Arith(x, yi, f, z)

@@ -2,11 +2,11 @@ package goal
 
 // flip returns +x.
 func flip(x V) V {
-	if xv, ok := x.value.(*Dict); ok {
+	if xv, ok := x.bv.(*Dict); ok {
 		return NewV(&Dict{keys: xv.values, values: xv.keys})
 	}
 	x = toArray(x)
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AV:
 		cols := xv.Len()
 		if cols == 0 {
@@ -15,7 +15,7 @@ func flip(x V) V {
 		lines := -1
 		for _, o := range xv.elts {
 			var nl int
-			switch a := o.value.(type) {
+			switch a := o.bv.(type) {
 			case array:
 				nl = a.Len()
 			default:
@@ -70,7 +70,7 @@ func flip(x V) V {
 
 // getAB retrieves the *getAB value. It assumes Value type is *getAB.
 func (x V) getAB() *AB {
-	return x.value.(*AB)
+	return x.bv.(*AB)
 }
 
 func flipAB(x *AV, b bool) V {
@@ -130,7 +130,7 @@ func flipAF(x *AV) V {
 			r[i] = float64(xi.F())
 			continue
 		}
-		switch xiv := xi.value.(type) {
+		switch xiv := xi.bv.(type) {
 		case *AB:
 			r[i] = float64(xiv.At(0))
 		case *AF:
@@ -163,7 +163,7 @@ func flipAVAF(x *AV, lines int) V {
 			}
 			continue
 		}
-		switch xiv := xi.value.(type) {
+		switch xiv := xi.bv.(type) {
 		case *AB:
 			for j := 0; j < lines; j++ {
 				a[i+j*xlen] = float64(xiv.At(j))
@@ -192,7 +192,7 @@ func flipAI(x *AV) V {
 			r[i] = xi.I()
 			continue
 		}
-		switch xiv := xi.value.(type) {
+		switch xiv := xi.bv.(type) {
 		case *AB:
 			r[i] = int64(xiv.At(0))
 		case *AI:
@@ -216,7 +216,7 @@ func flipAVAI(x *AV, lines int) V {
 			}
 			continue
 		}
-		switch xiv := xi.value.(type) {
+		switch xiv := xi.bv.(type) {
 		case *AB:
 			for j := 0; j < lines; j++ {
 				a[i+j*xlen] = int64(xiv.At(j))
@@ -237,7 +237,7 @@ func flipAVAI(x *AV, lines int) V {
 func flipAS(x *AV) V {
 	r := make([]string, x.Len())
 	for i, xi := range x.elts {
-		switch xiv := xi.value.(type) {
+		switch xiv := xi.bv.(type) {
 		case S:
 			r[i] = string(xiv)
 		case *AS:
@@ -254,7 +254,7 @@ func flipAVAS(x *AV, lines int) V {
 	var n int = 2
 	rc := &n
 	for i, xi := range x.elts {
-		switch xiv := xi.value.(type) {
+		switch xiv := xi.bv.(type) {
 		case S:
 			for j := 0; j < lines; j++ {
 				a[i+j*xlen] = string(xiv)
@@ -275,7 +275,7 @@ func flipAVAS(x *AV, lines int) V {
 func flipAV(x *AV) V {
 	r := make([]V, x.Len())
 	for i, xi := range x.elts {
-		switch xiv := xi.value.(type) {
+		switch xiv := xi.bv.(type) {
 		case array:
 			r[i] = xiv.at(0)
 		default:
@@ -290,7 +290,7 @@ func flipAVAV(x *AV, lines int) V {
 	a := make([]V, lines*x.Len())
 	xlen := x.Len()
 	for i, xi := range x.elts {
-		switch xiv := xi.value.(type) {
+		switch xiv := xi.bv.(type) {
 		case array:
 			for j := 0; j < lines; j++ {
 				a[i+j*xlen] = xiv.at(j)

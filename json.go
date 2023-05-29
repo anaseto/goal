@@ -6,7 +6,7 @@ import (
 )
 
 func fJSON(x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return jsonStringToGoal(string(xv))
 	case *AS:

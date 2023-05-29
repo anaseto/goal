@@ -11,11 +11,11 @@ type Dict struct {
 // NewDict returns a dictionary. Both keys and values should be arrays, and
 // they should have the same length.
 func NewDict(keys, values V) V {
-	xv, ok := keys.value.(array)
+	xv, ok := keys.bv.(array)
 	if !ok {
 		panic(fmt.Sprintf("NewDict(keys, values) : keys not an array (%s)", keys.Type()))
 	}
-	yv, ok := values.value.(array)
+	yv, ok := values.bv.(array)
 	if !ok {
 		panic(fmt.Sprintf("NewDict(keys, values) : values not an array (%s)", values.Type()))
 	}
@@ -31,7 +31,7 @@ func newDictValues(keys array, values V) V {
 	if values.IsPanic() {
 		return values
 	}
-	v := values.value.(array)
+	v := values.bv.(array)
 	initRC(v)
 	return NewV(&Dict{keys: keys, values: v})
 }
@@ -77,11 +77,11 @@ func dict(x, y V) V {
 		}
 		return moddivpad(int64(x.F()), y)
 	}
-	xv, ok := x.value.(array)
+	xv, ok := x.bv.(array)
 	if !ok {
 		return panicType("X!Y", "X", x)
 	}
-	yv, ok := y.value.(array)
+	yv, ok := y.bv.(array)
 	if !ok {
 		return panicType("X!Y", "X", x)
 	}
@@ -101,7 +101,7 @@ func dictAmendKVI(xd *Dict, yk array) (array, array, V) {
 	if max == int64(nkeys) {
 		b := equalIV(max, ky)
 		flags := keys.getFlags() & flagDistinct
-		keys = join(NewV(keys), distinct(replicate(b, ykv))).value.(array)
+		keys = join(NewV(keys), distinct(replicate(b, ykv))).bv.(array)
 		keys.setFlags(flags)
 		initRC(keys)
 		values = padArrayMut(keys.Len()-nkeys, values)
@@ -114,7 +114,7 @@ func dictAmendKVI(xd *Dict, yk array) (array, array, V) {
 func dictMerge(xd, yd *Dict) V {
 	keys, values, ky := dictAmendKVI(xd, yd.keys)
 	var r array
-	switch kyv := ky.value.(type) {
+	switch kyv := ky.bv.(type) {
 	case *AB:
 		r = mergeAtIntegers(values, kyv.elts, yd.values)
 	case *AI:
@@ -135,7 +135,7 @@ func dictArith(xd, yd *Dict, f func(V, V) V) V {
 	keys, values, ky := dictAmendKVI(xd, yd.keys)
 	var err error
 	var r array
-	switch kyv := ky.value.(type) {
+	switch kyv := ky.bv.(type) {
 	case *AB:
 		r, err = arithAmendIntegersArray(values, kyv.elts, f, yd.values)
 	case *AI:

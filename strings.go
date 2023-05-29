@@ -99,7 +99,7 @@ func applyS(s S, x V) V {
 		}
 		return applyS(s, NewI(int64(x.F())))
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		return applySIntegers(string(s), xv.elts)
 	case *AI:
@@ -157,7 +157,7 @@ func applyS2(s S, x V, y V) V {
 		}
 		return applyS2I(s, int64(x.F()), y)
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		return applyS2Is(s, xv.elts, y)
 	case *AI:
@@ -196,7 +196,7 @@ func applyS2I(s S, x int64, y V) V {
 		}
 		return applyS2I(s, x, NewI(int64(y.F())))
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		return applyS2IIs(string(s), x, yv.elts)
 	case *AI:
@@ -253,7 +253,7 @@ func applyS2Is[I integer](s S, x []I, y V) V {
 		}
 		return applyS2Is(s, x, NewI(int64(y.F())))
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		return applyS2IsIs(string(s), x, yv.elts)
 	case *AI:
@@ -343,7 +343,7 @@ func casti(y V) V {
 	if y.IsF() {
 		return NewI(int64(y.F()))
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		xi, err := parseInt(string(yv))
 		if err != nil {
@@ -414,7 +414,7 @@ func castn(y V) V {
 	if y.IsF() {
 		return y
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		xi, err := parseFloat(string(yv))
 		if err != nil {
@@ -464,7 +464,7 @@ func parseFloat(s string) (float64, error) {
 }
 
 func casts(ctx *Context, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		return y
 	case *AS:
@@ -494,7 +494,7 @@ func castb(y V) V {
 		}
 		return NewS(string([]byte{byte(y.F())}))
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		return NewAB([]byte(string(yv)))
 	case *AS:
@@ -532,7 +532,7 @@ func castc(y V) V {
 	if y.IsF() {
 		return castc(NewI(int64(y.F())))
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		return castcString(string(yv))
 	case *AB:
@@ -607,7 +607,7 @@ func castFormat1(ctx *Context, s string, y V) V {
 	if y.IsF() {
 		return NewS(fmt.Sprintf(s, y.F()))
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		return NewS(fmt.Sprintf(s, string(yv)))
 	case *AB:
@@ -650,7 +650,7 @@ func castFormatN(ctx *Context, s string, y V, n int) V {
 	if y.IsF() {
 		return NewS(fmt.Sprintf(s, y.F()))
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		return NewS(fmt.Sprintf(s, string(yv)))
 	case *AB:
@@ -679,7 +679,7 @@ func valueToAny(ctx *Context, x V) any {
 	if x.IsF() {
 		return x.F()
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return string(xv)
 	default:
@@ -697,7 +697,7 @@ func formatNArray[T any](s string, y []T, n int) string {
 }
 
 func dropS(s S, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		return NewS(strings.TrimPrefix(string(yv), string(s)))
 	case *AS:
@@ -723,7 +723,7 @@ func dropS(s S, y V) V {
 }
 
 func dropAS(x *AS, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		r := make([]string, x.Len())
 		for i, xi := range x.elts {
@@ -763,7 +763,7 @@ func dropAS(x *AS, y V) V {
 
 // trim returns s^y.
 func trim(s S, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		return NewS(strings.Trim(string(yv), string(s)))
 	case *AS:
@@ -790,7 +790,7 @@ func trim(s S, y V) V {
 
 // trimSpaces returns ""^y.
 func trimSpaces(y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		return NewS(strings.TrimSpace(string(yv)))
 	case *AS:
@@ -809,7 +809,7 @@ func trimSpaces(y V) V {
 }
 
 func sub1(x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AS:
 		if xv.Len()%2 != 0 {
 			return panics("sub[S] : non-even length array")
@@ -823,15 +823,15 @@ func sub1(x V) V {
 }
 
 func sub2(x, y V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
-		yv, ok := y.value.(S)
+		yv, ok := y.bv.(S)
 		if !ok {
 			return panicType("sub[s;s]", "s", y)
 		}
 		return NewV(&nReplacer{olds: xv, news: yv, n: -1})
 	case *AS:
-		yv, ok := y.value.(*AS)
+		yv, ok := y.bv.(*AS)
 		if !ok {
 			return panicType("sub[S;S]", "S", y)
 		}
@@ -845,7 +845,7 @@ func sub2(x, y V) V {
 		}
 		return NewV(&replacer{r: strings.NewReplacer(oldnew...), oldnew: &AS{elts: oldnew, rc: reuseRCp(yv.rc)}})
 	case *rx:
-		switch y.value.(type) {
+		switch y.bv.(type) {
 		case S:
 			return NewV(&rxReplacer{r: xv, repl: y})
 		default:
@@ -860,9 +860,9 @@ func sub2(x, y V) V {
 }
 
 func sub3(x, y, z V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
-		yv, ok := y.value.(S)
+		yv, ok := y.bv.(S)
 		if !ok {
 			return panicType("sub[s;y;i]", "y", y)
 		}
@@ -884,7 +884,7 @@ func sub3(x, y, z V) V {
 }
 
 func (ctx *Context) replace(f stringReplacer, x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return NewS(f.replace(ctx, string(xv)))
 	case *AS:
@@ -911,7 +911,7 @@ func (ctx *Context) replace(f stringReplacer, x V) V {
 }
 
 func containedInS(x V, s string) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return NewI(b2I(strings.Contains(s, string(xv))))
 	case *AS:
@@ -945,7 +945,7 @@ func srepeat(s S, n int64) string {
 }
 
 func scount(s S, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		return NewI(int64(strings.Count(string(yv), string(s))))
 	case *AS:
@@ -972,7 +972,7 @@ func scount(s S, y V) V {
 }
 
 func splitN(n int, sep S, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		return NewAS(strings.SplitN(string(yv), string(sep), n))
 	case *AS:

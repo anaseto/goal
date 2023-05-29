@@ -10,7 +10,7 @@ import (
 func vfTime(ctx *Context, args []V) V {
 	x := args[len(args)-1]
 	var cmd string
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		cmd = string(xv)
 	default:
@@ -29,18 +29,18 @@ func vfTime(ctx *Context, args []V) V {
 		return doTime(cmd, y, time.RFC3339, "")
 	case 3:
 		z := args[len(args)-3]
-		format, ok := z.value.(S)
+		format, ok := z.bv.(S)
 		if !ok {
 			return panicType("time[cmd;t;format]", "format", z)
 		}
 		return doTime(cmd, y, getFormat(string(format)), "")
 	case 4:
 		z := args[len(args)-3]
-		format, ok := z.value.(S)
+		format, ok := z.bv.(S)
 		if !ok {
 			return panicType("time[cmd;t;format]", "format", z)
 		}
-		loc, ok := args[len(args)-4].value.(S)
+		loc, ok := args[len(args)-4].bv.(S)
 		if !ok {
 			return panicType("time[cmd;t;format;loc]", "loc", args[len(args)-4])
 		}
@@ -90,7 +90,7 @@ func doTime(cmd string, y V, layout, loc string) V {
 		}
 		return doTimeI(cmd, int64(y.F()), layout)
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		return doTimeInts(cmd, yv.elts, layout, loc)
 	case *AI:

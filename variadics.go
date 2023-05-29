@@ -471,7 +471,7 @@ func vfApplyN(ctx *Context, args []V) V {
 		return get(ctx, args[0])
 	case 2:
 		x := args[1]
-		av := toArray(args[0]).value.(array)
+		av := toArray(args[0]).bv.(array)
 		if av.Len() == 0 {
 			return x
 		}
@@ -510,7 +510,7 @@ func vfList(ctx *Context, args []V) V {
 func vfQq(ctx *Context, args []V) V {
 	n := 0
 	for _, arg := range args {
-		switch argv := arg.value.(type) {
+		switch argv := arg.bv.(type) {
 		case S:
 			n += len(argv)
 		case *AS:
@@ -526,7 +526,7 @@ func vfQq(ctx *Context, args []V) V {
 	var sb strings.Builder
 	sb.Grow(n)
 	for _, arg := range args {
-		switch argv := arg.value.(type) {
+		switch argv := arg.bv.(type) {
 		case S:
 			sb.WriteString(string(argv))
 		case *AS:
@@ -713,7 +713,7 @@ func vfPanic(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
 		x := args[0]
-		switch xv := x.value.(type) {
+		switch xv := x.bv.(type) {
 		case S:
 			return panics(string(xv))
 		default:
@@ -738,7 +738,7 @@ func vfOr(ctx *Context, args []V) V {
 func vfSet(ctx *Context, args []V) V {
 	switch len(args) {
 	case 1:
-		name, ok := args[0].value.(S)
+		name, ok := args[0].bv.(S)
 		if !ok {
 			return panicType(":: x", "x", args[0])
 		}
@@ -748,7 +748,7 @@ func vfSet(ctx *Context, args []V) V {
 		}
 		return r
 	case 2:
-		name, ok := args[1].value.(S)
+		name, ok := args[1].bv.(S)
 		if !ok {
 			return panicType("::[x;y]", "x", args[1])
 		}
@@ -825,7 +825,7 @@ func vfRTOFS(ctx *Context, args []V) V {
 		return panicRank(`rt.ofs`)
 	}
 	x := args[0]
-	s, ok := x.value.(S)
+	s, ok := x.bv.(S)
 	if !ok {
 		return panicType("rt.ofs s", "s", x)
 	}
@@ -868,7 +868,7 @@ func vfRTVars(ctx *Context, args []V) V {
 		return panicRank(`rt.vars`)
 	}
 	x := args[0]
-	cmd, ok := x.value.(S)
+	cmd, ok := x.bv.(S)
 	if !ok {
 		return panicType("rt.vars s", "s", x)
 	}
@@ -927,7 +927,7 @@ func vfRTVars(ctx *Context, args []V) V {
 func vfRTTime(ctx *Context, args []V) V {
 	x := args[len(args)-1]
 	var n int64 = 1
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		if len(args) > 2 {
 			return panicRank(`rt.time[s;n]`)
@@ -973,7 +973,7 @@ func vfRTTime(ctx *Context, args []V) V {
 			}
 		}
 		x.IncrRC()
-		av := toArray(y).value.(array)
+		av := toArray(y).bv.(array)
 		av.IncrRC()
 		t := time.Now()
 		for i := int64(0); i < n; i++ {

@@ -62,7 +62,7 @@ func roll(ctx *Context, n int64, y V) V {
 		}
 		return roll(ctx, n, NewI(int64(y.F())))
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		var fl flags
 		if yv.IsBoolean() {
@@ -151,7 +151,7 @@ func deal(ctx *Context, n int64, y V) V {
 		}
 		return deal(ctx, n, NewI(int64(y.F())))
 	}
-	ya, ok := y.value.(array)
+	ya, ok := y.bv.(array)
 	if !ok {
 		return panicType("(-i)?y", "y", y)
 	}
@@ -165,7 +165,7 @@ func deal(ctx *Context, n int64, y V) V {
 	if n == math.MinInt64 {
 		n = int64(ylen)
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		fl := flagDistinct
 		if yv.IsBoolean() {

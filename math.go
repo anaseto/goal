@@ -22,7 +22,7 @@ func isNaN(x V) V {
 	if x.IsF() {
 		return NewF(b2F(math.IsNaN(x.F())))
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		r := xv.reuse()
 		for i := range r.elts {
@@ -71,7 +71,7 @@ func fillNaNf(fill float64, y V) V {
 		}
 		return y
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		return y
 	case *AI:

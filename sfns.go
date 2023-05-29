@@ -8,7 +8,7 @@ import (
 
 // Len returns the length of a value like in #x.
 func (x V) Len() int {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case countable:
 		return xv.Len()
 	default:
@@ -39,20 +39,20 @@ func reverseMut(x array) {
 
 // reverse returns |x.
 func reverse(x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case array:
 		flags := xv.getFlags() &^ flagAscending
 		xv = xv.shallowClone()
 		reverseMut(xv)
 		xv.setFlags(flags)
-		x.value = xv
+		x.bv = xv
 		return x
 	case *Dict:
 		k := reverse(NewV(xv.keys))
 		k.InitRC()
 		v := reverse(NewV(xv.values))
 		v.InitRC()
-		return NewV(&Dict{keys: k.value.(array), values: v.value.(array)})
+		return NewV(&Dict{keys: k.bv.(array), values: v.bv.(array)})
 	default:
 		return panicType("|x", "x", x)
 	}
@@ -69,7 +69,7 @@ func rotate(x, y V) V {
 		}
 		return rotateI(int64(x.F()), y)
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		r := make([]V, xv.Len())
 		for i, xi := range xv.elts {
@@ -127,7 +127,7 @@ func rotateI(i int64, y V) V {
 	if i < 0 {
 		i += ylen
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		fl := yv.flags &^ flagAscending
 		return NewV(&AB{elts: rotateSlice[byte](i, yv.elts), rc: reuseRCp(yv.rc), flags: fl})
@@ -154,7 +154,7 @@ func rotateI(i int64, y V) V {
 			return v
 		}
 		v.InitRC()
-		return NewV(&Dict{keys: k.value.(array), values: v.value.(array)})
+		return NewV(&Dict{keys: k.bv.(array), values: v.bv.(array)})
 	default:
 		return panicType("x rotate y", "y", y)
 	}
@@ -171,7 +171,7 @@ func rotateSlice[T any](i int64, ys []T) []T {
 
 // first returns *x.
 func first(x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case array:
 		if xv.Len() == 0 {
 			switch xv.(type) {
@@ -204,7 +204,7 @@ func drop(x, y V) V {
 		}
 		return dropN(int64(x.F()), y)
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return dropS(xv, y)
 	case *AB:
@@ -225,7 +225,7 @@ func drop(x, y V) V {
 }
 
 func dropN(n int64, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		switch {
 		case n >= 0:
@@ -246,14 +246,14 @@ func dropN(n int64, y V) V {
 			if n > int64(yv.Len()) {
 				n = int64(yv.Len())
 			}
-			y.value = yv.slice(int(n), yv.Len())
+			y.bv = yv.slice(int(n), yv.Len())
 			return Canonical(y)
 		default:
 			n = int64(yv.Len()) + n
 			if n < 0 {
 				n = 0
 			}
-			y.value = yv.slice(0, int(n))
+			y.bv = yv.slice(0, int(n))
 			return Canonical(y)
 		}
 	case *Dict:
@@ -262,15 +262,15 @@ func dropN(n int64, y V) V {
 		rv := dropN(n, NewV(yv.values))
 		rv.InitRC()
 		return NewV(&Dict{
-			keys:   rk.value.(array),
-			values: rv.value.(array)})
+			keys:   rk.bv.(array),
+			values: rv.bv.(array)})
 	default:
 		return panicType("i_y", "y", y)
 	}
 }
 
 func cutAB(xv *AB, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		return cutABS(xv, yv)
 	case array:
@@ -291,7 +291,7 @@ func cutAB(xv *AB, y V) V {
 }
 
 func cutAI(xv *AI, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		return cutAIS(xv, yv)
 	case array:
@@ -432,7 +432,7 @@ func cutIntsS[I integer](x []I, y S) []string {
 }
 
 func cutWhere(x, y V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		x = whereAB(xv)
 		return drop(x, y)
@@ -461,7 +461,7 @@ func take(x, y V) V {
 		}
 		n = int64(x.F())
 	} else {
-		switch xv := x.value.(type) {
+		switch xv := x.bv.(type) {
 		case S:
 			return scount(xv, y)
 		case array:
@@ -470,15 +470,15 @@ func take(x, y V) V {
 			return panicType("x#y", "x", x)
 		}
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *Dict:
 		rk := takeN(n, yv.keys)
 		rk.InitRC()
 		rv := takeN(n, yv.values)
 		rv.InitRC()
 		return NewV(&Dict{
-			keys:   rk.value.(array),
-			values: rv.value.(array)})
+			keys:   rk.bv.(array),
+			values: rv.bv.(array)})
 	case array:
 		return takeN(n, yv)
 	default:
@@ -535,7 +535,7 @@ func takeNAtom(n int64, y V) V {
 		r := constArray(n, yv)
 		return NewAF(r)
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		r := constArray(n, string(yv))
 		return NewAS(r)
@@ -687,7 +687,7 @@ func padNSliceVs(n int64, ys []V) []V {
 
 // ShiftBefore returns x rshift y.
 func shiftBefore(x, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		return shiftBeforeAB(x, yv)
 	case *AI:
@@ -738,7 +738,7 @@ func shiftBeforeAB(x V, yv *AB) V {
 		r[0] = x.F()
 		return NewAFWithRC(r, reuseRCp(yv.rc))
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		fl := xv.flags & yv.flags & flagBool
 		r := yv.reuse()
@@ -794,7 +794,7 @@ func shiftBeforeAI(x V, yv *AI) V {
 		r[0] = x.F()
 		return NewAFWithRC(r, reuseRCp(yv.rc))
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		r := yv.reuse()
 		copy(r.elts[max:], ys[:len(ys)-max])
@@ -842,7 +842,7 @@ func shiftBeforeAF(x V, yv *AF) V {
 		r.elts[0] = x.F()
 		return NewV(r)
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		r := yv.reuse()
 		copy(r.elts[max:], ys[:len(ys)-max])
@@ -879,7 +879,7 @@ func shiftBeforeAS(x V, yv *AS) V {
 		return NewV(yv)
 	}
 	ys := yv.elts
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		r := yv.reuse()
 		copy(r.elts[max:], ys[:len(ys)-max])
@@ -907,7 +907,7 @@ func shiftBeforeAV(x V, yv *AV) V {
 		return NewV(yv)
 	}
 	ys := yv.elts
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case array:
 		r := yv.reuse()
 		copy(r.elts[max:], ys[:len(ys)-max])
@@ -965,7 +965,7 @@ func nudge(x V) V {
 	if x.Len() == 0 {
 		return x
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		fl := xv.flags & flagBool
 		r := xv.reuse()
@@ -1004,7 +1004,7 @@ func nudge(x V) V {
 
 // ShiftAfter returns x shift y.
 func shiftAfter(x, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		return shiftAfterAB(x, yv)
 	case *AI:
@@ -1054,7 +1054,7 @@ func shiftAfterAB(x V, yv *AB) V {
 		r[len(ys)-1] = x.F()
 		return NewAFWithRC(r, reuseRCp(yv.rc))
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		fl := xv.flags & yv.flags & flagBool
 		r := yv.reuse()
@@ -1110,7 +1110,7 @@ func shiftAfterAI(x V, yv *AI) V {
 		r[len(ys)-1] = x.F()
 		return NewAFWithRC(r, reuseRCp(yv.rc))
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		r := yv.reuse()
 		copy(r.elts[:len(ys)-max], ys[max:])
@@ -1158,7 +1158,7 @@ func shiftAfterAF(x V, yv *AF) V {
 		r.elts[len(ys)-1] = x.F()
 		return NewV(r)
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		r := yv.reuse()
 		copy(r.elts[:len(ys)-max], ys[max:])
@@ -1195,7 +1195,7 @@ func shiftAfterAS(x V, yv *AS) V {
 		return NewV(yv)
 	}
 	ys := yv.elts
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		r := yv.reuse()
 		copy(r.elts[:len(ys)-max], ys[max:])
@@ -1223,7 +1223,7 @@ func shiftAfterAV(x V, yv *AV) V {
 		return NewV(yv)
 	}
 	ys := yv.elts
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case array:
 		r := yv.reuse()
 		copy(r.elts[:len(ys)-max], ys[max:])
@@ -1281,7 +1281,7 @@ func nudgeBack(x V) V {
 	if x.Len() == 0 {
 		return x
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		fl := xv.flags & flagBool
 		r := xv.reuse()
@@ -1320,7 +1320,7 @@ func nudgeBack(x V) V {
 
 // windows returns i^y.
 func windows(i int64, y V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		if i < 0 && -i < int64(len(yv))+1 {
 			return windowsString(-i, string(yv))
@@ -1371,7 +1371,7 @@ func shape(ctx *Context, x, y V) V {
 		}
 		return cutShapeI(int64(x.F()), y)
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return cast(ctx, xv, y)
 	case array:
@@ -1388,7 +1388,7 @@ func cutShapeI(i int64, y V) V {
 	if y.IsF() {
 		return NewF(1 + y.F() - float64(i))
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		if i < 0 && -i < int64(len(yv))+1 {
 			return cutColsString(-i, string(yv))

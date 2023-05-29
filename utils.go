@@ -174,7 +174,7 @@ func isIndices(x V) bool {
 	if isStar(x) {
 		return true
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		return true
 	case *AI:
@@ -211,7 +211,7 @@ func toIndicesRec(x V) V {
 	if isStar(x) {
 		return x
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AF:
 		return toAI(xv)
 	case *AV:
@@ -249,7 +249,7 @@ func toArray(x V) V {
 		r := &AF{elts: []float64{float64(x.F())}, rc: &n}
 		return NewV(r)
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		var n int
 		r := &AS{elts: []string{string(xv)}, rc: &n}
@@ -325,7 +325,7 @@ func (x V) IsFalse() bool {
 	if x.IsF() {
 		return x.F() == 0
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return xv == ""
 	case *errV:
@@ -344,7 +344,7 @@ func (x V) IsTrue() bool {
 	if x.IsF() {
 		return x.F() != 0
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return xv != ""
 	case *errV:
@@ -376,8 +376,8 @@ const (
 func getType(x V) vType {
 	if x.IsI() {
 		switch {
-		case x.n >= 0 && x.n < 256:
-			if x.n < 2 {
+		case x.uv >= 0 && x.uv < 256:
+			if x.uv < 2 {
 				return tb
 			}
 			return tB
@@ -388,7 +388,7 @@ func getType(x V) vType {
 	if x.IsF() {
 		return tF
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return tS
 	case *AB:
@@ -414,8 +414,8 @@ func getType(x V) vType {
 func getAtomType(x V) vType {
 	if x.IsI() {
 		switch {
-		case x.n >= 0 && x.n < 256:
-			if x.n < 2 {
+		case x.uv >= 0 && x.uv < 256:
+			if x.uv < 2 {
 				return tb
 			}
 			return tB
@@ -426,7 +426,7 @@ func getAtomType(x V) vType {
 	if x.IsF() {
 		return tF
 	}
-	switch x.value.(type) {
+	switch x.bv.(type) {
 	case S:
 		return tS
 	default:
@@ -444,7 +444,7 @@ func getAtomTypeFast(x V) vType {
 	if x.IsF() {
 		return tF
 	}
-	switch x.value.(type) {
+	switch x.bv.(type) {
 	case S:
 		return tS
 	default:
@@ -518,7 +518,7 @@ func isbI(x int64) bool {
 }
 
 func isCanonical(x V) bool {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AV:
 		_, ok := isCanonicalAV(xv)
 		return ok
@@ -547,7 +547,7 @@ func isCanonicalAV(x *AV) (vType, bool) {
 }
 
 func (ctx *Context) assertCanonical(x V) {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AV:
 		_, ok := isCanonicalAV(xv)
 		if !ok {
@@ -590,7 +590,7 @@ func normalizeRec(x *AV) (array, bool) {
 	case tS:
 		r := make([]string, x.Len())
 		for i, xi := range x.elts {
-			r[i] = string(xi.value.(S))
+			r[i] = string(xi.bv.(S))
 		}
 		return &AS{elts: r, rc: x.rc}, true
 	case tV, tAV:
@@ -638,7 +638,7 @@ func normalize(x *AV) (array, bool) {
 	case tS:
 		r := make([]string, x.Len())
 		for i, xi := range x.elts {
-			r[i] = string(xi.value.(S))
+			r[i] = string(xi.bv.(S))
 		}
 		return &AS{elts: r, rc: reuseRCp(x.rc), flags: x.flags}, true
 	default:
@@ -671,7 +671,7 @@ func normalizeFast(x *AV) (array, bool) {
 	case tS:
 		r := make([]string, x.Len())
 		for i, xi := range x.elts {
-			r[i] = string(xi.value.(S))
+			r[i] = string(xi.bv.(S))
 		}
 		return &AS{elts: r, rc: reuseRCp(x.rc), flags: x.flags}, true
 	default:
@@ -685,11 +685,11 @@ func normalizeFast(x *AV) (array, bool) {
 // value. All variadic functions have to return results in canonical form, so
 // this function can be used to ensure that when defining new ones.
 func CanonicalRec(x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AV:
 		r, b := normalizeRec(xv)
 		if b {
-			x.value = r
+			x.bv = r
 		}
 		return x
 	default:
@@ -721,11 +721,11 @@ func canonicalArray(x array) array {
 // functions have to return results in canonical form, so this function can be
 // used to ensure that when defining new ones.
 func Canonical(x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AV:
 		r, b := normalize(xv)
 		if b {
-			x.value = r
+			x.bv = r
 		}
 		return x
 	default:
@@ -734,11 +734,11 @@ func Canonical(x V) V {
 }
 
 func canonicalFast(x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AV:
 		r, b := normalizeFast(xv)
 		if b {
-			x.value = r
+			x.bv = r
 		}
 		return x
 	default:
@@ -753,7 +753,7 @@ func protoV(x V) V {
 	if x.IsF() {
 		return NewF(0)
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return NewS("")
 	case *AB:
@@ -783,7 +783,7 @@ func protoArrayForV(x V) V {
 	if x.IsF() {
 		return NewAF(nil)
 	}
-	switch x.value.(type) {
+	switch x.bv.(type) {
 	case S:
 		return NewAS(nil)
 	case *AB:
@@ -869,7 +869,7 @@ func cloneArgs(a []V) []V {
 
 // maxIndices returns the maximum index, assuming V is an array of indices.
 func maxIndices(x V) int64 {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *AB:
 		if xv.Len() == 0 {
 			return 0
@@ -900,7 +900,7 @@ func (x V) numeric() bool {
 	if x.IsF() {
 		return true
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case array:
 		return xv.numeric()
 	default:
@@ -957,7 +957,7 @@ func isFlat(x []V) bool {
 		if xi.kind != valBoxed {
 			continue
 		}
-		switch xi.value.(type) {
+		switch xi.bv.(type) {
 		case *Dict:
 			if i == 0 {
 				return false

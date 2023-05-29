@@ -7,7 +7,7 @@ func (x V) Clone() V {
 		return x
 	}
 	var p *int
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case RefCountHolder:
 		p = xv.RC()
 		if !reusableRCp(p) {
@@ -28,7 +28,7 @@ func (x V) CloneWithRC(rc *int) V {
 	if x.kind != valBoxed {
 		return x
 	}
-	xc, ok := x.value.(RefCounter)
+	xc, ok := x.bv.(RefCounter)
 	if ok {
 		return NewV(xc.CloneWithRC(rc))
 	}
@@ -162,9 +162,9 @@ func (x V) immutable() {
 	if x.kind != valBoxed {
 		return
 	}
-	xh, ok := x.value.(RefCountHolder)
+	xh, ok := x.bv.(RefCountHolder)
 	if !ok {
-		xc, ok := x.value.(RefCounter)
+		xc, ok := x.bv.(RefCounter)
 		if ok {
 			var n int = 2
 			xc.InitWithRC(&n)

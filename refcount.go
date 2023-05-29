@@ -53,7 +53,7 @@ func (x V) HasRC() bool {
 	if x.kind != valBoxed {
 		return false
 	}
-	_, ok := x.value.(RefCounter)
+	_, ok := x.bv.(RefCounter)
 	return ok
 }
 
@@ -62,7 +62,7 @@ func (x V) IncrRC() {
 	if x.kind != valBoxed {
 		return
 	}
-	xrc, ok := x.value.(RefCounter)
+	xrc, ok := x.bv.(RefCounter)
 	if ok {
 		xrc.IncrRC()
 	}
@@ -73,7 +73,7 @@ func (x V) incrRC2() {
 	if x.kind != valBoxed {
 		return
 	}
-	xrc, ok := x.value.(RefCounter)
+	xrc, ok := x.bv.(RefCounter)
 	if ok {
 		xrc.IncrRC()
 		xrc.IncrRC()
@@ -85,7 +85,7 @@ func (x V) DecrRC() {
 	if x.kind != valBoxed {
 		return
 	}
-	xrc, ok := x.value.(RefCounter)
+	xrc, ok := x.bv.(RefCounter)
 	if ok {
 		xrc.DecrRC()
 	}
@@ -96,7 +96,7 @@ func (x V) decrRC2() {
 	if x.kind != valBoxed {
 		return
 	}
-	xrc, ok := x.value.(RefCounter)
+	xrc, ok := x.bv.(RefCounter)
 	if ok {
 		xrc.DecrRC()
 		xrc.DecrRC()
@@ -104,7 +104,7 @@ func (x V) decrRC2() {
 }
 
 func (x V) rcdecrRefCounter() {
-	xrc, ok := x.value.(RefCounter)
+	xrc, ok := x.bv.(RefCounter)
 	if ok {
 		xrc.DecrRC()
 	}
@@ -293,7 +293,7 @@ func (x V) InitRC() {
 	if x.kind != valBoxed {
 		return
 	}
-	xrch, ok := x.value.(RefCountHolder)
+	xrch, ok := x.bv.(RefCountHolder)
 	if ok {
 		initRC(xrch)
 	}
@@ -311,7 +311,7 @@ func (x V) InitWithRC(rc *int) {
 	if x.kind != valBoxed {
 		return
 	}
-	xrc, ok := x.value.(RefCounter)
+	xrc, ok := x.bv.(RefCounter)
 	if ok {
 		xrc.InitWithRC(rc)
 	}
@@ -411,7 +411,7 @@ func refcounts(x V) V {
 	if x.kind != valBoxed {
 		return NewI(-1)
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return NewI(-1)
 	case *errV:

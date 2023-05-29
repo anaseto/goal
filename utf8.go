@@ -12,7 +12,7 @@ func vfUTF8(ctx *Context, args []V) V {
 		return utf8valid(args[0])
 	case 2:
 		x := args[1]
-		s, ok := x.value.(S)
+		s, ok := x.bv.(S)
 		if !ok {
 			return panicType("x utf8 s", "x", x)
 		}
@@ -23,7 +23,7 @@ func vfUTF8(ctx *Context, args []V) V {
 }
 
 func utf8valid(x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return NewI(b2I(utf8.ValidString(string(xv))))
 	case *AS:
@@ -40,7 +40,7 @@ func utf8valid(x V) V {
 }
 
 func toValidUTF8(repl string, x V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return NewS(strings.ToValidUTF8(string(xv), repl))
 	case *AS:

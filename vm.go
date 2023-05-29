@@ -211,7 +211,7 @@ func (ctx *Context) pop() V {
 	arg := ctx.stack[len(ctx.stack)-1]
 	if arg.kind == valBoxed {
 		arg.rcdecrRefCounter()
-		ctx.stack[len(ctx.stack)-1].value = nil
+		ctx.stack[len(ctx.stack)-1].bv = nil
 	}
 	ctx.stack = ctx.stack[:len(ctx.stack)-1]
 	return arg
@@ -241,7 +241,7 @@ func (ctx *Context) peekN(n int) []V {
 func (ctx *Context) drop() {
 	if v := &ctx.stack[len(ctx.stack)-1]; v.kind == valBoxed {
 		v.rcdecrRefCounter()
-		v.value = nil
+		v.bv = nil
 	}
 	ctx.stack = ctx.stack[:len(ctx.stack)-1]
 }
@@ -252,7 +252,7 @@ func (ctx *Context) dropN(n int) {
 		v := &topN[i]
 		if v.kind == valBoxed {
 			v.rcdecrRefCounter()
-			v.value = nil
+			v.bv = nil
 		}
 	}
 	ctx.stack = ctx.stack[:len(ctx.stack)-n]
@@ -263,14 +263,14 @@ func (ctx *Context) dropNnoRC(n int) {
 	for i := range topN {
 		v := &topN[i]
 		if v.kind == valBoxed {
-			v.value = nil
+			v.bv = nil
 		}
 	}
 	ctx.stack = ctx.stack[:len(ctx.stack)-n]
 }
 
 func (ctx *Context) assignGlobals(ids []int, x V) error {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case array:
 		if len(ids) > xv.Len() {
 			return fmt.Errorf("length mismatch in list assignment (%d > %d)", len(ids), xv.Len())
@@ -287,7 +287,7 @@ func (ctx *Context) assignGlobals(ids []int, x V) error {
 }
 
 func (ctx *Context) assignLocals(ids []int32, x V) error {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case array:
 		if len(ids) > xv.Len() {
 			return fmt.Errorf("length error in list assignment (%d > %d)", len(ids), xv.Len())

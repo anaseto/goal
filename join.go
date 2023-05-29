@@ -8,7 +8,7 @@ func join(x, y V) V {
 	if x.IsF() {
 		return joinF(x.F(), y)
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return joinS(xv, y)
 	case *AB:
@@ -22,7 +22,7 @@ func join(x, y V) V {
 	case *AV:
 		return joinAV(xv, y, false)
 	case *Dict:
-		switch yv := y.value.(type) {
+		switch yv := y.bv.(type) {
 		case *Dict:
 			return dictMerge(xv, yv)
 		case array:
@@ -31,7 +31,7 @@ func join(x, y V) V {
 			return NewAV([]V{x, y})
 		}
 	default:
-		switch yv := y.value.(type) {
+		switch yv := y.bv.(type) {
 		case array:
 			return joinAtomToArray(x, yv, true)
 		default:
@@ -48,7 +48,7 @@ func joinI(x int64, y V) V {
 		return NewAF([]float64{float64(x), float64(y.F())})
 	}
 	const left = true
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		return NewAV([]V{NewI(x), y})
 	case *AB:
@@ -74,7 +74,7 @@ func joinF(x float64, y V) V {
 		return NewAF([]float64{float64(x), float64(y.F())})
 	}
 	const left = true
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		return NewAV([]V{NewF(x), y})
 	case *AB:
@@ -100,7 +100,7 @@ func joinS(x S, y V) V {
 		return NewAV([]V{NewV(x), y})
 	}
 	const left = true
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		return NewAS([]string{string(x), string(yv)})
 	case *AB:
@@ -141,7 +141,7 @@ func joinAB(x *AB, y V, left bool) V {
 	if y.IsF() {
 		return NewAFWithRC(joinIsN(x.elts, y.F(), left), reuseRCp(x.rc))
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		// left == false
 		return joinABAB(x, yv)
@@ -205,7 +205,7 @@ func joinAI(x *AI, y V, left bool) V {
 	if y.IsF() {
 		return NewAFWithRC(joinIsN(x.elts, y.F(), left), reuseRCp(x.rc))
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		// left == false
 		return joinAIAB(x, yv)
@@ -246,7 +246,7 @@ func joinAF(x *AF, y V, left bool) V {
 		}
 		return NewAF(joinSlice(x.elts, y.F()))
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		// left == false
 		return joinAFAB(x, yv)
@@ -367,7 +367,7 @@ func joinAFAI(x *AF, y *AI) V {
 }
 
 func joinAS(x *AS, y V, left bool) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case S:
 		if left {
 			return NewASWithRC(joinSliceLeft(x.elts, string(yv)), reuseRCp(x.rc))
@@ -395,7 +395,7 @@ func joinAS(x *AS, y V, left bool) V {
 }
 
 func joinAV(x *AV, y V, left bool) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AV:
 		// left == false
 		if reusableRCp(x.RC()) {
@@ -478,7 +478,7 @@ func enlist(x V) V {
 	if x.IsF() {
 		return NewAF([]float64{x.F()})
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case S:
 		return NewAS([]string{string(xv)})
 	case RefCountHolder:

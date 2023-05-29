@@ -7,7 +7,7 @@ import (
 
 // amend3 implements @[X;i;f].
 func (ctx *Context) amend3(x, y, f V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *Dict:
 		return amend3Dict(ctx, xv, y, f)
 	case array:
@@ -39,7 +39,7 @@ func (ctx *Context) amend3array(x array, y, f V) (array, error) {
 }
 
 func amend3Dict(ctx *Context, d *Dict, y, f V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case array:
 		keys, values, ky := dictAmendKVI(d, yv)
 		r, err := ctx.amend3array(values, ky, f)
@@ -52,7 +52,7 @@ func amend3Dict(ctx *Context, d *Dict, y, f V) V {
 		keys, values := d.keys, d.values.shallowClone()
 		ky := findArray(keys, y)
 		if ky.I() == int64(keys.Len()) {
-			keys = join(NewV(keys), y).value.(array)
+			keys = join(NewV(keys), y).bv.(array)
 			initRC(keys)
 			values = padArrayMut(1, values)
 		}
@@ -119,7 +119,7 @@ func (ctx *Context) amend3arrayI(x array, y int64, f V) (array, error) {
 	xy := x.at(int(y))
 	repl := ctx.Apply(f, xy)
 	if repl.IsPanic() {
-		return x, fmt.Errorf("f call %v", repl.value.(panicV))
+		return x, fmt.Errorf("f call %v", repl.bv.(panicV))
 	}
 	return amendArrayAt(x, int(y), repl), nil
 }
@@ -131,7 +131,7 @@ func (ctx *Context) amend3arrayGeneric(x array, y, f V) (array, error) {
 	if isStar(y) {
 		return ctx.amend3array(x, enumI(int64(x.Len())), f)
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		return amend3arrayAtIntegers(ctx, x, yv.elts, f)
 	case *AI:
@@ -163,7 +163,7 @@ func amend3arrayAtIntegers[I integer](ctx *Context, x array, y []I, f V) (array,
 
 // amend4 implements @[X;i;f;z].
 func (ctx *Context) amend4(x, y, f, z V) V {
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case *Dict:
 		return amend4Dict(ctx, xv, y, f, z)
 	case array:
@@ -205,7 +205,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) (array, error) {
 }
 
 func amend4Dict(ctx *Context, d *Dict, y, f, z V) V {
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case array:
 		keys, values, ky := dictAmendKVI(d, yv)
 		r, err := ctx.amend4array(values, ky, f, z)
@@ -218,11 +218,11 @@ func amend4Dict(ctx *Context, d *Dict, y, f, z V) V {
 		keys, values := d.keys, d.values.shallowClone()
 		ky := findArray(keys, y)
 		if ky.I() == int64(keys.Len()) {
-			keys = join(NewV(keys), y).value.(array)
+			keys = join(NewV(keys), y).bv.(array)
 			initRC(keys)
 			values = padArrayMut(1, values)
 		}
-		if f.kind == valVariadic && variadic(f.n) == vRight {
+		if f.kind == valVariadic && variadic(f.uv) == vRight {
 			r, err := amend4Right(values, ky, z)
 			if err != nil {
 				// never happens because of key padding
@@ -246,7 +246,7 @@ func (ctx *Context) amend4arrayI(x array, y int64, f, z V) (array, error) {
 	xy := x.at(int(y))
 	repl := ctx.Apply2(f, xy, z)
 	if repl.IsPanic() {
-		return x, fmt.Errorf("f call %v", repl.value.(panicV))
+		return x, fmt.Errorf("f call %v", repl.bv.(panicV))
 	}
 	return amendArrayAt(x, int(y), repl), nil
 }
@@ -258,14 +258,14 @@ func (ctx *Context) amend4arrayGeneric(x array, y, f, z V) (array, error) {
 	if isStar(y) {
 		return ctx.amend4array(x, enumI(int64(x.Len())), f, z)
 	}
-	switch yv := y.value.(type) {
+	switch yv := y.bv.(type) {
 	case *AB:
 		return amend4arrayAtIntegers(ctx, x, yv.elts, f, z)
 	case *AI:
 		return amend4arrayAtIntegers(ctx, x, yv.elts, f, z)
 	case *AV:
 		var err error
-		za, ok := z.value.(array)
+		za, ok := z.bv.(array)
 		if !ok {
 			for _, yi := range yv.elts {
 				x, err = ctx.amend4array(x, yi, f, z)
@@ -294,7 +294,7 @@ func (ctx *Context) amend4arrayGeneric(x array, y, f, z V) (array, error) {
 
 func amend4arrayAtIntegers[I integer](ctx *Context, x array, y []I, f, z V) (array, error) {
 	var err error
-	za, ok := z.value.(array)
+	za, ok := z.bv.(array)
 	if !ok {
 		for _, yi := range y {
 			x, err = ctx.amend4arrayI(x, int64(yi), f, z)
@@ -321,7 +321,7 @@ func amend4arrayAtIntegers[I integer](ctx *Context, x array, y []I, f, z V) (arr
 // deepAmend3 implements .[X;y;f].
 func (ctx *Context) deepAmend3(x, y, f V) V {
 	x = x.Clone()
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case array:
 		y = toIndices(y)
 		if y.IsPanic() {
@@ -341,7 +341,7 @@ func (ctx *Context) deepAmend3array(x array, y, f V) (array, error) {
 	if y.IsI() {
 		return ctx.amend3arrayI(x, y.I(), f)
 	}
-	yv := y.value.(array)
+	yv := y.bv.(array)
 	if yv.Len() == 0 {
 		return ctx.amend3array(x, enumI(int64(x.Len())), f)
 	}
@@ -367,7 +367,7 @@ func (ctx *Context) deepAmend3rec(x array, y0 V, y array, f V) (array, error) {
 			return x, fmt.Errorf("y out of bounds (%d)", y0.I())
 		}
 		xy0 := x.at(int(y0.I()))
-		xy0v, ok := xy0.value.(array)
+		xy0v, ok := xy0.bv.(array)
 		if !ok {
 			return x, errors.New("y out of depth")
 		}
@@ -377,7 +377,7 @@ func (ctx *Context) deepAmend3rec(x array, y0 V, y array, f V) (array, error) {
 		}
 		return amendArrayAt(x, int(y0.I()), NewV(repl)), nil
 	}
-	y0v := y0.value.(array)
+	y0v := y0.bv.(array)
 	for i := 0; i < y0v.Len(); i++ {
 		y0i := y0v.at(i)
 		x, err = ctx.deepAmend3rec(x, y0i, y, f)
@@ -391,7 +391,7 @@ func (ctx *Context) deepAmend3rec(x array, y0 V, y array, f V) (array, error) {
 // deepAmend4 implements .[X;y;f].
 func (ctx *Context) deepAmend4(x, y, f, z V) V {
 	x = x.Clone()
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
 	case array:
 		y = toIndices(y)
 		if y.IsPanic() {
@@ -411,7 +411,7 @@ func (ctx *Context) deepAmend4array(x array, y, f, z V) (array, error) {
 	if y.IsI() {
 		return ctx.amend4arrayI(x, y.I(), f, z)
 	}
-	yv := y.value.(array)
+	yv := y.bv.(array)
 	if yv.Len() == 0 {
 		return ctx.amend4array(x, enumI(int64(x.Len())), f, z)
 	}
@@ -437,7 +437,7 @@ func (ctx *Context) deepAmend4rec(x array, y0 V, y array, f, z V) (array, error)
 			return x, fmt.Errorf("y out of bounds (%d)", y0.I())
 		}
 		xy0 := x.at(int(y0.I()))
-		xy0v, ok := xy0.value.(array)
+		xy0v, ok := xy0.bv.(array)
 		if !ok {
 			return x, errors.New("y out of depth")
 		}
@@ -447,7 +447,7 @@ func (ctx *Context) deepAmend4rec(x array, y0 V, y array, f, z V) (array, error)
 		}
 		return amendArrayAt(x, int(y0.I()), NewV(repl)), nil
 	}
-	y0v := y0.value.(array)
+	y0v := y0.bv.(array)
 	for i := 0; i < y0v.Len(); i++ {
 		y0i := y0v.at(i)
 		x, err = ctx.deepAmend4rec(x, y0i, y, f, z)

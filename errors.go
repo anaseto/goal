@@ -107,11 +107,11 @@ func ppanic(pfx string, x V) V {
 }
 
 func panics(s string) V {
-	return V{kind: valPanic, value: panicV(s)}
+	return V{kind: valPanic, bv: panicV(s)}
 }
 
 func panicErr(err error) V {
-	return V{kind: valPanic, value: panicV(err.Error())}
+	return V{kind: valPanic, bv: panicV(err.Error())}
 }
 
 // Panicf returns a formatted fatal error value.
