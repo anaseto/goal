@@ -22,7 +22,7 @@ func negate(x V) V {
 		for i, xi := range xv.elts {
 			r[i] = -int64(xi)
 		}
-		return NewAIWithRC(r, reuseRCp(xv.rc))
+		return NewAI(r)
 	case *AI:
 		r := xv.reuse()
 		for i, xi := range xv.elts {
@@ -103,7 +103,7 @@ func sign(x V) V {
 		for i, xi := range xv.elts {
 			r[i] = int64(signF(xi))
 		}
-		return NewAIWithRC(r, reuseRCp(xv.rc))
+		return NewAI(r)
 	case *AV:
 		return monadAV(xv, sign)
 	case *Dict:
@@ -208,19 +208,19 @@ func not(x V) V {
 		for i, xi := range xv.elts {
 			r[i] = b2B(xi == 0)
 		}
-		return newABbWithRC(r, reuseRCp(xv.rc))
+		return newABb(r)
 	case *AF:
 		r := make([]byte, xv.Len())
 		for i, xi := range xv.elts {
 			r[i] = b2B(xi == 0)
 		}
-		return newABbWithRC(r, reuseRCp(xv.rc))
+		return newABb(r)
 	case *AS:
 		r := make([]byte, xv.Len())
 		for i, xi := range xv.elts {
 			r[i] = b2B(xi == "")
 		}
-		return newABbWithRC(r, reuseRCp(xv.rc))
+		return newABb(r)
 	case *AV:
 		r := xv.reuse()
 		for i, xi := range xv.elts {

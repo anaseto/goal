@@ -173,13 +173,13 @@ genOp:{[opname;opsym] / globals o,op,xt,h
     // $o returns x${op}y.
     func $o(x, y V) V {|
   h say'{"if x.Is$x() { return $o${x}V(x.$x(), y) }"}'utypes#ts
-  h say `switch xv := x.value.(type) {`
+  h say `switch xv := x.bv.(type) {`
   h say'{"  case $x: return $o${x}V(xv, y)"}'^(ntypes^ts)
   h say'{"  case *$x: return $o${x}V(xv, y)"}'^"A"+ts
   fmtop:escp op
   h say "\n"_qq/
     case *AV:
-        switch yv := y.value.(type) {
+        switch yv := y.bv.(type) {
         case *Dict:
               return newDictValues(yv.keys, $o(x, NewV(yv.values)))
         case array:
@@ -191,7 +191,7 @@ genOp:{[opname;opsym] / globals o,op,xt,h
   h say "return dyadAVV(xv, y, $o)"
   h say "\n"_qq/
     case *Dict:
-        yv, ok := y.value.(*Dict)
+        yv, ok := y.bv.(*Dict)
         if ok {
             r := dictArith(xv, yv, $o)
             if r.IsPanic() {
@@ -218,7 +218,7 @@ dox:{
   h say rmbl "\n"_qq/
     func $o${xt}V(x $xct, y V) V {
         $xUy
-        switch yv := y.value.(type) {
+        switch yv := y.bv.(type) {
         $xBy
         $xY
         $xdAV
@@ -244,7 +244,7 @@ doxBy:{[yt;e;t]
 doxY:{[yt;e;t]
   e:doExpr[e;yt;"x";"yi"]
   rt:t2go t
-  rs:?[yt~t;"r := yv.reuse()";"r := &A${t}{elts: make([]$rt, yv.Len()), rc: reuseRCp(yv.rc)}"]
+  rs:?[yt~t;"r := yv.reuse()";"r := &A${t}{elts: make([]$rt, yv.Len())}"]
   rs:?[op¿cmps;"$rs; r.flags |= flagBool";rs]
   rs:?[(xt¿ntypes)&op¿"+""&""|";"asc := yv.flags.Has(flagAscending); $rs; if asc { r.flags |= flagAscending }";rs]
   "\n"_qq/
@@ -262,8 +262,7 @@ doxdAV:{
         if v.IsPanic() {
                 return v
         }
-        v.InitRC()
-        return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
+        return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
     case *AV:
         r := yv.reuse()
         for i, yi := range yv.elts {
@@ -271,6 +270,7 @@ doxdAV:{
                 if ri.IsPanic() {
                         return ri
                 }
+                ri.MarkImmutable()
                 r.elts[i] = ri
         }
         return NewV(r)
@@ -287,7 +287,7 @@ doX:{
   h say rmbl "\n"_qq/
     func ${o}A${xt}V(x *A${xt}, y V) V {
         $XUy
-        switch yv := y.value.(type) {
+        switch yv := y.bv.(type) {
         $XBy
         $XY
         $XdAV
@@ -298,7 +298,7 @@ doX:{
 doXUy:{[yt;e;t]
   e:doExpr[e;t2go yt;"xi";qq/y.$yt()/]
   rt:t2go t
-  rs:?[xt~t;"x.reuse()";"&A${t}{elts: make([]$rt, x.Len()), rc: reuseRCp(x.rc)}"]
+  rs:?[xt~t;"x.reuse()";"&A${t}{elts: make([]$rt, x.Len())}"]
   rs:?[op¿cmps;"$rs; r.flags |= flagBool";rs]
   / TODO: add flagBool in & and | when possible
   "\n"_qq/
@@ -313,7 +313,7 @@ doXUy:{[yt;e;t]
 doXBy:{[yt;e;t]
   e:doExpr[e;yt;"x.At(i)";"yv"]
   rt:t2go t
-  rs:?[xt~t;"r := x.reuse()";"r := &A${t}{elts: make([]$rt, x.Len()), rc: reuseRCp(x.rc)}"]
+  rs:?[xt~t;"r := x.reuse()";"r := &A${t}{elts: make([]$rt, x.Len())}"]
   rs:?[op¿cmps;"$rs; r.flags |= flagBool";rs]
   rs:?[(yt¿ntypes)&op¿"+""-""&""|";"asc := x.flags.Has(flagAscending); $rs; if asc { r.flags |= flagAscending }";rs]
   / currently, yt~"S" in thoses cases
@@ -335,7 +335,7 @@ doXY:{[yt;e;t]
                     return panicLength("x${op}y", x.Len(), yv.Len())
             }/
   xy:?[xt~t;"x";"yv"]
-  rs:?[t¿xt,yt;"r := ${xy}.reuse()";"r := &A${t}{elts: make([]$rt, yv.Len()), rc: reuseRCp(x.rc)}"]
+  rs:?[t¿xt,yt;"r := ${xy}.reuse()";"r := &A${t}{elts: make([]$rt, yv.Len())}"]
   rs:?[op¿cmps;"$rs; r.flags |= flagBool";rs]
   rs:?[and[op¿"&""|";xt~"B";yt~"B"]
           qq/b := x.IsBoolean() && yv.IsBoolean(); $rs
@@ -366,8 +366,7 @@ doXdAV:{
             if v.IsPanic() {
                     return v
             }
-            v.InitRC()
-            return NewV(&Dict{keys: yv.keys, values: v.value.(array)})
+            return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
     case *AV:
             if x.Len() != yv.Len() {
                     return panicLength("x${op}y", x.Len(), yv.Len())
@@ -378,6 +377,7 @@ doXdAV:{
                     if ri.IsPanic() {
                             return ri
                     }
+                    ri.MarkImmutable()
                     r.elts[i] = ri
             }
             return NewV(r)

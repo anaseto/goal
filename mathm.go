@@ -17,13 +17,13 @@ func mathm(x V, f func(float64) float64) V {
 		for i, xi := range xv.elts {
 			r[i] = f(float64(xi))
 		}
-		return NewAFWithRC(r, reuseRCp(xv.rc))
+		return NewAF(r)
 	case *AI:
 		r := make([]float64, xv.Len())
 		for i, xi := range xv.elts {
 			r[i] = f(float64(xi))
 		}
-		return NewAFWithRC(r, reuseRCp(xv.rc))
+		return NewAF(r)
 	case *AF:
 		r := xv.reuse()
 		for i, xi := range xv.elts {

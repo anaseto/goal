@@ -10,7 +10,8 @@ func flip(x V) V {
 	case *AV:
 		cols := xv.Len()
 		if cols == 0 {
-			return NewAV([]V{x})
+			x.MarkImmutable()
+			return newAV([]V{x})
 		}
 		lines := -1
 		for _, o := range xv.elts {
@@ -31,21 +32,22 @@ func flip(x V) V {
 		t := rType(xv)
 		switch {
 		case lines <= 0:
-			return NewAV([]V{x})
+			x.MarkImmutable()
+			return newAV([]V{x})
 		case lines == 1:
 			switch t {
 			case tb, tAb:
-				return NewAV([]V{flipAB(xv, true)})
+				return newAV([]V{flipAB(xv, true)})
 			case tB, tAB:
-				return NewAV([]V{flipAB(xv, false)})
+				return newAV([]V{flipAB(xv, false)})
 			case tF, tAF:
-				return NewAV([]V{flipAF(xv)})
+				return newAV([]V{flipAF(xv)})
 			case tI, tAI:
-				return NewAV([]V{flipAI(xv)})
+				return newAV([]V{flipAI(xv)})
 			case tS, tAS:
-				return NewAV([]V{flipAS(xv)})
+				return newAV([]V{flipAS(xv)})
 			default:
-				return NewAV([]V{flipAV(xv)})
+				return newAV([]V{flipAV(xv)})
 			}
 		default:
 			switch t {
@@ -64,7 +66,8 @@ func flip(x V) V {
 			}
 		}
 	default:
-		return NewAV([]V{x})
+		x.MarkImmutable()
+		return newAV([]V{x})
 	}
 }
 
@@ -86,15 +89,13 @@ func flipAB(x *AV, b bool) V {
 	if b {
 		fl |= flagBool
 	}
-	return NewV(&AB{elts: r, flags: fl})
+	return NewV(&AB{elts: r, flags: fl | flagImmutable})
 }
 
 func flipAVAB(x *AV, lines int, b bool) V {
 	r := make([]V, lines)
 	a := make([]byte, lines*x.Len())
 	xlen := x.Len()
-	var n int = 2
-	rc := &n
 	for i, xi := range x.elts {
 		if xi.IsI() {
 			b := byte(xi.I())
@@ -113,10 +114,9 @@ func flipAVAB(x *AV, lines int, b bool) V {
 		fl |= flagBool
 	}
 	for j := range r {
-		r[j] = NewV(&AB{elts: a[j*xlen : (j+1)*xlen], rc: rc, flags: fl})
+		r[j] = NewV(&AB{elts: a[j*xlen : (j+1)*xlen], flags: fl | flagImmutable})
 	}
-	var rn int
-	return NewAVWithRC(r, &rn)
+	return newAV(r)
 }
 
 func flipAF(x *AV) V {
@@ -139,15 +139,13 @@ func flipAF(x *AV) V {
 			r[i] = float64(xiv.At(0))
 		}
 	}
-	return NewAF(r)
+	return NewV(&AF{elts: r, flags: flagImmutable})
 }
 
 func flipAVAF(x *AV, lines int) V {
 	r := make([]V, lines)
 	a := make([]float64, lines*x.Len())
 	xlen := x.Len()
-	var n int = 2
-	rc := &n
 	for i, xi := range x.elts {
 		if xi.IsI() {
 			f := float64(xi.I())
@@ -179,10 +177,9 @@ func flipAVAF(x *AV, lines int) V {
 		}
 	}
 	for j := range r {
-		r[j] = NewAFWithRC(a[j*xlen:(j+1)*xlen], rc)
+		r[j] = NewV(&AF{elts: a[j*xlen : (j+1)*xlen], flags: flagImmutable})
 	}
-	var rn int
-	return NewAVWithRC(r, &rn)
+	return newAV(r)
 }
 
 func flipAI(x *AV) V {
@@ -199,15 +196,13 @@ func flipAI(x *AV) V {
 			r[i] = xiv.At(0)
 		}
 	}
-	return NewAI(r)
+	return NewV(&AI{elts: r, flags: flagImmutable})
 }
 
 func flipAVAI(x *AV, lines int) V {
 	r := make([]V, lines)
 	a := make([]int64, lines*x.Len())
 	xlen := x.Len()
-	var n int = 2
-	rc := &n
 	for i, xi := range x.elts {
 		if xi.IsI() {
 			n := xi.I()
@@ -228,10 +223,9 @@ func flipAVAI(x *AV, lines int) V {
 		}
 	}
 	for j := range r {
-		r[j] = NewAIWithRC(a[j*xlen:(j+1)*xlen], rc)
+		r[j] = NewV(&AI{elts: a[j*xlen : (j+1)*xlen], flags: flagImmutable})
 	}
-	var rn int
-	return NewAVWithRC(r, &rn)
+	return newAV(r)
 }
 
 func flipAS(x *AV) V {
@@ -244,15 +238,13 @@ func flipAS(x *AV) V {
 			r[i] = xiv.At(0)
 		}
 	}
-	return NewAS(r)
+	return NewV(&AS{elts: r, flags: flagImmutable})
 }
 
 func flipAVAS(x *AV, lines int) V {
 	r := make([]V, lines)
 	a := make([]string, lines*x.Len())
 	xlen := x.Len()
-	var n int = 2
-	rc := &n
 	for i, xi := range x.elts {
 		switch xiv := xi.bv.(type) {
 		case S:
@@ -266,10 +258,9 @@ func flipAVAS(x *AV, lines int) V {
 		}
 	}
 	for j := range r {
-		r[j] = NewASWithRC(a[j*xlen:(j+1)*xlen], rc)
+		r[j] = NewV(&AS{elts: a[j*xlen : (j+1)*xlen], flags: flagImmutable})
 	}
-	var rn int
-	return NewAVWithRC(r, &rn)
+	return newAV(r)
 }
 
 func flipAV(x *AV) V {
@@ -282,7 +273,7 @@ func flipAV(x *AV) V {
 			r[i] = xi
 		}
 	}
-	return Canonical(NewAVWithRC(r, x.rc))
+	return canonicalAV(&AV{elts: r, flags: flagImmutable})
 }
 
 func flipAVAV(x *AV, lines int) V {
@@ -301,9 +292,8 @@ func flipAVAV(x *AV, lines int) V {
 			}
 		}
 	}
-	*x.rc += 2
 	for j := range r {
-		r[j] = Canonical(NewAVWithRC(a[j*xlen:(j+1)*xlen], x.rc))
+		r[j] = canonicalAV(&AV{elts: a[j*xlen : (j+1)*xlen], flags: flagImmutable})
 	}
-	return NewAV(r)
+	return newAV(r)
 }

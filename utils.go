@@ -217,10 +217,12 @@ func toIndicesRec(x V) V {
 	case *AV:
 		r := make([]V, xv.Len())
 		for i, xi := range xv.elts {
-			r[i] = toIndicesRec(xi)
-			if r[i].IsPanic() {
-				return r[i]
+			ri := toIndicesRec(xi)
+			if ri.IsPanic() {
+				return ri
 			}
+			ri.MarkImmutable()
+			r[i] = ri
 		}
 		return NewAV(r)
 	case *AS:
@@ -256,13 +258,9 @@ func toArray(x V) V {
 		return NewV(r)
 	case array:
 		return x
-	case RefCountHolder:
-		r := &AV{elts: []V{x}, rc: xv.RC()}
-		return NewV(r)
 	default:
-		var n int
-		r := &AV{elts: []V{x}, rc: &n}
-		x.InitWithRC(&n)
+		x.MarkImmutable()
+		r := &AV{elts: []V{x}}
 		return NewV(r)
 	}
 }
@@ -276,7 +274,7 @@ func toAI(x *AF) V {
 		}
 		r[i] = int64(xi)
 	}
-	return NewAIWithRC(r, reuseRCp(x.rc))
+	return NewAI(r)
 }
 
 // castToAI casts AF into AI.
@@ -285,7 +283,7 @@ func castToAI(x *AF) V {
 	for i, xi := range x.elts {
 		r[i] = int64(xi)
 	}
-	return NewAIWithRC(r, reuseRCp(x.rc))
+	return NewAI(r)
 }
 
 // toAF converts AI into AF.
@@ -294,7 +292,7 @@ func toAF(x *AI) V {
 	for i, xi := range x.elts {
 		r[i] = float64(xi)
 	}
-	return NewAFWithRC(r, reuseRCp(x.rc))
+	return NewAF(r)
 }
 
 // fromABtoAF converts AB into AF.
@@ -303,7 +301,7 @@ func fromABtoAF(x *AB) V {
 	for i, xi := range x.elts {
 		r[i] = float64(xi)
 	}
-	return NewAFWithRC(r, reuseRCp(x.rc))
+	return NewAF(r)
 }
 
 // fromABtoAI converts AB into AI (for simplifying code, used only for
@@ -313,7 +311,7 @@ func fromABtoAI(x *AB) V {
 	for i, xi := range x.elts {
 		r[i] = int64(xi)
 	}
-	return NewAIWithRC(r, reuseRCp(x.rc))
+	return NewAI(r)
 }
 
 // IsFalse returns true for false values, that is zero numbers, empty strings,
@@ -614,17 +612,17 @@ func normalize(x *AV) (array, bool) {
 		for i, xi := range x.elts {
 			r[i] = byte(xi.I())
 		}
-		flags := x.flags
+		fl := x.flags
 		if t == tb {
-			flags |= flagBool
+			fl |= flagBool
 		}
-		return &AB{elts: r, rc: reuseRCp(x.rc), flags: flags}, true
+		return &AB{elts: r, flags: fl}, true
 	case tI:
 		r := make([]int64, x.Len())
 		for i, xi := range x.elts {
 			r[i] = xi.I()
 		}
-		return &AI{elts: r, rc: reuseRCp(x.rc), flags: x.flags}, true
+		return &AI{elts: r, flags: x.flags}, true
 	case tF:
 		r := make([]float64, x.Len())
 		for i, xi := range x.elts {
@@ -634,13 +632,13 @@ func normalize(x *AV) (array, bool) {
 				r[i] = float64(xi.F())
 			}
 		}
-		return &AF{elts: r, rc: reuseRCp(x.rc), flags: x.flags}, true
+		return &AF{elts: r, flags: x.flags}, true
 	case tS:
 		r := make([]string, x.Len())
 		for i, xi := range x.elts {
 			r[i] = string(xi.bv.(S))
 		}
-		return &AS{elts: r, rc: reuseRCp(x.rc), flags: x.flags}, true
+		return &AS{elts: r, flags: x.flags}, true
 	default:
 		return x, false
 	}
@@ -697,10 +695,16 @@ func CanonicalRec(x V) V {
 	}
 }
 
-// canonicalAV returns the canonical form of a given generic array.
-func canonicalAV(x *AV) array {
+// canonicalArrayAV returns the canonical form of a given generic array.
+func canonicalArrayAV(x *AV) array {
 	r, _ := normalize(x)
 	return r
+}
+
+// canonicalAV returns the canonical form of a given generic array.
+func canonicalAV(x *AV) V {
+	r, _ := normalize(x)
+	return NewV(r)
 }
 
 // canonicalArray returns the canonical form of a given generic array.
@@ -712,6 +716,19 @@ func canonicalArray(x array) array {
 	default:
 		return x
 	}
+}
+
+func canonicalVs(r []V) V {
+	ra, ok := normalize(&AV{elts: r})
+	if !ok {
+		newAV(r)
+	}
+	return NewV(ra)
+}
+
+func canonicalArrayVs(r []V) array {
+	ra, _ := normalize(&AV{elts: r})
+	return ra
 }
 
 // Canonical returns the canonical form of a given value, that is the
@@ -746,6 +763,13 @@ func canonicalFast(x V) V {
 	}
 }
 
+func proto(x []V) V {
+	if len(x) == 0 {
+		return NewV(&AV{flags: flagImmutable})
+	}
+	return protoV(x[0])
+}
+
 func protoV(x V) V {
 	if x.IsI() {
 		return NewI(0)
@@ -757,15 +781,15 @@ func protoV(x V) V {
 	case S:
 		return NewS("")
 	case *AB:
-		return newABb(nil)
+		return NewV(&AB{flags: flagBool | flagImmutable})
 	case *AI:
-		return newABb(nil)
+		return NewV(&AB{flags: flagBool | flagImmutable})
 	case *AF:
-		return NewAF(nil)
+		return NewV(&AF{flags: flagImmutable})
 	case *AS:
-		return NewAS(nil)
+		return NewV(&AS{flags: flagImmutable})
 	case *AV:
-		return NewAV(nil)
+		return NewV(&AV{flags: flagImmutable})
 	case *Dict:
 		return NewDict(protoArray(xv.keys), protoArray(xv.values))
 	default:
@@ -776,41 +800,18 @@ func protoV(x V) V {
 	}
 }
 
-func protoArrayForV(x V) V {
-	if x.IsI() {
-		return newABb(nil)
-	}
-	if x.IsF() {
-		return NewAF(nil)
-	}
-	switch x.bv.(type) {
-	case S:
-		return NewAS(nil)
-	case *AB:
-		return newABb(nil)
-	case *AI:
-		return newABb(nil)
-	case *AF:
-		return NewAF(nil)
-	case *AS:
-		return NewAS(nil)
-	default:
-		return NewAV(nil)
-	}
-}
-
 func protoArray(x array) V {
 	switch x.(type) {
 	case *AB:
-		return newABb(nil)
+		return NewV(&AB{flags: flagBool | flagImmutable})
 	case *AI:
-		return newABb(nil)
+		return NewV(&AB{flags: flagBool | flagImmutable})
 	case *AF:
-		return NewAF(nil)
+		return NewV(&AF{flags: flagImmutable})
 	case *AS:
-		return NewAS(nil)
+		return NewV(&AS{flags: flagImmutable})
 	case *AV:
-		return NewAV(nil)
+		return NewV(&AV{flags: flagImmutable})
 	default:
 		panic("protoArray")
 	}
@@ -833,11 +834,27 @@ func arrayProtoV(x array) V {
 	}
 }
 
-func proto(x []V) V {
-	if len(x) == 0 {
-		return NewAV(nil)
+func protoArrayForV(x V) V {
+	if x.IsI() {
+		return newABb(nil)
 	}
-	return protoV(x[0])
+	if x.IsF() {
+		return NewAF(nil)
+	}
+	switch x.bv.(type) {
+	case S:
+		return NewV(&AS{flags: flagImmutable})
+	case *AB:
+		return NewV(&AB{flags: flagBool | flagImmutable})
+	case *AI:
+		return NewV(&AB{flags: flagBool | flagImmutable})
+	case *AF:
+		return NewV(&AF{flags: flagImmutable})
+	case *AS:
+		return NewV(&AS{flags: flagImmutable})
+	default:
+		return NewV(&AV{flags: flagImmutable})
+	}
 }
 
 // hasNil returns true if there is a nil value in the given array.
@@ -915,6 +932,7 @@ func monadAV(x *AV, f func(V) V) V {
 		if ri.IsPanic() {
 			return ri
 		}
+		ri.MarkImmutable()
 		r.elts[i] = ri
 	}
 	return NewV(r)
@@ -927,6 +945,7 @@ func dyadAVV(x *AV, y V, f func(V, V) V) V {
 		if ri.IsPanic() {
 			return ri
 		}
+		ri.MarkImmutable()
 		r.elts[i] = ri
 	}
 	return NewV(r)
@@ -939,6 +958,7 @@ func dyadAVarray(x *AV, y array, f func(V, V) V) V {
 		if ri.IsPanic() {
 			return ri
 		}
+		ri.MarkImmutable()
 		r.elts[i] = ri
 	}
 	return NewV(r)

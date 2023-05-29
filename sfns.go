@@ -247,14 +247,14 @@ func dropN(n int64, y V) V {
 				n = int64(yv.Len())
 			}
 			y.bv = yv.slice(int(n), yv.Len())
-			return Canonical(y)
+			return y
 		default:
 			n = int64(yv.Len()) + n
 			if n < 0 {
 				n = 0
 			}
 			y.bv = yv.slice(0, int(n))
-			return Canonical(y)
+			return y
 		}
 	case *Dict:
 		rk := dropN(n, NewV(yv.keys))
@@ -324,15 +324,10 @@ func cutAIarray(x *AI, y array) V {
 	}
 	xlen := x.Len()
 	if xlen == 0 {
-		return NewAVWithRC(nil, reuseRCp(x.rc))
+		return NewAV(nil)
 	}
-	_, generic := y.(*AV)
-	r := cutIntsArray(x.elts, y, generic)
-	if generic {
-		return NewAV(r)
-	}
-	var nrc int
-	return NewAVWithRC(r, &nrc)
+	r := cutIntsArray(x.elts, y)
+	return newAV(r)
 }
 
 func cutABarray(x *AB, y array) V {
@@ -350,31 +345,20 @@ func cutABarray(x *AB, y array) V {
 	if xlen == 0 {
 		return NewAV(nil)
 	}
-	_, generic := y.(*AV)
-	r := cutIntsArray(x.elts, y, generic)
-	if generic {
-		return NewAV(r)
-	}
-	var nrc int
-	return NewAVWithRC(r, &nrc)
+	r := cutIntsArray(x.elts, y)
+	return newAV(r)
 }
 
-func cutIntsArray[I integer](x []I, y array, generic bool) []V {
+func cutIntsArray[I integer](x []I, y array) []V {
 	xlen := len(x)
 	ylen := int64(y.Len())
 	r := make([]V, xlen)
-	rc := y.RC()
-	*rc += 2
 	for i, from := range x {
 		to := ylen
 		if i+1 < xlen {
 			to = int64(x[i+1])
 		}
-		if generic {
-			r[i] = NewV(canonicalArray(y.slice(int(from), int(to))))
-		} else {
-			r[i] = NewV(y.slice(int(from), int(to)))
-		}
+		r[i] = NewV(y.slice(int(from), int(to)))
 	}
 	return r
 }
@@ -392,10 +376,10 @@ func cutAIS(x *AI, y S) V {
 	}
 	xlen := x.Len()
 	if xlen == 0 {
-		return NewASWithRC(nil, reuseRCp(x.rc))
+		return NewAS(nil)
 	}
 	r := cutIntsS(x.elts, y)
-	return NewASWithRC(r, reuseRCp(x.rc))
+	return NewAS(r)
 }
 
 func cutABS(x *AB, y S) V {
@@ -411,10 +395,10 @@ func cutABS(x *AB, y S) V {
 	}
 	xlen := x.Len()
 	if xlen == 0 {
-		return NewASWithRC(nil, reuseRCp(x.rc))
+		return NewAS(nil)
 	}
 	r := cutIntsS(x.elts, y)
-	return NewASWithRC(r, reuseRCp(x.rc))
+	return NewAS(r)
 }
 
 func cutIntsS[I integer](x []I, y S) []string {
@@ -584,12 +568,12 @@ func takeN(n int64, y array) V {
 		if n > int64(y.Len()) {
 			return takeCyclic(n, y)
 		}
-		return Canonical(NewV(y.slice(0, int(n))))
+		return NewV(y.slice(0, int(n)))
 	default:
 		if n < int64(-y.Len()) {
 			return takeCyclic(n, y)
 		}
-		return Canonical(NewV(y.slice(y.Len()+int(n), y.Len())))
+		return NewV(y.slice(y.Len()+int(n), y.Len()))
 	}
 }
 
@@ -600,14 +584,14 @@ func takeCyclic(n int64, y array) V {
 		r := takeCyclicSlice[byte](n, yv.elts)
 		return NewV(&AB{elts: r, rc: reuseRCp(yv.rc), flags: fl})
 	case *AI:
-		return NewAIWithRC(takeCyclicSlice[int64](n, yv.elts), reuseRCp(yv.rc))
+		return NewAI(takeCyclicSlice[int64](n, yv.elts))
 	case *AF:
-		return NewAFWithRC(takeCyclicSlice[float64](n, yv.elts), reuseRCp(yv.rc))
+		return NewAF(takeCyclicSlice[float64](n, yv.elts))
 	case *AS:
-		return NewASWithRC(takeCyclicSlice[string](n, yv.elts), reuseRCp(yv.rc))
+		return NewAS(takeCyclicSlice[string](n, yv.elts))
 	case *AV:
 		*yv.rc += 2
-		return NewAVWithRC(takeCyclicSlice[V](n, yv.elts), yv.rc)
+		return NewAV(takeCyclicSlice[V](n, yv.elts))
 	default:
 		panic("takeCyclic: y not an array")
 	}
@@ -619,12 +603,12 @@ func takePadN(n int64, x array) V {
 		if n > int64(x.Len()) {
 			return padArrayN(n, x)
 		}
-		return Canonical(NewV(x.slice(0, int(n))))
+		return NewV(x.slice(0, int(n)))
 	default:
 		if n < int64(-x.Len()) {
 			return padArrayN(n, x)
 		}
-		return Canonical(NewV(x.slice(x.Len()+int(n), x.Len())))
+		return NewV(x.slice(x.Len()+int(n), x.Len()))
 	}
 }
 
@@ -728,7 +712,7 @@ func shiftBeforeAB(x V, yv *AB) V {
 			r[i] = int64(yv.At(i - max))
 		}
 		r[0] = x.I()
-		return NewAIWithRC(r, reuseRCp(yv.rc))
+		return NewAI(r)
 	}
 	if x.IsF() {
 		r := make([]float64, len(ys))
@@ -736,7 +720,7 @@ func shiftBeforeAB(x V, yv *AB) V {
 			r[i] = float64(yv.At(i - max))
 		}
 		r[0] = x.F()
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewAF(r)
 	}
 	switch xv := x.bv.(type) {
 	case *AB:
@@ -752,14 +736,14 @@ func shiftBeforeAB(x V, yv *AB) V {
 			r[i] = float64(ys[i-max])
 		}
 		copy(r[:max], xv.elts)
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewAF(r)
 	case *AI:
 		r := make([]int64, len(ys))
 		for i := max; i < len(ys); i++ {
 			r[i] = int64(yv.At(i - max))
 		}
 		copy(r[:max], xv.elts)
-		return NewAIWithRC(r, reuseRCp(yv.rc))
+		return NewAI(r)
 	case *AV:
 		return shiftAVBeforeArray(xv, yv)
 	case array:
@@ -792,7 +776,7 @@ func shiftBeforeAI(x V, yv *AI) V {
 			r[i] = float64(yv.At(i - max))
 		}
 		r[0] = x.F()
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewAF(r)
 	}
 	switch xv := x.bv.(type) {
 	case *AB:
@@ -808,7 +792,7 @@ func shiftBeforeAI(x V, yv *AI) V {
 			r[i] = float64(ys[i-max])
 		}
 		copy(r[:max], xv.elts)
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewAF(r)
 	case *AI:
 		r := yv.reuse()
 		copy(r.elts[max:], ys[:len(ys)-max])
@@ -936,7 +920,7 @@ func shiftArrayBeforeArray(xv, yv array) V {
 		xi.InitWithRC(rc)
 		r[i] = xi
 	}
-	return NewAVWithRC(r, rc)
+	return NewAV(r)
 }
 
 func shiftVBeforeArray(x V, yv array) V {
@@ -1045,14 +1029,14 @@ func shiftAfterAB(x V, yv *AB) V {
 			r[i-max] = int64(yv.At(i))
 		}
 		r[len(ys)-1] = x.I()
-		return NewAIWithRC(r, reuseRCp(yv.rc))
+		return NewAI(r)
 	} else if x.IsF() {
 		r := make([]float64, len(ys))
 		for i := max; i < len(ys); i++ {
 			r[i-max] = float64(yv.At(i))
 		}
 		r[len(ys)-1] = x.F()
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewAF(r)
 	}
 	switch xv := x.bv.(type) {
 	case *AB:
@@ -1068,14 +1052,14 @@ func shiftAfterAB(x V, yv *AB) V {
 			r[i-max] = float64(ys[i])
 		}
 		copy(r[len(ys)-max:], xv.elts)
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewAF(r)
 	case *AI:
 		r := make([]int64, len(ys))
 		for i := max; i < len(ys); i++ {
 			r[i-max] = int64(yv.At(i))
 		}
 		copy(r[len(ys)-max:], xv.elts)
-		return NewAIWithRC(r, reuseRCp(yv.rc))
+		return NewAI(r)
 	case *AV:
 		return shiftAVAfterArray(xv, yv)
 	case array:
@@ -1108,7 +1092,7 @@ func shiftAfterAI(x V, yv *AI) V {
 			r[i-max] = float64(yv.At(i))
 		}
 		r[len(ys)-1] = x.F()
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewAF(r)
 	}
 	switch xv := x.bv.(type) {
 	case *AB:
@@ -1124,7 +1108,7 @@ func shiftAfterAI(x V, yv *AI) V {
 			r[i-max] = float64(ys[i])
 		}
 		copy(r[len(ys)-max:], xv.elts)
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewAF(r)
 	case *AI:
 		r := yv.reuse()
 		copy(r.elts[:len(ys)-max], ys[max:])
@@ -1252,7 +1236,7 @@ func shiftArrayAfterArray(xv, yv array) V {
 		xi.InitWithRC(rc)
 		r[ylen-max+i] = xi
 	}
-	return NewAVWithRC(r, rc)
+	return NewAV(r)
 }
 
 func shiftVAfterArray(x V, yv array) V {
@@ -1352,13 +1336,11 @@ func windowsString(i int64, s string) V {
 
 func windowsArray(i int64, y array) V {
 	r := make([]V, 1+y.Len()-int(i))
-	rc := y.RC()
-	*rc += 2
 	for j := range r {
-		r[j] = Canonical(NewV(y.slice(j, j+int(i))))
+		r[j] = NewV(y.slice(j, j+int(i)))
 	}
 	var n int
-	return NewAVWithRC(r, &n)
+	return newAV(r)
 }
 
 func shape(ctx *Context, x, y V) V {
@@ -1454,38 +1436,32 @@ func cutLinesString(n int, s string) V {
 func cutColsArray(i int64, y array) V {
 	ylen := y.Len()
 	if i >= int64(ylen) {
-		return NewAVWithRC([]V{NewV(y)}, y.RC())
+		return NewAV([]V{NewV(y)})
 	}
 	n := ylen / int(i)
 	if ylen%int(i) != 0 {
 		n++
 	}
-	rc := y.RC()
-	*rc += 2
 	r := make([]V, n)
 	for j := 0; j < n; j++ {
 		from := j * int(i)
 		to := minInt(from+int(i), ylen)
-		r[j] = Canonical(NewV(y.slice(from, to)))
+		r[j] = NewV(y.slice(from, to))
 	}
-	var rcn int
-	return NewAVWithRC(r, &rcn)
+	return newAV(r)
 }
 
 func cutLinesArray(n int, y array) V {
 	ylen := y.Len()
 	if n == 1 {
-		return NewAVWithRC([]V{NewV(y)}, y.RC())
+		return NewAV([]V{NewV(y)})
 	}
-	rc := y.RC()
-	*rc += 2
 	r := make([]V, n)
 	from := 0
 	for j := 0; j < n; j++ {
 		to := minInt(from+(ylen-from)/(n-j), ylen)
-		r[j] = Canonical(NewV(y.slice(from, to)))
+		r[j] = NewV(y.slice(from, to))
 		from = to
 	}
-	var rcn int
-	return NewAVWithRC(r, &rcn)
+	return newAV(r)
 }

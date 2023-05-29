@@ -136,10 +136,10 @@ func joinAB(x *AB, y V, left bool) V {
 			}
 			return NewV(&AB{elts: joinSlice(x.elts, byte(y.I())), flags: fl})
 		}
-		return NewAIWithRC(joinIsN(x.elts, y.I(), left), reuseRCp(x.rc))
+		return NewAI(joinIsN(x.elts, y.I(), left))
 	}
 	if y.IsF() {
-		return NewAFWithRC(joinIsN(x.elts, y.F(), left), reuseRCp(x.rc))
+		return NewAF(joinIsN(x.elts, y.F(), left))
 	}
 	switch yv := y.bv.(type) {
 	case *AB:
@@ -192,7 +192,7 @@ func joinSliceLeft[T any](x []T, y T) []T {
 func joinAI(x *AI, y V, left bool) V {
 	if y.IsI() {
 		if left {
-			return NewAIWithRC(joinSliceLeft(x.elts, y.I()), reuseRCp(x.rc))
+			return NewAI(joinSliceLeft(x.elts, y.I()))
 		}
 		if reusableRCp(x.RC()) {
 			x.elts = append(x.elts, y.I())
@@ -203,7 +203,7 @@ func joinAI(x *AI, y V, left bool) V {
 
 	}
 	if y.IsF() {
-		return NewAFWithRC(joinIsN(x.elts, y.F(), left), reuseRCp(x.rc))
+		return NewAF(joinIsN(x.elts, y.F(), left))
 	}
 	switch yv := y.bv.(type) {
 	case *AB:
@@ -226,7 +226,7 @@ func joinAI(x *AI, y V, left bool) V {
 func joinAF(x *AF, y V, left bool) V {
 	if y.IsI() {
 		if left {
-			return NewAFWithRC(joinSliceLeft(x.elts, float64(y.I())), reuseRCp(x.rc))
+			return NewAF(joinSliceLeft(x.elts, float64(y.I())))
 		}
 		if reusableRCp(x.RC()) {
 			x.elts = append(x.elts, float64(y.I()))
@@ -237,7 +237,7 @@ func joinAF(x *AF, y V, left bool) V {
 	}
 	if y.IsF() {
 		if left {
-			return NewAFWithRC(joinSliceLeft(x.elts, y.F()), reuseRCp(x.rc))
+			return NewAF(joinSliceLeft(x.elts, y.F()))
 		}
 		if reusableRCp(x.RC()) {
 			x.elts = append(x.elts, y.F())
@@ -304,7 +304,7 @@ func joinAFAF(x *AF, y *AF) V {
 }
 
 func joinABAI(x *AB, y *AI) V {
-	return NewAIWithRC(joinSliceToNums(x.elts, y.elts), reuseRCp(x.rc))
+	return NewAI(joinSliceToNums(x.elts, y.elts))
 }
 
 func joinSliceToNums[N number, M number](x []N, y []M) []M {
@@ -337,7 +337,7 @@ func joinNumsToSlice[N number, M number](x []N, y []M) []N {
 }
 
 func joinABAF(x *AB, y *AF) V {
-	return NewAFWithRC(joinSliceToNums(x.elts, y.elts), reuseRCp(x.rc))
+	return NewAF(joinSliceToNums(x.elts, y.elts))
 }
 
 func joinAFAB(x *AF, y *AB) V {
@@ -352,7 +352,7 @@ func joinAFAB(x *AF, y *AB) V {
 }
 
 func joinAIAF(x *AI, y *AF) V {
-	return NewAFWithRC(joinSliceToNums(x.elts, y.elts), reuseRCp(x.rc))
+	return NewAF(joinSliceToNums(x.elts, y.elts))
 }
 
 func joinAFAI(x *AF, y *AI) V {
@@ -370,7 +370,7 @@ func joinAS(x *AS, y V, left bool) V {
 	switch yv := y.bv.(type) {
 	case S:
 		if left {
-			return NewASWithRC(joinSliceLeft(x.elts, string(yv)), reuseRCp(x.rc))
+			return NewAS(joinSliceLeft(x.elts, string(yv)))
 		}
 		if reusableRCp(x.RC()) {
 			x.elts = append(x.elts, string(yv))
@@ -482,7 +482,7 @@ func enlist(x V) V {
 	case S:
 		return NewAS([]string{string(xv)})
 	case RefCountHolder:
-		return NewAVWithRC([]V{x}, reuseRCp(xv.RC()))
+		return NewAV([]V{x})
 	default:
 		return NewAV([]V{x})
 	}

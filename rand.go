@@ -77,7 +77,7 @@ func roll(ctx *Context, n int64, y V) V {
 		return NewAS(rollSlice[string](ctx, n, yv.elts))
 	case *AV:
 		*yv.rc += 2
-		return NewAVWithRC(rollSlice[V](ctx, n, yv.elts), yv.rc)
+		return NewAV(rollSlice[V](ctx, n, yv.elts))
 	default:
 		return panicType("i?y", "y", y)
 	}

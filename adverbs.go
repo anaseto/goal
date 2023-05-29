@@ -728,11 +728,3 @@ func (x V) at(i int) V {
 		return x
 	}
 }
-
-func canonicalVs(r []V) V {
-	ra, ok := normalize(&AV{elts: r})
-	if !ok {
-		newAV(r)
-	}
-	return NewV(ra)
-}

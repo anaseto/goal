@@ -79,23 +79,19 @@ func odometer[I integer](x []I) V {
 	if bsize {
 		a := odometerWithCols[I, byte](x, cols)
 		r := make([]V, len(x))
-		var n int = 2
 		for i := range r {
 			ai := a[i*int(cols) : (i+1)*int(cols)]
-			r[i] = NewABWithRC(ai, &n)
+			r[i] = NewV(&AB{elts: ai, flags: flagImmutable})
 		}
-		var rn int
-		return NewAVWithRC(r, &rn)
+		return newAV(r)
 	}
 	a := odometerWithCols[I, int64](x, cols)
 	r := make([]V, len(x))
-	var n int = 2
 	for i := range r {
 		ai := a[i*int(cols) : (i+1)*int(cols)]
-		r[i] = NewAIWithRC(ai, &n)
+		r[i] = NewV(&AI{elts: ai, flags: flagImmutable})
 	}
-	var rn int
-	return NewAVWithRC(r, &rn)
+	return newAV(r)
 }
 
 func odometerWithCols[I integer, J integer](x []I, cols int64) []J {
@@ -173,26 +169,26 @@ func whereAB(xv *AB) V {
 	if xv.IsBoolean() {
 		if xv.Len() < 256 {
 			r := whereBools[byte](xv.elts)
-			return NewV(&AB{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
+			return NewV(&AB{elts: r, flags: flagAscending})
 		}
 		r := whereBools[int64](xv.elts)
-		return NewV(&AI{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
+		return NewV(&AI{elts: r, flags: flagAscending})
 	}
 	if xv.Len() < 256 {
 		r := whereBytes[byte](xv.elts)
-		return NewV(&AB{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
+		return NewV(&AB{elts: r, flags: flagAscending})
 	}
 	r := whereBytes[int64](xv.elts)
-	return NewV(&AI{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
+	return NewV(&AI{elts: r, flags: flagAscending})
 }
 
 func whereAI(xv *AI) V {
 	if xv.Len() < 256 {
 		r := whereInts[byte](xv.elts)
-		return NewV(&AB{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
+		return NewV(&AB{elts: r, flags: flagAscending})
 	}
 	r := whereInts[int64](xv.elts)
-	return NewV(&AI{elts: r, rc: reuseRCp(xv.rc), flags: flagAscending})
+	return NewV(&AI{elts: r, flags: flagAscending})
 }
 
 func whereBools[I integer](x []byte) []I {
@@ -317,20 +313,19 @@ func replicateI(n int64, y V) V {
 		return NewAS(r)
 	case *AB:
 		r := replicateISlice(n, yv.elts)
-		return NewABWithRC(r, reuseRCp(yv.rc))
+		return NewAB(r)
 	case *AI:
 		r := replicateISlice(n, yv.elts)
-		return NewAIWithRC(r, reuseRCp(yv.rc))
+		return NewAI(r)
 	case *AF:
 		r := replicateISlice(n, yv.elts)
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewAF(r)
 	case *AS:
 		r := replicateISlice(n, yv.elts)
-		return NewASWithRC(r, reuseRCp(yv.rc))
+		return NewAS(r)
 	case *AV:
 		r := replicateISlice(n, yv.elts)
-		*yv.rc += 2
-		return NewAVWithRC(r, yv.rc)
+		return NewAV(r)
 	case *Dict:
 		keys := replicateI(n, NewV(yv.keys))
 		values := replicateI(n, NewV(yv.values))
@@ -360,43 +355,42 @@ func replicateAB(x *AB, y V) V {
 	case *AB:
 		if x.IsBoolean() {
 			r := replicateBools(x.elts, yv.elts)
-			return NewV(&AB{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
+			return NewV(&AB{elts: r, flags: yv.flags &^ flagImmutable})
 		}
 		r := replicateBytes(x.elts, yv.elts)
 		var fl flags
 		if yv.IsBoolean() {
 			fl = flagBool
 		}
-		return NewV(&AB{elts: r, rc: reuseRCp(yv.rc), flags: fl})
+		return NewV(&AB{elts: r, flags: fl})
 	case *AI:
 		if x.IsBoolean() {
 			r := replicateBools(x.elts, yv.elts)
-			return NewV(&AI{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
+			return NewV(&AI{elts: r, flags: yv.flags &^ flagImmutable})
 		}
 		r := replicateBytes(x.elts, yv.elts)
-		return NewAIWithRC(r, reuseRCp(yv.rc))
+		return NewAI(r)
 	case *AF:
 		if x.IsBoolean() {
 			r := replicateBools(x.elts, yv.elts)
-			return NewV(&AF{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
+			return NewV(&AF{elts: r, flags: yv.flags &^ flagImmutable})
 		}
 		r := replicateBytes(x.elts, yv.elts)
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewAF(r)
 	case *AS:
 		if x.IsBoolean() {
 			r := replicateBools(x.elts, yv.elts)
-			return NewV(&AS{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
+			return NewV(&AS{elts: r, flags: yv.flags &^ flagImmutable})
 		}
 		r := replicateBytes(x.elts, yv.elts)
-		return NewASWithRC(r, reuseRCp(yv.rc))
+		return NewAS(r)
 	case *AV:
 		if x.IsBoolean() {
 			r := replicateBools(x.elts, yv.elts)
-			return NewV(canonicalAV(&AV{elts: r, rc: yv.rc, flags: yv.flags}))
+			return canonicalAV(&AV{elts: r, flags: yv.flags &^ flagImmutable})
 		}
-		*yv.rc += 2
 		r := replicateBytes(x.elts, yv.elts)
-		return Canonical(NewAVWithRC(r, yv.rc))
+		return canonicalVs(r)
 	case *Dict:
 		keys := replicateAB(x, NewV(yv.keys))
 		if keys.IsPanic() {
@@ -458,32 +452,31 @@ func replicateAI(x *AI, y V) V {
 		if yv.IsBoolean() {
 			fl = flagBool
 		}
-		return NewV(&AB{elts: r, rc: reuseRCp(yv.rc), flags: fl})
+		return NewV(&AB{elts: r, flags: fl})
 	case *AI:
 		r, err := replicateInts(x.elts, yv.elts)
 		if err != nil {
 			return panicErr(err)
 		}
-		return NewAIWithRC(r, reuseRCp(yv.rc))
+		return NewAI(r)
 	case *AF:
 		r, err := replicateInts(x.elts, yv.elts)
 		if err != nil {
 			return panicErr(err)
 		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewAF(r)
 	case *AS:
 		r, err := replicateInts(x.elts, yv.elts)
 		if err != nil {
 			return panicErr(err)
 		}
-		return NewASWithRC(r, reuseRCp(yv.rc))
+		return NewAS(r)
 	case *AV:
 		r, err := replicateInts(x.elts, yv.elts)
 		if err != nil {
 			return panicErr(err)
 		}
-		*yv.rc += 2
-		return Canonical(NewAVWithRC(r, yv.rc))
+		return canonicalVs(r)
 	case *Dict:
 		keys := replicateAI(x, NewV(yv.keys))
 		if keys.IsPanic() {
@@ -537,12 +530,12 @@ func weedOut(x, y V) V {
 		if xv.Len() != y.Len() {
 			return Panicf("f_y : length mismatch: %d (f[y]) vs %d (y)", xv.Len(), y.Len())
 		}
-		return weedOutAB(xv, y)
+		return weedOutAIs((*A[byte])(xv), y)
 	case *AI:
 		if xv.Len() != y.Len() {
 			return Panicf("f_y : length mismatch: %d (f[y]) vs %d (y)", xv.Len(), y.Len())
 		}
-		return weedOutAI(xv, y)
+		return weedOutAIs((*A[int64])(xv), y)
 	case *AF:
 		ix := toAI(xv)
 		if ix.IsPanic() {
@@ -554,29 +547,29 @@ func weedOut(x, y V) V {
 	}
 }
 
-func weedOutAB(x *AB, y V) V {
+func weedOutAIs[I integer](x *A[I], y V) V {
 	switch yv := y.bv.(type) {
 	case *AB:
 		r := weedOutIntegers(x.elts, yv.elts)
-		return NewV(&AB{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
+		return NewV(&AB{elts: r, flags: yv.flags &^ flagImmutable})
 	case *AI:
 		r := weedOutIntegers(x.elts, yv.elts)
-		return NewV(&AI{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
+		return NewV(&AI{elts: r, flags: yv.flags &^ flagImmutable})
 	case *AF:
 		r := weedOutIntegers(x.elts, yv.elts)
-		return NewV(&AF{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
+		return NewV(&AF{elts: r, flags: yv.flags &^ flagImmutable})
 	case *AS:
 		r := weedOutIntegers(x.elts, yv.elts)
-		return NewV(&AS{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
+		return NewV(&AS{elts: r, flags: yv.flags &^ flagImmutable})
 	case *AV:
 		r := weedOutIntegers(x.elts, yv.elts)
-		return NewV(canonicalAV(&AV{elts: r, rc: yv.rc, flags: yv.flags}))
+		return canonicalAV(&AV{elts: r, flags: yv.flags &^ flagImmutable})
 	case *Dict:
-		keys := weedOutAB(x, NewV(yv.keys))
+		keys := weedOutAIs(x, NewV(yv.keys))
 		if keys.IsPanic() {
 			return keys
 		}
-		values := weedOutAB(x, NewV(yv.values))
+		values := weedOutAIs(x, NewV(yv.values))
 		if values.IsPanic() {
 			return values
 		}
@@ -600,38 +593,6 @@ func weedOutIntegers[I integer, T any](x []I, y []T) []T {
 		}
 	}
 	return r
-}
-
-func weedOutAI(x *AI, y V) V {
-	switch yv := y.bv.(type) {
-	case *AB:
-		r := weedOutIntegers(x.elts, yv.elts)
-		return NewV(&AB{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
-	case *AI:
-		r := weedOutIntegers(x.elts, yv.elts)
-		return NewV(&AI{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
-	case *AF:
-		r := weedOutIntegers(x.elts, yv.elts)
-		return NewV(&AF{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
-	case *AS:
-		r := weedOutIntegers(x.elts, yv.elts)
-		return NewV(&AS{elts: r, rc: reuseRCp(yv.rc), flags: yv.flags})
-	case *AV:
-		r := weedOutIntegers(x.elts, yv.elts)
-		return NewV(canonicalAV(&AV{elts: r, rc: yv.rc, flags: yv.flags}))
-	case *Dict:
-		keys := weedOutAI(x, NewV(yv.keys))
-		if keys.IsPanic() {
-			return keys
-		}
-		values := weedOutAI(x, NewV(yv.values))
-		if values.IsPanic() {
-			return values
-		}
-		return NewDict(keys, values)
-	default:
-		return panicType("f_y", "y", y)
-	}
 }
 
 // get implements .x.

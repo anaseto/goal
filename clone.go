@@ -107,7 +107,7 @@ func (r *replacer) Clone() Value {
 	if r.oldnew.reusable() {
 		return r
 	}
-	return &replacer{r: r.r, oldnew: r.oldnew.Clone()}
+	return &replacer{r: r.r, oldnew: (*AS)((*A[string])(r.oldnew).sclone())}
 }
 
 func (r *rxReplacer) Clone() Value {

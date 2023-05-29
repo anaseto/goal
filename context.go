@@ -93,8 +93,7 @@ func NewContext() *Context {
 	ctx.stack = make([]V, 0, 32)
 	ctx.gIDs = make(map[string]int, 8)
 	ctx.sources = make(map[string]string, 4)
-	var n int = 2
-	ctx.constants = []V{constAV: NewAVWithRC(nil, &n)}
+	ctx.constants = []V{constAV: NewV(&AV{flags: flagImmutable})}
 	ctx.sconstants = map[string]int{}
 	ctx.Prec = -1
 	ctx.OFS = " "
@@ -163,7 +162,6 @@ func (ctx *Context) RegisterDyad(name string, vf VariadicFun) V {
 // AssignGlobal assigns a value to a global variable name.
 func (ctx *Context) AssignGlobal(name string, x V) {
 	id := ctx.global(name)
-	x.InitRC()
 	x.IncrRC()
 	ctx.globals[id] = x
 }
@@ -364,7 +362,7 @@ func (ctx *Context) Show() string {
 
 func (ctx *Context) storeConst(x V) int {
 	if ctx.compiler.scope() != nil {
-		x.IncrRC()
+		x.MarkImmutable()
 	}
 	ctx.constants = append(ctx.constants, x)
 	return len(ctx.constants) - 1

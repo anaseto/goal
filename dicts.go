@@ -22,8 +22,6 @@ func NewDict(keys, values V) V {
 	if xv.Len() != yv.Len() {
 		panic(fmt.Sprintf("NewDict(keys, values) : length mismatch (%d vs %d)", xv.Len(), yv.Len()))
 	}
-	initRC(xv)
-	initRC(yv)
 	return NewV(&Dict{keys: xv, values: yv})
 }
 
@@ -32,7 +30,6 @@ func newDictValues(keys array, values V) V {
 		return values
 	}
 	v := values.bv.(array)
-	initRC(v)
 	return NewV(&Dict{keys: keys, values: v})
 }
 
@@ -103,7 +100,6 @@ func dictAmendKVI(xd *Dict, yk array) (array, array, V) {
 		flags := keys.getFlags() & flagDistinct
 		keys = join(NewV(keys), distinct(replicate(b, ykv))).bv.(array)
 		keys.setFlags(flags)
-		initRC(keys)
 		values = padArrayMut(keys.Len()-nkeys, values)
 		ky = findArray(keys, ykv)
 	}
@@ -120,7 +116,6 @@ func dictMerge(xd, yd *Dict) V {
 	case *AI:
 		r = mergeAtIntegers(values, kyv.elts, yd.values)
 	}
-	initRC(r)
 	return NewV(&Dict{keys: keys, values: canonicalArray(r)})
 }
 
@@ -144,7 +139,6 @@ func dictArith(xd, yd *Dict, f func(V, V) V) V {
 	if err != nil {
 		return Panicf("%v", err)
 	}
-	initRC(r)
 	return NewV(&Dict{keys: keys, values: canonicalArray(r)})
 }
 

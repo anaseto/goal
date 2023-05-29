@@ -81,72 +81,72 @@ func classify(ctx *Context, x V) V {
 		}
 		if xv.flags.Has(flagAscending) {
 			r := classifySortedSlice[byte, byte](xv.elts)
-			return NewABWithRC(r, reuseRCp(xv.rc))
+			return NewAB(r)
 		}
 		if xv.Len() < bruteForceBytes {
 			r := classifyBrute(xv.elts)
-			return NewABWithRC(r, reuseRCp(xv.rc))
+			return NewAB(r)
 		}
-		return NewABWithRC(classifyBytes(xv.elts), reuseRCp(xv.rc))
+		return NewAB(classifyBytes(xv.elts))
 	case *AI:
 		if xv.flags.Has(flagAscending) {
 			if xv.Len() < 256 {
 				r := classifySortedSlice[int64, byte](xv.elts)
-				return NewABWithRC(r, reuseRCp(xv.rc))
+				return NewAB(r)
 			}
 			r := classifySortedSlice[int64, int64](xv.elts)
-			return NewAIWithRC(r, reuseRCp(xv.rc))
+			return NewAI(r)
 		}
 		min, span, ok := smallRange(xv)
 		if ok {
 			// fast path avoiding hash table
 			if span < 256 || xv.Len() < 256 {
 				r := classifyInts[byte](xv.elts, min, span)
-				return NewABWithRC(r, reuseRCp(xv.rc))
+				return NewAB(r)
 			}
 			r := classifyInts[int64](xv.elts, min, span)
-			return NewAIWithRC(r, reuseRCp(xv.rc))
+			return NewAI(r)
 		}
 		if xv.Len() <= bruteForceNumeric {
 			r := classifyBrute(xv.elts)
-			return NewABWithRC(r, reuseRCp(xv.rc))
+			return NewAB(r)
 		}
 		r := classifySlice[int64, int64](xv.elts)
-		return NewAIWithRC(r, reuseRCp(xv.rc))
+		return NewAI(r)
 	case *AF:
 		if xv.flags.Has(flagAscending) {
 			if xv.Len() < 256 {
 				r := classifySortedSlice[float64, byte](xv.elts)
-				return NewABWithRC(r, reuseRCp(xv.rc))
+				return NewAB(r)
 			}
 			r := classifySortedSlice[float64, int64](xv.elts)
-			return NewAIWithRC(r, reuseRCp(xv.rc))
+			return NewAI(r)
 		}
 		if xv.Len() <= bruteForceNumeric {
 			r := classifyBrute(xv.elts)
-			return NewABWithRC(r, reuseRCp(xv.rc))
+			return NewAB(r)
 		}
 		r := classifySlice[float64, int64](xv.elts)
-		return NewAIWithRC(r, reuseRCp(xv.rc))
+		return NewAI(r)
 	case *AS:
 		if xv.flags.Has(flagAscending) {
 			if xv.Len() < 256 {
 				r := classifySortedSlice[string, byte](xv.elts)
-				return NewABWithRC(r, reuseRCp(xv.rc))
+				return NewAB(r)
 			}
 			r := classifySortedSlice[string, int64](xv.elts)
-			return NewAIWithRC(r, reuseRCp(xv.rc))
+			return NewAI(r)
 		}
 		if xv.Len() <= bruteForceGeneric {
 			r := classifyBrute(xv.elts)
-			return NewABWithRC(r, reuseRCp(xv.rc))
+			return NewAB(r)
 		}
 		if xv.Len() < 256 {
 			r := classifySlice[string, byte](xv.elts)
-			return NewABWithRC(r, reuseRCp(xv.rc))
+			return NewAB(r)
 		}
 		r := classifySlice[string, int64](xv.elts)
-		return NewAIWithRC(r, reuseRCp(xv.rc))
+		return NewAI(r)
 	case *AV:
 		if xv.Len() > bruteForceGeneric {
 			ss := make([]string, xv.Len())
@@ -285,9 +285,7 @@ func distinctDict(x *Dict) *Dict {
 	mf := markFirsts(NewV(x.values))
 	x.values.DecrRC()
 	nk := replicate(mf, NewV(x.keys))
-	nk.InitRC()
 	nv := replicate(mf, NewV(x.values))
-	nv.InitRC()
 	return &Dict{keys: nk.bv.(array), values: nv.bv.(array)}
 }
 
@@ -301,20 +299,20 @@ func distinctArray(x array) array {
 			b := xv.At(0)
 			for i := 1; i < xv.Len(); i++ {
 				if xv.At(i) != b {
-					return &AB{elts: []byte{b, xv.At(i)}, rc: reuseRCp(xv.rc), flags: xv.flags | flagDistinct}
+					return &AB{elts: []byte{b, xv.At(i)}, flags: xv.flags | flagDistinct}
 				}
 			}
-			return &AB{elts: []byte{b}, rc: reuseRCp(xv.rc), flags: xv.flags | flagDistinct}
+			return &AB{elts: []byte{b}, flags: xv.flags | flagDistinct}
 		}
 		if xv.flags.Has(flagAscending) {
 			r := distinctSortedSlice[byte](xv.elts)
-			return &AB{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagDistinct}
+			return &AB{elts: r, flags: xv.flags | flagDistinct}
 		}
 		if xv.Len() < bruteForceBytes {
 			r := distinctBrute(xv.elts)
-			return &AB{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagDistinct}
+			return &AB{elts: r, flags: xv.flags | flagDistinct}
 		}
-		return &AB{elts: distinctBytes(xv.elts), rc: reuseRCp(xv.rc), flags: xv.flags | flagDistinct}
+		return &AB{elts: distinctBytes(xv.elts), flags: xv.flags | flagDistinct}
 	case *AF:
 		var r []float64
 		if xv.flags.Has(flagAscending) {
@@ -322,21 +320,21 @@ func distinctArray(x array) array {
 		} else {
 			r = distinctSlice[float64](xv.elts, bruteForceNumeric)
 		}
-		return &AF{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagDistinct}
+		return &AF{elts: r, flags: xv.flags | flagDistinct}
 	case *AI:
 		var r []int64
 		min, span, ok := smallRange(xv)
 		if ok {
 			// fast path avoiding hash table
 			r = distinctInts(xv.elts, min, span)
-			return &AI{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagDistinct}
+			return &AI{elts: r, flags: xv.flags | flagDistinct}
 		}
 		if xv.flags.Has(flagAscending) {
 			r = distinctSortedSlice[int64](xv.elts)
 		} else {
 			r = distinctSlice[int64](xv.elts, bruteForceNumeric)
 		}
-		return &AI{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagDistinct}
+		return &AI{elts: r, flags: xv.flags | flagDistinct}
 	case *AS:
 		var r []string
 		if xv.flags.Has(flagAscending) {
@@ -344,7 +342,7 @@ func distinctArray(x array) array {
 		} else {
 			r = distinctSlice[string](xv.elts, bruteForceGeneric)
 		}
-		return &AS{elts: r, rc: reuseRCp(xv.rc), flags: xv.flags | flagDistinct}
+		return &AS{elts: r, flags: xv.flags | flagDistinct}
 	case *AV:
 		xv.IncrRC()
 		mf := markFirsts(NewV(xv))
@@ -479,18 +477,18 @@ func markFirsts(x V) V {
 					break
 				}
 			}
-			return newABbWithRC(r, reuseRCp(xv.rc))
+			return newABb(r)
 		}
 		if xv.flags.Has(flagAscending) {
 			r := markFirstsSortedSlice[byte](xv.elts)
-			return newABbWithRC(r, reuseRCp(xv.rc))
+			return newABb(r)
 		}
 		if xv.Len() < bruteForceBytes {
 			r := make([]byte, xv.Len())
 			markFirstsBrute(xv.elts, r)
-			return newABbWithRC(r, reuseRCp(xv.rc))
+			return newABb(r)
 		}
-		return newABbWithRC(markFirstsBytes(xv.elts), reuseRCp(xv.rc))
+		return newABb(markFirstsBytes(xv.elts))
 	case *AF:
 		var r []byte
 		if xv.flags.Has(flagAscending) {
@@ -498,21 +496,21 @@ func markFirsts(x V) V {
 		} else {
 			r = markFirstsSlice[float64](xv.elts, bruteForceNumeric)
 		}
-		return newABbWithRC(r, reuseRCp(xv.rc))
+		return newABb(r)
 	case *AI:
 		var r []byte
 		if xv.flags.Has(flagAscending) {
 			r = markFirstsSortedSlice[int64](xv.elts)
-			return newABbWithRC(r, reuseRCp(xv.rc))
+			return newABb(r)
 		}
 		min, span, ok := smallRange(xv)
 		if ok {
 			// fast path avoiding hash table
 			r = markFirstsInts(xv.elts, min, span)
-			return newABbWithRC(r, reuseRCp(xv.rc))
+			return newABb(r)
 		}
 		r = markFirstsSlice[int64](xv.elts, bruteForceNumeric)
-		return newABbWithRC(r, reuseRCp(xv.rc))
+		return newABb(r)
 	case *AS:
 		var r []byte
 		if xv.flags.Has(flagAscending) {
@@ -520,7 +518,7 @@ func markFirsts(x V) V {
 		} else {
 			r = markFirstsSlice[string](xv.elts, bruteForceGeneric)
 		}
-		return newABbWithRC(r, reuseRCp(xv.rc))
+		return newABb(r)
 	case *AV:
 		if xv.Len() > bruteForceGeneric {
 			ss := make([]string, xv.Len())
@@ -528,7 +526,7 @@ func markFirsts(x V) V {
 			for i, xi := range xv.elts {
 				ss[i] = xi.Sprint(ctx)
 			}
-			return newABbWithRC(markFirstsSlice[string](ss, bruteForceGeneric), reuseRCp(xv.rc))
+			return newABb(markFirstsSlice[string](ss, bruteForceGeneric))
 		}
 		r := make([]byte, xv.Len())
 	loop:
@@ -540,7 +538,7 @@ func markFirsts(x V) V {
 			}
 			r[i] = 1
 		}
-		return newABbWithRC(r, reuseRCp(xv.rc))
+		return newABb(r)
 	default:
 		panic("firsts")
 	}
@@ -765,7 +763,7 @@ func memberOfAF(x V, y *AF) V {
 	case *AI:
 		return memberOfAF(toAF(xv), y)
 	case *AF:
-		return newABbWithRC(memberOfSlice[float64](xv.elts, y.elts, bruteForceNumeric), reuseRCp(xv.rc))
+		return newABb(memberOfSlice[float64](xv.elts, y.elts, bruteForceNumeric))
 	case array:
 		return memberOfArray(xv, y)
 	default:
@@ -828,10 +826,10 @@ func memberOfAI(x V, y *AI) V {
 			for i, xi := range xv.elts {
 				r[i] = mb[xi]
 			}
-			return newABbWithRC(r, reuseRCp(xv.rc))
+			return newABb(r)
 		}
 		r := memberOfBI(xv.elts, y.elts)
-		return newABbWithRC(r, reuseRCp(xv.rc))
+		return newABb(r)
 	case *AI:
 		ylen := int64(y.Len())
 		xlen := int64(xv.Len())
@@ -852,7 +850,7 @@ func memberOfAI(x V, y *AI) V {
 			if span < ylen+xlen+smallRangeSpan {
 				// fast path avoiding hash table
 				r := memberOfII(xv.elts, y.elts, min, max)
-				return newABbWithRC(r, reuseRCp(xv.rc))
+				return newABb(r)
 			}
 		}
 		if asc && ylen > numericSortedLen {
@@ -860,9 +858,9 @@ func memberOfAI(x V, y *AI) V {
 			for i, xi := range xv.elts {
 				r[i] = b2B(memberISortedAI(xi, y))
 			}
-			return newABbWithRC(r, reuseRCp(xv.rc))
+			return newABb(r)
 		}
-		return newABbWithRC(memberOfSlice[int64](xv.elts, y.elts, bruteForceNumeric), reuseRCp(xv.rc))
+		return newABb(memberOfSlice[int64](xv.elts, y.elts, bruteForceNumeric))
 	case *AF:
 		return memberOf(x, toAF(y))
 	case array:
@@ -928,9 +926,9 @@ func memberOfAS(x V, y *AS) V {
 			for i, xi := range xv.elts {
 				r[i] = b2B(memberSOfAS(xi, y))
 			}
-			return newABbWithRC(r, reuseRCp(xv.rc))
+			return newABb(r)
 		}
-		return newABbWithRC(memberOfSlice[string](xv.elts, y.elts, bruteForceGeneric), reuseRCp(xv.rc))
+		return newABb(memberOfSlice[string](xv.elts, y.elts, bruteForceGeneric))
 	case array:
 		return memberOfArray(xv, y)
 	default:
@@ -997,32 +995,32 @@ func occurrenceCount(ctx *Context, x V) V {
 				r[i] = counts[xi]
 				counts[xi]++
 			}
-			return NewAIWithRC(r, reuseRCp(xv.rc))
+			return NewAI(r)
 		}
 		if xv.flags.Has(flagAscending) {
 			r := occurrenceCountSortedSlice[byte](xv.elts)
-			return NewAIWithRC(r, reuseRCp(xv.rc))
+			return NewAI(r)
 		}
 		if xv.Len() < bruteForceBytes {
 			r := occurrenceCountSlice[byte](xv.elts, bruteForceNumeric)
-			return NewAIWithRC(r, reuseRCp(xv.rc))
+			return NewAI(r)
 		}
 		r := occurrenceCountBytes(xv.elts)
-		return NewAIWithRC(r, reuseRCp(xv.rc))
+		return NewAI(r)
 	case *AI:
 		var r []int64
 		if xv.flags.Has(flagAscending) {
 			r = occurrenceCountSortedSlice[int64](xv.elts)
-			return NewAIWithRC(r, reuseRCp(xv.rc))
+			return NewAI(r)
 		}
 		min, span, ok := smallRange(xv)
 		if ok {
 			// fast path avoiding hash table
 			r = occurrenceCountInts(xv.elts, min, span)
-			return NewAIWithRC(r, reuseRCp(xv.rc))
+			return NewAI(r)
 		}
 		r = occurrenceCountSlice[int64](xv.elts, bruteForceNumeric)
-		return NewAIWithRC(r, reuseRCp(xv.rc))
+		return NewAI(r)
 	case *AF:
 		var r []int64
 		if xv.flags.Has(flagAscending) {
@@ -1030,7 +1028,7 @@ func occurrenceCount(ctx *Context, x V) V {
 		} else {
 			r = occurrenceCountSlice[float64](xv.elts, bruteForceNumeric)
 		}
-		return NewAIWithRC(r, reuseRCp(xv.rc))
+		return NewAI(r)
 	case *AS:
 		var r []int64
 		if xv.flags.Has(flagAscending) {
@@ -1038,14 +1036,14 @@ func occurrenceCount(ctx *Context, x V) V {
 		} else {
 			r = occurrenceCountSlice[string](xv.elts, bruteForceGeneric)
 		}
-		return NewAIWithRC(r, reuseRCp(xv.rc))
+		return NewAI(r)
 	case *AV:
 		if xv.Len() > (2*bruteForceGeneric)/3 {
 			ss := make([]string, xv.Len())
 			for i, xi := range xv.elts {
 				ss[i] = xi.Sprint(ctx)
 			}
-			return NewAIWithRC(occurrenceCountSlice[string](ss, bruteForceGeneric), reuseRCp(xv.rc))
+			return NewAI(occurrenceCountSlice[string](ss, bruteForceGeneric))
 		}
 		r := make([]byte, xv.Len())
 	loop:
@@ -1284,9 +1282,10 @@ func findS(s S, y V) V {
 			if ri.IsPanic() {
 				return ri
 			}
+			ri.MarkImmutable()
 			r[i] = ri
 		}
-		return NewAV(r)
+		return newAV(r)
 	default:
 		return panicType("s?y", "y", y)
 	}
@@ -1414,17 +1413,17 @@ func findAI(x *AI, y V) V {
 		if yv.IsBoolean() {
 			if x.Len() < 256 {
 				r := findIsBbs[byte](x.elts, yv.elts)
-				return NewABWithRC(r, reuseRCp(yv.rc))
+				return NewAB(r)
 			}
 			r := findIsBbs[int64](x.elts, yv.elts)
-			return NewAIWithRC(r, reuseRCp(yv.rc))
+			return NewAI(r)
 		}
 		if x.Len() < 256 {
 			r := findIsBs[byte](x.elts, yv.elts)
-			return NewABWithRC(r, reuseRCp(yv.rc))
+			return NewAB(r)
 		}
 		r := findIsBs[int64](x.elts, yv.elts)
-		return NewAIWithRC(r, reuseRCp(yv.rc))
+		return NewAI(r)
 	case *AI:
 		xlen := int64(x.Len())
 		ylen := int64(yv.Len())
@@ -1446,24 +1445,24 @@ func findAI(x *AI, y V) V {
 				// fast path avoiding hash table
 				if xlen < 256 {
 					r := findIsIs[byte](x.elts, yv.elts, min, max)
-					return NewABWithRC(r, reuseRCp(yv.rc))
+					return NewAB(r)
 				}
 				r := findIsIs[int64](x.elts, yv.elts, min, max)
-				return NewAIWithRC(r, reuseRCp(yv.rc))
+				return NewAI(r)
 			}
 		}
 		if asc && xlen > numericSortedLen {
 			if xlen < 256 {
 				r := findSortedIsIs[byte](x.elts, yv.elts)
-				return NewABWithRC(r, reuseRCp(yv.rc))
+				return NewAB(r)
 			}
 			r := findSortedIsIs[int64](x.elts, yv.elts)
-			return NewAIWithRC(r, reuseRCp(yv.rc))
+			return NewAI(r)
 		}
 		if xlen < 256 {
-			return NewABWithRC(findSlices[int64, byte](x.elts, yv.elts, bruteForceNumeric), reuseRCp(yv.rc))
+			return NewAB(findSlices[int64, byte](x.elts, yv.elts, bruteForceNumeric))
 		}
-		return NewAIWithRC(findSlices[int64, int64](x.elts, yv.elts, bruteForceNumeric), reuseRCp(yv.rc))
+		return NewAI(findSlices[int64, int64](x.elts, yv.elts, bruteForceNumeric))
 	case *AF:
 		return findAF(toAF(x).bv.(*AF), y)
 	case array:
@@ -1627,9 +1626,9 @@ func findAF(x *AF, y V) V {
 		return findAF(x, toAF(yv))
 	case *AF:
 		if x.Len() < 256 {
-			return NewABWithRC(findSlices[float64, byte](x.elts, yv.elts, bruteForceNumeric), reuseRCp(yv.rc))
+			return NewAB(findSlices[float64, byte](x.elts, yv.elts, bruteForceNumeric))
 		}
-		return NewAIWithRC(findSlices[float64, int64](x.elts, yv.elts, bruteForceNumeric), reuseRCp(yv.rc))
+		return NewAI(findSlices[float64, int64](x.elts, yv.elts, bruteForceNumeric))
 	case array:
 		return findArrays(x, yv)
 	default:
@@ -1662,15 +1661,15 @@ func findAS(x *AS, y V) V {
 		if x.flags.Has(flagAscending) && x.Len() > bruteForceGeneric/4 {
 			if x.Len() < 256 {
 				r := findSortedSsSs[byte](x.elts, yv.elts)
-				return NewABWithRC(r, reuseRCp(yv.rc))
+				return NewAB(r)
 			}
 			r := findSortedSsSs[int64](x.elts, yv.elts)
-			return NewAIWithRC(r, reuseRCp(yv.rc))
+			return NewAI(r)
 		}
 		if x.Len() < 256 {
-			return NewABWithRC(findSlices[string, byte](x.elts, yv.elts, bruteForceGeneric), reuseRCp(yv.rc))
+			return NewAB(findSlices[string, byte](x.elts, yv.elts, bruteForceGeneric))
 		}
-		return NewAIWithRC(findSlices[string, int64](x.elts, yv.elts, bruteForceGeneric), reuseRCp(yv.rc))
+		return NewAI(findSlices[string, int64](x.elts, yv.elts, bruteForceGeneric))
 	case array:
 		return findArrays(x, yv)
 	default:

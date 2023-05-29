@@ -218,7 +218,7 @@ func (x *AS) slice(i, j int) array {
 
 func (x *AV) slice(i, j int) array {
 	x.flags |= flagImmutable
-	return &AV{flags: x.flags, elts: x.elts[i:j]}
+	return canonicalArrayAV(&AV{flags: x.flags, elts: x.elts[i:j]})
 }
 
 func (x *AB) getFlags() flags { return x.flags }
@@ -259,54 +259,36 @@ func (x *AV) set(i int, y V) {
 	x.elts[i] = y
 }
 
-func (x *AB) vAtInts(y *AI) V {
-	r := &AB{elts: make([]byte, y.Len())}
-	if x.IsBoolean() {
-		r.flags |= flagBool
-	}
-	xlen := int64(x.Len())
-	for i, yi := range y.elts {
+func selectNumsAtInts[N number](dst, x []N, y []int64) {
+	xlen := int64(len(x))
+	for i, yi := range y {
 		if yi < 0 {
 			yi += xlen
 		}
 		if yi >= 0 && yi < xlen {
-			r.elts[i] = x.elts[yi]
+			dst[i] = x[yi]
 		} else {
-			r.elts[i] = 0
+			dst[i] = 0
 		}
 	}
+}
+
+func (x *AB) vAtInts(y *AI) V {
+	r := &AB{elts: make([]byte, y.Len())}
+	r.flags = x.flags & flagBool
+	selectNumsAtInts(r.elts, x.elts, y.elts)
 	return NewV(r)
 }
 
 func (x *AI) vAtInts(y *AI) V {
 	r := make([]int64, y.Len())
-	xlen := int64(x.Len())
-	for i, yi := range y.elts {
-		if yi < 0 {
-			yi += xlen
-		}
-		if yi >= 0 && yi < xlen {
-			r[i] = x.elts[yi]
-		} else {
-			r[i] = 0
-		}
-	}
+	selectNumsAtInts(r, x.elts, y.elts)
 	return NewAI(r)
 }
 
 func (x *AF) vAtInts(y *AI) V {
 	r := make([]float64, y.Len())
-	xlen := int64(x.Len())
-	for i, yi := range y.elts {
-		if yi < 0 {
-			yi += xlen
-		}
-		if yi >= 0 && yi < xlen {
-			r[i] = x.elts[yi]
-		} else {
-			r[i] = 0
-		}
-	}
+	selectNumsAtInts(r, x.elts, y.elts)
 	return NewAF(r)
 }
 
@@ -329,6 +311,7 @@ func (x *AS) vAtInts(y *AI) V {
 func (x *AV) vAtInts(y *AI) V {
 	r := make([]V, y.Len())
 	xlen := int64(x.Len())
+	var p V
 	for i, yi := range y.elts {
 		if yi < 0 {
 			yi += xlen
@@ -336,54 +319,42 @@ func (x *AV) vAtInts(y *AI) V {
 		if yi >= 0 && yi < xlen {
 			r[i] = x.elts[yi]
 		} else {
-			r[i] = proto(x.elts)
+			if p.kind == valNil {
+				p = proto(x.elts)
+			}
+			r[i] = p
 		}
 	}
-	rv := &AV{elts: r}
-	var n int
-	rv.InitWithRC(&n)
-	return NewV(canonicalAV(rv))
+	return canonicalVs(r)
+}
+
+func selectNumsAtBytes[N number](dst, x []N, y []byte) {
+	xlen := int(len(x))
+	for i, yi := range y {
+		if int(yi) < xlen {
+			dst[i] = x[yi]
+		} else {
+			dst[i] = 0
+		}
+	}
 }
 
 func (x *AB) vAtBytes(y *AB) V {
 	r := &AB{elts: make([]byte, y.Len())}
-	if x.IsBoolean() {
-		r.flags |= flagBool
-	}
-	xlen := x.Len()
-	for i, yi := range y.elts {
-		if int(yi) < xlen {
-			r.elts[i] = x.elts[yi]
-		} else {
-			r.elts[i] = 0
-		}
-	}
+	r.flags = x.flags & flagBool
+	selectNumsAtBytes(r.elts, x.elts, y.elts)
 	return NewV(r)
 }
 
 func (x *AI) vAtBytes(y *AB) V {
 	r := make([]int64, y.Len())
-	xlen := x.Len()
-	for i, yi := range y.elts {
-		if int(yi) < xlen {
-			r[i] = x.elts[yi]
-		} else {
-			r[i] = 0
-		}
-	}
+	selectNumsAtBytes(r, x.elts, y.elts)
 	return NewAI(r)
 }
 
 func (x *AF) vAtBytes(y *AB) V {
 	r := make([]float64, y.Len())
-	xlen := x.Len()
-	for i, yi := range y.elts {
-		if int(yi) < xlen {
-			r[i] = x.elts[yi]
-		} else {
-			r[i] = 0
-		}
-	}
+	selectNumsAtBytes(r, x.elts, y.elts)
 	return NewAF(r)
 }
 
@@ -403,17 +374,18 @@ func (x *AS) vAtBytes(y *AB) V {
 func (x *AV) vAtBytes(y *AB) V {
 	r := make([]V, y.Len())
 	xlen := x.Len()
+	var p V
 	for i, yi := range y.elts {
 		if int(yi) < xlen {
 			r[i] = x.elts[yi]
 		} else {
-			r[i] = proto(x.elts)
+			if p.kind == valNil {
+				p = proto(x.elts)
+			}
+			r[i] = p
 		}
 	}
-	rv := &AV{elts: r}
-	var n int
-	rv.InitWithRC(&n)
-	return NewV(canonicalAV(rv))
+	return canonicalVs(r)
 }
 
 func (x *AB) atInts(y []int64) array {
@@ -456,17 +428,7 @@ func (x *AV) atInts(y []int64) array {
 	for i, yi := range y {
 		r[i] = x.elts[yi]
 	}
-	nr := &AV{elts: r}
-	var p *int
-	if reusableRCp(x.rc) {
-		p = x.rc
-	} else {
-		var n int
-		p = &n
-	}
-	nr.InitWithRC(p)
-	a, _ := normalize(nr)
-	return a
+	return canonicalArrayVs(r)
 }
 
 func (x *AB) atBytes(y []byte) array {
@@ -509,17 +471,7 @@ func (x *AV) atBytes(y []byte) array {
 	for i, yi := range y {
 		r[i] = x.elts[yi]
 	}
-	nr := &AV{elts: r}
-	var p *int
-	if reusableRCp(x.rc) {
-		p = x.rc
-	} else {
-		var n int
-		p = &n
-	}
-	nr.InitWithRC(p)
-	a, _ := normalize(nr)
-	return a
+	return canonicalArrayVs(r)
 }
 
 func (x *AB) sclone() array {

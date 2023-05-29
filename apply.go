@@ -90,7 +90,6 @@ func (v variadic) apply(ctx *Context) V {
 		return NewV(&projectionMonad{Fun: newVariadic(v)})
 	}
 	r := ctx.variadics[v](ctx, args)
-	r.InitRC()
 	return r
 }
 
@@ -112,7 +111,6 @@ func (v variadic) apply2(ctx *Context) V {
 		return NewV(&projection{Fun: newVariadic(v), Args: args})
 	}
 	r := ctx.variadics[v](ctx, args)
-	r.InitRC()
 	ctx.drop()
 	return r
 }
@@ -125,7 +123,6 @@ func (v variadic) applyN(ctx *Context, n int) V {
 		return NewV(&projection{Fun: newVariadic(v), Args: args})
 	}
 	r := ctx.variadics[v](ctx, args)
-	r.InitRC()
 	ctx.dropN(n - 1)
 	return r
 }
@@ -225,7 +222,6 @@ func (dv *derivedVerb) applyN(ctx *Context, n int) V {
 		return NewV(&projection{Fun: NewV(dv), Args: args})
 	}
 	r := ctx.variadics[dv.Fun](ctx, args)
-	r.InitRC()
 	ctx.dropN(n)
 	return r
 }
@@ -288,12 +284,10 @@ func (s S) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
 		r := applyS(s, ctx.top())
-		r.InitRC()
 		return r
 	case 2:
 		args := ctx.peekN(n)
 		r := applyS2(s, args[1], args[0])
-		r.InitRC()
 		ctx.dropN(n - 1)
 		return r
 	default:
@@ -310,7 +304,6 @@ func (re *rx) applyN(ctx *Context, n int) V {
 			return NewV(&projectionMonad{Fun: NewV(re)})
 		}
 		r := applyRx(re, x)
-		r.InitRC()
 		return r
 	case 2:
 		args := ctx.peekN(2)
@@ -330,7 +323,6 @@ func (re *rx) applyN(ctx *Context, n int) V {
 			return NewV(&projection{Fun: NewV(re), Args: args})
 		}
 		r := applyRx2(re, args[1], args[0])
-		r.InitRC()
 		ctx.drop()
 		return r
 	default:
@@ -343,7 +335,6 @@ func (x *AB) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
 		r := applyArray(x, ctx.top())
-		r.InitRC()
 		return r
 	default:
 		ctx.dropN(n - 1)
@@ -355,7 +346,6 @@ func (x *AI) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
 		r := applyArray(x, ctx.top())
-		r.InitRC()
 		return r
 	default:
 		ctx.dropN(n - 1)
@@ -367,7 +357,6 @@ func (x *AF) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
 		r := applyArray(x, ctx.top())
-		r.InitRC()
 		return r
 	default:
 		ctx.dropN(n - 1)
@@ -379,7 +368,6 @@ func (x *AS) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
 		r := applyArray(x, ctx.top())
-		r.InitRC()
 		return r
 	default:
 		ctx.dropN(n - 1)
@@ -391,12 +379,10 @@ func (x *AV) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
 		r := applyArray(x, ctx.top())
-		r.InitRC()
 		return r
 	default:
 		args := ctx.peekN(n)
 		r := ctx.applyArrayArgs(x, args[len(args)-1], args[:len(args)-1])
-		r.InitRC()
 		ctx.dropN(n - 1)
 		return r
 	}
@@ -407,12 +393,10 @@ func (d *Dict) applyN(ctx *Context, n int) V {
 	case 1:
 		y := ctx.top()
 		r := applyDict(d, y)
-		r.InitRC()
 		return r
 	default:
 		args := ctx.peekN(n)
 		r := ctx.applyDictArgs(d, args[len(args)-1], args[:len(args)-1])
-		r.InitRC()
 		ctx.dropN(n - 1)
 		return r
 	}
@@ -432,7 +416,6 @@ func applyDict(d *Dict, y V) V {
 		return d.values.at(int(i))
 	}
 	r := vArrayAtV(d.values, ky)
-	r.InitRC()
 	return r
 }
 
@@ -447,9 +430,10 @@ func (ctx *Context) applyDictArgs(x *Dict, arg V, args []V) V {
 			if ri.IsPanic() {
 				return ri
 			}
+			ri.MarkImmutable()
 			r[i] = ri
 		}
-		return NewV(canonicalAV(&AV{elts: r}))
+		return canonicalVs(r)
 	}
 	switch argv := arg.bv.(type) {
 	case array:
@@ -459,9 +443,10 @@ func (ctx *Context) applyDictArgs(x *Dict, arg V, args []V) V {
 			if ri.IsPanic() {
 				return ri
 			}
+			ri.MarkImmutable()
 			r[i] = ri
 		}
-		return NewV(canonicalAV(&AV{elts: r}))
+		return canonicalVs(r)
 	default:
 		r := applyDict(x, arg)
 		// applyDict never panics
@@ -516,9 +501,10 @@ func applyArray(x array, y V) V {
 			if ri.IsPanic() {
 				return ri
 			}
+			ri.MarkImmutable()
 			r[i] = ri
 		}
-		return NewV(canonicalAV(&AV{elts: r}))
+		return canonicalVs(r)
 	case *Dict:
 		return newDictValues(yv.keys, applyArray(x, NewV(yv.values)))
 	default:
@@ -537,9 +523,10 @@ func (ctx *Context) applyArrayArgs(x array, arg V, args []V) V {
 			if ri.IsPanic() {
 				return ri
 			}
+			ri.MarkImmutable()
 			r[i] = ri
 		}
-		return NewV(canonicalAV(&AV{elts: r}))
+		return canonicalVs(r)
 	}
 	switch argv := arg.bv.(type) {
 	case array:
@@ -549,9 +536,10 @@ func (ctx *Context) applyArrayArgs(x array, arg V, args []V) V {
 			if ri.IsPanic() {
 				return ri
 			}
+			ri.MarkImmutable()
 			r[i] = ri
 		}
-		return NewV(canonicalAV(&AV{elts: r}))
+		return canonicalVs(r)
 	default:
 		r := applyArray(x, arg)
 		if r.IsPanic() {
@@ -574,7 +562,6 @@ func (r *nReplacer) applyN(ctx *Context, n int) V {
 		return Panicf("substitution got too many arguments")
 	}
 	nr := ctx.replace(r, ctx.top())
-	nr.InitRC()
 	return nr
 }
 
@@ -584,7 +571,6 @@ func (r *replacer) applyN(ctx *Context, n int) V {
 		return Panicf("substitution got too many arguments")
 	}
 	nr := ctx.replace(r, ctx.top())
-	nr.InitRC()
 	return nr
 }
 
@@ -594,7 +580,6 @@ func (r *rxReplacer) applyN(ctx *Context, n int) V {
 		return Panicf("substitution got too many arguments")
 	}
 	nr := ctx.replace(r, ctx.top())
-	nr.InitRC()
 	return nr
 }
 
@@ -605,19 +590,15 @@ func applyI(n int, i int64, y V) V {
 	switch yv := y.bv.(type) {
 	case *Dict:
 		rk := takePadN(i, yv.keys)
-		rk.InitRC()
 		rv := takePadN(i, yv.values)
-		rv.InitRC()
 		return NewV(&Dict{
 			keys:   rk.bv.(array),
 			values: rv.bv.(array)})
 	case array:
 		r := takePadN(i, yv)
-		r.InitRC()
 		return r
 	default:
 		r := takePadN(i, toArray(y).bv.(array))
-		r.InitRC()
 		return r
 	}
 }

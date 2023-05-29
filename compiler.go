@@ -760,7 +760,6 @@ func (c *compiler) doStrand(st *astStrand, n int) error {
 		}
 	}
 	r := canonicalArray(&AV{elts: a})
-	initRC(r)
 	initArrayFlags(r)
 	id := c.ctx.storeConst(NewV(r))
 	c.push2(opConst, opcode(id))

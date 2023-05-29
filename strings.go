@@ -474,7 +474,7 @@ func casts(ctx *Context, y V) V {
 		for i, yi := range yv.elts {
 			r.elts[i] = casts(ctx, yi)
 		}
-		return NewV(canonicalAV(r))
+		return canonicalAV(r)
 	case array:
 		return each2String(ctx, yv)
 	case *Dict:

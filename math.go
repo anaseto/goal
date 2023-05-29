@@ -32,13 +32,13 @@ func isNaN(x V) V {
 		return NewV(r)
 	case *AI:
 		r := make([]byte, xv.Len())
-		return newABbWithRC(r, reuseRCp(xv.rc))
+		return newABb(r)
 	case *AF:
 		r := make([]byte, xv.Len())
 		for i, xi := range xv.elts {
 			r[i] = b2B(math.IsNaN(xi))
 		}
-		return newABbWithRC(r, reuseRCp(xv.rc))
+		return newABb(r)
 	case *AV:
 		return monadAV(xv, isNaN)
 	case *Dict:
@@ -89,7 +89,7 @@ func fillNaNf(fill float64, y V) V {
 				r[i] = fill
 			}
 		}
-		return NewAFWithRC(r, reuseRCp(yv.rc))
+		return NewAF(r)
 	case *AV:
 		r := yv.reuse()
 		for i, yi := range yv.elts {
