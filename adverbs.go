@@ -367,7 +367,6 @@ func scanfx(ctx *Context, f, x V) V {
 		r := make([]V, xv.Len())
 		next := xv.at(0)
 		r[0] = next
-		next.IncrRC()
 		f.IncrRC()
 		ctx.pushNoRC(V{})
 		for i := 1; i < xv.Len(); i++ {
@@ -377,15 +376,14 @@ func scanfx(ctx *Context, f, x V) V {
 			if next.IsPanic() {
 				f.DecrRC()
 				ctx.drop()
-				rcdecrArgs(r)
 				return next
 			}
+			next.MarkImmutable()
 			r[i] = next
-			next.IncrRC()
 		}
 		f.DecrRC()
 		ctx.drop()
-		return normalizedArgs(r)
+		return canonicalVs(r)
 	default:
 		return x
 	}
@@ -398,26 +396,24 @@ func converges(ctx *Context, f, x V) V {
 	first := x
 	ctx.push(x)
 	for {
+		x.MarkImmutable()
 		r = append(r, x)
-		x.IncrRC()
 		y := f.applyN(ctx, 1)
 		if y.IsPanic() {
 			f.DecrRC()
-			rcdecrArgs(r)
 			ctx.drop()
 			return y
 		}
 		if y.Matches(x) || y.Matches(first) {
 			f.DecrRC()
 			ctx.drop()
-			return normalizedArgs(r)
+			return canonicalVs(r)
 		}
 		ctx.replaceTop(y)
 		x = y
 		n++
 		if n > maxConvergeIters {
 			f.DecrRC()
-			rcdecrArgs(r)
 			ctx.drop()
 			return panics(`f\x : too many iterations`)
 		}
@@ -480,15 +476,14 @@ func scanxfy(ctx *Context, x, f, y V) V {
 			if x.IsPanic() {
 				f.DecrRC()
 				ctx.drop()
-				rcdecrArgs(r)
 				return x
 			}
+			x.MarkImmutable()
 			r[i] = x
-			x.IncrRC()
 		}
 		f.DecrRC()
 		ctx.drop()
-		return normalizedArgs(r)
+		return canonicalVs(r)
 	default:
 		ctx.push(y)
 		ctx.push(x)
@@ -527,23 +522,21 @@ func scanN(ctx *Context, args []V) V {
 			ctx.push(args[j].at(i))
 		}
 		ctx.push(x)
-		next := f.applyN(ctx, n)
-		if next.IsPanic() {
+		x = f.applyN(ctx, n)
+		if x.IsPanic() {
 			f.DecrRC()
 			ctx.drop()
-			rcdecrArgs(r)
-			return next
+			return x
 		}
-		x = next
+		x.MarkImmutable()
 		r[i] = x
-		x.IncrRC()
 	}
 	f.DecrRC()
 	ctx.drop()
 	if d, ok := args[len(args)-3].bv.(*Dict); ok {
-		return newDictValues(d.keys, normalizedArgs(r))
+		return newDictValues(d.keys, canonicalVs(r))
 	}
-	return normalizedArgs(r)
+	return canonicalVs(r)
 }
 
 func splitNS(x V, sep S, y V) V {
@@ -589,25 +582,23 @@ func doWhiles(ctx *Context, args []V) V {
 				f.DecrRC()
 				x.DecrRC()
 				ctx.drop()
-				rcdecrArgs(r)
 				return cond
 			}
 			if !cond.IsTrue() {
 				f.DecrRC()
 				x.DecrRC()
 				ctx.drop()
-				return normalizedArgs(r)
+				return canonicalVs(r)
 			}
 			y = f.applyN(ctx, 1)
 			if y.IsPanic() {
 				f.DecrRC()
 				x.DecrRC()
 				ctx.drop()
-				rcdecrArgs(r)
 				return y
 			}
+			y.MarkImmutable()
 			r = append(r, y)
-			y.IncrRC()
 			ctx.replaceTop(y)
 		}
 	}
@@ -616,8 +607,8 @@ func doWhiles(ctx *Context, args []V) V {
 
 func dosTimes(ctx *Context, n int64, f, y V) V {
 	r := make([]V, n+1)
+	y.MarkImmutable()
 	r[0] = y
-	y.IncrRC()
 	f.IncrRC()
 	ctx.push(y)
 	for i := int64(1); i <= n; i++ {
@@ -625,16 +616,15 @@ func dosTimes(ctx *Context, n int64, f, y V) V {
 		if y.IsPanic() {
 			f.DecrRC()
 			ctx.drop()
-			rcdecrArgs(r)
 			return y
 		}
+		y.MarkImmutable()
 		r[i] = y
-		y.IncrRC()
 		ctx.replaceTop(y)
 	}
 	f.DecrRC()
 	ctx.drop()
-	return normalizedArgs(r)
+	return canonicalVs(r)
 }
 
 func each2(ctx *Context, f, x V) V {
@@ -673,15 +663,14 @@ func eachfx(ctx *Context, f V, x array) V {
 		if next.IsPanic() {
 			f.DecrRC()
 			ctx.drop()
-			rcdecrArgs(r)
 			return next
 		}
+		next.MarkImmutable()
 		r[i] = next
-		next.IncrRC()
 	}
 	f.DecrRC()
 	ctx.drop()
-	return normalizedArgs(r)
+	return canonicalVs(r)
 }
 
 func eachN(ctx *Context, args []V) V {
@@ -716,18 +705,17 @@ func eachN(ctx *Context, args []V) V {
 		if next.IsPanic() {
 			f.DecrRC()
 			ctx.drop()
-			rcdecrArgs(r)
 			return next
 		}
+		next.MarkImmutable()
 		r[i] = next
-		next.IncrRC()
 	}
 	f.DecrRC()
 	ctx.drop()
 	if d, ok := args[len(args)-2].bv.(*Dict); ok {
-		return newDictValues(d.keys, normalizedArgs(r))
+		return newDictValues(d.keys, canonicalVs(r))
 	}
-	return normalizedArgs(r)
+	return canonicalVs(r)
 }
 
 func (x V) at(i int) V {
@@ -741,10 +729,10 @@ func (x V) at(i int) V {
 	}
 }
 
-func normalizedArgs(r []V) V {
+func canonicalVs(r []V) V {
 	ra, ok := normalize(&AV{elts: r})
 	if !ok {
-		rcdecrArgs(r)
+		newAV(r)
 	}
 	return NewV(ra)
 }

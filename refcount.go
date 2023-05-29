@@ -3,12 +3,12 @@ package goal
 import "math"
 
 // RefCounter is implemented by values that use a reference count. In goal the
-// refcount is not used for memory management, but only for optimization of
-// memory allocations.  Refcount is increased by each assignement, and each
-// push operation on the stack, except for pushes corresponding to the last use
-// of a variable (as approximated conservatively). It is reduced after each
-// drop.  If refcount is equal or less than one, then the value is considered
-// reusable.
+// refcount is not used for memory management, but only for optimization
+// purposes.  Refcount is increased by each assignement, and each push
+// operation on the stack, except for pushes corresponding to the last use of a
+// variable (as approximated conservatively). It is reduced after each drop.
+// If refcount is equal or less than one, then the value is considered
+// reusable, unless it was marked as immutable.
 //
 // When defining a new type implementing the Value interface, it is only
 // necessary to also implement RefCounter if the type definition makes use of a
@@ -16,36 +16,23 @@ import "math"
 type RefCounter interface {
 	Value
 
-	// IncrRC increments the reference count by one. It can panic if the
-	// value's refcount pointer has not been properly initialized.
+	// IncrRC increments the reference count by one.
 	IncrRC()
 
 	// DecrRC decrements the reference count by one, or zero if it is
-	// already non positive.
+	// already non-positive.
 	DecrRC()
 
-	// InitWithRC recursively sets the refcount pointer for reusable
-	// values, and increments by 2 the refcount of non-reusable values, to
-	// ensure immutability of non-reusable children without cloning them.
-	InitWithRC(rc *int)
+	// MarkImmutable marks the value as definitively non-reusable, even if
+	// the reference counter is less than one. Extensions might use this
+	// function to keep a value around without having to track its
+	// reference count anymore.
+	MarkImmutable()
 
-	// CloneWithRC returns a clone of the value, with rc as new refcount
-	// pointer.  If the current value's refcount pointer is nil, reusable
-	// or equal to the passed one, the same value is returned after
-	// updating the refcount pointer as needed, instead of doing a full
-	// clone.
-	CloneWithRC(rc *int) Value
-}
-
-// RefCountHolder is a RefCounter that has a root refcount pointer. When such
-// values are returned from a variadic function, if the refcount pointer is
-// still nil, InitWithRC is automatically called with a newly allocated
-// refcount pointer to a zero count.
-type RefCountHolder interface {
-	RefCounter
-
-	// RC returns the value's root reference count pointer.
-	RC() *int
+	// Clone returns a clone of the value. Note that the cloned value might
+	// still share some structures with its parent if they're deemed
+	// reusable.
+	Clone() Value
 }
 
 // HasRC returns true if the value is boxed and implements RefCounter.
@@ -110,126 +97,124 @@ func (x V) rcdecrRefCounter() {
 	}
 }
 
-// RC returns the array's reference count pointer.
-func (x *AB) RC() *int { return x.rc }
-
-// RC returns the array's reference count pointer.
-func (x *AI) RC() *int { return x.rc }
-
-// RC returns the array's reference count pointer.
-func (x *AF) RC() *int { return x.rc }
-
-// RC returns the array's reference count pointer.
-func (x *AS) RC() *int { return x.rc }
-
-// RC returns the array's reference count pointer.
-func (x *AV) RC() *int { return x.rc }
-
-func reuseRCp(p *int) *int {
-	if !reusableRCp(p) {
-		var n int
-		p = &n
-	}
-	return p
-}
-
-func reusableRCp(p *int) bool {
-	if p == nil {
-		return true
-	}
-	if *p <= 1 {
-		*p = 0
+// Reusable returns true if the array value is reusable.
+func (x *A[T]) reusable() bool {
+	if x.rc <= 1 && x.flags&flagImmutable == 0 {
+		x.rc = 0
 		return true
 	}
 	return false
 }
 
-func (x *AB) reuse() *AB {
-	if reusableRCp(x.rc) {
+// Reusable returns true if the array value is reusable.
+func (x *AB) reusable() bool {
+	return (*A[byte])(x).reusable()
+}
+
+// Reusable returns true if the array value is reusable.
+func (x *AI) reusable() bool {
+	return (*A[int64])(x).reusable()
+}
+
+// Reusable returns true if the array value is reusable.
+func (x *AF) reusable() bool {
+	return (*A[float64])(x).reusable()
+}
+
+// Reusable returns true if the array value is reusable.
+func (x *AS) reusable() bool {
+	return (*A[string])(x).reusable()
+}
+
+// Reusable returns true if the array value is reusable.
+func (x *AV) reusable() bool {
+	return (*A[V])(x).reusable()
+}
+
+// reuse returns an array of same size that may share memory with the parent
+// one if it was reusable. Any flags of the parent are reset.
+func (x *A[T]) reuse() *A[T] {
+	if x.reusable() {
 		x.flags = flagNone
 		return x
 	}
-	return &AB{elts: make([]byte, x.Len())}
+	return &A[T]{elts: make([]T, len(x.elts))}
+}
+
+func (x *AB) reuse() *AB {
+	return (*AB)((*A[byte])(x).reuse())
 }
 
 func (x *AI) reuse() *AI {
-	if reusableRCp(x.rc) {
-		x.flags = flagNone
-		return x
-	}
-	return &AI{elts: make([]int64, x.Len())}
+	return (*AI)((*A[int64])(x).reuse())
 }
 
 func (x *AF) reuse() *AF {
-	if reusableRCp(x.rc) {
-		x.flags = flagNone
-		return x
-	}
-	return &AF{elts: make([]float64, x.Len())}
+	return (*AF)((*A[float64])(x).reuse())
 }
 
 func (x *AS) reuse() *AS {
-	if reusableRCp(x.rc) {
-		x.flags = flagNone
-		return x
-	}
-	return &AS{elts: make([]string, x.Len())}
+	return (*AS)((*A[string])(x).reuse())
 }
 
 func (x *AV) reuse() *AV {
-	if reusableRCp(x.rc) {
-		x.flags = flagNone
-		x.rc = nil // NOTE: not always necessary, maybe use two functions
-		return x
-	}
-	return &AV{elts: make([]V, x.Len())}
+	return (*AV)((*A[V])(x).reuse())
 }
 
-func decrRCp(p *int) {
-	if p != nil && *p > 0 {
-		*p--
+// IncrRC increments the reference count by one.
+func (x *AB) IncrRC() { x.rc++ }
+
+// IncrRC increments the reference count by one.
+func (x *AI) IncrRC() { x.rc++ }
+
+// IncrRC increments the reference count by one.
+func (x *AF) IncrRC() { x.rc++ }
+
+// IncrRC increments the reference count by one.
+func (x *AS) IncrRC() { x.rc++ }
+
+// IncrRC increments the reference count by one.
+func (x *AV) IncrRC() { x.rc++ }
+
+// DecrRC decrements the reference count by one, or zero if it is already non
+// positive.
+func (x *AB) DecrRC() {
+	if x.rc > 0 {
+		x.rc--
 	}
 }
 
-// IncrRC increments the reference count by one. It can panic if the value's
-// refcount pointer has not been properly initialized.
-func (x *AB) IncrRC() { *x.rc++ }
-
-// IncrRC increments the reference count by one. It can panic if the value's
-// refcount pointer has not been properly initialized.
-func (x *AI) IncrRC() { *x.rc++ }
-
-// IncrRC increments the reference count by one. It can panic if the value's
-// refcount pointer has not been properly initialized.
-func (x *AF) IncrRC() { *x.rc++ }
-
-// IncrRC increments the reference count by one. It can panic if the value's
-// refcount pointer has not been properly initialized.
-func (x *AS) IncrRC() { *x.rc++ }
-
-// IncrRC increments the reference count by one. It can panic if the value's
-// refcount pointer has not been properly initialized.
-func (x *AV) IncrRC() { *x.rc++ }
+// DecrRC decrements the reference count by one, or zero if it is already non
+// positive.
+func (x *AI) DecrRC() {
+	if x.rc > 0 {
+		x.rc--
+	}
+}
 
 // DecrRC decrements the reference count by one, or zero if it is already non
 // positive.
-func (x *AB) DecrRC() { decrRCp(x.rc) }
+func (x *AF) DecrRC() {
+	if x.rc > 0 {
+		x.rc--
+	}
+}
 
 // DecrRC decrements the reference count by one, or zero if it is already non
 // positive.
-func (x *AI) DecrRC() { decrRCp(x.rc) }
+func (x *AS) DecrRC() {
+	if x.rc > 0 {
+		x.rc--
+	}
+}
 
 // DecrRC decrements the reference count by one, or zero if it is already non
 // positive.
-func (x *AF) DecrRC() { decrRCp(x.rc) }
-
-// DecrRC decrements the reference count by one, or zero if it is already non
-// positive.
-func (x *AS) DecrRC() { decrRCp(x.rc) }
-
-// DecrRC decrements the reference count by one, or zero if it is already non
-// positive.
-func (x *AV) DecrRC() { decrRCp(x.rc) }
+func (x *AV) DecrRC() {
+	if x.rc > 0 {
+		x.rc--
+	}
+}
 
 // IncrRC increments the reference count of both the key and value arrays by
 // one.
@@ -287,124 +272,79 @@ func (r *replacer) DecrRC()   { r.oldnew.DecrRC() }
 func (r *rxReplacer) IncrRC() { r.repl.IncrRC() }
 func (r *rxReplacer) DecrRC() { r.repl.DecrRC() }
 
-// InitRC initializes refcount if the value is a RefCountHolder with nil
-// refcount.
-func (x V) InitRC() {
-	if x.kind != valBoxed {
-		return
-	}
-	xrch, ok := x.bv.(RefCountHolder)
-	if ok {
-		initRC(xrch)
-	}
-}
-
-func initRC(x RefCountHolder) {
-	if x.RC() == nil {
-		var n int
-		x.InitWithRC(&n)
-	}
-}
-
-// InitWithRC calls the method of the same name on boxed values.
-func (x V) InitWithRC(rc *int) {
+// MarkImmutable marks the value as definitively non-reusable.
+func (x V) MarkImmutable() {
 	if x.kind != valBoxed {
 		return
 	}
 	xrc, ok := x.bv.(RefCounter)
 	if ok {
-		xrc.InitWithRC(rc)
+		xrc.MarkImmutable()
 	}
 }
 
-func (e *errV) InitWithRC(rc *int) {
-	e.V.InitWithRC(rc)
+// MarkImmutable marks the value as definitively non-reusable.
+func (e *errV) MarkImmutable() {
+	e.V.MarkImmutable()
 }
 
-// InitWithRC satisfies the specification of the RefCounter interface.
-func (x *AB) InitWithRC(rc *int) {
-	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
-		x.rc = rc
-		return
-	}
-	*x.rc += 2
+// MarkImmutable marks the value as definitively non-reusable.
+func (x *AB) MarkImmutable() {
+	x.flags |= flagImmutable
 }
 
-// InitWithRC satisfies the specification of the RefCounter interface.
-func (x *AI) InitWithRC(rc *int) {
-	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
-		x.rc = rc
-		return
-	}
-	*x.rc += 2
+// MarkImmutable marks the value as definitively non-reusable.
+func (x *AI) MarkImmutable() {
+	x.flags |= flagImmutable
 }
 
-// InitWithRC satisfies the specification of the RefCounter interface.
-func (x *AF) InitWithRC(rc *int) {
-	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
-		x.rc = rc
-		return
-	}
-	*x.rc += 2
+// MarkImmutable marks the value as definitively non-reusable.
+func (x *AF) MarkImmutable() {
+	x.flags |= flagImmutable
 }
 
-// InitWithRC satisfies the specification of the RefCounter interface.
-func (x *AS) InitWithRC(rc *int) {
-	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
-		x.rc = rc
-		return
-	}
-	*x.rc += 2
+// MarkImmutable marks the value as definitively non-reusable.
+func (x *AS) MarkImmutable() {
+	x.flags |= flagImmutable
 }
 
-// InitWithRC satisfies the specification of the RefCounter interface.
-func (x *AV) InitWithRC(rc *int) {
-	if x.rc == nil || *x.rc <= 1 || x.rc == rc {
-		x.rc = rc
-		for _, xi := range x.elts {
-			xi.InitWithRC(rc)
-		}
-		return
-	}
-	*x.rc += 2
+// MarkImmutable marks the value as definitively non-reusable.
+func (x *AV) MarkImmutable() {
+	x.flags |= flagImmutable
 }
 
-// InitWithRC satisfies the specification of the RefCounter interface.
-func (d *Dict) InitWithRC(rc *int) {
-	d.keys.InitWithRC(rc)
-	d.values.InitWithRC(rc)
+// MarkImmutable marks the value as definitively non-reusable.
+func (d *Dict) MarkImmutable() {
+	d.keys.MarkImmutable()
+	d.values.MarkImmutable()
 }
 
-func (p *projection) InitWithRC(rc *int) {
-	p.Fun.InitWithRC(rc)
+func (p *projection) MarkImmutable() {
+	p.Fun.MarkImmutable()
 	for _, arg := range p.Args {
-		arg.InitWithRC(rc)
+		arg.MarkImmutable()
 	}
 }
 
-func (p *projectionFirst) InitWithRC(rc *int) {
-	p.Fun.InitWithRC(rc)
-	p.Arg.InitWithRC(rc)
+func (p *projectionFirst) MarkImmutable() {
+	p.Fun.MarkImmutable()
+	p.Arg.MarkImmutable()
 }
 
-func (p *projectionMonad) InitWithRC(rc *int) {
-	p.Fun.InitWithRC(rc)
+func (p *projectionMonad) MarkImmutable() {
+	p.Fun.MarkImmutable()
 }
 
-func (r *derivedVerb) InitWithRC(rc *int) {
-	r.Arg.InitWithRC(rc)
+func (r *derivedVerb) MarkImmutable() {
+	r.Arg.MarkImmutable()
 }
 
-func (r *replacer) InitWithRC(rc *int) {
-	if r.oldnew.rc == nil || *r.oldnew.rc <= 1 || r.oldnew.rc == rc {
-		r.oldnew.rc = rc
-		return
-	}
-	*r.oldnew.rc += 2
+func (r *replacer) MarkImmutable() {
+	r.oldnew.MarkImmutable()
 }
 
-func (r *rxReplacer) InitWithRC(rc *int) {
-	r.repl.InitWithRC(rc)
+func (r *rxReplacer) MarkImmutable() {
+	r.repl.MarkImmutable()
 }
 
 func refcounts(x V) V {
@@ -416,14 +356,16 @@ func refcounts(x V) V {
 		return NewI(-1)
 	case *errV:
 		return refcounts(xv.V)
+	case *AB:
+		return NewI(int64(xv.rc))
+	case *AI:
+		return NewI(int64(xv.rc))
+	case *AF:
+		return NewI(int64(xv.rc))
+	case *AS:
+		return NewI(int64(xv.rc))
 	case *AV:
-		r := make([]V, xv.Len())
-		for i, xi := range xv.elts {
-			r[i] = refcounts(xi)
-		}
-		return Canonical(NewAV(r))
-	case array:
-		return NewI(int64(*xv.RC()))
+		return NewI(int64(xv.rc))
 	case *Dict:
 		return Canonical(NewAV([]V{refcounts(NewV(xv.keys)), refcounts(NewV(xv.values))}))
 	default:

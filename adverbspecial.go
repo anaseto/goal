@@ -56,9 +56,11 @@ func each2First(x array) V {
 	case *AV:
 		r := make([]V, xv.Len())
 		for i, xi := range xv.elts {
-			r[i] = first(xi)
+			ri := first(xi)
+			ri.MarkImmutable()
+			r[i] = ri
 		}
-		return Canonical(NewAV(r))
+		return canonicalVs(r)
 	default:
 		return NewV(x)
 	}
@@ -627,14 +629,11 @@ func scan2Generic(x *AV, f func(V, V) V) V {
 	r := x.reuse()
 	r.elts[0] = x.elts[0]
 	for i, xi := range x.elts[1:] {
-		last := r.elts[i]
-		last.incrRC2()
-		next := f(last, xi)
-		next.InitRC()
-		last.decrRC2()
+		next := f(r.elts[i], xi)
 		if next.IsPanic() {
 			return next
 		}
+		next.MarkImmutable()
 		r.elts[i+1] = next
 	}
 	// Will never be canonical (for currently used fs), so normalizing is
@@ -648,19 +647,16 @@ func scan3Generic(x V, y array, f func(V, V) V) V {
 	}
 	r := make([]V, y.Len())
 	for i := 0; i < y.Len(); i++ {
-		last := x
-		last.incrRC2()
-		x = f(last, y.at(i))
-		x.InitRC()
-		last.decrRC2()
+		x = f(x, y.at(i))
 		if x.IsPanic() {
 			return x
 		}
+		x.MarkImmutable()
 		r[i] = x
 	}
 	// Will never be canonical (for currently used fs), so normalizing is
 	// not needed.
-	return NewAV(r)
+	return newAV(r)
 }
 
 func scan2vAdd(x V) V {

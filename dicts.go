@@ -92,7 +92,7 @@ func dict(x, y V) V {
 }
 
 func dictAmendKVI(xd *Dict, yk array) (array, array, V) {
-	keys, values := xd.keys, xd.values.shallowClone()
+	keys, values := xd.keys, xd.values.sclone()
 	ykv := NewV(yk)
 	yk.IncrRC()
 	ky := findArray(keys, ykv)

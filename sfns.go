@@ -42,7 +42,7 @@ func reverse(x V) V {
 	switch xv := x.bv.(type) {
 	case array:
 		flags := xv.getFlags() &^ flagAscending
-		xv = xv.shallowClone()
+		xv = xv.sclone()
 		reverseMut(xv)
 		xv.setFlags(flags)
 		x.bv = xv

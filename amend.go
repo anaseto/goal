@@ -11,7 +11,7 @@ func (ctx *Context) amend3(x, y, f V) V {
 	case *Dict:
 		return amend3Dict(ctx, xv, y, f)
 	case array:
-		xv = xv.shallowClone()
+		xv = xv.sclone()
 		y = toIndices(y)
 		if y.IsPanic() {
 			return ppanic("@[X;i;f] : ", y)
@@ -46,21 +46,18 @@ func amend3Dict(ctx *Context, d *Dict, y, f V) V {
 		if err != nil {
 			return Panicf("@[d;y;f] : %v", err)
 		}
-		initRC(r)
 		return NewV(&Dict{keys: keys, values: canonicalArray(r)})
 	default:
-		keys, values := d.keys, d.values.shallowClone()
+		keys, values := d.keys, d.values.sclone()
 		ky := findArray(keys, y)
 		if ky.I() == int64(keys.Len()) {
 			keys = join(NewV(keys), y).bv.(array)
-			initRC(keys)
 			values = padArrayMut(1, values)
 		}
 		r, err := ctx.amend3arrayI(values, ky.I(), f)
 		if err != nil {
 			return Panicf("@[d;y;f] : %v", err)
 		}
-		initRC(r)
 		return NewV(&Dict{keys: keys, values: canonicalArray(r)})
 	}
 }
@@ -89,7 +86,7 @@ func padArrayMut(n int, x array) array {
 		}
 	case *AV:
 		pad := proto(xv.elts)
-		pad.immutable()
+		pad.MarkImmutable()
 		for i := 0; i < n; i++ {
 			xv.elts = append(xv.elts, pad)
 		}
@@ -106,10 +103,9 @@ func amendArrayAt(x array, y int, z V) array {
 	for i := range a {
 		a[i] = x.at(i)
 	}
-	rc := x.RC()
-	z.immutable()
+	z.MarkImmutable()
 	a[y] = z
-	return &AV{elts: a, rc: rc}
+	return &AV{elts: a}
 }
 
 func (ctx *Context) amend3arrayI(x array, y int64, f V) (array, error) {
@@ -167,7 +163,7 @@ func (ctx *Context) amend4(x, y, f, z V) V {
 	case *Dict:
 		return amend4Dict(ctx, xv, y, f, z)
 	case array:
-		xv = xv.shallowClone()
+		xv = xv.sclone()
 		y = toIndices(y)
 		if y.IsPanic() {
 			return ppanic("@[X;i;f;z] : ", y)
@@ -212,14 +208,12 @@ func amend4Dict(ctx *Context, d *Dict, y, f, z V) V {
 		if err != nil {
 			return Panicf("@[d;y;f;z] : %v", err)
 		}
-		initRC(r)
 		return NewV(&Dict{keys: keys, values: canonicalArray(r)})
 	default:
-		keys, values := d.keys, d.values.shallowClone()
+		keys, values := d.keys, d.values.sclone()
 		ky := findArray(keys, y)
 		if ky.I() == int64(keys.Len()) {
 			keys = join(NewV(keys), y).bv.(array)
-			initRC(keys)
 			values = padArrayMut(1, values)
 		}
 		if f.kind == valVariadic && variadic(f.uv) == vRight {
@@ -234,7 +228,6 @@ func amend4Dict(ctx *Context, d *Dict, y, f, z V) V {
 		if err != nil {
 			return Panicf("@[d;y;f;z] : %v", err)
 		}
-		initRC(r)
 		return NewV(&Dict{keys: keys, values: canonicalArray(r)})
 	}
 }

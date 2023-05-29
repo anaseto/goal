@@ -149,7 +149,7 @@ func amend3NegateI(x array, y int64) array {
 			r[i] = int64(xi)
 		}
 		r[y] = -r[y]
-		return &AI{elts: r, rc: x.RC()}
+		return &AI{elts: r}
 	case *AI:
 		xv.elts[y] = -xv.elts[y]
 		return x
@@ -171,7 +171,7 @@ func amend3NegateIntegers[I integer](x array, y []I) array {
 		for _, yi := range y {
 			r[yi] = -r[yi]
 		}
-		return &AI{elts: r, rc: x.RC()}
+		return &AI{elts: r}
 	case *AI:
 		for _, yi := range y {
 			xv.elts[yi] = -xv.elts[yi]
@@ -218,10 +218,9 @@ func amend4RightI(x array, y int64, z V) (array, error) {
 	for i := range r {
 		r[i] = x.at(i)
 	}
-	rc := x.RC()
-	z.InitWithRC(rc)
+	z.MarkImmutable()
 	r[y] = z
-	return &AV{elts: r, rc: rc}, nil
+	return &AV{elts: r}, nil
 }
 
 func amend4RightIs[I integer](x array, y []I, z V) (array, error) {
@@ -255,12 +254,11 @@ func amend4RightIsV[I integer](x array, y []I, z V) (array, error) {
 	for i := range r {
 		r[i] = x.at(i)
 	}
-	rc := x.RC()
-	z.immutable()
+	z.MarkImmutable()
 	for _, yi := range y {
 		r[yi] = z
 	}
-	return &AV{elts: r, rc: rc}, nil
+	return &AV{elts: r}, nil
 }
 
 func amend4RightIntegersAtom[I integer](x array, y []I, z V) {
@@ -302,7 +300,6 @@ func amend4RightIntegersSlice[I integer](x array, y []I, za array) array {
 		amend4RightSlices(xv.elts, y, zv.elts)
 	case *AV:
 		zv := za.(*AV)
-		*zv.rc += 2
 		amend4RightSlices(xv.elts, y, zv.elts)
 	}
 	return x
@@ -321,7 +318,7 @@ func amend4RightIntegersArrays[I integer](x array, y []I, z array) array {
 			for i := range r {
 				r[i] = x.at(i)
 			}
-			x = &AV{elts: r, rc: x.RC()}
+			x = &AV{elts: r}
 			break
 		}
 	}

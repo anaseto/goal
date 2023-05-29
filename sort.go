@@ -95,12 +95,12 @@ func sortUp(ctx *Context, x V) V {
 		xv.setFlags(flags | flagAscending)
 		return NewV(xv)
 	case *AV:
-		xa = xv.shallowClone()
+		xa = xv.sclone()
 		sort.Stable(xa)
 		xa.setFlags(flags | flagAscending)
 		return NewV(xa)
 	default:
-		xa = xa.shallowClone()
+		xa = xa.sclone()
 		sort.Sort(xa)
 		xa.setFlags(flags | flagAscending)
 		return NewV(xa)

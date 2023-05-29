@@ -9,7 +9,7 @@ type countable interface {
 // array interface is satisfied by the different kind of supported arrays.
 // Typical implementation is given in comments.
 type array interface {
-	RefCountHolder
+	RefCounter
 	countable
 	sort.Interface
 	at(i int) V           // x[i]
@@ -21,18 +21,20 @@ type array interface {
 	vAtBytes(y *AB) V     // x[y] (like in goal code)
 	atInts([]int64) array // like x[y] but assumes valid positive indices
 	atBytes([]byte) array // like x[y] but assumes valid positive indices
-	shallowClone() array  // shallow clone, erases flags
+	sclone() array        // shallow clone, erases flags
 	numeric() bool        // flat numeric array
 	canSet(y V) bool      // compatible type for set
+	reusable() bool       // reusable array
 }
 
 type flags uint32
 
 const (
-	flagNone      flags = 0b000
-	flagAscending flags = 0b001
-	flagDistinct  flags = 0b010
-	flagBool      flags = 0b100
+	flagNone      flags = 0b0000
+	flagImmutable flags = 0b0001
+	flagAscending flags = 0b0010
+	flagDistinct  flags = 0b0100
+	flagBool      flags = 0b1000
 )
 
 func (f flags) Has(ff flags) bool {
@@ -43,7 +45,7 @@ func (f flags) Has(ff flags) bool {
 // implement the Value interface.
 type A[T any] struct {
 	flags flags
-	rc    *int
+	rc    int32
 	elts  []T
 }
 
@@ -56,14 +58,12 @@ func newA[T any](x []T) A[T] {
 // particular for arrays of booleans (0s and 1s).
 type AB A[byte]
 
-// NewAB returns a new byte array. It does not initialize the reference
-// counter.
+// NewAB returns a new byte array.
 func NewAB(x []byte) V {
 	return NewV(&AB{elts: x})
 }
 
-// newABb returns a new byte array with boolean flag. It does not initialize
-// the reference counter.
+// newABb returns a new byte array with boolean flag.
 func newABb(x []byte) V {
 	return NewV(&AB{elts: x, flags: flagBool})
 }
@@ -75,104 +75,74 @@ func (x *AB) IsBoolean() bool {
 }
 
 // Slice returns the underlying immutable slice of values. It should not be
-// modified unless the value's refcount pointer is reusable, and even then, you
-// should normally return a new array with the modified slice.
+// modified.
 func (x *AB) Slice() []byte {
 	return x.elts
-}
-
-// NewABWithRC returns a new byte array.
-func NewABWithRC(x []byte, rc *int) V {
-	return NewV(&AB{elts: x, rc: rc})
-}
-
-// newABbWithRC returns a new byte array.
-func newABbWithRC(x []byte, rc *int) V {
-	return NewV(&AB{elts: x, rc: rc, flags: flagBool})
 }
 
 // AI represents an array of integers.
 type AI A[int64]
 
-// NewAI returns a new int array. It does not initialize the reference
-// counter.
+// NewAI returns a new int array.
 func NewAI(x []int64) V {
 	return NewV(&AI{elts: x})
 }
 
 // Slice returns the underlying immutable slice of values. It should not be
-// modified unless the value's refcount pointer is reusable, and even then, you
-// should normally return a new array with the modified slice.
+// modified.
 func (x *AI) Slice() []int64 {
 	return x.elts
-}
-
-// NewAIWithRC returns a new int array.
-func NewAIWithRC(x []int64, rc *int) V {
-	return NewV(&AI{elts: x, rc: rc})
 }
 
 // AF represents an array of reals.
 type AF A[float64]
 
-// NewAF returns a new array of reals. It does not initialize the reference
-// counter.
+// NewAF returns a new array of reals.
 func NewAF(x []float64) V {
 	return NewV(&AF{elts: x})
 }
 
 // Slice returns the underlying immutable slice of values. It should not be
-// modified unless the value's refcount pointer is reusable, and even then, you
-// should normally return a new array with the modified slice.
+// modified.
 func (x *AF) Slice() []float64 {
 	return x.elts
-}
-
-// NewAFWithRC returns a new array of reals.
-func NewAFWithRC(x []float64, rc *int) V {
-	return NewV(&AF{elts: x, rc: rc})
 }
 
 // AS represents an array of strings.
 type AS A[string]
 
-// NewAS returns a new array of strings. It does not initialize the reference
-// counter.
+// NewAS returns a new array of strings.
 func NewAS(x []string) V {
 	return NewV(&AS{elts: x})
 }
 
 // Slice returns the underlying immutable slice of values. It should not be
-// modified unless the value's refcount pointer is reusable, and even then, you
-// should normally return a new array with the modified slice.
+// modified.
 func (x *AS) Slice() []string {
 	return x.elts
-}
-
-// NewASWithRC returns a new array of strings.
-func NewASWithRC(x []string, rc *int) V {
-	return NewV(&AS{elts: x, rc: rc})
 }
 
 // AV represents a generic array.
 type AV A[V]
 
-// NewAV returns a new generic array. It does not initialize the reference
-// counter.
+// NewAV returns a new generic array.
 func NewAV(x []V) V {
+	for _, xi := range x {
+		xi.MarkImmutable()
+	}
+	return NewV(&AV{elts: x})
+}
+
+// newAV returns a new generic array. It does not mark it's elements as
+// immutable, assuming they already were marked as such.
+func newAV(x []V) V {
 	return NewV(&AV{elts: x})
 }
 
 // Slice returns the underlying immutable slice of values. It should not be
-// modified unless the value's refcount pointer is reusable, and even then, you
-// should normally return a new array with the modified slice.
+// modified.
 func (x *AV) Slice() []V {
 	return x.elts
-}
-
-// NewAVWithRC returns a new generic array.
-func NewAVWithRC(x []V, rc *int) V {
-	return NewV(&AV{elts: x, rc: rc})
 }
 
 // Type returns the name of the value's type ("I").
@@ -226,11 +196,30 @@ func (x *AS) At(i int) string { return x.elts[i] }
 // At returns array value at the given index.
 func (x *AV) At(i int) V { return x.elts[i] }
 
-func (x *AB) slice(i, j int) array { return &AB{rc: x.rc, flags: x.flags, elts: x.elts[i:j]} }
-func (x *AI) slice(i, j int) array { return &AI{rc: x.rc, flags: x.flags, elts: x.elts[i:j]} }
-func (x *AF) slice(i, j int) array { return &AF{rc: x.rc, flags: x.flags, elts: x.elts[i:j]} }
-func (x *AS) slice(i, j int) array { return &AS{rc: x.rc, flags: x.flags, elts: x.elts[i:j]} }
-func (x *AV) slice(i, j int) array { return &AV{rc: x.rc, flags: x.flags, elts: x.elts[i:j]} }
+func (x *AB) slice(i, j int) array {
+	x.flags |= flagImmutable
+	return &AB{flags: x.flags, elts: x.elts[i:j]}
+}
+
+func (x *AI) slice(i, j int) array {
+	x.flags |= flagImmutable
+	return &AI{flags: x.flags, elts: x.elts[i:j]}
+}
+
+func (x *AF) slice(i, j int) array {
+	x.flags |= flagImmutable
+	return &AF{flags: x.flags, elts: x.elts[i:j]}
+}
+
+func (x *AS) slice(i, j int) array {
+	x.flags |= flagImmutable
+	return &AS{flags: x.flags, elts: x.elts[i:j]}
+}
+
+func (x *AV) slice(i, j int) array {
+	x.flags |= flagImmutable
+	return &AV{flags: x.flags, elts: x.elts[i:j]}
+}
 
 func (x *AB) getFlags() flags { return x.flags }
 func (x *AI) getFlags() flags { return x.flags }
@@ -266,7 +255,7 @@ func (x *AS) set(i int, y V) {
 
 // set changes x at i with y (in place).
 func (x *AV) set(i int, y V) {
-	y.immutable()
+	y.MarkImmutable()
 	x.elts[i] = y
 }
 
@@ -533,67 +522,32 @@ func (x *AV) atBytes(y []byte) array {
 	return a
 }
 
-func (x *AB) shallowClone() array {
-	return shallowCloneAB(x)
+func (x *AB) sclone() array {
+	return (*AB)((*A[byte])(x).sclone())
+}
+
+func (x *AI) sclone() array {
+	return (*AI)((*A[int64])(x).sclone())
+}
+
+func (x *AF) sclone() array {
+	return (*AF)((*A[float64])(x).sclone())
+}
+
+func (x *AS) sclone() array {
+	return (*AS)((*A[string])(x).sclone())
+}
+
+func (x *AV) sclone() array {
+	return (*AV)((*A[V])(x).sclone())
 }
 
 func shallowCloneAB(x *AB) *AB {
-	if reusableRCp(x.rc) {
-		x.setFlags(flagNone)
-		return x
-	}
-	var n int
-	r := &AB{elts: make([]byte, x.Len()), rc: &n}
-	copy(r.elts, x.elts)
-	return r
-}
-
-func (x *AI) shallowClone() array {
-	return shallowCloneAI(x)
+	return (*AB)((*A[byte])(x).sclone())
 }
 
 func shallowCloneAI(x *AI) *AI {
-	if reusableRCp(x.rc) {
-		x.setFlags(flagNone)
-		return x
-	}
-	var n int
-	r := &AI{elts: make([]int64, x.Len()), rc: &n}
-	copy(r.elts, x.elts)
-	return r
-}
-
-func (x *AF) shallowClone() array {
-	if reusableRCp(x.rc) {
-		x.setFlags(flagNone)
-		return x
-	}
-	var n int
-	r := &AF{elts: make([]float64, x.Len()), rc: &n}
-	copy(r.elts, x.elts)
-	return r
-}
-
-func (x *AS) shallowClone() array {
-	if reusableRCp(x.rc) {
-		x.setFlags(flagNone)
-		return x
-	}
-	var n int
-	r := &AS{elts: make([]string, x.Len()), rc: &n}
-	copy(r.elts, x.elts)
-	return r
-}
-
-func (x *AV) shallowClone() array {
-	if reusableRCp(x.rc) {
-		x.setFlags(flagNone)
-		return x
-	}
-	r := &AV{elts: make([]V, x.Len())}
-	copy(r.elts, x.elts)
-	initRC(r)
-	return r
+	return (*AI)((*A[int64])(x).sclone())
 }
 
 // Matches returns true if the two values match like in x~y.
