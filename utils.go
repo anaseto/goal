@@ -724,10 +724,7 @@ func protoV(x V) V {
 	case *Dict:
 		return NewDict(protoArray(xv.keys), protoArray(xv.values))
 	default:
-		if x.IsFunction() {
-			return newVariadic(vRight)
-		}
-		return NewError(NewS("fill"))
+		return newVariadic(vRight)
 	}
 }
 
