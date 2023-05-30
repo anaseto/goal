@@ -111,7 +111,7 @@ func applyS(s S, x V) V {
 		}
 		return applyS(s, x)
 	case *AV:
-		return canonicalFast(monadAV(xv, func(x V) V { return applyS(s, x) }))
+		return canonicalFast(monadAV(xv, func(xi V) V { return applyS(s, xi) }))
 	default:
 		return panicType("s@i", "i", x)
 	}
@@ -161,7 +161,7 @@ func applyS2(s S, x V, y V) V {
 		}
 		return applyS2(s, x, y)
 	case *AV:
-		return canonicalFast(monadAV(xv, func(x V) V { return applyS2(s, x, y) }))
+		return canonicalFast(monadAV(xv, func(xi V) V { return applyS2(s, xi, y) }))
 	default:
 		return panicType("s[x;y]", "x", x)
 	}
@@ -193,7 +193,7 @@ func applyS2I(s S, x int64, y V) V {
 		}
 		return applyS2I(s, x, y)
 	case *AV:
-		return monadAV(yv, func(y V) V { return applyS2I(s, int64(x), y) })
+		return monadAV(yv, func(yi V) V { return applyS2I(s, int64(x), yi) })
 	default:
 		return panicType("s[i;y]", "y", y)
 	}
@@ -691,7 +691,7 @@ func dropS(s S, y V) V {
 		}
 		return NewAS(r)
 	case *AV:
-		return monadAV(yv, func(y V) V { return dropS(s, y) })
+		return monadAV(yv, func(yi V) V { return dropS(s, yi) })
 	case *Dict:
 		return newDictValues(yv.keys, dropS(s, NewV(yv.values)))
 	default:
@@ -752,7 +752,7 @@ func trim(s S, y V) V {
 		}
 		return NewAS(r)
 	case *AV:
-		return monadAV(yv, func(y V) V { return trim(s, y) })
+		return monadAV(yv, func(yi V) V { return trim(s, yi) })
 	case *Dict:
 		return newDictValues(yv.keys, trim(s, NewV(yv.values)))
 	default:
@@ -894,7 +894,7 @@ func containedInS(x V, s string) V {
 		}
 		return newABb(r)
 	case *AV:
-		return monadAV(xv, func(x V) V { return containedInS(x, s) })
+		return monadAV(xv, func(xi V) V { return containedInS(xi, s) })
 	case *Dict:
 		return newDictValues(xv.keys, containedInS(NewV(xv.values), s))
 	default:
@@ -920,7 +920,7 @@ func scount(s S, y V) V {
 		}
 		return NewAI(r)
 	case *AV:
-		return monadAV(yv, func(y V) V { return scount(s, y) })
+		return monadAV(yv, func(yi V) V { return scount(s, yi) })
 	case *Dict:
 		return newDictValues(yv.keys, scount(s, NewV(yv.values)))
 	default:
@@ -939,7 +939,7 @@ func splitN(n int, sep S, y V) V {
 		}
 		return newAVu(r)
 	case *AV:
-		return monadAV(yv, func(y V) V { return splitN(n, sep, y) })
+		return monadAV(yv, func(yi V) V { return splitN(n, sep, yi) })
 	case *Dict:
 		return newDictValues(yv.keys, splitN(n, sep, NewV(yv.values)))
 	default:

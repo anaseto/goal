@@ -340,15 +340,7 @@ func modpad(x int64, y V) V {
 		}
 		return NewV(r)
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := modpad(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return modpad(x, yi) })
 	case *Dict:
 		return newDictValues(yv.keys, modpad(x, NewV(yv.values)))
 	default:
@@ -412,15 +404,7 @@ func divpad(x int64, y V) V {
 		}
 		return NewV(r)
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := divpad(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return divpad(x, yi) })
 	case *Dict:
 		return newDictValues(yv.keys, divpad(x, NewV(yv.values)))
 	default:

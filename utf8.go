@@ -33,7 +33,7 @@ func utf8valid(x V) V {
 		}
 		return newABb(r)
 	case *AV:
-		return Canonical(monadAV(xv, utf8valid))
+		return monadAV(xv, utf8valid)
 	default:
 		return panicType("utf8 s", "s", x)
 	}
@@ -50,7 +50,7 @@ func toValidUTF8(repl string, x V) V {
 		}
 		return NewAS(r)
 	case *AV:
-		return monadAV(xv, func(x V) V { return toValidUTF8(repl, x) })
+		return monadAV(xv, func(xi V) V { return toValidUTF8(repl, xi) })
 	default:
 		return panicType("x utf8 s", "s", x)
 	}

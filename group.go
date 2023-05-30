@@ -292,7 +292,7 @@ func groupByBytesVs(x []byte, y []V, max byte) V {
 	}
 	groupByScatterBytes[V](x, y, yg, offset)
 	for i, ri := range r {
-		r[i] = Canonical(ri)
+		r[i] = canonicalImmut(ri)
 	}
 	return newAVu(r)
 }
@@ -380,7 +380,7 @@ func groupByInt64sVs(x []int64, y []V, max int64) V {
 	}
 	groupByScatter[V](x, y, yg, offset)
 	for i, ri := range r {
-		r[i] = Canonical(ri)
+		r[i] = canonicalImmut(ri)
 	}
 	return newAVu(r)
 }
@@ -423,6 +423,7 @@ func groupBySorted[I integer](x []I, y array, max int64) V {
 	}
 	from = i0
 	var p V
+	y.MarkImmutable()
 	for i, xi := range x[i0:] {
 		if int64(xi) == n {
 			continue

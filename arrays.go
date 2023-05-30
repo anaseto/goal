@@ -222,27 +222,37 @@ func (x *AS) At(i int) string { return x.elts[i] }
 func (x *AV) At(i int) V { return x.elts[i] }
 
 func (x *AB) slice(i, j int) array {
-	x.flags |= flagImmutable
+	if !x.reusable() {
+		x.flags |= flagImmutable
+	}
 	return &AB{flags: x.flags, elts: x.elts[i:j]}
 }
 
 func (x *AI) slice(i, j int) array {
-	x.flags |= flagImmutable
+	if !x.reusable() {
+		x.flags |= flagImmutable
+	}
 	return &AI{flags: x.flags, elts: x.elts[i:j]}
 }
 
 func (x *AF) slice(i, j int) array {
-	x.flags |= flagImmutable
+	if !x.reusable() {
+		x.flags |= flagImmutable
+	}
 	return &AF{flags: x.flags, elts: x.elts[i:j]}
 }
 
 func (x *AS) slice(i, j int) array {
-	x.flags |= flagImmutable
+	if !x.reusable() {
+		x.flags |= flagImmutable
+	}
 	return &AS{flags: x.flags, elts: x.elts[i:j]}
 }
 
 func (x *AV) slice(i, j int) array {
-	x.flags |= flagImmutable
+	if !x.reusable() {
+		x.flags |= flagImmutable
+	}
 	return canonicalArrayAV(&AV{flags: x.flags, elts: x.elts[i:j]})
 }
 

@@ -293,7 +293,7 @@ func flipAVAV(x *AV, lines int) V {
 		}
 	}
 	for j := range r {
-		r[j] = canonicalAV(&AV{elts: a[j*xlen : (j+1)*xlen], flags: flagImmutable})
+		r[j] = canonicalAVImmut(&AV{elts: a[j*xlen : (j+1)*xlen], flags: flagImmutable})
 	}
 	return newAVu(r)
 }

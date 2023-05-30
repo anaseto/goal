@@ -732,16 +732,7 @@ func eval(ctx *Context, x V) V {
 		}
 		return canonicalVs(r)
 	case *AV:
-		r := make([]V, xv.Len())
-		for i, xi := range xv.elts {
-			ri := eval(ctx, xi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r[i] = ri
-		}
-		return canonicalVs(r)
+		return monadAVc(xv, func(xi V) V { return eval(ctx, xi) })
 	default:
 		return panicType("eval x", "x", x)
 	}

@@ -329,6 +329,7 @@ func cutIntsArray[I integer](x []I, y array) []V {
 	xlen := len(x)
 	ylen := int64(y.Len())
 	r := make([]V, xlen)
+	y.MarkImmutable()
 	for i, from := range x {
 		to := ylen
 		if i+1 < xlen {
@@ -498,7 +499,7 @@ func takeNAtom(n int64, y V) V {
 		r := constArray(n, string(yv))
 		return NewAS(r)
 	default:
-		y.immutable()
+		y.MarkImmutable()
 		return newAVu(constArray(n, y))
 	}
 }
@@ -1302,6 +1303,7 @@ func windowsString(i int64, s string) V {
 
 func windowsArray(i int64, y array) V {
 	r := make([]V, 1+y.Len()-int(i))
+	y.MarkImmutable()
 	for j := range r {
 		r[j] = NewV(y.slice(j, j+int(i)))
 	}
@@ -1409,6 +1411,7 @@ func cutColsArray(i int64, y array) V {
 		n++
 	}
 	r := make([]V, n)
+	y.MarkImmutable()
 	for j := 0; j < n; j++ {
 		from := j * int(i)
 		to := minInt(from+int(i), ylen)
@@ -1425,6 +1428,7 @@ func cutLinesArray(n int, y array) V {
 	}
 	r := make([]V, n)
 	from := 0
+	y.MarkImmutable()
 	for j := 0; j < n; j++ {
 		to := minInt(from+(ylen-from)/(n-j), ylen)
 		r[j] = NewV(y.slice(from, to))

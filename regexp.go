@@ -119,15 +119,7 @@ func applyRxMatch(x *rx, y V) V {
 		}
 		return NewAB(r)
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := applyRxMatch(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return applyRxMatch(x, yi) })
 	default:
 		return panicType("r[y]", "y", y)
 	}

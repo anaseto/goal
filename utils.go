@@ -582,6 +582,7 @@ func normalizeRec(x *AV) (array, bool) {
 	case tV, tAV:
 		for i, xi := range x.elts {
 			x.elts[i] = CanonicalRec(xi)
+			x.elts[i].MarkImmutable()
 		}
 		return x, false
 	default:
@@ -604,13 +605,13 @@ func normalize(x *AV) (array, bool) {
 		if t == tb {
 			fl |= flagBool
 		}
-		return &AB{elts: r, flags: fl}, true
+		return &AB{elts: r, flags: fl &^ flagImmutable}, true
 	case tI:
 		r := make([]int64, x.Len())
 		for i, xi := range x.elts {
 			r[i] = xi.I()
 		}
-		return &AI{elts: r, flags: x.flags}, true
+		return &AI{elts: r, flags: x.flags &^ flagImmutable}, true
 	case tF:
 		r := make([]float64, x.Len())
 		for i, xi := range x.elts {
@@ -620,13 +621,13 @@ func normalize(x *AV) (array, bool) {
 				r[i] = float64(xi.F())
 			}
 		}
-		return &AF{elts: r, flags: x.flags}, true
+		return &AF{elts: r, flags: x.flags &^ flagImmutable}, true
 	case tS:
 		r := make([]string, x.Len())
 		for i, xi := range x.elts {
 			r[i] = string(xi.bv.(S))
 		}
-		return &AS{elts: r, flags: x.flags}, true
+		return &AS{elts: r, flags: x.flags &^ flagImmutable}, true
 	default:
 		return x, false
 	}
@@ -643,7 +644,7 @@ func normalizeFast(x *AV) (array, bool) {
 		for i, xi := range x.elts {
 			r[i] = xi.I()
 		}
-		return &AI{elts: r, flags: x.flags}, true
+		return &AI{elts: r, flags: x.flags &^ flagImmutable}, true
 	case tF:
 		r := make([]float64, x.Len())
 		for i, xi := range x.elts {
@@ -653,13 +654,13 @@ func normalizeFast(x *AV) (array, bool) {
 				r[i] = float64(xi.F())
 			}
 		}
-		return &AF{elts: r, flags: x.flags}, true
+		return &AF{elts: r, flags: x.flags &^ flagImmutable}, true
 	case tS:
 		r := make([]string, x.Len())
 		for i, xi := range x.elts {
 			r[i] = string(xi.bv.(S))
 		}
-		return &AS{elts: r, flags: x.flags}, true
+		return &AS{elts: r, flags: x.flags &^ flagImmutable}, true
 	default:
 		return x, false
 	}
@@ -692,6 +693,13 @@ func canonicalArrayAV(x *AV) array {
 // canonicalAV returns the canonical form of a given generic array.
 func canonicalAV(x *AV) V {
 	r, _ := normalize(x)
+	return NewV(r)
+}
+
+// canonicalAV returns the canonical form of a given generic array.
+func canonicalAVImmut(x *AV) V {
+	r, _ := normalize(x)
+	r.setFlags(x.flags)
 	return NewV(r)
 }
 
@@ -730,6 +738,21 @@ func Canonical(x V) V {
 	case *AV:
 		r, b := normalize(xv)
 		if b {
+			x.bv = r
+		}
+		return x
+	default:
+		return x
+	}
+}
+
+// canonicalImmut is like Canonical, but preserve immutable flag too.
+func canonicalImmut(x V) V {
+	switch xv := x.bv.(type) {
+	case *AV:
+		r, b := normalize(xv)
+		if b {
+			r.setFlags(xv.flags)
 			x.bv = r
 		}
 		return x
@@ -928,6 +951,19 @@ func monadAV(x *AV, f func(V) V) V {
 		r.elts[i] = ri
 	}
 	return NewV(r)
+}
+
+func monadAVc(x *AV, f func(V) V) V {
+	r := x.reuse()
+	for i, xi := range x.elts {
+		ri := f(xi)
+		if ri.IsPanic() {
+			return ri
+		}
+		ri.MarkImmutable()
+		r.elts[i] = ri
+	}
+	return canonicalAV(r)
 }
 
 func dyadAVV(x *AV, y V, f func(V, V) V) V {

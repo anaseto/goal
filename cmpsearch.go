@@ -1276,16 +1276,7 @@ func findS(s S, y V) V {
 		}
 		return NewAI(r)
 	case *AV:
-		r := make([]V, yv.Len())
-		for i, yi := range yv.elts {
-			ri := findS(s, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r[i] = ri
-		}
-		return newAVu(r)
+		return monadAV(yv, func(yi V) V { return findS(s, yi) })
 	default:
 		return panicType("s?y", "y", y)
 	}
