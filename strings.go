@@ -111,7 +111,7 @@ func applyS(s S, x V) V {
 		}
 		return applyS(s, x)
 	case *AV:
-		return Canonical(monadAV(xv, func(xi V) V { return applyS(s, xi) }))
+		return monadAVc(xv, func(xi V) V { return applyS(s, xi) })
 	default:
 		return panicType("s@i", "i", x)
 	}
@@ -161,7 +161,7 @@ func applyS2(s S, x V, y V) V {
 		}
 		return applyS2(s, x, y)
 	case *AV:
-		return Canonical(monadAV(xv, func(xi V) V { return applyS2(s, xi, y) }))
+		return monadAVc(xv, func(xi V) V { return applyS2(s, xi, y) })
 	default:
 		return panicType("s[x;y]", "x", x)
 	}
@@ -361,7 +361,7 @@ func casti(y V) V {
 	case *AF:
 		return castToAI(yv)
 	case *AV:
-		return Canonical(monadAV(yv, casti))
+		return monadAVc(yv, casti)
 	case *Dict:
 		return newDictValues(yv.keys, casti(NewV(yv.values)))
 	default:
@@ -416,7 +416,7 @@ func castn(y V) V {
 	case *AF:
 		return y
 	case *AV:
-		return Canonical(monadAV(yv, castn))
+		return monadAVc(yv, castn)
 	case *Dict:
 		return newDictValues(yv.keys, castn(NewV(yv.values)))
 	default:
@@ -499,7 +499,7 @@ func castb(y V) V {
 		}
 		return castb(y)
 	case *AV:
-		return Canonical(monadAV(yv, castb))
+		return monadAVc(yv, castb)
 	default:
 		return panicType("\"b\"$y", "y", y)
 	}
@@ -542,7 +542,7 @@ func castc(y V) V {
 		}
 		return newAVu(r)
 	case *AV:
-		return Canonical(monadAV(yv, castc))
+		return monadAVc(yv, castc)
 	default:
 		return panicType("\"c\"$y", "y", y)
 	}

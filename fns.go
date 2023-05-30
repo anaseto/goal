@@ -150,7 +150,7 @@ func where(x V) V {
 		}
 		return NewAI(r)
 	case *AV:
-		return Canonical(monadAV(xv, where))
+		return monadAVc(xv, where)
 	case *Dict:
 		if xv.values.numeric() {
 			r := where(NewV(xv.values))
