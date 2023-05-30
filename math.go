@@ -91,15 +91,7 @@ func fillNaNf(fill float64, y V) V {
 		}
 		return NewAF(r)
 	case *AV:
-		r := yv.reuse()
-		for i, yi := range yv.elts {
-			ri := fillNaNf(fill, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(yv, func(yi V) V { return fillNaNf(fill, yi) })
 	case *Dict:
 		return newDictValues(yv.keys, fillNaNf(fill, NewV(yv.values)))
 	default:

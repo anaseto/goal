@@ -31,16 +31,7 @@ func mathm(x V, f func(float64) float64) V {
 		}
 		return NewV(r)
 	case *AV:
-		r := xv.reuse()
-		for i, xi := range xv.elts {
-			ri := mathm(xi, f)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return monadAV(xv, func(xi V) V { return mathm(xi, f) })
 	case *Dict:
 		r := mathm(NewV(xv.values), f)
 		return NewV(&Dict{keys: xv.keys, values: r.bv.(array)})
