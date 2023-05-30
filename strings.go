@@ -111,7 +111,7 @@ func applyS(s S, x V) V {
 		}
 		return applyS(s, x)
 	case *AV:
-		return canonicalFast(monadAV(xv, func(xi V) V { return applyS(s, xi) }))
+		return Canonical(monadAV(xv, func(xi V) V { return applyS(s, xi) }))
 	default:
 		return panicType("s@i", "i", x)
 	}
@@ -161,7 +161,7 @@ func applyS2(s S, x V, y V) V {
 		}
 		return applyS2(s, x, y)
 	case *AV:
-		return canonicalFast(monadAV(xv, func(xi V) V { return applyS2(s, xi, y) }))
+		return Canonical(monadAV(xv, func(xi V) V { return applyS2(s, xi, y) }))
 	default:
 		return panicType("s[x;y]", "x", x)
 	}
@@ -499,7 +499,7 @@ func castb(y V) V {
 		}
 		return castb(y)
 	case *AV:
-		return canonicalFast(monadAV(yv, castb))
+		return Canonical(monadAV(yv, castb))
 	default:
 		return panicType("\"b\"$y", "y", y)
 	}
@@ -542,7 +542,7 @@ func castc(y V) V {
 		}
 		return newAVu(r)
 	case *AV:
-		return canonicalFast(monadAV(yv, castc))
+		return Canonical(monadAV(yv, castc))
 	default:
 		return panicType("\"c\"$y", "y", y)
 	}

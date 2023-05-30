@@ -20,7 +20,7 @@ func (ctx *Context) amend3(x, y, f V) V {
 		if err != nil {
 			return Panicf("@[X;i;f] : %v", err)
 		}
-		return canonicalFast(NewV(r))
+		return Canonical(NewV(r))
 	default:
 		return panicType("@[X;i;f]", "X", x)
 	}
@@ -172,7 +172,7 @@ func (ctx *Context) amend4(x, y, f, z V) V {
 		if err != nil {
 			return Panicf("@[X;i;f;z] : %v", err)
 		}
-		return canonicalFast(NewV(r))
+		return Canonical(NewV(r))
 	default:
 		return panicType("@[X;i;f;z]", "X", x)
 	}
