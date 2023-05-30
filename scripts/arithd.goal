@@ -246,7 +246,7 @@ doxY:{[yt;e;t]
   rt:t2go t
   rs:?[yt~t;"r := yv.reuse()";"r := &A${t}{elts: make([]$rt, yv.Len())}"]
   rs:?[op¿cmps;"$rs; r.flags |= flagBool";rs]
-  rs:?[(xt¿ntypes)&op¿"+""&""|";"asc := yv.flags.Has(flagAscending); $rs; if asc { r.flags |= flagAscending }";rs]
+  rs:?[(xt¿ntypes)&op¿"+""&""|";"asc := ascending(yv); $rs; if asc { r.flags |= flagAscending }";rs]
   "\n"_qq/
     case *A$yt:
         $rs
@@ -306,7 +306,7 @@ doXBy:{[yt;e;t]
   rt:t2go t
   rs:?[xt~t;"r := x.reuse()";"r := &A${t}{elts: make([]$rt, x.Len())}"]
   rs:?[op¿cmps;"$rs; r.flags |= flagBool";rs]
-  rs:?[(yt¿ntypes)&op¿"+""-""&""|";"asc := x.flags.Has(flagAscending); $rs; if asc { r.flags |= flagAscending }";rs]
+  rs:?[(yt¿ntypes)&op¿"+""-""&""|";"asc := ascending(x); $rs; if asc { r.flags |= flagAscending }";rs]
   / currently, yt~"S" in thoses cases
   "\n"_qq/
       case $yt:

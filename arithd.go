@@ -1309,7 +1309,7 @@ func addFV(x float64, y V) V {
 	}
 	switch yv := y.bv.(type) {
 	case *AB:
-		asc := yv.flags.Has(flagAscending)
+		asc := ascending(yv)
 		r := &AF{elts: make([]float64, yv.Len())}
 		if asc {
 			r.flags |= flagAscending
@@ -1319,7 +1319,7 @@ func addFV(x float64, y V) V {
 		}
 		return NewV(r)
 	case *AF:
-		asc := yv.flags.Has(flagAscending)
+		asc := ascending(yv)
 		r := yv.reuse()
 		if asc {
 			r.flags |= flagAscending
@@ -1329,7 +1329,7 @@ func addFV(x float64, y V) V {
 		}
 		return NewV(r)
 	case *AI:
-		asc := yv.flags.Has(flagAscending)
+		asc := ascending(yv)
 		r := &AF{elts: make([]float64, yv.Len())}
 		if asc {
 			r.flags |= flagAscending
@@ -1360,7 +1360,7 @@ func addIV(x int64, y V) V {
 	}
 	switch yv := y.bv.(type) {
 	case *AB:
-		asc := yv.flags.Has(flagAscending)
+		asc := ascending(yv)
 		r := &AI{elts: make([]int64, yv.Len())}
 		if asc {
 			r.flags |= flagAscending
@@ -1370,7 +1370,7 @@ func addIV(x int64, y V) V {
 		}
 		return NewV(r)
 	case *AF:
-		asc := yv.flags.Has(flagAscending)
+		asc := ascending(yv)
 		r := yv.reuse()
 		if asc {
 			r.flags |= flagAscending
@@ -1380,7 +1380,7 @@ func addIV(x int64, y V) V {
 		}
 		return NewV(r)
 	case *AI:
-		asc := yv.flags.Has(flagAscending)
+		asc := ascending(yv)
 		r := yv.reuse()
 		if asc {
 			r.flags |= flagAscending
@@ -2935,7 +2935,7 @@ func minimumFV(x float64, y V) V {
 	}
 	switch yv := y.bv.(type) {
 	case *AB:
-		asc := yv.flags.Has(flagAscending)
+		asc := ascending(yv)
 		r := &AF{elts: make([]float64, yv.Len())}
 		if asc {
 			r.flags |= flagAscending
@@ -2945,7 +2945,7 @@ func minimumFV(x float64, y V) V {
 		}
 		return NewV(r)
 	case *AF:
-		asc := yv.flags.Has(flagAscending)
+		asc := ascending(yv)
 		r := yv.reuse()
 		if asc {
 			r.flags |= flagAscending
@@ -2955,7 +2955,7 @@ func minimumFV(x float64, y V) V {
 		}
 		return NewV(r)
 	case *AI:
-		asc := yv.flags.Has(flagAscending)
+		asc := ascending(yv)
 		r := &AF{elts: make([]float64, yv.Len())}
 		if asc {
 			r.flags |= flagAscending
@@ -2986,7 +2986,7 @@ func minimumIV(x int64, y V) V {
 	}
 	switch yv := y.bv.(type) {
 	case *AB:
-		asc := yv.flags.Has(flagAscending)
+		asc := ascending(yv)
 		r := &AI{elts: make([]int64, yv.Len())}
 		if asc {
 			r.flags |= flagAscending
@@ -2996,7 +2996,7 @@ func minimumIV(x int64, y V) V {
 		}
 		return NewV(r)
 	case *AF:
-		asc := yv.flags.Has(flagAscending)
+		asc := ascending(yv)
 		r := yv.reuse()
 		if asc {
 			r.flags |= flagAscending
@@ -3006,7 +3006,7 @@ func minimumIV(x int64, y V) V {
 		}
 		return NewV(r)
 	case *AI:
-		asc := yv.flags.Has(flagAscending)
+		asc := ascending(yv)
 		r := yv.reuse()
 		if asc {
 			r.flags |= flagAscending
@@ -3359,7 +3359,7 @@ func maximumFV(x float64, y V) V {
 	}
 	switch yv := y.bv.(type) {
 	case *AB:
-		asc := yv.flags.Has(flagAscending)
+		asc := ascending(yv)
 		r := &AF{elts: make([]float64, yv.Len())}
 		if asc {
 			r.flags |= flagAscending
@@ -3369,7 +3369,7 @@ func maximumFV(x float64, y V) V {
 		}
 		return NewV(r)
 	case *AF:
-		asc := yv.flags.Has(flagAscending)
+		asc := ascending(yv)
 		r := yv.reuse()
 		if asc {
 			r.flags |= flagAscending
@@ -3379,7 +3379,7 @@ func maximumFV(x float64, y V) V {
 		}
 		return NewV(r)
 	case *AI:
-		asc := yv.flags.Has(flagAscending)
+		asc := ascending(yv)
 		r := &AF{elts: make([]float64, yv.Len())}
 		if asc {
 			r.flags |= flagAscending
@@ -3410,7 +3410,7 @@ func maximumIV(x int64, y V) V {
 	}
 	switch yv := y.bv.(type) {
 	case *AB:
-		asc := yv.flags.Has(flagAscending)
+		asc := ascending(yv)
 		r := &AI{elts: make([]int64, yv.Len())}
 		if asc {
 			r.flags |= flagAscending
@@ -3420,7 +3420,7 @@ func maximumIV(x int64, y V) V {
 		}
 		return NewV(r)
 	case *AF:
-		asc := yv.flags.Has(flagAscending)
+		asc := ascending(yv)
 		r := yv.reuse()
 		if asc {
 			r.flags |= flagAscending
@@ -3430,7 +3430,7 @@ func maximumIV(x int64, y V) V {
 		}
 		return NewV(r)
 	case *AI:
-		asc := yv.flags.Has(flagAscending)
+		asc := ascending(yv)
 		r := yv.reuse()
 		if asc {
 			r.flags |= flagAscending

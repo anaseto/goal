@@ -79,7 +79,7 @@ func classify(ctx *Context, x V) V {
 			}
 			return not(x)
 		}
-		if xv.flags.Has(flagAscending) {
+		if ascending(xv) {
 			r := classifySortedSlice[byte, byte](xv.elts)
 			return NewAB(r)
 		}
@@ -89,7 +89,7 @@ func classify(ctx *Context, x V) V {
 		}
 		return NewAB(classifyBytes(xv.elts))
 	case *AI:
-		if xv.flags.Has(flagAscending) {
+		if ascending(xv) {
 			if xv.Len() < 256 {
 				r := classifySortedSlice[int64, byte](xv.elts)
 				return NewAB(r)
@@ -114,7 +114,7 @@ func classify(ctx *Context, x V) V {
 		r := classifySlice[int64, int64](xv.elts)
 		return NewAI(r)
 	case *AF:
-		if xv.flags.Has(flagAscending) {
+		if ascending(xv) {
 			if xv.Len() < 256 {
 				r := classifySortedSlice[float64, byte](xv.elts)
 				return NewAB(r)
@@ -129,7 +129,7 @@ func classify(ctx *Context, x V) V {
 		r := classifySlice[float64, int64](xv.elts)
 		return NewAI(r)
 	case *AS:
-		if xv.flags.Has(flagAscending) {
+		if ascending(xv) {
 			if xv.Len() < 256 {
 				r := classifySortedSlice[string, byte](xv.elts)
 				return NewAB(r)
@@ -304,7 +304,7 @@ func distinctArray(x array) array {
 			}
 			return &AB{elts: []byte{b}, flags: xv.flags | flagDistinct}
 		}
-		if xv.flags.Has(flagAscending) {
+		if ascending(xv) {
 			r := distinctSortedSlice[byte](xv.elts)
 			return &AB{elts: r, flags: xv.flags | flagDistinct}
 		}
@@ -315,7 +315,7 @@ func distinctArray(x array) array {
 		return &AB{elts: distinctBytes(xv.elts), flags: xv.flags | flagDistinct}
 	case *AF:
 		var r []float64
-		if xv.flags.Has(flagAscending) {
+		if ascending(xv) {
 			r = distinctSortedSlice[float64](xv.elts)
 		} else {
 			r = distinctSlice[float64](xv.elts, bruteForceNumeric)
@@ -329,7 +329,7 @@ func distinctArray(x array) array {
 			r = distinctInts(xv.elts, min, span)
 			return &AI{elts: r, flags: xv.flags | flagDistinct}
 		}
-		if xv.flags.Has(flagAscending) {
+		if ascending(xv) {
 			r = distinctSortedSlice[int64](xv.elts)
 		} else {
 			r = distinctSlice[int64](xv.elts, bruteForceNumeric)
@@ -337,7 +337,7 @@ func distinctArray(x array) array {
 		return &AI{elts: r, flags: xv.flags | flagDistinct}
 	case *AS:
 		var r []string
-		if xv.flags.Has(flagAscending) {
+		if ascending(xv) {
 			r = distinctSortedSlice[string](xv.elts)
 		} else {
 			r = distinctSlice[string](xv.elts, bruteForceGeneric)
@@ -479,7 +479,7 @@ func markFirsts(x V) V {
 			}
 			return newABb(r)
 		}
-		if xv.flags.Has(flagAscending) {
+		if ascending(xv) {
 			r := markFirstsSortedSlice[byte](xv.elts)
 			return newABb(r)
 		}
@@ -491,7 +491,7 @@ func markFirsts(x V) V {
 		return newABb(markFirstsBytes(xv.elts))
 	case *AF:
 		var r []byte
-		if xv.flags.Has(flagAscending) {
+		if ascending(xv) {
 			r = markFirstsSortedSlice[float64](xv.elts)
 		} else {
 			r = markFirstsSlice[float64](xv.elts, bruteForceNumeric)
@@ -499,7 +499,7 @@ func markFirsts(x V) V {
 		return newABb(r)
 	case *AI:
 		var r []byte
-		if xv.flags.Has(flagAscending) {
+		if ascending(xv) {
 			r = markFirstsSortedSlice[int64](xv.elts)
 			return newABb(r)
 		}
@@ -513,7 +513,7 @@ func markFirsts(x V) V {
 		return newABb(r)
 	case *AS:
 		var r []byte
-		if xv.flags.Has(flagAscending) {
+		if ascending(xv) {
 			r = markFirstsSortedSlice[string](xv.elts)
 		} else {
 			r = markFirstsSlice[string](xv.elts, bruteForceGeneric)
@@ -792,7 +792,7 @@ func findSortedSlice[T ordered](x []T, y T) int {
 
 func memberOfAI(x V, y *AI) V {
 	if x.IsI() {
-		if y.flags.Has(flagAscending) && y.Len() > numericSortedLen {
+		if ascending(y) && y.Len() > numericSortedLen {
 			return NewI(b2I(memberISortedAI(x.I(), y)))
 		}
 		for _, yi := range y.elts {
@@ -806,7 +806,7 @@ func memberOfAI(x V, y *AI) V {
 		if !isI(x.F()) {
 			return NewI(0)
 		}
-		if y.flags.Has(flagAscending) && y.Len() > numericSortedLen {
+		if ascending(y) && y.Len() > numericSortedLen {
 			return NewI(b2I(memberISortedAI(int64(x.F()), y)))
 		}
 		for _, yi := range y.elts {
@@ -833,7 +833,7 @@ func memberOfAI(x V, y *AI) V {
 	case *AI:
 		ylen := int64(y.Len())
 		xlen := int64(xv.Len())
-		asc := y.flags.Has(flagAscending)
+		asc := ascending(y)
 		if ylen > smallRangeLen && xlen > smallRangeLen || xlen > bruteForceNumeric && ylen > 0 {
 			// NOTE: heuristics here might need some adjustments:
 			// we used one based on self-search functions, but
@@ -911,7 +911,7 @@ func memberSOfAS(x string, y *AS) bool {
 func memberOfAS(x V, y *AS) V {
 	switch xv := x.bv.(type) {
 	case S:
-		if y.flags.Has(flagAscending) && y.Len() > bruteForceGeneric/4 {
+		if ascending(y) && y.Len() > bruteForceGeneric/4 {
 			return NewI(b2I(memberSOfAS(string(xv), y)))
 		}
 		for _, yi := range y.elts {
@@ -921,7 +921,7 @@ func memberOfAS(x V, y *AS) V {
 		}
 		return NewI(0)
 	case *AS:
-		if y.flags.Has(flagAscending) && y.Len() > bruteForceGeneric/4 {
+		if ascending(y) && y.Len() > bruteForceGeneric/4 {
 			r := make([]byte, xv.Len())
 			for i, xi := range xv.elts {
 				r[i] = b2B(memberSOfAS(xi, y))
@@ -997,7 +997,7 @@ func occurrenceCount(ctx *Context, x V) V {
 			}
 			return NewAI(r)
 		}
-		if xv.flags.Has(flagAscending) {
+		if ascending(xv) {
 			r := occurrenceCountSortedSlice[byte](xv.elts)
 			return NewAI(r)
 		}
@@ -1009,7 +1009,7 @@ func occurrenceCount(ctx *Context, x V) V {
 		return NewAI(r)
 	case *AI:
 		var r []int64
-		if xv.flags.Has(flagAscending) {
+		if ascending(xv) {
 			r = occurrenceCountSortedSlice[int64](xv.elts)
 			return NewAI(r)
 		}
@@ -1023,7 +1023,7 @@ func occurrenceCount(ctx *Context, x V) V {
 		return NewAI(r)
 	case *AF:
 		var r []int64
-		if xv.flags.Has(flagAscending) {
+		if ascending(xv) {
 			r = occurrenceCountSortedSlice[float64](xv.elts)
 		} else {
 			r = occurrenceCountSlice[float64](xv.elts, bruteForceNumeric)
@@ -1031,7 +1031,7 @@ func occurrenceCount(ctx *Context, x V) V {
 		return NewAI(r)
 	case *AS:
 		var r []int64
-		if xv.flags.Has(flagAscending) {
+		if ascending(xv) {
 			r = occurrenceCountSortedSlice[string](xv.elts)
 		} else {
 			r = occurrenceCountSlice[string](xv.elts, bruteForceGeneric)
@@ -1382,7 +1382,7 @@ func findBsIs[I integer](xs []byte, ys []int64) []I {
 func findAI(x *AI, y V) V {
 	if y.IsI() {
 		yv := y.I()
-		if x.flags.Has(flagAscending) && x.Len() > numericSortedLen {
+		if ascending(x) && x.Len() > numericSortedLen {
 			return NewI(findIs(x.elts, yv))
 		}
 		for i, xi := range x.elts {
@@ -1418,7 +1418,7 @@ func findAI(x *AI, y V) V {
 	case *AI:
 		xlen := int64(x.Len())
 		ylen := int64(yv.Len())
-		asc := x.flags.Has(flagAscending)
+		asc := ascending(x)
 		if xlen > smallRangeLen && ylen > smallRangeLen || ylen > bruteForceNumeric && xlen > 0 {
 			// NOTE: heuristics here might need some adjustments:
 			// we used one based on self-search functions, but find
@@ -1639,7 +1639,7 @@ func findSs(x []string, y string) int64 {
 func findAS(x *AS, y V) V {
 	switch yv := y.bv.(type) {
 	case S:
-		if x.flags.Has(flagAscending) && x.Len() > bruteForceGeneric/4 {
+		if ascending(x) && x.Len() > bruteForceGeneric/4 {
 			return NewI(findSs(x.elts, string(yv)))
 		}
 		for i, xi := range x.elts {
@@ -1649,7 +1649,7 @@ func findAS(x *AS, y V) V {
 		}
 		return NewI(int64(x.Len()))
 	case *AS:
-		if x.flags.Has(flagAscending) && x.Len() > bruteForceGeneric/4 {
+		if ascending(x) && x.Len() > bruteForceGeneric/4 {
 			if x.Len() < 256 {
 				r := findSortedSsSs[byte](x.elts, yv.elts)
 				return NewAB(r)

@@ -95,7 +95,7 @@ func groupBy(x, y V) V {
 			return groupByBoolsV(xv.elts, y)
 		}
 		max := maxBytes(xv.elts)
-		if xv.flags.Has(flagAscending) {
+		if ascending(xv) {
 			switch yv := y.bv.(type) {
 			case array:
 				return groupBySorted(xv.elts, yv, int64(max))
@@ -122,7 +122,7 @@ func groupBy(x, y V) V {
 		if max < 0 {
 			return protoAV()
 		}
-		if xv.flags.Has(flagAscending) {
+		if ascending(xv) {
 			switch yv := y.bv.(type) {
 			case array:
 				return groupBySorted(xv.elts, yv, int64(max))

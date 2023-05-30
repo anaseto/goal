@@ -723,7 +723,7 @@ func eval(ctx *Context, x V) V {
 	case *AS:
 		r := make([]V, xv.Len())
 		for i, xi := range xv.elts {
-			ri := evalString(ctx, string(xi))
+			ri := evalString(ctx, xi)
 			if ri.IsPanic() {
 				return ri
 			}

@@ -252,7 +252,7 @@ func ascendBools[I integer](xs []byte) []I {
 
 func ascendAI(ctx *Context, xv *AI) V {
 	xlen := xv.Len()
-	if xv.getFlags().Has(flagAscending) {
+	if ascending(xv) {
 		if xlen < 256 {
 			return NewAB(permRange[byte](xlen))
 		}
@@ -302,13 +302,13 @@ func ascendArray(ctx *Context, x array) V {
 	case array:
 		if x.Len() < 256 {
 			p := &permutation[byte]{Perm: permRange[byte](xv.Len()), X: xv}
-			if !xv.getFlags().Has(flagAscending) {
+			if !ascending(xv) {
 				sort.Stable(p)
 			}
 			return NewAB(p.Perm)
 		}
 		p := &permutation[int64]{Perm: permRange[int64](xv.Len()), X: xv}
-		if !xv.getFlags().Has(flagAscending) {
+		if !ascending(xv) {
 			sort.Stable(p)
 		}
 		return NewAI(p.Perm)
@@ -348,31 +348,31 @@ func descend(ctx *Context, x V) V {
 func search(x V, y V) V {
 	switch xv := x.bv.(type) {
 	case *AB:
-		if !xv.flags.Has(flagAscending) && !sort.IsSorted(xv) {
+		if !ascending(xv) && !sort.IsSorted(xv) {
 			return panics("X$y : non-ascending X")
 		}
 		xv.flags |= flagAscending
 		return searchAB(xv, y)
 	case *AI:
-		if !xv.flags.Has(flagAscending) && !sort.IsSorted(xv) {
+		if !ascending(xv) && !sort.IsSorted(xv) {
 			return panics("X$y : non-ascending X")
 		}
 		xv.flags |= flagAscending
 		return searchAI(xv, y)
 	case *AF:
-		if !xv.flags.Has(flagAscending) && !sort.IsSorted(xv) {
+		if !ascending(xv) && !sort.IsSorted(xv) {
 			return panics("X$y : non-ascending X")
 		}
 		xv.flags |= flagAscending
 		return searchAF(xv, y)
 	case *AS:
-		if !xv.flags.Has(flagAscending) && !sort.IsSorted(xv) {
+		if !ascending(xv) && !sort.IsSorted(xv) {
 			return panics("X$y : non-ascending X")
 		}
 		xv.flags |= flagAscending
 		return searchAS(xv, y)
 	case *AV:
-		if !xv.flags.Has(flagAscending) && !sort.IsSorted(xv) {
+		if !ascending(xv) && !sort.IsSorted(xv) {
 			return panics("X$y : non-ascending X")
 		}
 		xv.flags |= flagAscending

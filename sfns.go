@@ -288,7 +288,7 @@ func cutAI(xv *AI, y V) V {
 }
 
 func cutAIarray(x *AI, y array) V {
-	if !x.flags.Has(flagAscending) && !sort.IsSorted(x) {
+	if !ascending(x) && !sort.IsSorted(x) {
 		return panics("I_y : non-ascending I")
 	}
 	x.flags |= flagAscending
@@ -307,7 +307,7 @@ func cutAIarray(x *AI, y array) V {
 }
 
 func cutABarray(x *AB, y array) V {
-	if !x.flags.Has(flagAscending) && !sort.IsSorted(x) {
+	if !ascending(x) && !sort.IsSorted(x) {
 		return panics("I_y : non-ascending I")
 	}
 	x.flags |= flagAscending
@@ -341,7 +341,7 @@ func cutIntsArray[I integer](x []I, y array) []V {
 }
 
 func cutAIS(x *AI, y S) V {
-	if !x.flags.Has(flagAscending) && !sort.IsSorted(x) {
+	if !ascending(x) && !sort.IsSorted(x) {
 		return panics("I_s : non-ascending I")
 	}
 	x.flags |= flagAscending
@@ -360,7 +360,7 @@ func cutAIS(x *AI, y S) V {
 }
 
 func cutABS(x *AB, y S) V {
-	if !x.flags.Has(flagAscending) && !sort.IsSorted(x) {
+	if !ascending(x) && !sort.IsSorted(x) {
 		return panics("I_s : non-ascending I")
 	}
 	x.flags |= flagAscending

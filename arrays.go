@@ -742,3 +742,7 @@ func (x *AI) canSet(y V) bool { return y.IsI() }
 func (x *AF) canSet(y V) bool { return y.IsF() }
 func (x *AS) canSet(y V) bool { _, ok := y.bv.(S); return ok }
 func (x *AV) canSet(y V) bool { return true }
+
+func ascending(x array) bool {
+	return x.getFlags().Has(flagAscending)
+}
