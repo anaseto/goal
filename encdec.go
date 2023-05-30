@@ -186,38 +186,9 @@ func encode(f V, x V) V {
 	}
 	switch fv := f.bv.(type) {
 	case *AB:
-		return encode(fromABtoAI(fv), x)
+		return encodeIs(fv.elts, x)
 	case *AI:
-		for _, b := range fv.elts {
-			if b <= 1 {
-				return panics("I\\x : I contains base < 2")
-			}
-		}
-		if x.IsI() {
-			return encodeIsIv(fv.elts, x.I())
-		}
-		if x.IsF() {
-			if !isI(x.F()) {
-				return Panicf("I/x : x non-integer (%g)", x.F())
-			}
-			return encode(f, NewI(int64(x.F())))
-		}
-		switch xv := x.bv.(type) {
-		case *AI:
-			return encodeIsInts(fv.elts, xv.elts)
-		case *AB:
-			return encodeIsBytes(fv.elts, xv.elts)
-		case *AF:
-			aix := toAI(xv)
-			if aix.IsPanic() {
-				return ppanic("I\\x : I ", aix)
-			}
-			return encode(f, aix)
-		case *AV:
-			return Canonical(monadAV(xv, func(xi V) V { return encode(f, xi) }))
-		default:
-			return panicType("I\\x", "x", x)
-		}
+		return encodeIs(fv.elts, x)
 	case *AF:
 		aif := toAI(fv)
 		if aif.IsPanic() {
@@ -227,6 +198,39 @@ func encode(f V, x V) V {
 	default:
 		// should not happen
 		return panicType("I\\x", "I", f)
+	}
+}
+
+func encodeIs[I integer](f []I, x V) V {
+	for _, b := range f {
+		if b <= 1 {
+			return panics("I\\x : I contains base < 2")
+		}
+	}
+	if x.IsI() {
+		return encodeIsIv(f, x.I())
+	}
+	if x.IsF() {
+		if !isI(x.F()) {
+			return Panicf("I/x : x non-integer (%g)", x.F())
+		}
+		return encodeIs(f, NewI(int64(x.F())))
+	}
+	switch xv := x.bv.(type) {
+	case *AI:
+		return encodeIsInts(f, xv.elts)
+	case *AB:
+		return encodeIsBytes(f, xv.elts)
+	case *AF:
+		aix := toAI(xv)
+		if aix.IsPanic() {
+			return ppanic("I\\x : I ", aix)
+		}
+		return encodeIs(f, aix)
+	case *AV:
+		return Canonical(monadAV(xv, func(xi V) V { return encodeIs(f, xi) }))
+	default:
+		return panicType("I\\x", "x", x)
 	}
 }
 
@@ -270,44 +274,9 @@ func decode(f V, x V) V {
 	}
 	switch fv := f.bv.(type) {
 	case *AB:
-		return decode(fromABtoAI(fv), x)
+		return decodeIs(fv.elts, x)
 	case *AI:
-		for _, b := range fv.elts {
-			if b <= 0 {
-				return panics("I/x : I contains non positive")
-			}
-		}
-		if x.IsI() {
-			return NewI(decodeIsI(fv.elts, x.I()))
-		}
-		if x.IsF() {
-			if !isI(x.F()) {
-				return Panicf("I/x : x non-integer (%g)", x.F())
-			}
-			return decode(f, NewI(int64(x.F())))
-		}
-		switch xv := x.bv.(type) {
-		case *AI:
-			if fv.Len() != xv.Len() {
-				return panicLength("I/x", fv.Len(), xv.Len())
-			}
-			return NewI(decodeIsIs(fv.elts, xv.elts))
-		case *AB:
-			if fv.Len() != xv.Len() {
-				return panicLength("I/x", fv.Len(), xv.Len())
-			}
-			return NewI(decodeIsIs(fv.elts, xv.elts))
-		case *AF:
-			aix := toAI(xv)
-			if aix.IsPanic() {
-				return ppanic("I/x : I ", aix)
-			}
-			return decode(f, aix)
-		case *AV:
-			return Canonical(monadAV(xv, func(xi V) V { return decode(f, xi) }))
-		default:
-			return panicType("I/x", "x", x)
-		}
+		return decodeIs(fv.elts, x)
 	case *AF:
 		aif := toAI(fv)
 		if aif.IsPanic() {
@@ -317,6 +286,45 @@ func decode(f V, x V) V {
 	default:
 		// should not happen
 		return panicType("I/x", "I", f)
+	}
+}
+
+func decodeIs[I integer](f []I, x V) V {
+	for _, b := range f {
+		if b <= 0 {
+			return panics("I/x : I contains non positive")
+		}
+	}
+	if x.IsI() {
+		return NewI(decodeIsI(f, x.I()))
+	}
+	if x.IsF() {
+		if !isI(x.F()) {
+			return Panicf("I/x : x non-integer (%g)", x.F())
+		}
+		return decodeIs(f, NewI(int64(x.F())))
+	}
+	switch xv := x.bv.(type) {
+	case *AI:
+		if len(f) != xv.Len() {
+			return panicLength("I/x", len(f), xv.Len())
+		}
+		return NewI(decodeIsIs(f, xv.elts))
+	case *AB:
+		if len(f) != xv.Len() {
+			return panicLength("I/x", len(f), xv.Len())
+		}
+		return NewI(decodeIsIs(f, xv.elts))
+	case *AF:
+		aix := toAI(xv)
+		if aix.IsPanic() {
+			return ppanic("I/x : I ", aix)
+		}
+		return decodeIs(f, aix)
+	case *AV:
+		return Canonical(monadAV(xv, func(xi V) V { return decodeIs(f, xi) }))
+	default:
+		return panicType("I/x", "x", x)
 	}
 }
 
