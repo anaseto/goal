@@ -116,16 +116,7 @@ func doTime(cmd string, y V, layout, loc string) V {
 		}
 		return canonicalVs(r)
 	case *AV:
-		r := make([]V, yv.Len())
-		for i, yi := range yv.elts {
-			ri := doTime(cmd, yi, layout, loc)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r[i] = ri
-		}
-		return canonicalVs(r)
+		return monadAVc(yv, func(yi V) V { return doTime(cmd, yi, layout, loc) })
 	default:
 		return panicType("time[cmd;t;...]", "t", y)
 	}

@@ -415,7 +415,7 @@ func applyDict(d *Dict, y V) V {
 		}
 		return d.values.at(int(i))
 	}
-	r := vArrayAtV(d.values, ky)
+	r := atIv(d.values, ky)
 	return r
 }
 

@@ -497,7 +497,7 @@ func vfApplyN(ctx *Context, args []V) V {
 // vfList implements (x;y;...) array constructor variadic verb.
 func vfList(ctx *Context, args []V) V {
 	xav := &AV{elts: args}
-	xv, cloned := normalize(xav)
+	xv, cloned := normalize(xav, aType(xav))
 	if cloned {
 		r := NewV(xv)
 		return r

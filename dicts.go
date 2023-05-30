@@ -141,9 +141,3 @@ func dictArith(xd, yd *Dict, f func(V, V) V) V {
 	}
 	return NewV(&Dict{keys: keys, values: canonicalArray(r)})
 }
-
-// withKeys implements X#d.
-func withKeys(x array, y *Dict) V {
-	r := memberOf(NewV(y.keys), NewV(x))
-	return NewDict(replicate(r, NewV(y.keys)), replicate(r, NewV(y.values)))
-}

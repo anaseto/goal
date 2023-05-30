@@ -64,7 +64,7 @@ func radixSortAI(ctx *Context, x *AI, min, max int64) *AI {
 	// NOTE: given that Go's stdlib interface-based sort isn't the fastest
 	// on integers, it would sometimes be better to use radix sort for
 	// 64bits too, but not always.
-	x = shallowCloneAI(x)
+	x = scloneAI(x)
 	sort.Sort(x)
 	return x
 }

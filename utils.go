@@ -140,11 +140,11 @@ func maxS(x, y S) S {
 	return x
 }
 
-func minMax(x *AI) (min, max int64) {
-	return minMaxIntegers(x.elts)
+func minMaxAI(x *AI) (min, max int64) {
+	return minMaxIs(x.elts)
 }
 
-func minMaxIntegers[I integer](x []I) (min, max I) {
+func minMaxIs[I integer](x []I) (min, max I) {
 	if len(x) == 0 {
 		return
 	}
@@ -195,7 +195,7 @@ func toIndices(x V) V {
 	if isIndices(x) {
 		return x
 	}
-	return CanonicalRec(toIndicesRec(x))
+	return toIndicesRec(x)
 }
 
 func toIndicesRec(x V) V {
@@ -215,7 +215,7 @@ func toIndicesRec(x V) V {
 	case *AF:
 		return toAI(xv)
 	case *AV:
-		return monadAV(xv, func(xi V) V { return toIndicesRec(xi) })
+		return monadAVc(xv, func(xi V) V { return toIndicesRec(xi) })
 	case *AS:
 		return Panicf("bad type \"%s\" as index", x.Type())
 	default:
@@ -540,59 +540,10 @@ func (ctx *Context) assertCanonical(x V) {
 	}
 }
 
-// normalizeRec returns a canonical form of an AV array. It returns true if a
-// shallow clone was made.
-func normalizeRec(x *AV) (array, bool) {
-	t := aType(x)
-	switch t {
-	case tb, tB:
-		r := make([]byte, x.Len())
-		for i, xi := range x.elts {
-			r[i] = byte(xi.I())
-		}
-		var fl flags
-		if t == tb {
-			fl = flagBool
-		}
-		return &AB{elts: r, flags: fl}, true
-	case tI:
-		r := make([]int64, x.Len())
-		for i, xi := range x.elts {
-			r[i] = xi.I()
-		}
-		return &AI{elts: r}, true
-	case tF:
-		r := make([]float64, x.Len())
-		for i, xi := range x.elts {
-			if xi.IsI() {
-				r[i] = float64(xi.I())
-			} else {
-				r[i] = float64(xi.F())
-			}
-		}
-		return &AF{elts: r}, true
-	case tS:
-		r := make([]string, x.Len())
-		for i, xi := range x.elts {
-			r[i] = string(xi.bv.(S))
-		}
-		return &AS{elts: r}, true
-	case tV, tAV:
-		for i, xi := range x.elts {
-			x.elts[i] = CanonicalRec(xi)
-			x.elts[i].MarkImmutable()
-		}
-		return x, false
-	default:
-		return x, false
-	}
-}
-
 // normalize returns a canonical form of an AV array, assuming it's
 // elements themselves are canonical. It returns true if a shallow clone was
 // made, in other words, if the returned array is not generic.
-func normalize(x *AV) (array, bool) {
-	t := aType(x)
+func normalize(x *AV, t vType) (array, bool) {
 	switch t {
 	case tb, tB:
 		r := make([]byte, x.Len())
@@ -631,19 +582,30 @@ func normalize(x *AV) (array, bool) {
 	}
 }
 
-// CanonicalRec returns the canonical form of a given value, that is the most
+// canonicalRec returns the canonical form of a given value, that is the most
 // specialized form. In practice, if the value is a generic array, but a more
 // specialized version could represent the value, it returns the specialized
 // value. All variadic functions have to return results in canonical form, so
 // this function can be used to ensure that when defining new ones.
-func CanonicalRec(x V) V {
+func canonicalRec(x V) V {
 	switch xv := x.bv.(type) {
 	case *AV:
-		r, b := normalizeRec(xv)
-		if b {
-			x.bv = r
+		t := aType(xv)
+		switch t {
+		case tV, tAV:
+			for i, xi := range xv.elts {
+				cxi := canonicalRec(xi)
+				cxi.MarkImmutable()
+				xv.elts[i] = cxi
+			}
+			return x
+		default:
+			r, b := normalize(xv, t)
+			if b {
+				x.bv = r
+			}
+			return x
 		}
-		return x
 	default:
 		return x
 	}
@@ -651,19 +613,19 @@ func CanonicalRec(x V) V {
 
 // canonicalArrayAV returns the canonical form of a given generic array.
 func canonicalArrayAV(x *AV) array {
-	r, _ := normalize(x)
+	r, _ := normalize(x, aType(x))
 	return r
 }
 
 // canonicalAV returns the canonical form of a given generic array.
 func canonicalAV(x *AV) V {
-	r, _ := normalize(x)
+	r, _ := normalize(x, aType(x))
 	return NewV(r)
 }
 
 // canonicalAV returns the canonical form of a given generic array.
 func canonicalAVImmut(x *AV) V {
-	r, _ := normalize(x)
+	r, _ := normalize(x, aType(x))
 	r.setFlags(x.flags)
 	return NewV(r)
 }
@@ -672,7 +634,7 @@ func canonicalAVImmut(x *AV) V {
 func canonicalArray(x array) array {
 	switch xv := x.(type) {
 	case *AV:
-		r, _ := normalize(xv)
+		r, _ := normalize(xv, aType(xv))
 		return r
 	default:
 		return x
@@ -680,7 +642,8 @@ func canonicalArray(x array) array {
 }
 
 func canonicalVs(r []V) V {
-	ra, ok := normalize(&AV{elts: r})
+	x := &AV{elts: r}
+	ra, ok := normalize(x, aType(x))
 	if !ok {
 		newAVu(r)
 	}
@@ -688,7 +651,8 @@ func canonicalVs(r []V) V {
 }
 
 func canonicalArrayVs(r []V) array {
-	ra, _ := normalize(&AV{elts: r})
+	x := &AV{elts: r}
+	ra, _ := normalize(x, aType(x))
 	return ra
 }
 
@@ -701,7 +665,7 @@ func canonicalArrayVs(r []V) array {
 func Canonical(x V) V {
 	switch xv := x.bv.(type) {
 	case *AV:
-		r, b := normalize(xv)
+		r, b := normalize(xv, aType(xv))
 		if b {
 			x.bv = r
 		}
@@ -715,7 +679,7 @@ func Canonical(x V) V {
 func canonicalImmut(x V) V {
 	switch xv := x.bv.(type) {
 	case *AV:
-		r, b := normalize(xv)
+		r, b := normalize(xv, aType(xv))
 		if b {
 			r.setFlags(xv.flags)
 			x.bv = r
@@ -856,7 +820,7 @@ func maxIndices(x V) int64 {
 	switch xv := x.bv.(type) {
 	case *AB:
 		if xv.Len() == 0 {
-			return 0
+			return math.MinInt64
 		}
 		return int64(maxBytes(xv.elts))
 	case *AI:

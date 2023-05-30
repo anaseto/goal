@@ -82,7 +82,7 @@ func sortUp(ctx *Context, x V) V {
 	}
 	switch xv := xa.(type) {
 	case *AB:
-		xv = shallowCloneAB(xv)
+		xv = scloneAB(xv)
 		if flags.Has(flagBool) {
 			sortBools(xv.elts)
 		} else {
@@ -137,19 +137,19 @@ func sortBytes(xs []byte) {
 
 func sortInts(ctx *Context, xv *AI) *AI {
 	if xv.Len() > 32 {
-		min, max := minMax(xv)
+		min, max := minMaxAI(xv)
 		span := max - min + 1
 		if span == 1 {
 			return xv
 		}
 		if span <= 256 {
-			xv = shallowCloneAI(xv)
+			xv = scloneAI(xv)
 			sortSmallInts(xv.elts, min)
 			return xv
 		}
 		return radixSortAI(ctx, xv, min, max)
 	}
-	xv = shallowCloneAI(xv)
+	xv = scloneAI(xv)
 	sort.Sort(xv)
 	return xv
 }
@@ -259,7 +259,7 @@ func ascendAI(ctx *Context, xv *AI) V {
 		return NewAI(permRange[int64](xlen))
 	}
 	if xlen > 32 {
-		min, max := minMax(xv)
+		min, max := minMaxAI(xv)
 		span := max - min + 1
 		if span == 1 {
 			if xlen < 256 {

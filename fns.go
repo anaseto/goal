@@ -157,7 +157,7 @@ func where(x V) V {
 			if r.IsPanic() {
 				return r
 			}
-			return NewV(arrayAtV(xv.keys, r))
+			return NewV(arrayAtIv(xv.keys, r))
 		}
 		return newDictValues(xv.keys, where(NewV(xv.values)))
 	default:

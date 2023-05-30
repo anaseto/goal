@@ -426,7 +426,7 @@ func take(x, y V) V {
 		case S:
 			return scount(xv, y)
 		case array:
-			return intersection(xv, y)
+			return withValuesOrKeys(xv, y)
 		default:
 			return panicType("x#y", "x", x)
 		}

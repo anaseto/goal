@@ -20,7 +20,7 @@ func (ctx *Context) amend3(x, y, f V) V {
 		if err != nil {
 			return Panicf("@[X;i;f] : %v", err)
 		}
-		return Canonical(NewV(r))
+		return NewV(canonicalArray(r))
 	default:
 		return panicType("@[X;i;f]", "X", x)
 	}
@@ -172,7 +172,7 @@ func (ctx *Context) amend4(x, y, f, z V) V {
 		if err != nil {
 			return Panicf("@[X;i;f;z] : %v", err)
 		}
-		return Canonical(NewV(r))
+		return NewV(canonicalArray(r))
 	default:
 		return panicType("@[X;i;f;z]", "X", x)
 	}
@@ -324,7 +324,7 @@ func (ctx *Context) deepAmend3(x, y, f V) V {
 		if err != nil {
 			return Panicf(".[X;y;f] : %v", err)
 		}
-		return CanonicalRec(NewV(x))
+		return canonicalRec(NewV(x))
 	default:
 		return panicType(".[X;y;f]", "x", x)
 	}
@@ -394,7 +394,7 @@ func (ctx *Context) deepAmend4(x, y, f, z V) V {
 		if err != nil {
 			return Panicf(".[X;y;f] : %v", err)
 		}
-		return CanonicalRec(NewV(x))
+		return canonicalRec(NewV(x))
 	default:
 		return panicType(".[X;y;f]", "x", x)
 	}

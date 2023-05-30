@@ -80,7 +80,7 @@ func (x *AB) Slice() []byte {
 	return x.elts
 }
 
-// AI represents an array of integers.
+// AI represents an array of int64 values.
 type AI A[int64]
 
 // NewAI returns a new int array.
@@ -94,10 +94,10 @@ func (x *AI) Slice() []int64 {
 	return x.elts
 }
 
-// AF represents an array of reals.
+// AF represents an array of float64 values.
 type AF A[float64]
 
-// NewAF returns a new array of reals.
+// NewAF returns a new array of float64 values.
 func NewAF(x []float64) V {
 	return NewV(&AF{elts: x})
 }
@@ -131,7 +131,7 @@ type AV A[V]
 // will be an array in canonical form.
 func NewAV(x []V) V {
 	xav := &AV{elts: x}
-	xv, cloned := normalize(xav)
+	xv, cloned := normalize(xav, aType(xav))
 	if cloned {
 		r := NewV(xv)
 		return r
@@ -148,7 +148,7 @@ func newAVu(x []V) V {
 	return NewV(&AV{elts: x})
 }
 
-// newAV returns a new generic array.
+// newAV returns a new generic array, assuming it is in canonical form.
 func newAV(x []V) *AV {
 	for _, xi := range x {
 		xi.MarkImmutable()
@@ -156,7 +156,7 @@ func newAV(x []V) *AV {
 	return &AV{elts: x}
 }
 
-// newAV returns a new generic array.
+// newAV returns a new generic array, assuming it is in canonical form.
 func newAVv(x []V) V {
 	for _, xi := range x {
 		xi.MarkImmutable()
@@ -529,17 +529,17 @@ func (x *AV) sclone() array {
 	return (*AV)((*A[V])(x).sclone())
 }
 
-func shallowCloneAB(x *AB) *AB {
+func scloneAB(x *AB) *AB {
 	return (*AB)((*A[byte])(x).sclone())
 }
 
-func shallowCloneAI(x *AI) *AI {
+func scloneAI(x *AI) *AI {
 	return (*AI)((*A[int64])(x).sclone())
 }
 
 // Matches returns true if the two values match like in x~y.
 func (x *AB) Matches(y Value) bool {
-	if !matchArrayLen(x, y) {
+	if !matchesLength(x, y) {
 		return false
 	}
 	if x.Len() == 0 {
@@ -559,7 +559,7 @@ func (x *AB) Matches(y Value) bool {
 
 // Matches returns true if the two values match like in x~y.
 func (x *AI) Matches(y Value) bool {
-	if !matchArrayLen(x, y) {
+	if !matchesLength(x, y) {
 		return false
 	}
 	if x.Len() == 0 {
@@ -579,7 +579,7 @@ func (x *AI) Matches(y Value) bool {
 
 // Matches returns true if the two values match like in x~y.
 func (x *AF) Matches(y Value) bool {
-	if !matchArrayLen(x, y) {
+	if !matchesLength(x, y) {
 		return false
 	}
 	if x.Len() == 0 {
@@ -599,7 +599,7 @@ func (x *AF) Matches(y Value) bool {
 
 // Matches returns true if the two values match like in x~y.
 func (x *AS) Matches(y Value) bool {
-	if !matchArrayLen(x, y) {
+	if !matchesLength(x, y) {
 		return false
 	}
 	if x.Len() == 0 {
@@ -619,7 +619,7 @@ func (x *AS) Matches(y Value) bool {
 
 // Matches returns true if the two values match like in x~y.
 func (x *AV) Matches(y Value) bool {
-	if !matchArrayLen(x, y) {
+	if !matchesLength(x, y) {
 		return false
 	}
 	if x.Len() == 0 {
@@ -637,8 +637,8 @@ func (x *AV) Matches(y Value) bool {
 	return true
 }
 
-// matchArrayLen returns true if y is an array of same length as x.
-func matchArrayLen(x array, y Value) bool {
+// matchesLength returns true if y is an array of same length as x.
+func matchesLength(x array, y Value) bool {
 	ya, ok := y.(array)
 	if !ok {
 		return false
@@ -709,7 +709,7 @@ func initArrayFlags(x array) {
 	}
 }
 
-func arrayAtV(x array, y V) array {
+func arrayAtIv(x array, y V) array {
 	switch yv := y.bv.(type) {
 	case *AB:
 		return x.atBytes(yv.elts)
@@ -720,7 +720,7 @@ func arrayAtV(x array, y V) array {
 	}
 }
 
-func vArrayAtV(x array, y V) V {
+func atIv(x array, y V) V {
 	switch yv := y.bv.(type) {
 	case *AB:
 		return x.vAtBytes(yv)

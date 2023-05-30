@@ -273,7 +273,7 @@ func amend4RightIntegersAtom[I integer](x array, y []I, z V) {
 		zs := string(z.bv.(S))
 		amendSlice(xv.elts, y, zs)
 	case *AV:
-		z.immutable()
+		z.MarkImmutable()
 		amendSlice(xv.elts, y, z)
 	}
 }

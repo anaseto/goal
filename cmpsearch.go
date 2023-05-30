@@ -47,7 +47,7 @@ func smallRange(xv *AI) (min, span int64, ok bool) {
 	xlen := int64(xv.Len())
 	if xlen > smallRangeLen {
 		var max int64
-		min, max = minMax(xv)
+		min, max = minMaxAI(xv)
 		span = max - min + 1
 		if span < 2*xlen+smallRangeSpan {
 			return min, span, true
@@ -844,7 +844,7 @@ func memberOfAI(x V, y *AI) V {
 			if asc {
 				min, max = y.elts[0], y.elts[ylen-1]
 			} else {
-				min, max = minMax(y)
+				min, max = minMaxAI(y)
 			}
 			span := max - min + 1
 			if span < ylen+xlen+smallRangeSpan {
@@ -1164,13 +1164,13 @@ func without(x, y V) V {
 			}
 			return panicType("X^Y", "Y", y)
 		}
-		return withoutVArray(x, y)
+		return withoutArray(x, y)
 	default:
 		return panicType("x^y", "x", x)
 	}
 }
 
-func withoutVArray(x, y V) V {
+func withoutArray(x, y V) V {
 	r := memberOf(y, x)
 	switch bres := r.bv.(type) {
 	case *AB:
@@ -1192,13 +1192,14 @@ func withoutDict(x V, y *Dict) V {
 	return NewDict(replicate(r, NewV(y.keys)), replicate(r, NewV(y.values)))
 }
 
-// intersection implements keep x#y.
-func intersection(x array, y V) V {
+// withValuesOrKeys implements with values/keys x#y.
+func withValuesOrKeys(x array, y V) V {
 	switch yv := y.bv.(type) {
 	case array:
 		return replicate(memberOf(y, NewV(x)), y)
 	case *Dict:
-		return withKeys(x, yv)
+		r := memberOf(NewV(yv.keys), NewV(x))
+		return NewDict(replicate(r, NewV(yv.keys)), replicate(r, NewV(yv.values)))
 	default:
 		return panicType("X#Y", "Y", y)
 	}
@@ -1239,7 +1240,7 @@ func findDict(d *Dict, y V) V {
 		}
 		return d.keys.at(int(i))
 	}
-	return vArrayAtV(d.keys, idx)
+	return atIv(d.keys, idx)
 }
 
 func findArray(x array, y V) V {
@@ -1429,7 +1430,7 @@ func findAI(x *AI, y V) V {
 			if asc {
 				min, max = x.elts[0], x.elts[xlen-1]
 			} else {
-				min, max = minMax(x)
+				min, max = minMaxAI(x)
 			}
 			span := max - min + 1
 			if span < xlen+ylen+smallRangeSpan {

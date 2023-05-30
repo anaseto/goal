@@ -116,8 +116,3 @@ func (r *rxReplacer) Clone() Value {
 	}
 	return r
 }
-
-func (x V) immutable() {
-	// TODO: remove this function
-	x.MarkImmutable()
-}

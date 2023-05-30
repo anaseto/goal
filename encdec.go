@@ -36,7 +36,7 @@ func encodeII[I integer](f int64, x int64) []I {
 }
 
 func encodeIInts(f int64, x []int64) V {
-	min, max := minMaxIntegers(x)
+	min, max := minMaxIs(x)
 	if min < 0 {
 		return Panicf(`i\I : negative integer (%d)`, min)
 	}
@@ -108,7 +108,7 @@ func encodeIsBytes[I integer](f []I, x []byte) V {
 	encodeIsIs(f, a, len(x))
 	r := make([]V, n)
 	var fl flags
-	min, max := minMaxIntegers(f)
+	min, max := minMaxIs(f)
 	if min == 2 && max == 2 {
 		fl |= flagBool
 	}
