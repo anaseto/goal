@@ -6,9 +6,6 @@ Features:
 Tests:
 - improve test coverage for error messages and refactor and improve them along
   the way (in particular, ensure more consistency) (in progress)
-- add more immutability tests to catch any possible regressions after the
-  refcount overhaul, because refcounting is hard (in progress).
-- see if there are remaining regressions from []bool -> []byte overhaul.
 
 Documentation:
 - maybe write some introductory guide (in addition to the current help and FAQ)
@@ -16,5 +13,3 @@ Documentation:
 Optimizations:
 - maybe special code for common arithmetic amends (like @[;;+;])
 - maybe improve liveness analysis for code with branches
-- maybe some remaining special cases in self-search functions (all common cases
-  already done)

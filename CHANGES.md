@@ -1,3 +1,16 @@
+# v? ?
+
+* Simplification of reference count system, so that it's less error-prone and
+  easier to maintain. Because of the GC, we use it only for optimization
+  purposes, so we can take advantage of that. We limit reference counting to
+  the first level of nesting of generic arrays, marking deeply nested data as
+  definitively immutable. This avoids the need for pointers, and simplifies
+  handling of shared data. It makes incrementing and decrementing reference
+  counts cheaper in the common cases, and most of the time doesn't affect
+  negatively performance, except when making many small amends to nested data.
+* Various other code refactorings that should facilitate maintenance in the
+  long run.
+
 # v0.18.0 2023-05-21
 
 * Improve `d op d` semantics for uncommon or duplicate keys, so that it's in
