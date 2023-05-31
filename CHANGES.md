@@ -10,6 +10,8 @@
   negatively performance, except when making many small amends to nested data.
 * Various other code refactorings that should facilitate maintenance in the
   long run.
+* There were a few changes in types names in the Go library interface, for
+  better consistency.
 
 # v0.18.0 2023-05-21
 
