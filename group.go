@@ -31,9 +31,9 @@ func icountGroup(x V) V {
 			return newABb(nil)
 		}
 		if xv.Len() < 256 {
-			return NewAB(icountInts[byte](xv.elts))
+			return NewAB(icountIs[byte](xv.elts))
 		}
-		return NewAI(icountInts[int64](xv.elts))
+		return NewAI(icountIs[int64](xv.elts))
 	case *AF:
 		x = toAI(xv)
 		if x.IsPanic() {
@@ -55,7 +55,7 @@ func icountGroup(x V) V {
 	}
 }
 
-func icountInts[I integer](x []int64) []I {
+func icountIs[I integer](x []int64) []I {
 	max := maxIs(x)
 	if max < 0 {
 		max = -1

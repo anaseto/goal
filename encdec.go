@@ -35,7 +35,7 @@ func encodeII[I integer](f int64, x int64) []I {
 	return r
 }
 
-func encodeIInts(f int64, x []int64) V {
+func encodeIInt64s(f int64, x []int64) V {
 	min, max := minMaxIs(x)
 	if min < 0 {
 		return Panicf(`i\I : negative integer (%d)`, min)
@@ -163,7 +163,7 @@ func encode(f V, x V) V {
 		}
 		switch xv := x.bv.(type) {
 		case *AI:
-			return encodeIInts(f.I(), xv.elts)
+			return encodeIInt64s(f.I(), xv.elts)
 		case *AB:
 			return encodeIBytes(f.I(), xv.elts)
 		case *AF:

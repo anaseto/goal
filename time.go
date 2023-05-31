@@ -92,10 +92,10 @@ func doTime(cmd string, y V, layout, loc string) V {
 	}
 	switch yv := y.bv.(type) {
 	case *AB:
-		return doTimeInts(cmd, yv.elts, layout, loc)
+		return doTimeIs(cmd, yv.elts, layout, loc)
 	case *AI:
 		// doTime: allocations could be optimized depending on cmd.
-		return doTimeInts(cmd, yv.elts, layout, loc)
+		return doTimeIs(cmd, yv.elts, layout, loc)
 	case *AF:
 		y = toAI(yv)
 		if y.IsPanic() {
@@ -122,7 +122,7 @@ func doTime(cmd string, y V, layout, loc string) V {
 	}
 }
 
-func doTimeInts[I integer](cmd string, y []I, layout, loc string) V {
+func doTimeIs[I integer](cmd string, y []I, layout, loc string) V {
 	r := make([]V, len(y))
 	for i, yi := range y {
 		ri := doTimeI(cmd, int64(yi), layout)

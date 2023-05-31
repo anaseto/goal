@@ -91,7 +91,7 @@ func sortUp(ctx *Context, x V) V {
 		xv.setFlags(flags | flagAscending)
 		return NewV(xv)
 	case *AI:
-		xv = sortInts(ctx, xv)
+		xv = sortAI(ctx, xv)
 		xv.setFlags(flags | flagAscending)
 		return NewV(xv)
 	case *AV:
@@ -135,7 +135,7 @@ func sortBytes(xs []byte) {
 	}
 }
 
-func sortInts(ctx *Context, xv *AI) *AI {
+func sortAI(ctx *Context, xv *AI) *AI {
 	if xv.Len() > 32 {
 		min, max := minMaxAI(xv)
 		span := max - min + 1
@@ -144,7 +144,7 @@ func sortInts(ctx *Context, xv *AI) *AI {
 		}
 		if span <= 256 {
 			xv = scloneAI(xv)
-			sortSmallInts(xv.elts, min)
+			sortSmallInt64s(xv.elts, min)
 			return xv
 		}
 		return radixSortAI(ctx, xv, min, max)
@@ -154,7 +154,7 @@ func sortInts(ctx *Context, xv *AI) *AI {
 	return xv
 }
 
-func sortSmallInts(xs []int64, min int64) {
+func sortSmallInt64s(xs []int64, min int64) {
 	var freq [256]int
 	for _, xi := range xs {
 		freq[xi-min]++

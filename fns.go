@@ -184,10 +184,10 @@ func whereAB(xv *AB) V {
 
 func whereAI(xv *AI) V {
 	if xv.Len() < 256 {
-		r := whereInts[byte](xv.elts)
+		r := whereIs[byte](xv.elts)
 		return NewV(&AB{elts: r, flags: flagAscending})
 	}
-	r := whereInts[int64](xv.elts)
+	r := whereIs[int64](xv.elts)
 	return NewV(&AI{elts: r, flags: flagAscending})
 }
 
@@ -221,7 +221,7 @@ func whereBytes[I integer](x []byte) []I {
 	return r
 }
 
-func whereInts[I integer](x []int64) []I {
+func whereIs[I integer](x []int64) []I {
 	var n int64
 	for _, xi := range x {
 		if xi < 0 {
@@ -445,7 +445,7 @@ func replicateBytes[T any](x []byte, y []T) []T {
 func replicateAI(x *AI, y V) V {
 	switch yv := y.bv.(type) {
 	case *AB:
-		r, err := replicateInts(x.elts, yv.elts)
+		r, err := replicateIs(x.elts, yv.elts)
 		if err != nil {
 			return panicErr(err)
 		}
@@ -455,25 +455,25 @@ func replicateAI(x *AI, y V) V {
 		}
 		return NewV(&AB{elts: r, flags: fl})
 	case *AI:
-		r, err := replicateInts(x.elts, yv.elts)
+		r, err := replicateIs(x.elts, yv.elts)
 		if err != nil {
 			return panicErr(err)
 		}
 		return NewAI(r)
 	case *AF:
-		r, err := replicateInts(x.elts, yv.elts)
+		r, err := replicateIs(x.elts, yv.elts)
 		if err != nil {
 			return panicErr(err)
 		}
 		return NewAF(r)
 	case *AS:
-		r, err := replicateInts(x.elts, yv.elts)
+		r, err := replicateIs(x.elts, yv.elts)
 		if err != nil {
 			return panicErr(err)
 		}
 		return NewAS(r)
 	case *AV:
-		r, err := replicateInts(x.elts, yv.elts)
+		r, err := replicateIs(x.elts, yv.elts)
 		if err != nil {
 			return panicErr(err)
 		}
@@ -493,7 +493,7 @@ func replicateAI(x *AI, y V) V {
 	}
 }
 
-func replicateInts[T any](x []int64, y []T) ([]T, error) {
+func replicateIs[T any](x []int64, y []T) ([]T, error) {
 	var n int64
 	for _, xi := range x {
 		if xi < 0 {

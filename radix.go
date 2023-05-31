@@ -69,8 +69,8 @@ func radixSortAI(ctx *Context, x *AI, min, max int64) *AI {
 	return x
 }
 
-func radixSortAIWithSize[T signed](x *AI, buf []T, size uint, min T) *AI {
-	from := radixSortIntsWithSize[T](x.elts, buf, size, min)
+func radixSortAIWithSize[I signed](x *AI, buf []I, size uint, min I) *AI {
+	from := radixSortInt64sWithSize[I](x.elts, buf, size, min)
 	var dst []int64
 	reuse := x.reusable()
 	if reuse {
@@ -87,14 +87,14 @@ func radixSortAIWithSize[T signed](x *AI, buf []T, size uint, min T) *AI {
 	return &AI{elts: dst}
 }
 
-func radixSortIntsWithSize[T signed](x []int64, buf []T, size uint, min T) []T {
+func radixSortInt64sWithSize[I signed](x []int64, buf []I, size uint, min I) []I {
 	xlen := len(x)
 	from := buf[:xlen]
 	to := buf[xlen : xlen*2]
 	for i, xi := range x {
-		from[i] = T(xi)
+		from[i] = I(xi)
 	}
-	radixSortWithBuffer[T](from, to, size, min)
+	radixSortWithBuffer[I](from, to, size, min)
 	return from
 }
 
@@ -109,12 +109,12 @@ type unsigned interface {
 // radixSortWithBuffer sorts from using a radix sort. The to buffer slice
 // should have same length as from, size should be the bitsize of T, and min
 // should be the minimum possible value of type T.
-func radixSortWithBuffer[T signed](from, to []T, size uint, min T) {
+func radixSortWithBuffer[I signed](from, to []I, size uint, min I) {
 	var keyOffset uint
 	for keyOffset = 0; keyOffset < size; keyOffset += radix {
 		var (
 			offset [256]int // Keep track of where room is made for byte groups in the buffer
-			prev   T        = min
+			prev   I        = min
 			key    uint8
 			sorted = true
 		)
@@ -223,7 +223,7 @@ func radixGradeAI(ctx *Context, x *AI, min, max int64) V {
 			r := radixGradeAIBytes[int16](x, buf, 16, math.MinInt16)
 			return NewAB(r)
 		}
-		r := radixGradeAIInts[int16](x, buf, 16, math.MinInt16)
+		r := radixGradeAIIs[int16](x, buf, 16, math.MinInt16)
 		return NewAI(r)
 	}
 	if min >= math.MinInt32 && max <= math.MaxInt32 {
@@ -240,7 +240,7 @@ func radixGradeAI(ctx *Context, x *AI, min, max int64) V {
 			r := radixGradeAIBytes[int32](x, buf, 32, math.MinInt32)
 			return NewAB(r)
 		}
-		r := radixGradeAIInts[int32](x, buf, 32, math.MinInt32)
+		r := radixGradeAIIs[int32](x, buf, 32, math.MinInt32)
 		return NewAI(r)
 	}
 	if xlen < 256 {
@@ -253,12 +253,12 @@ func radixGradeAI(ctx *Context, x *AI, min, max int64) V {
 	return NewAI(p.Perm)
 }
 
-func radixGradeAIInts[T signed](x *AI, buf []T, size uint, min T) []int64 {
+func radixGradeAIIs[I signed](x *AI, buf []I, size uint, min I) []int64 {
 	xlen := x.Len()
 	from := buf[:xlen]
 	to := buf[xlen : xlen*2]
 	for i, xi := range x.elts {
-		from[i] = T(xi)
+		from[i] = I(xi)
 	}
 	var fromp, top []int64
 	if x.reusable() {
@@ -272,16 +272,16 @@ func radixGradeAIInts[T signed](x *AI, buf []T, size uint, min T) []int64 {
 	for i := range fromp {
 		fromp[i] = int64(i)
 	}
-	radixGradeWithBuffer[T, int64](from, to, fromp, top, size, min)
+	radixGradeWithBuffer[I, int64](from, to, fromp, top, size, min)
 	return fromp
 }
 
-func radixGradeAIBytes[T signed](x *AI, buf []T, size uint, min T) []byte {
+func radixGradeAIBytes[I signed](x *AI, buf []I, size uint, min I) []byte {
 	xlen := x.Len()
 	from := buf[:xlen]
 	to := buf[xlen : xlen*2]
 	for i, xi := range x.elts {
-		from[i] = T(xi)
+		from[i] = I(xi)
 	}
 	bufp := make([]byte, xlen*2)
 	fromp := bufp[:xlen]
@@ -289,19 +289,19 @@ func radixGradeAIBytes[T signed](x *AI, buf []T, size uint, min T) []byte {
 	for i := range fromp {
 		fromp[i] = byte(i)
 	}
-	radixGradeWithBuffer[T, byte](from, to, fromp, top, size, min)
+	radixGradeWithBuffer[I, byte](from, to, fromp, top, size, min)
 	return fromp
 }
 
 // radixGradeWithBuffer sorts from using a radix sort. The to buffer, fromp,
 // top slices should have same length as from, size should be the bitsize of T,
 // and min should be the minimum possible value of type T.
-func radixGradeWithBuffer[T signed, I integer](from, to []T, fromp, top []I, size uint, min T) {
+func radixGradeWithBuffer[J signed, I integer](from, to []J, fromp, top []I, size uint, min J) {
 	var keyOffset uint
 	for keyOffset = 0; keyOffset < size; keyOffset += radix {
 		var (
 			offset [256]I // Keep track of where room is made for byte groups in the buffer
-			prev   T      = min
+			prev   J      = min
 			key    uint8
 			sorted = true
 		)
