@@ -101,9 +101,9 @@ func applyS(s S, x V) V {
 	}
 	switch xv := x.bv.(type) {
 	case *AB:
-		return applySIntegers(string(s), xv.elts)
+		return applySIs(string(s), xv.elts)
 	case *AI:
-		return applySIntegers(string(s), xv.elts)
+		return applySIs(string(s), xv.elts)
 	case *AF:
 		x := toAI(xv)
 		if x.IsPanic() {
@@ -111,13 +111,13 @@ func applyS(s S, x V) V {
 		}
 		return applyS(s, x)
 	case *AV:
-		return monadAVc(xv, func(xi V) V { return applyS(s, xi) })
+		return mapAVc(xv, func(xi V) V { return applyS(s, xi) })
 	default:
 		return panicType("s@i", "i", x)
 	}
 }
 
-func applySIntegers[I integer](s string, x []I) V {
+func applySIs[I integer](s string, x []I) V {
 	r := make([]string, len(x))
 	for i, xi := range x {
 		ri, err := applySI(string(s), int64(xi))
@@ -161,7 +161,7 @@ func applyS2(s S, x V, y V) V {
 		}
 		return applyS2(s, x, y)
 	case *AV:
-		return monadAVc(xv, func(xi V) V { return applyS2(s, xi, y) })
+		return mapAVc(xv, func(xi V) V { return applyS2(s, xi, y) })
 	default:
 		return panicType("s[x;y]", "x", x)
 	}
@@ -193,7 +193,7 @@ func applyS2I(s S, x int64, y V) V {
 		}
 		return applyS2I(s, x, y)
 	case *AV:
-		return monadAV(yv, func(yi V) V { return applyS2I(s, int64(x), yi) })
+		return mapAV(yv, func(yi V) V { return applyS2I(s, int64(x), yi) })
 	default:
 		return panicType("s[i;y]", "y", y)
 	}
@@ -361,7 +361,7 @@ func casti(y V) V {
 	case *AF:
 		return castToAI(yv)
 	case *AV:
-		return monadAVc(yv, casti)
+		return mapAVc(yv, casti)
 	case *Dict:
 		return newDictValues(yv.keys, casti(NewV(yv.values)))
 	default:
@@ -416,7 +416,7 @@ func castn(y V) V {
 	case *AF:
 		return y
 	case *AV:
-		return monadAVc(yv, castn)
+		return mapAVc(yv, castn)
 	case *Dict:
 		return newDictValues(yv.keys, castn(NewV(yv.values)))
 	default:
@@ -499,7 +499,7 @@ func castb(y V) V {
 		}
 		return castb(y)
 	case *AV:
-		return monadAVc(yv, castb)
+		return mapAVc(yv, castb)
 	default:
 		return panicType("\"b\"$y", "y", y)
 	}
@@ -542,7 +542,7 @@ func castc(y V) V {
 		}
 		return newAVu(r)
 	case *AV:
-		return monadAVc(yv, castc)
+		return mapAVc(yv, castc)
 	default:
 		return panicType("\"c\"$y", "y", y)
 	}
@@ -691,7 +691,7 @@ func dropS(s S, y V) V {
 		}
 		return NewAS(r)
 	case *AV:
-		return monadAV(yv, func(yi V) V { return dropS(s, yi) })
+		return mapAV(yv, func(yi V) V { return dropS(s, yi) })
 	case *Dict:
 		return newDictValues(yv.keys, dropS(s, NewV(yv.values)))
 	default:
@@ -752,7 +752,7 @@ func trim(s S, y V) V {
 		}
 		return NewAS(r)
 	case *AV:
-		return monadAV(yv, func(yi V) V { return trim(s, yi) })
+		return mapAV(yv, func(yi V) V { return trim(s, yi) })
 	case *Dict:
 		return newDictValues(yv.keys, trim(s, NewV(yv.values)))
 	default:
@@ -772,7 +772,7 @@ func trimSpaces(y V) V {
 		}
 		return NewAS(r)
 	case *AV:
-		return monadAV(yv, trimSpaces)
+		return mapAV(yv, trimSpaces)
 	case *Dict:
 		return newDictValues(yv.keys, trimSpaces(NewV(yv.values)))
 	default:
@@ -894,7 +894,7 @@ func containedInS(x V, s string) V {
 		}
 		return newABb(r)
 	case *AV:
-		return monadAV(xv, func(xi V) V { return containedInS(xi, s) })
+		return mapAV(xv, func(xi V) V { return containedInS(xi, s) })
 	case *Dict:
 		return newDictValues(xv.keys, containedInS(NewV(xv.values), s))
 	default:
@@ -920,7 +920,7 @@ func scount(s S, y V) V {
 		}
 		return NewAI(r)
 	case *AV:
-		return monadAV(yv, func(yi V) V { return scount(s, yi) })
+		return mapAV(yv, func(yi V) V { return scount(s, yi) })
 	case *Dict:
 		return newDictValues(yv.keys, scount(s, NewV(yv.values)))
 	default:
@@ -939,7 +939,7 @@ func splitN(n int, sep S, y V) V {
 		}
 		return newAVu(r)
 	case *AV:
-		return monadAV(yv, func(yi V) V { return splitN(n, sep, yi) })
+		return mapAV(yv, func(yi V) V { return splitN(n, sep, yi) })
 	case *Dict:
 		return newDictValues(yv.keys, splitN(n, sep, NewV(yv.values)))
 	default:

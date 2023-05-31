@@ -10,7 +10,7 @@ func icountGroup(x V) V {
 			return newABb(nil)
 		}
 		if xv.IsBoolean() {
-			n := sumIntegers(xv.elts)
+			n := sumIs(xv.elts)
 			if n == 0 {
 				if xv.Len() < 256 {
 					return NewAB([]byte{byte(xv.Len())})
@@ -49,14 +49,14 @@ func icountGroup(x V) V {
 	case *Dict:
 		return groupBy(NewV(xv.values), NewV(xv.keys))
 	case *AV:
-		return monadAV(xv, icountGroup)
+		return mapAV(xv, icountGroup)
 	default:
 		return panicType("=x", "x", x)
 	}
 }
 
 func icountInts[I integer](x []int64) []I {
-	max := maxIntegers(x)
+	max := maxIs(x)
 	if max < 0 {
 		max = -1
 	}
@@ -118,7 +118,7 @@ func groupBy(x, y V) V {
 			return panicType("f=Y", "Y", y)
 		}
 	case *AI:
-		max := maxIntegers(xv.elts)
+		max := maxIs(xv.elts)
 		if max < 0 {
 			return protoAV()
 		}
@@ -156,7 +156,7 @@ func groupBy(x, y V) V {
 }
 
 func groupByBoolsV(x []byte, y V) V {
-	n := int(sumIntegers(x))
+	n := int(sumIs(x))
 	r := make([]V, int(b2I(n > 0)+1))
 	switch yv := y.bv.(type) {
 	case *AB:

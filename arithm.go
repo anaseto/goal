@@ -42,7 +42,7 @@ func negate(x V) V {
 		}
 		return NewV(r)
 	case *AV:
-		return monadAV(xv, negate)
+		return mapAV(xv, negate)
 	case *Dict:
 		return newDictValues(xv.keys, negate(NewV(xv.values)))
 	default:
@@ -105,7 +105,7 @@ func sign(x V) V {
 		}
 		return NewAI(r)
 	case *AV:
-		return monadAV(xv, sign)
+		return mapAV(xv, sign)
 	case *Dict:
 		return newDictValues(xv.keys, sign(NewV(xv.values)))
 	default:
@@ -141,7 +141,7 @@ func floor(x V) V {
 		}
 		return NewV(r)
 	case *AV:
-		return monadAV(xv, floor)
+		return mapAV(xv, floor)
 	case *Dict:
 		return newDictValues(xv.keys, floor(NewV(xv.values)))
 	default:
@@ -177,7 +177,7 @@ func upperCeil(x V) V {
 		}
 		return NewV(r)
 	case *AV:
-		return monadAV(xv, upperCeil)
+		return mapAV(xv, upperCeil)
 	case *Dict:
 		return newDictValues(xv.keys, upperCeil(NewV(xv.values)))
 	default:
@@ -259,7 +259,7 @@ func abs(x V) V {
 		}
 		return NewV(r)
 	case *AV:
-		return monadAV(xv, abs)
+		return mapAV(xv, abs)
 	case *Dict:
 		return newDictValues(xv.keys, abs(NewV(xv.values)))
 	default:
@@ -317,14 +317,14 @@ func modpad(x int64, y V) V {
 	case *AI:
 		if x <= 256 {
 			r := make([]byte, yv.Len())
-			modIntegers(x, yv.elts, r)
+			modIs(x, yv.elts, r)
 			if x == 2 {
 				return newABb(r)
 			}
 			return NewAB(r)
 		}
 		r := yv.reuse()
-		modIntegers(x, yv.elts, r.elts)
+		modIs(x, yv.elts, r.elts)
 		return NewV(r)
 	case *AF:
 		r := yv.reuse()
@@ -340,7 +340,7 @@ func modpad(x int64, y V) V {
 		}
 		return NewV(r)
 	case *AV:
-		return monadAV(yv, func(yi V) V { return modpad(x, yi) })
+		return mapAV(yv, func(yi V) V { return modpad(x, yi) })
 	case *Dict:
 		return newDictValues(yv.keys, modpad(x, NewV(yv.values)))
 	default:
@@ -348,7 +348,7 @@ func modpad(x int64, y V) V {
 	}
 }
 
-func modIntegers[I integer](x int64, y []int64, r []I) {
+func modIs[I integer](x int64, y []int64, r []I) {
 	if x&(x-1) == 0 {
 		x = x - 1
 		for i, yi := range y {
@@ -404,7 +404,7 @@ func divpad(x int64, y V) V {
 		}
 		return NewV(r)
 	case *AV:
-		return monadAV(yv, func(yi V) V { return divpad(x, yi) })
+		return mapAV(yv, func(yi V) V { return divpad(x, yi) })
 	case *Dict:
 		return newDictValues(yv.keys, divpad(x, NewV(yv.values)))
 	default:

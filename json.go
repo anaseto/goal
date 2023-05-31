@@ -18,7 +18,7 @@ func fJSON(x V) V {
 		}
 		return canonicalVs(r)
 	case *AV:
-		return monadAV(xv, fJSON)
+		return mapAV(xv, fJSON)
 	default:
 		return panicType("json x", "x", x)
 	}

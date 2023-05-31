@@ -116,7 +116,7 @@ func doTime(cmd string, y V, layout, loc string) V {
 		}
 		return canonicalVs(r)
 	case *AV:
-		return monadAVc(yv, func(yi V) V { return doTime(cmd, yi, layout, loc) })
+		return mapAVc(yv, func(yi V) V { return doTime(cmd, yi, layout, loc) })
 	default:
 		return panicType("time[cmd;t;...]", "t", y)
 	}

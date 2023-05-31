@@ -40,7 +40,7 @@ func isNaN(x V) V {
 		}
 		return newABb(r)
 	case *AV:
-		return monadAV(xv, isNaN)
+		return mapAV(xv, isNaN)
 	case *Dict:
 		return newDictValues(xv.keys, isNaN(NewV(xv.values)))
 	default:
@@ -91,7 +91,7 @@ func fillNaNf(fill float64, y V) V {
 		}
 		return NewAF(r)
 	case *AV:
-		return monadAV(yv, func(yi V) V { return fillNaNf(fill, yi) })
+		return mapAV(yv, func(yi V) V { return fillNaNf(fill, yi) })
 	case *Dict:
 		return newDictValues(yv.keys, fillNaNf(fill, NewV(yv.values)))
 	default:

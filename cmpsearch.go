@@ -1277,7 +1277,7 @@ func findS(s S, y V) V {
 		}
 		return NewAI(r)
 	case *AV:
-		return monadAV(yv, func(yi V) V { return findS(s, yi) })
+		return mapAV(yv, func(yi V) V { return findS(s, yi) })
 	default:
 		return panicType("s?y", "y", y)
 	}

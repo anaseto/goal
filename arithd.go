@@ -34,9 +34,9 @@ func equal(x, y V) V {
 			if yv.Len() != xv.Len() {
 				return panicLength("x=y", xv.Len(), yv.Len())
 			}
-			return dyadAVarray(xv, yv, equal)
+			return mapAVarray(xv, yv, equal)
 		}
-		return dyadAVV(xv, y, equal)
+		return mapAVV(xv, y, equal)
 	case *Dict:
 		yv, ok := y.bv.(*Dict)
 		if ok {
@@ -88,7 +88,7 @@ func equalFV(x float64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return equalFV(x, yi) })
+		return mapAV(yv, func(yi V) V { return equalFV(x, yi) })
 	default:
 		return panicType("x=y", "y", y)
 	}
@@ -130,7 +130,7 @@ func equalIV(x int64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return equalIV(x, yi) })
+		return mapAV(yv, func(yi V) V { return equalIV(x, yi) })
 	default:
 		return panicType("x=y", "y", y)
 	}
@@ -154,7 +154,7 @@ func equalSV(x S, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return equalSV(x, yi) })
+		return mapAV(yv, func(yi V) V { return equalSV(x, yi) })
 	default:
 		return panicType("x=y", "y", y)
 	}
@@ -450,9 +450,9 @@ func less(x, y V) V {
 			if yv.Len() != xv.Len() {
 				return panicLength("x<y", xv.Len(), yv.Len())
 			}
-			return dyadAVarray(xv, yv, less)
+			return mapAVarray(xv, yv, less)
 		}
-		return dyadAVV(xv, y, less)
+		return mapAVV(xv, y, less)
 	case *Dict:
 		yv, ok := y.bv.(*Dict)
 		if ok {
@@ -504,7 +504,7 @@ func lessFV(x float64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return lessFV(x, yi) })
+		return mapAV(yv, func(yi V) V { return lessFV(x, yi) })
 	default:
 		return panicType("x<y", "y", y)
 	}
@@ -546,7 +546,7 @@ func lessIV(x int64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return lessIV(x, yi) })
+		return mapAV(yv, func(yi V) V { return lessIV(x, yi) })
 	default:
 		return panicType("x<y", "y", y)
 	}
@@ -570,7 +570,7 @@ func lessSV(x S, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return lessSV(x, yi) })
+		return mapAV(yv, func(yi V) V { return lessSV(x, yi) })
 	default:
 		return panicType("x<y", "y", y)
 	}
@@ -866,9 +866,9 @@ func more(x, y V) V {
 			if yv.Len() != xv.Len() {
 				return panicLength("x>y", xv.Len(), yv.Len())
 			}
-			return dyadAVarray(xv, yv, more)
+			return mapAVarray(xv, yv, more)
 		}
-		return dyadAVV(xv, y, more)
+		return mapAVV(xv, y, more)
 	case *Dict:
 		yv, ok := y.bv.(*Dict)
 		if ok {
@@ -920,7 +920,7 @@ func moreFV(x float64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return moreFV(x, yi) })
+		return mapAV(yv, func(yi V) V { return moreFV(x, yi) })
 	default:
 		return panicType("x>y", "y", y)
 	}
@@ -962,7 +962,7 @@ func moreIV(x int64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return moreIV(x, yi) })
+		return mapAV(yv, func(yi V) V { return moreIV(x, yi) })
 	default:
 		return panicType("x>y", "y", y)
 	}
@@ -986,7 +986,7 @@ func moreSV(x S, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return moreSV(x, yi) })
+		return mapAV(yv, func(yi V) V { return moreSV(x, yi) })
 	default:
 		return panicType("x>y", "y", y)
 	}
@@ -1282,9 +1282,9 @@ func add(x, y V) V {
 			if yv.Len() != xv.Len() {
 				return panicLength("x+y", xv.Len(), yv.Len())
 			}
-			return dyadAVarray(xv, yv, add)
+			return mapAVarray(xv, yv, add)
 		}
-		return dyadAVV(xv, y, add)
+		return mapAVV(xv, y, add)
 	case *Dict:
 		yv, ok := y.bv.(*Dict)
 		if ok {
@@ -1345,7 +1345,7 @@ func addFV(x float64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return addFV(x, yi) })
+		return mapAV(yv, func(yi V) V { return addFV(x, yi) })
 	default:
 		return panicType("x+y", "y", y)
 	}
@@ -1396,7 +1396,7 @@ func addIV(x int64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return addIV(x, yi) })
+		return mapAV(yv, func(yi V) V { return addIV(x, yi) })
 	default:
 		return panicType("x+y", "y", y)
 	}
@@ -1419,7 +1419,7 @@ func addSV(x S, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return addSV(x, yi) })
+		return mapAV(yv, func(yi V) V { return addSV(x, yi) })
 	default:
 		return panicType("x+y", "y", y)
 	}
@@ -1698,9 +1698,9 @@ func subtract(x, y V) V {
 			if yv.Len() != xv.Len() {
 				return panicLength("x-y", xv.Len(), yv.Len())
 			}
-			return dyadAVarray(xv, yv, subtract)
+			return mapAVarray(xv, yv, subtract)
 		}
-		return dyadAVV(xv, y, subtract)
+		return mapAVV(xv, y, subtract)
 	case *Dict:
 		yv, ok := y.bv.(*Dict)
 		if ok {
@@ -1749,7 +1749,7 @@ func subtractFV(x float64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return subtractFV(x, yi) })
+		return mapAV(yv, func(yi V) V { return subtractFV(x, yi) })
 	default:
 		return panicType("x-y", "y", y)
 	}
@@ -1788,7 +1788,7 @@ func subtractIV(x int64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return subtractIV(x, yi) })
+		return mapAV(yv, func(yi V) V { return subtractIV(x, yi) })
 	default:
 		return panicType("x-y", "y", y)
 	}
@@ -1811,7 +1811,7 @@ func subtractSV(x S, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return subtractSV(x, yi) })
+		return mapAV(yv, func(yi V) V { return subtractSV(x, yi) })
 	default:
 		return panicType("x-y", "y", y)
 	}
@@ -2090,9 +2090,9 @@ func multiply(x, y V) V {
 			if yv.Len() != xv.Len() {
 				return panicLength("x*y", xv.Len(), yv.Len())
 			}
-			return dyadAVarray(xv, yv, multiply)
+			return mapAVarray(xv, yv, multiply)
 		}
-		return dyadAVV(xv, y, multiply)
+		return mapAVV(xv, y, multiply)
 	case *Dict:
 		yv, ok := y.bv.(*Dict)
 		if ok {
@@ -2149,7 +2149,7 @@ func multiplyFV(x float64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return multiplyFV(x, yi) })
+		return mapAV(yv, func(yi V) V { return multiplyFV(x, yi) })
 	default:
 		return panicType("x*y", "y", y)
 	}
@@ -2196,7 +2196,7 @@ func multiplyIV(x int64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return multiplyIV(x, yi) })
+		return mapAV(yv, func(yi V) V { return multiplyIV(x, yi) })
 	default:
 		return panicType("x*y", "y", y)
 	}
@@ -2235,7 +2235,7 @@ func multiplySV(x S, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return multiplySV(x, yi) })
+		return mapAV(yv, func(yi V) V { return multiplySV(x, yi) })
 	default:
 		return panicType("x*y", "y", y)
 	}
@@ -2581,9 +2581,9 @@ func divide(x, y V) V {
 			if yv.Len() != xv.Len() {
 				return panicLength("x%y", xv.Len(), yv.Len())
 			}
-			return dyadAVarray(xv, yv, divide)
+			return mapAVarray(xv, yv, divide)
 		}
-		return dyadAVV(xv, y, divide)
+		return mapAVV(xv, y, divide)
 	case *Dict:
 		yv, ok := y.bv.(*Dict)
 		if ok {
@@ -2632,7 +2632,7 @@ func divideFV(x float64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return divideFV(x, yi) })
+		return mapAV(yv, func(yi V) V { return divideFV(x, yi) })
 	default:
 		return panicType("x%y", "y", y)
 	}
@@ -2671,7 +2671,7 @@ func divideIV(x int64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return divideIV(x, yi) })
+		return mapAV(yv, func(yi V) V { return divideIV(x, yi) })
 	default:
 		return panicType("x%y", "y", y)
 	}
@@ -2908,9 +2908,9 @@ func minimum(x, y V) V {
 			if yv.Len() != xv.Len() {
 				return panicLength("x&y", xv.Len(), yv.Len())
 			}
-			return dyadAVarray(xv, yv, minimum)
+			return mapAVarray(xv, yv, minimum)
 		}
-		return dyadAVV(xv, y, minimum)
+		return mapAVV(xv, y, minimum)
 	case *Dict:
 		yv, ok := y.bv.(*Dict)
 		if ok {
@@ -2971,7 +2971,7 @@ func minimumFV(x float64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return minimumFV(x, yi) })
+		return mapAV(yv, func(yi V) V { return minimumFV(x, yi) })
 	default:
 		return panicType("x&y", "y", y)
 	}
@@ -3022,7 +3022,7 @@ func minimumIV(x int64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return minimumIV(x, yi) })
+		return mapAV(yv, func(yi V) V { return minimumIV(x, yi) })
 	default:
 		return panicType("x&y", "y", y)
 	}
@@ -3045,7 +3045,7 @@ func minimumSV(x S, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return minimumSV(x, yi) })
+		return mapAV(yv, func(yi V) V { return minimumSV(x, yi) })
 	default:
 		return panicType("x&y", "y", y)
 	}
@@ -3332,9 +3332,9 @@ func maximum(x, y V) V {
 			if yv.Len() != xv.Len() {
 				return panicLength("x|y", xv.Len(), yv.Len())
 			}
-			return dyadAVarray(xv, yv, maximum)
+			return mapAVarray(xv, yv, maximum)
 		}
-		return dyadAVV(xv, y, maximum)
+		return mapAVV(xv, y, maximum)
 	case *Dict:
 		yv, ok := y.bv.(*Dict)
 		if ok {
@@ -3395,7 +3395,7 @@ func maximumFV(x float64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return maximumFV(x, yi) })
+		return mapAV(yv, func(yi V) V { return maximumFV(x, yi) })
 	default:
 		return panicType("x|y", "y", y)
 	}
@@ -3446,7 +3446,7 @@ func maximumIV(x int64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return maximumIV(x, yi) })
+		return mapAV(yv, func(yi V) V { return maximumIV(x, yi) })
 	default:
 		return panicType("x|y", "y", y)
 	}
@@ -3469,7 +3469,7 @@ func maximumSV(x S, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return maximumSV(x, yi) })
+		return mapAV(yv, func(yi V) V { return maximumSV(x, yi) })
 	default:
 		return panicType("x|y", "y", y)
 	}
@@ -3752,9 +3752,9 @@ func arctan2(x, y V) V {
 			if yv.Len() != xv.Len() {
 				return panicLength("x atan y", xv.Len(), yv.Len())
 			}
-			return dyadAVarray(xv, yv, arctan2)
+			return mapAVarray(xv, yv, arctan2)
 		}
-		return dyadAVV(xv, y, arctan2)
+		return mapAVV(xv, y, arctan2)
 	case *Dict:
 		yv, ok := y.bv.(*Dict)
 		if ok {
@@ -3803,7 +3803,7 @@ func arctan2FV(x float64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return arctan2FV(x, yi) })
+		return mapAV(yv, func(yi V) V { return arctan2FV(x, yi) })
 	default:
 		return panicType("x atan y", "y", y)
 	}
@@ -3842,7 +3842,7 @@ func arctan2IV(x int64, y V) V {
 		}
 		return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
 	case *AV:
-		return monadAV(yv, func(yi V) V { return arctan2IV(x, yi) })
+		return mapAV(yv, func(yi V) V { return arctan2IV(x, yi) })
 	default:
 		return panicType("x atan y", "y", y)
 	}

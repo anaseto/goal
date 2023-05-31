@@ -31,7 +31,7 @@ func mathm(x V, f func(float64) float64) V {
 		}
 		return NewV(r)
 	case *AV:
-		return monadAV(xv, func(xi V) V { return mathm(xi, f) })
+		return mapAV(xv, func(xi V) V { return mathm(xi, f) })
 	case *Dict:
 		r := mathm(NewV(xv.values), f)
 		return NewV(&Dict{keys: xv.keys, values: r.bv.(array)})

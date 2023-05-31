@@ -129,9 +129,9 @@ func (ctx *Context) amend3arrayGeneric(x array, y, f V) (array, error) {
 	}
 	switch yv := y.bv.(type) {
 	case *AB:
-		return amend3arrayAtIntegers(ctx, x, yv.elts, f)
+		return amend3arrayAtIs(ctx, x, yv.elts, f)
 	case *AI:
-		return amend3arrayAtIntegers(ctx, x, yv.elts, f)
+		return amend3arrayAtIs(ctx, x, yv.elts, f)
 	case *AV:
 		var err error
 		for _, yi := range yv.elts {
@@ -146,7 +146,7 @@ func (ctx *Context) amend3arrayGeneric(x array, y, f V) (array, error) {
 	}
 }
 
-func amend3arrayAtIntegers[I integer](ctx *Context, x array, y []I, f V) (array, error) {
+func amend3arrayAtIs[I integer](ctx *Context, x array, y []I, f V) (array, error) {
 	var err error
 	for _, yi := range y {
 		x, err = ctx.amend3arrayI(x, int64(yi), f)
@@ -253,9 +253,9 @@ func (ctx *Context) amend4arrayGeneric(x array, y, f, z V) (array, error) {
 	}
 	switch yv := y.bv.(type) {
 	case *AB:
-		return amend4arrayAtIntegers(ctx, x, yv.elts, f, z)
+		return amend4arrayAtIs(ctx, x, yv.elts, f, z)
 	case *AI:
-		return amend4arrayAtIntegers(ctx, x, yv.elts, f, z)
+		return amend4arrayAtIs(ctx, x, yv.elts, f, z)
 	case *AV:
 		var err error
 		za, ok := z.bv.(array)
@@ -285,7 +285,7 @@ func (ctx *Context) amend4arrayGeneric(x array, y, f, z V) (array, error) {
 	}
 }
 
-func amend4arrayAtIntegers[I integer](ctx *Context, x array, y []I, f, z V) (array, error) {
+func amend4arrayAtIs[I integer](ctx *Context, x array, y []I, f, z V) (array, error) {
 	var err error
 	za, ok := z.bv.(array)
 	if !ok {

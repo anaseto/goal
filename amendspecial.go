@@ -70,9 +70,9 @@ func amend3NotV(x array, y V) (array, error) {
 	}
 	switch yv := y.bv.(type) {
 	case *AB:
-		return amend3NotIntegers(x, yv.elts), nil
+		return amend3NotIs(x, yv.elts), nil
 	case *AI:
-		return amend3NotIntegers(x, yv.elts), nil
+		return amend3NotIs(x, yv.elts), nil
 	case *AV:
 		return arithmAmend3AV(x, yv, amend3NotV)
 	default:
@@ -96,7 +96,7 @@ func amend3NotI(x array, y int64) array {
 	}
 }
 
-func amend3NotIntegers[I integer](x array, y []I) array {
+func amend3NotIs[I integer](x array, y []I) array {
 	switch xv := x.(type) {
 	case *AB:
 		for _, yi := range y {
@@ -114,7 +114,7 @@ func amend3NotIntegers[I integer](x array, y []I) array {
 		}
 		return x
 	default:
-		panic("amend3NotIntegers")
+		panic("amend3NotIs")
 	}
 }
 
@@ -131,9 +131,9 @@ func amend3NegateV(x array, y V) (array, error) {
 	}
 	switch yv := y.bv.(type) {
 	case *AB:
-		return amend3NegateIntegers(x, yv.elts), nil
+		return amend3NegateIs(x, yv.elts), nil
 	case *AI:
-		return amend3NegateIntegers(x, yv.elts), nil
+		return amend3NegateIs(x, yv.elts), nil
 	case *AV:
 		return arithmAmend3AV(x, yv, amend3NegateV)
 	default:
@@ -161,7 +161,7 @@ func amend3NegateI(x array, y int64) array {
 	}
 }
 
-func amend3NegateIntegers[I integer](x array, y []I) array {
+func amend3NegateIs[I integer](x array, y []I) array {
 	switch xv := x.(type) {
 	case *AB:
 		r := make([]int64, xv.Len())
@@ -183,7 +183,7 @@ func amend3NegateIntegers[I integer](x array, y []I) array {
 		}
 		return x
 	default:
-		panic("amend3NegateIntegers")
+		panic("amend3NegateIs")
 	}
 }
 
@@ -239,15 +239,15 @@ func amend4RightIs[I integer](x array, y []I, z V) (array, error) {
 			len(y), za.Len())
 	}
 	if sameType(x, za) {
-		return amend4RightIntegersSlice(x, y, za), nil
+		return amend4RightIsATs(x, y, za), nil
 	}
-	return amend4RightIntegersArrays(x, y, za), nil
+	return amend4RightIsArrays(x, y, za), nil
 }
 
 func amend4RightIsV[I integer](x array, y []I, z V) (array, error) {
 	if x.canSet(z) {
 		// NOTE: we could optimize some float and integer mix cases.
-		amend4RightIntegersAtom(x, y, z)
+		amend4RightIsAtom(x, y, z)
 		return x, nil
 	}
 	r := make([]V, x.Len())
@@ -261,7 +261,7 @@ func amend4RightIsV[I integer](x array, y []I, z V) (array, error) {
 	return &AV{elts: r}, nil
 }
 
-func amend4RightIntegersAtom[I integer](x array, y []I, z V) {
+func amend4RightIsAtom[I integer](x array, y []I, z V) {
 	switch xv := x.(type) {
 	case *AB:
 		amendSlice(xv.elts, y, byte(z.I()))
@@ -284,7 +284,7 @@ func amendSlice[I integer, T any](x []T, y []I, z T) {
 	}
 }
 
-func amend4RightIntegersSlice[I integer](x array, y []I, za array) array {
+func amend4RightIsATs[I integer](x array, y []I, za array) array {
 	switch xv := x.(type) {
 	case *AB:
 		zv := za.(*AB)
@@ -311,7 +311,7 @@ func amend4RightSlices[I integer, T any](x []T, y []I, z []T) {
 	}
 }
 
-func amend4RightIntegersArrays[I integer](x array, y []I, z array) array {
+func amend4RightIsArrays[I integer](x array, y []I, z array) array {
 	for i := range y {
 		if !x.canSet(z.at(i)) {
 			r := make([]V, x.Len())
@@ -366,9 +366,9 @@ func amend4Arith(x array, y V, f func(V, V) V, z V) (array, error) {
 	}
 	switch yv := y.bv.(type) {
 	case *AB:
-		return arithAmendIntegersV(x, yv.elts, f, z)
+		return arithAmendIsV(x, yv.elts, f, z)
 	case *AI:
-		return arithAmendIntegersV(x, yv.elts, f, z)
+		return arithAmendIsV(x, yv.elts, f, z)
 	case *AV:
 		return arithAmend4AV(x, yv.elts, f, z)
 	default:
@@ -385,19 +385,19 @@ func arithAmendI(x array, y int, f func(V, V) V, z V) (array, error) {
 	return amendArrayAt(x, y, repl), nil
 }
 
-func arithAmendIntegersV[I integer](x array, y []I, f func(V, V) V, z V) (array, error) {
+func arithAmendIsV[I integer](x array, y []I, f func(V, V) V, z V) (array, error) {
 	za, ok := z.bv.(array)
 	if !ok {
-		return arithAmendIntegersAtom(x, y, f, z)
+		return arithAmendIsAtom(x, y, f, z)
 	}
 	if za.Len() != len(y) {
 		return x, fmt.Errorf("length mismatch between y and z (%d vs %d)",
 			len(y), za.Len())
 	}
-	return arithAmendIntegersArray(x, y, f, za)
+	return arithAmendIsArray(x, y, f, za)
 }
 
-func arithAmendIntegersArray[I integer](x array, y []I, f func(V, V) V, z array) (array, error) {
+func arithAmendIsArray[I integer](x array, y []I, f func(V, V) V, z array) (array, error) {
 	var err error
 	for i, yi := range y {
 		x, err = arithAmendI(x, int(yi), f, z.at(i))
@@ -408,7 +408,7 @@ func arithAmendIntegersArray[I integer](x array, y []I, f func(V, V) V, z array)
 	return x, nil
 }
 
-func arithAmendIntegersAtom[I integer](x array, y []I, f func(V, V) V, z V) (array, error) {
+func arithAmendIsAtom[I integer](x array, y []I, f func(V, V) V, z V) (array, error) {
 	var err error
 	z.incrRC2()
 	for _, yi := range y {

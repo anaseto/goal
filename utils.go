@@ -215,7 +215,7 @@ func toIndicesRec(x V) V {
 	case *AF:
 		return toAI(xv)
 	case *AV:
-		return monadAVc(xv, func(xi V) V { return toIndicesRec(xi) })
+		return mapAVc(xv, func(xi V) V { return toIndicesRec(xi) })
 	case *AS:
 		return Panicf("bad type \"%s\" as index", x.Type())
 	default:
@@ -821,7 +821,7 @@ func maxIndices(x V) int64 {
 		}
 		return int64(maxBytes(xv.elts))
 	case *AI:
-		return maxIntegers(xv.elts)
+		return maxIs(xv.elts)
 	default:
 		panic("maxIndices")
 	}
@@ -853,7 +853,7 @@ func (x V) numeric() bool {
 	}
 }
 
-func monadAV(x *AV, f func(V) V) V {
+func mapAV(x *AV, f func(V) V) V {
 	r := x.reuse()
 	for i, xi := range x.elts {
 		ri := f(xi)
@@ -866,7 +866,7 @@ func monadAV(x *AV, f func(V) V) V {
 	return NewV(r)
 }
 
-func monadAVc(x *AV, f func(V) V) V {
+func mapAVc(x *AV, f func(V) V) V {
 	r := x.reuse()
 	for i, xi := range x.elts {
 		ri := f(xi)
@@ -879,7 +879,7 @@ func monadAVc(x *AV, f func(V) V) V {
 	return canonicalAV(r)
 }
 
-func dyadAVV(x *AV, y V, f func(V, V) V) V {
+func mapAVV(x *AV, y V, f func(V, V) V) V {
 	r := x.reuse()
 	for i, xi := range x.elts {
 		ri := f(xi, y)
@@ -892,7 +892,7 @@ func dyadAVV(x *AV, y V, f func(V, V) V) V {
 	return NewV(r)
 }
 
-func dyadAVarray(x *AV, y array, f func(V, V) V) V {
+func mapAVarray(x *AV, y array, f func(V, V) V) V {
 	r := x.reuse()
 	for i, xi := range x.elts {
 		ri := f(xi, y.at(i))
@@ -905,7 +905,7 @@ func dyadAVarray(x *AV, y array, f func(V, V) V) V {
 	return NewV(r)
 }
 
-func sumIntegers[T integer](x []T) int64 {
+func sumIs[I integer](x []I) int64 {
 	var n int64
 	for _, xi := range x {
 		n += int64(xi)

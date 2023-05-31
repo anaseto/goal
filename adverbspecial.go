@@ -9,9 +9,9 @@ import (
 func each2String(ctx *Context, x array) V {
 	switch xv := x.(type) {
 	case *AB:
-		return NewAS(stringIntegers(xv.elts))
+		return NewAS(stringIs(xv.elts))
 	case *AI:
-		return NewAS(stringIntegers(xv.elts))
+		return NewAS(stringIs(xv.elts))
 	case *AF:
 		return NewAS(stringFloat64s(xv.elts, ctx.Prec))
 	case *AS:
@@ -27,7 +27,7 @@ func each2String(ctx *Context, x array) V {
 	}
 }
 
-func stringIntegers[T integer](x []T) []string {
+func stringIs[T integer](x []T) []string {
 	r := make([]string, len(x))
 	for i, xi := range x {
 		r[i] = strconv.FormatInt(int64(xi), 10)
@@ -141,9 +141,9 @@ func fold2vAdd(x V) V {
 	case *Dict:
 		return fold2vAdd(NewV(xv.values))
 	case *AB:
-		return NewI(sumIntegers(xv.elts))
+		return NewI(sumIs(xv.elts))
 	case *AI:
-		return NewI(sumIntegers(xv.elts))
+		return NewI(sumIs(xv.elts))
 	case *AF:
 		return NewF(sumNumbers(0.0, xv.elts))
 	case *AS:
@@ -378,9 +378,9 @@ func fold2vMax(x V) V {
 		if xv.IsBoolean() {
 			return NewI(maxBools(xv.elts))
 		}
-		return NewI(maxIntegers(xv.elts))
+		return NewI(maxIs(xv.elts))
 	case *AI:
-		return NewI(maxIntegers(xv.elts))
+		return NewI(maxIs(xv.elts))
 	case *AF:
 		return NewF(maxNumbers(math.Inf(-1), xv.elts))
 	case *AS:
@@ -458,7 +458,7 @@ func maxStrings(x string, y []string) string {
 	return x
 }
 
-func maxIntegers[I integer](x []I) int64 {
+func maxIs[I integer](x []I) int64 {
 	var max int64 = math.MinInt64
 	for _, xi := range x {
 		if int64(xi) > max {
@@ -479,9 +479,9 @@ func fold2vMin(x V) V {
 		if xv.IsBoolean() {
 			return NewI(minBools(xv.elts))
 		}
-		return NewI(minIntegers(xv.elts))
+		return NewI(minIs(xv.elts))
 	case *AI:
-		return NewI(minIntegers(xv.elts))
+		return NewI(minIs(xv.elts))
 	case *AF:
 		return NewF(minNumbers(math.Inf(1), xv.elts))
 	case *AS:
@@ -544,7 +544,7 @@ func minBools(x []byte) int64 {
 	return int64(min)
 }
 
-func minIntegers[T integer](x []T) int64 {
+func minIs[T integer](x []T) int64 {
 	var min int64 = math.MaxInt64
 	for _, xi := range x {
 		if int64(xi) < min {

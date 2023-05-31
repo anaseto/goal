@@ -81,7 +81,7 @@ func encodeIIs[I integer](f int64, a []I, cols, n int) {
 }
 
 func encodeIsIv[I integer](f []I, x int64) V {
-	max := maxIntegers(f)
+	max := maxIs(f)
 	if max <= 256 {
 		r := encodeIsI[I, byte](f, x)
 		return NewAB(r)
@@ -119,7 +119,7 @@ func encodeIsBytes[I integer](f []I, x []byte) V {
 }
 
 func encodeIsInts[I integer](f []I, x []int64) V {
-	min := minIntegers(x)
+	min := minIs(x)
 	if min < 0 {
 		return Panicf(`I\I : negative integer (%d)`, min)
 	}
@@ -173,7 +173,7 @@ func encode(f V, x V) V {
 			}
 			return encode(f, aix)
 		case *AV:
-			return monadAVc(xv, func(xi V) V { return encode(f, xi) })
+			return mapAVc(xv, func(xi V) V { return encode(f, xi) })
 		default:
 			return panicType("i\\x", "x", x)
 		}
@@ -228,7 +228,7 @@ func encodeIs[I integer](f []I, x V) V {
 		}
 		return encodeIs(f, aix)
 	case *AV:
-		return monadAVc(xv, func(xi V) V { return encodeIs(f, xi) })
+		return mapAVc(xv, func(xi V) V { return encodeIs(f, xi) })
 	default:
 		return panicType("I\\x", "x", x)
 	}
@@ -260,7 +260,7 @@ func decode(f V, x V) V {
 			}
 			return decode(f, aix)
 		case *AV:
-			return monadAVc(xv, func(xi V) V { return decode(f, xi) })
+			return mapAVc(xv, func(xi V) V { return decode(f, xi) })
 		default:
 			return panicType("i/x", "x", x)
 		}
@@ -322,7 +322,7 @@ func decodeIs[I integer](f []I, x V) V {
 		}
 		return decodeIs(f, aix)
 	case *AV:
-		return monadAVc(xv, func(xi V) V { return decodeIs(f, xi) })
+		return mapAVc(xv, func(xi V) V { return decodeIs(f, xi) })
 	default:
 		return panicType("I/x", "x", x)
 	}

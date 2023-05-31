@@ -79,7 +79,7 @@ func rotate(x, y V) V {
 		}
 		return rotate(x, y)
 	case *AV:
-		return dyadAVV(xv, y, rotate)
+		return mapAVV(xv, y, rotate)
 	default:
 		return panicType("x rotate y", "x", x)
 	}

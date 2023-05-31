@@ -119,7 +119,7 @@ func applyRxMatch(x *rx, y V) V {
 		}
 		return NewAB(r)
 	case *AV:
-		return monadAV(yv, func(yi V) V { return applyRxMatch(x, yi) })
+		return mapAV(yv, func(yi V) V { return applyRxMatch(x, yi) })
 	default:
 		return panicType("r[y]", "y", y)
 	}
@@ -138,7 +138,7 @@ func applyRxFindSubmatch(x *rx, y V) V {
 		}
 		return newAVu(r)
 	case *AV:
-		return monadAV(yv, func(yi V) V { return applyRxFindSubmatch(x, yi) })
+		return mapAV(yv, func(yi V) V { return applyRxFindSubmatch(x, yi) })
 	default:
 		return panicType("r[y]", "y", y)
 	}
@@ -180,7 +180,7 @@ func applyRxFindAllSubmatch(x *rx, y V, n int64) V {
 		}
 		return newAVu(r)
 	case *AV:
-		return monadAV(yv, func(yi V) V { return applyRxFindAllSubmatch(x, yi, n) })
+		return mapAV(yv, func(yi V) V { return applyRxFindAllSubmatch(x, yi, n) })
 	default:
 		return panicType("r[y]", "y", y)
 	}
@@ -200,7 +200,7 @@ func applyRxFindAll(x *rx, y V, n int64) V {
 		}
 		return newAVu(r)
 	case *AV:
-		return monadAV(yv, func(yi V) V { return applyRxFindAll(x, yi, n) })
+		return mapAV(yv, func(yi V) V { return applyRxFindAll(x, yi, n) })
 	default:
 		return panicType("r[y]", "y", y)
 	}
@@ -220,7 +220,7 @@ func splitRx(f *rx, x V) V {
 		}
 		return newAVu(r)
 	case *AV:
-		return monadAV(xv, func(xi V) V { return splitRx(f, xi) })
+		return mapAV(xv, func(xi V) V { return splitRx(f, xi) })
 	default:
 		return panicType("r\\x", "x", x)
 	}

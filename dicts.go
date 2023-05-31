@@ -112,18 +112,18 @@ func dictMerge(xd, yd *Dict) V {
 	var r array
 	switch kyv := ky.bv.(type) {
 	case *AB:
-		r = mergeAtIntegers(values, kyv.elts, yd.values)
+		r = mergeAtIs(values, kyv.elts, yd.values)
 	case *AI:
-		r = mergeAtIntegers(values, kyv.elts, yd.values)
+		r = mergeAtIs(values, kyv.elts, yd.values)
 	}
 	return NewV(&Dict{keys: keys, values: canonicalArray(r)})
 }
 
-func mergeAtIntegers[I integer](x array, y []I, z array) array {
+func mergeAtIs[I integer](x array, y []I, z array) array {
 	if sameType(x, z) {
-		return amend4RightIntegersSlice(x, y, z)
+		return amend4RightIsATs(x, y, z)
 	}
-	return amend4RightIntegersArrays(x, y, z)
+	return amend4RightIsArrays(x, y, z)
 }
 
 func dictArith(xd, yd *Dict, f func(V, V) V) V {
@@ -132,9 +132,9 @@ func dictArith(xd, yd *Dict, f func(V, V) V) V {
 	var r array
 	switch kyv := ky.bv.(type) {
 	case *AB:
-		r, err = arithAmendIntegersArray(values, kyv.elts, f, yd.values)
+		r, err = arithAmendIsArray(values, kyv.elts, f, yd.values)
 	case *AI:
-		r, err = arithAmendIntegersArray(values, kyv.elts, f, yd.values)
+		r, err = arithAmendIsArray(values, kyv.elts, f, yd.values)
 	}
 	if err != nil {
 		return Panicf("%v", err)

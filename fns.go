@@ -37,7 +37,7 @@ func enum(x V) V {
 		}
 		return newAVu(r)
 	case *AV:
-		return monadAV(xv, enum)
+		return mapAV(xv, enum)
 	case *Dict:
 		return xv.Keys()
 	default:
@@ -150,7 +150,7 @@ func where(x V) V {
 		}
 		return NewAI(r)
 	case *AV:
-		return monadAVc(xv, where)
+		return mapAVc(xv, where)
 	case *Dict:
 		if xv.values.numeric() {
 			r := where(NewV(xv.values))
@@ -551,19 +551,19 @@ func weedOut(x, y V) V {
 func weedOutAIs[I integer](x *A[I], y V) V {
 	switch yv := y.bv.(type) {
 	case *AB:
-		r := weedOutIntegers(x.elts, yv.elts)
+		r := weedOutIs(x.elts, yv.elts)
 		return NewV(&AB{elts: r, flags: yv.flags &^ flagImmutable})
 	case *AI:
-		r := weedOutIntegers(x.elts, yv.elts)
+		r := weedOutIs(x.elts, yv.elts)
 		return NewV(&AI{elts: r, flags: yv.flags &^ flagImmutable})
 	case *AF:
-		r := weedOutIntegers(x.elts, yv.elts)
+		r := weedOutIs(x.elts, yv.elts)
 		return NewV(&AF{elts: r, flags: yv.flags &^ flagImmutable})
 	case *AS:
-		r := weedOutIntegers(x.elts, yv.elts)
+		r := weedOutIs(x.elts, yv.elts)
 		return NewV(&AS{elts: r, flags: yv.flags &^ flagImmutable})
 	case *AV:
-		r := weedOutIntegers(x.elts, yv.elts)
+		r := weedOutIs(x.elts, yv.elts)
 		return canonicalAV(&AV{elts: r, flags: yv.flags &^ flagImmutable})
 	case *Dict:
 		keys := weedOutAIs(x, NewV(yv.keys))
@@ -580,7 +580,7 @@ func weedOutAIs[I integer](x *A[I], y V) V {
 	}
 }
 
-func weedOutIntegers[I integer, T any](x []I, y []T) []T {
+func weedOutIs[I integer, T any](x []I, y []T) []T {
 	var n int64
 	for _, xi := range x {
 		n += b2I(xi == 0)
@@ -732,7 +732,7 @@ func eval(ctx *Context, x V) V {
 		}
 		return canonicalVs(r)
 	case *AV:
-		return monadAVc(xv, func(xi V) V { return eval(ctx, xi) })
+		return mapAVc(xv, func(xi V) V { return eval(ctx, xi) })
 	default:
 		return panicType("eval x", "x", x)
 	}
