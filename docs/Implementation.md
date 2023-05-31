@@ -25,10 +25,10 @@ SIMD) and Rust (with it's excellent regexp library), but I only know the first
 on the surface, I don't feel comfortable with the second, and SIMD comes at
 quite a cost in code complexity and portability anyway.
 
-Also, Go gives us excellent garbage collection out of the box, which is quite a
-good thing, as my knowledge about garbage collection implementation is limited.
-I know there are GC libraries for most non-GC languages, but it's still one
-less thing to worry about. As a tradeoff, we cannot catch out of memory errors
+Also, Go gives us good garbage collection out of the box, which is quite a good
+thing, as my knowledge about garbage collection implementation is limited.  I
+know there are GC libraries for most non-GC languages, but it's still one less
+thing to worry about. As a tradeoff, we cannot catch out of memory errors
 reliably in programs.
 
 Even counting the recent generics addition, a downside of Go for implementing
@@ -38,7 +38,7 @@ given Goal's somewhat minimalist design, it's not an issue for me.
 Interestingly, while Go and Goal are quite the opposite in terms of conciseness
 due to the gap between scalar and array paradigms, they both encourage idioms
 over abstraction, and writing executable code over writing types: this might
-explain why this in at least the third project for an array language in Go.
+explain why this is at least the third project for an array language in Go.
 
 # Context
 
@@ -264,6 +264,7 @@ normally going to be using array primitives on performance sensitive parts, so
 it's going to go fast, not like in SIMD or gonum fast in Goal's case, but fast
 like in typical Go code. Also, talking about array performace, the refcount
 system that allows for amortized constant time append and memory reuse in many
-builtins while using immutable arrays has been the major source of bugs during
-development: I know what people mean now when they say refcounting stuff is
-hard!
+builtins while using immutable arrays has been maybe the major source of bugs
+during development: I know what people mean now when they say refcounting stuff
+is hard! Thankfully, I only had to deal with a simplified version of
+refcounting, because memory management is done by Go's GC.
