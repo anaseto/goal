@@ -18,12 +18,12 @@ type valueKind int8
 
 const (
 	valNil      valueKind = iota
-	valInt                // unboxed int64 (n field)
-	valFloat              // unboxed float64 (n field)
-	valVariadic           // unboxed int32 (n field)
-	valLambda             // unboxed int32 (n field)
-	valBoxed              // boxed value (value field)
-	valPanic              // boxed value (value field)
+	valInt                // unboxed int64 (uv field)
+	valFloat              // unboxed float64 (uv field)
+	valVariadic           // unboxed int32 (uv field)
+	valLambda             // unboxed int32 (uv field)
+	valBoxed              // boxed value (bv field)
+	valPanic              // boxed value (bv field)
 )
 
 // Value is the interface satisfied by all boxed values.
@@ -88,13 +88,13 @@ func NewV(xv Value) V {
 	return V{kind: valBoxed, bv: xv}
 }
 
-// variadic retrieves the variadic value from N field. It assumes kind is
+// variadic retrieves the variadic value from uv field. It assumes kind is
 // IntVariadic.
 func (x V) variadic() variadic {
 	return variadic(x.uv)
 }
 
-// Variadic retrieves the lambda value from N field. It assumes kind is
+// Variadic retrieves the lambda value from uv field. It assumes kind is
 // IntLambda.
 func (x V) lambda() lambda {
 	return lambda(x.uv)
@@ -105,7 +105,7 @@ func (x V) Error() V {
 	return x.bv.(*errV).V
 }
 
-// I retrieves the unboxed integer value from N field. It assumes x.IsI().
+// I retrieves the unboxed integer value from uv field. It assumes x.IsI().
 func (x V) I() int64 {
 	return x.uv
 }

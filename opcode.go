@@ -93,7 +93,7 @@ func (ctx *Context) opcodesString(ops []opcode, lc *lambdaCode) string {
 		case opJump, opJumpFalse, opJumpTrue:
 			fmt.Fprintf(&sb, "%d", int(ops[i+1])+1+i)
 		}
-		fmt.Fprint(&sb, "\n")
+		sb.WriteByte('\n')
 		i += op.argc()
 	}
 	return sb.String()

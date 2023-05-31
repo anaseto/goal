@@ -285,8 +285,8 @@ func sortBy(ctx *Context, keys, values array) *Dict {
 		nv := values.atBytes(av.elts)
 		return &Dict{keys: nk, values: nv}
 	case *AI:
-		nk := keys.atInts(av.elts)
-		nv := values.atInts(av.elts)
+		nk := keys.atInt64s(av.elts)
+		nv := values.atInt64s(av.elts)
 		return &Dict{keys: nk, values: nv}
 	default:
 		panic("sortBy")

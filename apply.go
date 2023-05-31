@@ -485,7 +485,7 @@ func applyArray(x array, y V) V {
 	}
 	switch yv := y.bv.(type) {
 	case *AB:
-		return x.vAtBytes(yv)
+		return x.vAtAB(yv)
 	case *AF:
 		y = toAI(yv)
 		if y.IsPanic() {
@@ -493,7 +493,7 @@ func applyArray(x array, y V) V {
 		}
 		return applyArray(x, y)
 	case *AI:
-		return x.vAtInts(yv)
+		return x.vAtAI(yv)
 	case *AV:
 		r := make([]V, yv.Len())
 		for i, yi := range yv.elts {

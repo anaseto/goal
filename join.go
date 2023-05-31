@@ -411,12 +411,12 @@ func joinAV(x *AV, y V, left bool) V {
 		if x.Len() == 0 {
 			return toArray(y)
 		}
+		y.MarkImmutable()
 		if left {
 			return NewV(&AV{elts: joinSliceLeft(x.elts, y)})
 		}
 		if x.reusable() {
 			x.elts = append(x.elts, y)
-			y.MarkImmutable()
 			x.flags = flagNone
 			return NewV(x)
 		}
@@ -449,11 +449,13 @@ func joinAtomToArray(x V, y array, left bool) V {
 	r := make([]V, y.Len()+1)
 	if left {
 		r[0] = x
+		x.MarkImmutable()
 		for i := 1; i < len(r); i++ {
 			r[i] = y.at(i - 1)
 		}
 	} else {
 		r[len(r)-1] = x
+		x.MarkImmutable()
 		for i := 0; i < len(r)-1; i++ {
 			r[i] = y.at(i)
 		}

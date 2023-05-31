@@ -12,19 +12,20 @@ type array interface {
 	RefCounter
 	countable
 	sort.Interface
-	at(i int) V           // x[i]
-	slice(i, j int) array // x[i:j]
-	getFlags() flags      // get the array's flags
-	setFlags(flags)       // set the array's flags
-	set(i int, y V)       // puts y at indix i, assuming compatibility
-	vAtInts(y *AI) V      // x[y] (like in goal code)
-	vAtBytes(y *AB) V     // x[y] (like in goal code)
-	atInts([]int64) array // like x[y] but assumes valid positive indices
-	atBytes([]byte) array // like x[y] but assumes valid positive indices
-	sclone() array        // shallow clone, erases flags
-	numeric() bool        // flat numeric array
-	canSet(y V) bool      // compatible type for set
-	reusable() bool       // reusable array
+
+	at(i int) V             // x[i]
+	atBytes([]byte) array   // like x[y] but assumes valid positive indices
+	atInt64s([]int64) array // like x[y] but assumes valid positive indices
+	canSet(y V) bool        // compatible type for set
+	getFlags() flags        // get the array's flags
+	numeric() bool          // flat numeric array
+	reusable() bool         // reusable array
+	sclone() array          // shallow clone, erases flags
+	set(i int, y V)         // puts y at indix i, assuming compatibility
+	setFlags(flags)         // set the array's flags
+	slice(i, j int) array   // x[i:j]
+	vAtAB(y *AB) V          // x[y] (like in goal code)
+	vAtAI(y *AI) V          // x[y] (like in goal code)
 }
 
 type flags uint32
@@ -308,26 +309,26 @@ func selectNumsAtInts[N number](dst, x []N, y []int64) {
 	}
 }
 
-func (x *AB) vAtInts(y *AI) V {
+func (x *AB) vAtAI(y *AI) V {
 	r := &AB{elts: make([]byte, y.Len())}
 	r.flags = x.flags & flagBool
 	selectNumsAtInts(r.elts, x.elts, y.elts)
 	return NewV(r)
 }
 
-func (x *AI) vAtInts(y *AI) V {
+func (x *AI) vAtAI(y *AI) V {
 	r := make([]int64, y.Len())
 	selectNumsAtInts(r, x.elts, y.elts)
 	return NewAI(r)
 }
 
-func (x *AF) vAtInts(y *AI) V {
+func (x *AF) vAtAI(y *AI) V {
 	r := make([]float64, y.Len())
 	selectNumsAtInts(r, x.elts, y.elts)
 	return NewAF(r)
 }
 
-func (x *AS) vAtInts(y *AI) V {
+func (x *AS) vAtAI(y *AI) V {
 	r := make([]string, y.Len())
 	xlen := int64(x.Len())
 	for i, yi := range y.elts {
@@ -343,7 +344,7 @@ func (x *AS) vAtInts(y *AI) V {
 	return NewAS(r)
 }
 
-func (x *AV) vAtInts(y *AI) V {
+func (x *AV) vAtAI(y *AI) V {
 	r := make([]V, y.Len())
 	xlen := int64(x.Len())
 	var p V
@@ -374,26 +375,26 @@ func selectNumsAtBytes[N number](dst, x []N, y []byte) {
 	}
 }
 
-func (x *AB) vAtBytes(y *AB) V {
+func (x *AB) vAtAB(y *AB) V {
 	r := &AB{elts: make([]byte, y.Len())}
 	r.flags = x.flags & flagBool
 	selectNumsAtBytes(r.elts, x.elts, y.elts)
 	return NewV(r)
 }
 
-func (x *AI) vAtBytes(y *AB) V {
+func (x *AI) vAtAB(y *AB) V {
 	r := make([]int64, y.Len())
 	selectNumsAtBytes(r, x.elts, y.elts)
 	return NewAI(r)
 }
 
-func (x *AF) vAtBytes(y *AB) V {
+func (x *AF) vAtAB(y *AB) V {
 	r := make([]float64, y.Len())
 	selectNumsAtBytes(r, x.elts, y.elts)
 	return NewAF(r)
 }
 
-func (x *AS) vAtBytes(y *AB) V {
+func (x *AS) vAtAB(y *AB) V {
 	r := make([]string, y.Len())
 	xlen := x.Len()
 	for i, yi := range y.elts {
@@ -406,7 +407,7 @@ func (x *AS) vAtBytes(y *AB) V {
 	return NewAS(r)
 }
 
-func (x *AV) vAtBytes(y *AB) V {
+func (x *AV) vAtAB(y *AB) V {
 	r := make([]V, y.Len())
 	xlen := x.Len()
 	var p V
@@ -423,7 +424,7 @@ func (x *AV) vAtBytes(y *AB) V {
 	return canonicalVs(r)
 }
 
-func (x *AB) atInts(y []int64) array {
+func (x *AB) atInt64s(y []int64) array {
 	r := &AB{elts: make([]byte, len(y))}
 	if x.IsBoolean() {
 		r.flags |= flagBool
@@ -434,7 +435,7 @@ func (x *AB) atInts(y []int64) array {
 	return r
 }
 
-func (x *AI) atInts(y []int64) array {
+func (x *AI) atInt64s(y []int64) array {
 	r := make([]int64, len(y))
 	for i, yi := range y {
 		r[i] = x.elts[yi]
@@ -442,7 +443,7 @@ func (x *AI) atInts(y []int64) array {
 	return &AI{elts: r}
 }
 
-func (x *AF) atInts(y []int64) array {
+func (x *AF) atInt64s(y []int64) array {
 	r := make([]float64, len(y))
 	for i, yi := range y {
 		r[i] = x.elts[yi]
@@ -450,7 +451,7 @@ func (x *AF) atInts(y []int64) array {
 	return &AF{elts: r}
 }
 
-func (x *AS) atInts(y []int64) array {
+func (x *AS) atInt64s(y []int64) array {
 	r := make([]string, len(y))
 	for i, yi := range y {
 		r[i] = x.elts[yi]
@@ -458,7 +459,7 @@ func (x *AS) atInts(y []int64) array {
 	return &AS{elts: r}
 }
 
-func (x *AV) atInts(y []int64) array {
+func (x *AV) atInt64s(y []int64) array {
 	r := make([]V, len(y))
 	for i, yi := range y {
 		r[i] = x.elts[yi]
@@ -714,7 +715,7 @@ func arrayAtIv(x array, y V) array {
 	case *AB:
 		return x.atBytes(yv.elts)
 	case *AI:
-		return x.atInts(yv.elts)
+		return x.atInt64s(yv.elts)
 	default:
 		panic("arrayAtV")
 	}
@@ -723,9 +724,9 @@ func arrayAtIv(x array, y V) array {
 func atIv(x array, y V) V {
 	switch yv := y.bv.(type) {
 	case *AB:
-		return x.vAtBytes(yv)
+		return x.vAtAB(yv)
 	case *AI:
-		return x.vAtInts(yv)
+		return x.vAtAI(yv)
 	default:
 		panic("arrayAtV")
 	}
