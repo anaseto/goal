@@ -1,4 +1,4 @@
-*Last updated: 2023-05-07*
+*Last updated: 2023-05-31*
 
 # Implementation notes
 
@@ -108,14 +108,14 @@ values themselves are represented by the following struct type:
 ``` go
 // V contains a boxed or unboxed value.
 type V struct {
-	kind  valueKind // valInt, valFloat, valBoxed, ...
-	n     int64     // unboxed integer or float value
-	value Value     // boxed value
+	kind valueKind // valInt, valFloat, valBoxed, ...
+	uv   int64     // unboxed integer or float value
+	bv   Value     // boxed value
 }
 ```
 
 As a result, Goal has unboxed integer and floating point values (by
-interpreting the `n` field as one type or the other depending on the kind
+interpreting the `uv` field as one type or the other depending on the kind
 field), as well as unboxed types for built-in functions and lambdas. This makes
 scalar code faster and more memory-friendly by keeping numeric atoms in the
 stack.  Although the V struct is less compact than a union struct in C (we need
@@ -179,7 +179,9 @@ func negate(x V) V {
 	if x.IsF() {
 		return NewF(-x.F())
 	}
-	switch xv := x.value.(type) {
+	switch xv := x.bv.(type) {
+	case S:
+		return NewS(strings.TrimRightFunc(string(xv), unicode.IsSpace))
 	case *AB:
 		r := make([]int64, xv.Len())
 		for i, xi := range xv.elts {
@@ -198,31 +200,31 @@ func negate(x V) V {
 			r.elts[i] = -xi
 		}
 		return NewV(r)
-	case *AV:
+	case *AS:
 		r := xv.reuse()
 		for i, xi := range xv.elts {
-			ri := negate(xi)
-			if ri.IsPanic() {
-				return ri
-			}
-			r.elts[i] = ri
+			r.elts[i] = strings.TrimRightFunc(xi, unicode.IsSpace)
 		}
 		return NewV(r)
+	case *AV:
+		return mapAV(xv, negate)
+	case *Dict:
+		return newDictValues(xv.keys, negate(NewV(xv.values)))
 	default:
 		return panicType("-x", "x", x)
 	}
 }
 ```
 
-The actual code is a bit more complicated, and handles also dictionaries, but
-the idea is the same.  The binary case is more intricate, as the number of
-cases to handle becomes quadratic in the number of types (among those that can
-be combined).
+The binary case is more intricate, as the number of cases to handle becomes
+quadratic in the number of types (among those that can be combined).
 
 Most of the function is quite self-explanatory, except for the `.reuse` method,
 which is an internal optimization that returns an array value of same-length
 and type which may reuse the original's value intact memory, if it's deemed
-reusable by the reference count system for array values.
+reusable by the reference count system for array values. Also, the `mapAV`
+function is used for the generic array case, as it works the same in many
+monadic primitives.
 
 If performance is not a concern, like for example for the APL-like bignum
 calculator [ivy](https://pkg.go.dev/robpike.io/ivy) (also written in Go!), it's
