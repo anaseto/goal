@@ -2,7 +2,8 @@ package goal
 
 import "sort"
 
-// Array interface is satisfied by the different kind of supported arrays.
+// Array interface is satisfied by the different kinds of supported array
+// values.
 type Array interface {
 	RefCounter
 	sort.Interface
