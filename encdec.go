@@ -118,7 +118,7 @@ func encodeIsBytes[I integer](f []I, x []byte) V {
 	return newAVu(r)
 }
 
-func encodeIsInts[I integer](f []I, x []int64) V {
+func encodeIsInt64s[I integer](f []I, x []int64) V {
 	min := minIs(x)
 	if min < 0 {
 		return Panicf(`I\I : negative integer (%d)`, min)
@@ -218,7 +218,7 @@ func encodeIs[I integer](f []I, x V) V {
 	}
 	switch xv := x.bv.(type) {
 	case *AI:
-		return encodeIsInts(f, xv.elts)
+		return encodeIsInt64s(f, xv.elts)
 	case *AB:
 		return encodeIsBytes(f, xv.elts)
 	case *AF:

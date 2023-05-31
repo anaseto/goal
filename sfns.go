@@ -302,7 +302,7 @@ func cutAIarray(x *AI, y array) V {
 	if xlen == 0 {
 		return protoAV()
 	}
-	r := cutIntsArray(x.elts, y)
+	r := cutInt64sArray(x.elts, y)
 	return newAVu(r)
 }
 
@@ -321,11 +321,11 @@ func cutABarray(x *AB, y array) V {
 	if xlen == 0 {
 		return protoAV()
 	}
-	r := cutIntsArray(x.elts, y)
+	r := cutInt64sArray(x.elts, y)
 	return newAVu(r)
 }
 
-func cutIntsArray[I integer](x []I, y array) []V {
+func cutInt64sArray[I integer](x []I, y array) []V {
 	xlen := len(x)
 	ylen := int64(y.Len())
 	r := make([]V, xlen)
@@ -355,7 +355,7 @@ func cutAIS(x *AI, y S) V {
 	if xlen == 0 {
 		return NewAS(nil)
 	}
-	r := cutIntsS(x.elts, y)
+	r := cutInt64sS(x.elts, y)
 	return NewAS(r)
 }
 
@@ -374,11 +374,11 @@ func cutABS(x *AB, y S) V {
 	if xlen == 0 {
 		return NewAS(nil)
 	}
-	r := cutIntsS(x.elts, y)
+	r := cutInt64sS(x.elts, y)
 	return NewAS(r)
 }
 
-func cutIntsS[I integer](x []I, y S) []string {
+func cutInt64sS[I integer](x []I, y S) []string {
 	xlen := len(x)
 	ylen := int64(len(y))
 	r := make([]string, xlen)

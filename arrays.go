@@ -295,7 +295,7 @@ func (x *AV) set(i int, y V) {
 	x.elts[i] = y
 }
 
-func selectNumsAtInts[N number](dst, x []N, y []int64) {
+func selectNumsAtInt64s[N number](dst, x []N, y []int64) {
 	xlen := int64(len(x))
 	for i, yi := range y {
 		if yi < 0 {
@@ -312,19 +312,19 @@ func selectNumsAtInts[N number](dst, x []N, y []int64) {
 func (x *AB) vAtAI(y *AI) V {
 	r := &AB{elts: make([]byte, y.Len())}
 	r.flags = x.flags & flagBool
-	selectNumsAtInts(r.elts, x.elts, y.elts)
+	selectNumsAtInt64s(r.elts, x.elts, y.elts)
 	return NewV(r)
 }
 
 func (x *AI) vAtAI(y *AI) V {
 	r := make([]int64, y.Len())
-	selectNumsAtInts(r, x.elts, y.elts)
+	selectNumsAtInt64s(r, x.elts, y.elts)
 	return NewAI(r)
 }
 
 func (x *AF) vAtAI(y *AI) V {
 	r := make([]float64, y.Len())
-	selectNumsAtInts(r, x.elts, y.elts)
+	selectNumsAtInt64s(r, x.elts, y.elts)
 	return NewAF(r)
 }
 

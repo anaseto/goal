@@ -15,7 +15,7 @@ func inBoundsV(y V, l int) (int64, bool) {
 	case *AB:
 		return inBoundsBytes(yv.elts, l)
 	case *AI:
-		return inBoundsInts(yv.elts, l)
+		return inBoundsInt64s(yv.elts, l)
 	default:
 		return 0, true
 	}
@@ -30,7 +30,7 @@ func inBoundsBytes(y []byte, l int) (int64, bool) {
 	return 0, true
 }
 
-func inBoundsInts(y []int64, l int) (int64, bool) {
+func inBoundsInt64s(y []int64, l int) (int64, bool) {
 	for _, yi := range y {
 		if outOfBounds(yi, l) {
 			return yi, false

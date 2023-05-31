@@ -101,10 +101,10 @@ func classify(ctx *Context, x V) V {
 		if ok {
 			// fast path avoiding hash table
 			if span < 256 || xv.Len() < 256 {
-				r := classifyInts[byte](xv.elts, min, span)
+				r := classifyInt64s[byte](xv.elts, min, span)
 				return NewAB(r)
 			}
-			r := classifyInts[int64](xv.elts, min, span)
+			r := classifyInt64s[int64](xv.elts, min, span)
 			return NewAI(r)
 		}
 		if xv.Len() <= bruteForceNumeric {
@@ -194,7 +194,7 @@ func classifyBytes(xs []byte) []byte {
 	return r
 }
 
-func classifyInts[T integer](xs []int64, min, span int64) []T {
+func classifyInt64s[T integer](xs []int64, min, span int64) []T {
 	// len(xs) <= MaxIntT so that n+1 fits in T
 	r := make([]T, len(xs))
 	var n T
@@ -326,7 +326,7 @@ func distinctArray(x array) array {
 		min, span, ok := smallRange(xv)
 		if ok {
 			// fast path avoiding hash table
-			r = distinctInts(xv.elts, min, span)
+			r = distinctInt64s(xv.elts, min, span)
 			return &AI{elts: r, flags: xv.flags | flagDistinct}
 		}
 		if ascending(xv) {
@@ -353,7 +353,7 @@ func distinctArray(x array) array {
 	}
 }
 
-func distinctInts(xs []int64, min, span int64) []int64 {
+func distinctInt64s(xs []int64, min, span int64) []int64 {
 	offset := -min
 	m := make([]bool, span)
 	n := 0
@@ -506,7 +506,7 @@ func markFirsts(x V) V {
 		min, span, ok := smallRange(xv)
 		if ok {
 			// fast path avoiding hash table
-			r = markFirstsInts(xv.elts, min, span)
+			r = markFirstsInt64s(xv.elts, min, span)
 			return newABb(r)
 		}
 		r = markFirstsSlice[int64](xv.elts, bruteForceNumeric)
@@ -544,7 +544,7 @@ func markFirsts(x V) V {
 	}
 }
 
-func markFirstsInts(xs []int64, min, span int64) []byte {
+func markFirstsInt64s(xs []int64, min, span int64) []byte {
 	r := make([]byte, len(xs))
 	offset := -min
 	m := make([]bool, span)
@@ -1016,7 +1016,7 @@ func occurrenceCount(ctx *Context, x V) V {
 		min, span, ok := smallRange(xv)
 		if ok {
 			// fast path avoiding hash table
-			r = occurrenceCountInts(xv.elts, min, span)
+			r = occurrenceCountInt64s(xv.elts, min, span)
 			return NewAI(r)
 		}
 		r = occurrenceCountSlice[int64](xv.elts, bruteForceNumeric)
@@ -1077,7 +1077,7 @@ func occurrenceCountBytes(xs []byte) []int64 {
 	return r
 }
 
-func occurrenceCountInts(xs []int64, min, span int64) []int64 {
+func occurrenceCountInt64s(xs []int64, min, span int64) []int64 {
 	r := make([]int64, len(xs))
 	offset := -min
 	m := make([]int64, span)
