@@ -271,12 +271,12 @@ func (ctx *Context) dropNnoRC(n int) {
 
 func (ctx *Context) assignGlobals(ids []int, x V) error {
 	switch xv := x.bv.(type) {
-	case array:
+	case Array:
 		if len(ids) > xv.Len() {
 			return fmt.Errorf("length mismatch in list assignment (%d > %d)", len(ids), xv.Len())
 		}
 		for i, id := range ids {
-			xi := xv.at(i)
+			xi := xv.VAt(i)
 			xi.IncrRC()
 			ctx.globals[id] = xi
 		}
@@ -288,12 +288,12 @@ func (ctx *Context) assignGlobals(ids []int, x V) error {
 
 func (ctx *Context) assignLocals(ids []int32, x V) error {
 	switch xv := x.bv.(type) {
-	case array:
+	case Array:
 		if len(ids) > xv.Len() {
 			return fmt.Errorf("length error in list assignment (%d > %d)", len(ids), xv.Len())
 		}
 		for i, id := range ids {
-			xi := xv.at(i)
+			xi := xv.VAt(i)
 			xi.IncrRC()
 			ctx.stack[ctx.frameIdx-id] = xi
 		}

@@ -239,7 +239,7 @@ func (d *D) Append(ctx *Context, dst []byte) []byte {
 	return dst
 }
 
-func arrayNeedsParens(x array) bool {
+func arrayNeedsParens(x Array) bool {
 	switch x.Len() {
 	case 0:
 		switch x.(type) {

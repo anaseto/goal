@@ -61,7 +61,7 @@ func classify(ctx *Context, x V) V {
 	switch xv := x.bv.(type) {
 	case *D:
 		return newDictValues(xv.keys, classify(ctx, NewV(xv.values)))
-	case array:
+	case Array:
 		if xv.Len() == 0 {
 			return x
 		}
@@ -270,7 +270,7 @@ func distinct(x V) V {
 	switch xv := x.bv.(type) {
 	case *D:
 		return NewV(distinctDict(xv))
-	case array:
+	case Array:
 		return NewV(distinctArray(xv))
 	default:
 		return panicType("?x", "x", x)
@@ -286,10 +286,10 @@ func distinctDict(x *D) *D {
 	x.values.DecrRC()
 	nk := replicate(mf, NewV(x.keys))
 	nv := replicate(mf, NewV(x.values))
-	return &D{keys: nk.bv.(array), values: nv.bv.(array)}
+	return &D{keys: nk.bv.(Array), values: nv.bv.(Array)}
 }
 
-func distinctArray(x array) array {
+func distinctArray(x Array) Array {
 	if x.Len() == 0 || x.getFlags().Has(flagDistinct) {
 		return x
 	}
@@ -347,7 +347,7 @@ func distinctArray(x array) array {
 		xv.IncrRC()
 		mf := markFirsts(NewV(xv))
 		xv.DecrRC()
-		return replicate(mf, NewV(xv)).bv.(array)
+		return replicate(mf, NewV(xv)).bv.(Array)
 	default:
 		panic("distinctArray")
 	}
@@ -451,7 +451,7 @@ func markFirsts(x V) V {
 	switch xv := x.bv.(type) {
 	case *D:
 		return newDictValues(xv.keys, markFirsts(NewV(xv.values)))
-	case array:
+	case Array:
 		if xv.Len() == 0 {
 			return x
 		}
@@ -668,7 +668,7 @@ func memberOfAB(x V, y *AB) V {
 		return newABb(r)
 	case *AF:
 		return memberOf(x, fromABtoAF(y))
-	case array:
+	case Array:
 		return memberOfArray(xv, y)
 	default:
 		return NewI(0)
@@ -764,7 +764,7 @@ func memberOfAF(x V, y *AF) V {
 		return memberOfAF(toAF(xv), y)
 	case *AF:
 		return newABb(memberOfSlice[float64](xv.elts, y.elts, bruteForceNumeric))
-	case array:
+	case Array:
 		return memberOfArray(xv, y)
 	default:
 		return NewI(0)
@@ -863,7 +863,7 @@ func memberOfAI(x V, y *AI) V {
 		return newABb(memberOfSlice[int64](xv.elts, y.elts, bruteForceNumeric))
 	case *AF:
 		return memberOf(x, toAF(y))
-	case array:
+	case Array:
 		return memberOfArray(xv, y)
 	default:
 		return NewI(0)
@@ -929,7 +929,7 @@ func memberOfAS(x V, y *AS) V {
 			return newABb(r)
 		}
 		return newABb(memberOfSlice[string](xv.elts, y.elts, bruteForceGeneric))
-	case array:
+	case Array:
 		return memberOfArray(xv, y)
 	default:
 		return NewI(0)
@@ -938,7 +938,7 @@ func memberOfAS(x V, y *AS) V {
 
 func memberOfAV(x V, y *AV) V {
 	switch xv := x.bv.(type) {
-	case array:
+	case Array:
 		return memberOfArray(xv, y)
 	default:
 		for _, yi := range y.elts {
@@ -952,7 +952,7 @@ func memberOfAV(x V, y *AV) V {
 
 const bruteForceGenericDyad = 24
 
-func memberOfArray(x, y array) V {
+func memberOfArray(x, y Array) V {
 	if x.Len() > bruteForceGenericDyad && y.Len() > bruteForceGenericDyad {
 		ctx := NewContext()
 		return memberOf(each2String(ctx, x), each2String(ctx, y))
@@ -960,7 +960,7 @@ func memberOfArray(x, y array) V {
 	r := make([]byte, x.Len())
 	for i := 0; i < x.Len(); i++ {
 		for j := 0; j < y.Len(); j++ {
-			if x.at(i).Matches(y.at(j)) {
+			if x.VAt(i).Matches(y.VAt(j)) {
 				r[i] = 1
 				break
 			}
@@ -974,7 +974,7 @@ func occurrenceCount(ctx *Context, x V) V {
 	switch xv := x.bv.(type) {
 	case *D:
 		return newDictValues(xv.keys, occurrenceCount(ctx, NewV(xv.values)))
-	case array:
+	case Array:
 		if xv.Len() == 0 {
 			return x
 		}
@@ -1155,8 +1155,8 @@ func without(x, y V) V {
 			return trimSpaces(y)
 		}
 		return trim(xv, y)
-	case array:
-		_, ok := y.bv.(array)
+	case Array:
+		_, ok := y.bv.(Array)
 		if !ok {
 			d, ok := y.bv.(*D)
 			if ok {
@@ -1193,9 +1193,9 @@ func withoutDict(x V, y *D) V {
 }
 
 // withValuesOrKeys implements with values/keys x#y.
-func withValuesOrKeys(x array, y V) V {
+func withValuesOrKeys(x Array, y V) V {
 	switch yv := y.bv.(type) {
-	case array:
+	case Array:
 		return replicate(memberOf(y, NewV(x)), y)
 	case *D:
 		r := memberOf(NewV(yv.keys), NewV(x))
@@ -1238,12 +1238,12 @@ func findDict(d *D, y V) V {
 		if i == int64(l) {
 			return arrayProtoV(d.keys)
 		}
-		return d.keys.at(int(i))
+		return d.keys.VAt(int(i))
 	}
 	return atIv(d.keys, idx)
 }
 
-func findArray(x array, y V) V {
+func findArray(x Array, y V) V {
 	switch xv := x.(type) {
 	case *AB:
 		return findAB(xv, y)
@@ -1323,7 +1323,7 @@ func findAB(x *AB, y V) V {
 		return NewAI(r)
 	case *AF:
 		return find(fromABtoAF(x), y)
-	case array:
+	case Array:
 		return findArrays(x, yv)
 	default:
 		return NewI(int64(x.Len()))
@@ -1457,7 +1457,7 @@ func findAI(x *AI, y V) V {
 		return NewAI(findSlices[int64, int64](x.elts, yv.elts, bruteForceNumeric))
 	case *AF:
 		return findAF(toAF(x).bv.(*AF), y)
-	case array:
+	case Array:
 		return findArrays(x, yv)
 	default:
 		return NewI(int64(x.Len()))
@@ -1621,7 +1621,7 @@ func findAF(x *AF, y V) V {
 			return NewAB(findSlices[float64, byte](x.elts, yv.elts, bruteForceNumeric))
 		}
 		return NewAI(findSlices[float64, int64](x.elts, yv.elts, bruteForceNumeric))
-	case array:
+	case Array:
 		return findArrays(x, yv)
 	default:
 		return NewI(int64(x.Len()))
@@ -1662,7 +1662,7 @@ func findAS(x *AS, y V) V {
 			return NewAB(findSlices[string, byte](x.elts, yv.elts, bruteForceGeneric))
 		}
 		return NewAI(findSlices[string, int64](x.elts, yv.elts, bruteForceGeneric))
-	case array:
+	case Array:
 		return findArrays(x, yv)
 	default:
 		return NewI(int64(x.Len()))
@@ -1677,7 +1677,7 @@ func findSortedSsSs[I integer](xs, ys []string) []I {
 	return r
 }
 
-func findArrays(x, y array) V {
+func findArrays(x, y Array) V {
 	if x.Len() > bruteForceGenericDyad && y.Len() > bruteForceGenericDyad {
 		ctx := NewContext()
 		return find(each2String(ctx, x), each2String(ctx, y))
@@ -1688,14 +1688,14 @@ func findArrays(x, y array) V {
 	return NewAI(findArraysBrute[int64](x, y))
 }
 
-func findArraysBrute[I integer](x, y array) []I {
+func findArraysBrute[I integer](x, y Array) []I {
 	r := make([]I, y.Len())
 	for i := range r {
 		r[i] = I(x.Len())
 	}
 	for i := 0; i < y.Len(); i++ {
 		for j := 0; j < x.Len(); j++ {
-			if y.at(i).Matches(x.at(j)) {
+			if y.VAt(i).Matches(x.VAt(j)) {
 				r[i] = I(j)
 				break
 			}
@@ -1706,7 +1706,7 @@ func findArraysBrute[I integer](x, y array) []I {
 
 func findAV(x *AV, y V) V {
 	switch yv := y.bv.(type) {
-	case array:
+	case Array:
 		return findArrays(x, yv)
 	default:
 		for i, xi := range x.elts {

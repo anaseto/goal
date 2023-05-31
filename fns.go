@@ -605,7 +605,7 @@ func get(ctx *Context, x V) V {
 		return xv.V
 	case *D:
 		return xv.Values()
-	case array:
+	case Array:
 		return NewV(&D{keys: xv, values: xv})
 	default:
 		return panicType(".x", "x", x)
@@ -651,12 +651,12 @@ func recompileLambdas(ctx, nctx *Context, x V) V {
 		if ks.IsPanic() {
 			return ks
 		}
-		xv.keys = ks.bv.(array)
+		xv.keys = ks.bv.(Array)
 		vs := recompileLambdas(ctx, nctx, xv.Values())
 		if vs.IsPanic() {
 			return vs
 		}
-		xv.values = vs.bv.(array)
+		xv.values = vs.bv.(Array)
 		return x
 	case *errV:
 		xv.V = recompileLambdas(ctx, nctx, xv.V)
@@ -792,12 +792,12 @@ func evalPackage(ctx *Context, x V, y V, z V) V {
 
 // try implements .[f1;x;f2].
 func try(ctx *Context, f1, x, f2 V) V {
-	av := toArray(x).bv.(array)
+	av := toArray(x).bv.(Array)
 	if av.Len() == 0 {
 		return panics(".[f1;x;f2] : empty x")
 	}
 	for i := av.Len() - 1; i >= 0; i-- {
-		ctx.push(av.at(i))
+		ctx.push(av.VAt(i))
 	}
 	r := f1.applyN(ctx, av.Len())
 	if r.IsPanic() {

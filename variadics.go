@@ -471,12 +471,12 @@ func vfApplyN(ctx *Context, args []V) V {
 		return get(ctx, args[0])
 	case 2:
 		x := args[1]
-		av := toArray(args[0]).bv.(array)
+		av := toArray(args[0]).bv.(Array)
 		if av.Len() == 0 {
 			return x
 		}
 		for i := av.Len() - 1; i >= 0; i-- {
-			ctx.push(av.at(i))
+			ctx.push(av.VAt(i))
 		}
 		r := x.applyN(ctx, av.Len())
 		ctx.drop()
@@ -981,7 +981,7 @@ func vfRTTime(ctx *Context, args []V) V {
 			}
 		}
 		x.IncrRC()
-		av := toArray(y).bv.(array)
+		av := toArray(y).bv.(Array)
 		av.IncrRC()
 		t := time.Now()
 		for i := int64(0); i < n; i++ {
@@ -989,7 +989,7 @@ func vfRTTime(ctx *Context, args []V) V {
 				continue
 			}
 			for i := av.Len() - 1; i >= 0; i-- {
-				ctx.push(av.at(i))
+				ctx.push(av.VAt(i))
 			}
 			r := x.applyN(ctx, av.Len())
 			if r.IsPanic() {

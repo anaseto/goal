@@ -97,7 +97,7 @@ func getPosLine(s string, pos int) (string, int, int) {
 }
 
 // newExecError returns an execution error from a panicV value. It assumes
-// isPanic(x) is true and the Value type is panicV.
+// isPanic(x) is true and the underlying boxed value type is panicV.
 func newExecError(x V) error {
 	return errors.New(x.Panic())
 }

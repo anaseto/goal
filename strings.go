@@ -455,7 +455,7 @@ func casts(ctx *Context, y V) V {
 			r.elts[i] = ri
 		}
 		return canonicalAV(r)
-	case array:
+	case Array:
 		return each2String(ctx, yv)
 	case *D:
 		return newDictValues(yv.keys, casts(ctx, NewV(yv.values)))

@@ -50,7 +50,7 @@ func foldfx(ctx *Context, f, x V) V {
 	switch xv := x.bv.(type) {
 	case *D:
 		return foldfx(ctx, f, NewV(xv.values))
-	case array:
+	case Array:
 		if xv.Len() == 0 {
 			switch xv.(type) {
 			case *AS:
@@ -63,11 +63,11 @@ func foldfx(ctx *Context, f, x V) V {
 				return NewI(0)
 			}
 		}
-		r := xv.at(0)
+		r := xv.VAt(0)
 		ctx.pushNoRC(V{})
 		f.IncrRC()
 		for i := 1; i < xv.Len(); i++ {
-			ctx.replaceTop(xv.at(i))
+			ctx.replaceTop(xv.VAt(i))
 			ctx.push(r)
 			r = f.applyN(ctx, 2)
 		}
@@ -170,7 +170,7 @@ func foldxfy(ctx *Context, x, f, y V) V {
 	switch yv := y.bv.(type) {
 	case *D:
 		return foldxfy(ctx, x, f, NewV(yv.values))
-	case array:
+	case Array:
 		r := x
 		if yv.Len() == 0 {
 			return r
@@ -178,7 +178,7 @@ func foldxfy(ctx *Context, x, f, y V) V {
 		f.IncrRC()
 		ctx.pushNoRC(V{})
 		for i := 0; i < yv.Len(); i++ {
-			ctx.replaceTop(yv.at(i))
+			ctx.replaceTop(yv.VAt(i))
 			ctx.push(r)
 			r = f.applyN(ctx, 2)
 			if r.IsPanic() {
@@ -239,9 +239,9 @@ func foldN(ctx *Context, args []V) V {
 	ctx.pushNoRC(V{})
 	r := x
 	for i := 0; i < mlen; i++ {
-		ctx.replaceTop(args[0].at(i))
+		ctx.replaceTop(args[0].VAt(i))
 		for j := 1; j < len(args)-2; j++ {
-			ctx.push(args[j].at(i))
+			ctx.push(args[j].VAt(i))
 		}
 		ctx.push(r)
 		r = f.applyN(ctx, n)
@@ -360,17 +360,17 @@ func scanfx(ctx *Context, f, x V) V {
 	switch xv := x.bv.(type) {
 	case *D:
 		return newDictValues(xv.keys, scanfx(ctx, f, NewV(xv.values)))
-	case array:
+	case Array:
 		if xv.Len() == 0 {
 			return x
 		}
 		r := make([]V, xv.Len())
-		next := xv.at(0)
+		next := xv.VAt(0)
 		r[0] = next
 		f.IncrRC()
 		ctx.pushNoRC(V{})
 		for i := 1; i < xv.Len(); i++ {
-			ctx.replaceTop(xv.at(i))
+			ctx.replaceTop(xv.VAt(i))
 			ctx.push(next)
 			next = f.applyN(ctx, 2)
 			if next.IsPanic() {
@@ -462,7 +462,7 @@ func scanxfy(ctx *Context, x, f, y V) V {
 	switch yv := y.bv.(type) {
 	case *D:
 		return newDictValues(yv.keys, scanxfy(ctx, x, f, NewV(yv.values)))
-	case array:
+	case Array:
 		if yv.Len() == 0 {
 			return y
 		}
@@ -470,7 +470,7 @@ func scanxfy(ctx *Context, x, f, y V) V {
 		ctx.pushNoRC(V{})
 		r := make([]V, yv.Len())
 		for i := 0; i < yv.Len(); i++ {
-			ctx.replaceTop(yv.at(i))
+			ctx.replaceTop(yv.VAt(i))
 			ctx.push(x)
 			x = f.applyN(ctx, 2)
 			if x.IsPanic() {
@@ -517,9 +517,9 @@ func scanN(ctx *Context, args []V) V {
 	ctx.pushNoRC(V{})
 	r := make([]V, mlen)
 	for i := 0; i < mlen; i++ {
-		ctx.replaceTop(args[0].at(i))
+		ctx.replaceTop(args[0].VAt(i))
 		for j := 1; j < len(args)-2; j++ {
-			ctx.push(args[j].at(i))
+			ctx.push(args[j].VAt(i))
 		}
 		ctx.push(x)
 		x = f.applyN(ctx, n)
@@ -634,14 +634,14 @@ func each2(ctx *Context, f, x V) V {
 	switch xv := x.bv.(type) {
 	case *D:
 		return newDictValues(xv.keys, eachfx(ctx, f, xv.values))
-	case array:
+	case Array:
 		return eachfx(ctx, f, xv)
 	default:
 		return ctx.Apply(f, x)
 	}
 }
 
-func eachfx(ctx *Context, f V, x array) V {
+func eachfx(ctx *Context, f V, x Array) V {
 	if f.kind == valVariadic {
 		switch f.variadic() {
 		case vShape:
@@ -658,7 +658,7 @@ func eachfx(ctx *Context, f V, x array) V {
 	f.IncrRC()
 	ctx.pushNoRC(V{})
 	for i := range r {
-		ctx.replaceTop(x.at(i))
+		ctx.replaceTop(x.VAt(i))
 		next := f.applyN(ctx, 1)
 		if next.IsPanic() {
 			f.DecrRC()
@@ -697,9 +697,9 @@ func eachN(ctx *Context, args []V) V {
 	f.IncrRC()
 	ctx.pushNoRC(V{})
 	for i := range r {
-		ctx.replaceTop(y.at(i))
+		ctx.replaceTop(y.VAt(i))
 		for j := 1; j < len(args)-1; j++ {
-			ctx.push(args[j].at(i))
+			ctx.push(args[j].VAt(i))
 		}
 		next := f.applyN(ctx, n)
 		if next.IsPanic() {
@@ -718,12 +718,12 @@ func eachN(ctx *Context, args []V) V {
 	return canonicalVs(r)
 }
 
-func (x V) at(i int) V {
+func (x V) VAt(i int) V {
 	switch xv := x.bv.(type) {
 	case *D:
-		return xv.values.at(i)
-	case array:
-		return xv.at(i)
+		return xv.values.VAt(i)
+	case Array:
+		return xv.VAt(i)
 	default:
 		return x
 	}

@@ -182,11 +182,11 @@ genOp:{[opname;opsym] / globals o,op,xt,h
         switch yv := y.bv.(type) {
         case *D:
               return newDictValues(yv.keys, $o(x, NewV(yv.values)))
-        case array:
+        case Array:
               if yv.Len() != xv.Len() {
                       return panicLength("x${op}y", xv.Len(), yv.Len())
               }/
-  h say "return mapAVarray(xv, yv, $o)"
+  h say "return mapAVArray(xv, yv, $o)"
   h say `}`
   h say "return mapAVV(xv, y, $o)"
   h say "\n"_qq/
@@ -262,7 +262,7 @@ doxdAV:{
         if v.IsPanic() {
                 return v
         }
-        return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+        return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
     case *AV:
         return mapAV(yv, func(yi V) V { return $o${xt}V(x, yi) })
     default:
@@ -357,7 +357,7 @@ doXdAV:{
             if v.IsPanic() {
                     return v
             }
-            return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+            return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
     case *AV:
             if x.Len() != yv.Len() {
                     return panicLength("x${op}y", x.Len(), yv.Len())

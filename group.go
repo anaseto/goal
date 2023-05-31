@@ -97,7 +97,7 @@ func groupBy(x, y V) V {
 		max := maxBytes(xv.elts)
 		if ascending(xv) {
 			switch yv := y.bv.(type) {
-			case array:
+			case Array:
 				return groupBySorted(xv.elts, yv, int64(max))
 			default:
 				return panicType("f=Y", "Y", y)
@@ -124,7 +124,7 @@ func groupBy(x, y V) V {
 		}
 		if ascending(xv) {
 			switch yv := y.bv.(type) {
-			case array:
+			case Array:
 				return groupBySorted(xv.elts, yv, int64(max))
 			default:
 				return panicType("f=Y", "Y", y)
@@ -411,7 +411,7 @@ func groupByScatter[T any](x []int64, y []T, yg []T, offset []int) {
 	}
 }
 
-func groupBySorted[I integer](x []I, y array, max int64) V {
+func groupBySorted[I integer](x []I, y Array, max int64) V {
 	r := make([]V, max+1)
 	var from, i0 int
 	var n int64

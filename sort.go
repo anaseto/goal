@@ -67,7 +67,7 @@ func (x *D) Swap(i, j int) {
 
 // sortUp returns ^x.
 func sortUp(ctx *Context, x V) V {
-	xa, ok := x.bv.(array)
+	xa, ok := x.bv.(Array)
 	if !ok {
 		switch xv := x.bv.(type) {
 		case *D:
@@ -182,7 +182,7 @@ func sortUpDictKeys(ctx *Context, d *D) *D {
 
 type permutation[I integer] struct {
 	Perm []I
-	X    array
+	X    Array
 }
 
 func (p *permutation[I]) Len() int {
@@ -208,7 +208,7 @@ func permRange[I integer](n int) []I {
 // ascend returns <x.
 func ascend(ctx *Context, x V) V {
 	switch xv := x.bv.(type) {
-	case array:
+	case Array:
 		return ascendArray(ctx, xv)
 	case *D:
 		return NewV(sortUpDict(ctx, xv))
@@ -277,7 +277,7 @@ func ascendAI(ctx *Context, xv *AI) V {
 	return NewAB(p.Perm)
 }
 
-func sortBy(ctx *Context, keys, values array) *D {
+func sortBy(ctx *Context, keys, values Array) *D {
 	a := ascendArray(ctx, values)
 	switch av := a.bv.(type) {
 	case *AB:
@@ -293,13 +293,13 @@ func sortBy(ctx *Context, keys, values array) *D {
 	}
 }
 
-func ascendArray(ctx *Context, x array) V {
+func ascendArray(ctx *Context, x Array) V {
 	switch xv := x.(type) {
 	case *AB:
 		return ascendAB(xv)
 	case *AI:
 		return ascendAI(ctx, xv)
-	case array:
+	case Array:
 		if x.Len() < 256 {
 			p := &permutation[byte]{Perm: permRange[byte](xv.Len()), X: xv}
 			if !ascending(xv) {
@@ -330,8 +330,8 @@ func sortUpDict(ctx *Context, d *D) *D {
 // descend returns >x.
 func descend(ctx *Context, x V) V {
 	switch xv := x.bv.(type) {
-	case array:
-		r := ascendArray(ctx, xv).bv.(array)
+	case Array:
+		r := ascendArray(ctx, xv).bv.(Array)
 		reverseMut(r)
 		return NewV(r)
 	case *D:
@@ -443,7 +443,7 @@ func searchAB(x *AB, y V) V {
 		return NewI(searchABF(x, y.F()))
 	}
 	switch yv := y.bv.(type) {
-	case array:
+	case Array:
 		if x.Len() < 256 {
 			return NewAB(searchABArray[byte](x, yv))
 		}
@@ -453,7 +453,7 @@ func searchAB(x *AB, y V) V {
 	}
 }
 
-func searchABArray[I integer](x *AB, y array) []I {
+func searchABArray[I integer](x *AB, y Array) []I {
 	switch yv := y.(type) {
 	case *AB:
 		r := make([]I, yv.Len())
@@ -477,7 +477,7 @@ func searchABArray[I integer](x *AB, y array) []I {
 		r := make([]I, y.Len())
 		for i := 0; i < y.Len(); i++ {
 			r[i] = I(sort.Search(x.Len(),
-				func(j int) bool { return y.at(i).LessT(NewI(int64(x.At(j)))) }))
+				func(j int) bool { return y.VAt(i).LessT(NewI(int64(x.At(j)))) }))
 		}
 		return r
 	}
@@ -491,7 +491,7 @@ func searchAI(x *AI, y V) V {
 		return NewI(searchAIF(x, y.F()))
 	}
 	switch yv := y.bv.(type) {
-	case array:
+	case Array:
 		if x.Len() < 256 {
 			return NewAB(searchAIArray[byte](x, yv))
 		}
@@ -501,7 +501,7 @@ func searchAI(x *AI, y V) V {
 	}
 }
 
-func searchAIArray[I integer](x *AI, y array) []I {
+func searchAIArray[I integer](x *AI, y Array) []I {
 	switch yv := y.(type) {
 	case *AB:
 		r := make([]I, yv.Len())
@@ -525,7 +525,7 @@ func searchAIArray[I integer](x *AI, y array) []I {
 		r := make([]I, y.Len())
 		for i := 0; i < y.Len(); i++ {
 			r[i] = I(sort.Search(x.Len(),
-				func(j int) bool { return y.at(i).LessT(NewI(x.At(j))) }))
+				func(j int) bool { return y.VAt(i).LessT(NewI(x.At(j))) }))
 		}
 		return r
 	}
@@ -539,7 +539,7 @@ func searchAF(x *AF, y V) V {
 		return NewI(searchAFF(x, y.F()))
 	}
 	switch yv := y.bv.(type) {
-	case array:
+	case Array:
 		if x.Len() < 256 {
 			return NewAB(searchAFArray[byte](x, yv))
 		}
@@ -549,7 +549,7 @@ func searchAF(x *AF, y V) V {
 	}
 }
 
-func searchAFArray[I integer](x *AF, y array) []I {
+func searchAFArray[I integer](x *AF, y Array) []I {
 	switch yv := y.(type) {
 	case *AB:
 		r := make([]I, yv.Len())
@@ -573,7 +573,7 @@ func searchAFArray[I integer](x *AF, y array) []I {
 		r := make([]I, y.Len())
 		for i := 0; i < y.Len(); i++ {
 			r[i] = I(sort.Search(x.Len(),
-				func(j int) bool { return y.at(i).LessT(NewF(x.At(j))) }))
+				func(j int) bool { return y.VAt(i).LessT(NewF(x.At(j))) }))
 		}
 		return r
 	}
@@ -583,7 +583,7 @@ func searchAS(x *AS, y V) V {
 	switch yv := y.bv.(type) {
 	case S:
 		return NewI(searchASS(x, yv))
-	case array:
+	case Array:
 		if x.Len() < 256 {
 			return NewAB(searchASArray[byte](x, yv))
 		}
@@ -593,7 +593,7 @@ func searchAS(x *AS, y V) V {
 	}
 }
 
-func searchASArray[I integer](x *AS, y array) []I {
+func searchASArray[I integer](x *AS, y Array) []I {
 	switch yv := y.(type) {
 	case *AS:
 		r := make([]I, yv.Len())
@@ -605,7 +605,7 @@ func searchASArray[I integer](x *AS, y array) []I {
 		r := make([]I, y.Len())
 		for i := 0; i < y.Len(); i++ {
 			r[i] = I(sort.Search(x.Len(),
-				func(j int) bool { return y.at(i).LessT(NewS(x.At(j))) }))
+				func(j int) bool { return y.VAt(i).LessT(NewS(x.At(j))) }))
 		}
 		return r
 	}
@@ -613,7 +613,7 @@ func searchASArray[I integer](x *AS, y array) []I {
 
 func searchAV(x *AV, y V) V {
 	switch yv := y.bv.(type) {
-	case array:
+	case Array:
 		if x.Len() < 256 {
 			return NewAB(searchAVArray[byte](x, yv))
 		}
@@ -625,11 +625,11 @@ func searchAV(x *AV, y V) V {
 	}
 }
 
-func searchAVArray[I integer](x *AV, y array) []I {
+func searchAVArray[I integer](x *AV, y Array) []I {
 	r := make([]I, y.Len())
 	for i := 0; i < y.Len(); i++ {
 		r[i] = I(sort.Search(x.Len(),
-			func(j int) bool { return y.at(i).LessT(x.At(j)) }))
+			func(j int) bool { return y.VAt(i).LessT(x.At(j)) }))
 	}
 	return r
 }

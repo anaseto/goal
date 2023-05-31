@@ -244,7 +244,7 @@ func toArray(x V) V {
 	case S:
 		r := &AS{elts: []string{string(xv)}}
 		return NewV(r)
-	case array:
+	case Array:
 		return x
 	default:
 		x.MarkImmutable()
@@ -485,7 +485,7 @@ func eType(x *AV) vType {
 }
 
 // sameType returns true if two arrays have same type.
-func sameType(x, y array) bool {
+func sameType(x, y Array) bool {
 	return reflect.TypeOf(x) == reflect.TypeOf(y)
 }
 
@@ -543,7 +543,7 @@ func (ctx *Context) assertCanonical(x V) {
 // normalize returns a canonical form of an AV array, assuming it's
 // elements themselves are canonical. It returns true if a shallow clone was
 // made, in other words, if the returned array is not generic.
-func normalize(x *AV, t vType) (array, bool) {
+func normalize(x *AV, t vType) (Array, bool) {
 	switch t {
 	case tb, tB:
 		r := make([]byte, x.Len())
@@ -612,7 +612,7 @@ func canonicalRec(x V) V {
 }
 
 // canonicalArrayAV returns the canonical form of a given generic array.
-func canonicalArrayAV(x *AV) array {
+func canonicalArrayAV(x *AV) Array {
 	r, _ := normalize(x, aType(x))
 	return r
 }
@@ -631,7 +631,7 @@ func canonicalAVImmut(x *AV) V {
 }
 
 // canonicalArray returns the canonical form of a given generic array.
-func canonicalArray(x array) array {
+func canonicalArray(x Array) Array {
 	switch xv := x.(type) {
 	case *AV:
 		r, _ := normalize(xv, aType(xv))
@@ -650,7 +650,7 @@ func canonicalVs(r []V) V {
 	return NewV(ra)
 }
 
-func canonicalArrayVs(r []V) array {
+func canonicalArrayVs(r []V) Array {
 	x := &AV{elts: r}
 	ra, _ := normalize(x, aType(x))
 	return ra
@@ -728,7 +728,7 @@ func protoV(x V) V {
 	}
 }
 
-func protoArray(x array) V {
+func protoArray(x Array) V {
 	switch x.(type) {
 	case *AB:
 		return NewV(&AB{flags: flagBool | flagImmutable})
@@ -745,7 +745,7 @@ func protoArray(x array) V {
 	}
 }
 
-func arrayProtoV(x array) V {
+func arrayProtoV(x Array) V {
 	switch xv := x.(type) {
 	case *AB:
 		return NewI(0)
@@ -846,7 +846,7 @@ func (x V) numeric() bool {
 		return true
 	}
 	switch xv := x.bv.(type) {
-	case array:
+	case Array:
 		return xv.numeric()
 	default:
 		return false
@@ -892,10 +892,10 @@ func mapAVV(x *AV, y V, f func(V, V) V) V {
 	return NewV(r)
 }
 
-func mapAVarray(x *AV, y array, f func(V, V) V) V {
+func mapAVArray(x *AV, y Array, f func(V, V) V) V {
 	r := x.reuse()
 	for i, xi := range x.elts {
-		ri := f(xi, y.at(i))
+		ri := f(xi, y.VAt(i))
 		if ri.IsPanic() {
 			return ri
 		}
@@ -923,7 +923,7 @@ func isFlat(x []V) bool {
 			if i == 0 {
 				return false
 			}
-		case array:
+		case Array:
 			return false
 		}
 	}

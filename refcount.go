@@ -10,9 +10,9 @@ import "math"
 // If refcount is equal or less than one, then the value is considered
 // reusable, unless it was marked as immutable.
 //
-// When defining a new type implementing the Value interface, it is only
-// necessary to also implement RefCounter if the type definition makes use of a
-// type implementing it (for example an array type or a generic V).
+// When defining a new type implementing the BV interface, it is only necessary
+// to also implement RefCounter if the type definition makes use of a type
+// implementing it (for example an array type or a generic V).
 type RefCounter interface {
 	BV
 

@@ -78,12 +78,23 @@ as an interface, as opposed to, say, a sum-type or an union-type in other
 languages, has the advantage of allowing easy extensibility, as adding new
 kinds of native values just means implementing an interface for a new type.
 
+Goal's value representation is a bit more complicated than usual: the expected
+Value interface is called `BV` and is satisfied by all *boxed* values, but
+values themselves are represented by a struct type called `V`.
+
 ``` go
-// Value is the interface satisfied by all boxed values.
-type Value interface {
+// V contains a boxed or unboxed value.
+type V struct {
+	kind valueKind // valInt, valFloat, valBoxed, ...
+	uv   int64     // unboxed integer or float value
+	bv   BV        // boxed value
+}
+
+// BV is the interface satisfied by all boxed values.
+type BV interface {
 	// Matches returns true if the value matches another (in the sense of
 	// the ~ operator).
-	Matches(Value) bool
+	Matches(BV) bool
 	// Append appends a unique program representation of the value to dst,
 	// and returns the extended buffer.
 	Append(ctx *Context, dst []byte) []byte
@@ -97,30 +108,17 @@ type Value interface {
 	// that is, irreflexive (~x<x), asymmetric (if x<y then ~y<x),
 	// transitive, connected (different values are comparable, except
 	// NaNs).
-	LessT(Value) bool
+	LessT(BV) bool
 }
 ```
 
-That said, Goal's value representation is a bit more complicated than that: the
-expected Value interface does exist and is satisfied by all *boxed* values, but
-values themselves are represented by the following struct type:
-
-``` go
-// V contains a boxed or unboxed value.
-type V struct {
-	kind valueKind // valInt, valFloat, valBoxed, ...
-	uv   int64     // unboxed integer or float value
-	bv   Value     // boxed value
-}
-```
-
-As a result, Goal has unboxed integer and floating point values (by
-interpreting the `uv` field as one type or the other depending on the kind
-field), as well as unboxed types for built-in functions and lambdas. This makes
-scalar code faster and more memory-friendly by keeping numeric atoms in the
-stack.  Although the V struct is less compact than a union struct in C (we need
-four words), it does perform quite well in practice, as Go is good at
-efficiently copying small types up to a few words.
+Hence, Goal has unboxed integer and floating point values (by interpreting the
+`uv` field as one type or the other depending on the kind field), as well as
+unboxed types for built-in functions and lambdas. This makes scalar code faster
+and more memory-friendly by keeping numeric atoms in the stack.  Although the V
+struct is less compact than a union struct in C (we need four words), it does
+perform quite well in practice, as Go is good at efficiently copying small
+types up to a few words.
 
 # Primitives
 

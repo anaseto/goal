@@ -25,14 +25,14 @@ func join(x, y V) V {
 		switch yv := y.bv.(type) {
 		case *D:
 			return dictMerge(xv, yv)
-		case array:
+		case Array:
 			return joinAtomToArray(x, yv, true)
 		default:
 			return newAVv([]V{x, y})
 		}
 	default:
 		switch yv := y.bv.(type) {
-		case array:
+		case Array:
 			return joinAtomToArray(x, yv, true)
 		default:
 			return newAVv([]V{x, y})
@@ -151,7 +151,7 @@ func joinAB(x *AB, y V, left bool) V {
 	case *AF:
 		// left == false
 		return joinABAF(x, yv)
-	case array:
+	case Array:
 		// left == false
 		return joinArrays(x, yv)
 	default:
@@ -215,7 +215,7 @@ func joinAI(x *AI, y V, left bool) V {
 	case *AF:
 		// left == false
 		return joinAIAF(x, yv)
-	case array:
+	case Array:
 		// left == false
 		return joinArrays(x, yv)
 	default:
@@ -256,7 +256,7 @@ func joinAF(x *AF, y V, left bool) V {
 	case *AF:
 		// left == false
 		return joinAFAF(x, yv)
-	case array:
+	case Array:
 		// left == false
 		return joinArrays(x, yv)
 	default:
@@ -386,7 +386,7 @@ func joinAS(x *AS, y V, left bool) V {
 			return NewV(x)
 		}
 		return NewAS(joinSlices(x.elts, yv.elts))
-	case array:
+	case Array:
 		// left == false
 		return joinArrays(x, yv)
 	default:
@@ -404,7 +404,7 @@ func joinAV(x *AV, y V, left bool) V {
 			return NewV(x)
 		}
 		return joinArrays(x, yv)
-	case array:
+	case Array:
 		// left == false
 		return joinArrays(x, yv)
 	default:
@@ -424,7 +424,7 @@ func joinAV(x *AV, y V, left bool) V {
 	}
 }
 
-func joinArrays(x, y array) V {
+func joinArrays(x, y Array) V {
 	if y.Len() == 0 {
 		return NewV(x)
 	}
@@ -433,15 +433,15 @@ func joinArrays(x, y array) V {
 	}
 	r := make([]V, y.Len()+x.Len())
 	for i := 0; i < x.Len(); i++ {
-		r[i] = x.at(i)
+		r[i] = x.VAt(i)
 	}
 	for i := x.Len(); i < len(r); i++ {
-		r[i] = y.at(i - x.Len())
+		r[i] = y.VAt(i - x.Len())
 	}
 	return NewV(&AV{elts: r})
 }
 
-func joinAtomToArray(x V, y array, left bool) V {
+func joinAtomToArray(x V, y Array, left bool) V {
 	yv, ok := y.(*AV)
 	if ok {
 		return joinAV(yv, x, left)
@@ -451,13 +451,13 @@ func joinAtomToArray(x V, y array, left bool) V {
 		r[0] = x
 		x.MarkImmutable()
 		for i := 1; i < len(r); i++ {
-			r[i] = y.at(i - 1)
+			r[i] = y.VAt(i - 1)
 		}
 	} else {
 		r[len(r)-1] = x
 		x.MarkImmutable()
 		for i := 0; i < len(r)-1; i++ {
-			r[i] = y.at(i)
+			r[i] = y.VAt(i)
 		}
 	}
 	return NewV(&AV{elts: r})

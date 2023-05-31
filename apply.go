@@ -413,7 +413,7 @@ func applyDict(d *D, y V) V {
 		if i >= int64(dlen) {
 			return arrayProtoV(d.values)
 		}
-		return d.values.at(int(i))
+		return d.values.VAt(int(i))
 	}
 	r := atIv(d.values, ky)
 	return r
@@ -426,7 +426,7 @@ func (ctx *Context) applyDictArgs(x *D, arg V, args []V) V {
 	if arg.kind == valNil {
 		r := make([]V, x.Len())
 		for i := 0; i < len(r); i++ {
-			ri := ctx.applyDictArgs(x, x.keys.at(i), args)
+			ri := ctx.applyDictArgs(x, x.keys.VAt(i), args)
 			if ri.IsPanic() {
 				return ri
 			}
@@ -436,10 +436,10 @@ func (ctx *Context) applyDictArgs(x *D, arg V, args []V) V {
 		return canonicalVs(r)
 	}
 	switch argv := arg.bv.(type) {
-	case array:
+	case Array:
 		r := make([]V, argv.Len())
 		for i := 0; i < argv.Len(); i++ {
-			ri := ctx.applyDictArgs(x, argv.at(i), args)
+			ri := ctx.applyDictArgs(x, argv.VAt(i), args)
 			if ri.IsPanic() {
 				return ri
 			}
@@ -451,7 +451,7 @@ func (ctx *Context) applyDictArgs(x *D, arg V, args []V) V {
 		r := applyDict(x, arg)
 		// applyDict never panics
 		switch rv := r.bv.(type) {
-		case array:
+		case Array:
 			return ctx.applyArrayArgs(rv, args[len(args)-1], args[:len(args)-1])
 		case *D:
 			return ctx.applyDictArgs(rv, args[len(args)-1], args[:len(args)-1])
@@ -462,7 +462,7 @@ func (ctx *Context) applyDictArgs(x *D, arg V, args []V) V {
 }
 
 // applyArray applies an array to a value.
-func applyArray(x array, y V) V {
+func applyArray(x Array, y V) V {
 	if y.IsI() {
 		i := y.I()
 		if i < 0 {
@@ -471,7 +471,7 @@ func applyArray(x array, y V) V {
 		if i < 0 || i >= int64(x.Len()) {
 			return arrayProtoV(x)
 		}
-		return x.at(int(i))
+		return x.VAt(int(i))
 
 	}
 	if y.IsF() {
@@ -512,7 +512,7 @@ func applyArray(x array, y V) V {
 	}
 }
 
-func (ctx *Context) applyArrayArgs(x array, arg V, args []V) V {
+func (ctx *Context) applyArrayArgs(x Array, arg V, args []V) V {
 	if len(args) == 0 {
 		return applyArray(x, arg)
 	}
@@ -529,10 +529,10 @@ func (ctx *Context) applyArrayArgs(x array, arg V, args []V) V {
 		return canonicalVs(r)
 	}
 	switch argv := arg.bv.(type) {
-	case array:
+	case Array:
 		r := make([]V, argv.Len())
 		for i := 0; i < argv.Len(); i++ {
-			ri := ctx.applyArrayArgs(x, argv.at(i), args)
+			ri := ctx.applyArrayArgs(x, argv.VAt(i), args)
 			if ri.IsPanic() {
 				return ri
 			}
@@ -546,7 +546,7 @@ func (ctx *Context) applyArrayArgs(x array, arg V, args []V) V {
 			return r
 		}
 		switch rv := r.bv.(type) {
-		case array:
+		case Array:
 			return ctx.applyArrayArgs(rv, args[len(args)-1], args[:len(args)-1])
 		case *D:
 			return ctx.applyDictArgs(rv, args[len(args)-1], args[:len(args)-1])
@@ -604,13 +604,13 @@ func applyI(n int, i int64, y V) V {
 		rk := takePadN(i, yv.keys)
 		rv := takePadN(i, yv.values)
 		return NewV(&D{
-			keys:   rk.bv.(array),
-			values: rv.bv.(array)})
-	case array:
+			keys:   rk.bv.(Array),
+			values: rv.bv.(Array)})
+	case Array:
 		r := takePadN(i, yv)
 		return r
 	default:
-		r := takePadN(i, toArray(y).bv.(array))
+		r := takePadN(i, toArray(y).bv.(Array))
 		return r
 	}
 }

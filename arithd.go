@@ -30,11 +30,11 @@ func equal(x, y V) V {
 		switch yv := y.bv.(type) {
 		case *D:
 			return newDictValues(yv.keys, equal(x, NewV(yv.values)))
-		case array:
+		case Array:
 			if yv.Len() != xv.Len() {
 				return panicLength("x=y", xv.Len(), yv.Len())
 			}
-			return mapAVarray(xv, yv, equal)
+			return mapAVArray(xv, yv, equal)
 		}
 		return mapAVV(xv, y, equal)
 	case *D:
@@ -86,7 +86,7 @@ func equalFV(x float64, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return equalFV(x, yi) })
 	default:
@@ -128,7 +128,7 @@ func equalIV(x int64, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return equalIV(x, yi) })
 	default:
@@ -152,7 +152,7 @@ func equalSV(x S, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return equalSV(x, yi) })
 	default:
@@ -213,7 +213,7 @@ func equalABV(x *AB, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x=y", x.Len(), yv.Len())
@@ -286,7 +286,7 @@ func equalAFV(x *AF, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x=y", x.Len(), yv.Len())
@@ -359,7 +359,7 @@ func equalAIV(x *AI, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x=y", x.Len(), yv.Len())
@@ -403,7 +403,7 @@ func equalASV(x *AS, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x=y", x.Len(), yv.Len())
@@ -446,11 +446,11 @@ func less(x, y V) V {
 		switch yv := y.bv.(type) {
 		case *D:
 			return newDictValues(yv.keys, less(x, NewV(yv.values)))
-		case array:
+		case Array:
 			if yv.Len() != xv.Len() {
 				return panicLength("x<y", xv.Len(), yv.Len())
 			}
-			return mapAVarray(xv, yv, less)
+			return mapAVArray(xv, yv, less)
 		}
 		return mapAVV(xv, y, less)
 	case *D:
@@ -502,7 +502,7 @@ func lessFV(x float64, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return lessFV(x, yi) })
 	default:
@@ -544,7 +544,7 @@ func lessIV(x int64, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return lessIV(x, yi) })
 	default:
@@ -568,7 +568,7 @@ func lessSV(x S, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return lessSV(x, yi) })
 	default:
@@ -629,7 +629,7 @@ func lessABV(x *AB, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x<y", x.Len(), yv.Len())
@@ -702,7 +702,7 @@ func lessAFV(x *AF, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x<y", x.Len(), yv.Len())
@@ -775,7 +775,7 @@ func lessAIV(x *AI, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x<y", x.Len(), yv.Len())
@@ -819,7 +819,7 @@ func lessASV(x *AS, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x<y", x.Len(), yv.Len())
@@ -862,11 +862,11 @@ func more(x, y V) V {
 		switch yv := y.bv.(type) {
 		case *D:
 			return newDictValues(yv.keys, more(x, NewV(yv.values)))
-		case array:
+		case Array:
 			if yv.Len() != xv.Len() {
 				return panicLength("x>y", xv.Len(), yv.Len())
 			}
-			return mapAVarray(xv, yv, more)
+			return mapAVArray(xv, yv, more)
 		}
 		return mapAVV(xv, y, more)
 	case *D:
@@ -918,7 +918,7 @@ func moreFV(x float64, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return moreFV(x, yi) })
 	default:
@@ -960,7 +960,7 @@ func moreIV(x int64, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return moreIV(x, yi) })
 	default:
@@ -984,7 +984,7 @@ func moreSV(x S, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return moreSV(x, yi) })
 	default:
@@ -1045,7 +1045,7 @@ func moreABV(x *AB, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x>y", x.Len(), yv.Len())
@@ -1118,7 +1118,7 @@ func moreAFV(x *AF, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x>y", x.Len(), yv.Len())
@@ -1191,7 +1191,7 @@ func moreAIV(x *AI, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x>y", x.Len(), yv.Len())
@@ -1235,7 +1235,7 @@ func moreASV(x *AS, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x>y", x.Len(), yv.Len())
@@ -1278,11 +1278,11 @@ func add(x, y V) V {
 		switch yv := y.bv.(type) {
 		case *D:
 			return newDictValues(yv.keys, add(x, NewV(yv.values)))
-		case array:
+		case Array:
 			if yv.Len() != xv.Len() {
 				return panicLength("x+y", xv.Len(), yv.Len())
 			}
-			return mapAVarray(xv, yv, add)
+			return mapAVArray(xv, yv, add)
 		}
 		return mapAVV(xv, y, add)
 	case *D:
@@ -1343,7 +1343,7 @@ func addFV(x float64, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return addFV(x, yi) })
 	default:
@@ -1394,7 +1394,7 @@ func addIV(x int64, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return addIV(x, yi) })
 	default:
@@ -1417,7 +1417,7 @@ func addSV(x S, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return addSV(x, yi) })
 	default:
@@ -1473,7 +1473,7 @@ func addABV(x *AB, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x+y", x.Len(), yv.Len())
@@ -1541,7 +1541,7 @@ func addAFV(x *AF, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x+y", x.Len(), yv.Len())
@@ -1609,7 +1609,7 @@ func addAIV(x *AI, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x+y", x.Len(), yv.Len())
@@ -1651,7 +1651,7 @@ func addASV(x *AS, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x+y", x.Len(), yv.Len())
@@ -1694,11 +1694,11 @@ func subtract(x, y V) V {
 		switch yv := y.bv.(type) {
 		case *D:
 			return newDictValues(yv.keys, subtract(x, NewV(yv.values)))
-		case array:
+		case Array:
 			if yv.Len() != xv.Len() {
 				return panicLength("x-y", xv.Len(), yv.Len())
 			}
-			return mapAVarray(xv, yv, subtract)
+			return mapAVArray(xv, yv, subtract)
 		}
 		return mapAVV(xv, y, subtract)
 	case *D:
@@ -1747,7 +1747,7 @@ func subtractFV(x float64, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return subtractFV(x, yi) })
 	default:
@@ -1786,7 +1786,7 @@ func subtractIV(x int64, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return subtractIV(x, yi) })
 	default:
@@ -1809,7 +1809,7 @@ func subtractSV(x S, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return subtractSV(x, yi) })
 	default:
@@ -1865,7 +1865,7 @@ func subtractABV(x *AB, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x-y", x.Len(), yv.Len())
@@ -1933,7 +1933,7 @@ func subtractAFV(x *AF, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x-y", x.Len(), yv.Len())
@@ -2001,7 +2001,7 @@ func subtractAIV(x *AI, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x-y", x.Len(), yv.Len())
@@ -2043,7 +2043,7 @@ func subtractASV(x *AS, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x-y", x.Len(), yv.Len())
@@ -2086,11 +2086,11 @@ func multiply(x, y V) V {
 		switch yv := y.bv.(type) {
 		case *D:
 			return newDictValues(yv.keys, multiply(x, NewV(yv.values)))
-		case array:
+		case Array:
 			if yv.Len() != xv.Len() {
 				return panicLength("x*y", xv.Len(), yv.Len())
 			}
-			return mapAVarray(xv, yv, multiply)
+			return mapAVArray(xv, yv, multiply)
 		}
 		return mapAVV(xv, y, multiply)
 	case *D:
@@ -2147,7 +2147,7 @@ func multiplyFV(x float64, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return multiplyFV(x, yi) })
 	default:
@@ -2194,7 +2194,7 @@ func multiplyIV(x int64, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return multiplyIV(x, yi) })
 	default:
@@ -2233,7 +2233,7 @@ func multiplySV(x S, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return multiplySV(x, yi) })
 	default:
@@ -2304,7 +2304,7 @@ func multiplyABV(x *AB, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x*y", x.Len(), yv.Len())
@@ -2387,7 +2387,7 @@ func multiplyAFV(x *AF, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x*y", x.Len(), yv.Len())
@@ -2470,7 +2470,7 @@ func multiplyAIV(x *AI, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x*y", x.Len(), yv.Len())
@@ -2538,7 +2538,7 @@ func multiplyASV(x *AS, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x*y", x.Len(), yv.Len())
@@ -2577,11 +2577,11 @@ func divide(x, y V) V {
 		switch yv := y.bv.(type) {
 		case *D:
 			return newDictValues(yv.keys, divide(x, NewV(yv.values)))
-		case array:
+		case Array:
 			if yv.Len() != xv.Len() {
 				return panicLength("x%y", xv.Len(), yv.Len())
 			}
-			return mapAVarray(xv, yv, divide)
+			return mapAVArray(xv, yv, divide)
 		}
 		return mapAVV(xv, y, divide)
 	case *D:
@@ -2630,7 +2630,7 @@ func divideFV(x float64, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return divideFV(x, yi) })
 	default:
@@ -2669,7 +2669,7 @@ func divideIV(x int64, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return divideIV(x, yi) })
 	default:
@@ -2725,7 +2725,7 @@ func divideABV(x *AB, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x%y", x.Len(), yv.Len())
@@ -2793,7 +2793,7 @@ func divideAFV(x *AF, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x%y", x.Len(), yv.Len())
@@ -2861,7 +2861,7 @@ func divideAIV(x *AI, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x%y", x.Len(), yv.Len())
@@ -2904,11 +2904,11 @@ func minimum(x, y V) V {
 		switch yv := y.bv.(type) {
 		case *D:
 			return newDictValues(yv.keys, minimum(x, NewV(yv.values)))
-		case array:
+		case Array:
 			if yv.Len() != xv.Len() {
 				return panicLength("x&y", xv.Len(), yv.Len())
 			}
-			return mapAVarray(xv, yv, minimum)
+			return mapAVArray(xv, yv, minimum)
 		}
 		return mapAVV(xv, y, minimum)
 	case *D:
@@ -2969,7 +2969,7 @@ func minimumFV(x float64, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return minimumFV(x, yi) })
 	default:
@@ -3020,7 +3020,7 @@ func minimumIV(x int64, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return minimumIV(x, yi) })
 	default:
@@ -3043,7 +3043,7 @@ func minimumSV(x S, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return minimumSV(x, yi) })
 	default:
@@ -3107,7 +3107,7 @@ func minimumABV(x *AB, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x&y", x.Len(), yv.Len())
@@ -3175,7 +3175,7 @@ func minimumAFV(x *AF, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x&y", x.Len(), yv.Len())
@@ -3243,7 +3243,7 @@ func minimumAIV(x *AI, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x&y", x.Len(), yv.Len())
@@ -3285,7 +3285,7 @@ func minimumASV(x *AS, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x&y", x.Len(), yv.Len())
@@ -3328,11 +3328,11 @@ func maximum(x, y V) V {
 		switch yv := y.bv.(type) {
 		case *D:
 			return newDictValues(yv.keys, maximum(x, NewV(yv.values)))
-		case array:
+		case Array:
 			if yv.Len() != xv.Len() {
 				return panicLength("x|y", xv.Len(), yv.Len())
 			}
-			return mapAVarray(xv, yv, maximum)
+			return mapAVArray(xv, yv, maximum)
 		}
 		return mapAVV(xv, y, maximum)
 	case *D:
@@ -3393,7 +3393,7 @@ func maximumFV(x float64, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return maximumFV(x, yi) })
 	default:
@@ -3444,7 +3444,7 @@ func maximumIV(x int64, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return maximumIV(x, yi) })
 	default:
@@ -3467,7 +3467,7 @@ func maximumSV(x S, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return maximumSV(x, yi) })
 	default:
@@ -3531,7 +3531,7 @@ func maximumABV(x *AB, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x|y", x.Len(), yv.Len())
@@ -3599,7 +3599,7 @@ func maximumAFV(x *AF, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x|y", x.Len(), yv.Len())
@@ -3667,7 +3667,7 @@ func maximumAIV(x *AI, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x|y", x.Len(), yv.Len())
@@ -3709,7 +3709,7 @@ func maximumASV(x *AS, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x|y", x.Len(), yv.Len())
@@ -3748,11 +3748,11 @@ func arctan2(x, y V) V {
 		switch yv := y.bv.(type) {
 		case *D:
 			return newDictValues(yv.keys, arctan2(x, NewV(yv.values)))
-		case array:
+		case Array:
 			if yv.Len() != xv.Len() {
 				return panicLength("x atan y", xv.Len(), yv.Len())
 			}
-			return mapAVarray(xv, yv, arctan2)
+			return mapAVArray(xv, yv, arctan2)
 		}
 		return mapAVV(xv, y, arctan2)
 	case *D:
@@ -3801,7 +3801,7 @@ func arctan2FV(x float64, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return arctan2FV(x, yi) })
 	default:
@@ -3840,7 +3840,7 @@ func arctan2IV(x int64, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		return mapAV(yv, func(yi V) V { return arctan2IV(x, yi) })
 	default:
@@ -3896,7 +3896,7 @@ func arctan2ABV(x *AB, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x atan y", x.Len(), yv.Len())
@@ -3964,7 +3964,7 @@ func arctan2AFV(x *AF, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x atan y", x.Len(), yv.Len())
@@ -4032,7 +4032,7 @@ func arctan2AIV(x *AI, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: yv.keys, values: v.bv.(array)})
+		return NewV(&D{keys: yv.keys, values: v.bv.(Array)})
 	case *AV:
 		if x.Len() != yv.Len() {
 			return panicLength("x atan y", x.Len(), yv.Len())

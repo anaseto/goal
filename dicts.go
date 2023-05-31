@@ -4,18 +4,18 @@ import "fmt"
 
 // D represents a dictionary.
 type D struct {
-	keys   array
-	values array
+	keys   Array
+	values Array
 }
 
 // NewD returns a dictionary. Both keys and values should be arrays, and
 // they should have the same length.
 func NewD(keys, values V) V {
-	xv, ok := keys.bv.(array)
+	xv, ok := keys.bv.(Array)
 	if !ok {
 		panic(fmt.Sprintf("NewD(keys, values) : keys not an array (%s)", keys.Type()))
 	}
-	yv, ok := values.bv.(array)
+	yv, ok := values.bv.(Array)
 	if !ok {
 		panic(fmt.Sprintf("NewD(keys, values) : values not an array (%s)", values.Type()))
 	}
@@ -25,11 +25,11 @@ func NewD(keys, values V) V {
 	return NewV(&D{keys: xv, values: yv})
 }
 
-func newDictValues(keys array, values V) V {
+func newDictValues(keys Array, values V) V {
 	if values.IsPanic() {
 		return values
 	}
-	v := values.bv.(array)
+	v := values.bv.(Array)
 	return NewV(&D{keys: keys, values: v})
 }
 
@@ -74,11 +74,11 @@ func dict(x, y V) V {
 		}
 		return moddivpad(int64(x.F()), y)
 	}
-	xv, ok := x.bv.(array)
+	xv, ok := x.bv.(Array)
 	if !ok {
 		return panicType("X!Y", "X", x)
 	}
-	yv, ok := y.bv.(array)
+	yv, ok := y.bv.(Array)
 	if !ok {
 		return panicType("X!Y", "X", x)
 	}
@@ -88,7 +88,7 @@ func dict(x, y V) V {
 	return NewV(&D{keys: xv, values: yv})
 }
 
-func dictAmendKVI(xd *D, yk array) (array, array, V) {
+func dictAmendKVI(xd *D, yk Array) (Array, Array, V) {
 	keys, values := xd.keys, xd.values.sclone()
 	ykv := NewV(yk)
 	yk.IncrRC()
@@ -98,7 +98,7 @@ func dictAmendKVI(xd *D, yk array) (array, array, V) {
 	if max == int64(nkeys) {
 		b := equalIV(max, ky)
 		flags := keys.getFlags() & flagDistinct
-		keys = join(NewV(keys), distinct(replicate(b, ykv))).bv.(array)
+		keys = join(NewV(keys), distinct(replicate(b, ykv))).bv.(Array)
 		keys.setFlags(flags)
 		values = padArrayMut(keys.Len()-nkeys, values)
 		ky = findArray(keys, ykv)
@@ -109,7 +109,7 @@ func dictAmendKVI(xd *D, yk array) (array, array, V) {
 
 func dictMerge(xd, yd *D) V {
 	keys, values, ky := dictAmendKVI(xd, yd.keys)
-	var r array
+	var r Array
 	switch kyv := ky.bv.(type) {
 	case *AB:
 		r = mergeAtIs(values, kyv.elts, yd.values)
@@ -119,7 +119,7 @@ func dictMerge(xd, yd *D) V {
 	return NewV(&D{keys: keys, values: canonicalArray(r)})
 }
 
-func mergeAtIs[I integer](x array, y []I, z array) array {
+func mergeAtIs[I integer](x Array, y []I, z Array) Array {
 	if sameType(x, z) {
 		return amend4RightIsATs(x, y, z)
 	}
@@ -129,7 +129,7 @@ func mergeAtIs[I integer](x array, y []I, z array) array {
 func dictArith(xd, yd *D, f func(V, V) V) V {
 	keys, values, ky := dictAmendKVI(xd, yd.keys)
 	var err error
-	var r array
+	var r Array
 	switch kyv := ky.bv.(type) {
 	case *AB:
 		r, err = arithAmendIsArray(values, kyv.elts, f, yd.values)

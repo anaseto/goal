@@ -117,8 +117,8 @@ func (x V) F() float64 {
 	return f
 }
 
-// Value retrieves the boxed value, or nil if the value is not boxed. You can
-// check whether the value is boxed with IsValue(v).
+// BV retrieves the boxed value, or nil if the value is not boxed. You can
+// check whether the value is boxed with IsBV(v).
 func (x V) BV() BV {
 	return x.bv
 }
@@ -175,9 +175,9 @@ func (x V) IsError() bool {
 	return ok
 }
 
-// IsValue returns true if the value is a boxed value satisfying the Value
-// interface. You can then get the value with the Value method.
-func (x V) IsValue() bool {
+// IsBV returns true if the value is a boxed value satisfying the BV interface.
+// You can then get the value with the BV method.
+func (x V) IsBV() bool {
 	return x.kind == valBoxed
 }
 

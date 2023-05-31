@@ -150,7 +150,7 @@ func deal(ctx *Context, n int64, y V) V {
 		}
 		return deal(ctx, n, NewI(int64(y.F())))
 	}
-	ya, ok := y.bv.(array)
+	ya, ok := y.bv.(Array)
 	if !ok {
 		return panicType("(-i)?y", "y", y)
 	}

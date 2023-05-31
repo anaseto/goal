@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func each2String(ctx *Context, x array) V {
+func each2String(ctx *Context, x Array) V {
 	switch xv := x.(type) {
 	case *AB:
 		return NewAS(stringIs(xv.elts))
@@ -51,7 +51,7 @@ func stringVs(x []V, ctx *Context) []string {
 	return r
 }
 
-func each2First(x array) V {
+func each2First(x Array) V {
 	switch xv := x.(type) {
 	case *AV:
 		r := make([]V, xv.Len())
@@ -66,7 +66,7 @@ func each2First(x array) V {
 	}
 }
 
-func each2Length(x array) V {
+func each2Length(x Array) V {
 	switch xv := x.(type) {
 	case *AV:
 		r := make([]int64, xv.Len())
@@ -83,7 +83,7 @@ func each2Length(x array) V {
 	}
 }
 
-func each2Type(x array) V {
+func each2Type(x Array) V {
 	switch xv := x.(type) {
 	case *AF:
 		r := make([]string, x.Len())
@@ -126,9 +126,9 @@ func fold2Generic(x *AV, f func(V, V) V) V {
 	return r
 }
 
-func fold3Generic(x V, y array, f func(V, V) V) V {
+func fold3Generic(x V, y Array, f func(V, V) V) V {
 	for i := 0; i < y.Len(); i++ {
-		x = f(x, y.at(i))
+		x = f(x, y.VAt(i))
 		if x.IsPanic() {
 			return x
 		}
@@ -641,13 +641,13 @@ func scan2Generic(x *AV, f func(V, V) V) V {
 	return NewV(r)
 }
 
-func scan3Generic(x V, y array, f func(V, V) V) V {
+func scan3Generic(x V, y Array, f func(V, V) V) V {
 	if y.Len() == 0 {
 		return NewV(y)
 	}
 	r := make([]V, y.Len())
 	for i := 0; i < y.Len(); i++ {
-		x = f(x, y.at(i))
+		x = f(x, y.VAt(i))
 		if x.IsPanic() {
 			return x
 		}
@@ -1119,11 +1119,11 @@ func each3Match(x, y V) V {
 	case *D:
 		return newDictValues(xv.keys, each3Match(NewV(xv.values), y))
 	default:
-		xa, ok := x.bv.(array)
+		xa, ok := x.bv.(Array)
 		if !ok {
 			break
 		}
-		ya, ok := y.bv.(array)
+		ya, ok := y.bv.(Array)
 		if !ok {
 			yd, ok := y.bv.(*D)
 			if !ok {
@@ -1134,8 +1134,8 @@ func each3Match(x, y V) V {
 		xlen := xa.Len()
 		r := make([]byte, xlen)
 		for i := 0; i < xlen; i++ {
-			xi := xa.at(i)
-			yi := ya.at(i)
+			xi := xa.VAt(i)
+			yi := ya.VAt(i)
 			r[i] = b2B(xi.Matches(yi))
 		}
 		return newABb(r)
@@ -1143,8 +1143,8 @@ func each3Match(x, y V) V {
 	l := maxInt(x.Len(), y.Len())
 	r := make([]byte, l)
 	for i := 0; i < l; i++ {
-		xi := x.at(i)
-		yi := y.at(i)
+		xi := x.VAt(i)
+		yi := y.VAt(i)
 		r[i] = b2B(xi.Matches(yi))
 	}
 	return newABb(r)

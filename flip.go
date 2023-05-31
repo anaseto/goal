@@ -17,7 +17,7 @@ func flip(x V) V {
 		for _, o := range xv.elts {
 			var nl int
 			switch a := o.bv.(type) {
-			case array:
+			case Array:
 				nl = a.Len()
 			default:
 				continue
@@ -267,8 +267,8 @@ func flipAV(x *AV) V {
 	r := make([]V, x.Len())
 	for i, xi := range x.elts {
 		switch xiv := xi.bv.(type) {
-		case array:
-			r[i] = xiv.at(0)
+		case Array:
+			r[i] = xiv.VAt(0)
 		default:
 			r[i] = xi
 		}
@@ -282,9 +282,9 @@ func flipAVAV(x *AV, lines int) V {
 	xlen := x.Len()
 	for i, xi := range x.elts {
 		switch xiv := xi.bv.(type) {
-		case array:
+		case Array:
 			for j := 0; j < lines; j++ {
-				a[i+j*xlen] = xiv.at(j)
+				a[i+j*xlen] = xiv.VAt(j)
 			}
 		default:
 			for j := 0; j < lines; j++ {

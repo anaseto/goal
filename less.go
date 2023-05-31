@@ -42,7 +42,7 @@ func (x V) LessT(y V) bool {
 	return x.kind < y.kind
 }
 
-// LessT satisfies the specification of the Value interface.
+// LessT satisfies the specification of the BV interface.
 func (s S) LessT(y BV) bool {
 	switch yv := y.(type) {
 	case S:
@@ -52,7 +52,7 @@ func (s S) LessT(y BV) bool {
 	}
 }
 
-// LessT satisfies the specification of the Value interface.
+// LessT satisfies the specification of the BV interface.
 func (x *AB) LessT(y BV) bool {
 	switch yv := y.(type) {
 	case *AB:
@@ -99,7 +99,7 @@ func (x *AB) LessT(y BV) bool {
 	}
 }
 
-// LessT satisfies the specification of the Value interface.
+// LessT satisfies the specification of the BV interface.
 func (x *AI) LessT(y BV) bool {
 	switch yv := y.(type) {
 	case *AB:
@@ -146,7 +146,7 @@ func (x *AI) LessT(y BV) bool {
 	}
 }
 
-// LessT satisfies the specification of the Value interface.
+// LessT satisfies the specification of the BV interface.
 func (x *AF) LessT(y BV) bool {
 	switch yv := y.(type) {
 	case *AB:
@@ -193,7 +193,7 @@ func (x *AF) LessT(y BV) bool {
 	}
 }
 
-// LessT satisfies the specification of the Value interface.
+// LessT satisfies the specification of the BV interface.
 func (x *AS) LessT(y BV) bool {
 	switch yv := y.(type) {
 	case *AS:
@@ -214,7 +214,7 @@ func (x *AS) LessT(y BV) bool {
 	}
 }
 
-// LessT satisfies the specification of the Value interface.
+// LessT satisfies the specification of the BV interface.
 func (x *AV) LessT(y BV) bool {
 	switch yv := y.(type) {
 	case *AV:
@@ -235,7 +235,7 @@ func (x *AV) LessT(y BV) bool {
 	}
 }
 
-// LessT satisfies the specification of the Value interface.
+// LessT satisfies the specification of the BV interface.
 func (d *D) LessT(y BV) bool {
 	switch yv := y.(type) {
 	case *D:

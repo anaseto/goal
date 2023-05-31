@@ -71,7 +71,7 @@ func (x *AV) Clone() BV {
 // Clone returns a clone of the value. Note that the cloned value might still
 // share some structures with its parent if they're deemed reusable.
 func (d *D) Clone() BV {
-	return &D{keys: d.keys.Clone().(array), values: d.values.Clone().(array)}
+	return &D{keys: d.keys.Clone().(Array), values: d.values.Clone().(Array)}
 }
 
 func (p *projection) Clone() BV {

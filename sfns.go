@@ -6,6 +6,13 @@ import (
 	"sort"
 )
 
+// countable interface is satisfied by values that have a length, like arrays
+// and dictionaries.
+type countable interface {
+	// Len returns the value's length.
+	Len() int
+}
+
 // Len returns the length of a value like in #x.
 func (x V) Len() int {
 	switch xv := x.bv.(type) {
@@ -22,7 +29,7 @@ func reverseSlice[T any](xs []T) {
 	}
 }
 
-func reverseMut(x array) {
+func reverseMut(x Array) {
 	switch xv := x.(type) {
 	case *AB:
 		reverseSlice[byte](xv.elts)
@@ -40,7 +47,7 @@ func reverseMut(x array) {
 // reverse returns |x.
 func reverse(x V) V {
 	switch xv := x.bv.(type) {
-	case array:
+	case Array:
 		flags := xv.getFlags() &^ flagAscending
 		xv = xv.sclone()
 		reverseMut(xv)
@@ -50,7 +57,7 @@ func reverse(x V) V {
 	case *D:
 		k := reverse(NewV(xv.keys))
 		v := reverse(NewV(xv.values))
-		return NewV(&D{keys: k.bv.(array), values: v.bv.(array)})
+		return NewV(&D{keys: k.bv.(Array), values: v.bv.(Array)})
 	default:
 		return panicType("|x", "x", x)
 	}
@@ -132,7 +139,7 @@ func rotateI(i int64, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&D{keys: k.bv.(array), values: v.bv.(array)})
+		return NewV(&D{keys: k.bv.(Array), values: v.bv.(Array)})
 	default:
 		return panicType("x rotate y", "y", y)
 	}
@@ -150,7 +157,7 @@ func rotateSlice[T any](i int64, ys []T) []T {
 // first returns *x.
 func first(x V) V {
 	switch xv := x.bv.(type) {
-	case array:
+	case Array:
 		if xv.Len() == 0 {
 			switch xv.(type) {
 			case *AF:
@@ -163,7 +170,7 @@ func first(x V) V {
 				return NewI(0)
 			}
 		}
-		return xv.at(0)
+		return xv.VAt(0)
 	case *D:
 		return first(NewV(xv.values))
 	default:
@@ -218,7 +225,7 @@ func dropN(n int64, y V) V {
 			}
 			return NewV(yv[:n])
 		}
-	case array:
+	case Array:
 		switch {
 		case n >= 0:
 			if n > int64(yv.Len()) {
@@ -238,8 +245,8 @@ func dropN(n int64, y V) V {
 		rk := dropN(n, NewV(yv.keys))
 		rv := dropN(n, NewV(yv.values))
 		return NewV(&D{
-			keys:   rk.bv.(array),
-			values: rv.bv.(array)})
+			keys:   rk.bv.(Array),
+			values: rv.bv.(Array)})
 	default:
 		return panicType("i_y", "y", y)
 	}
@@ -249,7 +256,7 @@ func cutAB(xv *AB, y V) V {
 	switch yv := y.bv.(type) {
 	case S:
 		return cutABS(xv, yv)
-	case array:
+	case Array:
 		return cutABarray(xv, yv)
 	case *D:
 		k := cutABarray(xv, yv.keys)
@@ -270,7 +277,7 @@ func cutAI(xv *AI, y V) V {
 	switch yv := y.bv.(type) {
 	case S:
 		return cutAIS(xv, yv)
-	case array:
+	case Array:
 		return cutAIarray(xv, yv)
 	case *D:
 		k := cutAIarray(xv, yv.keys)
@@ -287,7 +294,7 @@ func cutAI(xv *AI, y V) V {
 	}
 }
 
-func cutAIarray(x *AI, y array) V {
+func cutAIarray(x *AI, y Array) V {
 	if !ascending(x) && !sort.IsSorted(x) {
 		return panics("I_y : non-ascending I")
 	}
@@ -306,7 +313,7 @@ func cutAIarray(x *AI, y array) V {
 	return newAVu(r)
 }
 
-func cutABarray(x *AB, y array) V {
+func cutABarray(x *AB, y Array) V {
 	if !ascending(x) && !sort.IsSorted(x) {
 		return panics("I_y : non-ascending I")
 	}
@@ -325,7 +332,7 @@ func cutABarray(x *AB, y array) V {
 	return newAVu(r)
 }
 
-func cutInt64sArray[I integer](x []I, y array) []V {
+func cutInt64sArray[I integer](x []I, y Array) []V {
 	xlen := len(x)
 	ylen := int64(y.Len())
 	r := make([]V, xlen)
@@ -425,7 +432,7 @@ func take(x, y V) V {
 		switch xv := x.bv.(type) {
 		case S:
 			return scount(xv, y)
-		case array:
+		case Array:
 			return withValuesOrKeys(xv, y)
 		default:
 			return panicType("x#y", "x", x)
@@ -436,9 +443,9 @@ func take(x, y V) V {
 		rk := takeN(n, yv.keys)
 		rv := takeN(n, yv.values)
 		return NewV(&D{
-			keys:   rk.bv.(array),
-			values: rv.bv.(array)})
-	case array:
+			keys:   rk.bv.(Array),
+			values: rv.bv.(Array)})
+	case Array:
 		return takeN(n, yv)
 	default:
 		return takeNAtom(n, y)
@@ -512,7 +519,7 @@ func constArray[T any](n int64, y T) []T {
 	return r
 }
 
-func takeN(n int64, y array) V {
+func takeN(n int64, y Array) V {
 	if y.Len() == 0 {
 		if n < 0 {
 			n = -n
@@ -550,7 +557,7 @@ func takeN(n int64, y array) V {
 	}
 }
 
-func takeCyclic(n int64, y array) V {
+func takeCyclic(n int64, y Array) V {
 	switch yv := y.(type) {
 	case *AB:
 		fl := yv.flags & flagBool
@@ -569,7 +576,7 @@ func takeCyclic(n int64, y array) V {
 	}
 }
 
-func takePadN(n int64, x array) V {
+func takePadN(n int64, x Array) V {
 	switch {
 	case n >= 0:
 		if n > int64(x.Len()) {
@@ -584,7 +591,7 @@ func takePadN(n int64, x array) V {
 	}
 }
 
-func padArrayN(n int64, x array) V {
+func padArrayN(n int64, x Array) V {
 	switch xv := x.(type) {
 	case *AB:
 		r := padNSlice[byte](n, xv.elts)
@@ -717,7 +724,7 @@ func shiftBeforeAB(x V, yv *AB) V {
 		return NewAI(r)
 	case *AV:
 		return shiftAVBeforeArray(xv, yv)
-	case array:
+	case Array:
 		return shiftArrayBeforeArray(xv, yv)
 	default:
 		return shiftVBeforeArray(x, yv)
@@ -773,7 +780,7 @@ func shiftBeforeAI(x V, yv *AI) V {
 		return NewV(r)
 	case *AV:
 		return shiftAVBeforeArray(xv, yv)
-	case array:
+	case Array:
 		return shiftArrayBeforeArray(xv, yv)
 	default:
 		return shiftVBeforeArray(x, yv)
@@ -821,7 +828,7 @@ func shiftBeforeAF(x V, yv *AF) V {
 		return NewV(r)
 	case *AV:
 		return shiftAVBeforeArray(xv, yv)
-	case array:
+	case Array:
 		return shiftArrayBeforeArray(xv, yv)
 	default:
 		return shiftVBeforeArray(x, yv)
@@ -849,7 +856,7 @@ func shiftBeforeAS(x V, yv *AS) V {
 		return NewV(r)
 	case *AV:
 		return shiftAVBeforeArray(xv, yv)
-	case array:
+	case Array:
 		return shiftArrayBeforeArray(xv, yv)
 	default:
 		return shiftVBeforeArray(x, yv)
@@ -863,11 +870,11 @@ func shiftBeforeAV(x V, yv *AV) V {
 	}
 	ys := yv.elts
 	switch xv := x.bv.(type) {
-	case array:
+	case Array:
 		r := yv.reuse()
 		copy(r.elts[max:], ys[:len(ys)-max])
 		for i := 0; i < max; i++ {
-			r.elts[i] = xv.at(i)
+			r.elts[i] = xv.VAt(i)
 		}
 		return canonicalAV(r)
 	default:
@@ -878,37 +885,37 @@ func shiftBeforeAV(x V, yv *AV) V {
 	}
 }
 
-func shiftArrayBeforeArray(xv, yv array) V {
+func shiftArrayBeforeArray(xv, yv Array) V {
 	ylen := yv.Len()
 	max := minInt(xv.Len(), ylen)
 	r := make([]V, ylen)
 	for i := max; i < ylen; i++ {
-		r[i] = yv.at(i - max)
+		r[i] = yv.VAt(i - max)
 	}
 	for i := 0; i < max; i++ {
-		xi := xv.at(i)
+		xi := xv.VAt(i)
 		r[i] = xi
 	}
 	return newAVu(r)
 }
 
-func shiftVBeforeArray(x V, yv array) V {
+func shiftVBeforeArray(x V, yv Array) V {
 	ylen := yv.Len()
 	r := make([]V, ylen)
 	for i := 1; i < ylen; i++ {
-		r[i] = yv.at(i - 1)
+		r[i] = yv.VAt(i - 1)
 	}
 	r[0] = x
 	x.MarkImmutable()
 	return newAVu(r)
 }
 
-func shiftAVBeforeArray(xv *AV, yv array) V {
+func shiftAVBeforeArray(xv *AV, yv Array) V {
 	ylen := yv.Len()
 	max := minInt(xv.Len(), ylen)
 	r := make([]V, ylen)
 	for i := max; i < ylen; i++ {
-		r[i] = yv.at(i - max)
+		r[i] = yv.VAt(i - max)
 	}
 	copy(r[:max], xv.elts)
 	return newAVu(r)
@@ -1031,7 +1038,7 @@ func shiftAfterAB(x V, yv *AB) V {
 		return NewAI(r)
 	case *AV:
 		return shiftAVAfterArray(xv, yv)
-	case array:
+	case Array:
 		return shiftArrayAfterArray(xv, yv)
 	default:
 		return shiftVAfterArray(x, yv)
@@ -1087,7 +1094,7 @@ func shiftAfterAI(x V, yv *AI) V {
 		return NewV(r)
 	case *AV:
 		return shiftAVAfterArray(xv, yv)
-	case array:
+	case Array:
 		return shiftArrayAfterArray(xv, yv)
 	default:
 		return shiftVAfterArray(x, yv)
@@ -1135,7 +1142,7 @@ func shiftAfterAF(x V, yv *AF) V {
 		return NewV(r)
 	case *AV:
 		return shiftAVAfterArray(xv, yv)
-	case array:
+	case Array:
 		return shiftArrayAfterArray(xv, yv)
 	default:
 		return shiftVAfterArray(x, yv)
@@ -1163,7 +1170,7 @@ func shiftAfterAS(x V, yv *AS) V {
 		return NewV(r)
 	case *AV:
 		return shiftAVAfterArray(xv, yv)
-	case array:
+	case Array:
 		return shiftArrayAfterArray(xv, yv)
 	default:
 		return shiftVAfterArray(x, yv)
@@ -1177,11 +1184,11 @@ func shiftAfterAV(x V, yv *AV) V {
 	}
 	ys := yv.elts
 	switch xv := x.bv.(type) {
-	case array:
+	case Array:
 		r := yv.reuse()
 		copy(r.elts[:len(ys)-max], ys[max:])
 		for i := 0; i < max; i++ {
-			r.elts[len(ys)-max+i] = xv.at(i)
+			r.elts[len(ys)-max+i] = xv.VAt(i)
 		}
 		return Canonical(NewV(r))
 	default:
@@ -1192,37 +1199,37 @@ func shiftAfterAV(x V, yv *AV) V {
 	}
 }
 
-func shiftArrayAfterArray(xv, yv array) V {
+func shiftArrayAfterArray(xv, yv Array) V {
 	ylen := yv.Len()
 	max := minInt(xv.Len(), ylen)
 	r := make([]V, ylen)
 	for i := max; i < ylen; i++ {
-		r[i-max] = yv.at(i)
+		r[i-max] = yv.VAt(i)
 	}
 	for i := 0; i < max; i++ {
-		xi := xv.at(i)
+		xi := xv.VAt(i)
 		r[ylen-max+i] = xi
 	}
 	return newAVu(r)
 }
 
-func shiftVAfterArray(x V, yv array) V {
+func shiftVAfterArray(x V, yv Array) V {
 	ylen := yv.Len()
 	r := make([]V, ylen)
 	for i := 1; i < ylen; i++ {
-		r[i-1] = yv.at(i)
+		r[i-1] = yv.VAt(i)
 	}
 	r[ylen-1] = x
 	x.MarkImmutable()
 	return newAVu(r)
 }
 
-func shiftAVAfterArray(xv *AV, yv array) V {
+func shiftAVAfterArray(xv *AV, yv Array) V {
 	ylen := yv.Len()
 	max := minInt(xv.Len(), ylen)
 	r := make([]V, ylen)
 	for i := max; i < ylen; i++ {
-		r[i-max] = yv.at(i)
+		r[i-max] = yv.VAt(i)
 	}
 	copy(r[ylen-max:], xv.elts)
 	return newAVu(r)
@@ -1280,7 +1287,7 @@ func windows(i int64, y V) V {
 			return windowsString(int64(len(yv))-i+1, string(yv))
 		}
 		return Panicf("i^y : out of range i (%d)", i)
-	case array:
+	case Array:
 		if i < 0 && -i < int64(yv.Len())+1 {
 			return windowsArray(-i, yv)
 		}
@@ -1301,7 +1308,7 @@ func windowsString(i int64, s string) V {
 	return NewAS(r)
 }
 
-func windowsArray(i int64, y array) V {
+func windowsArray(i int64, y Array) V {
 	r := make([]V, 1+y.Len()-int(i))
 	y.MarkImmutable()
 	for j := range r {
@@ -1323,7 +1330,7 @@ func shape(ctx *Context, x, y V) V {
 	switch xv := x.bv.(type) {
 	case S:
 		return cast(ctx, xv, y)
-	case array:
+	case Array:
 		return search(x, y)
 	default:
 		return panicType("x$y", "x", x)
@@ -1346,7 +1353,7 @@ func cutShapeI(i int64, y V) V {
 			return cutLinesString(int(i), string(yv))
 		}
 		return Panicf("i$s : out of range i (%d)", i)
-	case array:
+	case Array:
 		if i < 0 && -i < int64(yv.Len())+1 {
 			return cutColsArray(-i, yv)
 		}
@@ -1400,7 +1407,7 @@ func cutLinesString(n int, s string) V {
 	return NewAS(r)
 }
 
-func cutColsArray(i int64, y array) V {
+func cutColsArray(i int64, y Array) V {
 	ylen := y.Len()
 	if i >= int64(ylen) {
 		y.MarkImmutable()
@@ -1420,7 +1427,7 @@ func cutColsArray(i int64, y array) V {
 	return newAVu(r)
 }
 
-func cutLinesArray(n int, y array) V {
+func cutLinesArray(n int, y Array) V {
 	ylen := y.Len()
 	if n == 1 {
 		y.MarkImmutable()

@@ -2,28 +2,26 @@ package goal
 
 import "sort"
 
-type countable interface {
-	Len() int
-}
-
-// array interface is satisfied by the different kind of supported arrays.
-// Typical implementation is given in comments.
-type array interface {
+// Array interface is satisfied by the different kind of supported arrays.
+type Array interface {
 	RefCounter
-	countable
 	sort.Interface
 
-	at(i int) V             // x[i]
-	atBytes([]byte) array   // like x[y] but assumes valid positive indices
-	atInt64s([]int64) array // like x[y] but assumes valid positive indices
+	// Len returns the value's length.
+	Len() int
+	// VAt returns the value at index i, assuming it's not out of bounds.
+	VAt(i int) V
+
+	atBytes([]byte) Array   // like x[y] but assumes valid positive indices
+	atInt64s([]int64) Array // like x[y] but assumes valid positive indices
 	canSet(y V) bool        // compatible type for set
 	getFlags() flags        // get the array's flags
 	numeric() bool          // flat numeric array
 	reusable() bool         // reusable array
-	sclone() array          // shallow clone, erases flags
+	sclone() Array          // shallow clone, erases flags
 	set(i int, y V)         // puts y at indix i, assuming compatibility
 	setFlags(flags)         // set the array's flags
-	slice(i, j int) array   // x[i:j]
+	slice(i, j int) Array   // x[i:j]
 	vAtAB(y *AB) V          // x[y] (like in goal code)
 	vAtAI(y *AI) V          // x[y] (like in goal code)
 }
@@ -43,7 +41,7 @@ func (f flags) Has(ff flags) bool {
 }
 
 // A is a generic type used to represent arrays. Only specific instantiations
-// implement the Value interface.
+// implement the BV and Array interfaces.
 type A[T any] struct {
 	flags flags
 	rc    int32
@@ -201,11 +199,11 @@ func (x *AS) Len() int { return len(x.elts) }
 // Len returns the length of the array.
 func (x *AV) Len() int { return len(x.elts) }
 
-func (x *AB) at(i int) V { return NewI(int64(x.elts[i])) }
-func (x *AI) at(i int) V { return NewI(x.elts[i]) }
-func (x *AF) at(i int) V { return NewF(x.elts[i]) }
-func (x *AS) at(i int) V { return NewS(x.elts[i]) }
-func (x *AV) at(i int) V { return x.elts[i] }
+func (x *AB) VAt(i int) V { return NewI(int64(x.elts[i])) }
+func (x *AI) VAt(i int) V { return NewI(x.elts[i]) }
+func (x *AF) VAt(i int) V { return NewF(x.elts[i]) }
+func (x *AS) VAt(i int) V { return NewS(x.elts[i]) }
+func (x *AV) VAt(i int) V { return x.elts[i] }
 
 // At returns array value at the given index.
 func (x *AB) At(i int) byte { return x.elts[i] }
@@ -222,35 +220,35 @@ func (x *AS) At(i int) string { return x.elts[i] }
 // At returns array value at the given index.
 func (x *AV) At(i int) V { return x.elts[i] }
 
-func (x *AB) slice(i, j int) array {
+func (x *AB) slice(i, j int) Array {
 	if !x.reusable() {
 		x.flags |= flagImmutable
 	}
 	return &AB{flags: x.flags, elts: x.elts[i:j]}
 }
 
-func (x *AI) slice(i, j int) array {
+func (x *AI) slice(i, j int) Array {
 	if !x.reusable() {
 		x.flags |= flagImmutable
 	}
 	return &AI{flags: x.flags, elts: x.elts[i:j]}
 }
 
-func (x *AF) slice(i, j int) array {
+func (x *AF) slice(i, j int) Array {
 	if !x.reusable() {
 		x.flags |= flagImmutable
 	}
 	return &AF{flags: x.flags, elts: x.elts[i:j]}
 }
 
-func (x *AS) slice(i, j int) array {
+func (x *AS) slice(i, j int) Array {
 	if !x.reusable() {
 		x.flags |= flagImmutable
 	}
 	return &AS{flags: x.flags, elts: x.elts[i:j]}
 }
 
-func (x *AV) slice(i, j int) array {
+func (x *AV) slice(i, j int) Array {
 	if !x.reusable() {
 		x.flags |= flagImmutable
 	}
@@ -424,7 +422,7 @@ func (x *AV) vAtAB(y *AB) V {
 	return canonicalVs(r)
 }
 
-func (x *AB) atInt64s(y []int64) array {
+func (x *AB) atInt64s(y []int64) Array {
 	r := &AB{elts: make([]byte, len(y))}
 	if x.IsBoolean() {
 		r.flags |= flagBool
@@ -435,7 +433,7 @@ func (x *AB) atInt64s(y []int64) array {
 	return r
 }
 
-func (x *AI) atInt64s(y []int64) array {
+func (x *AI) atInt64s(y []int64) Array {
 	r := make([]int64, len(y))
 	for i, yi := range y {
 		r[i] = x.elts[yi]
@@ -443,7 +441,7 @@ func (x *AI) atInt64s(y []int64) array {
 	return &AI{elts: r}
 }
 
-func (x *AF) atInt64s(y []int64) array {
+func (x *AF) atInt64s(y []int64) Array {
 	r := make([]float64, len(y))
 	for i, yi := range y {
 		r[i] = x.elts[yi]
@@ -451,7 +449,7 @@ func (x *AF) atInt64s(y []int64) array {
 	return &AF{elts: r}
 }
 
-func (x *AS) atInt64s(y []int64) array {
+func (x *AS) atInt64s(y []int64) Array {
 	r := make([]string, len(y))
 	for i, yi := range y {
 		r[i] = x.elts[yi]
@@ -459,7 +457,7 @@ func (x *AS) atInt64s(y []int64) array {
 	return &AS{elts: r}
 }
 
-func (x *AV) atInt64s(y []int64) array {
+func (x *AV) atInt64s(y []int64) Array {
 	r := make([]V, len(y))
 	for i, yi := range y {
 		r[i] = x.elts[yi]
@@ -467,7 +465,7 @@ func (x *AV) atInt64s(y []int64) array {
 	return canonicalArrayVs(r)
 }
 
-func (x *AB) atBytes(y []byte) array {
+func (x *AB) atBytes(y []byte) Array {
 	r := &AB{elts: make([]byte, len(y))}
 	if x.IsBoolean() {
 		r.flags |= flagBool
@@ -478,7 +476,7 @@ func (x *AB) atBytes(y []byte) array {
 	return r
 }
 
-func (x *AI) atBytes(y []byte) array {
+func (x *AI) atBytes(y []byte) Array {
 	r := make([]int64, len(y))
 	for i, yi := range y {
 		r[i] = x.elts[yi]
@@ -486,7 +484,7 @@ func (x *AI) atBytes(y []byte) array {
 	return &AI{elts: r}
 }
 
-func (x *AF) atBytes(y []byte) array {
+func (x *AF) atBytes(y []byte) Array {
 	r := make([]float64, len(y))
 	for i, yi := range y {
 		r[i] = x.elts[yi]
@@ -494,7 +492,7 @@ func (x *AF) atBytes(y []byte) array {
 	return &AF{elts: r}
 }
 
-func (x *AS) atBytes(y []byte) array {
+func (x *AS) atBytes(y []byte) Array {
 	r := make([]string, len(y))
 	for i, yi := range y {
 		r[i] = x.elts[yi]
@@ -502,7 +500,7 @@ func (x *AS) atBytes(y []byte) array {
 	return &AS{elts: r}
 }
 
-func (x *AV) atBytes(y []byte) array {
+func (x *AV) atBytes(y []byte) Array {
 	r := make([]V, len(y))
 	for i, yi := range y {
 		r[i] = x.elts[yi]
@@ -510,23 +508,23 @@ func (x *AV) atBytes(y []byte) array {
 	return canonicalArrayVs(r)
 }
 
-func (x *AB) sclone() array {
+func (x *AB) sclone() Array {
 	return (*AB)((*A[byte])(x).sclone())
 }
 
-func (x *AI) sclone() array {
+func (x *AI) sclone() Array {
 	return (*AI)((*A[int64])(x).sclone())
 }
 
-func (x *AF) sclone() array {
+func (x *AF) sclone() Array {
 	return (*AF)((*A[float64])(x).sclone())
 }
 
-func (x *AS) sclone() array {
+func (x *AS) sclone() Array {
 	return (*AS)((*A[string])(x).sclone())
 }
 
-func (x *AV) sclone() array {
+func (x *AV) sclone() Array {
 	return (*AV)((*A[V])(x).sclone())
 }
 
@@ -639,8 +637,8 @@ func (x *AV) Matches(y BV) bool {
 }
 
 // matchesLength returns true if y is an array of same length as x.
-func matchesLength(x array, y BV) bool {
-	ya, ok := y.(array)
+func matchesLength(x Array, y BV) bool {
+	ya, ok := y.(Array)
 	if !ok {
 		return false
 	}
@@ -703,14 +701,14 @@ func matchAF(x, y *AF) bool {
 
 // initArrayFlags sets Ascending flag if x is non-generic sorted array. It is
 // used to set the flag on constants arrays.
-func initArrayFlags(x array) {
+func initArrayFlags(x Array) {
 	flags := x.getFlags()
 	if !flags.Has(flagAscending) && sort.IsSorted(x) {
 		x.setFlags(flags | flagAscending)
 	}
 }
 
-func arrayAtIv(x array, y V) array {
+func arrayAtIv(x Array, y V) Array {
 	switch yv := y.bv.(type) {
 	case *AB:
 		return x.atBytes(yv.elts)
@@ -721,7 +719,7 @@ func arrayAtIv(x array, y V) array {
 	}
 }
 
-func atIv(x array, y V) V {
+func atIv(x Array, y V) V {
 	switch yv := y.bv.(type) {
 	case *AB:
 		return x.vAtAB(yv)
@@ -744,6 +742,6 @@ func (x *AF) canSet(y V) bool { return y.IsF() }
 func (x *AS) canSet(y V) bool { _, ok := y.bv.(S); return ok }
 func (x *AV) canSet(y V) bool { return true }
 
-func ascending(x array) bool {
+func ascending(x Array) bool {
 	return x.getFlags().Has(flagAscending)
 }
