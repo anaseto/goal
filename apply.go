@@ -561,7 +561,11 @@ func (r *nReplacer) applyN(ctx *Context, n int) V {
 		ctx.dropN(n - 1)
 		return Panicf("substitution got too many arguments")
 	}
-	nr := ctx.replace(r, ctx.top())
+	x := ctx.top()
+	if x.kind == valNil {
+		return NewV(&projectionMonad{Fun: NewV(r)})
+	}
+	nr := ctx.replace(r, x)
 	return nr
 }
 
@@ -570,7 +574,11 @@ func (r *replacer) applyN(ctx *Context, n int) V {
 		ctx.dropN(n - 1)
 		return Panicf("substitution got too many arguments")
 	}
-	nr := ctx.replace(r, ctx.top())
+	x := ctx.top()
+	if x.kind == valNil {
+		return NewV(&projectionMonad{Fun: NewV(r)})
+	}
+	nr := ctx.replace(r, x)
 	return nr
 }
 
@@ -579,7 +587,11 @@ func (r *rxReplacer) applyN(ctx *Context, n int) V {
 		ctx.dropN(n - 1)
 		return Panicf("substitution got too many arguments")
 	}
-	nr := ctx.replace(r, ctx.top())
+	x := ctx.top()
+	if x.kind == valNil {
+		return NewV(&projectionMonad{Fun: NewV(r)})
+	}
+	nr := ctx.replace(r, x)
 	return nr
 }
 

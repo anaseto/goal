@@ -73,10 +73,12 @@
 "b" "a"_"a""b"!("bc" "ad";"abc") / "a""b"!(("c" "ad");"bc")
 " "^(("bc ";"  ad");"abc  ") / (("bc";"ad");"abc")
 " "^"a""b"!(("bc ";"  ad");"abc  ") / "a""b"!(("bc";"ad");"abc")
+sub["b";"d"][]"abc" / "adc"
 sub["b";"d"]"abc" / "adc"
 sub["a";"b"]"aaa" / "bbb"
 sub["a";"b"]',"aaa" / ,"bbb"
 sub["a";"b";2]"aaa" / "bba"
+sub["a";"b";2][]"aaa" / "bba"
 2 sub["a";"b";1]/"aaa" / "bba"
 $sub["a";"b";2] / `sub["a";"b";2]`
 $sub["a";"b"] / `sub["a";"b";-1]`
@@ -87,6 +89,7 @@ sub["a";"b";2.0]~sub["a";"b";2] / 1
 sub["a";"b";3]~sub["a";"b";2] / 0
 sub["a";"b";2]',"aaa" / ,"bba"
 sub["b" "d" "c" "e"]"abc" / "ade"
+sub["b" "d" "c" "e"][]"abc" / "ade"
 $sub["b" "d" "c" "e"] / `sub["b" "d" "c" "e"]`
 sub["b" "d" "c" "e"]~ sub["b" "c";"d" "e"] / 1
 sub["b" "d" "c" "e"]~ sub["b" "c"!"d" "e"] / 1

@@ -5,6 +5,7 @@ rx[`[a-z]`]~rx[`[a-d]`] / 0
 $rx[`[a-z]`] / "rx[\"[a-z]\"]"
 'r:rx`[a-z]`;sub[r;"Z"] "aBbcC" / "ZBZZC"
 sub[rx/[a-z]/;"Z"]"aBc" / "ZBZ"
+sub[rx/[a-z]/;"Z"][]"aBc" / "ZBZ"
 sub[rx/[A-Z]/;_]"aBc" / "abc"
 sub[rx/[A-Z]/;_]"aBc" "ÉA" / "abc" "Éa"
 2 sub[rx/[A-Z]/;_]/"aBc" "ÉA" / "abc" "Éa"
