@@ -220,7 +220,7 @@ func (x *AV) Append(ctx *Context, dst []byte) []byte {
 
 // Append appends a unique program representation of the value to dst, and
 // returns the extended buffer.
-func (d *Dict) Append(ctx *Context, dst []byte) []byte {
+func (d *D) Append(ctx *Context, dst []byte) []byte {
 	osc := ctx.compactFmt
 	ctx.compactFmt = true
 	defer func() {

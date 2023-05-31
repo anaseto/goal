@@ -15,7 +15,7 @@ func (x V) Clone() V {
 	}
 }
 
-func (e *errV) Clone() Value {
+func (e *errV) Clone() BV {
 	if e.V.HasRC() {
 		return &errV{V: e.V.Clone()}
 	}
@@ -36,31 +36,31 @@ func (x *A[T]) sclone() *A[T] {
 
 // Clone returns a clone of the value. Note that the cloned value might still
 // share some structures with its parent if they're deemed reusable.
-func (x *AB) Clone() Value {
+func (x *AB) Clone() BV {
 	return (*AB)((*A[byte])(x).sclone())
 }
 
 // Clone returns a clone of the value. Note that the cloned value might still
 // share some structures with its parent if they're deemed reusable.
-func (x *AI) Clone() Value {
+func (x *AI) Clone() BV {
 	return (*AI)((*A[int64])(x).sclone())
 }
 
 // Clone returns a clone of the value. Note that the cloned value might still
 // share some structures with its parent if they're deemed reusable.
-func (x *AF) Clone() Value {
+func (x *AF) Clone() BV {
 	return (*AF)((*A[float64])(x).sclone())
 }
 
 // Clone returns a clone of the value. Note that the cloned value might still
 // share some structures with its parent if they're deemed reusable.
-func (x *AS) Clone() Value {
+func (x *AS) Clone() BV {
 	return (*AS)((*A[string])(x).sclone())
 }
 
 // Clone returns a clone of the value. Note that the cloned value might still
 // share some structures with its parent if they're deemed reusable.
-func (x *AV) Clone() Value {
+func (x *AV) Clone() BV {
 	x = (*AV)((*A[V])(x).sclone())
 	for i, xi := range x.elts {
 		x.elts[i] = xi.Clone()
@@ -70,11 +70,11 @@ func (x *AV) Clone() Value {
 
 // Clone returns a clone of the value. Note that the cloned value might still
 // share some structures with its parent if they're deemed reusable.
-func (d *Dict) Clone() Value {
-	return &Dict{keys: d.keys.Clone().(array), values: d.values.Clone().(array)}
+func (d *D) Clone() BV {
+	return &D{keys: d.keys.Clone().(array), values: d.values.Clone().(array)}
 }
 
-func (p *projection) Clone() Value {
+func (p *projection) Clone() BV {
 	np := &projection{Fun: p.Fun.Clone(), Args: make([]V, len(p.Args))}
 	for i, arg := range p.Args {
 		np.Args[i] = arg.Clone()
@@ -82,35 +82,35 @@ func (p *projection) Clone() Value {
 	return np
 }
 
-func (p *projectionFirst) Clone() Value {
+func (p *projectionFirst) Clone() BV {
 	if p.Fun.HasRC() || p.Arg.HasRC() {
 		return &projectionFirst{Fun: p.Fun.Clone(), Arg: p.Arg.Clone()}
 	}
 	return p
 }
 
-func (p *projectionMonad) Clone() Value {
+func (p *projectionMonad) Clone() BV {
 	if p.Fun.HasRC() {
 		return &projectionMonad{Fun: p.Fun.Clone()}
 	}
 	return p
 }
 
-func (r *derivedVerb) Clone() Value {
+func (r *derivedVerb) Clone() BV {
 	if r.Arg.HasRC() {
 		return &derivedVerb{Fun: r.Fun, Arg: r.Arg.Clone()}
 	}
 	return r
 }
 
-func (r *replacer) Clone() Value {
+func (r *replacer) Clone() BV {
 	if r.oldnew.reusable() {
 		return r
 	}
 	return &replacer{r: r.r, oldnew: (*AS)((*A[string])(r.oldnew).sclone())}
 }
 
-func (r *rxReplacer) Clone() Value {
+func (r *rxReplacer) Clone() BV {
 	if r.repl.HasRC() {
 		return &rxReplacer{r: r.r, repl: r.repl.Clone()}
 	}

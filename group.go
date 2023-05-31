@@ -46,7 +46,7 @@ func icountGroup(x V) V {
 			r[i] = NewV(&AS{elts: lineSplit(xi), flags: flagImmutable})
 		}
 		return newAVu(r)
-	case *Dict:
+	case *D:
 		return groupBy(NewV(xv.values), NewV(xv.keys))
 	case *AV:
 		return mapAV(xv, icountGroup)

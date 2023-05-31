@@ -29,7 +29,7 @@ func NewStdHandle(f *os.File) goal.V {
 	return newFile(f)
 }
 
-func (f *file) Matches(y goal.Value) bool {
+func (f *file) Matches(y goal.BV) bool {
 	switch yv := y.(type) {
 	case *file:
 		return f.f.Fd() == yv.f.Fd()
@@ -53,7 +53,7 @@ func (f *file) Type() string {
 	return "h"
 }
 
-func (f *file) LessT(y goal.Value) bool {
+func (f *file) LessT(y goal.BV) bool {
 	switch yv := y.(type) {
 	case *file:
 		return f.f.Fd() < yv.f.Fd()
@@ -86,7 +86,7 @@ func cmdToAS(cmd *command) goal.V {
 	return goal.NewAS(cmd.c.Args)
 }
 
-func (cmd *command) Matches(y goal.Value) bool {
+func (cmd *command) Matches(y goal.BV) bool {
 	switch yv := y.(type) {
 	case *command:
 		return cmd.mode == yv.mode && cmdToAS(cmd).Matches(cmdToAS(yv))
@@ -108,7 +108,7 @@ func (cmd *command) Type() string {
 	return "h"
 }
 
-func (cmd *command) LessT(y goal.Value) bool {
+func (cmd *command) LessT(y goal.BV) bool {
 	switch yv := y.(type) {
 	case *command:
 		return cmd.mode < yv.mode || cmd.mode == yv.mode && cmdToAS(cmd).LessT(cmdToAS(yv))
@@ -162,7 +162,7 @@ func VFOpen(ctx *goal.Context, args []goal.V) goal.V {
 	var mode goal.S = "r"
 	if len(args) == 2 {
 		var ok bool
-		mode, ok = args[1].Value().(goal.S)
+		mode, ok = args[1].BV().(goal.S)
 		if !ok {
 			return panicType("x open s", "x", args[1])
 		}
@@ -187,7 +187,7 @@ func VFOpen(ctx *goal.Context, args []goal.V) goal.V {
 	default:
 		return goal.Panicf("mode open path : invalid mode (%s)", m)
 	}
-	path, ok := args[0].Value().(goal.S)
+	path, ok := args[0].BV().(goal.S)
 	if !ok {
 		if len(args) == 2 {
 			return panicType("x open s", "s", args[0])
@@ -204,7 +204,7 @@ func VFOpen(ctx *goal.Context, args []goal.V) goal.V {
 
 func openPipe(m string, c goal.V) goal.V {
 	var cmd *exec.Cmd
-	switch cv := c.Value().(type) {
+	switch cv := c.BV().(type) {
 	case goal.S:
 		cmd = exec.Command(string(cv))
 	case *goal.AS:
@@ -250,7 +250,7 @@ func VFClose(ctx *goal.Context, args []goal.V) goal.V {
 	if len(args) > 1 {
 		return goal.Panicf("close : too many arguments (%d)", len(args))
 	}
-	switch h := args[0].Value().(type) {
+	switch h := args[0].BV().(type) {
 	case io.Closer:
 		err := h.Close()
 		if err != nil {
@@ -268,7 +268,7 @@ func VFClose(ctx *goal.Context, args []goal.V) goal.V {
 func exitError(err *exec.ExitError) goal.V {
 	keys := goal.NewAS([]string{"code", "msg"})
 	values := goal.NewAV([]goal.V{goal.NewI(int64(err.ProcessState.ExitCode())), goal.NewS(err.Error())})
-	return goal.NewError(goal.NewDict(keys, values))
+	return goal.NewError(goal.NewD(keys, values))
 }
 
 func isI(x float64) bool {
@@ -304,14 +304,14 @@ func VFRead(ctx *goal.Context, args []goal.V) goal.V {
 			}
 			n = int64(x.F())
 		} else {
-			s, ok := x.Value().(goal.S)
+			s, ok := x.BV().(goal.S)
 			if ok {
 				return readString(y, string(s))
 			}
 			return panicType("x read h", "x", x)
 		}
 	}
-	switch yv := y.Value().(type) {
+	switch yv := y.BV().(type) {
 	case goal.S:
 		if len(args) != 1 {
 			break
@@ -357,7 +357,7 @@ func readString(h goal.V, delim string) goal.V {
 	if len(delim) != 1 {
 		return goal.Panicf("s read h : s not a 1-byte string (got %d bytes)", len(delim))
 	}
-	switch hv := h.Value().(type) {
+	switch hv := h.BV().(type) {
 	case *file:
 		s, err := hv.b.Reader.ReadString(delim[0])
 		if err != nil && (err != io.EOF || s == "") {
@@ -395,7 +395,7 @@ func VFFlush(ctx *goal.Context, args []goal.V) goal.V {
 		return goal.Panicf("flush : too many arguments (%d)", len(args))
 	}
 	x := args[0]
-	switch xv := x.Value().(type) {
+	switch xv := x.BV().(type) {
 	case *file:
 		err := xv.b.Writer.Flush()
 		if err != nil {

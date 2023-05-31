@@ -2,8 +2,8 @@ package goal
 
 // flip returns +x.
 func flip(x V) V {
-	if xv, ok := x.bv.(*Dict); ok {
-		return NewV(&Dict{keys: xv.values, values: xv.keys})
+	if xv, ok := x.bv.(*D); ok {
+		return NewV(&D{keys: xv.values, values: xv.keys})
 	}
 	x = toArray(x)
 	switch xv := x.bv.(type) {

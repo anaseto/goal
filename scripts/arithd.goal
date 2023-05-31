@@ -180,7 +180,7 @@ genOp:{[opname;opsym] / globals o,op,xt,h
   h say "\n"_qq/
     case *AV:
         switch yv := y.bv.(type) {
-        case *Dict:
+        case *D:
               return newDictValues(yv.keys, $o(x, NewV(yv.values)))
         case array:
               if yv.Len() != xv.Len() {
@@ -190,8 +190,8 @@ genOp:{[opname;opsym] / globals o,op,xt,h
   h say `}`
   h say "return mapAVV(xv, y, $o)"
   h say "\n"_qq/
-    case *Dict:
-        yv, ok := y.bv.(*Dict)
+    case *D:
+        yv, ok := y.bv.(*D)
         if ok {
             r := dictArith(xv, yv, $o)
             if r.IsPanic() {
@@ -257,12 +257,12 @@ doxY:{[yt;e;t]
 }
 doxdAV:{
   "\n"_qq/
-    case *Dict:
+    case *D:
         v := $o${xt}V(x, NewV(yv.values))
         if v.IsPanic() {
                 return v
         }
-        return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
+        return NewV(&D{keys: yv.keys, values: v.bv.(array)})
     case *AV:
         return mapAV(yv, func(yi V) V { return $o${xt}V(x, yi) })
     default:
@@ -352,12 +352,12 @@ doXdAV:{
   xct:?[xt~"B";"int64";xt~"I";"int64";xt~"F";"float64";xt]
   fmtop:escp op
   "\n"_qq/
-    case *Dict:
+    case *D:
             v := ${o}A${xt}V(x, NewV(yv.values))
             if v.IsPanic() {
                     return v
             }
-            return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
+            return NewV(&D{keys: yv.keys, values: v.bv.(array)})
     case *AV:
             if x.Len() != yv.Len() {
                     return panicLength("x${op}y", x.Len(), yv.Len())

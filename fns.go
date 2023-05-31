@@ -38,7 +38,7 @@ func enum(x V) V {
 		return newAVu(r)
 	case *AV:
 		return mapAV(xv, enum)
-	case *Dict:
+	case *D:
 		return xv.Keys()
 	default:
 		return panicType("!x", "x", x)
@@ -151,7 +151,7 @@ func where(x V) V {
 		return NewAI(r)
 	case *AV:
 		return mapAVc(xv, where)
-	case *Dict:
+	case *D:
 		if xv.values.numeric() {
 			r := where(NewV(xv.values))
 			if r.IsPanic() {
@@ -326,10 +326,10 @@ func replicateI(n int64, y V) V {
 	case *AV:
 		r := replicateISlice(n, yv.elts)
 		return newAVu(r)
-	case *Dict:
+	case *D:
 		keys := replicateI(n, NewV(yv.keys))
 		values := replicateI(n, NewV(yv.values))
-		return NewDict(keys, values)
+		return NewD(keys, values)
 	default:
 		r := make([]V, n)
 		y.MarkImmutable()
@@ -392,7 +392,7 @@ func replicateAB(x *AB, y V) V {
 		}
 		r := replicateBytes(x.elts, yv.elts)
 		return canonicalVs(r)
-	case *Dict:
+	case *D:
 		keys := replicateAB(x, NewV(yv.keys))
 		if keys.IsPanic() {
 			return keys
@@ -401,7 +401,7 @@ func replicateAB(x *AB, y V) V {
 		if values.IsPanic() {
 			return values
 		}
-		return NewDict(keys, values)
+		return NewD(keys, values)
 	default:
 		return panicType("f#y", "y", y)
 	}
@@ -478,7 +478,7 @@ func replicateAI(x *AI, y V) V {
 			return panicErr(err)
 		}
 		return canonicalVs(r)
-	case *Dict:
+	case *D:
 		keys := replicateAI(x, NewV(yv.keys))
 		if keys.IsPanic() {
 			return keys
@@ -487,7 +487,7 @@ func replicateAI(x *AI, y V) V {
 		if values.IsPanic() {
 			return values
 		}
-		return NewDict(keys, values)
+		return NewD(keys, values)
 	default:
 		return panicType("f#y", "y", y)
 	}
@@ -565,7 +565,7 @@ func weedOutAIs[I integer](x *A[I], y V) V {
 	case *AV:
 		r := weedOutIs(x.elts, yv.elts)
 		return canonicalAV(&AV{elts: r, flags: yv.flags &^ flagImmutable})
-	case *Dict:
+	case *D:
 		keys := weedOutAIs(x, NewV(yv.keys))
 		if keys.IsPanic() {
 			return keys
@@ -574,7 +574,7 @@ func weedOutAIs[I integer](x *A[I], y V) V {
 		if values.IsPanic() {
 			return values
 		}
-		return NewDict(keys, values)
+		return NewD(keys, values)
 	default:
 		return panicType("f_y", "y", y)
 	}
@@ -603,10 +603,10 @@ func get(ctx *Context, x V) V {
 		return reval(ctx, xv)
 	case *errV:
 		return xv.V
-	case *Dict:
+	case *D:
 		return xv.Values()
 	case array:
-		return NewV(&Dict{keys: xv, values: xv})
+		return NewV(&D{keys: xv, values: xv})
 	default:
 		return panicType(".x", "x", x)
 	}
@@ -646,7 +646,7 @@ func recompileLambdas(ctx, nctx *Context, x V) V {
 		return x
 	case *rx:
 		return x
-	case *Dict:
+	case *D:
 		ks := recompileLambdas(ctx, nctx, xv.Keys())
 		if ks.IsPanic() {
 			return ks

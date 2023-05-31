@@ -539,7 +539,7 @@ func scloneAI(x *AI) *AI {
 }
 
 // Matches returns true if the two values match like in x~y.
-func (x *AB) Matches(y Value) bool {
+func (x *AB) Matches(y BV) bool {
 	if !matchesLength(x, y) {
 		return false
 	}
@@ -559,7 +559,7 @@ func (x *AB) Matches(y Value) bool {
 }
 
 // Matches returns true if the two values match like in x~y.
-func (x *AI) Matches(y Value) bool {
+func (x *AI) Matches(y BV) bool {
 	if !matchesLength(x, y) {
 		return false
 	}
@@ -579,7 +579,7 @@ func (x *AI) Matches(y Value) bool {
 }
 
 // Matches returns true if the two values match like in x~y.
-func (x *AF) Matches(y Value) bool {
+func (x *AF) Matches(y BV) bool {
 	if !matchesLength(x, y) {
 		return false
 	}
@@ -599,7 +599,7 @@ func (x *AF) Matches(y Value) bool {
 }
 
 // Matches returns true if the two values match like in x~y.
-func (x *AS) Matches(y Value) bool {
+func (x *AS) Matches(y BV) bool {
 	if !matchesLength(x, y) {
 		return false
 	}
@@ -619,7 +619,7 @@ func (x *AS) Matches(y Value) bool {
 }
 
 // Matches returns true if the two values match like in x~y.
-func (x *AV) Matches(y Value) bool {
+func (x *AV) Matches(y BV) bool {
 	if !matchesLength(x, y) {
 		return false
 	}
@@ -639,7 +639,7 @@ func (x *AV) Matches(y Value) bool {
 }
 
 // matchesLength returns true if y is an array of same length as x.
-func matchesLength(x array, y Value) bool {
+func matchesLength(x array, y BV) bool {
 	ya, ok := y.(array)
 	if !ok {
 		return false

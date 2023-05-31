@@ -880,7 +880,7 @@ func vfRTVars(ctx *Context, args []V) V {
 		v := cloneArgs(ctx.globals)
 		k := make([]string, len(ctx.gNames))
 		copy(k, ctx.gNames)
-		return NewDict(NewAS(k), canonicalVs(v))
+		return NewD(NewAS(k), canonicalVs(v))
 	case "f":
 		v := []V{}
 		k := []string{}
@@ -891,7 +891,7 @@ func vfRTVars(ctx *Context, args []V) V {
 				k = append(k, ctx.gNames[i])
 			}
 		}
-		return NewDict(NewAS(k), canonicalVs(v))
+		return NewD(NewAS(k), canonicalVs(v))
 	case "v":
 		v := []V{}
 		k := []string{}
@@ -902,7 +902,7 @@ func vfRTVars(ctx *Context, args []V) V {
 				k = append(k, ctx.gNames[i])
 			}
 		}
-		return NewDict(NewAS(k), canonicalVs(v))
+		return NewD(NewAS(k), canonicalVs(v))
 	case "rc":
 		v := []V{}
 		k := []string{}
@@ -915,7 +915,7 @@ func vfRTVars(ctx *Context, args []V) V {
 			rcv.MarkImmutable()
 			k = append(k, ctx.gNames[i])
 		}
-		return NewDict(NewAS(k), canonicalVs(v))
+		return NewD(NewAS(k), canonicalVs(v))
 	case "stack":
 		k := make([]string, len(ctx.stack))
 		v := make([]V, len(k))
@@ -925,7 +925,7 @@ func vfRTVars(ctx *Context, args []V) V {
 			vi.MarkImmutable()
 			v[i] = vi
 		}
-		return NewDict(NewAS(k), canonicalVs(v))
+		return NewD(NewAS(k), canonicalVs(v))
 	default:
 		return Panicf("rt.vars s : invalid value (%s)", cmd)
 	}

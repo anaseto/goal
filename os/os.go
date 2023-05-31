@@ -31,7 +31,7 @@ func VFImport(ctx *goal.Context, args []goal.V) goal.V {
 	var hasPfx bool
 	if len(args) == 2 {
 		pfx := args[1]
-		p, ok := pfx.Value().(goal.S)
+		p, ok := pfx.BV().(goal.S)
 		if !ok {
 			return panicType("x import s", "x", pfx)
 		}
@@ -39,7 +39,7 @@ func VFImport(ctx *goal.Context, args []goal.V) goal.V {
 		hasPfx = true
 	}
 	s := args[0]
-	switch sv := s.Value().(type) {
+	switch sv := s.BV().(type) {
 	case goal.S:
 		return importWithPrefix(ctx, prefix, string(sv), hasPfx)
 	case *goal.AS:
@@ -166,7 +166,7 @@ func VFSay(ctx *goal.Context, args []goal.V) goal.V {
 }
 
 func fprintFunc(ctx *goal.Context, w, x goal.V, f func(*goal.Context, io.Writer, goal.V) error) goal.V {
-	switch wv := w.Value().(type) {
+	switch wv := w.BV().(type) {
 	case goal.S:
 		file, err := os.Create(string(wv))
 		if err != nil {
@@ -210,7 +210,7 @@ func fprintFunc(ctx *goal.Context, w, x goal.V, f func(*goal.Context, io.Writer,
 }
 
 func printV(ctx *goal.Context, x goal.V) error {
-	switch xv := x.Value().(type) {
+	switch xv := x.BV().(type) {
 	case goal.S:
 		_, err := fmt.Print(string(xv))
 		return err
@@ -231,7 +231,7 @@ func printV(ctx *goal.Context, x goal.V) error {
 }
 
 func sayV(ctx *goal.Context, x goal.V) error {
-	switch xv := x.Value().(type) {
+	switch xv := x.BV().(type) {
 	case goal.S:
 		_, err := fmt.Println(string(xv))
 		return err
@@ -253,7 +253,7 @@ func sayV(ctx *goal.Context, x goal.V) error {
 }
 
 func fprintV(ctx *goal.Context, w io.Writer, x goal.V) error {
-	switch xv := x.Value().(type) {
+	switch xv := x.BV().(type) {
 	case goal.S:
 		_, err := fmt.Fprint(w, string(xv))
 		return err
@@ -274,7 +274,7 @@ func fprintV(ctx *goal.Context, w io.Writer, x goal.V) error {
 }
 
 func fsayV(ctx *goal.Context, w io.Writer, x goal.V) error {
-	switch xv := x.Value().(type) {
+	switch xv := x.BV().(type) {
 	case goal.S:
 		_, err := fmt.Fprintln(w, string(xv))
 		return err
@@ -302,7 +302,7 @@ func VFShell(ctx *goal.Context, args []goal.V) goal.V {
 	}
 	var shellcmd string
 	y := args[0]
-	switch yv := y.Value().(type) {
+	switch yv := y.BV().(type) {
 	case goal.S:
 		shellcmd = string(yv)
 	default:
@@ -325,7 +325,7 @@ func VFShell(ctx *goal.Context, args []goal.V) goal.V {
 		return goal.NewS(sb.String())
 	case 2:
 		x := args[1]
-		s, ok := x.Value().(goal.S)
+		s, ok := x.BV().(goal.S)
 		if !ok {
 			return panicType("x run s", "x", x)
 		}
@@ -341,7 +341,7 @@ func VFShell(ctx *goal.Context, args []goal.V) goal.V {
 func cmdError(err error, cmd *exec.Cmd, out string) goal.V {
 	keys := goal.NewAS([]string{"code", "msg", "out"})
 	values := goal.NewAV([]goal.V{goal.NewI(int64(cmd.ProcessState.ExitCode())), goal.NewS(err.Error()), goal.NewS(out)})
-	return goal.NewError(goal.NewDict(keys, values))
+	return goal.NewError(goal.NewD(keys, values))
 }
 
 // VFRun implements the run monad.
@@ -359,7 +359,7 @@ func VFRun(ctx *goal.Context, args []goal.V) goal.V {
 	}
 	var cmds []string
 	y := args[0]
-	switch yv := y.Value().(type) {
+	switch yv := y.BV().(type) {
 	case goal.S:
 		cmds = []string{string(yv)}
 	case *goal.AS:
@@ -386,7 +386,7 @@ func VFRun(ctx *goal.Context, args []goal.V) goal.V {
 		return goal.NewS(sb.String())
 	}
 	x := args[1]
-	s, ok := x.Value().(goal.S)
+	s, ok := x.BV().(goal.S)
 	if !ok {
 		return panicType("x run s", "x", x)
 	}
@@ -412,7 +412,7 @@ func VFChdir(ctx *goal.Context, args []goal.V) goal.V {
 		return goal.Panicf("chdir : too many arguments (%d)", len(args))
 	}
 	x := args[0]
-	switch dir := x.Value().(type) {
+	switch dir := x.BV().(type) {
 	case goal.S:
 		err := os.Chdir(string(dir))
 		if err != nil {

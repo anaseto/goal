@@ -18,7 +18,7 @@ func environ() goal.V {
 	}
 	keys := goal.NewAS(ss[:len(env)])
 	values := goal.NewAS(ss[len(env):])
-	return goal.NewDict(keys, values)
+	return goal.NewD(keys, values)
 }
 
 // VFEnv implements the os.env dyad.
@@ -32,7 +32,7 @@ func environ() goal.V {
 // whole environment.
 func VFEnv(ctx *goal.Context, args []goal.V) goal.V {
 	x := args[len(args)-1]
-	name, ok := x.Value().(goal.S)
+	name, ok := x.BV().(goal.S)
 	switch len(args) {
 	case 1:
 		if !ok {
@@ -51,7 +51,7 @@ func VFEnv(ctx *goal.Context, args []goal.V) goal.V {
 			return panicType("x env s", "x", x)
 		}
 		y := args[0]
-		s, ok := y.Value().(goal.S)
+		s, ok := y.BV().(goal.S)
 		if !ok {
 			if y.IsI() && y.I() == 0 || y.IsF() && y.F() == 0 {
 				if name == "" {

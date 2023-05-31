@@ -721,8 +721,8 @@ func protoV(x V) V {
 		return NewV(&AS{flags: flagImmutable})
 	case *AV:
 		return protoAV()
-	case *Dict:
-		return NewDict(protoArray(xv.keys), protoArray(xv.values))
+	case *D:
+		return NewD(protoArray(xv.keys), protoArray(xv.values))
 	default:
 		return newVariadic(vRight)
 	}
@@ -919,7 +919,7 @@ func isFlat(x []V) bool {
 			continue
 		}
 		switch xi.bv.(type) {
-		case *Dict:
+		case *D:
 			if i == 0 {
 				return false
 			}

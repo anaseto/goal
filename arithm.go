@@ -43,7 +43,7 @@ func negate(x V) V {
 		return NewV(r)
 	case *AV:
 		return mapAV(xv, negate)
-	case *Dict:
+	case *D:
 		return newDictValues(xv.keys, negate(NewV(xv.values)))
 	default:
 		return panicType("-x", "x", x)
@@ -106,7 +106,7 @@ func sign(x V) V {
 		return NewAI(r)
 	case *AV:
 		return mapAV(xv, sign)
-	case *Dict:
+	case *D:
 		return newDictValues(xv.keys, sign(NewV(xv.values)))
 	default:
 		return panicType("sign x", "x", x)
@@ -142,7 +142,7 @@ func floor(x V) V {
 		return NewV(r)
 	case *AV:
 		return mapAV(xv, floor)
-	case *Dict:
+	case *D:
 		return newDictValues(xv.keys, floor(NewV(xv.values)))
 	default:
 		return panicType("_N", "N", x)
@@ -178,7 +178,7 @@ func upperCeil(x V) V {
 		return NewV(r)
 	case *AV:
 		return mapAV(xv, upperCeil)
-	case *Dict:
+	case *D:
 		return newDictValues(xv.keys, upperCeil(NewV(xv.values)))
 	default:
 		return panicType("uc x", "x", x)
@@ -228,7 +228,7 @@ func not(x V) V {
 			// never panics
 		}
 		return NewV(r)
-	case *Dict:
+	case *D:
 		return newDictValues(xv.keys, not(NewV(xv.values)))
 	default:
 		return NewI(b2I(!x.IsTrue()))
@@ -260,7 +260,7 @@ func abs(x V) V {
 		return NewV(r)
 	case *AV:
 		return mapAV(xv, abs)
-	case *Dict:
+	case *D:
 		return newDictValues(xv.keys, abs(NewV(xv.values)))
 	default:
 		return panicType("abs x", "x", x)
@@ -341,7 +341,7 @@ func modpad(x int64, y V) V {
 		return NewV(r)
 	case *AV:
 		return mapAV(yv, func(yi V) V { return modpad(x, yi) })
-	case *Dict:
+	case *D:
 		return newDictValues(yv.keys, modpad(x, NewV(yv.values)))
 	default:
 		return panicType("i!y", "y", y)
@@ -405,7 +405,7 @@ func divpad(x int64, y V) V {
 		return NewV(r)
 	case *AV:
 		return mapAV(yv, func(yi V) V { return divpad(x, yi) })
-	case *Dict:
+	case *D:
 		return newDictValues(yv.keys, divpad(x, NewV(yv.values)))
 	default:
 		return panicType("i!y", "y", y)

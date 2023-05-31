@@ -47,10 +47,10 @@ func reverse(x V) V {
 		xv.setFlags(flags)
 		x.bv = xv
 		return x
-	case *Dict:
+	case *D:
 		k := reverse(NewV(xv.keys))
 		v := reverse(NewV(xv.values))
-		return NewV(&Dict{keys: k.bv.(array), values: v.bv.(array)})
+		return NewV(&D{keys: k.bv.(array), values: v.bv.(array)})
 	default:
 		return panicType("|x", "x", x)
 	}
@@ -123,7 +123,7 @@ func rotateI(i int64, y V) V {
 	case *AV:
 		fl := yv.flags &^ flagAscending
 		return NewV(&AV{elts: rotateSlice[V](i, yv.elts), flags: fl})
-	case *Dict:
+	case *D:
 		k := rotateI(i, NewV(yv.keys))
 		if k.IsPanic() {
 			return k
@@ -132,7 +132,7 @@ func rotateI(i int64, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewV(&Dict{keys: k.bv.(array), values: v.bv.(array)})
+		return NewV(&D{keys: k.bv.(array), values: v.bv.(array)})
 	default:
 		return panicType("x rotate y", "y", y)
 	}
@@ -164,7 +164,7 @@ func first(x V) V {
 			}
 		}
 		return xv.at(0)
-	case *Dict:
+	case *D:
 		return first(NewV(xv.values))
 	default:
 		return x
@@ -234,10 +234,10 @@ func dropN(n int64, y V) V {
 			y.bv = yv.slice(0, int(n))
 			return y
 		}
-	case *Dict:
+	case *D:
 		rk := dropN(n, NewV(yv.keys))
 		rv := dropN(n, NewV(yv.values))
-		return NewV(&Dict{
+		return NewV(&D{
 			keys:   rk.bv.(array),
 			values: rv.bv.(array)})
 	default:
@@ -251,7 +251,7 @@ func cutAB(xv *AB, y V) V {
 		return cutABS(xv, yv)
 	case array:
 		return cutABarray(xv, yv)
-	case *Dict:
+	case *D:
 		k := cutABarray(xv, yv.keys)
 		if k.IsPanic() {
 			return k
@@ -260,7 +260,7 @@ func cutAB(xv *AB, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewDict(k, v)
+		return NewD(k, v)
 	default:
 		return panicType("I_y", "y", y)
 	}
@@ -272,7 +272,7 @@ func cutAI(xv *AI, y V) V {
 		return cutAIS(xv, yv)
 	case array:
 		return cutAIarray(xv, yv)
-	case *Dict:
+	case *D:
 		k := cutAIarray(xv, yv.keys)
 		if k.IsPanic() {
 			return k
@@ -281,7 +281,7 @@ func cutAI(xv *AI, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewDict(k, v)
+		return NewD(k, v)
 	default:
 		return panicType("I_y", "y", y)
 	}
@@ -432,10 +432,10 @@ func take(x, y V) V {
 		}
 	}
 	switch yv := y.bv.(type) {
-	case *Dict:
+	case *D:
 		rk := takeN(n, yv.keys)
 		rv := takeN(n, yv.values)
-		return NewV(&Dict{
+		return NewV(&D{
 			keys:   rk.bv.(array),
 			values: rv.bv.(array)})
 	case array:
@@ -653,7 +653,7 @@ func shiftBefore(x, y V) V {
 		return shiftBeforeAS(x, yv)
 	case *AV:
 		return shiftBeforeAV(x, yv)
-	case *Dict:
+	case *D:
 		return newDictValues(yv.keys, shiftBefore(x, NewV(yv.values)))
 	default:
 		return panicType("x rshift Y", "Y", y)
@@ -948,7 +948,7 @@ func nudge(x V) V {
 		copy(r.elts[1:], xv.elts[:xv.Len()-1])
 		r.elts[0] = r0
 		return canonicalAV(r)
-	case *Dict:
+	case *D:
 		return newDictValues(xv.keys, nudge(NewV(xv.values)))
 	default:
 		return panicType("rshift X", "X", x)
@@ -968,7 +968,7 @@ func shiftAfter(x, y V) V {
 		return shiftAfterAS(x, yv)
 	case *AV:
 		return shiftAfterAV(x, yv)
-	case *Dict:
+	case *D:
 		return newDictValues(yv.keys, shiftAfter(x, NewV(yv.values)))
 	default:
 		return panicType("x shift Y", "Y", y)
@@ -1262,7 +1262,7 @@ func nudgeBack(x V) V {
 		copy(r.elts[0:xv.Len()-1], xv.elts[1:])
 		r.elts[xv.Len()-1] = rlast
 		return canonicalAV(r)
-	case *Dict:
+	case *D:
 		return newDictValues(xv.keys, nudgeBack(NewV(xv.values)))
 	default:
 		return panicType("shift X", "X", x)
@@ -1354,7 +1354,7 @@ func cutShapeI(i int64, y V) V {
 			return cutLinesArray(int(i), yv)
 		}
 		return Panicf("i$Y : out of range i (%d)", i)
-	case *Dict:
+	case *D:
 		k := cutShapeI(i, NewV(yv.keys))
 		if k.IsPanic() {
 			return k
@@ -1363,7 +1363,7 @@ func cutShapeI(i int64, y V) V {
 		if v.IsPanic() {
 			return v
 		}
-		return NewDict(k, v)
+		return NewD(k, v)
 	default:
 		return panicType("i$y", "y", y)
 	}

@@ -2,27 +2,27 @@ package goal
 
 import "fmt"
 
-// Dict represents a dictionary.
-type Dict struct {
+// D represents a dictionary.
+type D struct {
 	keys   array
 	values array
 }
 
-// NewDict returns a dictionary. Both keys and values should be arrays, and
+// NewD returns a dictionary. Both keys and values should be arrays, and
 // they should have the same length.
-func NewDict(keys, values V) V {
+func NewD(keys, values V) V {
 	xv, ok := keys.bv.(array)
 	if !ok {
-		panic(fmt.Sprintf("NewDict(keys, values) : keys not an array (%s)", keys.Type()))
+		panic(fmt.Sprintf("NewD(keys, values) : keys not an array (%s)", keys.Type()))
 	}
 	yv, ok := values.bv.(array)
 	if !ok {
-		panic(fmt.Sprintf("NewDict(keys, values) : values not an array (%s)", values.Type()))
+		panic(fmt.Sprintf("NewD(keys, values) : values not an array (%s)", values.Type()))
 	}
 	if xv.Len() != yv.Len() {
-		panic(fmt.Sprintf("NewDict(keys, values) : length mismatch (%d vs %d)", xv.Len(), yv.Len()))
+		panic(fmt.Sprintf("NewD(keys, values) : length mismatch (%d vs %d)", xv.Len(), yv.Len()))
 	}
-	return NewV(&Dict{keys: xv, values: yv})
+	return NewV(&D{keys: xv, values: yv})
 }
 
 func newDictValues(keys array, values V) V {
@@ -30,23 +30,23 @@ func newDictValues(keys array, values V) V {
 		return values
 	}
 	v := values.bv.(array)
-	return NewV(&Dict{keys: keys, values: v})
+	return NewV(&D{keys: keys, values: v})
 }
 
 // Keys returns the keys of the dictionary.
-func (d *Dict) Keys() V {
+func (d *D) Keys() V {
 	return NewV(d.keys)
 }
 
 // Values returns the values of the dictionary.
-func (d *Dict) Values() V {
+func (d *D) Values() V {
 	return NewV(d.values)
 }
 
 // Matches returns true if the two values match like in x~y.
-func (d *Dict) Matches(y Value) bool {
+func (d *D) Matches(y BV) bool {
 	switch yv := y.(type) {
-	case *Dict:
+	case *D:
 		return d.keys.Matches(yv.keys) && d.values.Matches(yv.values)
 	default:
 		return false
@@ -54,13 +54,13 @@ func (d *Dict) Matches(y Value) bool {
 }
 
 // Type returns the name of the value's type.
-func (d *Dict) Type() string {
+func (d *D) Type() string {
 	return "d"
 }
 
 // Len returns the length of the dictionary, that is the common length to its
 // key and value arrays.
-func (d *Dict) Len() int {
+func (d *D) Len() int {
 	return d.keys.Len()
 }
 
@@ -85,10 +85,10 @@ func dict(x, y V) V {
 	if xv.Len() != yv.Len() {
 		return panicLength("X!Y", xv.Len(), yv.Len())
 	}
-	return NewV(&Dict{keys: xv, values: yv})
+	return NewV(&D{keys: xv, values: yv})
 }
 
-func dictAmendKVI(xd *Dict, yk array) (array, array, V) {
+func dictAmendKVI(xd *D, yk array) (array, array, V) {
 	keys, values := xd.keys, xd.values.sclone()
 	ykv := NewV(yk)
 	yk.IncrRC()
@@ -107,7 +107,7 @@ func dictAmendKVI(xd *Dict, yk array) (array, array, V) {
 	return keys, values, ky
 }
 
-func dictMerge(xd, yd *Dict) V {
+func dictMerge(xd, yd *D) V {
 	keys, values, ky := dictAmendKVI(xd, yd.keys)
 	var r array
 	switch kyv := ky.bv.(type) {
@@ -116,7 +116,7 @@ func dictMerge(xd, yd *Dict) V {
 	case *AI:
 		r = mergeAtIs(values, kyv.elts, yd.values)
 	}
-	return NewV(&Dict{keys: keys, values: canonicalArray(r)})
+	return NewV(&D{keys: keys, values: canonicalArray(r)})
 }
 
 func mergeAtIs[I integer](x array, y []I, z array) array {
@@ -126,7 +126,7 @@ func mergeAtIs[I integer](x array, y []I, z array) array {
 	return amend4RightIsArrays(x, y, z)
 }
 
-func dictArith(xd, yd *Dict, f func(V, V) V) V {
+func dictArith(xd, yd *D, f func(V, V) V) V {
 	keys, values, ky := dictAmendKVI(xd, yd.keys)
 	var err error
 	var r array
@@ -139,5 +139,5 @@ func dictArith(xd, yd *Dict, f func(V, V) V) V {
 	if err != nil {
 		return Panicf("%v", err)
 	}
-	return NewV(&Dict{keys: keys, values: canonicalArray(r)})
+	return NewV(&D{keys: keys, values: canonicalArray(r)})
 }

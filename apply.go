@@ -34,7 +34,7 @@ func (ctx *Context) ApplyN(x V, args []V) V {
 
 // callable represents boxed values than can be applied.
 type callable interface {
-	Value
+	BV
 
 	// applyN applies the value with the top n arguments in the stack and
 	// returns the result. It consumes only n-1 arguments, but does not
@@ -388,7 +388,7 @@ func (x *AV) applyN(ctx *Context, n int) V {
 	}
 }
 
-func (d *Dict) applyN(ctx *Context, n int) V {
+func (d *D) applyN(ctx *Context, n int) V {
 	switch n {
 	case 1:
 		y := ctx.top()
@@ -402,7 +402,7 @@ func (d *Dict) applyN(ctx *Context, n int) V {
 	}
 }
 
-func applyDict(d *Dict, y V) V {
+func applyDict(d *D, y V) V {
 	if y.kind == valNil {
 		return NewV(d.values)
 	}
@@ -419,7 +419,7 @@ func applyDict(d *Dict, y V) V {
 	return r
 }
 
-func (ctx *Context) applyDictArgs(x *Dict, arg V, args []V) V {
+func (ctx *Context) applyDictArgs(x *D, arg V, args []V) V {
 	if len(args) == 0 {
 		return applyDict(x, arg)
 	}
@@ -453,7 +453,7 @@ func (ctx *Context) applyDictArgs(x *Dict, arg V, args []V) V {
 		switch rv := r.bv.(type) {
 		case array:
 			return ctx.applyArrayArgs(rv, args[len(args)-1], args[:len(args)-1])
-		case *Dict:
+		case *D:
 			return ctx.applyDictArgs(rv, args[len(args)-1], args[:len(args)-1])
 		default:
 			return panics("d.y : out of depth indexing")
@@ -505,7 +505,7 @@ func applyArray(x array, y V) V {
 			r[i] = ri
 		}
 		return canonicalVs(r)
-	case *Dict:
+	case *D:
 		return newDictValues(yv.keys, applyArray(x, NewV(yv.values)))
 	default:
 		return panicType("X@i", "i", y)
@@ -548,7 +548,7 @@ func (ctx *Context) applyArrayArgs(x array, arg V, args []V) V {
 		switch rv := r.bv.(type) {
 		case array:
 			return ctx.applyArrayArgs(rv, args[len(args)-1], args[:len(args)-1])
-		case *Dict:
+		case *D:
 			return ctx.applyDictArgs(rv, args[len(args)-1], args[:len(args)-1])
 		default:
 			return panics("X.y : out of depth indexing")
@@ -600,10 +600,10 @@ func applyI(n int, i int64, y V) V {
 		return panicRank("i.y")
 	}
 	switch yv := y.bv.(type) {
-	case *Dict:
+	case *D:
 		rk := takePadN(i, yv.keys)
 		rv := takePadN(i, yv.values)
-		return NewV(&Dict{
+		return NewV(&D{
 			keys:   rk.bv.(array),
 			values: rv.bv.(array)})
 	case array:

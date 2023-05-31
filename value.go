@@ -10,7 +10,7 @@ import (
 type V struct {
 	kind valueKind // valInt, valFloat, valBoxed, ...
 	uv   int64     // unboxed integer or float value
-	bv   Value     // boxed value
+	bv   BV        // boxed value
 }
 
 // valueKind represents the kinds of values.
@@ -26,11 +26,11 @@ const (
 	valPanic              // boxed value (bv field)
 )
 
-// Value is the interface satisfied by all boxed values.
-type Value interface {
+// BV is the interface satisfied by all boxed values.
+type BV interface {
 	// Matches returns true if the value matches another (in the sense of
 	// the ~ operator).
-	Matches(Value) bool
+	Matches(BV) bool
 	// Append appends a unique program representation of the value to dst,
 	// and returns the extended buffer. It should not store the returned
 	// buffer elsewhere, so that it's possible to safely convert it to
@@ -46,7 +46,7 @@ type Value interface {
 	// that is, irreflexive (~x<x), asymmetric (if x<y then ~y<x),
 	// transitive, connected (different values are comparable, except
 	// NaNs).
-	LessT(Value) bool
+	LessT(BV) bool
 }
 
 // newVariadic returns a new variadic value.
@@ -84,8 +84,8 @@ func NewS(s string) V {
 }
 
 // NewV returns a new boxed value.
-func NewV(xv Value) V {
-	return V{kind: valBoxed, bv: xv}
+func NewV(x BV) V {
+	return V{kind: valBoxed, bv: x}
 }
 
 // variadic retrieves the variadic value from uv field. It assumes kind is
@@ -119,7 +119,7 @@ func (x V) F() float64 {
 
 // Value retrieves the boxed value, or nil if the value is not boxed. You can
 // check whether the value is boxed with IsValue(v).
-func (x V) Value() Value {
+func (x V) BV() BV {
 	return x.bv
 }
 
@@ -241,7 +241,7 @@ type errV struct {
 	V V
 }
 
-func (e *errV) Matches(y Value) bool {
+func (e *errV) Matches(y BV) bool {
 	switch yv := y.(type) {
 	case *errV:
 		return e.V.Matches(yv.V)
@@ -255,7 +255,7 @@ func (e *errV) Type() string { return "e" }
 // panicV represents a fatal error string.
 type panicV string
 
-func (e panicV) Matches(y Value) bool {
+func (e panicV) Matches(y BV) bool {
 	switch yv := y.(type) {
 	case panicV:
 		return e == yv
@@ -269,7 +269,7 @@ func (e panicV) Type() string { return "panic" }
 // S represents (immutable) strings of bytes.
 type S string
 
-func (s S) Matches(y Value) bool {
+func (s S) Matches(y BV) bool {
 	switch yv := y.(type) {
 	case S:
 		return s == yv
@@ -320,7 +320,7 @@ func (r *derivedVerb) Type() string     { return "f" }
 // the arity of the function that is passed to it.
 // Note that arrays do also have a “rank” but do not implement this interface.
 type function interface {
-	Value
+	BV
 	rank(ctx *Context) int
 	stype() string
 }
@@ -353,7 +353,7 @@ func (p *projectionFirst) stype() string { return "pf" }
 func (p *projectionMonad) stype() string { return "pm" }
 func (r *derivedVerb) stype() string     { return "r" }
 
-func (p *projection) Matches(x Value) bool {
+func (p *projection) Matches(x BV) bool {
 	xp, ok := x.(*projection)
 	if !ok || !p.Fun.Matches(xp.Fun) {
 		return false
@@ -369,17 +369,17 @@ func (p *projection) Matches(x Value) bool {
 	return true
 }
 
-func (p *projectionFirst) Matches(x Value) bool {
+func (p *projectionFirst) Matches(x BV) bool {
 	xp, ok := x.(*projectionFirst)
 	return ok && p.Fun.Matches(xp.Fun) && p.Arg.Matches(xp.Arg)
 }
 
-func (p *projectionMonad) Matches(x Value) bool {
+func (p *projectionMonad) Matches(x BV) bool {
 	xp, ok := x.(*projectionMonad)
 	return ok && p.Fun.Matches(xp.Fun)
 }
 
-func (r *derivedVerb) Matches(x Value) bool {
+func (r *derivedVerb) Matches(x BV) bool {
 	xr, ok := x.(*derivedVerb)
 	return ok && r.Fun == xr.Fun && r.Arg.Matches(xr.Arg)
 }

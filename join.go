@@ -21,9 +21,9 @@ func join(x, y V) V {
 		return joinAS(xv, y, false)
 	case *AV:
 		return joinAV(xv, y, false)
-	case *Dict:
+	case *D:
 		switch yv := y.bv.(type) {
-		case *Dict:
+		case *D:
 			return dictMerge(xv, yv)
 		case array:
 			return joinAtomToArray(x, yv, true)

@@ -48,7 +48,7 @@ func foldfx(ctx *Context, f, x V) V {
 		}
 	}
 	switch xv := x.bv.(type) {
-	case *Dict:
+	case *D:
 		return foldfx(ctx, f, NewV(xv.values))
 	case array:
 		if xv.Len() == 0 {
@@ -168,7 +168,7 @@ func foldxfy(ctx *Context, x, f, y V) V {
 		}
 	}
 	switch yv := y.bv.(type) {
-	case *Dict:
+	case *D:
 		return foldxfy(ctx, x, f, NewV(yv.values))
 	case array:
 		r := x
@@ -358,7 +358,7 @@ func scanfx(ctx *Context, f, x V) V {
 		}
 	}
 	switch xv := x.bv.(type) {
-	case *Dict:
+	case *D:
 		return newDictValues(xv.keys, scanfx(ctx, f, NewV(xv.values)))
 	case array:
 		if xv.Len() == 0 {
@@ -460,7 +460,7 @@ func scanxfy(ctx *Context, x, f, y V) V {
 		}
 	}
 	switch yv := y.bv.(type) {
-	case *Dict:
+	case *D:
 		return newDictValues(yv.keys, scanxfy(ctx, x, f, NewV(yv.values)))
 	case array:
 		if yv.Len() == 0 {
@@ -533,7 +533,7 @@ func scanN(ctx *Context, args []V) V {
 	}
 	f.DecrRC()
 	ctx.drop()
-	if d, ok := args[len(args)-3].bv.(*Dict); ok {
+	if d, ok := args[len(args)-3].bv.(*D); ok {
 		return newDictValues(d.keys, canonicalVs(r))
 	}
 	return canonicalVs(r)
@@ -632,7 +632,7 @@ func each2(ctx *Context, f, x V) V {
 		return panicType(`f'x`, "f", f)
 	}
 	switch xv := x.bv.(type) {
-	case *Dict:
+	case *D:
 		return newDictValues(xv.keys, eachfx(ctx, f, xv.values))
 	case array:
 		return eachfx(ctx, f, xv)
@@ -712,7 +712,7 @@ func eachN(ctx *Context, args []V) V {
 	}
 	f.DecrRC()
 	ctx.drop()
-	if d, ok := args[len(args)-2].bv.(*Dict); ok {
+	if d, ok := args[len(args)-2].bv.(*D); ok {
 		return newDictValues(d.keys, canonicalVs(r))
 	}
 	return canonicalVs(r)
@@ -720,7 +720,7 @@ func eachN(ctx *Context, args []V) V {
 
 func (x V) at(i int) V {
 	switch xv := x.bv.(type) {
-	case *Dict:
+	case *D:
 		return xv.values.at(i)
 	case array:
 		return xv.at(i)

@@ -60,7 +60,7 @@ func jsonToGoal(v any) V {
 			values = append(values, v)
 			keys = append(keys, k)
 		}
-		return NewDict(NewAS(keys), canonicalVs(values))
+		return NewD(NewAS(keys), canonicalVs(values))
 	default:
 		return NewError(NewS("null"))
 	}

@@ -59,7 +59,7 @@ func smallRange(xv *AI) (min, span int64, ok bool) {
 // classify returns %x.
 func classify(ctx *Context, x V) V {
 	switch xv := x.bv.(type) {
-	case *Dict:
+	case *D:
 		return newDictValues(xv.keys, classify(ctx, NewV(xv.values)))
 	case array:
 		if xv.Len() == 0 {
@@ -268,7 +268,7 @@ func classifySortedSlice[T comparable, I integer](xs []T) []I {
 // distinct returns ?x.
 func distinct(x V) V {
 	switch xv := x.bv.(type) {
-	case *Dict:
+	case *D:
 		return NewV(distinctDict(xv))
 	case array:
 		return NewV(distinctArray(xv))
@@ -277,7 +277,7 @@ func distinct(x V) V {
 	}
 }
 
-func distinctDict(x *Dict) *Dict {
+func distinctDict(x *D) *D {
 	if x.values.getFlags().Has(flagDistinct) {
 		return x
 	}
@@ -286,7 +286,7 @@ func distinctDict(x *Dict) *Dict {
 	x.values.DecrRC()
 	nk := replicate(mf, NewV(x.keys))
 	nv := replicate(mf, NewV(x.values))
-	return &Dict{keys: nk.bv.(array), values: nv.bv.(array)}
+	return &D{keys: nk.bv.(array), values: nv.bv.(array)}
 }
 
 func distinctArray(x array) array {
@@ -449,7 +449,7 @@ func distinctSortedSlice[T comparable](xs []T) []T {
 // Mark Firsts returns firsts x.
 func markFirsts(x V) V {
 	switch xv := x.bv.(type) {
-	case *Dict:
+	case *D:
 		return newDictValues(xv.keys, markFirsts(NewV(xv.values)))
 	case array:
 		if xv.Len() == 0 {
@@ -622,7 +622,7 @@ func markFirstsSortedSlice[T comparable](xs []T) []byte {
 func memberOf(x, y V) V {
 	// XXX: maybe we should make a switch first on x, instead of y, to
 	// handle simple unboxed cases firsts. Same comment for find.
-	if xv, ok := x.bv.(*Dict); ok {
+	if xv, ok := x.bv.(*D); ok {
 		return newDictValues(xv.keys, memberOf(NewV(xv.values), y))
 	}
 	switch yv := y.bv.(type) {
@@ -638,7 +638,7 @@ func memberOf(x, y V) V {
 		return memberOfAS(x, yv)
 	case *AV:
 		return memberOfAV(x, yv)
-	case *Dict:
+	case *D:
 		return memberOf(x, NewV(yv.values))
 	default:
 		return panicType("x in y", "y", y)
@@ -972,7 +972,7 @@ func memberOfArray(x, y array) V {
 // OccurrenceCount returns ocount x.
 func occurrenceCount(ctx *Context, x V) V {
 	switch xv := x.bv.(type) {
-	case *Dict:
+	case *D:
 		return newDictValues(xv.keys, occurrenceCount(ctx, NewV(xv.values)))
 	case array:
 		if xv.Len() == 0 {
@@ -1158,7 +1158,7 @@ func without(x, y V) V {
 	case array:
 		_, ok := y.bv.(array)
 		if !ok {
-			d, ok := y.bv.(*Dict)
+			d, ok := y.bv.(*D)
 			if ok {
 				return withoutDict(x, d)
 			}
@@ -1181,7 +1181,7 @@ func withoutArray(x, y V) V {
 	return replicate(r, y)
 }
 
-func withoutDict(x V, y *Dict) V {
+func withoutDict(x V, y *D) V {
 	r := memberOf(NewV(y.keys), x)
 	switch bres := r.bv.(type) {
 	case *AB:
@@ -1189,7 +1189,7 @@ func withoutDict(x V, y *Dict) V {
 			bres.elts[i] = 1 - b
 		}
 	}
-	return NewDict(replicate(r, NewV(y.keys)), replicate(r, NewV(y.values)))
+	return NewD(replicate(r, NewV(y.keys)), replicate(r, NewV(y.values)))
 }
 
 // withValuesOrKeys implements with values/keys x#y.
@@ -1197,9 +1197,9 @@ func withValuesOrKeys(x array, y V) V {
 	switch yv := y.bv.(type) {
 	case array:
 		return replicate(memberOf(y, NewV(x)), y)
-	case *Dict:
+	case *D:
 		r := memberOf(NewV(yv.keys), NewV(x))
-		return NewDict(replicate(r, NewV(yv.keys)), replicate(r, NewV(yv.values)))
+		return NewD(replicate(r, NewV(yv.keys)), replicate(r, NewV(yv.values)))
 	default:
 		return panicType("X#Y", "Y", y)
 	}
@@ -1207,7 +1207,7 @@ func withValuesOrKeys(x array, y V) V {
 
 // find returns x?y.
 func find(x, y V) V {
-	if yv, ok := y.bv.(*Dict); ok {
+	if yv, ok := y.bv.(*D); ok {
 		return newDictValues(yv.keys, find(x, NewV(yv.values)))
 	}
 	switch xv := x.bv.(type) {
@@ -1223,14 +1223,14 @@ func find(x, y V) V {
 		return findAS(xv, y)
 	case *AV:
 		return findAV(xv, y)
-	case *Dict:
+	case *D:
 		return findDict(xv, y)
 	default:
 		return panicType("x?y", "x", x)
 	}
 }
 
-func findDict(d *Dict, y V) V {
+func findDict(d *D, y V) V {
 	idx := find(NewV(d.values), y)
 	l := d.keys.Len()
 	if idx.IsI() {

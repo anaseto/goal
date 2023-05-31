@@ -138,7 +138,7 @@ func fold3Generic(x V, y array, f func(V, V) V) V {
 
 func fold2vAdd(x V) V {
 	switch xv := x.bv.(type) {
-	case *Dict:
+	case *D:
 		return fold2vAdd(NewV(xv.values))
 	case *AB:
 		return NewI(sumIs(xv.elts))
@@ -157,7 +157,7 @@ func fold2vAdd(x V) V {
 
 func fold3vAdd(x, y V) V {
 	switch yv := y.bv.(type) {
-	case *Dict:
+	case *D:
 		return fold3vAdd(x, NewV(yv.values))
 	case *AB:
 		if x.IsI() {
@@ -221,7 +221,7 @@ func concatStrings(x string, y []string) string {
 
 func fold2vSubtract(x V) V {
 	switch xv := x.bv.(type) {
-	case *Dict:
+	case *D:
 		return fold2vSubtract(NewV(xv.values))
 	case *AB:
 		if xv.Len() == 0 {
@@ -252,7 +252,7 @@ func fold2vSubtract(x V) V {
 
 func fold3vSubtract(x, y V) V {
 	switch yv := y.bv.(type) {
-	case *Dict:
+	case *D:
 		return fold3vSubtract(x, NewV(yv.values))
 	case *AB:
 		if x.IsI() {
@@ -306,7 +306,7 @@ func trimSuffixes(x string, y []string) string {
 
 func fold2vMultiply(x V) V {
 	switch xv := x.bv.(type) {
-	case *Dict:
+	case *D:
 		return fold2vMultiply(NewV(xv.values))
 	case *AB:
 		return NewI(multiplyNumbers(int64(1), xv.elts))
@@ -325,7 +325,7 @@ func fold2vMultiply(x V) V {
 
 func fold3vMultiply(x, y V) V {
 	switch yv := y.bv.(type) {
-	case *Dict:
+	case *D:
 		return fold3vMultiply(x, NewV(yv.values))
 	case *AB:
 		if x.IsI() {
@@ -369,7 +369,7 @@ func multiplyNumbers[T number, U number](x U, y []T) U {
 
 func fold2vMax(x V) V {
 	switch xv := x.bv.(type) {
-	case *Dict:
+	case *D:
 		return fold2vMax(NewV(xv.values))
 	case *AB:
 		if xv.Len() == 0 {
@@ -394,7 +394,7 @@ func fold2vMax(x V) V {
 
 func fold3vMax(x, y V) V {
 	switch yv := y.bv.(type) {
-	case *Dict:
+	case *D:
 		return fold3vMax(x, NewV(yv.values))
 	case *AB:
 		if x.IsI() {
@@ -470,7 +470,7 @@ func maxIs[I integer](x []I) int64 {
 
 func fold2vMin(x V) V {
 	switch xv := x.bv.(type) {
-	case *Dict:
+	case *D:
 		return fold2vMin(NewV(xv.values))
 	case *AB:
 		if xv.Len() == 0 {
@@ -498,7 +498,7 @@ func fold2vMin(x V) V {
 
 func fold3vMin(x, y V) V {
 	switch yv := y.bv.(type) {
-	case *Dict:
+	case *D:
 		return fold3vMin(x, NewV(yv.values))
 	case *AB:
 		if x.IsI() {
@@ -574,7 +574,7 @@ func minNumbers[T number, U number](x U, y []T) U {
 
 func fold2vJoin(x V) V {
 	switch xv := x.bv.(type) {
-	case *Dict:
+	case *D:
 		return fold2vJoin(NewV(xv.values))
 	case *AV:
 		if isFlat(xv.elts) {
@@ -592,7 +592,7 @@ func fold2vJoin(x V) V {
 
 func fold3vJoin(x, y V) V {
 	switch yv := y.bv.(type) {
-	case *Dict:
+	case *D:
 		return fold3vJoin(x, NewV(yv.values))
 	case *AV:
 		for _, yi := range yv.elts {
@@ -606,7 +606,7 @@ func fold3vJoin(x, y V) V {
 
 func convergeJoin(x V) V {
 	switch xv := x.bv.(type) {
-	case *Dict:
+	case *D:
 		return convergeJoin(NewV(xv.values))
 	case *AV:
 		if isFlat(xv.elts) {
@@ -661,7 +661,7 @@ func scan3Generic(x V, y array, f func(V, V) V) V {
 
 func scan2vAdd(x V) V {
 	switch xv := x.bv.(type) {
-	case *Dict:
+	case *D:
 		return newDictValues(xv.keys, scan2vAdd(NewV(xv.values)))
 	case *AB:
 		if xv.IsBoolean() && xv.Len() < 256 {
@@ -695,7 +695,7 @@ func scan2vAdd(x V) V {
 
 func scan3vAdd(x, y V) V {
 	switch yv := y.bv.(type) {
-	case *Dict:
+	case *D:
 		return newDictValues(yv.keys, scan3vAdd(x, NewV(yv.values)))
 	case *AB:
 		if x.IsI() {
@@ -775,7 +775,7 @@ func scanConcatStrings(x string, y *AS) V {
 
 func scan2vSubtract(x V) V {
 	switch xv := x.bv.(type) {
-	case *Dict:
+	case *D:
 		return newDictValues(xv.keys, scan2vSubtract(NewV(xv.values)))
 	case *AB:
 		if xv.Len() == 0 {
@@ -818,7 +818,7 @@ func scan2vSubtract(x V) V {
 
 func scan3vSubtract(x, y V) V {
 	switch yv := y.bv.(type) {
-	case *Dict:
+	case *D:
 		return newDictValues(yv.keys, scan3vSubtract(x, NewV(yv.values)))
 	case *AB:
 		if x.IsI() {
@@ -886,7 +886,7 @@ func scanTrimSuffixes(r []string, x string, y []string) {
 
 func scan2vMax(x V) V {
 	switch xv := x.bv.(type) {
-	case *Dict:
+	case *D:
 		return newDictValues(xv.keys, scan2vMax(NewV(xv.values)))
 	case *AB:
 		fl := xv.flags & flagBool
@@ -918,7 +918,7 @@ func scan2vMax(x V) V {
 
 func scan3vMax(x, y V) V {
 	switch yv := y.bv.(type) {
-	case *Dict:
+	case *D:
 		return newDictValues(yv.keys, scan3vMax(x, NewV(yv.values)))
 	case *AB:
 		if x.IsI() {
@@ -1003,7 +1003,7 @@ func scanMaxStrings(dst []string, x string, y []string) {
 
 func scan2vMin(x V) V {
 	switch xv := x.bv.(type) {
-	case *Dict:
+	case *D:
 		return newDictValues(xv.keys, scan2vMin(NewV(xv.values)))
 	case *AB:
 		r := xv.reuse()
@@ -1034,7 +1034,7 @@ func scan2vMin(x V) V {
 
 func scan3vMin(x, y V) V {
 	switch yv := y.bv.(type) {
-	case *Dict:
+	case *D:
 		return newDictValues(yv.keys, scan3vMin(x, NewV(yv.values)))
 	case *AB:
 		if x.IsI() {
@@ -1116,7 +1116,7 @@ func scanMinStrings(dst []string, x string, y []string) {
 
 func each3Match(x, y V) V {
 	switch xv := x.bv.(type) {
-	case *Dict:
+	case *D:
 		return newDictValues(xv.keys, each3Match(NewV(xv.values), y))
 	default:
 		xa, ok := x.bv.(array)
@@ -1125,7 +1125,7 @@ func each3Match(x, y V) V {
 		}
 		ya, ok := y.bv.(array)
 		if !ok {
-			yd, ok := y.bv.(*Dict)
+			yd, ok := y.bv.(*D)
 			if !ok {
 				break
 			}

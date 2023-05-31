@@ -208,7 +208,7 @@ func negate(x V) V {
 		return NewV(r)
 	case *AV:
 		return mapAV(xv, negate)
-	case *Dict:
+	case *D:
 		return newDictValues(xv.keys, negate(NewV(xv.values)))
 	default:
 		return panicType("-x", "x", x)

@@ -14,7 +14,7 @@ import "math"
 // necessary to also implement RefCounter if the type definition makes use of a
 // type implementing it (for example an array type or a generic V).
 type RefCounter interface {
-	Value
+	BV
 
 	// IncrRC increments the reference count by one.
 	IncrRC()
@@ -32,7 +32,7 @@ type RefCounter interface {
 	// Clone returns a clone of the value. Note that the cloned value might
 	// still share some structures with its parent if they're deemed
 	// reusable.
-	Clone() Value
+	Clone() BV
 }
 
 // HasRC returns true if the value is boxed and implements RefCounter.
@@ -218,14 +218,14 @@ func (x *AV) DecrRC() {
 
 // IncrRC increments the reference count of both the key and value arrays by
 // one.
-func (d *Dict) IncrRC() {
+func (d *D) IncrRC() {
 	d.keys.IncrRC()
 	d.values.IncrRC()
 }
 
 // DecrRC decrements the reference count of both the key and value arrays by
 // one, or zero if they are already non positive.
-func (d *Dict) DecrRC() {
+func (d *D) DecrRC() {
 	d.keys.DecrRC()
 	d.values.DecrRC()
 }
@@ -314,7 +314,7 @@ func (x *AV) MarkImmutable() {
 }
 
 // MarkImmutable marks the value as definitively non-reusable.
-func (d *Dict) MarkImmutable() {
+func (d *D) MarkImmutable() {
 	d.keys.MarkImmutable()
 	d.values.MarkImmutable()
 }
@@ -366,7 +366,7 @@ func refcounts(x V) V {
 		return NewI(int64(xv.rc))
 	case *AV:
 		return NewI(int64(xv.rc))
-	case *Dict:
+	case *D:
 		return canonicalAVImmut(newAV([]V{refcounts(NewV(xv.keys)), refcounts(NewV(xv.values))}))
 	default:
 		return NewI(math.MinInt64)

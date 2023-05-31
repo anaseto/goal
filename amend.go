@@ -8,7 +8,7 @@ import (
 // amend3 implements @[X;i;f].
 func (ctx *Context) amend3(x, y, f V) V {
 	switch xv := x.bv.(type) {
-	case *Dict:
+	case *D:
 		return amend3Dict(ctx, xv, y, f)
 	case array:
 		xv = xv.sclone()
@@ -38,7 +38,7 @@ func (ctx *Context) amend3array(x array, y, f V) (array, error) {
 	return ctx.amend3arrayGeneric(x, y, f)
 }
 
-func amend3Dict(ctx *Context, d *Dict, y, f V) V {
+func amend3Dict(ctx *Context, d *D, y, f V) V {
 	switch yv := y.bv.(type) {
 	case array:
 		keys, values, ky := dictAmendKVI(d, yv)
@@ -46,7 +46,7 @@ func amend3Dict(ctx *Context, d *Dict, y, f V) V {
 		if err != nil {
 			return Panicf("@[d;y;f] : %v", err)
 		}
-		return NewV(&Dict{keys: keys, values: canonicalArray(r)})
+		return NewV(&D{keys: keys, values: canonicalArray(r)})
 	default:
 		keys, values := d.keys, d.values.sclone()
 		ky := findArray(keys, y)
@@ -58,7 +58,7 @@ func amend3Dict(ctx *Context, d *Dict, y, f V) V {
 		if err != nil {
 			return Panicf("@[d;y;f] : %v", err)
 		}
-		return NewV(&Dict{keys: keys, values: canonicalArray(r)})
+		return NewV(&D{keys: keys, values: canonicalArray(r)})
 	}
 }
 
@@ -160,7 +160,7 @@ func amend3arrayAtIs[I integer](ctx *Context, x array, y []I, f V) (array, error
 // amend4 implements @[X;i;f;z].
 func (ctx *Context) amend4(x, y, f, z V) V {
 	switch xv := x.bv.(type) {
-	case *Dict:
+	case *D:
 		return amend4Dict(ctx, xv, y, f, z)
 	case array:
 		xv = xv.sclone()
@@ -200,7 +200,7 @@ func (ctx *Context) amend4array(x array, y, f, z V) (array, error) {
 	return ctx.amend4arrayGeneric(x, y, f, z)
 }
 
-func amend4Dict(ctx *Context, d *Dict, y, f, z V) V {
+func amend4Dict(ctx *Context, d *D, y, f, z V) V {
 	switch yv := y.bv.(type) {
 	case array:
 		keys, values, ky := dictAmendKVI(d, yv)
@@ -208,7 +208,7 @@ func amend4Dict(ctx *Context, d *Dict, y, f, z V) V {
 		if err != nil {
 			return Panicf("@[d;y;f;z] : %v", err)
 		}
-		return NewV(&Dict{keys: keys, values: canonicalArray(r)})
+		return NewV(&D{keys: keys, values: canonicalArray(r)})
 	default:
 		keys, values := d.keys, d.values.sclone()
 		ky := findArray(keys, y)
@@ -222,13 +222,13 @@ func amend4Dict(ctx *Context, d *Dict, y, f, z V) V {
 				// never happens because of key padding
 				return Panicf("@[d;y;f;z] : %v", err)
 			}
-			return NewV(&Dict{keys: keys, values: canonicalArray(r)})
+			return NewV(&D{keys: keys, values: canonicalArray(r)})
 		}
 		r, err := ctx.amend4arrayI(values, ky.I(), f, z)
 		if err != nil {
 			return Panicf("@[d;y;f;z] : %v", err)
 		}
-		return NewV(&Dict{keys: keys, values: canonicalArray(r)})
+		return NewV(&D{keys: keys, values: canonicalArray(r)})
 	}
 }
 

@@ -10,7 +10,7 @@ import (
 )
 
 type stringReplacer interface {
-	Value
+	BV
 	replace(*Context, string) string
 }
 
@@ -20,7 +20,7 @@ type nReplacer struct {
 	n    int
 }
 
-func (r *nReplacer) Matches(x Value) bool {
+func (r *nReplacer) Matches(x BV) bool {
 	xv, ok := x.(*nReplacer)
 	return ok && r.olds == xv.olds && r.news == xv.news && r.n == xv.n
 }
@@ -57,7 +57,7 @@ type replacer struct {
 	oldnew *AS
 }
 
-func (r *replacer) Matches(x Value) bool {
+func (r *replacer) Matches(x BV) bool {
 	xv, ok := x.(*replacer)
 	return ok && r.oldnew.Matches(xv.oldnew)
 }
@@ -362,7 +362,7 @@ func casti(y V) V {
 		return castToAI(yv)
 	case *AV:
 		return mapAVc(yv, casti)
-	case *Dict:
+	case *D:
 		return newDictValues(yv.keys, casti(NewV(yv.values)))
 	default:
 		return panicType("\"i\"$y", "y", y)
@@ -417,7 +417,7 @@ func castn(y V) V {
 		return y
 	case *AV:
 		return mapAVc(yv, castn)
-	case *Dict:
+	case *D:
 		return newDictValues(yv.keys, castn(NewV(yv.values)))
 	default:
 		return panicType("\"n\"$y", "y", y)
@@ -457,7 +457,7 @@ func casts(ctx *Context, y V) V {
 		return canonicalAV(r)
 	case array:
 		return each2String(ctx, yv)
-	case *Dict:
+	case *D:
 		return newDictValues(yv.keys, casts(ctx, NewV(yv.values)))
 	default:
 		return NewS(y.Sprint(ctx))
@@ -612,7 +612,7 @@ func castFormat1(ctx *Context, s string, y V) V {
 			r[i] = ri
 		}
 		return canonicalVs(r)
-	case *Dict:
+	case *D:
 		return newDictValues(yv.keys, castFormat1(ctx, s, NewV(yv.values)))
 	default:
 		return NewS(fmt.Sprintf(s, y.Sprint(ctx)))
@@ -692,7 +692,7 @@ func dropS(s S, y V) V {
 		return NewAS(r)
 	case *AV:
 		return mapAV(yv, func(yi V) V { return dropS(s, yi) })
-	case *Dict:
+	case *D:
 		return newDictValues(yv.keys, dropS(s, NewV(yv.values)))
 	default:
 		return panicType("s_y", "y", y)
@@ -730,7 +730,7 @@ func dropAS(x *AS, y V) V {
 			r[i] = ri
 		}
 		return newAVu(r)
-	case *Dict:
+	case *D:
 		if x.Len() != yv.Len() {
 			return panicLength("S_S", x.Len(), yv.Len())
 		}
@@ -753,7 +753,7 @@ func trim(s S, y V) V {
 		return NewAS(r)
 	case *AV:
 		return mapAV(yv, func(yi V) V { return trim(s, yi) })
-	case *Dict:
+	case *D:
 		return newDictValues(yv.keys, trim(s, NewV(yv.values)))
 	default:
 		return panicType("s^y", "y", y)
@@ -773,7 +773,7 @@ func trimSpaces(y V) V {
 		return NewAS(r)
 	case *AV:
 		return mapAV(yv, trimSpaces)
-	case *Dict:
+	case *D:
 		return newDictValues(yv.keys, trimSpaces(NewV(yv.values)))
 	default:
 		return panicType("s^y", "y", y)
@@ -787,7 +787,7 @@ func sub1(x V) V {
 			return panics("sub[S] : non-even length array")
 		}
 		return NewV(&replacer{r: strings.NewReplacer(xv.elts...), oldnew: xv})
-	case *Dict:
+	case *D:
 		return sub2(NewV(xv.keys), NewV(xv.values))
 	default:
 		return panicType("sub[x]", "x", x)
@@ -876,7 +876,7 @@ func (ctx *Context) replace(f stringReplacer, x V) V {
 			r.elts[i] = ri
 		}
 		return NewV(r)
-	case *Dict:
+	case *D:
 		return newDictValues(xv.keys, ctx.replace(f, NewV(xv.values)))
 	default:
 		return panicType("sub[...] x", "x", x)
@@ -895,7 +895,7 @@ func containedInS(x V, s string) V {
 		return newABb(r)
 	case *AV:
 		return mapAV(xv, func(xi V) V { return containedInS(xi, s) })
-	case *Dict:
+	case *D:
 		return newDictValues(xv.keys, containedInS(NewV(xv.values), s))
 	default:
 		return panicType("x in s", "x", x)
@@ -921,7 +921,7 @@ func scount(s S, y V) V {
 		return NewAI(r)
 	case *AV:
 		return mapAV(yv, func(yi V) V { return scount(s, yi) })
-	case *Dict:
+	case *D:
 		return newDictValues(yv.keys, scount(s, NewV(yv.values)))
 	default:
 		return panicType("s#y", "y", y)
@@ -940,7 +940,7 @@ func splitN(n int, sep S, y V) V {
 		return newAVu(r)
 	case *AV:
 		return mapAV(yv, func(yi V) V { return splitN(n, sep, yi) })
-	case *Dict:
+	case *D:
 		return newDictValues(yv.keys, splitN(n, sep, NewV(yv.values)))
 	default:
 		return Panicf("bad type \"%s\" in y", y.Type())

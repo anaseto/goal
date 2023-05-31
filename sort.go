@@ -55,12 +55,12 @@ func (x *AV) Swap(i, j int) {
 }
 
 // Less satisfies the specification of sort.Interface.
-func (x *Dict) Less(i, j int) bool {
+func (x *D) Less(i, j int) bool {
 	return x.values.Less(i, j)
 }
 
 // Swap satisfies the specification of sort.Interface.
-func (x *Dict) Swap(i, j int) {
+func (x *D) Swap(i, j int) {
 	x.keys.Swap(i, j)
 	x.values.Swap(i, j)
 }
@@ -70,7 +70,7 @@ func sortUp(ctx *Context, x V) V {
 	xa, ok := x.bv.(array)
 	if !ok {
 		switch xv := x.bv.(type) {
-		case *Dict:
+		case *D:
 			return NewV(sortUpDictKeys(ctx, xv))
 		default:
 			return panicType("^X", "X", x)
@@ -169,7 +169,7 @@ func sortSmallInt64s(xs []int64, min int64) {
 	}
 }
 
-func sortUpDictKeys(ctx *Context, d *Dict) *Dict {
+func sortUpDictKeys(ctx *Context, d *D) *D {
 	flags := d.keys.getFlags()
 	if flags.Has(flagAscending) {
 		return d
@@ -210,7 +210,7 @@ func ascend(ctx *Context, x V) V {
 	switch xv := x.bv.(type) {
 	case array:
 		return ascendArray(ctx, xv)
-	case *Dict:
+	case *D:
 		return NewV(sortUpDict(ctx, xv))
 	default:
 		return panicType("<X", "X", x)
@@ -277,17 +277,17 @@ func ascendAI(ctx *Context, xv *AI) V {
 	return NewAB(p.Perm)
 }
 
-func sortBy(ctx *Context, keys, values array) *Dict {
+func sortBy(ctx *Context, keys, values array) *D {
 	a := ascendArray(ctx, values)
 	switch av := a.bv.(type) {
 	case *AB:
 		nk := keys.atBytes(av.elts)
 		nv := values.atBytes(av.elts)
-		return &Dict{keys: nk, values: nv}
+		return &D{keys: nk, values: nv}
 	case *AI:
 		nk := keys.atInt64s(av.elts)
 		nv := values.atInt64s(av.elts)
-		return &Dict{keys: nk, values: nv}
+		return &D{keys: nk, values: nv}
 	default:
 		panic("sortBy")
 	}
@@ -317,7 +317,7 @@ func ascendArray(ctx *Context, x array) V {
 	}
 }
 
-func sortUpDict(ctx *Context, d *Dict) *Dict {
+func sortUpDict(ctx *Context, d *D) *D {
 	flags := d.values.getFlags()
 	if flags.Has(flagAscending) {
 		return d
@@ -334,7 +334,7 @@ func descend(ctx *Context, x V) V {
 		r := ascendArray(ctx, xv).bv.(array)
 		reverseMut(r)
 		return NewV(r)
-	case *Dict:
+	case *D:
 		d := sortUpDict(ctx, xv)
 		reverseMut(d.keys)
 		reverseMut(d.values)

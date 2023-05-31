@@ -103,7 +103,7 @@ func Cmd(ctx *goal.Context, cfg Config) {
 }
 
 func warn(ctx *goal.Context, r goal.V) {
-	s, ok := r.Error().Value().(goal.S)
+	s, ok := r.Error().BV().(goal.S)
 	if ok {
 		fmt.Fprintln(os.Stderr, s)
 	} else {
@@ -116,7 +116,7 @@ func runStdin(ctx *goal.Context, cfg Config, quiet bool) {
 	helpLast := false
 	helpv := ctx.RegisterMonad("help", func(ctx *goal.Context, args []goal.V) goal.V {
 		if len(args) >= 1 {
-			arg, ok := args[0].Value().(goal.S)
+			arg, ok := args[0].BV().(goal.S)
 			if !ok {
 				return goal.Panicf("help x : x not a string (%s)", args[0].Type())
 			}

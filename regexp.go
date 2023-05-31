@@ -9,7 +9,7 @@ type rx struct {
 	Regexp *regexp.Regexp
 }
 
-func (r *rx) Matches(x Value) bool {
+func (r *rx) Matches(x BV) bool {
 	xv, ok := x.(*rx)
 	return ok && r.Regexp.String() == xv.Regexp.String()
 }
@@ -30,7 +30,7 @@ type rxReplacer struct {
 	repl V
 }
 
-func (r *rxReplacer) Matches(x Value) bool {
+func (r *rxReplacer) Matches(x BV) bool {
 	xv, ok := x.(*rxReplacer)
 	return ok && r.r.Matches(xv.r) && r.repl.Matches(xv.repl)
 }

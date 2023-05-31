@@ -43,7 +43,7 @@ func (x V) LessT(y V) bool {
 }
 
 // LessT satisfies the specification of the Value interface.
-func (s S) LessT(y Value) bool {
+func (s S) LessT(y BV) bool {
 	switch yv := y.(type) {
 	case S:
 		return s < yv
@@ -53,7 +53,7 @@ func (s S) LessT(y Value) bool {
 }
 
 // LessT satisfies the specification of the Value interface.
-func (x *AB) LessT(y Value) bool {
+func (x *AB) LessT(y BV) bool {
 	switch yv := y.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
@@ -100,7 +100,7 @@ func (x *AB) LessT(y Value) bool {
 }
 
 // LessT satisfies the specification of the Value interface.
-func (x *AI) LessT(y Value) bool {
+func (x *AI) LessT(y BV) bool {
 	switch yv := y.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
@@ -147,7 +147,7 @@ func (x *AI) LessT(y Value) bool {
 }
 
 // LessT satisfies the specification of the Value interface.
-func (x *AF) LessT(y Value) bool {
+func (x *AF) LessT(y BV) bool {
 	switch yv := y.(type) {
 	case *AB:
 		if x.Len() != yv.Len() {
@@ -194,7 +194,7 @@ func (x *AF) LessT(y Value) bool {
 }
 
 // LessT satisfies the specification of the Value interface.
-func (x *AS) LessT(y Value) bool {
+func (x *AS) LessT(y BV) bool {
 	switch yv := y.(type) {
 	case *AS:
 		if x.Len() != yv.Len() {
@@ -215,7 +215,7 @@ func (x *AS) LessT(y Value) bool {
 }
 
 // LessT satisfies the specification of the Value interface.
-func (x *AV) LessT(y Value) bool {
+func (x *AV) LessT(y BV) bool {
 	switch yv := y.(type) {
 	case *AV:
 		if x.Len() != yv.Len() {
@@ -236,16 +236,16 @@ func (x *AV) LessT(y Value) bool {
 }
 
 // LessT satisfies the specification of the Value interface.
-func (d *Dict) LessT(y Value) bool {
+func (d *D) LessT(y BV) bool {
 	switch yv := y.(type) {
-	case *Dict:
+	case *D:
 		return d.keys.LessT(yv.keys) || d.keys.Matches(yv.keys) && d.values.LessT(yv.values)
 	default:
 		return d.Type() < y.Type()
 	}
 }
 
-func (xv *derivedVerb) LessT(y Value) bool {
+func (xv *derivedVerb) LessT(y BV) bool {
 	switch yv := y.(type) {
 	case *derivedVerb:
 		return xv.Fun < yv.Fun ||
@@ -257,7 +257,7 @@ func (xv *derivedVerb) LessT(y Value) bool {
 	}
 }
 
-func (xv *projection) LessT(y Value) bool {
+func (xv *projection) LessT(y BV) bool {
 	switch yv := y.(type) {
 	case *projection:
 		return xv.Fun.LessT(yv.Fun) ||
@@ -269,7 +269,7 @@ func (xv *projection) LessT(y Value) bool {
 	}
 }
 
-func (xv *projectionFirst) LessT(y Value) bool {
+func (xv *projectionFirst) LessT(y BV) bool {
 	switch yv := y.(type) {
 	case *projectionFirst:
 		return xv.Fun.LessT(yv.Fun) ||
@@ -281,7 +281,7 @@ func (xv *projectionFirst) LessT(y Value) bool {
 	}
 }
 
-func (xv *projectionMonad) LessT(y Value) bool {
+func (xv *projectionMonad) LessT(y BV) bool {
 	switch yv := y.(type) {
 	case *projectionMonad:
 		return xv.Fun.LessT(yv.Fun)
@@ -292,7 +292,7 @@ func (xv *projectionMonad) LessT(y Value) bool {
 	}
 }
 
-func (xv *nReplacer) LessT(y Value) bool {
+func (xv *nReplacer) LessT(y BV) bool {
 	switch yv := y.(type) {
 	case *nReplacer:
 		return xv.olds < yv.olds || xv.olds == yv.olds &&
@@ -304,7 +304,7 @@ func (xv *nReplacer) LessT(y Value) bool {
 	}
 }
 
-func (xv *replacer) LessT(y Value) bool {
+func (xv *replacer) LessT(y BV) bool {
 	switch yv := y.(type) {
 	case *replacer:
 		return xv.oldnew.LessT(yv.oldnew)
@@ -315,7 +315,7 @@ func (xv *replacer) LessT(y Value) bool {
 	}
 }
 
-func (xv *rxReplacer) LessT(y Value) bool {
+func (xv *rxReplacer) LessT(y BV) bool {
 	switch yv := y.(type) {
 	case *rxReplacer:
 		return xv.r.LessT(yv.r) || xv.r.Matches(yv.r) && xv.repl.LessT(yv.repl)
@@ -326,7 +326,7 @@ func (xv *rxReplacer) LessT(y Value) bool {
 	}
 }
 
-func (xv *rx) LessT(y Value) bool {
+func (xv *rx) LessT(y BV) bool {
 	switch yv := y.(type) {
 	case *rx:
 		return xv.Regexp.String() < yv.Regexp.String()
@@ -335,7 +335,7 @@ func (xv *rx) LessT(y Value) bool {
 	}
 }
 
-func (xv *errV) LessT(y Value) bool {
+func (xv *errV) LessT(y BV) bool {
 	switch yv := y.(type) {
 	case *errV:
 		return xv.V.LessT(yv.V)
@@ -344,7 +344,7 @@ func (xv *errV) LessT(y Value) bool {
 	}
 }
 
-func (xv panicV) LessT(y Value) bool {
+func (xv panicV) LessT(y BV) bool {
 	switch yv := y.(type) {
 	case panicV:
 		return xv < yv
