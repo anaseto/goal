@@ -76,7 +76,7 @@ func roll(ctx *Context, n int64, y V) V {
 	case *AS:
 		return NewAS(rollSlice[string](ctx, n, yv.elts))
 	case *AV:
-		return newAVu(rollSlice[V](ctx, n, yv.elts))
+		return canonicalVs(rollSlice[V](ctx, n, yv.elts))
 	default:
 		return panicType("i?y", "y", y)
 	}
@@ -174,7 +174,7 @@ func deal(ctx *Context, n int64, y V) V {
 	case *AS:
 		return NewV(&AS{elts: dealSlice[string](ctx, n, yv.elts), flags: flagDistinct & yv.flags})
 	case *AV:
-		return NewV(&AV{elts: dealSlice[V](ctx, n, yv.elts), flags: flagDistinct & yv.flags, rc: yv.rc})
+		return canonicalAV(&AV{elts: dealSlice[V](ctx, n, yv.elts), flags: flagDistinct & yv.flags, rc: yv.rc})
 	default:
 		panic("deal")
 	}
