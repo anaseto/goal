@@ -186,9 +186,9 @@ genOp:{[opname;opsym] / globals o,op,xt,h
               if yv.Len() != xv.Len() {
                       return panicLength("x${op}y", xv.Len(), yv.Len())
               }/
-  h say "return dyadAVarray(xv, yv, $o)"
+  h say "return mapAVarray(xv, yv, $o)"
   h say `}`
-  h say "return dyadAVV(xv, y, $o)"
+  h say "return mapAVV(xv, y, $o)"
   h say "\n"_qq/
     case *Dict:
         yv, ok := y.bv.(*Dict)
@@ -264,7 +264,7 @@ doxdAV:{
         }
         return NewV(&Dict{keys: yv.keys, values: v.bv.(array)})
     case *AV:
-        return monadAV(yv, func(yi V) V { return $o${xt}V(x, yi) })
+        return mapAV(yv, func(yi V) V { return $o${xt}V(x, yi) })
     default:
         return panicType("x${op}y", "y", y)/
 }
