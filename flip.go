@@ -273,7 +273,7 @@ func flipAV(x *AV) V {
 			r[i] = xi
 		}
 	}
-	return canonicalAV(&AV{elts: r, flags: flagImmutable})
+	return canonicalAVImmut(&AV{elts: r, flags: flagImmutable})
 }
 
 func flipAVAV(x *AV, lines int) V {
