@@ -1,5 +1,11 @@
 # v? ?
 
+* Flip `+x` now extends array elements (like in take `i#`) to maximum length if
+  needed, so that it works with any kind of ragged array.
+* There were a few changes in type names in the Go library interface, for
+  better consistency, like renaming `Value` into `BV` (boxed value) for
+  consistency with `V` (unboxed or boxed value), and `D` for dicts. Also, the
+  Array interface is now public.
 * Simplification of reference count system, so that it's less error-prone and
   easier to maintain. Because of the GC, we use it only for optimization
   purposes, so we can take advantage of that. We limit reference counting to
@@ -10,8 +16,6 @@
   negatively performance, except when making many small amends to nested data.
 * Various other code refactorings that should facilitate maintenance in the
   long run.
-* There were a few changes in types names in the Go library interface, for
-  better consistency.
 
 # v0.18.0 2023-05-21
 

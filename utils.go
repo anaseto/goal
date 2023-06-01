@@ -292,16 +292,6 @@ func fromABtoAF(x *AB) V {
 	return NewAF(r)
 }
 
-// fromABtoAI converts AB into AI (for simplifying code, used only for
-// unfrequent code).
-func fromABtoAI(x *AB) V {
-	r := make([]int64, x.Len())
-	for i, xi := range x.elts {
-		r[i] = int64(xi)
-	}
-	return NewAI(r)
-}
-
 // IsFalse returns true for false values, that is zero numbers, empty strings,
 // zero-length values, and errors.
 func (x V) IsFalse() bool {

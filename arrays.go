@@ -49,10 +49,6 @@ type A[T any] struct {
 	elts  []T
 }
 
-func newA[T any](x []T) A[T] {
-	return A[T]{elts: x}
-}
-
 // AB represents an array of bytes. From Goal's perspective, it's the same as
 // AI. It's used as an optimization to save space for small-integers, in
 // particular for arrays of booleans (0s and 1s).

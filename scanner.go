@@ -322,7 +322,7 @@ func scanAny(s *Scanner) stateFn {
 	case isAlpha(s.r):
 		return scanIdent
 	default:
-		return s.emitError(fmt.Sprintf("unexpected character: %c", s.r))
+		return s.emitError(fmt.Sprintf("unexpected character: %q", s.r))
 	}
 }
 

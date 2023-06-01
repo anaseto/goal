@@ -8,67 +8,94 @@ func flip(x V) V {
 	x = toArray(x)
 	switch xv := x.bv.(type) {
 	case *AV:
-		cols := xv.Len()
-		if cols == 0 {
+		if xv.Len() == 0 {
 			x.MarkImmutable()
 			return newAVu([]V{x})
 		}
-		lines := -1
-		for _, o := range xv.elts {
-			var nl int
-			switch a := o.bv.(type) {
-			case Array:
-				nl = a.Len()
-			default:
-				continue
+		l := -1
+		for _, xi := range xv.elts {
+			xia, ok := xi.bv.(Array)
+			if !ok {
+				x = extendAV(xv)
+				return flip(x)
 			}
+			nl := xia.Len()
 			switch {
-			case lines < 0:
-				lines = nl
-			case nl != lines:
-				return Panicf("line length mismatch: %d vs %d", nl, lines)
+			case l == -1:
+				l = nl
+			case nl != l:
+				x = extendAV(xv)
+				return flip(x)
 			}
 		}
 		t := eType(xv)
 		switch {
-		case lines <= 0:
+		case l == 0:
 			x.MarkImmutable()
 			return newAVu([]V{x})
-		case lines == 1:
+		case l == 1:
 			switch t {
-			case tb, tAb:
+			case tAb:
 				return newAVu([]V{flipAB(xv, true)})
-			case tB, tAB:
+			case tAB:
 				return newAVu([]V{flipAB(xv, false)})
-			case tF, tAF:
+			case tAF:
 				return newAVu([]V{flipAF(xv)})
-			case tI, tAI:
+			case tAI:
 				return newAVu([]V{flipAI(xv)})
-			case tS, tAS:
+			case tAS:
 				return newAVu([]V{flipAS(xv)})
 			default:
 				return newAVu([]V{flipAV(xv)})
 			}
 		default:
 			switch t {
-			case tb, tAb:
-				return flipAVAB(xv, lines, true)
-			case tB, tAB:
-				return flipAVAB(xv, lines, false)
-			case tF, tAF:
-				return flipAVAF(xv, lines)
-			case tI, tAI:
-				return flipAVAI(xv, lines)
-			case tS, tAS:
-				return flipAVAS(xv, lines)
+			case tAb:
+				return flipAVAB(xv, l, true)
+			case tAB:
+				return flipAVAB(xv, l, false)
+			case tAF:
+				return flipAVAF(xv, l)
+			case tAI:
+				return flipAVAI(xv, l)
+			case tAS:
+				return flipAVAS(xv, l)
 			default:
-				return flipAVAV(xv, lines)
+				return flipAVAV(xv, l)
 			}
 		}
 	default:
 		x.MarkImmutable()
 		return newAVu([]V{x})
 	}
+}
+
+func extendAV(x *AV) V {
+	n := 0
+	for _, xi := range x.elts {
+		xl := xi.Len()
+		if n < xl {
+			n = xl
+		}
+	}
+	r := x.reuse()
+	for i, xi := range x.elts {
+		xia, ok := xi.bv.(Array)
+		if ok {
+			if xia.Len() == n {
+				r.elts[i] = xi
+				continue
+			}
+			ri := takeN(int64(n), xia)
+			ri.MarkImmutable()
+			r.elts[i] = ri
+			continue
+		}
+		ri := takeNAtom(int64(n), xi)
+		ri.MarkImmutable()
+		r.elts[i] = ri
+	}
+	return NewV(r)
 }
 
 // getAB retrieves the *getAB value. It assumes Value type is *getAB.
@@ -79,11 +106,7 @@ func (x V) getAB() *AB {
 func flipAB(x *AV, b bool) V {
 	r := make([]byte, x.Len())
 	for i, xi := range x.elts {
-		if xi.IsI() {
-			r[i] = byte(xi.I())
-		} else {
-			r[i] = xi.getAB().At(0)
-		}
+		r[i] = xi.getAB().At(0)
 	}
 	var fl flags
 	if b {
@@ -97,16 +120,9 @@ func flipAVAB(x *AV, lines int, b bool) V {
 	a := make([]byte, lines*x.Len())
 	xlen := x.Len()
 	for i, xi := range x.elts {
-		if xi.IsI() {
-			b := byte(xi.I())
-			for j := 0; j < lines; j++ {
-				a[i+j*xlen] = b
-			}
-		} else {
-			xia := xi.getAB()
-			for j := 0; j < lines; j++ {
-				a[i+j*xlen] = xia.At(j)
-			}
+		xia := xi.getAB()
+		for j := 0; j < lines; j++ {
+			a[i+j*xlen] = xia.At(j)
 		}
 	}
 	var fl flags
@@ -122,14 +138,6 @@ func flipAVAB(x *AV, lines int, b bool) V {
 func flipAF(x *AV) V {
 	r := make([]float64, x.Len())
 	for i, xi := range x.elts {
-		if xi.IsI() {
-			r[i] = float64(xi.I())
-			continue
-		}
-		if xi.IsF() {
-			r[i] = float64(xi.F())
-			continue
-		}
 		switch xiv := xi.bv.(type) {
 		case *AB:
 			r[i] = float64(xiv.At(0))
@@ -147,20 +155,6 @@ func flipAVAF(x *AV, lines int) V {
 	a := make([]float64, lines*x.Len())
 	xlen := x.Len()
 	for i, xi := range x.elts {
-		if xi.IsI() {
-			f := float64(xi.I())
-			for j := 0; j < lines; j++ {
-				a[i+j*xlen] = f
-			}
-			continue
-		}
-		if xi.IsF() {
-			f := xi.F()
-			for j := 0; j < lines; j++ {
-				a[i+j*xlen] = f
-			}
-			continue
-		}
 		switch xiv := xi.bv.(type) {
 		case *AB:
 			for j := 0; j < lines; j++ {
@@ -185,10 +179,6 @@ func flipAVAF(x *AV, lines int) V {
 func flipAI(x *AV) V {
 	r := make([]int64, x.Len())
 	for i, xi := range x.elts {
-		if xi.IsI() {
-			r[i] = xi.I()
-			continue
-		}
 		switch xiv := xi.bv.(type) {
 		case *AB:
 			r[i] = int64(xiv.At(0))
@@ -204,13 +194,6 @@ func flipAVAI(x *AV, lines int) V {
 	a := make([]int64, lines*x.Len())
 	xlen := x.Len()
 	for i, xi := range x.elts {
-		if xi.IsI() {
-			n := xi.I()
-			for j := 0; j < lines; j++ {
-				a[i+j*xlen] = n
-			}
-			continue
-		}
 		switch xiv := xi.bv.(type) {
 		case *AB:
 			for j := 0; j < lines; j++ {
@@ -231,12 +214,8 @@ func flipAVAI(x *AV, lines int) V {
 func flipAS(x *AV) V {
 	r := make([]string, x.Len())
 	for i, xi := range x.elts {
-		switch xiv := xi.bv.(type) {
-		case S:
-			r[i] = string(xiv)
-		case *AS:
-			r[i] = xiv.At(0)
-		}
+		xiv := xi.bv.(*AS)
+		r[i] = xiv.At(0)
 	}
 	return NewV(&AS{elts: r, flags: flagImmutable})
 }
@@ -246,15 +225,9 @@ func flipAVAS(x *AV, lines int) V {
 	a := make([]string, lines*x.Len())
 	xlen := x.Len()
 	for i, xi := range x.elts {
-		switch xiv := xi.bv.(type) {
-		case S:
-			for j := 0; j < lines; j++ {
-				a[i+j*xlen] = string(xiv)
-			}
-		case *AS:
-			for j := 0; j < lines; j++ {
-				a[i+j*xlen] = xiv.At(j)
-			}
+		xiv := xi.bv.(*AS)
+		for j := 0; j < lines; j++ {
+			a[i+j*xlen] = xiv.At(j)
 		}
 	}
 	for j := range r {
@@ -266,12 +239,8 @@ func flipAVAS(x *AV, lines int) V {
 func flipAV(x *AV) V {
 	r := make([]V, x.Len())
 	for i, xi := range x.elts {
-		switch xiv := xi.bv.(type) {
-		case Array:
-			r[i] = xiv.VAt(0)
-		default:
-			r[i] = xi
-		}
+		xiv := xi.bv.(Array)
+		r[i] = xiv.VAt(0)
 	}
 	return canonicalAVImmut(&AV{elts: r, flags: flagImmutable})
 }
@@ -281,15 +250,9 @@ func flipAVAV(x *AV, lines int) V {
 	a := make([]V, lines*x.Len())
 	xlen := x.Len()
 	for i, xi := range x.elts {
-		switch xiv := xi.bv.(type) {
-		case Array:
-			for j := 0; j < lines; j++ {
-				a[i+j*xlen] = xiv.VAt(j)
-			}
-		default:
-			for j := 0; j < lines; j++ {
-				a[i+j*xlen] = xi
-			}
+		xiv := xi.bv.(Array)
+		for j := 0; j < lines; j++ {
+			a[i+j*xlen] = xiv.VAt(j)
 		}
 	}
 	for j := range r {

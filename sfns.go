@@ -452,31 +452,6 @@ func take(x, y V) V {
 	}
 }
 
-func takeCyclicSlice[T any](n int64, ys []T) []T {
-	neg := n < 0
-	if neg {
-		n = -n
-	}
-	i := int64(0)
-	step := int64(len(ys))
-	r := make([]T, n)
-	if neg {
-		res := n % step
-		if res > 0 {
-			copy(r[0:res], ys[step-res:])
-			i += res
-		}
-	}
-	for i+step <= n {
-		copy(r[i:i+step], ys)
-		i += step
-	}
-	if !neg && i < n {
-		copy(r[i:n], ys[:n-i])
-	}
-	return r
-}
-
 func takeNAtom(n int64, y V) V {
 	if y.IsI() {
 		yv := y.I()
@@ -521,27 +496,7 @@ func constArray[T any](n int64, y T) []T {
 
 func takeN(n int64, y Array) V {
 	if y.Len() == 0 {
-		if n < 0 {
-			n = -n
-		}
-		switch y.(type) {
-		case *AS:
-			r := make([]string, n)
-			return NewAS(r)
-		case *AF:
-			r := make([]float64, n)
-			return NewAF(r)
-		case *AV:
-			r := make([]V, n)
-			p := protoAV()
-			for i := range r {
-				r[i] = p
-			}
-			return newAVu(r)
-		default:
-			r := make([]byte, n)
-			return newABb(r)
-		}
+		return padEmptyArray(n, y)
 	}
 	switch {
 	case n >= 0:
@@ -554,6 +509,30 @@ func takeN(n int64, y Array) V {
 			return takeCyclic(n, y)
 		}
 		return NewV(y.slice(y.Len()+int(n), y.Len()))
+	}
+}
+
+func padEmptyArray(n int64, y Array) V {
+	if n < 0 {
+		n = -n
+	}
+	switch y.(type) {
+	case *AS:
+		r := make([]string, n)
+		return NewAS(r)
+	case *AF:
+		r := make([]float64, n)
+		return NewAF(r)
+	case *AV:
+		r := make([]V, n)
+		p := protoAV()
+		for i := range r {
+			r[i] = p
+		}
+		return newAVu(r)
+	default:
+		r := make([]byte, n)
+		return newABb(r)
 	}
 }
 
@@ -574,6 +553,31 @@ func takeCyclic(n int64, y Array) V {
 	default:
 		panic("takeCyclic: y not an array")
 	}
+}
+
+func takeCyclicSlice[T any](n int64, ys []T) []T {
+	neg := n < 0
+	if neg {
+		n = -n
+	}
+	i := int64(0)
+	step := int64(len(ys))
+	r := make([]T, n)
+	if neg {
+		res := n % step
+		if res > 0 {
+			copy(r[0:res], ys[step-res:])
+			i += res
+		}
+	}
+	for i+step <= n {
+		copy(r[i:i+step], ys)
+		i += step
+	}
+	if !neg && i < n {
+		copy(r[i:n], ys[:n-i])
+	}
+	return r
 }
 
 func takePadN(n int64, x Array) V {
