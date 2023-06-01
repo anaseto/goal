@@ -424,29 +424,11 @@ func (ctx *Context) applyDictArgs(x *D, arg V, args []V) V {
 		return applyDict(x, arg)
 	}
 	if arg.kind == valNil {
-		r := make([]V, x.Len())
-		for i := 0; i < len(r); i++ {
-			ri := ctx.applyDictArgs(x, x.keys.VAt(i), args)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r[i] = ri
-		}
-		return canonicalVs(r)
+		return cmapN(x.keys.Len(), func(i int) V { return ctx.applyDictArgs(x, x.keys.VAt(i), args) })
 	}
 	switch argv := arg.bv.(type) {
 	case Array:
-		r := make([]V, argv.Len())
-		for i := 0; i < argv.Len(); i++ {
-			ri := ctx.applyDictArgs(x, argv.VAt(i), args)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r[i] = ri
-		}
-		return canonicalVs(r)
+		return cmapN(argv.Len(), func(i int) V { return ctx.applyDictArgs(x, argv.VAt(i), args) })
 	default:
 		r := applyDict(x, arg)
 		// applyDict never panics
@@ -495,16 +477,7 @@ func applyArray(x Array, y V) V {
 	case *AI:
 		return x.vAtAI(yv)
 	case *AV:
-		r := make([]V, yv.Len())
-		for i, yi := range yv.elts {
-			ri := applyArray(x, yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r[i] = ri
-		}
-		return canonicalVs(r)
+		return cmapAV(yv, func(yi V) V { return applyArray(x, yi) })
 	case *D:
 		return newDictValues(yv.keys, applyArray(x, NewV(yv.values)))
 	default:
@@ -517,29 +490,11 @@ func (ctx *Context) applyArrayArgs(x Array, arg V, args []V) V {
 		return applyArray(x, arg)
 	}
 	if arg.kind == valNil {
-		r := make([]V, x.Len())
-		for i := 0; i < len(r); i++ {
-			ri := ctx.applyArrayArgs(x, NewI(int64(i)), args)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r[i] = ri
-		}
-		return canonicalVs(r)
+		return cmapN(x.Len(), func(i int) V { return ctx.applyArrayArgs(x, NewI(int64(i)), args) })
 	}
 	switch argv := arg.bv.(type) {
 	case Array:
-		r := make([]V, argv.Len())
-		for i := 0; i < argv.Len(); i++ {
-			ri := ctx.applyArrayArgs(x, argv.VAt(i), args)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r[i] = ri
-		}
-		return canonicalVs(r)
+		return cmapN(argv.Len(), func(i int) V { return ctx.applyArrayArgs(x, argv.VAt(i), args) })
 	default:
 		r := applyArray(x, arg)
 		if r.IsPanic() {

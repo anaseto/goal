@@ -215,7 +215,7 @@ func toIndicesRec(x V) V {
 	case *AF:
 		return toAI(xv)
 	case *AV:
-		return mapAVc(xv, func(xi V) V { return toIndicesRec(xi) })
+		return cmapAV(xv, func(xi V) V { return toIndicesRec(xi) })
 	case *AS:
 		return Panicf("bad type \"%s\" as index", x.Type())
 	default:
@@ -856,7 +856,20 @@ func mapAV(x *AV, f func(V) V) V {
 	return NewV(r)
 }
 
-func mapAVc(x *AV, f func(V) V) V {
+func mapAVNV(x *AV, f func(int, V) V) V {
+	r := x.reuse()
+	for i, xi := range x.elts {
+		ri := f(i, xi)
+		if ri.IsPanic() {
+			return ri
+		}
+		ri.MarkImmutable()
+		r.elts[i] = ri
+	}
+	return NewV(r)
+}
+
+func cmapAV(x *AV, f func(V) V) V {
 	r := x.reuse()
 	for i, xi := range x.elts {
 		ri := f(xi)
@@ -893,6 +906,32 @@ func mapAVArray(x *AV, y Array, f func(V, V) V) V {
 		r.elts[i] = ri
 	}
 	return NewV(r)
+}
+
+func cmapN(n int, f func(int) V) V {
+	r := make([]V, n)
+	for i := 0; i < n; i++ {
+		ri := f(i)
+		if ri.IsPanic() {
+			return ri
+		}
+		ri.MarkImmutable()
+		r[i] = ri
+	}
+	return canonicalVs(r)
+}
+
+func mapN(n int, f func(int) V) V {
+	r := make([]V, n)
+	for i := 0; i < n; i++ {
+		ri := f(i)
+		if ri.IsPanic() {
+			return ri
+		}
+		ri.MarkImmutable()
+		r[i] = ri
+	}
+	return newAVu(r)
 }
 
 func sumIs[I integer](x []I) int64 {

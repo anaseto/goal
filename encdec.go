@@ -173,7 +173,7 @@ func encode(f V, x V) V {
 			}
 			return encode(f, aix)
 		case *AV:
-			return mapAVc(xv, func(xi V) V { return encode(f, xi) })
+			return cmapAV(xv, func(xi V) V { return encode(f, xi) })
 		default:
 			return panicType("i\\x", "x", x)
 		}
@@ -228,7 +228,7 @@ func encodeIs[I integer](f []I, x V) V {
 		}
 		return encodeIs(f, aix)
 	case *AV:
-		return mapAVc(xv, func(xi V) V { return encodeIs(f, xi) })
+		return cmapAV(xv, func(xi V) V { return encodeIs(f, xi) })
 	default:
 		return panicType("I\\x", "x", x)
 	}
@@ -260,7 +260,7 @@ func decode(f V, x V) V {
 			}
 			return decode(f, aix)
 		case *AV:
-			return mapAVc(xv, func(xi V) V { return decode(f, xi) })
+			return cmapAV(xv, func(xi V) V { return decode(f, xi) })
 		default:
 			return panicType("i/x", "x", x)
 		}
@@ -322,7 +322,7 @@ func decodeIs[I integer](f []I, x V) V {
 		}
 		return decodeIs(f, aix)
 	case *AV:
-		return mapAVc(xv, func(xi V) V { return decodeIs(f, xi) })
+		return cmapAV(xv, func(xi V) V { return decodeIs(f, xi) })
 	default:
 		return panicType("I/x", "x", x)
 	}

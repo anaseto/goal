@@ -92,10 +92,10 @@ func doTime(cmd string, y V, layout, loc string) V {
 	}
 	switch yv := y.bv.(type) {
 	case *AB:
-		return doTimeIs(cmd, yv.elts, layout, loc)
+		return cmapN(yv.Len(), func(i int) V { return doTimeI(cmd, int64(yv.elts[i]), layout) })
 	case *AI:
 		// doTime: allocations could be optimized depending on cmd.
-		return doTimeIs(cmd, yv.elts, layout, loc)
+		return cmapN(yv.Len(), func(i int) V { return doTimeI(cmd, yv.elts[i], layout) })
 	case *AF:
 		y = toAI(yv)
 		if y.IsPanic() {
@@ -105,34 +105,12 @@ func doTime(cmd string, y V, layout, loc string) V {
 	case S:
 		return doTimeS(cmd, string(yv), layout, loc)
 	case *AS:
-		r := make([]V, yv.Len())
-		for i, yi := range yv.elts {
-			ri := doTimeS(cmd, yi, layout, loc)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r[i] = ri
-		}
-		return canonicalVs(r)
+		return cmapN(yv.Len(), func(i int) V { return doTimeS(cmd, yv.elts[i], layout, loc) })
 	case *AV:
-		return mapAVc(yv, func(yi V) V { return doTime(cmd, yi, layout, loc) })
+		return cmapAV(yv, func(yi V) V { return doTime(cmd, yi, layout, loc) })
 	default:
 		return panicType("time[cmd;t;...]", "t", y)
 	}
-}
-
-func doTimeIs[I integer](cmd string, y []I, layout, loc string) V {
-	r := make([]V, len(y))
-	for i, yi := range y {
-		ri := doTimeI(cmd, int64(yi), layout)
-		if ri.IsPanic() {
-			return ri
-		}
-		ri.MarkImmutable()
-		r[i] = ri
-	}
-	return canonicalVs(r)
 }
 
 func doTimeI(cmd string, yv int64, layout string) V {

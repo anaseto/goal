@@ -362,16 +362,7 @@ doXdAV:{
             if x.Len() != yv.Len() {
                     return panicLength("x${op}y", x.Len(), yv.Len())
             }
-            r := yv.reuse()
-            for i := range r.elts {
-                    ri := $o${nxt}V($xct(x.At(i)), yv.At(i))
-                    if ri.IsPanic() {
-                            return ri
-                    }
-                    ri.MarkImmutable()
-                    r.elts[i] = ri
-            }
-            return NewV(r)
+            return mapAVNV(yv, func(i int, yi V) V { return $o${nxt}V($xct(x.At(i)), yi) })
     default:
             return panicType("x${op}y", "y", y)/
 }

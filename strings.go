@@ -111,7 +111,7 @@ func applyS(s S, x V) V {
 		}
 		return applyS(s, x)
 	case *AV:
-		return mapAVc(xv, func(xi V) V { return applyS(s, xi) })
+		return cmapAV(xv, func(xi V) V { return applyS(s, xi) })
 	default:
 		return panicType("s@i", "i", x)
 	}
@@ -161,7 +161,7 @@ func applyS2(s S, x V, y V) V {
 		}
 		return applyS2(s, x, y)
 	case *AV:
-		return mapAVc(xv, func(xi V) V { return applyS2(s, xi, y) })
+		return cmapAV(xv, func(xi V) V { return applyS2(s, xi, y) })
 	default:
 		return panicType("s[x;y]", "x", x)
 	}
@@ -245,16 +245,7 @@ func applyS2Is[I integer](s S, x []I, y V) V {
 		if len(x) != yv.Len() {
 			return panicLength("s[x;y]", len(x), yv.Len())
 		}
-		r := make([]V, yv.Len())
-		for i, yi := range yv.elts {
-			ri := applyS2I(s, int64(x[i]), yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r[i] = ri
-		}
-		return newAVu(r)
+		return mapN(yv.Len(), func(i int) V { return applyS2I(s, int64(x[i]), yv.At(i)) })
 	default:
 		return panicType("s[i;y]", "y", y)
 	}
@@ -361,7 +352,7 @@ func casti(y V) V {
 	case *AF:
 		return castToAI(yv)
 	case *AV:
-		return mapAVc(yv, casti)
+		return cmapAV(yv, casti)
 	case *D:
 		return newDictValues(yv.keys, casti(NewV(yv.values)))
 	default:
@@ -416,7 +407,7 @@ func castn(y V) V {
 	case *AF:
 		return y
 	case *AV:
-		return mapAVc(yv, castn)
+		return cmapAV(yv, castn)
 	case *D:
 		return newDictValues(yv.keys, castn(NewV(yv.values)))
 	default:
@@ -499,7 +490,7 @@ func castb(y V) V {
 		}
 		return castb(y)
 	case *AV:
-		return mapAVc(yv, castb)
+		return cmapAV(yv, castb)
 	default:
 		return panicType("\"b\"$y", "y", y)
 	}
@@ -542,7 +533,7 @@ func castc(y V) V {
 		}
 		return newAVu(r)
 	case *AV:
-		return mapAVc(yv, castc)
+		return cmapAV(yv, castc)
 	default:
 		return panicType("\"c\"$y", "y", y)
 	}
@@ -720,16 +711,7 @@ func dropAS(x *AS, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("S_S", x.Len(), yv.Len())
 		}
-		r := make([]V, yv.Len())
-		for i, yi := range yv.elts {
-			ri := dropS(S(x.At(i)), yi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r[i] = ri
-		}
-		return newAVu(r)
+		return mapN(yv.Len(), func(i int) V { return dropS(S(x.At(i)), yv.At(i)) })
 	case *D:
 		if x.Len() != yv.Len() {
 			return panicLength("S_S", x.Len(), yv.Len())
@@ -866,16 +848,7 @@ func (ctx *Context) replace(f stringReplacer, x V) V {
 		}
 		return NewV(r)
 	case *AV:
-		r := xv.reuse()
-		for i, xi := range xv.elts {
-			ri := ctx.replace(f, xi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAV(xv, func(xi V) V { return ctx.replace(f, xi) })
 	case *D:
 		return newDictValues(xv.keys, ctx.replace(f, NewV(xv.values)))
 	default:

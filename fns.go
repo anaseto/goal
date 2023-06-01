@@ -150,7 +150,7 @@ func where(x V) V {
 		}
 		return NewAI(r)
 	case *AV:
-		return mapAVc(xv, where)
+		return cmapAV(xv, where)
 	case *D:
 		if xv.values.numeric() {
 			r := where(NewV(xv.values))
@@ -721,18 +721,9 @@ func eval(ctx *Context, x V) V {
 	case S:
 		return evalString(ctx, string(xv))
 	case *AS:
-		r := make([]V, xv.Len())
-		for i, xi := range xv.elts {
-			ri := evalString(ctx, xi)
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r[i] = ri
-		}
-		return canonicalVs(r)
+		return cmapN(xv.Len(), func(i int) V { return evalString(ctx, xv.At(i)) })
 	case *AV:
-		return mapAVc(xv, func(xi V) V { return eval(ctx, xi) })
+		return cmapAV(xv, func(xi V) V { return eval(ctx, xi) })
 	default:
 		return panicType("eval x", "x", x)
 	}

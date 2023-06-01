@@ -218,16 +218,7 @@ func equalABV(x *AB, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x=y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := equalIV(int64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return equalIV(int64(x.At(i)), yi) })
 	default:
 		return panicType("x=y", "y", y)
 	}
@@ -291,16 +282,7 @@ func equalAFV(x *AF, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x=y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := equalFV(float64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return equalFV(float64(x.At(i)), yi) })
 	default:
 		return panicType("x=y", "y", y)
 	}
@@ -364,16 +346,7 @@ func equalAIV(x *AI, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x=y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := equalIV(int64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return equalIV(int64(x.At(i)), yi) })
 	default:
 		return panicType("x=y", "y", y)
 	}
@@ -408,16 +381,7 @@ func equalASV(x *AS, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x=y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := equalSV(S(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return equalSV(S(x.At(i)), yi) })
 	default:
 		return panicType("x=y", "y", y)
 	}
@@ -634,16 +598,7 @@ func lessABV(x *AB, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x<y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := lessIV(int64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return lessIV(int64(x.At(i)), yi) })
 	default:
 		return panicType("x<y", "y", y)
 	}
@@ -707,16 +662,7 @@ func lessAFV(x *AF, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x<y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := lessFV(float64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return lessFV(float64(x.At(i)), yi) })
 	default:
 		return panicType("x<y", "y", y)
 	}
@@ -780,16 +726,7 @@ func lessAIV(x *AI, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x<y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := lessIV(int64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return lessIV(int64(x.At(i)), yi) })
 	default:
 		return panicType("x<y", "y", y)
 	}
@@ -824,16 +761,7 @@ func lessASV(x *AS, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x<y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := lessSV(S(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return lessSV(S(x.At(i)), yi) })
 	default:
 		return panicType("x<y", "y", y)
 	}
@@ -1050,16 +978,7 @@ func moreABV(x *AB, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x>y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := moreIV(int64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return moreIV(int64(x.At(i)), yi) })
 	default:
 		return panicType("x>y", "y", y)
 	}
@@ -1123,16 +1042,7 @@ func moreAFV(x *AF, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x>y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := moreFV(float64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return moreFV(float64(x.At(i)), yi) })
 	default:
 		return panicType("x>y", "y", y)
 	}
@@ -1196,16 +1106,7 @@ func moreAIV(x *AI, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x>y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := moreIV(int64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return moreIV(int64(x.At(i)), yi) })
 	default:
 		return panicType("x>y", "y", y)
 	}
@@ -1240,16 +1141,7 @@ func moreASV(x *AS, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x>y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := moreSV(S(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return moreSV(S(x.At(i)), yi) })
 	default:
 		return panicType("x>y", "y", y)
 	}
@@ -1478,16 +1370,7 @@ func addABV(x *AB, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x+y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := addIV(int64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return addIV(int64(x.At(i)), yi) })
 	default:
 		return panicType("x+y", "y", y)
 	}
@@ -1546,16 +1429,7 @@ func addAFV(x *AF, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x+y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := addFV(float64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return addFV(float64(x.At(i)), yi) })
 	default:
 		return panicType("x+y", "y", y)
 	}
@@ -1614,16 +1488,7 @@ func addAIV(x *AI, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x+y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := addIV(int64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return addIV(int64(x.At(i)), yi) })
 	default:
 		return panicType("x+y", "y", y)
 	}
@@ -1656,16 +1521,7 @@ func addASV(x *AS, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x+y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := addSV(S(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return addSV(S(x.At(i)), yi) })
 	default:
 		return panicType("x+y", "y", y)
 	}
@@ -1870,16 +1726,7 @@ func subtractABV(x *AB, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x-y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := subtractIV(int64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return subtractIV(int64(x.At(i)), yi) })
 	default:
 		return panicType("x-y", "y", y)
 	}
@@ -1938,16 +1785,7 @@ func subtractAFV(x *AF, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x-y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := subtractFV(float64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return subtractFV(float64(x.At(i)), yi) })
 	default:
 		return panicType("x-y", "y", y)
 	}
@@ -2006,16 +1844,7 @@ func subtractAIV(x *AI, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x-y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := subtractIV(int64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return subtractIV(int64(x.At(i)), yi) })
 	default:
 		return panicType("x-y", "y", y)
 	}
@@ -2048,16 +1877,7 @@ func subtractASV(x *AS, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x-y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := subtractSV(S(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return subtractSV(S(x.At(i)), yi) })
 	default:
 		return panicType("x-y", "y", y)
 	}
@@ -2309,16 +2129,7 @@ func multiplyABV(x *AB, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x*y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := multiplyIV(int64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return multiplyIV(int64(x.At(i)), yi) })
 	default:
 		return panicType("x*y", "y", y)
 	}
@@ -2392,16 +2203,7 @@ func multiplyAFV(x *AF, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x*y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := multiplyFV(float64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return multiplyFV(float64(x.At(i)), yi) })
 	default:
 		return panicType("x*y", "y", y)
 	}
@@ -2475,16 +2277,7 @@ func multiplyAIV(x *AI, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x*y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := multiplyIV(int64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return multiplyIV(int64(x.At(i)), yi) })
 	default:
 		return panicType("x*y", "y", y)
 	}
@@ -2543,16 +2336,7 @@ func multiplyASV(x *AS, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x*y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := multiplySV(S(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return multiplySV(S(x.At(i)), yi) })
 	default:
 		return panicType("x*y", "y", y)
 	}
@@ -2730,16 +2514,7 @@ func divideABV(x *AB, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x%y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := divideIV(int64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return divideIV(int64(x.At(i)), yi) })
 	default:
 		return panicType("x%y", "y", y)
 	}
@@ -2798,16 +2573,7 @@ func divideAFV(x *AF, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x%y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := divideFV(float64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return divideFV(float64(x.At(i)), yi) })
 	default:
 		return panicType("x%y", "y", y)
 	}
@@ -2866,16 +2632,7 @@ func divideAIV(x *AI, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x%y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := divideIV(int64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return divideIV(int64(x.At(i)), yi) })
 	default:
 		return panicType("x%y", "y", y)
 	}
@@ -3112,16 +2869,7 @@ func minimumABV(x *AB, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x&y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := minimumIV(int64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return minimumIV(int64(x.At(i)), yi) })
 	default:
 		return panicType("x&y", "y", y)
 	}
@@ -3180,16 +2928,7 @@ func minimumAFV(x *AF, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x&y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := minimumFV(float64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return minimumFV(float64(x.At(i)), yi) })
 	default:
 		return panicType("x&y", "y", y)
 	}
@@ -3248,16 +2987,7 @@ func minimumAIV(x *AI, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x&y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := minimumIV(int64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return minimumIV(int64(x.At(i)), yi) })
 	default:
 		return panicType("x&y", "y", y)
 	}
@@ -3290,16 +3020,7 @@ func minimumASV(x *AS, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x&y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := minimumSV(S(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return minimumSV(S(x.At(i)), yi) })
 	default:
 		return panicType("x&y", "y", y)
 	}
@@ -3536,16 +3257,7 @@ func maximumABV(x *AB, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x|y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := maximumIV(int64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return maximumIV(int64(x.At(i)), yi) })
 	default:
 		return panicType("x|y", "y", y)
 	}
@@ -3604,16 +3316,7 @@ func maximumAFV(x *AF, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x|y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := maximumFV(float64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return maximumFV(float64(x.At(i)), yi) })
 	default:
 		return panicType("x|y", "y", y)
 	}
@@ -3672,16 +3375,7 @@ func maximumAIV(x *AI, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x|y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := maximumIV(int64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return maximumIV(int64(x.At(i)), yi) })
 	default:
 		return panicType("x|y", "y", y)
 	}
@@ -3714,16 +3408,7 @@ func maximumASV(x *AS, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x|y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := maximumSV(S(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return maximumSV(S(x.At(i)), yi) })
 	default:
 		return panicType("x|y", "y", y)
 	}
@@ -3901,16 +3586,7 @@ func arctan2ABV(x *AB, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x atan y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := arctan2IV(int64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return arctan2IV(int64(x.At(i)), yi) })
 	default:
 		return panicType("x atan y", "y", y)
 	}
@@ -3969,16 +3645,7 @@ func arctan2AFV(x *AF, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x atan y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := arctan2FV(float64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return arctan2FV(float64(x.At(i)), yi) })
 	default:
 		return panicType("x atan y", "y", y)
 	}
@@ -4037,16 +3704,7 @@ func arctan2AIV(x *AI, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("x atan y", x.Len(), yv.Len())
 		}
-		r := yv.reuse()
-		for i := range r.elts {
-			ri := arctan2IV(int64(x.At(i)), yv.At(i))
-			if ri.IsPanic() {
-				return ri
-			}
-			ri.MarkImmutable()
-			r.elts[i] = ri
-		}
-		return NewV(r)
+		return mapAVNV(yv, func(i int, yi V) V { return arctan2IV(int64(x.At(i)), yi) })
 	default:
 		return panicType("x atan y", "y", y)
 	}
