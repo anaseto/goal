@@ -424,11 +424,11 @@ func (ctx *Context) applyDictArgs(x *D, arg V, args []V) V {
 		return applyDict(x, arg)
 	}
 	if arg.kind == valNil {
-		return cmapN(x.keys.Len(), func(i int) V { return ctx.applyDictArgs(x, x.keys.VAt(i), args) })
+		return cdoN(x.keys.Len(), func(i int) V { return ctx.applyDictArgs(x, x.keys.VAt(i), args) })
 	}
 	switch argv := arg.bv.(type) {
 	case Array:
-		return cmapN(argv.Len(), func(i int) V { return ctx.applyDictArgs(x, argv.VAt(i), args) })
+		return cdoN(argv.Len(), func(i int) V { return ctx.applyDictArgs(x, argv.VAt(i), args) })
 	default:
 		r := applyDict(x, arg)
 		// applyDict never panics
@@ -490,11 +490,11 @@ func (ctx *Context) applyArrayArgs(x Array, arg V, args []V) V {
 		return applyArray(x, arg)
 	}
 	if arg.kind == valNil {
-		return cmapN(x.Len(), func(i int) V { return ctx.applyArrayArgs(x, NewI(int64(i)), args) })
+		return cdoN(x.Len(), func(i int) V { return ctx.applyArrayArgs(x, NewI(int64(i)), args) })
 	}
 	switch argv := arg.bv.(type) {
 	case Array:
-		return cmapN(argv.Len(), func(i int) V { return ctx.applyArrayArgs(x, argv.VAt(i), args) })
+		return cdoN(argv.Len(), func(i int) V { return ctx.applyArrayArgs(x, argv.VAt(i), args) })
 	default:
 		r := applyArray(x, arg)
 		if r.IsPanic() {

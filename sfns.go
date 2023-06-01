@@ -76,9 +76,9 @@ func rotate(x, y V) V {
 	}
 	switch xv := x.bv.(type) {
 	case *AB:
-		return mapN(xv.Len(), func(i int) V { return rotateI(int64(xv.At(i)), y) })
+		return doN(xv.Len(), func(i int) V { return rotateI(int64(xv.At(i)), y) })
 	case *AI:
-		return mapN(xv.Len(), func(i int) V { return rotateI(xv.At(i), y) })
+		return doN(xv.Len(), func(i int) V { return rotateI(xv.At(i), y) })
 	case *AF:
 		x = toAI(xv)
 		if x.IsPanic() {
@@ -86,7 +86,7 @@ func rotate(x, y V) V {
 		}
 		return rotate(x, y)
 	case *AV:
-		return mapAVV(xv, y, rotate)
+		return imapAV(xv, func(i int, xi V) V { return rotate(xi, y) })
 	default:
 		return panicType("x rotate y", "x", x)
 	}

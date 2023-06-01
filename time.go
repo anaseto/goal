@@ -92,10 +92,10 @@ func doTime(cmd string, y V, layout, loc string) V {
 	}
 	switch yv := y.bv.(type) {
 	case *AB:
-		return cmapN(yv.Len(), func(i int) V { return doTimeI(cmd, int64(yv.elts[i]), layout) })
+		return cdoN(yv.Len(), func(i int) V { return doTimeI(cmd, int64(yv.elts[i]), layout) })
 	case *AI:
 		// doTime: allocations could be optimized depending on cmd.
-		return cmapN(yv.Len(), func(i int) V { return doTimeI(cmd, yv.elts[i], layout) })
+		return cdoN(yv.Len(), func(i int) V { return doTimeI(cmd, yv.elts[i], layout) })
 	case *AF:
 		y = toAI(yv)
 		if y.IsPanic() {
@@ -105,7 +105,7 @@ func doTime(cmd string, y V, layout, loc string) V {
 	case S:
 		return doTimeS(cmd, string(yv), layout, loc)
 	case *AS:
-		return cmapN(yv.Len(), func(i int) V { return doTimeS(cmd, yv.elts[i], layout, loc) })
+		return cdoN(yv.Len(), func(i int) V { return doTimeS(cmd, yv.elts[i], layout, loc) })
 	case *AV:
 		return cmapAV(yv, func(yi V) V { return doTime(cmd, yi, layout, loc) })
 	default:

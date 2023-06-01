@@ -245,7 +245,7 @@ func applyS2Is[I integer](s S, x []I, y V) V {
 		if len(x) != yv.Len() {
 			return panicLength("s[x;y]", len(x), yv.Len())
 		}
-		return mapN(yv.Len(), func(i int) V { return applyS2I(s, int64(x[i]), yv.At(i)) })
+		return doN(yv.Len(), func(i int) V { return applyS2I(s, int64(x[i]), yv.At(i)) })
 	default:
 		return panicType("s[i;y]", "y", y)
 	}
@@ -711,7 +711,7 @@ func dropAS(x *AS, y V) V {
 		if x.Len() != yv.Len() {
 			return panicLength("S_S", x.Len(), yv.Len())
 		}
-		return mapN(yv.Len(), func(i int) V { return dropS(S(x.At(i)), yv.At(i)) })
+		return doN(yv.Len(), func(i int) V { return dropS(S(x.At(i)), yv.At(i)) })
 	case *D:
 		if x.Len() != yv.Len() {
 			return panicLength("S_S", x.Len(), yv.Len())

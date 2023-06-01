@@ -721,7 +721,7 @@ func eval(ctx *Context, x V) V {
 	case S:
 		return evalString(ctx, string(xv))
 	case *AS:
-		return cmapN(xv.Len(), func(i int) V { return evalString(ctx, xv.At(i)) })
+		return cdoN(xv.Len(), func(i int) V { return evalString(ctx, xv.At(i)) })
 	case *AV:
 		return cmapAV(xv, func(xi V) V { return eval(ctx, xi) })
 	default:

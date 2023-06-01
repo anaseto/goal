@@ -186,9 +186,9 @@ genOp:{[opname;opsym] / globals o,op,xt,h
               if yv.Len() != xv.Len() {
                       return panicLength("x${op}y", xv.Len(), yv.Len())
               }/
-  h say "return mapAVArray(xv, yv, $o)"
+  h say "return imapAV(xv, func(i int, xi V) V { return $o(xi, yv.VAt(i))})"
   h say `}`
-  h say "return mapAVV(xv, y, $o)"
+  h say "return imapAV(xv, func(i int, xi V) V { return $o(xi, y)})"
   h say "\n"_qq/
     case *D:
         yv, ok := y.bv.(*D)
@@ -362,7 +362,7 @@ doXdAV:{
             if x.Len() != yv.Len() {
                     return panicLength("x${op}y", x.Len(), yv.Len())
             }
-            return mapAVNV(yv, func(i int, yi V) V { return $o${nxt}V($xct(x.At(i)), yi) })
+            return imapAV(yv, func(i int, yi V) V { return $o${nxt}V($xct(x.At(i)), yi) })
     default:
             return panicType("x${op}y", "y", y)/
 }

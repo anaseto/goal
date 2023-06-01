@@ -856,7 +856,7 @@ func mapAV(x *AV, f func(V) V) V {
 	return NewV(r)
 }
 
-func mapAVNV(x *AV, f func(int, V) V) V {
+func imapAV(x *AV, f func(int, V) V) V {
 	r := x.reuse()
 	for i, xi := range x.elts {
 		ri := f(i, xi)
@@ -882,33 +882,7 @@ func cmapAV(x *AV, f func(V) V) V {
 	return canonicalAV(r)
 }
 
-func mapAVV(x *AV, y V, f func(V, V) V) V {
-	r := x.reuse()
-	for i, xi := range x.elts {
-		ri := f(xi, y)
-		if ri.IsPanic() {
-			return ri
-		}
-		ri.MarkImmutable()
-		r.elts[i] = ri
-	}
-	return NewV(r)
-}
-
-func mapAVArray(x *AV, y Array, f func(V, V) V) V {
-	r := x.reuse()
-	for i, xi := range x.elts {
-		ri := f(xi, y.VAt(i))
-		if ri.IsPanic() {
-			return ri
-		}
-		ri.MarkImmutable()
-		r.elts[i] = ri
-	}
-	return NewV(r)
-}
-
-func cmapN(n int, f func(int) V) V {
+func cdoN(n int, f func(int) V) V {
 	r := make([]V, n)
 	for i := 0; i < n; i++ {
 		ri := f(i)
@@ -921,7 +895,7 @@ func cmapN(n int, f func(int) V) V {
 	return canonicalVs(r)
 }
 
-func mapN(n int, f func(int) V) V {
+func doN(n int, f func(int) V) V {
 	r := make([]V, n)
 	for i := 0; i < n; i++ {
 		ri := f(i)
