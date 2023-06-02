@@ -1,3 +1,7 @@
+# v? ?
+
+* Fix stability of `>X` and `>d`.
+
 # v0.19.0 2023-06-01
 
 * Flip `+x` now extends array elements (like in take `i#`) to maximum length if

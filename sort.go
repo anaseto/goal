@@ -277,22 +277,6 @@ func ascendAI(ctx *Context, xv *AI) V {
 	return NewAB(p.Perm)
 }
 
-func sortBy(ctx *Context, keys, values Array) *D {
-	a := ascendArray(ctx, values)
-	switch av := a.bv.(type) {
-	case *AB:
-		nk := keys.atBytes(av.elts)
-		nv := values.atBytes(av.elts)
-		return &D{keys: nk, values: nv}
-	case *AI:
-		nk := keys.atInt64s(av.elts)
-		nv := values.atInt64s(av.elts)
-		return &D{keys: nk, values: nv}
-	default:
-		panic("sortBy")
-	}
-}
-
 func ascendArray(ctx *Context, x Array) V {
 	switch xv := x.(type) {
 	case *AB:
@@ -327,21 +311,49 @@ func sortUpDict(ctx *Context, d *D) *D {
 	return d
 }
 
+func sortBy(ctx *Context, keys, values Array) *D {
+	a := ascendArray(ctx, values)
+	switch av := a.bv.(type) {
+	case *AB:
+		nk := keys.atBytes(av.elts)
+		nv := values.atBytes(av.elts)
+		return &D{keys: nk, values: nv}
+	case *AI:
+		nk := keys.atInt64s(av.elts)
+		nv := values.atInt64s(av.elts)
+		return &D{keys: nk, values: nv}
+	default:
+		panic("sortBy")
+	}
+}
+
 // descend returns >x.
 func descend(ctx *Context, x V) V {
 	switch xv := x.bv.(type) {
 	case Array:
-		r := ascendArray(ctx, xv).bv.(Array)
-		reverseMut(r)
-		return NewV(r)
+		return descendArray(ctx, xv)
 	case *D:
-		d := sortUpDict(ctx, xv)
-		reverseMut(d.keys)
-		reverseMut(d.values)
-		return NewV(d)
+		return NewV(sortDownDict(ctx, xv))
 	default:
 		return panicType(">X", "X", x)
 	}
+}
+
+func descendArray(ctx *Context, x Array) V {
+	x = x.sclone()
+	reverseMut(x)
+	r := ascendArray(ctx, x).bv.(Array)
+	reverseMut(r)
+	return subtract(NewI(int64(r.Len())-1), NewV(r))
+}
+
+func sortDownDict(ctx *Context, d *D) *D {
+	d.values.IncrRC()
+	dsc := descendArray(ctx, d.values).bv.(*AI) // subtract nevers returns *AB
+	d.values.DecrRC()
+	nk := d.keys.atInt64s(dsc.elts)
+	nv := d.values.atInt64s(dsc.elts)
+	return &D{keys: nk, values: nv}
 }
 
 // search implements x$y.
