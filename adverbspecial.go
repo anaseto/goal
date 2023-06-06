@@ -53,11 +53,7 @@ func formatFloat(f float64, prec int) string {
 	case math.IsNaN(f):
 		return "0n"
 	case isI(f):
-		p := 1
-		if prec != -1 {
-			p = prec
-		}
-		return strconv.FormatFloat(f, 'f', p, 64)
+		return strconv.FormatFloat(f, 'f', 1, 64)
 	default:
 		return strconv.FormatFloat(f, 'g', prec, 64)
 	}

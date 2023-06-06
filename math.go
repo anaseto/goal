@@ -20,7 +20,7 @@ func isNaN(x V) V {
 		return NewI(b2I(false))
 	}
 	if x.IsF() {
-		return NewF(b2F(math.IsNaN(x.F())))
+		return NewI(b2I(math.IsNaN(x.F())))
 	}
 	switch xv := x.bv.(type) {
 	case *AB:
