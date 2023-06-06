@@ -1,5 +1,7 @@
 # v? ?
 
+* Format floating point integer values with a trailing `.0`, so that the
+  numeric type can be retrieved if parsed again.
 * Fix stability of `>X` and `>d`.
 
 # v0.19.0 2023-06-01

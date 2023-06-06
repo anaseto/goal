@@ -38,9 +38,29 @@ func stringIs[T integer](x []T) []string {
 func stringFloat64s(x []float64, prec int) []string {
 	r := make([]string, len(x))
 	for i, xi := range x {
-		r[i] = strconv.FormatFloat(xi, 'g', prec, 64)
+		r[i] = formatFloat(xi, prec)
 	}
 	return r
+}
+
+func formatFloat(f float64, prec int) string {
+	switch {
+	case math.IsInf(f, 0):
+		if f >= 0 {
+			return "0w"
+		}
+		return "-0w"
+	case math.IsNaN(f):
+		return "0n"
+	case isI(f):
+		p := 1
+		if prec != -1 {
+			p = prec
+		}
+		return strconv.FormatFloat(f, 'f', p, 64)
+	default:
+		return strconv.FormatFloat(f, 'g', prec, 64)
+	}
 }
 
 func stringVs(x []V, ctx *Context) []string {

@@ -16,6 +16,12 @@ func appendFloat(ctx *Context, dst []byte, f float64) []byte {
 		return append(dst, "-0w"...)
 	case math.IsNaN(f):
 		return append(dst, "0n"...)
+	case isI(f):
+		p := 1
+		if ctx.Prec != -1 {
+			p = ctx.Prec
+		}
+		return strconv.AppendFloat(dst, f, 'f', p, 64)
 	default:
 		return strconv.AppendFloat(dst, f, 'g', ctx.Prec, 64)
 	}
