@@ -246,13 +246,17 @@ doxY:{[yt;e;t]
   rt:t2go t
   rs:?[yt~t;"r := yv.reuse()";"r := &A${t}{elts: make([]$rt, yv.Len())}"]
   rs:?[op¿cmps;"$rs; r.flags |= flagBool";rs]
-  rs:?[(xt¿ntypes)&op¿"+""&""|";"asc := ascending(yv); $rs; if asc { r.flags |= flagAscending }";rs]
+  rs:?[(xt¿ntypes)&op~"+";"asc := ascending(yv); $rs";rs]
+  rs:?[(xt¿ntypes)&op¿"&""|";"asc := ascending(yv); $rs";rs]
+  asc:""
+  asc:?[(xt¿ntypes)&op~"+";";if asc && ascFirstLast(r.elts) { r.flags |= flagAscending }";asc]
+  asc:?[(xt¿ntypes)&op¿"&""|";";if asc { r.flags |= flagAscending }";asc]
   "\n"_qq/
     case *A$yt:
         $rs
         for i, yi := range yv.elts {
                 r.elts[i] = $rt($e)
-        }
+        } $asc
         return NewV(r)/
 }
 doxdAV:{
@@ -289,15 +293,19 @@ doX:{
 doXUy:{[yt;e;t]
   e:doExpr[e;t2go yt;"xi";qq/y.$yt()/]
   rt:t2go t
-  rs:?[xt~t;"x.reuse()";"&A${t}{elts: make([]$rt, x.Len())}"]
+  rs:?[xt~t;"r := x.reuse()";"r := &A${t}{elts: make([]$rt, x.Len())}"]
   rs:?[op¿cmps;"$rs; r.flags |= flagBool";rs]
-  / TODO: add flagBool in & and | when possible
+  rs:?[(yt¿ntypes)&op¿"&""|";"asc := ascending(x); $rs";rs]
+  rs:?[(yt¿ntypes)&op¿"+""-";"asc := ascending(x); $rs";rs]
+  asc:""
+  asc:?[(yt¿ntypes)&op¿"&""|";";if asc { r.flags |= flagAscending }";asc]
+  asc:?[(yt¿ntypes)&op¿"+""-";";if asc && ascFirstLast(r.elts) { r.flags |= flagAscending }";asc]
   "\n"_qq/
       if y.Is$yt() {
-          r := $rs
+          $rs
           for i, xi := range x.elts {
                   r.elts[i] = $rt($e)
-          }
+          } $asc
           return NewV(r)
       }/
 }
@@ -306,7 +314,6 @@ doXBy:{[yt;e;t]
   rt:t2go t
   rs:?[xt~t;"r := x.reuse()";"r := &A${t}{elts: make([]$rt, x.Len())}"]
   rs:?[op¿cmps;"$rs; r.flags |= flagBool";rs]
-  rs:?[(yt¿ntypes)&op¿"+""-""&""|";"asc := ascending(x); $rs; if asc { r.flags |= flagAscending }";rs]
   / currently, yt~"S" in thoses cases
   "\n"_qq/
       case $yt:

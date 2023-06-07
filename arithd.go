@@ -1203,31 +1203,31 @@ func addFV(x float64, y V) V {
 	case *AB:
 		asc := ascending(yv)
 		r := &AF{elts: make([]float64, yv.Len())}
-		if asc {
-			r.flags |= flagAscending
-		}
 		for i, yi := range yv.elts {
 			r.elts[i] = float64(x + float64(yi))
+		}
+		if asc && ascFirstLast(r.elts) {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	case *AF:
 		asc := ascending(yv)
 		r := yv.reuse()
-		if asc {
-			r.flags |= flagAscending
-		}
 		for i, yi := range yv.elts {
 			r.elts[i] = float64(x + yi)
+		}
+		if asc && ascFirstLast(r.elts) {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	case *AI:
 		asc := ascending(yv)
 		r := &AF{elts: make([]float64, yv.Len())}
-		if asc {
-			r.flags |= flagAscending
-		}
 		for i, yi := range yv.elts {
 			r.elts[i] = float64(x + float64(yi))
+		}
+		if asc && ascFirstLast(r.elts) {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	case *D:
@@ -1254,31 +1254,31 @@ func addIV(x int64, y V) V {
 	case *AB:
 		asc := ascending(yv)
 		r := &AI{elts: make([]int64, yv.Len())}
-		if asc {
-			r.flags |= flagAscending
-		}
 		for i, yi := range yv.elts {
 			r.elts[i] = int64(x + int64(yi))
+		}
+		if asc && ascFirstLast(r.elts) {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	case *AF:
 		asc := ascending(yv)
 		r := yv.reuse()
-		if asc {
-			r.flags |= flagAscending
-		}
 		for i, yi := range yv.elts {
 			r.elts[i] = float64(float64(x) + yi)
+		}
+		if asc && ascFirstLast(r.elts) {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	case *AI:
 		asc := ascending(yv)
 		r := yv.reuse()
-		if asc {
-			r.flags |= flagAscending
-		}
 		for i, yi := range yv.elts {
 			r.elts[i] = int64(x + yi)
+		}
+		if asc && ascFirstLast(r.elts) {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	case *D:
@@ -1319,16 +1319,24 @@ func addSV(x S, y V) V {
 
 func addABV(x *AB, y V) V {
 	if y.IsI() {
+		asc := ascending(x)
 		r := &AI{elts: make([]int64, x.Len())}
 		for i, xi := range x.elts {
 			r.elts[i] = int64(int64(xi) + int64(y.I()))
 		}
+		if asc && ascFirstLast(r.elts) {
+			r.flags |= flagAscending
+		}
 		return NewV(r)
 	}
 	if y.IsF() {
+		asc := ascending(x)
 		r := &AF{elts: make([]float64, x.Len())}
 		for i, xi := range x.elts {
 			r.elts[i] = float64(float64(xi) + float64(y.F()))
+		}
+		if asc && ascFirstLast(r.elts) {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	}
@@ -1378,16 +1386,24 @@ func addABV(x *AB, y V) V {
 
 func addAFV(x *AF, y V) V {
 	if y.IsI() {
+		asc := ascending(x)
 		r := x.reuse()
 		for i, xi := range x.elts {
 			r.elts[i] = float64(xi + float64(int64(y.I())))
 		}
+		if asc && ascFirstLast(r.elts) {
+			r.flags |= flagAscending
+		}
 		return NewV(r)
 	}
 	if y.IsF() {
+		asc := ascending(x)
 		r := x.reuse()
 		for i, xi := range x.elts {
 			r.elts[i] = float64(xi + float64(y.F()))
+		}
+		if asc && ascFirstLast(r.elts) {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	}
@@ -1437,16 +1453,24 @@ func addAFV(x *AF, y V) V {
 
 func addAIV(x *AI, y V) V {
 	if y.IsI() {
+		asc := ascending(x)
 		r := x.reuse()
 		for i, xi := range x.elts {
 			r.elts[i] = int64(xi + int64(y.I()))
 		}
+		if asc && ascFirstLast(r.elts) {
+			r.flags |= flagAscending
+		}
 		return NewV(r)
 	}
 	if y.IsF() {
+		asc := ascending(x)
 		r := &AF{elts: make([]float64, x.Len())}
 		for i, xi := range x.elts {
 			r.elts[i] = float64(float64(xi) + float64(y.F()))
+		}
+		if asc && ascFirstLast(r.elts) {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	}
@@ -1675,16 +1699,24 @@ func subtractSV(x S, y V) V {
 
 func subtractABV(x *AB, y V) V {
 	if y.IsI() {
+		asc := ascending(x)
 		r := &AI{elts: make([]int64, x.Len())}
 		for i, xi := range x.elts {
 			r.elts[i] = int64(int64(xi) - int64(y.I()))
 		}
+		if asc && ascFirstLast(r.elts) {
+			r.flags |= flagAscending
+		}
 		return NewV(r)
 	}
 	if y.IsF() {
+		asc := ascending(x)
 		r := &AF{elts: make([]float64, x.Len())}
 		for i, xi := range x.elts {
 			r.elts[i] = float64(float64(xi) - float64(y.F()))
+		}
+		if asc && ascFirstLast(r.elts) {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	}
@@ -1734,16 +1766,24 @@ func subtractABV(x *AB, y V) V {
 
 func subtractAFV(x *AF, y V) V {
 	if y.IsI() {
+		asc := ascending(x)
 		r := x.reuse()
 		for i, xi := range x.elts {
 			r.elts[i] = float64(xi - float64(int64(y.I())))
 		}
+		if asc && ascFirstLast(r.elts) {
+			r.flags |= flagAscending
+		}
 		return NewV(r)
 	}
 	if y.IsF() {
+		asc := ascending(x)
 		r := x.reuse()
 		for i, xi := range x.elts {
 			r.elts[i] = float64(xi - float64(y.F()))
+		}
+		if asc && ascFirstLast(r.elts) {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	}
@@ -1793,16 +1833,24 @@ func subtractAFV(x *AF, y V) V {
 
 func subtractAIV(x *AI, y V) V {
 	if y.IsI() {
+		asc := ascending(x)
 		r := x.reuse()
 		for i, xi := range x.elts {
 			r.elts[i] = int64(xi - int64(y.I()))
 		}
+		if asc && ascFirstLast(r.elts) {
+			r.flags |= flagAscending
+		}
 		return NewV(r)
 	}
 	if y.IsF() {
+		asc := ascending(x)
 		r := &AF{elts: make([]float64, x.Len())}
 		for i, xi := range x.elts {
 			r.elts[i] = float64(float64(xi) - float64(y.F()))
+		}
+		if asc && ascFirstLast(r.elts) {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	}
@@ -2694,31 +2742,31 @@ func minimumFV(x float64, y V) V {
 	case *AB:
 		asc := ascending(yv)
 		r := &AF{elts: make([]float64, yv.Len())}
-		if asc {
-			r.flags |= flagAscending
-		}
 		for i, yi := range yv.elts {
 			r.elts[i] = float64(math.Min(x, float64(yi)))
+		}
+		if asc {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	case *AF:
 		asc := ascending(yv)
 		r := yv.reuse()
-		if asc {
-			r.flags |= flagAscending
-		}
 		for i, yi := range yv.elts {
 			r.elts[i] = float64(math.Min(x, float64(yi)))
+		}
+		if asc {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	case *AI:
 		asc := ascending(yv)
 		r := &AF{elts: make([]float64, yv.Len())}
-		if asc {
-			r.flags |= flagAscending
-		}
 		for i, yi := range yv.elts {
 			r.elts[i] = float64(math.Min(x, float64(yi)))
+		}
+		if asc {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	case *D:
@@ -2745,31 +2793,31 @@ func minimumIV(x int64, y V) V {
 	case *AB:
 		asc := ascending(yv)
 		r := &AI{elts: make([]int64, yv.Len())}
-		if asc {
-			r.flags |= flagAscending
-		}
 		for i, yi := range yv.elts {
 			r.elts[i] = int64(minI(x, int64(yi)))
+		}
+		if asc {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	case *AF:
 		asc := ascending(yv)
 		r := yv.reuse()
-		if asc {
-			r.flags |= flagAscending
-		}
 		for i, yi := range yv.elts {
 			r.elts[i] = float64(math.Min(float64(x), yi))
+		}
+		if asc {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	case *AI:
 		asc := ascending(yv)
 		r := yv.reuse()
-		if asc {
-			r.flags |= flagAscending
-		}
 		for i, yi := range yv.elts {
 			r.elts[i] = int64(minI(x, yi))
+		}
+		if asc {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	case *D:
@@ -2810,16 +2858,24 @@ func minimumSV(x S, y V) V {
 
 func minimumABV(x *AB, y V) V {
 	if y.IsI() {
+		asc := ascending(x)
 		r := &AI{elts: make([]int64, x.Len())}
 		for i, xi := range x.elts {
 			r.elts[i] = int64(minI(int64(xi), int64(y.I())))
 		}
+		if asc {
+			r.flags |= flagAscending
+		}
 		return NewV(r)
 	}
 	if y.IsF() {
+		asc := ascending(x)
 		r := &AF{elts: make([]float64, x.Len())}
 		for i, xi := range x.elts {
 			r.elts[i] = float64(math.Min(float64(xi), float64(y.F())))
+		}
+		if asc {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	}
@@ -2877,16 +2933,24 @@ func minimumABV(x *AB, y V) V {
 
 func minimumAFV(x *AF, y V) V {
 	if y.IsI() {
+		asc := ascending(x)
 		r := x.reuse()
 		for i, xi := range x.elts {
 			r.elts[i] = float64(math.Min(xi, float64(int64(y.I()))))
 		}
+		if asc {
+			r.flags |= flagAscending
+		}
 		return NewV(r)
 	}
 	if y.IsF() {
+		asc := ascending(x)
 		r := x.reuse()
 		for i, xi := range x.elts {
 			r.elts[i] = float64(math.Min(xi, float64(float64(y.F()))))
+		}
+		if asc {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	}
@@ -2936,16 +3000,24 @@ func minimumAFV(x *AF, y V) V {
 
 func minimumAIV(x *AI, y V) V {
 	if y.IsI() {
+		asc := ascending(x)
 		r := x.reuse()
 		for i, xi := range x.elts {
 			r.elts[i] = int64(minI(xi, int64(y.I())))
 		}
+		if asc {
+			r.flags |= flagAscending
+		}
 		return NewV(r)
 	}
 	if y.IsF() {
+		asc := ascending(x)
 		r := &AF{elts: make([]float64, x.Len())}
 		for i, xi := range x.elts {
 			r.elts[i] = float64(math.Min(float64(xi), float64(y.F())))
+		}
+		if asc {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	}
@@ -3082,31 +3154,31 @@ func maximumFV(x float64, y V) V {
 	case *AB:
 		asc := ascending(yv)
 		r := &AF{elts: make([]float64, yv.Len())}
-		if asc {
-			r.flags |= flagAscending
-		}
 		for i, yi := range yv.elts {
 			r.elts[i] = float64(math.Max(x, float64(yi)))
+		}
+		if asc {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	case *AF:
 		asc := ascending(yv)
 		r := yv.reuse()
-		if asc {
-			r.flags |= flagAscending
-		}
 		for i, yi := range yv.elts {
 			r.elts[i] = float64(math.Max(x, float64(yi)))
+		}
+		if asc {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	case *AI:
 		asc := ascending(yv)
 		r := &AF{elts: make([]float64, yv.Len())}
-		if asc {
-			r.flags |= flagAscending
-		}
 		for i, yi := range yv.elts {
 			r.elts[i] = float64(math.Max(x, float64(yi)))
+		}
+		if asc {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	case *D:
@@ -3133,31 +3205,31 @@ func maximumIV(x int64, y V) V {
 	case *AB:
 		asc := ascending(yv)
 		r := &AI{elts: make([]int64, yv.Len())}
-		if asc {
-			r.flags |= flagAscending
-		}
 		for i, yi := range yv.elts {
 			r.elts[i] = int64(maxI(x, int64(yi)))
+		}
+		if asc {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	case *AF:
 		asc := ascending(yv)
 		r := yv.reuse()
-		if asc {
-			r.flags |= flagAscending
-		}
 		for i, yi := range yv.elts {
 			r.elts[i] = float64(math.Max(float64(x), yi))
+		}
+		if asc {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	case *AI:
 		asc := ascending(yv)
 		r := yv.reuse()
-		if asc {
-			r.flags |= flagAscending
-		}
 		for i, yi := range yv.elts {
 			r.elts[i] = int64(maxI(x, yi))
+		}
+		if asc {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	case *D:
@@ -3198,16 +3270,24 @@ func maximumSV(x S, y V) V {
 
 func maximumABV(x *AB, y V) V {
 	if y.IsI() {
+		asc := ascending(x)
 		r := &AI{elts: make([]int64, x.Len())}
 		for i, xi := range x.elts {
 			r.elts[i] = int64(maxI(int64(xi), int64(y.I())))
 		}
+		if asc {
+			r.flags |= flagAscending
+		}
 		return NewV(r)
 	}
 	if y.IsF() {
+		asc := ascending(x)
 		r := &AF{elts: make([]float64, x.Len())}
 		for i, xi := range x.elts {
 			r.elts[i] = float64(math.Max(float64(xi), float64(y.F())))
+		}
+		if asc {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	}
@@ -3265,16 +3345,24 @@ func maximumABV(x *AB, y V) V {
 
 func maximumAFV(x *AF, y V) V {
 	if y.IsI() {
+		asc := ascending(x)
 		r := x.reuse()
 		for i, xi := range x.elts {
 			r.elts[i] = float64(math.Max(xi, float64(int64(y.I()))))
 		}
+		if asc {
+			r.flags |= flagAscending
+		}
 		return NewV(r)
 	}
 	if y.IsF() {
+		asc := ascending(x)
 		r := x.reuse()
 		for i, xi := range x.elts {
 			r.elts[i] = float64(math.Max(xi, float64(float64(y.F()))))
+		}
+		if asc {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	}
@@ -3324,16 +3412,24 @@ func maximumAFV(x *AF, y V) V {
 
 func maximumAIV(x *AI, y V) V {
 	if y.IsI() {
+		asc := ascending(x)
 		r := x.reuse()
 		for i, xi := range x.elts {
 			r.elts[i] = int64(maxI(xi, int64(y.I())))
 		}
+		if asc {
+			r.flags |= flagAscending
+		}
 		return NewV(r)
 	}
 	if y.IsF() {
+		asc := ascending(x)
 		r := &AF{elts: make([]float64, x.Len())}
 		for i, xi := range x.elts {
 			r.elts[i] = float64(math.Max(float64(xi), float64(y.F())))
+		}
+		if asc {
+			r.flags |= flagAscending
 		}
 		return NewV(r)
 	}

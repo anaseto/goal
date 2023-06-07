@@ -932,3 +932,10 @@ func isFlat(x []V) bool {
 	}
 	return true
 }
+
+func ascFirstLast[T ordered](x []T) bool {
+	if len(x) < 2 {
+		return true
+	}
+	return x[0] < x[len(x)-1]
+}
