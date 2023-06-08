@@ -334,6 +334,9 @@ func (ctx *Context) deepAmend3array(x Array, y, f V) (Array, error) {
 	if y.IsI() {
 		return ctx.amend3arrayI(x, y.I(), f)
 	}
+	if isStar(y) {
+		return ctx.amend3array(x, enumI(int64(x.Len())), f)
+	}
 	yv := y.bv.(Array)
 	if yv.Len() == 0 {
 		return ctx.amend3array(x, enumI(int64(x.Len())), f)
@@ -344,13 +347,7 @@ func (ctx *Context) deepAmend3array(x Array, y, f V) (Array, error) {
 func (ctx *Context) deepAmend3rec(x Array, y0 V, y Array, f V) (Array, error) {
 	var err error
 	if isStar(y0) {
-		for i := 0; i < x.Len(); i++ {
-			x, err = ctx.deepAmend3rec(x, NewI(int64(i)), y, f)
-			if err != nil {
-				return x, err
-			}
-		}
-		return x, nil
+		return ctx.deepAmend3rec(x, enumI(int64(x.Len())), y, f)
 	}
 	if y.Len() == 0 {
 		return ctx.amend3array(x, y0, f)
@@ -404,6 +401,9 @@ func (ctx *Context) deepAmend4array(x Array, y, f, z V) (Array, error) {
 	if y.IsI() {
 		return ctx.amend4arrayI(x, y.I(), f, z)
 	}
+	if isStar(y) {
+		return ctx.amend4array(x, enumI(int64(x.Len())), f, z)
+	}
 	yv := y.bv.(Array)
 	if yv.Len() == 0 {
 		return ctx.amend4array(x, enumI(int64(x.Len())), f, z)
@@ -414,13 +414,7 @@ func (ctx *Context) deepAmend4array(x Array, y, f, z V) (Array, error) {
 func (ctx *Context) deepAmend4rec(x Array, y0 V, y Array, f, z V) (Array, error) {
 	var err error
 	if isStar(y0) {
-		for i := 0; i < x.Len(); i++ {
-			x, err = ctx.deepAmend4rec(x, NewI(int64(i)), y, f, z)
-			if err != nil {
-				return x, err
-			}
-		}
-		return x, nil
+		return ctx.deepAmend4rec(x, enumI(int64(x.Len())), y, f, z)
 	}
 	if y.Len() == 0 {
 		return ctx.amend4array(x, y0, f, z)
