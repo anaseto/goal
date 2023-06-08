@@ -2,6 +2,7 @@
 
 * Format floating point integer values with a trailing `.0`, so that the
   numeric type can be retrieved if parsed again.
+* Fix unhandled lone `*` in deep amend, like in `.[x;*;y;z]`.
 * Fix stability of `>X` and `>d`.
 * Fix ascending flag preservation for `I+i`, `i+I`, and `I-i` in case of
   integer overflow by checking that first element is still smaller than last.
