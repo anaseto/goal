@@ -378,7 +378,7 @@ func (ctx *Context) deepAmend3rec(x Array, y0 V, y Array, f V) (Array, error) {
 	return x, nil
 }
 
-// deepAmend4 implements .[X;y;f].
+// deepAmend4 implements .[X;y;f;z].
 func (ctx *Context) deepAmend4(x, y, f, z V) V {
 	x = x.Clone()
 	switch xv := x.bv.(type) {

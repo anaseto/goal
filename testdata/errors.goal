@@ -1092,3 +1092,24 @@ rx/[a\O/ / error parsing regexp
 .[(1+5 6;8 9);(0 1 0;1;1;1);10+] / out of depth
 @[1 2 3;(0 5;0);~] / out of bounds
 @[1 2 3;5;:;4] / out of bounds
+(rx/\s/)^2 3 / type
+.[rx/\s/;2;:;5] / type
+.[!2 3;2 "a";:;5 3] / type
+@[1 2 3;(0 5;0);:;1] / out of bounds
+@[1 2 3;(0 5;0);:;1 2] / out of bounds
+(1 2;3 4)[+;3] / type
+&"a""b"!1.5 1 / non-integer
+{0.5 1}#2 3 / non-integer
+{0.5 1}^2 3 / non-integer
+{0.5 1}^"a""b"!2 3 / non-integer
+{0.5}^2 3 / non-integer
+{0 1 2}#"a""b"!1 2 / length
+{0 -1}#1 2 / negative
+{0 -1}#1 -2 / negative
+{0 -1}#1 -2.5 / negative
+{0 -1}#2"b" / negative
+{0 -1}#"a"1!2"b" / negative
+@["a"+;1;2+] / type
+@[8 4 5;1.5 2;+;10] / non-integer
+@[1 2 3;1.5;"a"*] / non-integer
+@[1 2 3;(*;1.5);"a"*] / non-integer

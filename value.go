@@ -181,14 +181,6 @@ func (x V) IsBV() bool {
 	return x.kind == valBoxed
 }
 
-func (x V) isArray() bool {
-	if x.kind != valBoxed {
-		return false
-	}
-	_, ok := x.bv.(Array)
-	return ok
-}
-
 // IsFunction returns true if the value is some kind of function.
 func (x V) IsFunction() bool {
 	switch x.kind {
