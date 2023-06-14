@@ -1161,7 +1161,7 @@ func (c *compiler) doApplyN(a *astApplyN, n int) error {
 func (c *compiler) doCond(a *astApplyN, n, pos int) error {
 	body := a.Args
 	if len(body)%2 != 1 {
-		return c.errorf("conditional ?[if;then;else] with even number of statements")
+		return c.errorf("conditional ?[if;then;else] with even number of statements: %d", len(body))
 	}
 	cond := body[0]
 	if !nonEmpty(cond) {
