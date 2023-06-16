@@ -31,37 +31,37 @@ func appendInt(dst []byte, i int64) []byte {
 }
 
 // Sprint returns a matching program string representation of the value.
-func (v V) Sprint(ctx *Context) string {
+func (x V) Sprint(ctx *Context) string {
 	// NOTE: optimize allocation away using unsafe. Caveat: Append should
 	// never increase the number of references to the dst slice for such an
 	// optimization to be correct. TODO: This code should be upgraded to
 	// use unsafe.String at a later time.
-	b := v.Append(ctx, nil)
+	b := x.Append(ctx, nil)
 	return *(*string)(unsafe.Pointer(&b))
 }
 
 // Append appends a unique program representation of the value to dst, and
 // returns the extended buffer.
-func (v V) Append(ctx *Context, dst []byte) []byte {
-	switch v.kind {
+func (x V) Append(ctx *Context, dst []byte) []byte {
+	switch x.kind {
 	case valInt:
-		return appendInt(dst, v.I())
+		return appendInt(dst, x.I())
 	case valFloat:
-		return appendFloat(ctx, dst, v.F())
+		return appendFloat(ctx, dst, x.F())
 	case valVariadic:
-		if v.uv >= int64(len(ctx.variadicsNames)) {
+		if x.uv >= int64(len(ctx.variadicsNames)) {
 			// Does not happen with main context.
-			return append(dst, fmt.Sprintf("·v[%d]", v.uv)...)
+			return append(dst, fmt.Sprintf("·v[%d]", x.uv)...)
 		}
-		return append(dst, ctx.variadicsNames[v.uv]...)
+		return append(dst, ctx.variadicsNames[x.uv]...)
 	case valLambda:
-		if v.uv >= int64(len(ctx.lambdas)) {
+		if x.uv >= int64(len(ctx.lambdas)) {
 			// Does not happen with main context.
-			return append(dst, fmt.Sprintf("·l[%d]", v.uv)...)
+			return append(dst, fmt.Sprintf("·l[%d]", x.uv)...)
 		}
-		return append(dst, ctx.lambdas[v.uv].Source...)
+		return append(dst, ctx.lambdas[x.uv].Source...)
 	case valBoxed, valPanic:
-		return v.bv.Append(ctx, dst)
+		return x.bv.Append(ctx, dst)
 	default:
 		// Could happen for nil values, but they are not normally
 		// created from goal programs.

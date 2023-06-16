@@ -55,14 +55,14 @@ func (x *AV) Swap(i, j int) {
 }
 
 // Less satisfies the specification of sort.Interface.
-func (x *D) Less(i, j int) bool {
-	return x.values.Less(i, j)
+func (d *D) Less(i, j int) bool {
+	return d.values.Less(i, j)
 }
 
 // Swap satisfies the specification of sort.Interface.
-func (x *D) Swap(i, j int) {
-	x.keys.Swap(i, j)
-	x.values.Swap(i, j)
+func (d *D) Swap(i, j int) {
+	d.keys.Swap(i, j)
+	d.values.Swap(i, j)
 }
 
 // sortUp returns ^x.
