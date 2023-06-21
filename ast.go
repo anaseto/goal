@@ -39,6 +39,12 @@ type astReturn struct {
 	OnError bool
 }
 
+// astLog represents a debugging \expr statement.
+type astLog struct {
+	Expr expr
+	Pos  int
+}
+
 // astAssign represents an assignment x:y.
 type astAssign struct {
 	Name   string // x
@@ -151,6 +157,7 @@ type astNop struct{}
 func (es exprs) node()                {}
 func (t *astToken) node()             {}
 func (a *astReturn) node()            {}
+func (a *astLog) node()               {}
 func (a *astAssign) node()            {}
 func (a *astListAssign) node()        {}
 func (a *astAssignOp) node()          {}

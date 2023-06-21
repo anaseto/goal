@@ -30,6 +30,7 @@ package goal
 import (
 	"errors"
 	"fmt"
+	"io"
 	"math/rand"
 	"strings"
 )
@@ -75,14 +76,15 @@ type Context struct {
 	rand *rand.Rand
 
 	// miscellaneous
-	assigned   bool    // last instruction was opAssignGlobal
-	compactFmt bool    // compact value sprint formatting
 	sortBuf32  []int32 // radix sort buffer
 	sortBuf16  []int16 // radix sort buffer
 	sortBuf8   []int8  // radix sort buffer
+	assigned   bool    // last instruction was opAssignGlobal
+	compactFmt bool    // compact value sprint formatting
 
-	Prec int    // floating point formatting precision (default: -1)
-	OFS  string // output field separator (default: " ")
+	Log  io.Writer // output writer for logging with \expr and rt.log
+	Prec int       // floating point formatting precision (default: -1)
+	OFS  string    // output field separator (default: " ")
 }
 
 // NewContext returns a new context for compiling and interpreting code, with
@@ -395,6 +397,7 @@ func (ctx *Context) derive() *Context {
 	nctx.keywords = ctx.keywords
 	nctx.vNames = ctx.vNames
 	nctx.rand = ctx.rand
+	nctx.Log = ctx.Log
 
 	nctx.constants = ctx.constants
 	nctx.sconstants = ctx.sconstants

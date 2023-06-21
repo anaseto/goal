@@ -12,6 +12,7 @@ import (
 
 func main() {
 	ctx := goal.NewContext()
+	ctx.Log = os.Stderr
 	registerVariadics(ctx)
 	cmd.Cmd(ctx, cmd.Config{Help: getHelp, ProgramName: "goal"})
 }

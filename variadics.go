@@ -1,6 +1,7 @@
 package goal
 
 import (
+	"fmt"
 	"math"
 	"strings"
 	"time"
@@ -162,6 +163,7 @@ func (ctx *Context) initVariadics() {
 	ctx.RegisterMonad("rt.seed", vfRTSeed)
 	ctx.RegisterMonad("rt.time", vfRTTime)
 	ctx.RegisterMonad("rt.vars", vfRTVars)
+	ctx.RegisterMonad("rt.log", vfRTLog)
 }
 
 // vfRight implements the : variadic verb.
@@ -1005,4 +1007,16 @@ func vfRTTime(ctx *Context, args []V) V {
 		d := time.Since(t)
 		return NewI(int64(d) / n)
 	}
+}
+
+// vfRTLog implements the rt.log variadic verb.
+func vfRTLog(ctx *Context, args []V) V {
+	if len(args) > 1 {
+		return panicRank(`rt.log`)
+	}
+	x := args[0]
+	if ctx.Log != nil {
+		fmt.Fprintln(ctx.Log, x.Sprint(ctx))
+	}
+	return x
 }

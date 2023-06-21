@@ -304,6 +304,17 @@ func (c *compiler) doExpr(e expr, n int) error {
 			c.push(opReturn)
 		}
 		return nil
+	case *astLog:
+		// n == 0 is normally ensured by construction, like for returns.
+		if n > 0 {
+			panic(c.errorf("doExpr: astLog: n > 0 (%d)", n))
+		}
+		err := c.doExpr(e.Expr, 0)
+		if err != nil {
+			return err
+		}
+		c.doVariadicAt("rt.log", e.Pos, 1)
+		return nil
 	case *astAssign:
 		err := c.doAssign(e, n)
 		if err != nil {
@@ -507,11 +518,11 @@ func (c *compiler) doAdverb(tok *astToken) {
 }
 
 func (c *compiler) doVariadic(tok *astToken, n int) {
+	// tok.Type either MONAD, DYAD or ADVERB
 	c.doVariadicAt(tok.Text, tok.Pos, n)
 }
 
 func (c *compiler) doVariadicAt(s string, pos, n int) {
-	// tok.Type either MONAD, DYAD or ADVERB
 	v := c.parseVariadic(s)
 	opos := c.pos
 	c.pos = pos

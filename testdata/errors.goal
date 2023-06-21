@@ -917,7 +917,6 @@ json(3 `"b"`;`"c"`) / type
 (-3)?2 3 / i > #Y
 rt.seed "a" / type
 3 in * / type
-+ \!5 / non-adverbial
 3 utf8 "abc" / type
 "a" utf8 42 / type
 "" utf8 (42;"a" "c") / type

@@ -107,8 +107,8 @@ func (p *parser) expr(es exprs) (exprs, error) {
 				e, err = p.earlyReturn(tok.Text)
 				return append(es, e), err
 			case `\`:
-				err = p.errorf("unexpected non-adverbial %s", tok.Text)
-				return es, err
+				e, err = p.logStmt(tok.Pos)
+				return append(es, e), err
 			}
 		}
 		// We handle adverb at start of expression.
@@ -519,6 +519,20 @@ func (p *parser) earlyReturn(s string) (expr, error) {
 	if len(es) == 0 {
 		// should not happen
 		return a, p.errorf("return without expression right")
+	}
+	return a, nil
+}
+
+func (p *parser) logStmt(pos int) (expr, error) {
+	a := &astLog{Pos: pos}
+	es, err := p.subExpr()
+	a.Expr = es
+	if err != nil {
+		return a, err
+	}
+	if len(es) == 0 {
+		// should not happen
+		return a, p.errorf("debug log stmt without expression right")
 	}
 	return a, nil
 }

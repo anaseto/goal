@@ -1,3 +1,8 @@
+# v? ?
+
+* New feature: simple debug logging with non-adverbial `\expr` or equivalent
+  `rt.log`.
+
 # v0.20.0 2023-06-09
 
 * Format floating point integer values with a trailing `.0`, so that the

@@ -320,6 +320,7 @@ cmd are as follows:
 `
 "Runtime" `
 RUNTIME HELP
+rt.log x        like :[x] but logs string representation of x       (same as \x)
 rt.ofs s        set output field separator for print S and "$S"    (default " ")
                 returns previous value
 rt.prec i       set floating point formatting precision to i        (default -1)
