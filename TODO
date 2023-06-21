@@ -1,7 +1,6 @@
 Features:
 - maybe s!s could be a sort of scanf
 - maybe add “case” x I'y
-- maybe use non-adverbial \ for some kind of statement (no ideas yet)
 
 Tests:
 - improve test coverage for error messages and refactor and improve them along
