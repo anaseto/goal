@@ -1,3 +1,5 @@
+**Mirror closed because of 2FA, now only at https://codeberg.org/anaseto/goal**
+
 # Goal
 
 [![pkg.go.dev](https://pkg.go.dev/badge/codeberg.org/anaseto/goal.svg)](https://pkg.go.dev/codeberg.org/anaseto/goal)
